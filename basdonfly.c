@@ -1,10 +1,8 @@
 
-#include "vendor/SDK/amx/amx.h"
-#include "vendor/SDK/plugincommon.h"
+/* vim: set filetype=c ts=8 noexpandtab: */
 
-#define MAX_PLAYERS (50)
-
-typedef void (*logprintf_t)(char* format, ...);
+#include "common.h"
+#include "various.h"
 
 logprintf_t logprintf;
 extern void *pAMXFunctions;
@@ -38,6 +36,7 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 AMX_NATIVE_INFO PluginNatives[] =
 {
 	{"ValidateMaxPlayers", ValidateMaxPlayers},
+	{"Urlencode", Urlencode},
 	{0, 0}
 };
 
@@ -50,3 +49,4 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx)
 {
 	return AMX_ERR_NONE;
 }
+

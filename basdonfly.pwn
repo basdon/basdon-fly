@@ -9,8 +9,7 @@ native ValidateMaxPlayers(maxplayers)
 //@summary Url encodes given string.
 //@param data string to encode
 //@param len amount of characters in {@param data}
-//@param output buffer to store result in (should be at least {@code len * 3} of size)
-//@remarks Does {@b not} add a zero terminator.
-//@returns Amount of charactes written.
+//@param output buffer to store result in (should be {@code len * 3} of size)
+//@returns Amount of charactes written (excluding terminating zero byte).
 native Urlencode(const data[], len, output[])
 
