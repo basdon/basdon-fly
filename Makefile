@@ -1,5 +1,5 @@
 
-FLAGS=-Wall -m32
+FLAGS=-Wall -m32 -std=c89 -ansi
 
 build: out/basdonfly.o out/amxplugin.o
 	$(GCC) $(FLAGS) -shared -o out/basdonfly.$(PLUGINTYPE) out/basdonfly.o out/amxplugin.o

@@ -1,3 +1,5 @@
+/*
+yugecin: surrounded // comments with block comments for C89 compat
 //----------------------------------------------------------
 //
 //   SA-MP Multiplayer Modification For GTA:SA
@@ -9,15 +11,20 @@
 // within samp-server.
 //
 //----------------------------------------------------------
+*/
 
 #include "amx/amx.h"
 #include "plugincommon.h"
 
+/*
 //----------------------------------------------------------
+*/
 
 void *pAMXFunctions;
 
+/*
 //----------------------------------------------------------
+*/
 
 typedef uint16_t *  AMXAPI (*amx_Align16_t)(uint16_t *v);
 uint16_t * AMXAPI amx_Align16(uint16_t *v)
@@ -329,5 +336,7 @@ int AMXAPI amx_UTF8Put(char *string, char **endptr, int maxchars, cell value)
 	return fn(string, endptr, maxchars, value);
 }
 
+/*
 //----------------------------------------------------------
 // EOF
+*/

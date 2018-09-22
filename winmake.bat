@@ -3,7 +3,6 @@
 IF [%~1] EQU [clean] (
 	IF EXIST out RD out /S /Q
 	MKDIR out
-	EXIT /B
 )
 
 SET "PLUGINTYPE=dll"

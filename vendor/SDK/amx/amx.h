@@ -24,13 +24,24 @@
 #ifndef AMX_H_INCLUDED
 #define AMX_H_INCLUDED
 
-// >>> yugecin: added these in so I can compile using the toolsets I use
+/* >>> yugecin: added these in so I can compile using the toolsets I use */
 #ifdef __MINGW32__
-	#include <stdint.h> // mingw
+  #if !defined __STDC_VERSION__ || __STDC_VERSION__ < 199901L
+    #define __need_size_t
+    #include <stddef.h>
+    #undef __need_size_t
+  #else
+    #define HAVE_STDINT_H
+  #endif
+#elif defined __linux || defined __linux__
+  #include <stdlib.h>
+  #ifndef __BYTE_ORDER
+    #include <endian.h>
+  #endif
 #else
-	#include <stddef.h> // VC2005
+  #include <stddef.h>
 #endif
-// <<< end
+/* <<< end */
 
 #if defined __linux || defined __linux__
 #define __LINUX__

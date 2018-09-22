@@ -1,17 +1,25 @@
+/*
+yugecin: surrounded // comments with block comments for C89 compat
+
 //----------------------------------------------------------
 //
 //   SA-MP Multiplayer Modification For GTA:SA
 //   Copyright 2004-2009 SA-MP Team
 //
 //----------------------------------------------------------
+*/
 
 #pragma once
 
+/*
 //----------------------------------------------------------
+*/
 
 #define SAMP_PLUGIN_VERSION 0x0200
 
+/*
 //----------------------------------------------------------
+*/
 
 #ifdef __cplusplus
   #define PLUGIN_EXTERN_C extern "C"
@@ -25,14 +33,16 @@
   #endif
   #define PLUGIN_CALL 
   #ifndef SAMPSVR
+    /*
     // Compile code with -fvisibility=hidden to hide non-exported functions.
+    */
     #define PLUGIN_EXPORT PLUGIN_EXTERN_C __attribute__((visibility("default")))
   #else
     #define PLUGIN_EXPORT PLUGIN_EXTERN_C 
   #endif
 #elif defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
   #ifndef _MSC_VER
-    // yugecin: added this ifndef to not show the warning when using gcc on win
+    /* yugecin: added this ifndef around the message to not show it when using gcc on win */
     #ifndef __MINGW32__
       #pragma message "Warning: Not using a VC++ compiler."
     #endif
@@ -43,7 +53,9 @@
   #error "You must define one of WIN32, LINUX or FREEBSD"
 #endif
 
+/*
 //----------------------------------------------------------
+*/
 
 enum SUPPORTS_FLAGS 
 {
@@ -53,21 +65,29 @@ enum SUPPORTS_FLAGS
 	SUPPORTS_PROCESS_TICK	= 0x20000
 };
 
+/*
 //----------------------------------------------------------
+*/
 
 enum PLUGIN_DATA_TYPE
 {
+	/*
 	// For some debugging
-	PLUGIN_DATA_LOGPRINTF		= 0x00,	// void (*logprintf)(char* format, ...)
+	*/
+	PLUGIN_DATA_LOGPRINTF		= 0x00,/*// void (*logprintf)(char* format, ...)*/
 
+	/*
 	// AMX
-	PLUGIN_DATA_AMX_EXPORTS		= 0x10,	// void* AmxFunctionTable[]    (see PLUGIN_AMX_EXPORT)
-	PLUGIN_DATA_CALLPUBLIC_FS	= 0x11, // int (*AmxCallPublicFilterScript)(char *szFunctionName)
-	PLUGIN_DATA_CALLPUBLIC_GM	= 0x12, // int (*AmxCallPublicGameMode)(char *szFunctionName)
+	*/
+	PLUGIN_DATA_AMX_EXPORTS		= 0x10,/*// void* AmxFunctionTable[]    (see PLUGIN_AMX_EXPORT)*/
+	PLUGIN_DATA_CALLPUBLIC_FS	= 0x11,/*// int (*AmxCallPublicFilterScript)(char *szFunctionName)*/
+	PLUGIN_DATA_CALLPUBLIC_GM	= 0x12,/*// int (*AmxCallPublicGameMode)(char *szFunctionName)*/
 
 };
 
+/*
 //----------------------------------------------------------
+*/
 
 enum PLUGIN_AMX_EXPORT
 {
@@ -117,5 +137,7 @@ enum PLUGIN_AMX_EXPORT
 	PLUGIN_AMX_EXPORT_UTF8Put		= 43,
 };
 
+/*
 //----------------------------------------------------------
 // EOF
+*/
