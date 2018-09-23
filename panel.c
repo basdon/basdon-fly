@@ -45,7 +45,7 @@ cell AMX_NATIVE_CALL Panel_ResetCaches(AMX *amx, cell *params)
 	return 1;
 }
 
-cell AMX_NATIVE_CALL Panel_UpdateAltitude(AMX *amx, cell *params)
+cell AMX_NATIVE_CALL Panel_FormatAltitude(AMX *amx, cell *params)
 {
 	int playerid = params[1];
 	int altitude = params[2];
@@ -113,7 +113,7 @@ cell AMX_NATIVE_CALL Panel_UpdateAltitude(AMX *amx, cell *params)
 	return 1;
 }
 
-cell AMX_NATIVE_CALL Panel_UpdateSpeed(AMX *amx, cell *params)
+cell AMX_NATIVE_CALL Panel_FormatSpeed(AMX *amx, cell *params)
 {
 	int playerid = params[1];
 	int speed = params[2];
@@ -162,7 +162,7 @@ cell AMX_NATIVE_CALL Panel_UpdateSpeed(AMX *amx, cell *params)
 	return 1;
 }
 
-cell AMX_NATIVE_CALL Panel_UpdateHeading(AMX *amx, cell *params)
+cell AMX_NATIVE_CALL Panel_FormatHeading(AMX *amx, cell *params)
 {
 	int playerid = params[1];
 	int heading = params[2];

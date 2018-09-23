@@ -10,9 +10,9 @@ extern void *pAMXFunctions;
 cell AMX_NATIVE_CALL Urlencode(AMX *amx, cell *params);
 /* panel.c */
 cell AMX_NATIVE_CALL Panel_ResetCaches(AMX *amx, cell *params);
-cell AMX_NATIVE_CALL Panel_UpdateAltitude(AMX *amx, cell *params);
-cell AMX_NATIVE_CALL Panel_UpdateSpeed(AMX *amx, cell *params);
-cell AMX_NATIVE_CALL Panel_UpdateHeading(AMX *amx, cell *params);
+cell AMX_NATIVE_CALL Panel_FormatAltitude(AMX *amx, cell *params);
+cell AMX_NATIVE_CALL Panel_FormatSpeed(AMX *amx, cell *params);
+cell AMX_NATIVE_CALL Panel_FormatHeading(AMX *amx, cell *params);
 
 cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
 {
@@ -45,9 +45,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	{"ValidateMaxPlayers", ValidateMaxPlayers},
 	{"Urlencode", Urlencode},
 	{"Panel_ResetCaches", Panel_ResetCaches},
-	{"Panel_UpdateAltitude", Panel_UpdateAltitude},
-	{"Panel_UpdateSpeed", Panel_UpdateSpeed},
-	{"Panel_UpdateHeading", Panel_UpdateHeading},
+	{"Panel_FormatAltitude", Panel_FormatAltitude},
+	{"Panel_FormatSpeed", Panel_FormatSpeed},
+	{"Panel_FormatHeading", Panel_FormatHeading},
 	{0, 0}
 };
 

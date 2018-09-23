@@ -17,7 +17,7 @@ native Urlencode(const data[], len, output[])
 //@param playerid the player to reset panel caches for
 native Panel_ResetCaches(playerid)
 
-//@summary Updates text for altitude part of panel
+//@summary Formats text for altitude part of panel
 //@param playerid the player to update the altitude for
 //@param altitude the altitude as int
 //@param buf4 buffer for the altitude text, must be of length {@code 4}
@@ -26,9 +26,9 @@ native Panel_ResetCaches(playerid)
 //@returns {@code 1} if an update is needed
 //@remarks {@code buf13[0]} will be set to {@code 0} if the small meter doesn't need to be updated
 //@remarks {@code buf44[0]} will be set to {@code 0} if the large meter doesn't need to be updated
-native Panel_UpdateAltitude(playerid, altitude, buf4[], buf13[], buf44[])
+native Panel_FormatAltitude(playerid, altitude, buf4[], buf13[], buf44[])
 
-//@summary Updates text for speed part of panel
+//@summary Formats text for speed part of panel
 //@param playerid the player to update the speed for
 //@param speed the speed as int
 //@param buf4 buffer for the speed text, must be of length {@code 4}
@@ -38,13 +38,13 @@ native Panel_UpdateAltitude(playerid, altitude, buf4[], buf13[], buf44[])
 //@remarks {@code buf13[0]} will be set to {@code 0} if the small meter doesn't need to be updated
 //@remarks {@code buf44[0]} will be set to {@code 0} if the large meter doesn't need to be updated
 //@remarks If the small meter doesn't need to be updated, the large meter won't need an update either
-native Panel_UpdateSpeed(playerid, speed, buf4[], buf13[], buf44[])
+native Panel_FormatSpeed(playerid, speed, buf4[], buf13[], buf44[])
 
-//@summary Updates text for heading part of panel
+//@summary Formats text for heading part of panel
 //@param playerid the player to update the heading for
 //@param heading the heading as int
 //@param buf4 buffer for the speed text, must be of length {@code 4}
 //@param buf44 buffer for the speed large meter text, must be of length {@code 44}
 //@returns {@code 1} if an update is needed
-native Panel_UpdateHeading(playerid, heading, buf4[], buf44[])
+native Panel_FormatHeading(playerid, heading, buf4[], buf44[])
 
