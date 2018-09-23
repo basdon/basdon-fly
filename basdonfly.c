@@ -2,10 +2,15 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
-#include "various.h"
 
 logprintf_t logprintf;
 extern void *pAMXFunctions;
+
+/* various.c */
+cell AMX_NATIVE_CALL Urlencode(AMX *amx, cell *params);
+/* panel.c */
+cell AMX_NATIVE_CALL Panel_ResetCaches(AMX *amx, cell *params);
+cell AMX_NATIVE_CALL Panel_UpdateAltitude(AMX *amx, cell *params);
 
 cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
 {
@@ -37,6 +42,8 @@ AMX_NATIVE_INFO PluginNatives[] =
 {
 	{"ValidateMaxPlayers", ValidateMaxPlayers},
 	{"Urlencode", Urlencode},
+	{"Panel_ResetCaches", Panel_ResetCaches},
+	{"Panel_UpdateAltitude", Panel_UpdateAltitude},
 	{0, 0}
 };
 
