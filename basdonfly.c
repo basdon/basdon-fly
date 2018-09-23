@@ -6,15 +6,17 @@
 logprintf_t logprintf;
 extern void *pAMXFunctions;
 
+#define FORWARD(X) cell AMX_NATIVE_CALL X(AMX *amx, cell *params)
+
 /* various.c */
-cell AMX_NATIVE_CALL Urlencode(AMX *amx, cell *params);
+FORWARD(Urlencode);
 /* panel.c */
-cell AMX_NATIVE_CALL Panel_ResetCaches(AMX *amx, cell *params);
-cell AMX_NATIVE_CALL Panel_FormatAltitude(AMX *amx, cell *params);
-cell AMX_NATIVE_CALL Panel_FormatSpeed(AMX *amx, cell *params);
-cell AMX_NATIVE_CALL Panel_FormatHeading(AMX *amx, cell *params);
+FORWARD(Panel_ResetCaches);
+FORWARD(Panel_FormatAltitude);
+FORWARD(Panel_FormatSpeed);
+FORWARD(Panel_FormatHeading);
 /* game_sa.c */
-cell AMX_NATIVE_CALL IsAirVehicle(AMX *amx, cell *params);
+FORWARD(IsAirVehicle);
 
 cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
 {
@@ -47,15 +49,16 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 {
 }
 
+#define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
-	{"ValidateMaxPlayers", ValidateMaxPlayers},
-	{"Urlencode", Urlencode},
-	{"Panel_ResetCaches", Panel_ResetCaches},
-	{"Panel_FormatAltitude", Panel_FormatAltitude},
-	{"Panel_FormatSpeed", Panel_FormatSpeed},
-	{"Panel_FormatHeading", Panel_FormatHeading},
-	{"IsAirVehicle", IsAirVehicle},
+	REGISTERNATIVE(ValidateMaxPlayers),
+	REGISTERNATIVE(Urlencode),
+	REGISTERNATIVE(Panel_ResetCaches),
+	REGISTERNATIVE(Panel_FormatAltitude),
+	REGISTERNATIVE(Panel_FormatSpeed),
+	REGISTERNATIVE(Panel_FormatHeading),
+	REGISTERNATIVE(IsAirVehicle),
 	{0, 0}
 };
 
