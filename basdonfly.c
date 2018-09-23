@@ -13,6 +13,8 @@ cell AMX_NATIVE_CALL Panel_ResetCaches(AMX *amx, cell *params);
 cell AMX_NATIVE_CALL Panel_FormatAltitude(AMX *amx, cell *params);
 cell AMX_NATIVE_CALL Panel_FormatSpeed(AMX *amx, cell *params);
 cell AMX_NATIVE_CALL Panel_FormatHeading(AMX *amx, cell *params);
+/* game_sa.c */
+cell AMX_NATIVE_CALL IsAirVehicle(AMX *amx, cell *params);
 
 cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
 {
@@ -48,6 +50,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	{"Panel_FormatAltitude", Panel_FormatAltitude},
 	{"Panel_FormatSpeed", Panel_FormatSpeed},
 	{"Panel_FormatHeading", Panel_FormatHeading},
+	{"IsAirVehicle", IsAirVehicle},
 	{0, 0}
 };
 

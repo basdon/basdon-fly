@@ -48,3 +48,8 @@ native Panel_FormatSpeed(playerid, speed, buf4[], buf13[], buf44[])
 //@returns {@code 1} if an update is needed
 native Panel_FormatHeading(playerid, heading, buf4[], buf44[])
 
+//@summary Checks if a vehicle with specified model is an air vehicle
+//@param model the model of the vehicle to check, {@b MUST} be either a valid model or {@code 0}
+//@returns {@code 0} if the model given is not an air vehicle
+native IsAirVehicle(model)
+
