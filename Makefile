@@ -1,5 +1,5 @@
 
-HEADERS=common.h
+HEADERS=common.h sharedsymbols.h
 FLAGS=-Wall -m32 -std=c89 -ansi
 
 build: out/basdonfly.o out/various.o out/panel.o out/amxplugin.o
