@@ -162,3 +162,48 @@ cell AMX_NATIVE_CALL Panel_UpdateSpeed(AMX *amx, cell *params)
 	return 1;
 }
 
+cell AMX_NATIVE_CALL Panel_UpdateHeading(AMX *amx, cell *params)
+{
+	int playerid = params[1];
+	int heading = params[2];
+	cell *addr4, *addr44;
+	char buf4[5];
+	char buf44[45];
+
+	/* normalize before cache, because rounding (0 & 360)*/
+	heading = 360 - heading;
+	if (heading == 0) {
+		heading = 360;
+	}
+
+	if (heading == caches[playerid].heading) {
+		return 0;
+	}
+	caches[playerid].heading = heading;
+
+	amx_GetAddr(amx, params[3], &addr4);
+	amx_GetAddr(amx, params[4], &addr44);
+
+	/* hdg */
+	sprintf(buf4, "%03d", heading);
+	amx_SetUString(addr4, buf4, sizeof(buf4));
+
+	/* hdg meter */
+	strcpy(buf44, "______________________________");
+	heading = heading % 360 + 1;
+	sprintf(buf44 + 18, "%03d", heading); heading = (heading % 360) + 1;
+	sprintf(buf44 + 22, "%03d", heading); heading = (heading % 360) + 1;
+	sprintf(buf44 + 26, "%03d", heading); heading = (heading + 355) % 360 + 1;
+	sprintf(buf44 +  8, "%03d", heading); heading = (heading + 358) % 360 + 1;
+	sprintf(buf44 +  4, "%03d", heading); heading = (heading + 358) % 360 + 1;
+	sprintf(buf44 +  0, "%03d", heading);
+	buf44[3] = '_';
+	buf44[7] = '_';
+	buf44[11] = '_';
+	buf44[21] = '_';
+	buf44[25] = '_';
+	amx_SetUString(addr44, buf44, sizeof(buf44));
+
+	return 1;
+}
+

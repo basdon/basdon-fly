@@ -40,3 +40,11 @@ native Panel_UpdateAltitude(playerid, altitude, buf4[], buf13[], buf44[])
 //@remarks If the small meter doesn't need to be updated, the large meter won't need an update either
 native Panel_UpdateSpeed(playerid, speed, buf4[], buf13[], buf44[])
 
+//@summary Updates text for heading part of panel
+//@param playerid the player to update the heading for
+//@param heading the heading as int
+//@param buf4 buffer for the speed text, must be of length {@code 4}
+//@param buf44 buffer for the speed large meter text, must be of length {@code 44}
+//@returns {@code 1} if an update is needed
+native Panel_UpdateHeading(playerid, heading, buf4[], buf44[])
+
