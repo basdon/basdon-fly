@@ -11,6 +11,7 @@ cell AMX_NATIVE_CALL Urlencode(AMX *amx, cell *params);
 /* panel.c */
 cell AMX_NATIVE_CALL Panel_ResetCaches(AMX *amx, cell *params);
 cell AMX_NATIVE_CALL Panel_UpdateAltitude(AMX *amx, cell *params);
+cell AMX_NATIVE_CALL Panel_UpdateSpeed(AMX *amx, cell *params);
 
 cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
 {
@@ -44,6 +45,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	{"Urlencode", Urlencode},
 	{"Panel_ResetCaches", Panel_ResetCaches},
 	{"Panel_UpdateAltitude", Panel_UpdateAltitude},
+	{"Panel_UpdateSpeed", Panel_UpdateSpeed},
 	{0, 0}
 };
 

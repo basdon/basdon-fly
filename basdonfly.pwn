@@ -28,3 +28,15 @@ native Panel_ResetCaches(playerid)
 //@remarks {@code buf44[0]} will be set to {@code 0} if the large meter doesn't need to be updated
 native Panel_UpdateAltitude(playerid, altitude, buf4[], buf13[], buf44[])
 
+//@summary Updates text for speed part of panel
+//@param playerid the player to update the speed for
+//@param speed the speed as int
+//@param buf4 buffer for the speed text, must be of length {@code 4}
+//@param buf13 buffer for the speed small meter text, must be of length {@code 13}
+//@param buf44 buffer for the speed large meter text, must be of length {@code 44}
+//@returns {@code 1} if an update is needed
+//@remarks {@code buf13[0]} will be set to {@code 0} if the small meter doesn't need to be updated
+//@remarks {@code buf44[0]} will be set to {@code 0} if the large meter doesn't need to be updated
+//@remarks If the small meter doesn't need to be updated, the large meter won't need an update either
+native Panel_UpdateSpeed(playerid, speed, buf4[], buf13[], buf44[])
+
