@@ -53,3 +53,27 @@ native Panel_FormatHeading(playerid, heading, buf4[], buf44[])
 //@returns {@code 0} if the model given is not an air vehicle
 native IsAirVehicle(model)
 
+//@summary Store password hash to confirm it later using {@link ValidatePasswordConfirmData}
+//@param playerid the player for which to store the hash
+//@param pwhash the hash to store
+//@remarks This will cause a memory leak if {@link ResetPasswordConfirmData} or {@link ValidatePasswordConfirmData} is not called before this is called again for the same {@param playerid}.
+//@seealso ResetPasswordConfirmData
+//@seealso ValidatePasswordConfirmData
+native SetPasswordConfirmData(playerid, pwhash[])
+
+//@summary Check if {@param pwhash} equals the previously saved hash
+//@param playerid the player for which the data was saved
+//@param pwhash the hash to check
+//@returns {@code 0} if the hash doesn't match the hash previously saved with {@link SetPasswordConfirmData}
+//@remarks The saved data gets reset after the check, so no need to call {@link ResetPasswordConfirmData}
+//@seealso SetPasswordConfirmData
+//@seealso ResetPasswordConfirmData
+native ValidatePasswordConfirmData(playerid, pwhash[])
+
+//@summary Free memory that was used to confirm a player's password
+//@param playerid the player for which the data was saved
+//@remarks Has no effect if the data was already reset
+//@seealso SetPasswordConfirmData
+//@seealso ValidatePasswordConfirmData
+native ResetPasswordConfirmData(playerid)
+

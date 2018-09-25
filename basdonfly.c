@@ -17,6 +17,10 @@ FORWARD(Panel_FormatSpeed);
 FORWARD(Panel_FormatHeading);
 /* game_sa.c */
 FORWARD(IsAirVehicle);
+/* login.c */
+FORWARD(ResetPasswordConfirmData);
+FORWARD(SetPasswordConfirmData);
+FORWARD(ValidatePasswordConfirmData);
 
 cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
 {
@@ -35,12 +39,13 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
-	void game_sa_init();
+	void game_sa_init(), login_init();
 
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 
 	game_sa_init();
+	login_init();
 
 	return 1;
 }
@@ -59,6 +64,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Panel_FormatSpeed),
 	REGISTERNATIVE(Panel_FormatHeading),
 	REGISTERNATIVE(IsAirVehicle),
+	REGISTERNATIVE(ResetPasswordConfirmData),
+	REGISTERNATIVE(SetPasswordConfirmData),
+	REGISTERNATIVE(ValidatePasswordConfirmData),
 	{0, 0}
 };
 
