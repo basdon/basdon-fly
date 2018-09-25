@@ -1,9 +1,14 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+/* global */
 #define MAX_PLAYERS (50)
 
+/* login.c / login.pwn */
+#define PW_HASH_LENGTH (65) /* including zero term */
+
 /* no parens around these numbers or gm may stop compiling */
+/* game_sa.c / game_sa.pwn, global */
 #define MODEL_LEVIATHAN 417 /* 0, 0x2000 */
 #define MODEL_HUNTER 425 /* 0, 0x2000000 */
 #define MODEL_SEASPARROW 447 /* 1, 0x8000 */

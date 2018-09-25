@@ -4,8 +4,6 @@
 #include "common.h"
 #include <string.h>
 
-#define PW_HASH_LENGTH (65) /* including zero term */
-
 static char *pwdata[MAX_PLAYERS];
 
 void login_init()
