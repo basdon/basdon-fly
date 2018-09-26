@@ -9,7 +9,7 @@ if (!isset($_POST['u'])) {
 
 $id = find_user_id_by_name($_POST['u']);
 
-if (db_err()) {
+if ($id == -2) {
 	echo 'e';
 	exit;
 }
