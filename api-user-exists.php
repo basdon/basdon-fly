@@ -14,5 +14,14 @@ if ($id == -2) {
 	exit;
 }
 
-echo $id == -1 ? 'f' : 't';
+if ($id == -1) {
+	echo 'f';
+	exit;
+}
+
+echo 't';
+echo chr(0x80 | ($id & 0xFF));
+echo chr(0x80 | (($id >> 7) & 0xFF));
+echo chr(0x80 | (($id >> 14) & 0xFF));
+echo chr(0x80 | (($id >> 21) & 0xFF));
 

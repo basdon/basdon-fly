@@ -48,8 +48,29 @@ err_stmt:
 	return -2;
 }
 
-function check_user_credentials($name, $pw)
+// -2 on failure, -1 if no match, score on success
+function check_user_credentials($id, $pw)
 {
+	global $db;
+	if ($db == null) goto err;
+	$stmt = $db->query('SELECT pw,score FROM usr WHERE id='.intval($id, 10).' LIMIT 1');
+	if ($stmt === false) goto err;
+	if (!$stmt->execute()) goto err_stmt;
+	$r = $stmt->fetchAll();
+	if ($r === false) goto err_stmt;
+	if (count($r) == 0) {
+		return -1;
+	}
+	if (!password_verify($pw, $r[0]->pw)) {
+		return -1;
+	}
+	return $r[0]->score;
+err:
+	$lastdberr = $db->errorCode();
+	return -2;
+err_stmt:
+	$lastdberr = $stmt->errorCode();
+	return -2;
 }
 
 // -1 on failure, id on success
