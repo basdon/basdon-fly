@@ -79,7 +79,7 @@ function create_user($name, $pw, $group)
 	global $lastdberr, $db;
 	if ($db == null) goto err;
 	$pw = password_hash($pw, PASSWORD_BCRYPT, array('cost' => 10));
-	$stmt = $db->prepare('INSERT INTO usr(name,pw,regdate,grp) VALUES(?,?,UNIX_TIMESTAMP(),?)');
+	$stmt = $db->prepare('INSERT INTO usr(name,pw,regdate,lastseen,grp) VALUES(?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),?)');
 	if ($stmt === false) goto err;
 	$stmt->bindValue(1, $name, PDO::PARAM_STR);
 	$stmt->bindValue(2, $pw, PDO::PARAM_STR);
