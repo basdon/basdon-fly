@@ -15,12 +15,13 @@ try {
 	// TODO: do something about it
 }
 
-function output_28bit_num($num)
+function output_nonnull_5byte_num($num)
 {
 	echo chr(0x80 | ($num & 0xFF));
 	echo chr(0x80 | (($num >> 7) & 0xFF));
 	echo chr(0x80 | (($num >> 14) & 0xFF));
 	echo chr(0x80 | (($num >> 21) & 0xFF));
+	echo chr(0xF0 | (($num >> 28) & 0x0F));
 }
 
 // true if error occured
@@ -38,7 +39,7 @@ function find_user_id_by_name($name)
 {
 	global $db;
 	if ($db == null) goto err;
-	$stmt = $db->prepare('SELECT id FROM usr WHERE name=? LIMIT 1');
+	$stmt = $db->prepare('SELECT i FROM usr WHERE n=? LIMIT 1');
 	if ($stmt === false) goto err;
 	$stmt->bindValue(1, $name);
 	if (!$stmt->execute()) goto err_stmt;
@@ -47,7 +48,7 @@ function find_user_id_by_name($name)
 	if (count($r) == 0) {
 		return -1;
 	}
-	return $r[0]->id;
+	return $r[0]->i;
 err:
 	$lastdberr = $db->errorCode();
 	return -2;
@@ -61,7 +62,7 @@ function check_user_credentials($id, $pw)
 {
 	global $db;
 	if ($db == null) goto err;
-	$stmt = $db->query('SELECT pw,score FROM usr WHERE id='.intval($id, 10).' LIMIT 1');
+	$stmt = $db->query('SELECT p,s FROM usr WHERE i='.intval($id, 10).' LIMIT 1');
 	if ($stmt === false) goto err;
 	if (!$stmt->execute()) goto err_stmt;
 	$r = $stmt->fetchAll();
@@ -69,10 +70,10 @@ function check_user_credentials($id, $pw)
 	if (count($r) == 0) {
 		return -1;
 	}
-	if (!password_verify($pw, $r[0]->pw)) {
+	if (!password_verify($pw, $r[0]->p)) {
 		return -1;
 	}
-	return $r[0]->score;
+	return $r[0]->s;
 err:
 	$lastdberr = $db->errorCode();
 	return -2;
@@ -87,7 +88,7 @@ function create_user($name, $pw, $group)
 	global $lastdberr, $db;
 	if ($db == null) goto err;
 	$pw = password_hash($pw, PASSWORD_BCRYPT, array('cost' => 10));
-	$stmt = $db->prepare('INSERT INTO usr(name,pw,regdate,lastseen,grp) VALUES(?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),?)');
+	$stmt = $db->prepare('INSERT INTO usr(n,p,r,l,g) VALUES(?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),?)');
 	if ($stmt === false) goto err;
 	$stmt->bindValue(1, $name, PDO::PARAM_STR);
 	$stmt->bindValue(2, $pw, PDO::PARAM_STR);
@@ -107,8 +108,8 @@ function create_game_session($uid, $ip)
 {
 	global $lastdberr, $db;
 	if ($db == null) goto err;
-	$db->exec('UPDATE usr SET lastseen=UNIX_TIMESTAMP() WHERE id='.intval($uid, 10).' LIMIT 1');
-	$stmt = $db->prepare('INSERT INTO sessions(uid,starttime,endtime,ip) VALUES(?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),?)');
+	$db->exec('UPDATE usr SET l=UNIX_TIMESTAMP() WHERE i='.intval($uid, 10).' LIMIT 1');
+	$stmt = $db->prepare('INSERT INTO ses(u,s,e,j) VALUES(?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),?)');
 	if ($stmt === false) goto err;
 	$stmt->bindValue(1, $uid, PDO::PARAM_INT);
 	$stmt->bindValue(2, $ip, PDO::PARAM_STR);

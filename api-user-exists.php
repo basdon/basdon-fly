@@ -20,5 +20,5 @@ if ($id == -1) {
 }
 
 echo 't';
-output_28bit_num($id);
+output_nonnull_5byte_num($id);
 

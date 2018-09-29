@@ -2,7 +2,7 @@
 
 require 'db.php';
 
-if (!isset($_POST['u'], $_POST['p'])) {
+if (!isset($_POST['u'], $_POST['p'], $_POST['j'])) {
 	echo 'e' . 'missing_data';
 	exit;
 }
@@ -17,6 +17,6 @@ if ($id == -1) {
 $sessionid = create_game_session($id, $_POST['j']);
 
 echo 's';
-ouput_28bit_num($id);
-ouput_28bit_num($sessionid);
+output_nonnull_5byte_num($id);
+output_nonnull_5byte_num($sessionid);
 

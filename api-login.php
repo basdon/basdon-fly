@@ -29,6 +29,6 @@ if ($sessionid == -1) {
 }
 
 echo 's';
-output_28bit_num($score);
-output_28bit_num($sessionid);
+output_nonnull_5byte_num($score);
+output_nonnull_5byte_num($sessionid);
 
