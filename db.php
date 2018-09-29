@@ -81,13 +81,24 @@ err_stmt:
 	$lastdberr = $stmt->errorCode();
 	return -2;
 }
-
 // -1 on failure, id on success
 function create_user($name, $pw, $group)
 {
+	$pw = password_hash($pw, PASSWORD_BCRYPT, array('cost' => 10));
+	return create_user_raw($name, $pw, $group);
+}
+
+// -1 on failure, id on success
+function create_guest($name)
+{
+	return create_user_raw($name, '', 0);
+}
+
+// -1 on failure, id on success
+function create_user_raw($name, $pw, $group)
+{
 	global $lastdberr, $db;
 	if ($db == null) goto err;
-	$pw = password_hash($pw, PASSWORD_BCRYPT, array('cost' => 10));
 	$stmt = $db->prepare('INSERT INTO usr(n,p,r,l,g) VALUES(?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),?)');
 	if ($stmt === false) goto err;
 	$stmt->bindValue(1, $name, PDO::PARAM_STR);
