@@ -8,6 +8,8 @@ extern void *pAMXFunctions;
 
 #define FORWARD(X) cell AMX_NATIVE_CALL X(AMX *amx, cell *params)
 
+/* commands.c */
+FORWARD(CommandHash);
 /* various.c */
 FORWARD(Urlencode);
 /* panel.c */
@@ -67,6 +69,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(ResetPasswordConfirmData),
 	REGISTERNATIVE(SetPasswordConfirmData),
 	REGISTERNATIVE(ValidatePasswordConfirmData),
+	REGISTERNATIVE(CommandHash),
 	{0, 0}
 };
 

@@ -77,3 +77,8 @@ native ValidatePasswordConfirmData(playerid, pwhash[])
 //@seealso ValidatePasswordConfirmData
 native ResetPasswordConfirmData(playerid)
 
+//@summary Gets hash of command in entered command text (excluding params)
+//@param cmdtext command text to get hash of
+//@remarks End delimiter for calculation is either a zero terminator, or anything below {@code ' '}
+native CommandHash(cmdtext[])
+
