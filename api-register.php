@@ -14,9 +14,9 @@ if ($id == -1) {
 	exit;
 }
 
+$sessionid = create_game_session($id, $_POST['j']);
+
 echo 's';
-echo chr(0x80 | ($id & 0xFF));
-echo chr(0x80 | (($id >> 7) & 0xFF));
-echo chr(0x80 | (($id >> 14) & 0xFF));
-echo chr(0x80 | (($id >> 21) & 0xFF));
+ouput_28bit_num($id);
+ouput_28bit_num($sessionid);
 

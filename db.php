@@ -15,6 +15,14 @@ try {
 	// TODO: do something about it
 }
 
+function output_28bit_num($num)
+{
+	echo chr(0x80 | ($num & 0xFF));
+	echo chr(0x80 | (($num >> 7) & 0xFF));
+	echo chr(0x80 | (($num >> 14) & 0xFF));
+	echo chr(0x80 | (($num >> 21) & 0xFF));
+}
+
 // true if error occured
 function db_err()
 {
@@ -84,6 +92,26 @@ function create_user($name, $pw, $group)
 	$stmt->bindValue(1, $name, PDO::PARAM_STR);
 	$stmt->bindValue(2, $pw, PDO::PARAM_STR);
 	$stmt->bindValue(3, $group, PDO::PARAM_INT);
+	if (!$stmt->execute()) {
+		$lastdberr = $stmt->errorCode();
+		return -1;
+	}
+	return $db->lastInsertId();
+err:
+	$lastdberr = $db->errorCode();
+	return -1;
+}
+
+// -1 on failure, sessionid on success
+function create_game_session($uid, $ip)
+{
+	global $lastdberr, $db;
+	if ($db == null) goto err;
+	$db->exec('UPDATE usr SET lastseen=UNIX_TIMESTAMP() WHERE id='.intval($uid, 10).' LIMIT 1');
+	$stmt = $db->prepare('INSERT INTO sessions(uid,starttime,endtime,ip) VALUES(?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),?)');
+	if ($stmt === false) goto err;
+	$stmt->bindValue(1, $uid, PDO::PARAM_INT);
+	$stmt->bindValue(2, $ip, PDO::PARAM_STR);
 	if (!$stmt->execute()) {
 		$lastdberr = $stmt->errorCode();
 		return -1;
