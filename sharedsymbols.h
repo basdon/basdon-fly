@@ -3,6 +3,11 @@
 
 /* global */
 #define MAX_PLAYERS (50)
+#ifdef MAX_PLAYER_NAME
+#assert MAX_PLAYER_NAME == 24
+#else
+#define MAX_PLAYER_NAME (24)
+#endif
 
 /* login.c / login.pwn */
 #define PW_HASH_LENGTH (65) /* including zero term */
