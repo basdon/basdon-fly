@@ -10,6 +10,7 @@ extern void *pAMXFunctions;
 
 /* commands.c */
 FORWARD(CommandHash);
+FORWARD(IsCommand);
 /* various.c */
 FORWARD(Urlencode);
 /* panel.c */
@@ -26,9 +27,8 @@ FORWARD(ValidatePasswordConfirmData);
 
 cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
 {
-	int maxplayers = params[1];
-	if (MAX_PLAYERS != maxplayers) {
-		logprintf("[FATAL] MAX_PLAYERS mistmatch: %d (plugin) vs %d (gm)", MAX_PLAYERS, maxplayers);
+	if (MAX_PLAYERS != params[1]) {
+		logprintf("[FATAL] MAX_PLAYERS mistmatch: %d (plugin) vs %d (gm)", MAX_PLAYERS, params[1]);
 		return 0;
 	}
 	return MAX_PLAYERS;
@@ -70,6 +70,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(SetPasswordConfirmData),
 	REGISTERNATIVE(ValidatePasswordConfirmData),
 	REGISTERNATIVE(CommandHash),
+	REGISTERNATIVE(IsCommand),
 	{0, 0}
 };
 

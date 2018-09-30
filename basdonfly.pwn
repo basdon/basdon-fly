@@ -82,3 +82,10 @@ native ResetPasswordConfirmData(playerid)
 //@remarks End delimiter for calculation is either a zero terminator, or anything below {@code ' '}
 native CommandHash(cmdtext[])
 
+//@summary Checks if the entered cmd is {@param cmd}
+//@param cmdtext cmdtext entered by player
+//@param cmd the command that should match (all lowercase, leading slash)
+//@remarks don't exceed cmd length of 49
+//@remarks commands can't have spaces in them for obvious reasons
+native IsCommand(cmdtext[], const cmd[])
+
