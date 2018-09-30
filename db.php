@@ -84,8 +84,12 @@ err_stmt:
 // -1 on failure, id on success
 function create_user($name, $pw, $group)
 {
-	$pw = password_hash($pw, PASSWORD_BCRYPT, array('cost' => 10));
-	return create_user_raw($name, $pw, $group);
+	return create_user_raw($name, hash_pw($pw), $group);
+}
+
+function hash_pw($pw)
+{
+	return password_hash($pw, PASSWORD_BCRYPT, array('cost' => 10));
 }
 
 // -1 on failure, id on success
