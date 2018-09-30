@@ -58,7 +58,7 @@ err_stmt:
 }
 
 // -2 on failure, -1 if no match, score on success
-function check_user_credentials($id, $pw)
+function check_user_credentials($id, $pw, $ip)
 {
 	global $db;
 	if ($db == null) goto err;
@@ -71,6 +71,14 @@ function check_user_credentials($id, $pw)
 		return -1;
 	}
 	if (!password_verify($pw, $r[0]->p)) {
+		if ($ip != null) {
+			$stmt = $db->prepare('INSERT INTO fal(u,t,j) VALUES(?,UNIX_TIMESTAMP(),?)');
+			if ($stmt !== false) {
+				$stmt->bindValue(1, $id, PDO::PARAM_INT);
+				$stmt->bindValue(2, $ip, PDO::PARAM_STR);
+				$stmt->execute();
+			}
+		}
 		return -1;
 	}
 	return $r[0]->s;

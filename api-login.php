@@ -9,7 +9,7 @@ if (!isset($_POST['i'], $_POST['p'], $_POST['j'])) {
 
 $id = intval($_POST['i'], 16);
 
-$score = check_user_credentials($id, $_POST['p']);
+$score = check_user_credentials($id, $_POST['p'], $_POST['j']);
 
 if ($score == -2) {
 	echo 'e' . $lastdberr;
