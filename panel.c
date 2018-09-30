@@ -151,6 +151,9 @@ cell AMX_NATIVE_CALL Panel_FormatSpeed(AMX *amx, cell *params)
 		memcpy(buf44, &SPDMETERDATA[tmp], 11);
 		memcpy(&buf44[26], &SPDMETERDATA[tmp + 14], 11);
 		amx_SetUString(addr44, buf44, sizeof(buf44));
+	} else {
+		buf4[0] = 0;
+		amx_SetUString(addr44, buf4, 1);
 	}
 
 	/* spd meter small */
