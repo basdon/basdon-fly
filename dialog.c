@@ -69,3 +69,8 @@ cell AMX_NATIVE_CALL DropDialogQueue(AMX *amx, cell *params)
 	}
 	return 1;
 }
+
+cell AMX_NATIVE_CALL IsDialogQueueEmpty(AMX *amx, cell *params)
+{
+	return dialogqueue[params[1]] == NULL;
+}

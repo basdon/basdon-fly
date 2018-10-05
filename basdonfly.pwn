@@ -106,3 +106,8 @@ native QueueDialog(playerid, dialogid, style, caption[], info[], button1[], butt
 //@param playerid the playerid to drop the queue for
 native DropDialogQueue(playerid)
 
+//@summary Check if a player's dialog queue is empty
+//@param playerid the playerid to check the queue for
+//@returns {@code 0} if the queue is not empty
+native IsDialogQueueEmpty(playerid)
+
