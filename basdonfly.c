@@ -14,7 +14,7 @@ FORWARD(IsCommand);
 /* dialog.c */
 FORWARD(QueueDialog);
 FORWARD(DropDialogQueue);
-FORWARD(IsDialogQueueEmpty);
+FORWARD(HasDialogsInQueue);
 /* various.c */
 FORWARD(Urlencode);
 /* panel.c */
@@ -78,7 +78,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(IsCommand),
 	REGISTERNATIVE(QueueDialog),
 	REGISTERNATIVE(DropDialogQueue),
-	REGISTERNATIVE(IsDialogQueueEmpty),
+	REGISTERNATIVE(HasDialogsInQueue),
 	{0, 0}
 };
 
