@@ -100,14 +100,38 @@ native IsCommand(cmdtext[], const cmd[])
 //@param transactionid the transactionid for the dialog
 //@returns info see {@link ShowPlayerDialog}
 //@remarks info see {@link ShowPlayerDialog}
+//@seealso HasDialogsInQueue
+//@seealso DropDialogQueue
+//@seealso PopDialogQueue
 native QueueDialog(playerid, dialogid, style, caption[], info[], button1[], button2[], transactionid)
 
 //@summary Drops the dialog queue for a player
 //@param playerid the playerid to drop the queue for
+//@seealso HasDialogsInQueue
+//@seealso QueueDialog
+//@seealso PopDialogQueue
 native DropDialogQueue(playerid)
 
 //@summary Check if there are dialogs queued for a player
 //@param playerid the playerid to check the queue for
 //@returns {@code 0} if the queue is empty
+//@seealso DropDialogQueue
+//@seealso QueueDialog
+//@seealso PopDialogQueue
 native HasDialogsInQueue(playerid)
+
+//@summary Pop the first queued dialog for a player
+//@param playerid the playerid to pop for
+//@param dialogid variable to store dialogid in, passed by ref
+//@param style variable to store style in, passed by ref
+//@param caption variable to store caption in, MUST be of at least {@code 64} len
+//@param info variable to store info in, MUST be of at least {@code 4096} len
+//@param button1 variable to store button1 in, MUST be of at least {@code 32} len
+//@param button2 variable to store button2 in, MUST be of at least {@code 32} len
+//@param transactionid variable to store transactionid in, passed by ref
+//@remarks undefined behavior if dialog queue is empty
+//@seealso DropDialogQueue
+//@seealso QueueDialog
+//@seealso HasDialogsInQueue
+native PopDialogQueue(playerid, &dialogid, &style, caption[], info[], button1[], button2[], &transactionid)
 

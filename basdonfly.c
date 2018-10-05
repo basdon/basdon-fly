@@ -15,6 +15,7 @@ FORWARD(IsCommand);
 FORWARD(QueueDialog);
 FORWARD(DropDialogQueue);
 FORWARD(HasDialogsInQueue);
+FORWARD(PopDialogQueue);
 /* various.c */
 FORWARD(Urlencode);
 /* panel.c */
@@ -79,6 +80,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(QueueDialog),
 	REGISTERNATIVE(DropDialogQueue),
 	REGISTERNATIVE(HasDialogsInQueue),
+	REGISTERNATIVE(PopDialogQueue),
 	{0, 0}
 };
 

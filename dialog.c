@@ -74,3 +74,35 @@ cell AMX_NATIVE_CALL HasDialogsInQueue(AMX *amx, cell *params)
 {
 	return dialogqueue[params[1]] != NULL;
 }
+
+/* native PopDialogQueue(playerid, &dialogid, &style, caption[], info[], button1[], button2[], &transactionid) */
+cell AMX_NATIVE_CALL PopDialogQueue(AMX *amx, cell *params)
+{
+	int playerid = params[1];
+	struct dialogdata *cur;
+	cell *addr = NULL;
+
+	if (dialogqueue[playerid] == NULL) {
+		return 1;
+	}
+
+	cur = dialogqueue[playerid];
+	amx_GetAddr(amx, params[2], &addr);
+	*addr = cur->dialogid;
+	amx_GetAddr(amx, params[3], &addr);
+	*addr = cur->style;
+	amx_GetAddr(amx, params[4], &addr);
+	amx_SetUString(addr, cur->caption, LIMIT_DIALOG_CAPTION);
+	amx_GetAddr(amx, params[5], &addr);
+	amx_SetUString(addr, cur->text, LIMIT_DIALOG_TEXT);
+	amx_GetAddr(amx, params[6], &addr);
+	amx_SetUString(addr, cur->button1, LIMIT_DIALOG_BUTTON);
+	amx_GetAddr(amx, params[7], &addr);
+	amx_SetUString(addr, cur->button2, LIMIT_DIALOG_BUTTON);
+	amx_GetAddr(amx, params[8], &addr);
+	*addr = cur->transactionid;
+	dialogqueue[playerid] = cur->next;
+	free(cur);
+
+	return 1;
+}
