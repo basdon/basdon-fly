@@ -9,6 +9,12 @@
 #define MAX_PLAYER_NAME (24)
 #endif
 
+/* dialog.c / dialog.pwn */
+#define LIMIT_DIALOG_CAPTION (64)
+#define LIMIT_DIALOG_TEXT (4096)
+/* button len limit is not defined */
+#define LIMIT_DIALOG_BUTTON (32)
+
 /* login.c / login.pwn */
 #define PW_HASH_LENGTH (65) /* including zero term */
 

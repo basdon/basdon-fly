@@ -89,3 +89,20 @@ native CommandHash(cmdtext[])
 //@remarks commands can't have spaces in them for obvious reasons
 native IsCommand(cmdtext[], const cmd[])
 
+//@summary Queue a dialog to show later
+//@param playerid see {@link ShowPlayerDialog}
+//@param dialogid see {@link ShowPlayerDialog}
+//@param style see {@link ShowPlayerDialog}
+//@param caption see {@link ShowPlayerDialog}
+//@param info see {@link ShowPlayerDialog}
+//@param button1 see {@link ShowPlayerDialog}
+//@param button2 see {@link ShowPlayerDialog}
+//@param transactionid the transactionid for the dialog
+//@returns info see {@link ShowPlayerDialog}
+//@remarks info see {@link ShowPlayerDialog}
+native QueueDialog(playerid, dialogid, style, caption[], info[], button1[], button2[], transactionid)
+
+//@summary Drops the dialog queue for a player
+//@param playerid the playerid to drop the queue for
+native DropDialogQueue(playerid)
+

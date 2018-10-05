@@ -11,6 +11,9 @@ extern void *pAMXFunctions;
 /* commands.c */
 FORWARD(CommandHash);
 FORWARD(IsCommand);
+/* dialog.c */
+FORWARD(QueueDialog);
+FORWARD(DropDialogQueue);
 /* various.c */
 FORWARD(Urlencode);
 /* panel.c */
@@ -41,13 +44,14 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
-	void game_sa_init(), login_init();
+	void game_sa_init(), login_init(), dialog_init();
 
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 
 	game_sa_init();
 	login_init();
+	dialog_init();
 
 	return 1;
 }
@@ -71,6 +75,8 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(ValidatePasswordConfirmData),
 	REGISTERNATIVE(CommandHash),
 	REGISTERNATIVE(IsCommand),
+	REGISTERNATIVE(QueueDialog),
+	REGISTERNATIVE(DropDialogQueue),
 	{0, 0}
 };
 
