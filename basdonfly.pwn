@@ -129,7 +129,7 @@ native HasDialogsInQueue(playerid)
 //@param button1 variable to store button1 in, MUST be of at least {@code 32} len
 //@param button2 variable to store button2 in, MUST be of at least {@code 32} len
 //@param transactionid variable to store transactionid in, passed by ref
-//@remarks undefined behavior if dialog queue is empty
+//@returns {@code 0} if there was no dialog to pop
 //@seealso DropDialogQueue
 //@seealso QueueDialog
 //@seealso HasDialogsInQueue

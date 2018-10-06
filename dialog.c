@@ -2,7 +2,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
-#include <string.h>
 
 static struct dialogdata {
 	short dialogid;
@@ -83,7 +82,7 @@ cell AMX_NATIVE_CALL PopDialogQueue(AMX *amx, cell *params)
 	cell *addr = NULL;
 
 	if (dialogqueue[playerid] == NULL) {
-		return 1;
+		return 0;
 	}
 
 	cur = dialogqueue[playerid];
