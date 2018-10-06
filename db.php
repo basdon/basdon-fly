@@ -34,6 +34,29 @@ function db_err()
 	return ($lastdberr = $db->errorCode()) != '000000';
 }
 
+// true if no error happened and ip should be blocked
+function should_ip_be_blocked_from_login_attempts($ip)
+{
+	global $db;
+	if ($db == null) goto err;
+	$stmt = $db->prepare('SELECT count(u) AS c FROM fal WHERE t>UNIX_TIMESTAMP()-1800 AND j=?');
+	if ($stmt === false) goto err;
+	$stmt->bindValue(1, $ip);
+	if (!$stmt->execute()) goto err_stmt;
+	$r = $stmt->fetchAll();
+	if ($r === false) goto err_stmt;
+	if (count($r) == 0) {
+		return false;
+	}
+	return $r[0]->c > 12;
+err:
+	$lastdberr = $db->errorCode();
+	return false;
+err_stmt:
+	$lastdberr = $stmt->errorCode();
+	return false;
+}
+
 // -2 on failure, -1 if not exist, id on success
 function find_user_id_by_name($name)
 {
