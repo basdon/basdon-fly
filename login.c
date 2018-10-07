@@ -83,7 +83,6 @@ void urlenc(char *in, char *out)
 
 void setLoginDataName(struct logindata *ldata, cell *inaddr, int namelen)
 {
-	char *namein, *nameout;
 	amx_GetUString(ldata->name, inaddr, MAX_PLAYER_NAME + 1);
 	ldata->namelen = namelen;
 	ldata->urlencodednamelen = namelen * 3;
