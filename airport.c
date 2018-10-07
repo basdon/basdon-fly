@@ -6,6 +6,8 @@
 #endif
 
 #include "common.h"
+#include <string.h>
+#include <math.h>
 
 #define ISINVALIDAIRPORT(X) ((X).code[0] == 0)
 static int airportscount;
@@ -112,3 +114,49 @@ cell AMX_NATIVE_CALL APT_AddRunway(AMX *amx, cell *params)
 	return 1;
 }
 
+struct apref {
+	float distance;
+	int index;
+};
+
+int sortaprefs(const void *_a, const void *_b)
+{
+	struct apref *a = (struct apref*) _a;
+	struct apref *b = (struct apref*) _b;
+	if (a->distance < b->distance) return 1;
+	if (a->distance > b->distance) return -1;
+	return 0;
+}
+
+/* native APT_FormatNearestAirportList(Float:x, Float:y, buf[]) */
+cell AMX_NATIVE_CALL APT_FormatNearestAirportsList(AMX *amx, cell *params)
+{
+	cell *addr;
+	int i = 0, idx = 0;
+	float dx, dy;
+	char buf[4096];
+	struct airport *ap;
+	struct apref *aps = malloc(sizeof(struct apref) * airportscount);
+	
+	while (i < airportscount) {
+		dx = airports[i].x - amx_ctof(params[1]);
+		dy = airports[i].y - amx_ctof(params[2]);
+		aps[i].distance = sqrt(dx * dx + dy * dy);
+		aps[i].index = i;
+		i++;
+	}
+	qsort(aps, airportscount, sizeof(*aps), sortaprefs);
+	while (i--) {
+		ap = airports + aps[i].index;
+		if (aps[i].distance < 1000.0f) {
+			idx += sprintf(buf + idx, "\n%.0f\t%s\t[%s]", aps[i].distance, ap->name, ap->code);
+		} else {
+			idx += sprintf(buf + idx, "\n%.1fK\t%s\t[%s]", aps[i].distance / 1000.0f, ap->name, ap->code);
+		}
+	}
+	amx_GetAddr(amx, params[3], &addr);
+	amx_SetUString(addr, buf + 1, sizeof(buf) - 1);
+	
+	free(aps);
+	return 1;
+}

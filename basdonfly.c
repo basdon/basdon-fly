@@ -13,6 +13,7 @@ FORWARD(APT_Init);
 FORWARD(APT_Destroy);
 FORWARD(APT_Add);
 FORWARD(APT_AddRunway);
+FORWARD(APT_FormatNearestAirportsList);
 /* commands.c */
 FORWARD(CommandHash);
 FORWARD(IsCommand);
@@ -106,6 +107,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(APT_Destroy),
 	REGISTERNATIVE(APT_Add),
 	REGISTERNATIVE(APT_AddRunway),
+	REGISTERNATIVE(APT_FormatNearestAirportsList),
 	{0, 0}
 };
 

@@ -227,3 +227,10 @@ native APT_AddRunway(aptindex, specifier, Float:heading, Float:x, Float:y, Float
 //@seealso APT_Init
 native APT_Destroy()
 
+//@summary Format airport list in tablist form, sorted by airport distance to given ({@param x},{@param y}) coordinates
+//@param x x position of player
+//@param y y position of player
+//@param buf the buffer to store the resulting list in (use {@code buf4096})
+//@remarks Despite being named 'nearest', it adds all airports, but sorted on distance.
+native APT_FormatNearestAirportsList(Float:x, Float:y, buf[])
+
