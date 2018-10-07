@@ -7,7 +7,7 @@ if (!isset($_POST['i'], $_POST['p'])) {
 	exit;
 }
 
-$id = intval($_POST['i'], 16);
+$id = intval($_POST['i'], 10);
 
 if ($db == null) {
 	echo 'enodb';

@@ -7,7 +7,7 @@ if (!isset($_POST['i'], $_POST['p'])) {
 	exit;
 }
 
-$id = intval($_POST['i'], 16);
+$id = intval($_POST['i'], 10);
 
 $score = check_user_credentials($id, $_POST['p'], null);
 

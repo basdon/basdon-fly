@@ -7,7 +7,7 @@ if (!isset($_POST['i'], $_POST['p'], $_POST['j'])) {
 	exit;
 }
 
-$id = intval($_POST['i'], 16);
+$id = intval($_POST['i'], 10);
 
 if (should_ip_be_blocked_from_account($id, $_POST['j'])) {
 	echo 'l';

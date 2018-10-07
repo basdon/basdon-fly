@@ -2,12 +2,12 @@
 
 require 'db.php';
 
-if (!isset($_POST['u'], $_POST['j'])) {
+if (!isset($_POST['n'], $_POST['j'])) {
 	echo 'e' . 'missing_data';
 	exit;
 }
 
-$id = create_guest($_POST['u']);
+$id = create_guest($_POST['n']);
 
 if ($id == -1) {
 	echo 'e' . $lastdberr;
