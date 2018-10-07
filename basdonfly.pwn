@@ -194,3 +194,21 @@ native FormatLoginApiCheckChangePass(userid, inputtext[], buf[])
 //@returns {@code 0} on failure (no login data set for {@param playerid})
 native FormatLoginApiUserExistsGuest(playerid, buf[])
 
+//@summary Inits the airport table
+//@param amount amount of airports that will be created using {@link APT_Add}
+native APT_Init(amount)
+
+//@summary Add an airport to the airports table
+//@param index the index in the table to add this airport
+//@param code airport's code, must not be longer than {@code 4} + zero term
+//@param enabled {@code 0} if the airport should not be usable
+//@param name airport's name, must not be longer than {@code MAX_AIRPORT_NAME} + zero term
+//@param beacon airport's beacon, must not be longer than {@code 4} + zero term
+//@param x beacon's x position
+//@param y beacon's y position
+//@param z beacon's z position
+native APT_Add(index, code[], enabled, name[], beacon[], Float:x, Float:y, Float:z)
+
+//@summary Clear the airport table and free the used memory
+native APT_Destroy()
+

@@ -2,8 +2,8 @@
 HEADERS=common.h sharedsymbols.h
 FLAGS=-Wall -m32 -std=c89 -ansi
 
-build: out/basdonfly.o out/various.o out/panel.o out/amxplugin.o out/game_sa.o out/login.o out/commands.o out/dialog.o
-	$(GCC) $(FLAGS) -shared -o out/basdonfly.$(PLUGINTYPE) out/basdonfly.o out/amxplugin.o out/various.o out/panel.o out/game_sa.o out/login.o out/commands.o out/dialog.o
+build: out/basdonfly.o out/various.o out/panel.o out/amxplugin.o out/game_sa.o out/login.o out/commands.o out/dialog.o out/airport.o
+	$(GCC) $(FLAGS) -shared -o out/basdonfly.$(PLUGINTYPE) out/basdonfly.o out/amxplugin.o out/various.o out/panel.o out/game_sa.o out/login.o out/commands.o out/dialog.o out/airport.o
 
 out/amxplugin.o: vendor/SDK/plugincommon.h vendor/SDK/amxplugin.c
 	$(GCC) $(FLAGS) -x c -c vendor/SDK/amxplugin.c -o out/amxplugin.o
@@ -28,6 +28,9 @@ out/commands.o: commands.c $(HEADERS)
 
 out/dialog.o: dialog.c $(HEADERS)
 	$(GCC) $(FLAGS) -x c -c dialog.c -o out/dialog.o
+
+out/airport.o: airport.c $(HEADERS)
+	$(GCC) $(FLAGS) -x c -c airport.c -o out/airport.o
 
 clean:
 	rm out/*

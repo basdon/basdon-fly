@@ -9,6 +9,8 @@
 #define MAX_PLAYER_NAME (24)
 #endif
 
+/* airport.c / airport.pwn */
+#define MAX_AIRPORT_NAME (24)
 /* dialog.c / dialog.pwn */
 #define LIMIT_DIALOG_CAPTION (64)
 #define LIMIT_DIALOG_TEXT (4096)

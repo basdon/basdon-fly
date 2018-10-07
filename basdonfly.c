@@ -8,6 +8,10 @@ extern void *pAMXFunctions;
 
 #define FORWARD(X) cell AMX_NATIVE_CALL X(AMX *amx, cell *params)
 
+/* airport.c */
+FORWARD(APT_Init);
+FORWARD(APT_Destroy);
+FORWARD(APT_Add);
 /* commands.c */
 FORWARD(CommandHash);
 FORWARD(IsCommand);
@@ -97,6 +101,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(FormatLoginApiGuestRegister),
 	REGISTERNATIVE(FormatLoginApiCheckChangePass),
 	REGISTERNATIVE(FormatLoginApiUserExistsGuest),
+	REGISTERNATIVE(APT_Init),
+	REGISTERNATIVE(APT_Destroy),
+	REGISTERNATIVE(APT_Add),
 	{0, 0}
 };
 
