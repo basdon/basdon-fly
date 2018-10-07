@@ -12,6 +12,7 @@ extern void *pAMXFunctions;
 FORWARD(APT_Init);
 FORWARD(APT_Destroy);
 FORWARD(APT_Add);
+FORWARD(APT_AddRunway);
 /* commands.c */
 FORWARD(CommandHash);
 FORWARD(IsCommand);
@@ -104,6 +105,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(APT_Init),
 	REGISTERNATIVE(APT_Destroy),
 	REGISTERNATIVE(APT_Add),
+	REGISTERNATIVE(APT_AddRunway),
 	{0, 0}
 };
 

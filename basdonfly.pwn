@@ -196,6 +196,8 @@ native FormatLoginApiUserExistsGuest(playerid, buf[])
 
 //@summary Inits the airport table
 //@param amount amount of airports that will be created using {@link APT_Add}
+//@seealso APT_Add
+//@seealso APT_Destroy
 native APT_Init(amount)
 
 //@summary Add an airport to the airports table
@@ -207,8 +209,21 @@ native APT_Init(amount)
 //@param x beacon's x position
 //@param y beacon's y position
 //@param z beacon's z position
+//@seealso APT_Init
+//@seealso APT_AddRunway
 native APT_Add(index, code[], enabled, name[], beacon[], Float:x, Float:y, Float:z)
 
+//@summary Add a runway that belongs to an airport in the airports table
+//@param aptindex the index of the airport in the airport table this runway belongs to
+//@param specifier either {@code 'L'}, {@code 'C'}, {@code 'R'} or {@code 0}
+//@param heading heading of the runway
+//@param x beacon's x position
+//@param y beacon's y position
+//@param z beacon's z position
+//@seealso APT_Add
+native APT_AddRunway(aptindex, specifier, Float:heading, Float:x, Float:y, Float:z)
+
 //@summary Clear the airport table and free the used memory
+//@seealso APT_Init
 native APT_Destroy()
 
