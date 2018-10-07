@@ -192,17 +192,17 @@ cell AMX_NATIVE_CALL APT_MapIndexFromListDialog(AMX *amx, cell *params)
 	return value;
 }
 
-/* native APT_FormatInfoList(playerid, aptidx, buf[]) */
-cell AMX_NATIVE_CALL APT_FormatInfoList(AMX *amx, cell *params)
+/* native APT_FormatInfo(aptidx, buf[]) */
+cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
 {
-	int playerid = params[1], idx = params[2];
+	int idx = params[1];
 	struct airport *ap;
 	struct runway *rnw;
 	cell *addr;
 	char buf[4096];
 	char szRunways[] = "Runways";
 
-	amx_GetAddr(amx, params[3], &addr);
+	amx_GetAddr(amx, params[2], &addr);
 	if (idx < 0 || airportscount <= idx) {
 		buf[0] = 0;
 		amx_SetUString(addr, buf, 2);

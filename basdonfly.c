@@ -15,7 +15,7 @@ FORWARD(APT_Add);
 FORWARD(APT_AddRunway);
 FORWARD(APT_FormatNearestList);
 FORWARD(APT_MapIndexFromListDialog);
-FORWARD(APT_FormatInfoList);
+FORWARD(APT_FormatInfo);
 FORWARD(APT_FormatCodeAndName);
 /* commands.c */
 FORWARD(CommandHash);
@@ -112,7 +112,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(APT_AddRunway),
 	REGISTERNATIVE(APT_FormatNearestList),
 	REGISTERNATIVE(APT_MapIndexFromListDialog),
-	REGISTERNATIVE(APT_FormatInfoList),
+	REGISTERNATIVE(APT_FormatInfo),
 	REGISTERNATIVE(APT_FormatCodeAndName),
 	{0, 0}
 };
