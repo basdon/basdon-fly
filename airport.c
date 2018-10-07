@@ -27,6 +27,8 @@ static struct airport {
 	struct runway *runways;
 } *airports;
 
+int *indexmap[MAX_PLAYERS];
+
 void freeAirportTable()
 {
 	struct airport *ap = airports;
@@ -63,6 +65,9 @@ cell AMX_NATIVE_CALL APT_Init(AMX *amx, cell *params)
 	airports = malloc(sizeof(struct airport) * airportscount);
 	while (i--) {
 		airports[i].code[0] = 0;
+	}
+	while (i < MAX_PLAYERS) {
+		indexmap[i++] = NULL;
 	}
 	return 1;
 }
@@ -128,25 +133,29 @@ int sortaprefs(const void *_a, const void *_b)
 	return 0;
 }
 
-/* native APT_FormatNearestAirportList(Float:x, Float:y, buf[]) */
-cell AMX_NATIVE_CALL APT_FormatNearestAirportsList(AMX *amx, cell *params)
+/* native APT_FormatNearestList(playerid, Float:x, Float:y, buf[]) */
+cell AMX_NATIVE_CALL APT_FormatNearestList(AMX *amx, cell *params)
 {
 	cell *addr;
-	int i = 0, idx = 0;
+	int i = 0, idx = 0, pid = params[1];
 	float dx, dy;
 	char buf[4096];
 	struct airport *ap;
 	struct apref *aps = malloc(sizeof(struct apref) * airportscount);
 	
 	while (i < airportscount) {
-		dx = airports[i].x - amx_ctof(params[1]);
-		dy = airports[i].y - amx_ctof(params[2]);
+		dx = airports[i].x - amx_ctof(params[2]);
+		dy = airports[i].y - amx_ctof(params[3]);
 		aps[i].distance = sqrt(dx * dx + dy * dy);
 		aps[i].index = i;
 		i++;
 	}
 	qsort(aps, airportscount, sizeof(*aps), sortaprefs);
+	if (indexmap[pid] == NULL) {
+		indexmap[pid] = malloc(sizeof(indexmap[0]) * airportscount);
+	}
 	while (i--) {
+		*(indexmap[pid] + airportscount - i - 1) = aps[i].index;
 		ap = airports + aps[i].index;
 		if (aps[i].distance < 1000.0f) {
 			idx += sprintf(buf + idx, "\n%.0f\t%s\t[%s]", aps[i].distance, ap->name, ap->code);
@@ -154,9 +163,81 @@ cell AMX_NATIVE_CALL APT_FormatNearestAirportsList(AMX *amx, cell *params)
 			idx += sprintf(buf + idx, "\n%.1fK\t%s\t[%s]", aps[i].distance / 1000.0f, ap->name, ap->code);
 		}
 	}
-	amx_GetAddr(amx, params[3], &addr);
-	amx_SetUString(addr, buf + 1, sizeof(buf) - 1);
-	
+	amx_GetAddr(amx, params[4], &addr);
+	amx_SetUString(addr, buf + 1, idx + 1);
+
 	free(aps);
+	return 1;
+}
+
+/* native API_MapIndexFromListDialog(playerid, listitem=0) */
+cell AMX_NATIVE_CALL APT_MapIndexFromListDialog(AMX *amx, cell *params)
+{
+	int value, pid = params[1];
+
+	if (indexmap[pid] == NULL) {
+		return 0;
+	}
+
+	if (params[2] < 0 || airportscount <= params[2]) {
+		value = 0;
+	} else {
+		value = *(indexmap[pid] + params[2]);
+	}
+
+	free(indexmap[pid]);
+	indexmap[pid] = NULL;
+	return value;
+}
+
+/* native APT_FormatInfoList(playerid, aptidx, buf[]) */
+cell AMX_NATIVE_CALL APT_FormatInfoList(AMX *amx, cell *params)
+{
+	int playerid = params[1], idx = params[2];
+	struct airport *ap;
+	struct runway *rnw;
+	cell *addr;
+	char buf[4096];
+	char szRunways[] = "Runways";
+
+	amx_GetAddr(amx, params[3], &addr);
+	if (idx < 0 || airportscount <= idx) {
+		buf[0] = 0;
+		amx_SetUString(addr, buf, 2);
+		return 0;
+	}
+	ap = airports + idx;
+	idx = sprintf(buf, "\nBeacon\t%s", ap->beacon);
+	rnw = ap->runways;
+	while (rnw != NULL) {
+		idx += sprintf(buf + idx, "\n%s\t%s", szRunways, rnw->id);
+		rnw = rnw->next;
+		szRunways[0] = '\t';
+		szRunways[1] = 0;
+	}
+
+	amx_SetUString(addr, buf + 1, idx + 1);
+	return 1;
+}
+
+/* native APT_FormatCodeAndName(aptidx, buf[]) */
+cell AMX_NATIVE_CALL APT_FormatCodeAndName(AMX *amx, cell *params)
+{
+	int idx = params[1];
+	cell *addr;
+	char res[64];
+
+	amx_GetAddr(amx, params[2], &addr);
+	if (idx < 0 || airportscount <= idx) {
+		res[0] = 'u';
+		res[1] = 'n';
+		res[2] = 'k';
+		res[3] = 0;
+		amx_SetUString(addr, res, 4);
+		return 0;
+	}
+
+	sprintf(res, "%s - %s", airports[idx].code, airports[idx].name);
+	amx_SetUString(addr, res, 64);
 	return 1;
 }
