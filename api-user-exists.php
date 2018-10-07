@@ -2,7 +2,7 @@
 
 require 'db.php';
 
-if (!isset($_POST['u'])) {
+if (!isset($_POST['u']) && !isset($_POST['j'])) {
 	echo 'e';
 	exit;
 }

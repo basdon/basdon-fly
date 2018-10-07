@@ -9,6 +9,11 @@ if (!isset($_POST['i'], $_POST['p'], $_POST['j'])) {
 
 $id = intval($_POST['i'], 16);
 
+if (should_ip_be_blocked_from_account($id, $_POST['j'])) {
+	echo 'l';
+	exit;
+}
+
 $score = check_user_credentials($id, $_POST['p'], $_POST['j']);
 
 if ($score == -2) {
