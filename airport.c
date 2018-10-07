@@ -15,6 +15,7 @@ static int airportscount;
 struct runway {
 	char id[4];
 	float heading, x, y, z;
+	int vor;
 	struct runway *next;
 };
 
@@ -101,7 +102,7 @@ cell AMX_NATIVE_CALL APT_Add(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native APT_AddRunway(aptindex, specifier, Float:heading, Float:x, Float:y, Float:z) */
+/* native APT_AddRunway(aptindex, specifier, Float:heading, Float:x, Float:y, Float:z, vor) */
 cell AMX_NATIVE_CALL APT_AddRunway(AMX *amx, cell *params)
 {
 	struct airport *ap = airports + params[1];
@@ -114,6 +115,7 @@ cell AMX_NATIVE_CALL APT_AddRunway(AMX *amx, cell *params)
 	rnw->x = amx_ctof(params[4]);
 	rnw->y = amx_ctof(params[5]);
 	rnw->z = amx_ctof(params[6]);
+	rnw->vor = params[7];
 	rnw->next = ap->runways;
 	ap->runways = rnw;
 	return 1;
@@ -210,7 +212,11 @@ cell AMX_NATIVE_CALL APT_FormatInfoList(AMX *amx, cell *params)
 	idx = sprintf(buf, "\nBeacon\t%s", ap->beacon);
 	rnw = ap->runways;
 	while (rnw != NULL) {
-		idx += sprintf(buf + idx, "\n%s\t%s", szRunways, rnw->id);
+		if (rnw->vor) {
+			idx += sprintf(buf + idx, "\n%s\t%s (VOR)", szRunways, rnw->id);
+		} else {
+			idx += sprintf(buf + idx, "\n%s\t%s", szRunways, rnw->id);
+		}
 		rnw = rnw->next;
 		szRunways[0] = '\t';
 		szRunways[1] = 0;
