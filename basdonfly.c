@@ -29,6 +29,14 @@ FORWARD(IsAirVehicle);
 FORWARD(ResetPasswordConfirmData);
 FORWARD(SetPasswordConfirmData);
 FORWARD(ValidatePasswordConfirmData);
+FORWARD(SetLoginData);
+FORWARD(ClearLoginData);
+FORWARD(UpdateLoginData);
+FORWARD(FormatLoginApiRegister);
+FORWARD(FormatLoginApiLogin);
+FORWARD(FormatLoginApiGuestRegister);
+FORWARD(FormatLoginApiCheckChangePass);
+FORWARD(FormatLoginApiUserExistsGuest);
 
 cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
 {
@@ -81,6 +89,14 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(DropDialogQueue),
 	REGISTERNATIVE(HasDialogsInQueue),
 	REGISTERNATIVE(PopDialogQueue),
+	REGISTERNATIVE(SetLoginData),
+	REGISTERNATIVE(ClearLoginData),
+	REGISTERNATIVE(UpdateLoginData),
+	REGISTERNATIVE(FormatLoginApiRegister),
+	REGISTERNATIVE(FormatLoginApiLogin),
+	REGISTERNATIVE(FormatLoginApiGuestRegister),
+	REGISTERNATIVE(FormatLoginApiCheckChangePass),
+	REGISTERNATIVE(FormatLoginApiUserExistsGuest),
 	{0, 0}
 };
 

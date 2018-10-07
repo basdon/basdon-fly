@@ -135,3 +135,62 @@ native HasDialogsInQueue(playerid)
 //@seealso HasDialogsInQueue
 native PopDialogQueue(playerid, &dialogid, &style, caption[], info[], button1[], button2[], &transactionid)
 
+//@summary Stores a player's data used for login stuff
+//@param playerid the playerid
+//@param ip player's ip
+//@param name player's name
+//@param namelen length of {@param name}, excluding zero term
+//@seealso UpdateLoginData
+//@seealso ClearLoginData
+native SetLoginData(playerid, ip[], name[], namelen)
+
+//@summary Updates a player's name in data saved for login stuff
+//@param playerid the playerid
+//@param name player's name
+//@param namelen length of {@param name}, excluding zero term
+//@seealso SetLoginData
+//@seealso ClearLoginData
+//@returns {@code 0} if there was no login data saved for {@param playerid}
+native UpdateLoginData(playerid, name[], namelen)
+
+//@summary Clears login data for a player
+//@param playerid player to clear login data for
+//@seealso SetLoginData
+native ClearLoginData(playerid)
+
+//@summary Format data to send to register api
+//@param playerid the player for who the call is
+//@param inputtext password as entered by player
+//@param buf the buffer to store the resulting post data in (use {@code buf4096})
+//@returns {@code 0} on failure (no login data set for {@param playerid})
+native FormatLoginApiRegister(playerid, inputtext[], buf[])
+
+//@summary Format data to send to login api
+//@param playerid the player for who the call is
+//@param userid userid of the player
+//@param inputtext password as entered by player
+//@param buf the buffer to store the resulting post data in (use {@code buf4096})
+//@returns {@code 0} on failure (no login data set for {@param playerid})
+native FormatLoginApiLogin(playerid, userid, inputtext[], buf[])
+
+//@summary Format data to send to guest register api
+//@param playerid the player for who the call is
+//@param userid userid of the player
+//@param inputtext password as entered by player
+//@param buf the buffer to store the resulting post data in (use {@code buf4096})
+//@returns {@code 0} on failure (no login data set for {@param playerid})
+native FormatLoginApiGuestRegister(playerid, userid, inputtext[], buf[])
+
+//@summary Format data to send to check/change passowrd api (they expect the same data)
+//@param userid userid of the player
+//@param inputtext password as entered by player
+//@param buf the buffer to store the resulting post data in (use {@code buf4096})
+//@returns {@code 0} on failure (no login data set for {@param playerid})
+native FormatLoginApiCheckChangePass(userid, inputtext[], buf[])
+
+//@summary Format data to send to user exists/guest api (they expect the same data)
+//@param playerid playerid of the player
+//@param buf the buffer to store the resulting post data in (use {@code buf4096})
+//@returns {@code 0} on failure (no login data set for {@param playerid})
+native FormatLoginApiUserExistsGuest(playerid, buf[])
+
