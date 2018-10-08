@@ -2,6 +2,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "playerdata.h"
 
 logprintf_t logprintf;
 extern void *pAMXFunctions;
@@ -32,15 +33,17 @@ FORWARD(Panel_ResetCaches);
 FORWARD(Panel_FormatAltitude);
 FORWARD(Panel_FormatSpeed);
 FORWARD(Panel_FormatHeading);
+/* playerdata.c */
+FORWARD(PlayerData_Init);
+FORWARD(PlayerData_Clear);
+FORWARD(PlayerData_UpdateName);
 /* game_sa.c */
 FORWARD(IsAirVehicle);
 /* login.c */
 FORWARD(ResetPasswordConfirmData);
 FORWARD(SetPasswordConfirmData);
 FORWARD(ValidatePasswordConfirmData);
-FORWARD(SetLoginData);
-FORWARD(ClearLoginData);
-FORWARD(UpdateLoginData);
+
 FORWARD(FormatLoginApiRegister);
 FORWARD(FormatLoginApiLogin);
 FORWARD(FormatLoginApiGuestRegister);
@@ -71,6 +74,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	game_sa_init();
 	login_init();
 	dialog_init();
+	pdata_init();
 
 	return 1;
 }
@@ -98,9 +102,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(DropDialogQueue),
 	REGISTERNATIVE(HasDialogsInQueue),
 	REGISTERNATIVE(PopDialogQueue),
-	REGISTERNATIVE(SetLoginData),
-	REGISTERNATIVE(ClearLoginData),
-	REGISTERNATIVE(UpdateLoginData),
+	REGISTERNATIVE(PlayerData_Init),
+	REGISTERNATIVE(PlayerData_Clear),
+	REGISTERNATIVE(PlayerData_UpdateName),
 	REGISTERNATIVE(FormatLoginApiRegister),
 	REGISTERNATIVE(FormatLoginApiLogin),
 	REGISTERNATIVE(FormatLoginApiGuestRegister),
