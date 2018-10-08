@@ -200,7 +200,7 @@ cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
 	struct runway *rnw;
 	cell *addr;
 	char buf[4096];
-	char szRunways[] = "Runways";
+	char szRunways[] = "Runways:";
 
 	amx_GetAddr(amx, params[2], &addr);
 	if (idx < 0 || airportscount <= idx) {
@@ -209,7 +209,7 @@ cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
 		return 0;
 	}
 	ap = airports + idx;
-	idx = sprintf(buf, "\nBeacon\t%s", ap->beacon);
+	idx = sprintf(buf, "\nBeacon:\t%s", ap->beacon);
 	rnw = ap->runways;
 	while (rnw != NULL) {
 		if (rnw->vor) {
