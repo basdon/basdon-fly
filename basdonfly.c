@@ -66,7 +66,7 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
-	void game_sa_init(), login_init(), dialog_init();
+	void game_sa_init(), login_init(), dialog_init(), zones_init();
 
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
@@ -75,6 +75,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	login_init();
 	dialog_init();
 	pdata_init();
+	zones_init();
 
 	return 1;
 }

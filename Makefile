@@ -2,8 +2,8 @@
 HEADERS=common.h sharedsymbols.h
 FLAGS=-Wall -m32 -std=c89 -ansi
 
-build: out/basdonfly.o out/various.o out/panel.o out/amxplugin.o out/game_sa.o out/login.o out/commands.o out/dialog.o out/airport.o out/playerdata.o
-	$(GCC) $(FLAGS) -shared -o out/basdonfly.$(PLUGINTYPE) out/basdonfly.o out/amxplugin.o out/various.o out/panel.o out/game_sa.o out/login.o out/commands.o out/dialog.o out/airport.o out/playerdata.o
+build: out/basdonfly.o out/various.o out/panel.o out/amxplugin.o out/game_sa.o out/login.o out/commands.o out/dialog.o out/airport.o out/playerdata.o out/zones.o out/zones_data.o
+	$(GCC) $(FLAGS) -shared -o out/basdonfly.$(PLUGINTYPE) out/basdonfly.o out/amxplugin.o out/various.o out/panel.o out/game_sa.o out/login.o out/commands.o out/dialog.o out/airport.o out/playerdata.o out/zones.o out/zones_data.o
 
 out/amxplugin.o: vendor/SDK/plugincommon.h vendor/SDK/amxplugin.c
 	$(GCC) $(FLAGS) -x c -c vendor/SDK/amxplugin.c -o out/amxplugin.o
@@ -34,6 +34,12 @@ out/airport.o: airport.c $(HEADERS)
 
 out/playerdata.o: playerdata.c $(HEADERS) playerdata.h
 	$(GCC) $(FLAGS) -x c -c playerdata.c -o out/playerdata.o
+
+out/zones.o: zones.c $(HEADERS) zones.h
+	$(GCC) $(FLAGS) -x c -c zones.c -o out/zones.o
+
+out/zones_data.o: zones_data.c $(HEADERS) zones.h
+	$(GCC) $(FLAGS) -x c -c zones_data.c -o out/zones_data.o
 
 clean:
 	rm out/*
