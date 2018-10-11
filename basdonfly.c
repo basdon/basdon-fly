@@ -43,12 +43,13 @@ FORWARD(IsAirVehicle);
 FORWARD(ResetPasswordConfirmData);
 FORWARD(SetPasswordConfirmData);
 FORWARD(ValidatePasswordConfirmData);
-
 FORWARD(FormatLoginApiRegister);
 FORWARD(FormatLoginApiLogin);
 FORWARD(FormatLoginApiGuestRegister);
 FORWARD(FormatLoginApiCheckChangePass);
 FORWARD(FormatLoginApiUserExistsGuest);
+/* zones.c */
+FORWARD(Zone_UpdateForPlayer);
 
 cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
 {
@@ -119,6 +120,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(APT_MapIndexFromListDialog),
 	REGISTERNATIVE(APT_FormatInfo),
 	REGISTERNATIVE(APT_FormatCodeAndName),
+	REGISTERNATIVE(Zone_UpdateForPlayer),
 	{0, 0}
 };
 
