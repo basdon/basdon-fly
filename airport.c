@@ -213,10 +213,9 @@ cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
 	idx += sprintf(buf + idx, "\nBeacon:\t%s", ap->beacon);
 	rnw = ap->runways;
 	while (rnw != NULL) {
+		idx += sprintf(buf + idx, "\n%s\t%s", szRunways, rnw->id);
 		if (rnw->vor) {
-			idx += sprintf(buf + idx, "\n%s\t%s (VOR)", szRunways, rnw->id);
-		} else {
-			idx += sprintf(buf + idx, "\n%s\t%s", szRunways, rnw->id);
+			idx += sprintf(buf + idx, " (VOR)");
 		}
 		rnw = rnw->next;
 		szRunways[0] = '\t';
