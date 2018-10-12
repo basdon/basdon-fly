@@ -209,7 +209,8 @@ cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
 		return 0;
 	}
 	ap = airports + idx;
-	idx = sprintf(buf, "\nBeacon:\t%s", ap->beacon);
+	idx = sprintf(buf, "\nElevation:\t%.0f FT", ap->z);
+	idx += sprintf(buf + idx, "\nBeacon:\t%s", ap->beacon);
 	rnw = ap->runways;
 	while (rnw != NULL) {
 		if (rnw->vor) {
