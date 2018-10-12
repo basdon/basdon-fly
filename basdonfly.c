@@ -49,7 +49,9 @@ FORWARD(FormatLoginApiGuestRegister);
 FORWARD(FormatLoginApiCheckChangePass);
 FORWARD(FormatLoginApiUserExistsGuest);
 /* zones.c */
-FORWARD(Zone_UpdateForPlayer);
+FORWARD(Zones_InvalidateForPlayer);
+FORWARD(Zones_UpdateForPlayer);
+FORWARD(Zones_FormatForPlayer);
 
 cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
 {
@@ -120,7 +122,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(APT_MapIndexFromListDialog),
 	REGISTERNATIVE(APT_FormatInfo),
 	REGISTERNATIVE(APT_FormatCodeAndName),
-	REGISTERNATIVE(Zone_UpdateForPlayer),
+	REGISTERNATIVE(Zones_InvalidateForPlayer),
+	REGISTERNATIVE(Zones_UpdateForPlayer),
+	REGISTERNATIVE(Zones_FormatForPlayer),
 	{0, 0}
 };
 

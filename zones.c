@@ -18,11 +18,6 @@ extern int zonecount;
 int lastzoneid[MAX_PLAYERS];
 int lastzoneindex[MAX_PLAYERS];
 
-#define SPECIAL_ZONE_SA_NW = -1
-#define SPECIAL_ZONE_SA_NE = -2
-#define SPECIAL_ZONE_SA_SW = -3
-#define SPECIAL_ZONE_SA_SE = -4
-
 void zones_init()
 {
 	struct region *r = regions, *rmax = regions + regioncount;
@@ -43,10 +38,30 @@ nr:
 			r->minzone = z;
 			goto nr;
 		}
+		pz->region = r;
 		z++;
 		pz++;
 	}
 	r->maxzone = z;
+
+	r = regions;
+	while (r < rmax) {
+		r->zone.region = r;
+		r++;
+	}
+
+	for (z = 0; z < MAX_PLAYERS; z++) {
+		lastzoneindex[z] = -1;
+		lastzoneid[z] = ZONE_INVALID;
+	}
+}
+
+/* native Zones_InvalidateForPlayer(playerid) */
+cell AMX_NATIVE_CALL Zones_InvalidateForPlayer(AMX *amx, cell *params)
+{
+	lastzoneindex[params[1]] = -1;
+	lastzoneid[params[1]] = ZONE_INVALID;
+	return 1;
 }
 
 static int isinzone(float x, float y, float z, struct zone *zone)
@@ -57,7 +72,7 @@ static int isinzone(float x, float y, float z, struct zone *zone)
 }
 
 /* native Zones_UpdateForPlayer(playerid, Float:x, Float:y, Float:z) */
-cell AMX_NATIVE_CALL Zone_UpdateForPlayer(AMX *amx, cell *params)
+cell AMX_NATIVE_CALL Zones_UpdateForPlayer(AMX *amx, cell *params)
 {
 	int playerid = params[1];
 	struct region *r = regions, *rmax = regions + regioncount;
@@ -93,5 +108,26 @@ cell AMX_NATIVE_CALL Zone_UpdateForPlayer(AMX *amx, cell *params)
 	newid = ZONE_NONE_NW + ((y < 0.0f) << 1) + (x > 0.0f);
 ret:
 	i = lastzoneid[playerid];
-	return (lastzoneid[playerid] = newid) == i;
+	return (lastzoneid[playerid] = newid) != i;
+}
+
+/* native Zones_FormatForPlayer(playerid, buf[]) */
+cell AMX_NATIVE_CALL Zones_FormatForPlayer(AMX *amx, cell *params)
+{
+	int playerid = params[1];
+	int lzidx = lastzoneindex[playerid];
+	cell *addr;
+	char result[100];
+
+	if (lzidx >= 0) {
+		sprintf(result, "%s~n~%s", zonenames[lastzoneid[playerid]], zonenames[zones[lzidx].region->zone.id]);
+	} else {
+		result[0] = result[2] = '~';
+		result[1] = 'n';
+		strcpy(result + 3, zonenames[lastzoneid[playerid]]);
+	}
+	amx_GetAddr(amx, params[2], &addr);
+	amx_SetUString(addr, result, sizeof(result));
+
+	return 1;
 }

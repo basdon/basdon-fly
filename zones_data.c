@@ -178,6 +178,7 @@ char *zonenames[] = {
 	"San Andreas (NE)",
 	"San Andreas (SW)",
 	"San Andreas (SE)",
+	"INVALID ZONE",
 };
 
 struct region regions[] = {

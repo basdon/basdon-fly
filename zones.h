@@ -4,6 +4,7 @@
 struct zone {
 	float x1, y1, z1, x2, y2, z2;
 	int id;
+	struct region *region;
 };
 
 struct region {
@@ -185,4 +186,5 @@ struct region {
 #define ZONE_NONE_NE 170
 #define ZONE_NONE_SW 171
 #define ZONE_NONE_SE 172
+#define ZONE_INVALID 173
 
