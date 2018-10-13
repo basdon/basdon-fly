@@ -21,10 +21,22 @@ void pdata_init()
 
 void setName(struct playerdata *data, AMX *amx, cell addrparam, int namelen)
 {
+	char *nin = data->name;
+	char *nout = data->normname;
+	char t;
 	cell *addr;
 	amx_GetAddr(amx, addrparam, &addr);
 	amx_GetUString(data->name, addr, MAX_PLAYER_NAME + 1);
 	data->namelen = namelen;
+	while(1) {
+		t = *nin++;
+		if ('A' <= t && t <= 'Z') {
+			t |= 0x20;
+		}
+		if ((*nout++ = t) == 0) {
+			break;
+		}
+	}
 }
 
 /* native PlayerData_Init(playerid, ip[], name[], namelen) */

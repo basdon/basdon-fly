@@ -6,6 +6,7 @@ void pdata_init();
 struct playerdata {
 	char ip[16];
 	char name[MAX_PLAYER_NAME + 1];
+	char normname[MAX_PLAYER_NAME + 1];
 	short namelen;
 };
 
