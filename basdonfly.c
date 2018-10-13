@@ -53,6 +53,7 @@ FORWARD(FormatLoginApiUserExistsGuest);
 FORWARD(Zones_InvalidateForPlayer);
 FORWARD(Zones_UpdateForPlayer);
 FORWARD(Zones_FormatForPlayer);
+FORWARD(Zones_FormatLoc);
 
 cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
 {
@@ -127,6 +128,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Zones_InvalidateForPlayer),
 	REGISTERNATIVE(Zones_UpdateForPlayer),
 	REGISTERNATIVE(Zones_FormatForPlayer),
+	REGISTERNATIVE(Zones_FormatLoc),
 	{0, 0}
 };
 

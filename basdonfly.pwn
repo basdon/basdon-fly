@@ -272,6 +272,16 @@ native Zones_InvalidateForPlayer(playerid)
 //@param buf a buffer
 native Zones_FormatForPlayer(playerid, buf[])
 
+//@summary Inserts the formatted '/loc' text for a player
+//@param playerid the playerid whose '/loc' is needed
+//@param buf a buffer
+//@param z z position of player
+//@param model model of vehicle the player is in or {@code 0}
+//@param vx x-velocity of vehicle the player is in
+//@param vy y-velocity of vehicle the player is in
+//@param vz z-velocity of vehicle the player is in
+native Zones_FormatLoc(playerid, buf[], Float:z, model, Float:vx, Float:vy, Float:vz)
+
 //@summary Scan the next part of {@param cmdtext} for a player reference
 //@param cmdtext cmdtext, positioned on the target parameter
 //@param idx location of cmdtext the param is, will be incremented to next param location if successful

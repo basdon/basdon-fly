@@ -7,7 +7,10 @@
 
 #include "common.h"
 #include "zones.h"
+#include "playerdata.h"
+#include "game_sa.h"
 #include <string.h>
+#include <math.h>
 
 extern char *zonenames[];
 extern struct region regions[];
@@ -93,7 +96,6 @@ cell AMX_NATIVE_CALL Zones_UpdateForPlayer(AMX *amx, cell *params)
 					lastzoneindex[playerid] = i;
 					lastzoneid[playerid] = pz->id;
 					goto ret;
-					
 				}
 			}
 			lastzoneid[playerid] = -1;
@@ -125,5 +127,34 @@ cell AMX_NATIVE_CALL Zones_FormatForPlayer(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, result, sizeof(result));
 
+	return 1;
+}
+
+/* native Zones_FormatLoc(playerid, buf[], Float:z, model, Float:vx, Float:vy, Float:vz) */
+cell AMX_NATIVE_CALL Zones_FormatLoc(AMX *amx, cell *params)
+{
+	int pid = params[1];
+	int model = params[4];
+	float vx = amx_ctof(params[5]), vy = amx_ctof(params[6]), vz = amx_ctof(params[7]);
+	cell *addr;
+	char result[144];
+	int lzid = lastzoneid[pid];
+	int lrid = lastregionid[pid];
+
+	int idx = sprintf(result, "%s(%d) is located at ", pdata[pid]->name, pid);
+	if (lzid >= 0) {
+		idx += sprintf(result + idx, "%s, ", zonenames[lzid]);
+	}
+	idx += sprintf(result + idx, "%s ", zonenames[lrid]);
+	if (model) {
+		sprintf(result + idx, "travelling at %.0f KPH in a %s (%.0f FT)",
+			VEL_TO_KPH_VAL * sqrt(vx * vx + vy * vy + vz * vz), vehnames[model - 400],
+			amx_ctof(params[3]));
+	} else {
+		sprintf(result + idx, "on foot (%.0f FT)", amx_ctof(params[3]));
+	}
+
+	amx_GetAddr(amx, params[2], &addr);
+	amx_SetUString(addr, result, sizeof(result));
 	return 1;
 }
