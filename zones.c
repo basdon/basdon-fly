@@ -16,6 +16,7 @@ extern int regioncount;
 extern int zonecount;
 
 int lastzoneid[MAX_PLAYERS];
+int lastregionid[MAX_PLAYERS];
 int lastzoneindex[MAX_PLAYERS];
 
 void zones_init()
@@ -38,29 +39,22 @@ nr:
 			r->minzone = z;
 			goto nr;
 		}
-		pz->region = r;
 		z++;
 		pz++;
 	}
 	r->maxzone = z;
 
-	r = regions;
-	while (r < rmax) {
-		r->zone.region = r;
-		r++;
-	}
-
 	for (z = 0; z < MAX_PLAYERS; z++) {
-		lastzoneindex[z] = -1;
-		lastzoneid[z] = ZONE_INVALID;
+		lastzoneindex[z] = lastzoneid[z] = -1;
+		lastregionid[z] = ZONE_INVALID;
 	}
 }
 
 /* native Zones_InvalidateForPlayer(playerid) */
 cell AMX_NATIVE_CALL Zones_InvalidateForPlayer(AMX *amx, cell *params)
 {
-	lastzoneindex[params[1]] = -1;
-	lastzoneid[params[1]] = ZONE_INVALID;
+	lastzoneindex[params[1]] = lastzoneid[params[1]] = -1;
+	lastregionid[params[1]] = ZONE_INVALID;
 	return 1;
 }
 
@@ -77,7 +71,9 @@ cell AMX_NATIVE_CALL Zones_UpdateForPlayer(AMX *amx, cell *params)
 	int playerid = params[1];
 	struct region *r = regions, *rmax = regions + regioncount;
 	struct zone *pz;
-	int i, newid;
+	int i;
+	int lrid = lastregionid[playerid];
+	int lzid = lastzoneid[playerid];
 	float x = amx_ctof(params[2]), y = amx_ctof(params[3]), z = amx_ctof(params[4]);
 
 	if (lastzoneindex[playerid] >= 0 && isinzone(x, y, z, zones + lastzoneindex[playerid])) {
@@ -90,41 +86,41 @@ cell AMX_NATIVE_CALL Zones_UpdateForPlayer(AMX *amx, cell *params)
 
 	while (r < rmax) {
 		if (isinzone(x, y, z, &r->zone)) {
+			lastregionid[playerid] = r->zone.id;
 			for (i = r->minzone; i < r->maxzone; i++) {
 				pz = zones + i;
 				if (isinzone(x, y, z, pz)) {
 					lastzoneindex[playerid] = i;
-					newid = pz->id;
+					lastzoneid[playerid] = pz->id;
 					goto ret;
 					
 				}
 			}
-			newid = r->zone.id;
+			lastzoneid[playerid] = -1;
 			goto ret;
 		}
 		r++;
 	}
 
-	newid = ZONE_NONE_NW + ((y < 0.0f) << 1) + (x > 0.0f);
+	lastregionid[playerid] = ZONE_NONE_NW + ((y < 0.0f) << 1) + (x > 0.0f);
 ret:
-	i = lastzoneid[playerid];
-	return (lastzoneid[playerid] = newid) != i;
+	return lrid != lastregionid[playerid] || lzid != lastzoneid[playerid];
 }
 
 /* native Zones_FormatForPlayer(playerid, buf[]) */
 cell AMX_NATIVE_CALL Zones_FormatForPlayer(AMX *amx, cell *params)
 {
-	int playerid = params[1];
-	int lzidx = lastzoneindex[playerid];
+	int lzid = lastzoneid[params[1]];
+	int lrid = lastregionid[params[1]];
 	cell *addr;
 	char result[100];
 
-	if (lzidx >= 0) {
-		sprintf(result, "%s~n~%s", zonenames[lastzoneid[playerid]], zonenames[zones[lzidx].region->zone.id]);
+	if (lzid != -1) {
+		sprintf(result, "%s~n~%s", zonenames[lzid], zonenames[lrid]);
 	} else {
 		result[0] = result[2] = '~';
 		result[1] = 'n';
-		strcpy(result + 3, zonenames[lastzoneid[playerid]]);
+		strcpy(result + 3, zonenames[lrid]);
 	}
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, result, sizeof(result));
