@@ -26,6 +26,7 @@ cell AMX_NATIVE_CALL CommandHash(AMX *amx, cell *params)
 	return result;
 }
 
+/* native IsCommand(cmdtext[], const cmd[], &idx) */
 cell AMX_NATIVE_CALL IsCommand(AMX *amx, cell *params)
 {
 	char cmdtext[50], cmd[50];
@@ -41,6 +42,9 @@ cell AMX_NATIVE_CALL IsCommand(AMX *amx, cell *params)
 	if (cmdtext[len] > ' ') {
 		return 0;
 	}
+
+	amx_GetAddr(amx, params[3], &addrofcmd);
+	*addrofcmd = len;
 
 	/* gt 0 because no need to check / */
 	while (--len > 0) {

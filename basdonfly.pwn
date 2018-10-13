@@ -85,9 +85,11 @@ native CommandHash(cmdtext[])
 //@summary Checks if the entered cmd is {@param cmd}
 //@param cmdtext cmdtext entered by player
 //@param cmd the command that should match (all lowercase, leading slash)
+//@param idx will contain the index where the params start in {@param cmdtext}
 //@remarks don't exceed cmd length of 49
+//@remarks {@param idx} may be changed even if this returns {@code 0}
 //@remarks commands can't have spaces in them for obvious reasons
-native IsCommand(cmdtext[], const cmd[])
+native IsCommand(cmdtext[], const cmd[], &idx)
 
 //@summary Queue a dialog to show later
 //@param playerid see {@link ShowPlayerDialog}
