@@ -66,7 +66,7 @@ cell AMX_NATIVE_CALL Params_GetPlayer(AMX *amx, cell *params)
 	char param[MAX_PLAYER_NAME + 1], *pp = param, val, cmdtext[144], *pc = cmdtext;
 	cell *addr, *player;
 	int idx;
-	int allnums = 1;
+	int isplayerid = 1;
 
 	amx_GetAddr(amx, params[1], &addr);
 	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
@@ -84,19 +84,19 @@ cell AMX_NATIVE_CALL Params_GetPlayer(AMX *amx, cell *params)
 			*pp = 0;
 			break;
 		}
-		if (allnums && '0' <= val && val <= '9') {
+		if (isplayerid && '0' <= val && val <= '9') {
 			if ((*player = *player * 10 + val - '0') >= MAX_PLAYERS) {
-				allnums = 0;
+				isplayerid = 0;
 			}
 			*pp++ = val;
 			continue;
 		}
-		allnums = 0;
+		isplayerid = 0;
 		if ('A' <= val && val <= 'Z') {
 			*pp++ = val | 0x20;
 			continue;
 		}
-		if ((val < 'a' || 'z' < val) && val != '[' &&
+		if ((val < 'a' || 'z' < val) && (val < '0' || '9' < val) && val != '[' &&
 			val != ']' && val != '(' && val != ')' && val != '$' &&
 			val != '@' && val != '.' && val != '_' && val != '=')
 		{
@@ -109,21 +109,23 @@ cell AMX_NATIVE_CALL Params_GetPlayer(AMX *amx, cell *params)
 	}
 
 	*addr = pc - cmdtext - 1;
-	if (allnums) {
+	if (isplayerid) {
 		if (pdata[*player] == NULL) {
 			*player = INVALID_PLAYER_ID;
 		}
 		return 1;
 	}
-	for (allnums = 0; allnums < MAX_PLAYERS; allnums++) {
-		if (pdata[allnums] == NULL) {
+#define tmp isplayerid
+	for (tmp = 0; tmp < MAX_PLAYERS; tmp++) {
+		if (pdata[tmp] == NULL) {
 			continue;
 		}
-		if (strstr(pdata[allnums]->normname, param) != NULL) {
-			*player = allnums;
+		if (strstr(pdata[tmp]->normname, param) != NULL) {
+			*player = tmp;
 			return 1;
 		}
 	}
+#undef tmp
 	*player = INVALID_PLAYER_ID;
 	return 1;
 }
