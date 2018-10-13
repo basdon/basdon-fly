@@ -239,6 +239,10 @@ native APT_Destroy()
 //@remarks Shown list order gets saved for follow-up, use {@link APT_ClearFlowCache} to free memory.
 native APT_FormatNearestList(playerid, Float:x, Float:y, buf[])
 
+//@summary Format beacon list in msgbox form
+//@param buf the buffer to store the resulting list in (use {@code buf4096})
+native APT_FormatBeaconList(buf[])
+
 //@summary Maps the clicked listitem (from {@link APT_FormatNearestList} to airport index.
 //@param playerid the playerid that clicked
 //@param listitem the listitem that the player clicked (optional={@code 0}

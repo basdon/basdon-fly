@@ -126,7 +126,7 @@ struct apref {
 	int index;
 };
 
-int sortaprefs(const void *_a, const void *_b)
+static int sortaprefs(const void *_a, const void *_b)
 {
 	struct apref *a = (struct apref*) _a;
 	struct apref *b = (struct apref*) _b;
@@ -169,6 +169,24 @@ cell AMX_NATIVE_CALL APT_FormatNearestList(AMX *amx, cell *params)
 	amx_SetUString(addr, buf + 1, idx + 1);
 
 	free(aps);
+	return 1;
+}
+
+/* native APT_FormatBeaconList(buf[]) */
+cell AMX_NATIVE_CALL APT_FormatBeaconList(AMX *amx, cell *params)
+{
+	cell *addr;
+	char buf[4096];
+	struct airport *ap = airports;
+	int count = airportscount, idx = 0;
+
+	while (count-- > 0) {
+		idx += sprintf(buf + idx, " %s", ap->beacon);
+		ap++;
+	}
+
+	amx_GetAddr(amx, params[1], &addr);
+	amx_SetUString(addr, buf + 1, idx + 1);
 	return 1;
 }
 

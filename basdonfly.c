@@ -15,6 +15,7 @@ FORWARD(APT_Destroy);
 FORWARD(APT_Add);
 FORWARD(APT_AddRunway);
 FORWARD(APT_FormatNearestList);
+FORWARD(APT_FormatBeaconList);
 FORWARD(APT_MapIndexFromListDialog);
 FORWARD(APT_FormatInfo);
 FORWARD(APT_FormatCodeAndName);
@@ -124,6 +125,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(APT_Add),
 	REGISTERNATIVE(APT_AddRunway),
 	REGISTERNATIVE(APT_FormatNearestList),
+	REGISTERNATIVE(APT_FormatBeaconList),
 	REGISTERNATIVE(APT_MapIndexFromListDialog),
 	REGISTERNATIVE(APT_FormatInfo),
 	REGISTERNATIVE(APT_FormatCodeAndName),
