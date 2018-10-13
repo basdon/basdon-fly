@@ -65,7 +65,6 @@ cell AMX_NATIVE_CALL Params_GetPlayer(AMX *amx, cell *params)
 {
 	char param[MAX_PLAYER_NAME + 1], *pp = param, val, cmdtext[144], *pc = cmdtext;
 	cell *addr, *player;
-	int idx;
 	int isplayerid = 1;
 
 	amx_GetAddr(amx, params[1], &addr);
