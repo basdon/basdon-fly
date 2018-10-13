@@ -6,29 +6,14 @@
 #endif
 
 #include "common.h"
+#include "airport.h"
 #include <string.h>
 #include <math.h>
 
-#define ISINVALIDAIRPORT(X) ((X).code[0] == 0)
-static int airportscount;
+struct airport *airports;
+int airportscount;
 
-struct runway {
-	char id[4];
-	float heading, x, y, z;
-	int nav;
-	struct runway *next;
-};
-
-static struct airport {
-	float x, y, z;
-	char code[4 + 1];
-	char enabled;
-	char beacon[4 + 1];
-	char name[MAX_AIRPORT_NAME + 1];
-	struct runway *runways;
-} *airports;
-
-int *indexmap[MAX_PLAYERS];
+static int *indexmap[MAX_PLAYERS];
 
 void freeAirportTable()
 {
@@ -95,9 +80,9 @@ cell AMX_NATIVE_CALL APT_Add(AMX *amx, cell *params)
 	amx_GetUString(ap->name, addr, sizeof(ap->name));
 	amx_GetAddr(amx, params[5], &addr);
 	amx_GetUString(ap->beacon, addr, sizeof(ap->beacon));
-	ap->x = amx_ctof(params[6]);
-	ap->y = amx_ctof(params[7]);
-	ap->z = amx_ctof(params[8]);
+	ap->pos.x = amx_ctof(params[6]);
+	ap->pos.y = amx_ctof(params[7]);
+	ap->pos.z = amx_ctof(params[8]);
 	ap->runways = NULL;
 	return 1;
 }
@@ -112,9 +97,9 @@ cell AMX_NATIVE_CALL APT_AddRunway(AMX *amx, cell *params)
 	rnw->id[2] = params[2];
 	rnw->id[3] = 0;
 	rnw->heading = amx_ctof(params[3]);
-	rnw->x = amx_ctof(params[4]);
-	rnw->y = amx_ctof(params[5]);
-	rnw->z = amx_ctof(params[6]);
+	rnw->pos.x = amx_ctof(params[4]);
+	rnw->pos.y = amx_ctof(params[5]);
+	rnw->pos.z = amx_ctof(params[6]);
 	rnw->nav = params[7];
 	rnw->next = ap->runways;
 	ap->runways = rnw;
@@ -146,8 +131,8 @@ cell AMX_NATIVE_CALL APT_FormatNearestList(AMX *amx, cell *params)
 	struct apref *aps = malloc(sizeof(struct apref) * airportscount);
 	
 	while (i < airportscount) {
-		dx = airports[i].x - amx_ctof(params[2]);
-		dy = airports[i].y - amx_ctof(params[3]);
+		dx = airports[i].pos.x - amx_ctof(params[2]);
+		dy = airports[i].pos.y - amx_ctof(params[3]);
 		aps[i].distance = sqrt(dx * dx + dy * dy);
 		aps[i].index = i;
 		i++;
@@ -227,7 +212,7 @@ cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
 		return 0;
 	}
 	ap = airports + idx;
-	idx = sprintf(buf, "\nElevation:\t%.0f FT", ap->z);
+	idx = sprintf(buf, "\nElevation:\t%.0f FT", ap->pos.z);
 	idx += sprintf(buf + idx, "\nBeacon:\t%s", ap->beacon);
 	rnw = ap->runways;
 	while (rnw != NULL) {

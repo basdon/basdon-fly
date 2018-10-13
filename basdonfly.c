@@ -51,6 +51,10 @@ FORWARD(FormatLoginApiLogin);
 FORWARD(FormatLoginApiGuestRegister);
 FORWARD(FormatLoginApiCheckChangePass);
 FORWARD(FormatLoginApiUserExistsGuest);
+/* nav.c */
+FORWARD(Nav_Reset);
+FORWARD(Nav_EnableADF);
+FORWARD(Nav_Update);
 /* zones.c */
 FORWARD(Zones_InvalidateForPlayer);
 FORWARD(Zones_UpdateForPlayer);
@@ -73,7 +77,7 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
-	void game_sa_init(), login_init(), dialog_init(), zones_init();
+	void game_sa_init(), login_init(), dialog_init(), zones_init(), nav_init();
 
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
@@ -83,6 +87,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	dialog_init();
 	pdata_init();
 	zones_init();
+	nav_init();
 
 	return 1;
 }
@@ -129,6 +134,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(APT_MapIndexFromListDialog),
 	REGISTERNATIVE(APT_FormatInfo),
 	REGISTERNATIVE(APT_FormatCodeAndName),
+	REGISTERNATIVE(Nav_Reset),
+	REGISTERNATIVE(Nav_EnableADF),
+	REGISTERNATIVE(Nav_Update),
 	REGISTERNATIVE(Zones_InvalidateForPlayer),
 	REGISTERNATIVE(Zones_UpdateForPlayer),
 	REGISTERNATIVE(Zones_FormatForPlayer),

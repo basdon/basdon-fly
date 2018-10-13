@@ -305,3 +305,22 @@ native Params_GetPlayer(cmdtext[], &idx, &player)
 //@remarks {@param idx} will not be increased if this returns {@code 0}
 native Params_GetString(cmdtext[], &idx, buf[])
 
+//@summary Resets all nav for a vehicle
+//@param vehicleid vehicle to reset nav for
+native Nav_Reset(vehicleid)
+
+//@summary Enables ADF navigation for a vehicle
+//@param vehicleid vehicle to enable ADF for
+//@param beacon beacon to navigate to
+//@returns {@code 0} if the beacon is not known
+native Nav_EnableADF(vehicleid, beacon[])
+
+//@summary Update nav for vehicle
+//@param vehicleid vehicle to update nav for
+//@param x x position of aircraft
+//@param y y position of aircraft
+//@param z z position of aircraft
+//@param heading heading of aircraft
+//@returns {@code 0} if no nav is set for this vehicle
+native Nav_Update(vehicleid, Float:x, Float:y, Float:z, Float:heading)
+

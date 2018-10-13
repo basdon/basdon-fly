@@ -13,6 +13,11 @@
 #else
 #define INVALID_PLAYER_ID (0xFFFF)
 #endif
+#ifdef MAX_VEHICLES
+#assert MAX_VEHICLES == 2000
+#else
+#define MAX_VEHICLES (2000)
+#endif
 
 /* airport.c / airport.pwn */
 #define MAX_AIRPORT_NAME (24)
