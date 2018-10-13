@@ -22,6 +22,7 @@ FORWARD(APT_FormatCodeAndName);
 FORWARD(CommandHash);
 FORWARD(IsCommand);
 FORWARD(Params_GetPlayer);
+FORWARD(Params_GetString);
 /* dialog.c */
 FORWARD(QueueDialog);
 FORWARD(DropDialogQueue);
@@ -105,6 +106,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(CommandHash),
 	REGISTERNATIVE(IsCommand),
 	REGISTERNATIVE(Params_GetPlayer),
+	REGISTERNATIVE(Params_GetString),
 	REGISTERNATIVE(QueueDialog),
 	REGISTERNATIVE(DropDialogQueue),
 	REGISTERNATIVE(HasDialogsInQueue),

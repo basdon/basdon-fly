@@ -72,12 +72,11 @@ cell AMX_NATIVE_CALL Params_GetPlayer(AMX *amx, cell *params)
 	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetAddr(amx, params[3], &player);
-	idx = *addr;
+	pc += *addr;
 	*player = 0;
 
 	while (*pc == ' ') {
 		pc++;
-		idx++;
 	}
 	while (1) {
 		val = *pc++;
@@ -85,7 +84,6 @@ cell AMX_NATIVE_CALL Params_GetPlayer(AMX *amx, cell *params)
 			*pp = 0;
 			break;
 		}
-		idx++;
 		if (allnums && '0' <= val && val <= '9') {
 			if ((*player = *player * 10 + val - '0') >= MAX_PLAYERS) {
 				allnums = 0;
@@ -110,7 +108,7 @@ cell AMX_NATIVE_CALL Params_GetPlayer(AMX *amx, cell *params)
 		return 0;
 	}
 
-	*addr = idx;
+	*addr = pc - cmdtext - 1;
 	if (allnums) {
 		if (pdata[*player] == NULL) {
 			*player = INVALID_PLAYER_ID;
@@ -127,6 +125,38 @@ cell AMX_NATIVE_CALL Params_GetPlayer(AMX *amx, cell *params)
 		}
 	}
 	*player = INVALID_PLAYER_ID;
+	return 1;
+}
+
+/* native Params_GetString(cmdtext[], &idx, buf[]) */
+cell AMX_NATIVE_CALL Params_GetString(AMX *amx, cell *params)
+{
+	char param[144], *pp = param, *trimmedparam, val;
+	cell *addr;
+
+	amx_GetAddr(amx, params[1], &addr);
+	amx_GetUString(param, addr, sizeof(param));
+	amx_GetAddr(amx, params[2], &addr);
+
+	pp += *addr;
+	while (*pp == ' ') {
+		pp++;
+	}
+	trimmedparam = pp;
+	while (1) {
+		val = *pp++;
+		if (val <= ' ') {
+			*pp = 0;
+			break;
+		}
+	}
+	if (trimmedparam[0] == 0) {
+		return 0;
+	}
+
+	*addr = pp - param - 1;
+	amx_GetAddr(amx, params[3], &addr);
+	amx_SetUString(addr, trimmedparam, sizeof(param) + param - trimmedparam);
 	return 1;
 }
 

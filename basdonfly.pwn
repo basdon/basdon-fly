@@ -285,11 +285,19 @@ native Zones_FormatForPlayer(playerid, buf[])
 native Zones_FormatLoc(playerid, buf[], Float:z, model, Float:vx, Float:vy, Float:vz)
 
 //@summary Scan the next part of {@param cmdtext} for a player reference
-//@param cmdtext cmdtext, positioned on the target parameter
-//@param idx location of cmdtext the param is, will be incremented to next param location if successful
+//@param cmdtext command text
+//@param idx start location of the param in {@param cmdtext}, will be increased to next param's position if successful
 //@param player variable to store target player id in (will be {@code INVALID_PLAYER_ID} if player not online)
 //@returns {@code 0} if there's no next player param (whitespace followed by active id or part of player name)
 //@remarks the value in {@param player} will be modified, even if this returns {@code 0}
 //@remarks {@param idx} will not be increased if this returns {@code 0}
 native Params_GetPlayer(cmdtext[], &idx, &player)
+
+//@summary Scan the next part of {@param cmdtext} for a string
+//@param cmdtext command text
+//@param idx start location of the param in {@param cmdtext}, will be increased to next param's position if successful
+//@param buf buffer to store string in
+//@returns {@code 0} if there's no next string
+//@remarks {@param idx} will not be increased if this returns {@code 0}
+native Params_GetString(cmdtext[], &idx, buf[])
 
