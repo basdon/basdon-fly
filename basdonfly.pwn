@@ -222,9 +222,9 @@ native APT_Add(index, code[], enabled, name[], beacon[], Float:x, Float:y, Float
 //@param x beacon's x position
 //@param y beacon's y position
 //@param z beacon's z position
-//@param vor {@code 1} if the runway has VOR abilities
+//@param nav {@code 1} if the runway has navigation (VOR and ILS) abilities
 //@seealso APT_Add
-native APT_AddRunway(aptindex, specifier, Float:heading, Float:x, Float:y, Float:z, vor)
+native APT_AddRunway(aptindex, specifier, Float:heading, Float:x, Float:y, Float:z, nav)
 
 //@summary Clear the airport table and free the used memory
 //@seealso APT_Init
