@@ -2,6 +2,8 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "playerdata.h"
+#include <string.h>
 
 cell AMX_NATIVE_CALL CommandHash(AMX *amx, cell *params)
 {
@@ -51,6 +53,76 @@ cell AMX_NATIVE_CALL IsCommand(AMX *amx, cell *params)
 		return 0;
 	}
 
+	return 1;
+}
+
+/* native Params_GetPlayer(cmdtext[], &idx, &player) */
+cell AMX_NATIVE_CALL Params_GetPlayer(AMX *amx, cell *params)
+{
+	char param[MAX_PLAYER_NAME + 1], *pp = param, val, cmdtext[144], *pc = cmdtext;
+	cell *addr, *player;
+	int idx;
+	int allnums = 1;
+
+	amx_GetAddr(amx, params[1], &addr);
+	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
+	amx_GetAddr(amx, params[2], &addr);
+	amx_GetAddr(amx, params[3], &player);
+	idx = *addr;
+	*player = 0;
+
+	while (*pc == ' ') {
+		pc++;
+		idx++;
+	}
+	while (1) {
+		val = *pc++;
+		if (val <= ' ') {
+			*pp = 0;
+			break;
+		}
+		idx++;
+		if (allnums && '0' <= val && val <= '9') {
+			if ((*player = *player * 10 + val - '0') >= MAX_PLAYERS) {
+				allnums = 0;
+			}
+			*pp++ = val;
+			continue;
+		}
+		allnums = 0;
+		if ('A' <= val && val <= 'Z') {
+			*pp++ = val | 0x20;
+			continue;
+		}
+		if ((val < 'a' || 'z' < val) && val != '[' &&
+			val != ']' && val != '(' && val != ')' && val != '$' &&
+			val != '@' && val != '.' && val != '_' && val != '=')
+		{
+			return 0;
+		}
+		*pp++ = val;
+	}
+	if (param[0] == 0) {
+		return 0;
+	}
+
+	*addr = idx;
+	if (allnums) {
+		if (pdata[*player] == NULL) {
+			*player = INVALID_PLAYER_ID;
+		}
+		return 1;
+	}
+	for (allnums = 0; allnums < MAX_PLAYERS; allnums++) {
+		if (pdata[allnums] == NULL) {
+			continue;
+		}
+		if (strstr(pdata[allnums]->normname, param) != NULL) {
+			*player = allnums;
+			return 1;
+		}
+	}
+	*player = INVALID_PLAYER_ID;
 	return 1;
 }
 

@@ -8,6 +8,11 @@
 #else
 #define MAX_PLAYER_NAME (24)
 #endif
+#ifdef INVALID_PLAYER_ID
+#assert INVALID_PLAYER_ID == 0xFFFF
+#else
+#define INVALID_PLAYER_ID (0xFFFF)
+#endif
 
 /* airport.c / airport.pwn */
 #define MAX_AIRPORT_NAME (24)
