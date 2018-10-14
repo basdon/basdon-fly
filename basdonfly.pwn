@@ -53,6 +53,16 @@ native Panel_FormatHeading(playerid, heading, buf4[], buf44[])
 //@returns {@code 0} if the model given is not an air vehicle
 native IsAirVehicle(model)
 
+//@summary Checks if a vehicle with specified model is a heli
+//@param model the model of the vehicle to check, {@b MUST} be either a valid model or {@code 0}
+//@returns {@code 0} if the model given is not a heli
+native IsHelicopter(model)
+
+//@summary Checks if a vehicle with specified model is a plane
+//@param model the model of the vehicle to check, {@b MUST} be either a valid model or {@code 0}
+//@returns {@code 0} if the model given is not a plane
+native IsPlane(model)
+
 //@summary Store password hash to confirm it later using {@link ValidatePasswordConfirmData}
 //@param playerid the player for which to store the hash
 //@param pwhash the hash to store

@@ -42,6 +42,8 @@ FORWARD(PlayerData_Clear);
 FORWARD(PlayerData_UpdateName);
 /* game_sa.c */
 FORWARD(IsAirVehicle);
+FORWARD(IsHelicopter);
+FORWARD(IsPlane);
 /* login.c */
 FORWARD(ResetPasswordConfirmData);
 FORWARD(SetPasswordConfirmData);
@@ -107,6 +109,8 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Panel_FormatSpeed),
 	REGISTERNATIVE(Panel_FormatHeading),
 	REGISTERNATIVE(IsAirVehicle),
+	REGISTERNATIVE(IsHelicopter),
+	REGISTERNATIVE(IsPlane),
 	REGISTERNATIVE(ResetPasswordConfirmData),
 	REGISTERNATIVE(SetPasswordConfirmData),
 	REGISTERNATIVE(ValidatePasswordConfirmData),
