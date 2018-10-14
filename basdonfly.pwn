@@ -307,6 +307,7 @@ native Params_GetString(cmdtext[], &idx, buf[])
 
 //@summary Resets all nav for a vehicle
 //@param vehicleid vehicle to reset nav for
+//@returns {@code 0} if nav was not enabled for vehicle
 native Nav_Reset(vehicleid)
 
 //@summary Enables ADF navigation for a vehicle
@@ -323,4 +324,13 @@ native Nav_EnableADF(vehicleid, beacon[])
 //@param heading heading of aircraft
 //@returns {@code 0} if no nav is set for this vehicle
 native Nav_Update(vehicleid, Float:x, Float:y, Float:z, Float:heading)
+
+//@summary Update nav data for player
+//@param playerid player to update nav for
+//@param vehicleid vehicle of player
+//@param bufdist buffer for distance
+//@param bufalt buffer for altitude
+//@param bufcrs buffer for course
+//@returns {@code 0} if nothing needs to be updated, otherwise the first byte of each component will be {@code 0} if no update needed
+native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[])
 

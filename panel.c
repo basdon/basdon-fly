@@ -40,8 +40,10 @@ struct panelcache {
 
 cell AMX_NATIVE_CALL Panel_ResetCaches(AMX *amx, cell *params)
 {
+	void nav_resetcache(int playerid);
 	int playerid = params[1];
 	memset(&caches[playerid], 0xFF, sizeof(struct panelcache));
+	nav_resetcache(playerid);
 	return 1;
 }
 
