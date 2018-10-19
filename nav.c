@@ -259,7 +259,11 @@ cell AMX_NATIVE_CALL Nav_Update(AMX *amx, cell *params)
 		n->dist = (n->dist / 100) * 100;
 	}
 	n->alt = (int) (z - pos->z);
-	crs = -(atan2(dx, dy) * 180.0f / M_PI);
+	if (n->vor != NULL) {
+		crs = n->vor->heading;
+	} else {
+		crs = -(atan2(dx, dy) * 180.0f / M_PI);
+	}
 	crs = 360.0f - heading - crs;
 	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);
 
