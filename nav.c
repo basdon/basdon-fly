@@ -96,6 +96,136 @@ cell AMX_NATIVE_CALL Nav_EnableADF(AMX *amx, cell *params)
 	return 0;
 }
 
+/* native Nav_EnableVOR(vehicleid, cmdtext[], buf64[]) */
+cell AMX_NATIVE_CALL Nav_EnableVOR(AMX *amx, cell *params)
+{
+	int vid = params[1];
+	cell *addr;
+	char cmdtext[144], *cp = cmdtext;
+	char beacon[5], *bp = beacon;
+	char rwt[4], *rp = rwt;
+	int len = 0;
+	struct airport *ap = airports;
+	struct runway *rw;
+
+	amx_GetAddr(amx, params[2], &addr);
+	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
+	amx_GetAddr(amx, params[3], &addr);
+
+	*addr = (nav[vid] != NULL); /* syntax msg / turn off */
+	while (1) {
+		if (*cp < ' ') {
+			if (nav[vid] != NULL) {
+				free(nav[vid]);
+				nav[vid] = NULL;
+			}
+			return 0;
+		}
+		if (*cp != ' ') {
+			break;
+		}
+		cp++;
+	}
+
+	/* beacon */
+	while (1) {
+		if (*cp == 0 || *cp == ' ' || ('0' <= *cp && *cp <= '9')) {
+			*bp = 0;
+			break;
+		}
+		if (++len >= 5) {
+			goto unkbeacon;
+		}
+		*bp = *cp & ~0x20;
+		if (*bp < 'A' || 'Z' < *bp) {
+			goto unkbeacon;
+		}
+		bp++;
+		cp++;
+	}
+
+	if (len) {
+		len = airportscount;
+		while (len--) {
+			if (strcmp(beacon, ap->beacon) == 0) {
+				goto havebeacon;
+			}
+			ap++;
+		}
+	}
+
+unkbeacon:
+	amx_SetUString(addr, WARN"Unknown beacon", 64);
+	return 0;
+
+havebeacon:
+	while (1) {
+		if (*cp < ' ') {
+			goto tellrws;
+		}
+		if (*cp != ' ') {
+			break;
+		}
+		cp++;
+	}
+
+	/* rw */
+	if (*cp < '0' || '9' < *cp) {
+		goto tellrws;
+	}
+	beacon[0] = *cp++;
+	if (*cp < '0' || '9' < *cp) {
+		goto tellrws;
+	}
+	beacon[1] = *cp++;
+	if (*cp == 0) {
+		beacon[2] = 0;
+	} else {
+		beacon[2] = *cp++ & ~0x20;
+		if (*cp != 0 || (beacon[2] != 'L' && beacon[2] != 'R')) {
+			goto tellrws;
+		}
+		beacon[3] = 0;
+	}
+
+	rw = ap->runways;
+	while (rw != NULL) {
+		if (strcmp(rw->id, beacon) == 0) {
+			if (nav[vid] == NULL) {
+				nav[vid] = malloc(sizeof(struct navdata));
+				nav[vid]->alt = nav[vid]->crs = nav[vid]->dist = 0.0f;
+			}
+			nav[vid]->beacon = NULL;
+			nav[vid]->ils = NULL;
+			nav[vid]->vor = rw;
+			return 1;
+		}
+		rw = rw->next;
+	}
+
+tellrws:
+	rw = ap->runways;
+	while (rw != NULL) {
+		if (rw->nav) {
+			goto hasnav;
+		}
+		rw = rw->next;
+	}
+	amx_SetUString(addr, WARN"There are no VOR capable runways at this beacon", 64);
+	return 0;
+hasnav:
+	len = sprintf(cmdtext, WARN"Unknown runway, try one of:");
+	rw = ap->runways;
+	while (rw != NULL) {
+		if (rw ->nav) {
+			len += sprintf(cmdtext + len, " %s", rw->id);
+		}
+		rw = rw->next;
+	}
+	amx_SetUString(addr, cmdtext, sizeof(cmdtext));
+	return 0;
+}
+
 /* native Nav_Update(vehicleid, Float:x, Float:y, Float:z, Float:heading) */
 cell AMX_NATIVE_CALL Nav_Update(AMX *amx, cell *params)
 {

@@ -19,6 +19,10 @@
 #define MAX_VEHICLES (2000)
 #endif
 
+#define WARN "! "
+#define INFO "* "
+#define SUCC "+ "
+
 /* airport.c / airport.pwn */
 #define MAX_AIRPORT_NAME (24)
 /* dialog.c / dialog.pwn */

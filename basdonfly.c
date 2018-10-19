@@ -56,6 +56,7 @@ FORWARD(FormatLoginApiUserExistsGuest);
 /* nav.c */
 FORWARD(Nav_Reset);
 FORWARD(Nav_EnableADF);
+FORWARD(Nav_EnableVOR);
 FORWARD(Nav_Format);
 FORWARD(Nav_Update);
 /* zones.c */
@@ -141,6 +142,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(APT_FormatCodeAndName),
 	REGISTERNATIVE(Nav_Reset),
 	REGISTERNATIVE(Nav_EnableADF),
+	REGISTERNATIVE(Nav_EnableVOR),
 	REGISTERNATIVE(Nav_Format),
 	REGISTERNATIVE(Nav_Update),
 	REGISTERNATIVE(Zones_InvalidateForPlayer),
