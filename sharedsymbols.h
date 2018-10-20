@@ -259,3 +259,8 @@
 #define VEL_TO_KFPM_VAL (9.8536894) /* K feet per minute (MPS * 3.28084 * 60 / 1000) */
 #define VEL_TO_KFPMA_VAL (5.630679) /* some adjustment (KFPM / 1.75) */
 
+/* nav.c ... */
+#define NAV_NONE 0
+#define NAV_ADF 1
+#define NAV_VOR 2
+#define NAV_ILS 3

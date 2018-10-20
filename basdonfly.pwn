@@ -361,3 +361,12 @@ native Nav_Update(vehicleid, Float:x, Float:y, Float:z, Float:heading)
 //@returns {@code 0} if nothing needs to be updated, otherwise the first byte of each component will be {@code 0} if no update needed
 native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[], &Float:vorvalue)
 
+//@summary get the active nav in the specified vehicle
+//@param vehicleid the vehicle to query its nav system
+//@returns one of {@code NAV_NONE} {@code NAV_ADF} {@code NAV_VOR} {@code NAV_ILS}
+native Nav_GetActiveNavType(vehicleid)
+
+//@summary Reset panel value indicators cache for a player
+//@param playerid player to reset cache for
+native Nav_ResetCache(playerid)
+

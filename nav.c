@@ -44,6 +44,13 @@ void nav_resetcache(int playerid)
 	pcache[playerid].crs = INVALID_CACHE;
 }
 
+/* native Nav_ResetCache(playerid) */
+cell AMX_NATIVE_CALL Nav_ResetCache(AMX *amx, cell *params)
+{
+	nav_resetcache(params[1]);
+	return 1;
+}
+
 /* native Nav_Reset(vehicleid) */
 cell AMX_NATIVE_CALL Nav_Reset(AMX *amx, cell *params)
 {
@@ -330,4 +337,23 @@ cell AMX_NATIVE_CALL Nav_Format(AMX *amx, cell *params)
 	}
 
 	return dist[0] != 0 || alt[0] != 0 || crs[0] != 0;
+}
+
+/* native Nav_GetActiveNavType(vehicleid) */
+cell AMX_NATIVE_CALL Nav_GetActiveNavType(AMX *amx, cell *params)
+{
+	int vid = params[1];
+	if (nav[vid] == NULL) {
+		return NAV_NONE;
+	}
+	if (nav[vid]->beacon != NULL) {
+		return NAV_ADF;
+	}
+	if (nav[vid]->vor != NULL) {
+		return NAV_VOR;
+	}
+	if (nav[vid]->ils != NULL) {
+		return NAV_ILS;
+	}
+	return NAV_NONE;
 }

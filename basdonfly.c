@@ -59,6 +59,8 @@ FORWARD(Nav_EnableADF);
 FORWARD(Nav_EnableVOR);
 FORWARD(Nav_Format);
 FORWARD(Nav_Update);
+FORWARD(Nav_GetActiveNavType);
+FORWARD(Nav_ResetCache);
 /* zones.c */
 FORWARD(Zones_InvalidateForPlayer);
 FORWARD(Zones_UpdateForPlayer);
@@ -145,6 +147,8 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Nav_EnableVOR),
 	REGISTERNATIVE(Nav_Format),
 	REGISTERNATIVE(Nav_Update),
+	REGISTERNATIVE(Nav_GetActiveNavType),
+	REGISTERNATIVE(Nav_ResetCache),
 	REGISTERNATIVE(Zones_InvalidateForPlayer),
 	REGISTERNATIVE(Zones_UpdateForPlayer),
 	REGISTERNATIVE(Zones_FormatForPlayer),
