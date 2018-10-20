@@ -97,6 +97,7 @@ cell AMX_NATIVE_CALL APT_AddRunway(AMX *amx, cell *params)
 	rnw->id[2] = params[2];
 	rnw->id[3] = 0;
 	rnw->heading = amx_ctof(params[3]);
+	rnw->headingr = rnw->heading * M_PI / 180.0f;
 	rnw->pos.x = amx_ctof(params[4]);
 	rnw->pos.y = amx_ctof(params[5]);
 	rnw->pos.z = amx_ctof(params[6]);

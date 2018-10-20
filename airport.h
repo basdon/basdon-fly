@@ -5,7 +5,7 @@
 
 struct runway {
 	char id[4];
-	float heading;
+	float heading, headingr;
 	struct vec3 pos;
 	int nav;
 	struct runway *next;

@@ -16,6 +16,7 @@ extern logprintf_t logprintf;
 #define amx_SetUString(dest, source, size) amx_SetString(dest, source, 0, 0, size)
 
 #define M_PI 3.14159265358979323846f
+#define M_PI2 1.57079632679489661923f
 
 struct vec3 {
 	float x, y, z;

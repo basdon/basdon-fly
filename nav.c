@@ -17,12 +17,14 @@ static struct navdata {
 	int dist;
 	int alt;
 	int crs;
+	int vorvalue;
 } *nav[MAX_VEHICLES];
 
 static struct playercache {
 	int dist;
 	int alt;
 	int crs;
+	int vorvalue;
 } pcache[MAX_PLAYERS];
 
 #define INVALID_CACHE 500000
@@ -233,9 +235,9 @@ cell AMX_NATIVE_CALL Nav_Update(AMX *amx, cell *params)
 	float x = amx_ctof(params[2]);
 	float y = amx_ctof(params[3]);
 	float z = amx_ctof(params[4]);
-	float heading = amx_ctof(params[5]);
+	float heading = 360.0f - amx_ctof(params[5]);
 	float dx, dy;
-	float crs;
+	float dist, crs;
 	struct vec3 *pos;
 
 	if (n == NULL) {
@@ -254,28 +256,38 @@ cell AMX_NATIVE_CALL Nav_Update(AMX *amx, cell *params)
 
 	dx = x - pos->x;
 	dy = pos->y - y;
-	n->dist = (int) sqrt(dx * dx + dy * dy);
+	dist = sqrt(dx * dx + dy * dy);
+	n->dist = (int) dist;
 	if (n->dist > 1000) {
 		n->dist = (n->dist / 100) * 100;
 	}
 	n->alt = (int) (z - pos->z);
+	crs = -atan2(dx, dy);
 	if (n->vor != NULL) {
-		crs = n->vor->heading;
+		n->vorvalue = (int) (dist * cos(crs + M_PI2 - n->vor->headingr) / 50.0f * 85.0f);
+		if (n->vorvalue > 85) {
+			n->vorvalue = 85;
+		} else if (n->vorvalue < -85) {
+			n->vorvalue = -85;
+		}
+		n->vorvalue = 320 - n->vorvalue;
+		crs = heading - n->vor->heading;
 	} else {
-		crs = -(atan2(dx, dy) * 180.0f / M_PI);
+		n->vorvalue = 1000;
+		crs = heading - (crs * 180.0f / M_PI);
 	}
-	crs = 360.0f - heading - crs;
-	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);
+	n->crs = (int) crs = crs - floor((crs + 180.0f) / 360.0f) * 360.0f;;
 
 	return 1;
 }
 
-/* native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[]) */
+/* native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[], &Float:vorvalue) */
 cell AMX_NATIVE_CALL Nav_Format(AMX *amx, cell *params)
 {
 	int pid = params[1];
 	struct navdata *n = nav[params[2]];
 	cell *addr;
+	float vorvalue;
 	char dist[16], alt[16], crs[16];
 
 	if (n == NULL) {
@@ -307,6 +319,15 @@ cell AMX_NATIVE_CALL Nav_Format(AMX *amx, cell *params)
 	amx_SetUString(addr, alt, 16);
 	amx_GetAddr(amx, params[5], &addr);
 	amx_SetUString(addr, crs, 16);
+
+	vorvalue = (float) n->vorvalue;
+	amx_GetAddr(amx, params[6], &addr);
+	*addr = amx_ftoc(vorvalue);
+
+	if (n->vorvalue != pcache[pid].vorvalue) {
+		pcache[pid].vorvalue = n->vorvalue;
+		return 1;
+	}
 
 	return dist[0] != 0 || alt[0] != 0 || crs[0] != 0;
 }
