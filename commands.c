@@ -78,6 +78,9 @@ cell AMX_NATIVE_CALL Params_GetPlayer(AMX *amx, cell *params)
 		pc++;
 	}
 	while (1) {
+		if (pp - param >= sizeof(param)) {
+			return 0;
+		}
 		val = *pc++;
 		if (val <= ' ') {
 			*pp = 0;
