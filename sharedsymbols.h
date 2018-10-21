@@ -265,6 +265,10 @@
 #define NAV_VOR 2
 #define NAV_ILS 6
 
+#define RESULT_ADF_OFF 0
+#define RESULT_ADF_ON 1
+#define RESULT_ADF_ERR 2
+
 #define RESULT_VOR_OFF 0
 #define RESULT_VOR_ON 1
 #define RESULT_VOR_ERR 2

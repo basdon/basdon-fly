@@ -322,11 +322,17 @@ native Nav_Reset(vehicleid)
 
 //@summary Enables ADF navigation for a vehicle
 //@param vehicleid vehicle to enable ADF for
-//@param beacon beacon to navigate to
-//@returns {@code 0} if the beacon is not known
+//@param cmdtext beacon to navigate to (may have whitespace in front)
+/// <returns>
+///   <ul>
+///     <li><b><c>RESULT_ADF_OFF</c></b> - ADF is now disabled</li>
+///     <li><b><c>RESULT_ADF_ON</c></b> - ADF is now enabled</li>
+///     <li><b><c>RESULT_ADF_ERR</c></b> - error, message stored in <paramref name="buf64"/></li>
+///   </ul>
+/// </returns>
 //@seealso Nav_EnableVOR
 //@seealso Nav_ToggleILS
-native Nav_EnableADF(vehicleid, beacon[])
+native Nav_EnableADF(vehicleid, cmdtext[], buf64[])
 
 //@summary Enables VOR navigation for a vehicle
 //@param vehicleid vehicle to enable VOR for

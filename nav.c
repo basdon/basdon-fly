@@ -64,28 +64,48 @@ cell AMX_NATIVE_CALL Nav_Reset(AMX *amx, cell *params)
 	return 0;
 }
 
-/* native Nav_EnableADF(vehicleid, beacon[]) */
+/* native Nav_EnableADF(vehicleid, cmdtext[], buf64[]) */
 cell AMX_NATIVE_CALL Nav_EnableADF(AMX *amx, cell *params)
 {
 	int vid = params[1];
 	cell *addr;
+	char cmdtext[144], *cp = cmdtext;
 	char beacon[5], *bp = beacon, len = 0;
 	struct airport *ap = airports;
 
 	amx_GetAddr(amx, params[2], &addr);
-	amx_GetUString(beacon, addr, 5);
+	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
+	amx_GetAddr(amx, params[3], &addr);
 
 	while (1) {
-		if (*bp == 0) {
+		if (*cp < ' ') {
+			if (nav[vid] != NULL) {
+				free(nav[vid]);
+				nav[vid] = NULL;
+				return RESULT_ADF_OFF;
+			}
+			amx_SetUString(addr, WARN"Syntax: /adf [beacon] - see /beacons or /nearest", 64);
+			return RESULT_ADF_ERR;
+		}
+		if (*cp != ' ') {
+			break;
+		}
+		cp++;
+	}
+
+	while (1) {
+		if (*cp == 0) {
+			*bp = 0;
 			break;
 		}
 		if (++len >= 5) {
-			return 0;
+			goto unkbeacon;
 		}
-		*bp &= ~0x20;
+		*bp = *cp & ~0x20;
 		if (*bp < 'A' || 'Z' < *bp) {
-			return 0;
+			goto unkbeacon;
 		}
+		cp++;
 		bp++;
 	}
 
@@ -99,12 +119,14 @@ cell AMX_NATIVE_CALL Nav_EnableADF(AMX *amx, cell *params)
 			nav[vid]->beacon = ap;
 			nav[vid]->vor = NULL;
 			nav[vid]->ils = 0;
-			return 1;
+			return RESULT_ADF_ON;
 		}
 		ap++;
 	}
 
-	return 0;
+unkbeacon:
+	amx_SetUString(addr, WARN"Unknown beacon - see /beacons or /nearest", 64);
+	return RESULT_ADF_ERR;
 }
 
 /* native Nav_EnableVOR(vehicleid, cmdtext[], buf64[]) */
