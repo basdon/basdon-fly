@@ -324,23 +324,39 @@ native Nav_Reset(vehicleid)
 //@param vehicleid vehicle to enable ADF for
 //@param beacon beacon to navigate to
 //@returns {@code 0} if the beacon is not known
+//@seealso Nav_EnableVOR
+//@seealso Nav_ToggleILS
 native Nav_EnableADF(vehicleid, beacon[])
 
 //@summary Enables VOR navigation for a vehicle
 //@param vehicleid vehicle to enable VOR for
 //@param cmdtext beacon+runway to navigate to (optionally prepended by whitespace and white space between beacon and runway)
-//@param buf64 buffer to store any more return data in, see remarks
-//@returns {@code 0} if the beacon/runway combination is not known, error message will be in {@param buf64}
-//@remarks If the return value is {@code 0}, the first cell in {@param buf64} will note extra info.
-/// <remarks>
-///   <b>first cell value:</b><p/>
+//@param buf64 buffer to store custom error message in
+/// <returns>
 ///   <ul>
-///     <li><b><c>0</c></b> - command syntax error</li>
-///     <li><b><c>1</c></b> - VOR is now disabled</li>
-///     <li><b><c>anything else</c></b> - <paramref name="buf64"/> contains a custom error message string</li>
+///     <li><b><c>RESULT_VOR_OFF</c></b> - VOR is now disabled</li>
+///     <li><b><c>RESULT_VOR_ON</c></b> - VOR is now enabled</li>
+///     <li><b><c>RESULT_VOR_ERR</c></b> - error, message stored in <paramref name="buf64"/></li>
 ///   </ul>
-/// </remarks>
+/// </returns>
+//@seealso Nav_EnableADF
+//@seealso Nav_ToggleILS
 native Nav_EnableVOR(vehicleid, cmdtext[], buf64[])
+
+//@summary Toggles ILS navigation for a vehicle
+//@param vehicleid vehicle to enable ILS for
+/// <returns>
+///   <ul>
+///     <li><b><c>RESULT_ILS_OFF</c></b> - ILS is now disabled</li>
+///     <li><b><c>RESULT_ILS_ON</c></b> - ILS is now enabled</li>
+///     <li><b><c>RESULT_ILS_NOVOR</c></b> - VOR is not enabled</li>
+///     <li><b><c>RESULT_ILS_NOILS</c></b> - no ILS for current VOR runway</li>
+///   </ul>
+/// </returns>
+//@remarks ILS can only be enabled if VOR is enabled on a runway that has VOR+ILS capabilities
+//@seealso Nav_EnableADF
+//@seealso Nav_EnableVOR
+native Nav_ToggleILS(vehicleid)
 
 //@summary Update nav for vehicle
 //@param vehicleid vehicle to update nav for
@@ -363,7 +379,8 @@ native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[], &Float:vor
 
 //@summary get the active nav in the specified vehicle
 //@param vehicleid the vehicle to query its nav system
-//@returns one of {@code NAV_NONE} {@code NAV_ADF} {@code NAV_VOR} {@code NAV_ILS}
+//@returns one of {@code NAV_NONE}, {@code NAV_ADF}, {@code NAV_VOR}, {@code NAV_ILS}
+//@remarks {@code NAV_ILS &amp; NAV_VOR == NAV_VOR}
 native Nav_GetActiveNavType(vehicleid)
 
 //@summary Reset panel value indicators cache for a player

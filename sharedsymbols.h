@@ -263,4 +263,13 @@
 #define NAV_NONE 0
 #define NAV_ADF 1
 #define NAV_VOR 2
-#define NAV_ILS 3
+#define NAV_ILS 6
+
+#define RESULT_VOR_OFF 0
+#define RESULT_VOR_ON 1
+#define RESULT_VOR_ERR 2
+
+#define RESULT_ILS_OFF 0
+#define RESULT_ILS_ON 1
+#define RESULT_ILS_NOVOR 2
+#define RESULT_ILS_NOILS 3

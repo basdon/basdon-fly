@@ -57,6 +57,7 @@ FORWARD(FormatLoginApiUserExistsGuest);
 FORWARD(Nav_Reset);
 FORWARD(Nav_EnableADF);
 FORWARD(Nav_EnableVOR);
+FORWARD(Nav_ToggleILS);
 FORWARD(Nav_Format);
 FORWARD(Nav_Update);
 FORWARD(Nav_GetActiveNavType);
@@ -145,6 +146,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Nav_Reset),
 	REGISTERNATIVE(Nav_EnableADF),
 	REGISTERNATIVE(Nav_EnableVOR),
+	REGISTERNATIVE(Nav_ToggleILS),
 	REGISTERNATIVE(Nav_Format),
 	REGISTERNATIVE(Nav_Update),
 	REGISTERNATIVE(Nav_GetActiveNavType),

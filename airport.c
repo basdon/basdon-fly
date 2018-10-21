@@ -218,8 +218,10 @@ cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
 	rnw = ap->runways;
 	while (rnw != NULL) {
 		idx += sprintf(buf + idx, "\n%s\t%s", szRunways, rnw->id);
-		if (rnw->nav) {
-			idx += sprintf(buf + idx, " (VOR,ILS)");
+		if (rnw->nav == NAV_VOR | NAV_ILS) {
+			idx += sprintf(buf + idx, " (VOR+ILS)");
+		} else if (rnw->nav) {
+			idx += sprintf(buf + idx, " (VOR)");
 		}
 		rnw = rnw->next;
 		szRunways[0] = '\t';
