@@ -18,7 +18,7 @@ static struct navdata {
 	int alt;
 	int crs;
 	int vorvalue;
-	float ilsx, ilsy;
+	char ilsx, ilsz;
 } *nav[MAX_VEHICLES];
 
 static struct playercache {
@@ -26,9 +26,12 @@ static struct playercache {
 	int alt;
 	int crs;
 	int vorvalue;
+	int ils;
 } pcache[MAX_PLAYERS];
 
 #define INVALID_CACHE 500000
+#define INVALID_ILS_VALUE 100
+#define ILS_MAX_DIST (1500.0f)
 
 void nav_init()
 {
@@ -43,6 +46,7 @@ void nav_resetcache(int playerid)
 	pcache[playerid].dist = INVALID_CACHE;
 	pcache[playerid].alt = INVALID_CACHE;
 	pcache[playerid].crs = INVALID_CACHE;
+	pcache[playerid].ils = INVALID_CACHE;
 }
 
 /* native Nav_ResetCache(playerid) */
@@ -136,7 +140,6 @@ cell AMX_NATIVE_CALL Nav_EnableVOR(AMX *amx, cell *params)
 	cell *addr;
 	char cmdtext[144], *cp = cmdtext;
 	char beacon[5], *bp = beacon;
-	char rwt[4], *rp = rwt;
 	int len = 0;
 	struct airport *ap = airports;
 	struct runway *rw;
@@ -270,7 +273,30 @@ cell AMX_NATIVE_CALL Nav_ToggleILS(AMX *amx, cell *params)
 	if ((nav[vid]->vor->nav & NAV_ILS) != NAV_ILS) {
 		return RESULT_ILS_NOILS;
 	}
+	nav[vid]->ilsx = nav[vid]->ilsz = INVALID_ILS_VALUE;
 	return (nav[vid]->ils ^= 1);
+}
+
+void calc_ils_values(
+	char *ilsx, char *ilsz, const float ydist,
+	const float z, const float dx)
+{
+	float xdev = 5.0f + ydist * (90.0f - 5.0f) / ILS_MAX_DIST;
+	float zdev = 2.0f + ydist * (100.0f - 2.0f) / 1500.0f;
+	float ztarget = 4.0f + ydist * (130.0f - 4.0f) / (500.0f);
+	int tmp;
+
+#define GREYZONE (50.0f)
+	if (/*z < ztarget - zdev - GREYZONE || z > ztarget + zdev + GREYZONE ||*/
+		dx < -xdev - GREYZONE || dx > xdev + GREYZONE)
+	{
+		*ilsx = INVALID_ILS_VALUE;
+		return;
+	}
+	tmp = (int) (-8.0f * (z - ztarget) / (zdev * 2.0f)) + 4;
+	*ilsz = CLAMP(tmp, 0, 8);
+	tmp = (int) (-8.0f * dx / (xdev * 2.0f)) + 4;
+	*ilsx = CLAMP(tmp, 0, 8);
 }
 
 /* native Nav_Update(vehicleid, Float:x, Float:y, Float:z, Float:heading) */
@@ -282,7 +308,7 @@ cell AMX_NATIVE_CALL Nav_Update(AMX *amx, cell *params)
 	float z = amx_ctof(params[4]);
 	float heading = 360.0f - amx_ctof(params[5]);
 	float dx, dy;
-	float dist, crs, tmp;
+	float dist, crs, vorangle, horizontaldeviation;
 	struct vec3 *pos;
 
 	if (n == NULL) {
@@ -307,12 +333,9 @@ cell AMX_NATIVE_CALL Nav_Update(AMX *amx, cell *params)
 	n->alt = (int) (z - pos->z);
 	crs = -atan2(dx, dy);
 	if (n->vor != NULL ) {
-		tmp = crs + M_PI2 - n->vor->headingr;
-		n->ilsx = dist * cos(tmp);
-		if (n->ils) {
-			n->ilsy = dist * sin(tmp);
-		}
-		n->vorvalue = (int) (n->ilsx / 50.0f * 85.0f);
+		vorangle = crs + M_PI2 - n->vor->headingr;
+		horizontaldeviation = dist * cos(vorangle);
+		n->vorvalue = (int) (horizontaldeviation / 50.0f * 85.0f);
 		n->vorvalue = CLAMP(n->vorvalue, -85, 85);
 		n->vorvalue = 320 - n->vorvalue;
 		crs = heading - n->vor->heading;
@@ -320,25 +343,32 @@ cell AMX_NATIVE_CALL Nav_Update(AMX *amx, cell *params)
 		n->vorvalue = 1000;
 		crs = heading - (crs * 180.0f / M_PI);
 	}
-	n->crs = (int) crs = crs - floor((crs + 180.0f) / 360.0f) * 360.0f;
+	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);
+	if (n->vor != NULL && n->ils) {
+		if (dist > ILS_MAX_DIST || (dist *= sin(vorangle)) <= 0.0f) {
+			n->ilsx = INVALID_ILS_VALUE;
+		} else {
+			calc_ils_values(&n->ilsx, &n->ilsz, dist, z, horizontaldeviation);
+		}
+	}
 
 	return 1;
 }
 
-/* native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[], &Float:vorvalue) */
+/* native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[], bufils[], &Float:vorvalue) */
 cell AMX_NATIVE_CALL Nav_Format(AMX *amx, cell *params)
 {
 	int pid = params[1];
 	struct navdata *n = nav[params[2]];
 	cell *addr;
 	float vorvalue;
-	char dist[16], alt[16], crs[16];
+	char dist[16], alt[16], crs[16], ils[80];
 
 	if (n == NULL) {
 		return 0;
 	}
 
-	dist[0] = alt[0] = crs[0] = 0;
+	dist[0] = alt[0] = crs[0] = ils[0] = 0;
 
 	if (n->dist != pcache[pid].dist) {
 		if (n->dist >= 1000) {
@@ -358,14 +388,17 @@ cell AMX_NATIVE_CALL Nav_Format(AMX *amx, cell *params)
 	}
 
 	amx_GetAddr(amx, params[3], &addr);
-	amx_SetUString(addr, dist, 16);
+	amx_SetUString(addr, dist, sizeof(dist));
 	amx_GetAddr(amx, params[4], &addr);
-	amx_SetUString(addr, alt, 16);
+	amx_SetUString(addr, alt, sizeof(alt));
 	amx_GetAddr(amx, params[5], &addr);
-	amx_SetUString(addr, crs, 16);
+	amx_SetUString(addr, crs, sizeof(crs));
+	sprintf(ils, "%d %d", n->ilsx, n->ilsz);
+	amx_GetAddr(amx, params[6], &addr);
+	amx_SetUString(addr, ils, sizeof(ils));
 
 	vorvalue = (float) n->vorvalue;
-	amx_GetAddr(amx, params[6], &addr);
+	amx_GetAddr(amx, params[7], &addr);
 	*addr = amx_ftoc(vorvalue);
 
 	if (n->vorvalue != pcache[pid].vorvalue) {
@@ -373,7 +406,7 @@ cell AMX_NATIVE_CALL Nav_Format(AMX *amx, cell *params)
 		return 1;
 	}
 
-	return dist[0] != 0 || alt[0] != 0 || crs[0] != 0;
+	return dist[0] != 0 || alt[0] != 0 || crs[0] != 0 || ils[0] != 0;
 }
 
 /* native Nav_GetActiveNavType(vehicleid) */

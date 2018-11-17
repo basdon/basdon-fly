@@ -379,9 +379,10 @@ native Nav_Update(vehicleid, Float:x, Float:y, Float:z, Float:heading)
 //@param bufdist buffer for distance
 //@param bufalt buffer for altitude
 //@param bufcrs buffer for course
+//@param bufils buffer for ILS text
 //@param vorvalue variable to store vor offset in, will be {@code [320.0f-85.0f,320.0f+85.0f]} or {@code > 640.0f} if not active.
 //@returns {@code 0} if nothing needs to be updated, otherwise the first byte of each component will be {@code 0} if no update needed
-native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[], &Float:vorvalue)
+native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[], bufils[], &Float:vorvalue)
 
 //@summary get the active nav in the specified vehicle
 //@param vehicleid the vehicle to query its nav system
