@@ -18,7 +18,7 @@ static struct navdata {
 	int alt;
 	int crs;
 	int vorvalue;
-	char ilsx, ilsz;
+	unsigned char ilsx, ilsz;
 } *nav[MAX_VEHICLES];
 
 static struct playercache {
@@ -278,7 +278,7 @@ cell AMX_NATIVE_CALL Nav_ToggleILS(AMX *amx, cell *params)
 }
 
 void calc_ils_values(
-	char *ilsx, char *ilsz, const float ydist,
+	unsigned char *ilsx, unsigned char *ilsz, const float ydist,
 	const float z, const float dx)
 {
 	float xdev = 5.0f + ydist * (90.0f - 5.0f) / ILS_MAX_DIST;
@@ -291,6 +291,7 @@ void calc_ils_values(
 		dx < -xdev - GREYZONE || dx > xdev + GREYZONE)
 	{
 		*ilsx = INVALID_ILS_VALUE;
+		*ilsz = 0;
 		return;
 	}
 	tmp = (int) (-8.0f * (z - ztarget) / (zdev * 2.0f)) + 4;
@@ -344,12 +345,14 @@ cell AMX_NATIVE_CALL Nav_Update(AMX *amx, cell *params)
 		crs = heading - (crs * 180.0f / M_PI);
 	}
 	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);
-	if (n->vor != NULL && n->ils) {
-		if (dist > ILS_MAX_DIST || (dist *= sin(vorangle)) <= 0.0f) {
-			n->ilsx = INVALID_ILS_VALUE;
-		} else {
-			calc_ils_values(&n->ilsx, &n->ilsz, dist, z, horizontaldeviation);
-		}
+	if (n->vor == NULL || !n->ils) {
+		n->ilsx = 0;
+		n->ilsz = INVALID_ILS_VALUE;
+	} else if (dist > ILS_MAX_DIST || (dist *= sin(vorangle)) <= 0.0f) {
+		n->ilsx = INVALID_ILS_VALUE;
+		n->ilsz = 0;
+	} else {
+		calc_ils_values(&n->ilsx, &n->ilsz, dist, z, horizontaldeviation);
 	}
 
 	return 1;
@@ -362,7 +365,7 @@ cell AMX_NATIVE_CALL Nav_Format(AMX *amx, cell *params)
 	struct navdata *n = nav[params[2]];
 	cell *addr;
 	float vorvalue;
-	char dist[16], alt[16], crs[16], ils[80];
+	char dist[16], alt[16], crs[16], ils[144];
 
 	if (n == NULL) {
 		return 0;
@@ -387,13 +390,20 @@ cell AMX_NATIVE_CALL Nav_Format(AMX *amx, cell *params)
 		pcache[pid].crs = n->crs;
 	}
 
+	if (n->ilsx < 0 || 8 < n->ilsx) {
+		strcpy(ils, "~r~~h~no ILS signal");
+	} else if (0 <= n->ilsz &&  n->ilsz <= 8) {
+		strcpy(ils, "~w~X~n~~w~X~n~~w~X~n~~w~X~n~~w~X ~w~X ~w~X ~w~X ~w~X"
+			" ~w~X ~w~X ~w~X ~w~X~n~~w~X~n~~w~X~n~~w~X~n~~w~X");
+		ils[29 + 5 * n->ilsx] = ils[(unsigned char) "\x01\x08\x0f\x16\x31\x4c\x53\x5a\x61"[n->ilsz]] = 'r';
+	}
+
 	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, dist, sizeof(dist));
 	amx_GetAddr(amx, params[4], &addr);
 	amx_SetUString(addr, alt, sizeof(alt));
 	amx_GetAddr(amx, params[5], &addr);
 	amx_SetUString(addr, crs, sizeof(crs));
-	sprintf(ils, "%d %d", n->ilsx, n->ilsz);
 	amx_GetAddr(amx, params[6], &addr);
 	amx_SetUString(addr, ils, sizeof(ils));
 
