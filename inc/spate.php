@@ -8,6 +8,12 @@
 function spate_generate($template_dir, $template)
 {
 	static $parsed_cache = [];
+	static $depth = 0;
+
+	if (++$depth > 128) {
+		$result = "recursion depth exceeded";
+		goto _return;
+	}
 
 	if (isset($parsed_cache[$template])) {
 		return $parsed_cache[$template];
@@ -108,6 +114,8 @@ directive_parse_if:
 next:
 	}
 
+_return:
+	$depth--;
 	$result = str_replace('?><?php', '', $result);
 	return $parsed_cache[$template] = $result;
 }
