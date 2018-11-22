@@ -79,16 +79,20 @@ function spate_generate($template_dir, $template)
 				$c = $in[++$i];
 			} while ($c != ' ' && $c != '}');
 			switch ($directive) {
+			case "@foreach":
+				$result .= '<?php foreach(';
+				$j += 14;
+				goto directive_parse_conditionbody__start;
 			case "@elseif":
 				$result .= '<?php }else if(';
 				$j += 15;
-				goto directive_parse_if__start;
+				goto directive_parse_conditionbody__start;
 			case "@if":
 				$result .= '<?php if(';
 				$j += 9;
-directive_parse_if__start:
+directive_parse_conditionbody__start:
 				$quote = '';
-directive_parse_if:
+directive_parse_conditionbody:
 				$c = $in[++$i];
 				if ($quote == $c) {
 					$quote == '';
@@ -100,7 +104,8 @@ directive_parse_if:
 					goto next;
 				}
 				$result[++$j] = $c;
-				goto directive_parse_if;
+				goto directive_parse_conditionbody;
+			case "@endforeach":
 			case "@endif":
 				$result .= '<?php } ?>';
 				$j += 10;
