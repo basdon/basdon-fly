@@ -68,6 +68,13 @@ function spate_generate($template_dir, $template)
 		case '{':
 			if ($wasescape) break;
 			$c = $in[++$i];
+			$suffix = '){?>';
+			if ($c == '$') {
+				$result .= '<?php echo htmlentities($';
+				$j += 25;
+				$suffix = ',ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE);?>';
+				goto directive_parse_conditionbody__start;
+			}
 			if ($c != '@') {
 				$c = '{';
 				--$i;
@@ -79,6 +86,11 @@ function spate_generate($template_dir, $template)
 				$c = $in[++$i];
 			} while ($c != ' ' && $c != '}');
 			switch ($directive) {
+			case "@unsafe":
+				$result .= '<?php echo ';
+				$j += 11;
+				$suffix = ';?>';
+				goto directive_parse_conditionbody__start;
 			case "@foreach":
 				$result .= '<?php foreach(';
 				$j += 14;
@@ -90,28 +102,31 @@ function spate_generate($template_dir, $template)
 			case "@if":
 				$result .= '<?php if(';
 				$j += 9;
-directive_parse_conditionbody__start:
-				$quote = '';
-directive_parse_conditionbody:
-				$c = $in[++$i];
-				if ($quote == $c) {
-					$quote == '';
-				} else if ($quote == '' && ($c == "'" || $c == '"')) {
-					$quote = $c;
-				} else if ($c == '}') {
-					$result .= '){?>';
-					$j += 4;
-					goto next;
-				}
-				$result[++$j] = $c;
-				goto directive_parse_conditionbody;
+				goto directive_parse_conditionbody__start;
 			case "@endforeach":
 			case "@endif":
 				$result .= '<?php } ?>';
 				$j += 10;
+				goto next;
 			default:
 				$result[++$j] = '?';
+				goto next;
 			}
+directive_parse_conditionbody__start:
+			$quote = '';
+directive_parse_conditionbody:
+			$c = $in[++$i];
+			if ($quote == $c) {
+				$quote == '';
+			} else if ($quote == '' && ($c == "'" || $c == '"')) {
+				$quote = $c;
+			} else if ($c == '}') {
+				$result .= $suffix;
+				$j += strlen($suffix);
+				goto next;
+			}
+			$result[++$j] = $c;
+			goto directive_parse_conditionbody;
 		}
 
 		if ($wasescape) $result[++$j] = '\\';
