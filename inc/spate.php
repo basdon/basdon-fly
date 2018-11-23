@@ -23,6 +23,7 @@ function spate_generate($template_dir, $template)
 	if ($in === false) {
 		die("failed reading $template");
 	}
+	$inlen = strlen($in);
 
 	$m = strlen($in);
 	$i = -1;
@@ -86,6 +87,11 @@ function spate_generate($template_dir, $template)
 				$c = $in[++$i];
 			} while ($c != ' ' && $c != '}');
 			switch ($directive) {
+			case "@eval":
+				$result .= '<?php ';
+				$j += 6;
+				$suffix = '?>';
+				goto directive_parse_conditionbody__start;
 			case "@unsafe":
 				$result .= '<?php echo ';
 				$j += 11;
@@ -119,6 +125,10 @@ render_parse_name:
 					goto next;
 				}
 				$name .= $c;
+				if ($i >= $inlen - 1) {
+					$result .= '<strong>unexpected EOF</strong>';
+					goto _return;
+				}
 				goto render_parse_name;
 			default:
 				$result[++$j] = '?';
@@ -126,18 +136,27 @@ render_parse_name:
 			}
 directive_parse_conditionbody__start:
 			$quote = '';
+			$_esc = false;
 directive_parse_conditionbody:
 			$c = $in[++$i];
-			if ($quote == $c) {
-				$quote == '';
-			} else if ($quote == '' && ($c == "'" || $c == '"')) {
+			$__esc = false;
+			if (!$_esc && $c == '\\') {
+				$__esc = !$_esc;
+			} else if (!$_esc && $quote == $c) {
+				$quote = '';
+			} else if (!$_esc && $quote == '' && ($c == "'" || $c == '"')) {
 				$quote = $c;
-			} else if ($c == '}') {
+			} else if ($quote == '' && $c == '}') {
 				$result .= $suffix;
 				$j += strlen($suffix);
 				goto next;
 			}
+			$_esc = $__esc;
 			$result[++$j] = $c;
+			if ($i >= $inlen - 1) {
+				$result .= '<strong>unexpected EOF</strong>';
+				goto _return;
+			}
 			goto directive_parse_conditionbody;
 		}
 
