@@ -108,6 +108,18 @@ function spate_generate($template_dir, $template)
 				$result .= '<?php } ?>';
 				$j += 10;
 				goto next;
+			case "@render":
+				$name = '';
+render_parse_name:
+				$c = $in[++$i];
+				if ($c == '}') {
+					$r = spate_generate($template_dir, $name);
+					$result .= $r;
+					$j += strlen($r);
+					goto next;
+				}
+				$name .= $c;
+				goto render_parse_name;
 			default:
 				$result[++$j] = '?';
 				goto next;
