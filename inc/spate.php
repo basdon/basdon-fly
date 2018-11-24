@@ -35,6 +35,7 @@ function spate_generate($template_dir, $template)
 	$doescape = false;
 	$inpre = false;
 	$indent = '';
+	$preindent = '';
 	$doindent = true;
 	$dopre = false;
 
@@ -51,13 +52,20 @@ function spate_generate($template_dir, $template)
 		case "\t":
 			if (!$wasindent) break;
 			$doindent = true;
+			if ($dopre && substr($indent, 0, strlen($preindent)) === $preindent) {
+				break;
+			}
 			$indent .= $c;
 			goto next;
 		case "\r":
 			$doindent = true;
+			$indent = '';
+			if ($dopre) break;
 			goto next;
 		case "\n":
 			$doindent = true;
+			$indent = '';
+			if ($dopre) break;
 			goto next;
 		case '\\':
 			if ($wasescape) {
@@ -87,6 +95,16 @@ function spate_generate($template_dir, $template)
 				$c = $in[++$i];
 			} while ($c != ' ' && $c != '}');
 			switch ($directive) {
+			case "@pre":
+			echo '-';
+			echo $indent;
+			echo '-';
+				$dopre = true;
+				$preindent = $indent;
+				goto next;
+			case "@endpre":
+				$dopre = false;
+				goto next;
 			case "@eval":
 				$result .= '<?php ';
 				$j += 6;
