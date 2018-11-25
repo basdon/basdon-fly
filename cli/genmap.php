@@ -50,14 +50,14 @@ try {
 	$draw = false;
 	$aptexts = [];
 	$vorcaps = [];
-	foreach ($db->query('SELECT r.x rx,r.y ry,r.n,r.h,a.c,a.b,a.x ax,a.y ay FROM rnw r JOIN apt a ON r.a=a.i ORDER BY r.a,r.i') as $r) {
+	foreach ($db->query('SELECT r.x rx,r.y ry,r.n,r.h,r.s,a.c,a.b,a.x ax,a.y ay FROM rnw r JOIN apt a ON r.a=a.i ORDER BY r.a,r.i') as $r) {
 		$code = $r->c;
 		if (array_key_exists($code, $aptexts)) {
 			$aptexts[$code] = [max($aptexts[$code][0], xcoord($r->rx)), ycoord($r->ay)];
 		} else {
 			$aptexts[$code] = [xcoord($r->rx), ycoord($r->ay)];
 
-			$vorcaps[$code] = [$r->ax, $r->ay, []];
+			$vorcaps[$code] = [];
 			$ax = xcoord($r->ax);
 			$ay = ycoord($r->ay);
 
@@ -83,6 +83,15 @@ try {
 			*/
 		}
 		$lastapcode = $code;
+
+		$txt = ' ' . sprintf('%02d', round($r->h / 10)) . $r->s;
+		if ($r->n & 2) {
+			$txt[0] = '^';
+		}
+		if ($r->n & 4) {
+			$txt[0] = '*';
+		}
+		$vorcaps[$code][] = $txt;
 
 		if ($r->n & 4) {
 			$h = deg2rad($r->h) + $PI2;
@@ -132,7 +141,24 @@ try {
 		}
 	}
 	foreach ($aptexts as $code => $t) {
-		imagestring($im, $codefont, $t[0] + 10, $t[1] - imagefontheight($codefont), $code, $color_ap);
+		$fh = imagefontheight($codefont) - 4;
+		$bh = $fh + 2;
+		$bw = imagefontwidth($codefont) * 4 + 2;
+		$x = $t[0] + 10;
+		$y = $t[1] - imagefontheight($codefont);
+		$bx = $x - 2;
+		$by = $y + 1;
+
+		$bhh = 2 + count($vorcaps[$code]) * $fh;
+		imagefilledrectangle($im, $bx, $by, $bx + $bw, $by + $bh + $bhh, $bg);
+		imagerectangle($im, $bx, $by, $bx + $bw, $by + $bh, $color_ap);
+		imagerectangle($im, $bx, $by, $bx + $bw, $by + $bh + $bhh, $color_ap);
+
+		imagestring($im, $codefont, $x, $y, $code, $color_ap);
+
+		foreach ($vorcaps[$code] as $key => $v) {
+			imagestring($im, $codefont, $x, $y + 2 + ($key + 1) * $fh, $v, $color_ap);
+		}
 	}
 } catch (PDOException $e) {
 	die($e->getMessage());
