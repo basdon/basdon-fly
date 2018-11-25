@@ -48,14 +48,16 @@ try {
 	$ox = 0;
 	$oy = 0;
 	$draw = false;
-	$aptexts = [];
+	$appos = [];
 	$vorcaps = [];
 	foreach ($db->query('SELECT r.x rx,r.y ry,r.n,r.h,r.s,a.c,a.b,a.x ax,a.y ay FROM rnw r JOIN apt a ON r.a=a.i ORDER BY r.a,r.i') as $r) {
 		$code = $r->c;
-		if (array_key_exists($code, $aptexts)) {
-			$aptexts[$code] = [max($aptexts[$code][0], xcoord($r->rx)), ycoord($r->ay)];
+		if (array_key_exists($code, $appos)) {
+			$appos[$code][0] = max($appos[$code][0], xcoord($r->rx));
+			$appos[$code][1] = min($appos[$code][1], ycoord($r->ry));
+			$appos[$code][2] = max($appos[$code][2], ycoord($r->ry));
 		} else {
-			$aptexts[$code] = [xcoord($r->rx), ycoord($r->ay)];
+			$appos[$code] = [xcoord($r->rx), ycoord($r->ry), ycoord($r->ry)];
 
 			$vorcaps[$code] = [];
 			$ax = xcoord($r->ax);
@@ -140,16 +142,16 @@ try {
 			$draw = true;
 		}
 	}
-	foreach ($aptexts as $code => $t) {
+	foreach ($appos as $code => $pos) {
 		$fh = imagefontheight($codefont) - 4;
 		$bh = $fh + 2;
 		$bw = imagefontwidth($codefont) * 4 + 2;
-		$x = $t[0] + 10;
-		$y = $t[1] - imagefontheight($codefont);
+		$bhh = 2 + count($vorcaps[$code]) * $fh;
+		$x = $pos[0] + 12;
+		$y = ($pos[2] + $pos[1] - $bh - $bhh) / 2;
 		$bx = $x - 2;
 		$by = $y + 1;
 
-		$bhh = 2 + count($vorcaps[$code]) * $fh;
 		imagefilledrectangle($im, $bx, $by, $bx + $bw, $by + $bh + $bhh, $bg);
 		imagerectangle($im, $bx, $by, $bx + $bw, $by + $bh, $color_ap);
 		imagerectangle($im, $bx, $by, $bx + $bw, $by + $bh + $bhh, $color_ap);
