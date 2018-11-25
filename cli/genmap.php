@@ -11,6 +11,9 @@ if (isset($_GET['s'])) {
 if (isset($_GET['dim'])) {
 	$dim = $_GET['dim'];
 }
+if ($dim > 40000) {
+	die();
+}
 $rwwidth = max(1, (int) (5 - ($dim - 6000) / 32000 * 5));
 $centerx = 0;
 $centery = 0;
@@ -44,6 +47,8 @@ if (!isset($_GET['watercolors'])) {
 	$color_ndb_a = imagecolorallocate($im, 157, 108, 159);
 	$color_ndb_b = imagecolorallocate($im, 194, 164, 194);
 	$color_ils = imagecolorallocate($im, 0, 255, 0);
+	$color_res = imagecolorallocate($im, 0, 255, 0);
+	$color_special = imagecolorallocate($im, 87, 128, 192);
 	$color_white = $bg;
 	$color_ap_text = $color_ap;
 } else {
@@ -53,12 +58,43 @@ if (!isset($_GET['watercolors'])) {
 	$color_ndb_b = imagecolorallocate($im, 150, 104, 153);
 	$color_ils = imagecolorallocate($im, 0, 255, 0);
 	$color_white = imagecolorallocate($im, 255, 255, 255);
+	$color_special = imagecolorallocate($im, 87, 128, 192);
 	$color_black = imagecolorallocate($im, 0, 0, 0);
 	$color_ap_text = $color_black;
 }
 
 $codefont = 2;
 
+$res = [];
+$res[] = [-91.586, 2123.01, 421.234, 1655.05];
+
+foreach ($res as $r) {
+	$x1 = (int) xcoord($r[0]);
+	$y1 = (int) ycoord($r[1]);
+	$x2 = (int) xcoord($r[2]);
+	$y2 = (int) ycoord($r[3]);
+	while (($x2 - $x1 + 1) % 3 > 0) $x2++;
+	while (($y2 - $y1 + 1) % 3 > 0) $y2++;
+
+	$len = 7;
+
+	imagerectangle($im, $x1 - 1, $y1 - 1, $x2 + 1, $y2 + 1, $color_special);
+	imagerectangle($im, $x1 - 2, $y1 - 2, $x2 + 2, $y2 + 2, $color_special);
+
+	for ($i = $x1 + 1; $i < $x2; $i += 3) {
+		$l = min($len, min($i - $x1, $x2 - $i));
+		imageline($im, $i, $y1, $i, $y1 + $l, $color_special);
+		imageline($im, $i, $y2 - $l, $i, $y2, $color_special);
+	}
+	for ($i = $y1 + 1; $i < $y2; $i += 3) {
+		$l = min($len, min($i - $y1, $y2 - $i));
+		imageline($im, $x1, $i, $x1 + $l, $i, $color_special);
+		imageline($im, $x2 - $l, $i, $x2, $i, $color_special);
+	}
+}
+
+$appos = [];
+$vorcaps = [];
 try {
 	$PI2 = pi() / 2;
 	$PI4 = pi() / 4;
@@ -67,8 +103,6 @@ try {
 	$ox = 0;
 	$oy = 0;
 	$draw = false;
-	$appos = [];
-	$vorcaps = [];
 	foreach ($db->query('SELECT r.x rx,r.y ry,r.n,r.h,r.s,a.c,a.b,a.x ax,a.y ay FROM rnw r JOIN apt a ON r.a=a.i ORDER BY r.a,r.i') as $r) {
 		$code = $r->c;
 		if (array_key_exists($code, $appos)) {
@@ -164,33 +198,33 @@ try {
 			$draw = true;
 		}
 	}
+} catch (PDOException $e) {
+	die($e->getMessage());
+}
 
-	if ($DRAWTEXT) {
-		foreach ($appos as $code => $pos) {
-			$fh = imagefontheight($codefont) - 4;
-			$bh = $fh + 2;
-			$bw = imagefontwidth($codefont) * 4 + 2;
-			$bhh = $SHOWRUNWAYIDS ? (2 + count($vorcaps[$code]) * $fh) : 0;
-			$x = $pos[0] + 12;
-			$y = ($pos[2] + $pos[1] - $bh - $bhh) / 2;
-			$bx = $x - 2;
-			$by = $y + 1;
+if ($DRAWTEXT) {
+	foreach ($appos as $code => $pos) {
+		$fh = imagefontheight($codefont) - 4;
+		$bh = $fh + 2;
+		$bw = imagefontwidth($codefont) * 4 + 2;
+		$bhh = $SHOWRUNWAYIDS ? (2 + count($vorcaps[$code]) * $fh) : 0;
+		$x = $pos[0] + 12;
+		$y = ($pos[2] + $pos[1] - $bh - $bhh) / 2;
+		$bx = $x - 2;
+		$by = $y + 1;
 
-			imagefilledrectangle($im, $bx, $by, $bx + $bw, $by + $bh + $bhh, $color_white);
-			imagerectangle($im, $bx, $by, $bx + $bw, $by + $bh, $color_ap_text);
-			imagestring($im, $codefont, $x, $y, $code, $color_ap_text);
+		imagefilledrectangle($im, $bx, $by, $bx + $bw, $by + $bh + $bhh, $color_white);
+		imagerectangle($im, $bx, $by, $bx + $bw, $by + $bh, $color_ap_text);
+		imagestring($im, $codefont, $x, $y, $code, $color_ap_text);
 
-			if ($SHOWRUNWAYIDS) {
-				imagerectangle($im, $bx, $by, $bx + $bw, $by + $bh + $bhh, $color_ap_text);
+		if ($SHOWRUNWAYIDS) {
+			imagerectangle($im, $bx, $by, $bx + $bw, $by + $bh + $bhh, $color_ap_text);
 
-				foreach ($vorcaps[$code] as $key => $v) {
-					imagestring($im, $codefont, $x, $y + 2 + ($key + 1) * $fh, $v, $color_ap_text);
-				}
+			foreach ($vorcaps[$code] as $key => $v) {
+				imagestring($im, $codefont, $x, $y + 2 + ($key + 1) * $fh, $v, $color_ap_text);
 			}
 		}
 	}
-} catch (PDOException $e) {
-	die($e->getMessage());
 }
 
 if (!$d) header('Content-Type: image/png');
