@@ -18,6 +18,10 @@ $scale = $imgwh / $dim;
 $offx = (($dim / 2) + $centerx) * $scale;
 $offy = (($dim / 2) + $centery) * $scale;
 
+$NDBSIZE = 22 - (12 / (40000 - 6000) * ($dim - 6000));
+$SHOWRUNWAYIDS = $dim < 15000;
+$DRAWTEXT = $dim < 25000;
+
 $d = isset($_GET['d']);
 
 function xcoord($x)
@@ -33,11 +37,26 @@ function ycoord($y)
 }
 
 $im = imagecreate($imgwh, $imgwh);
-$bg = imagecolorallocate($im, 255, 255, 255);
-$color_ap = imagecolorallocate($im, 11, 136, 192);
-$color_ndb_a = imagecolorallocate($im, 157, 108, 159);
-$color_ndb_b = imagecolorallocate($im, 194, 164, 194);
-$color_ils = imagecolorallocate($im, 0, 255, 0);
+
+if (!isset($_GET['watercolors'])) {
+	$bg = imagecolorallocate($im, 255, 255, 255);
+	$color_ap = imagecolorallocate($im, 11, 136, 192);
+	$color_ndb_a = imagecolorallocate($im, 157, 108, 159);
+	$color_ndb_b = imagecolorallocate($im, 194, 164, 194);
+	$color_ils = imagecolorallocate($im, 0, 255, 0);
+	$color_white = $bg;
+	$color_ap_text = $color_ap;
+} else {
+	$bg = imagecolorallocate($im, 111, 136, 169);
+	$color_ap = imagecolorallocate($im, 13, 89, 122);
+	$color_ndb_a = imagecolorallocate($im, 125, 86, 127);
+	$color_ndb_b = imagecolorallocate($im, 150, 104, 153);
+	$color_ils = imagecolorallocate($im, 0, 255, 0);
+	$color_white = imagecolorallocate($im, 255, 255, 255);
+	$color_black = imagecolorallocate($im, 0, 0, 0);
+	$color_ap_text = $color_black;
+}
+
 $codefont = 2;
 
 try {
@@ -66,17 +85,20 @@ try {
 			imageline($im, $ax -1, $ay, $ax + 1, $ay, $color_ndb_a);
 			imageline($im, $ax, $ay - 1, $ax, $ay + 1, $color_ndb_a);
 			imageellipse($im, $ax, $ay, 6, 6, $color_ndb_a);
-			for ($i = 6; $i < 20; $i += 2) {
+			for ($i = 6; $i < $NDBSIZE; $i += 2) {
 				$amt = pi() * $i;
 				$dang = 2 * pi() / $amt;
 				for ($ang = 0; $amt >= 0; $amt--, $ang += $dang) {
 					imagesetpixel($im, $ax + cos($ang) * $i, $ay + sin($ang) * $i, $color_ndb_b);
 				}
 			}
-			$off = 26 * sqrt(2) / 3;
-			$x = $ax - $off - strlen($r->b) * imagefontwidth($codefont);
-			$y = $ay - $off - imagefontheight($codefont);
-			imagestring($im, $codefont, $x, $y, $r->b, $color_ndb_a);
+
+			if ($DRAWTEXT) {
+				$off = $NDBSIZE * sqrt(2) / 2;
+				$x = $ax - $off - strlen($r->b) * imagefontwidth($codefont);
+				$y = $ay - $off - imagefontheight($codefont) + 4;
+				imagestring($im, $codefont, $x, $y, $r->b, $color_ndb_a);
+			}
 
 			/*
 			imagefilledellipse($im, $ax, $ay, 20, 20, $color_ap);
@@ -142,24 +164,29 @@ try {
 			$draw = true;
 		}
 	}
-	foreach ($appos as $code => $pos) {
-		$fh = imagefontheight($codefont) - 4;
-		$bh = $fh + 2;
-		$bw = imagefontwidth($codefont) * 4 + 2;
-		$bhh = 2 + count($vorcaps[$code]) * $fh;
-		$x = $pos[0] + 12;
-		$y = ($pos[2] + $pos[1] - $bh - $bhh) / 2;
-		$bx = $x - 2;
-		$by = $y + 1;
 
-		imagefilledrectangle($im, $bx, $by, $bx + $bw, $by + $bh + $bhh, $bg);
-		imagerectangle($im, $bx, $by, $bx + $bw, $by + $bh, $color_ap);
-		imagerectangle($im, $bx, $by, $bx + $bw, $by + $bh + $bhh, $color_ap);
+	if ($DRAWTEXT) {
+		foreach ($appos as $code => $pos) {
+			$fh = imagefontheight($codefont) - 4;
+			$bh = $fh + 2;
+			$bw = imagefontwidth($codefont) * 4 + 2;
+			$bhh = $SHOWRUNWAYIDS ? (2 + count($vorcaps[$code]) * $fh) : 0;
+			$x = $pos[0] + 12;
+			$y = ($pos[2] + $pos[1] - $bh - $bhh) / 2;
+			$bx = $x - 2;
+			$by = $y + 1;
 
-		imagestring($im, $codefont, $x, $y, $code, $color_ap);
+			imagefilledrectangle($im, $bx, $by, $bx + $bw, $by + $bh + $bhh, $color_white);
+			imagerectangle($im, $bx, $by, $bx + $bw, $by + $bh, $color_ap_text);
+			imagestring($im, $codefont, $x, $y, $code, $color_ap_text);
 
-		foreach ($vorcaps[$code] as $key => $v) {
-			imagestring($im, $codefont, $x, $y + 2 + ($key + 1) * $fh, $v, $color_ap);
+			if ($SHOWRUNWAYIDS) {
+				imagerectangle($im, $bx, $by, $bx + $bw, $by + $bh + $bhh, $color_ap_text);
+
+				foreach ($vorcaps[$code] as $key => $v) {
+					imagestring($im, $codefont, $x, $y + 2 + ($key + 1) * $fh, $v, $color_ap_text);
+				}
+			}
 		}
 	}
 } catch (PDOException $e) {
