@@ -71,7 +71,7 @@ try {
 					imagesetpixel($im, $ax + cos($ang) * $i, $ay + sin($ang) * $i, $color_ndb_b);
 				}
 			}
-			$off = 20 * sqrt(3) / 2;
+			$off = 26 * sqrt(2) / 3;
 			$x = $ax - $off - strlen($r->b) * imagefontwidth($codefont);
 			$y = $ay - $off - imagefontheight($codefont);
 			imagestring($im, $codefont, $x, $y, $r->b, $color_ndb_a);
