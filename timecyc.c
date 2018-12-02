@@ -249,7 +249,7 @@ unsigned char currentweather;
 static void makeWeatherMsg(const char* type, int weather, cell* outaddr)
 {
 	char buf[144];
-	sprintf(buf, "METAR %s: %s, Visibility: %s, Winds: %.0fkts, Waves: %s", type,
+	sprintf(buf, "METAR %s: %s, visibility: %s, winds: %.0fkts, waves: %s", type,
 		weathernames + weathernamemapping[weather], scales + visibilitymapping[weather],
 		winds[weather] * WIND_MULTIPLIER, scales + wavesmapping[weather]);
 	amx_SetUString(outaddr, buf, sizeof(buf));
