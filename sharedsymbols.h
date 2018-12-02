@@ -277,3 +277,6 @@
 #define RESULT_ILS_ON 1
 #define RESULT_ILS_NOVOR 2
 #define RESULT_ILS_NOILS 3
+
+/* timecyc.c / timecyc.pwn */
+#define NEXT_WEATHER_POSSIBILITIES (35)

@@ -6,6 +6,7 @@
 #endif
 
 #include "common.h"
+#include <string.h>
 
 /*
 
@@ -72,7 +73,7 @@ WAVE waveyness
 17: clear skies
 18: light clouds
 19: sandstorms
-20: thick fog
+20: green smog
 
 default:
 6 28.5% clear
@@ -81,6 +82,15 @@ default:
 2 9.5% thunderstorms
 2 9.5% thick fog
 1 4.7% sandstorms
+
+weighted:
+9 25.7%
+9 25.7%
+8 22.8%
+6 17.1%
+2  5.7%
+1  2.8%
+35
 
 wind * 34kts
 
@@ -129,3 +139,136 @@ DE | 18, 18, 18, 17, 17, 17, 17, 17, 17, 17, 19, 19, 19, 17
 
 */
 
+#define WEATHER_LA_EXTRASUNNY 0
+#define WEATHER_LA_SUNNY 1
+#define WEATHER_LA_EXTRASUNNYSMOG 2
+#define WEATHER_LA_SUNNYSMOG 3
+#define WEATHER_LA_CLOUDY 4
+#define WEATHER_SF_SUNNY 5
+#define WEATHER_SF_EXTRASUNNY 6
+#define WEATHER_SF_CLOUDY 7
+#define WEATHER_SF_RAINY 8
+#define WEATHER_SF_FOGGY 9
+#define WEATHER_LV_SUNNY 10
+#define WEATHER_LV_EXTRASUNNY 11
+#define WEATHER_LV_CLOUDY 12
+#define WEATHER_CS_EXTRASUNNY 13
+#define WEATHER_CS_SUNNY 14
+#define WEATHER_CS_CLOUDY 15
+#define WEATHER_CS_RAINY 16
+#define WEATHER_DE_EXTRASUNNY 17
+#define WEATHER_DE_SUNNY 18
+#define WEATHER_DE_SANDSTORMS 19
+#define WEATHER_UNDERWATER 20
+#define WEATHERS 21
+
+const unsigned char nextweatherarray[NEXT_WEATHER_POSSIBILITIES] = {
+	/* 9x clear */
+	WEATHER_LA_EXTRASUNNY, /* VD  800 */
+	WEATHER_LA_EXTRASUNNYSMOG, /* VD  800 */
+	WEATHER_SF_EXTRASUNNY, /* VD  455 */
+	WEATHER_LV_EXTRASUNNY, /* VD 1000 */
+	WEATHER_CS_EXTRASUNNY, /* VD 1500 */
+	WEATHER_DE_EXTRASUNNY, /* VD 1500 */
+
+	WEATHER_LA_EXTRASUNNY, /* VD  800 */
+	WEATHER_SF_EXTRASUNNY, /* VD  455 */
+	WEATHER_LV_EXTRASUNNY, /* VD 1000 */
+
+	/* 9x light clouds */
+	WEATHER_LA_SUNNY, /* VD  800 */
+	WEATHER_LA_SUNNYSMOG, /* VD  800 */
+	WEATHER_SF_SUNNY, /* VD  455 */
+	WEATHER_LV_SUNNY, /* VD 1000 */
+	WEATHER_CS_SUNNY, /* VD 1500 */
+	WEATHER_DE_SUNNY, /* VD 1500 */
+
+	WEATHER_LA_SUNNY, /* VD  800 */
+	WEATHER_SF_SUNNY, /* VD  455 */
+	WEATHER_LV_SUNNY, /* VD 1000 */
+
+	/* 8x overcast */
+	WEATHER_LA_CLOUDY,
+	WEATHER_SF_CLOUDY,
+	WEATHER_LV_CLOUDY,
+	WEATHER_CS_CLOUDY,
+
+	WEATHER_LA_CLOUDY,
+	WEATHER_SF_CLOUDY,
+	WEATHER_LV_CLOUDY,
+	WEATHER_CS_CLOUDY,
+
+	/* 6x thunderstorms */
+	WEATHER_SF_RAINY,
+	WEATHER_CS_RAINY,
+
+	WEATHER_SF_RAINY,
+	WEATHER_CS_RAINY,
+
+	WEATHER_SF_RAINY,
+	WEATHER_CS_RAINY,
+
+	/* 2x thick fog */
+	WEATHER_SF_FOGGY,
+	WEATHER_UNDERWATER,
+
+	/* 1x sandstorms */
+	WEATHER_DE_SANDSTORMS,
+};
+const char weathernames[] =
+	"clear\0light clouds\0overcast\0thunderstorms\0thick fog\0sandstorms";
+/*       0      6            19        28             42         52 */
+const unsigned char weathernamemapping[WEATHERS] = {
+	0, 6, 0, 6, 19, 6, 0, 19, 28, 42, 6, 0, 19, 0, 6, 19, 28, 0, 6, 52, 42
+};
+const float winds[WEATHERS] = {
+	0.0f, 0.25f, 0.0f, 0.2f, 0.7f, 0.25f, 0.0f, 0.7f, 1.0f, 0.0f, 0.2f,
+	0.0f, 0.4f, 0.0f, 0.3f, 0.7f, 1.0f, 0.0f, 0.3f, 1.5f, 0.0f
+};
+#define WIND_MULTIPLIER (34.0f)
+const char scales[] =
+	"very high\0moderate\0very low";
+/*       0    5    10        19   24 */
+const unsigned char visibilitymapping[WEATHERS] = {
+	/*    0 -  454 very low */
+	/*  455 -  650 low */
+	/*  651 -  700 moderate */
+	/*  701 - 1000 high */
+	/* 1001 - 1500 very high */
+	5, 5, 5, 5, 10, 24, 24, 0, 24, 19, 5, 5, 5, 0, 0, 0, 24, 0, 0, 19, 19
+};
+const unsigned char wavesmapping[WEATHERS] = {
+	/*   0 - 0.3 low */
+	/* 0.4 - 0.6 moderate */
+	/* 0.7 - 1.0 high */
+	24, 10, 24, 10, 5, 10, 24, 5, 5, 24, 10, 24, 5, 24, 10, 5, 5, 24, 10, 5, 24
+};
+
+unsigned char currentweather;
+
+static void makeWeatherMsg(const char* type, int weather, cell* outaddr)
+{
+	char buf[144];
+	sprintf(buf, "METAR %s: %s, Visibility: %s, Winds: %.0fkts, Waves: %s", type,
+		weathernames + weathernamemapping[weather], scales + visibilitymapping[weather],
+		winds[weather] * WIND_MULTIPLIER, scales + wavesmapping[weather]);
+	amx_SetUString(outaddr, buf, sizeof(buf));
+}
+
+/* native Timecyc_GetNextWeatherMsg(nextweatherindex, buf[]) */
+cell AMX_NATIVE_CALL Timecyc_GetNextWeatherMsg(AMX *amx, cell *params)
+{
+	cell* addr;
+	amx_GetAddr(amx, params[2], &addr);
+	makeWeatherMsg("forecast", currentweather = nextweatherarray[params[1]], addr);
+	return 1;
+}
+
+/* native Timecyc_GetCurrentWeatherMsg(nextweatherindex, buf[]) */
+cell AMX_NATIVE_CALL Timecyc_GetCurrentWeatherMsg(AMX *amx, cell *params)
+{
+	cell* addr;
+	amx_GetAddr(amx, params[1], &addr);
+	makeWeatherMsg("weather report", currentweather, addr);
+	return 1;
+}

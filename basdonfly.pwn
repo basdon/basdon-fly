@@ -394,3 +394,14 @@ native Nav_GetActiveNavType(vehicleid)
 //@param playerid player to reset cache for
 native Nav_ResetCache(playerid)
 
+//@summary Gets the next weather message to broadcast
+//@param nextweatherindex index of next weather, MUST be from {@code 0} to {@code NEXT_WEATHER_POSSIBILITIES} (exclusive)
+//@param buf buffer to store message in (should be {@code buf144})
+//@remarks Also sets the current weather in the plugin for use in {@link Timecyc_GetCurrentWeatherMsg}
+native Timecyc_GetNextWeatherMsg(nextweatherindex, buf[])
+
+//@summary Gets the current weather message
+//@param buf buffer to store message in (should be {@code buf144})
+//@remarks {@link Timecyc_GetNextWeatherMsg} MUST be called at least once before invoking this function
+native Timecyc_GetCurrentWeatherMsg(buf[]);
+
