@@ -430,7 +430,7 @@ cell AMX_NATIVE_CALL Nav_GetActiveNavType(AMX *amx, cell *params)
 		return NAV_ADF;
 	}
 	if (nav[vid]->vor != NULL) {
-		return NAV_VOR & (NAV_ILS * nav[vid]->ils);
+		return NAV_VOR | (NAV_ILS * nav[vid]->ils);
 	}
 	return NAV_NONE;
 }
