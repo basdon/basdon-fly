@@ -287,7 +287,7 @@ void calc_ils_values(
 	int tmp;
 
 #define GREYZONE (50.0f)
-	if (/*z < ztarget - zdev - GREYZONE || z > ztarget + zdev + GREYZONE ||*/
+	if (z < ztarget - zdev - GREYZONE || z > ztarget + zdev + GREYZONE ||
 		dx < -xdev - GREYZONE || dx > xdev + GREYZONE)
 	{
 		*ilsx = INVALID_ILS_VALUE;
