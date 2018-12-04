@@ -162,6 +162,8 @@ DE | 18, 18, 18, 17, 17, 17, 17, 17, 17, 17, 19, 19, 19, 17
 #define WEATHER_UNDERWATER 20
 #define WEATHERS 21
 
+#define WEATHER_INVALID 255
+
 const unsigned char nextweatherarray[NEXT_WEATHER_POSSIBILITIES] = {
 	/* 9x clear */
 	WEATHER_LA_EXTRASUNNY, /* VD  800 */
@@ -244,31 +246,40 @@ const unsigned char wavesmapping[WEATHERS] = {
 	24, 10, 24, 10, 5, 10, 24, 5, 5, 24, 10, 24, 5, 24, 10, 5, 5, 24, 10, 5, 24
 };
 
-unsigned char currentweather;
+unsigned char currentweather = WEATHER_INVALID;
 
-static void makeWeatherMsg(const char* type, int weather, cell* outaddr)
+static void makeWeatherMsg(char* buf, const char* type, int weather, cell* outaddr)
 {
-	char buf[144];
 	sprintf(buf, "METAR %s: %s, visibility: %s, winds: %.0fkts, waves: %s", type,
 		weathernames + weathernamemapping[weather], scales + visibilitymapping[weather],
 		winds[weather] * WIND_MULTIPLIER, scales + wavesmapping[weather]);
-	amx_SetUString(outaddr, buf, sizeof(buf));
+	amx_SetUString(outaddr, buf, 144);
 }
 
-/* native Timecyc_GetNextWeatherMsg(nextweatherindex, buf[]) */
-cell AMX_NATIVE_CALL Timecyc_GetNextWeatherMsg(AMX *amx, cell *params)
+/* native Timecyc_GetNextWeatherMsgQuery(nextweatherindex, bufmsg[], bufquery[]) */
+cell AMX_NATIVE_CALL Timecyc_GetNextWeatherMsgQuery(AMX *amx, cell *params)
 {
+	char buf[144];
 	cell* addr;
+	const unsigned char lastweather = currentweather;
 	amx_GetAddr(amx, params[2], &addr);
-	makeWeatherMsg("forecast", currentweather = nextweatherarray[params[1]], addr);
-	return 1;
+	makeWeatherMsg(buf, "forecast", currentweather = nextweatherarray[params[1]], addr);
+	amx_GetAddr(amx, params[3], &addr);
+	if (lastweather == WEATHER_INVALID) {
+		buf[0] = 0;
+	} else {
+		sprintf(buf, "INSERT INTO wth(w,l,t) VALUES(%d,%d,UNIX_TIMESTAMP())", currentweather, lastweather);
+	}
+	amx_SetUString(addr, buf, sizeof(buf));
+	return currentweather;
 }
 
 /* native Timecyc_GetCurrentWeatherMsg(nextweatherindex, buf[]) */
 cell AMX_NATIVE_CALL Timecyc_GetCurrentWeatherMsg(AMX *amx, cell *params)
 {
+	char buf[144];
 	cell* addr;
 	amx_GetAddr(amx, params[1], &addr);
-	makeWeatherMsg("weather report", currentweather, addr);
+	makeWeatherMsg(buf, "weather report", currentweather, addr);
 	return 1;
 }

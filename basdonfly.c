@@ -64,7 +64,7 @@ FORWARD(Nav_GetActiveNavType);
 FORWARD(Nav_ResetCache);
 /* timecyc.c */
 FORWARD(Timecyc_GetCurrentWeatherMsg);
-FORWARD(Timecyc_GetNextWeatherMsg);
+FORWARD(Timecyc_GetNextWeatherMsgQuery);
 /* zones.c */
 FORWARD(Zones_InvalidateForPlayer);
 FORWARD(Zones_UpdateForPlayer);
@@ -155,7 +155,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Nav_GetActiveNavType),
 	REGISTERNATIVE(Nav_ResetCache),
 	REGISTERNATIVE(Timecyc_GetCurrentWeatherMsg),
-	REGISTERNATIVE(Timecyc_GetNextWeatherMsg),
+	REGISTERNATIVE(Timecyc_GetNextWeatherMsgQuery),
 	REGISTERNATIVE(Zones_InvalidateForPlayer),
 	REGISTERNATIVE(Zones_UpdateForPlayer),
 	REGISTERNATIVE(Zones_FormatForPlayer),
