@@ -171,3 +171,23 @@ cell AMX_NATIVE_CALL FormatLoginApiUserExistsGuest(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Login_FormatCheckUserExist(playerid, buf[]); */
+cell AMX_NATIVE_CALL Login_FormatCheckUserExist(AMX *amx, cell *params)
+{
+	int pid = params[1];
+	char data[512];
+	cell *addr;
+
+	if (pdata[pid] == NULL) {
+		return 0;
+	}
+	sprintf(data,
+		"SELECT "
+		"(SELECT count(u) AS c FROM fal WHERE t>UNIX_TIMESTAMP()-1800 AND j='%s') AS b,"
+		"(SELECT p FROM usr WHERE n='%s') AS p,"
+		"(SELECT i FROM usr WHERE n='%s') AS i", pdata[pid]->ip, pdata[pid]->name, pdata[pid]->name);
+	amx_GetAddr(amx, params[2], &addr);
+	amx_SetUString(addr, data, sizeof(data));
+	return 1;
+}
+

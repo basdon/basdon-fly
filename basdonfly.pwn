@@ -206,6 +206,12 @@ native FormatLoginApiCheckChangePass(userid, inputtext[], buf[])
 //@returns {@code 0} on failure (no login data set for {@param playerid})
 native FormatLoginApiUserExistsGuest(playerid, buf[])
 
+//@summary Formats query to check if user exists
+//@param playerid player
+//@param buf buffer to store query in
+//@return {@code 0} if something failed and query could not be made
+native Login_FormatCheckUserExist(playerid, buf[]);
+
 //@summary Inits the airport table
 //@param amount amount of airports that will be created using {@link APT_Add}
 //@seealso APT_Add

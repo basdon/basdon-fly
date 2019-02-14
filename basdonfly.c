@@ -53,6 +53,7 @@ FORWARD(FormatLoginApiLogin);
 FORWARD(FormatLoginApiGuestRegister);
 FORWARD(FormatLoginApiCheckChangePass);
 FORWARD(FormatLoginApiUserExistsGuest);
+FORWARD(Login_FormatCheckUserExist);
 /* nav.c */
 FORWARD(Nav_Reset);
 FORWARD(Nav_EnableADF);
@@ -137,6 +138,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(FormatLoginApiGuestRegister),
 	REGISTERNATIVE(FormatLoginApiCheckChangePass),
 	REGISTERNATIVE(FormatLoginApiUserExistsGuest),
+	REGISTERNATIVE(Login_FormatCheckUserExist),
 	REGISTERNATIVE(APT_Init),
 	REGISTERNATIVE(APT_Destroy),
 	REGISTERNATIVE(APT_Add),
