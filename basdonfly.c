@@ -39,6 +39,7 @@ FORWARD(Panel_FormatHeading);
 /* playerdata.c */
 FORWARD(PlayerData_Init);
 FORWARD(PlayerData_Clear);
+FORWARD(PlayerData_SetUserId);
 FORWARD(PlayerData_UpdateName);
 /* game_sa.c */
 FORWARD(IsAirVehicle);
@@ -49,11 +50,14 @@ FORWARD(ResetPasswordConfirmData);
 FORWARD(SetPasswordConfirmData);
 FORWARD(ValidatePasswordConfirmData);
 FORWARD(FormatLoginApiRegister);
-FORWARD(FormatLoginApiLogin);
 FORWARD(FormatLoginApiGuestRegister);
 FORWARD(FormatLoginApiCheckChangePass);
 FORWARD(FormatLoginApiUserExistsGuest);
 FORWARD(Login_FormatCheckUserExist);
+FORWARD(Login_FormatCreateUserSession);
+FORWARD(Login_FormatLoadAccountData);
+FORWARD(Login_UsePassword);
+FORWARD(Login_GetPassword);
 /* nav.c */
 FORWARD(Nav_Reset);
 FORWARD(Nav_EnableADF);
@@ -132,13 +136,17 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PopDialogQueue),
 	REGISTERNATIVE(PlayerData_Init),
 	REGISTERNATIVE(PlayerData_Clear),
+	REGISTERNATIVE(PlayerData_SetUserId),
 	REGISTERNATIVE(PlayerData_UpdateName),
 	REGISTERNATIVE(FormatLoginApiRegister),
-	REGISTERNATIVE(FormatLoginApiLogin),
 	REGISTERNATIVE(FormatLoginApiGuestRegister),
 	REGISTERNATIVE(FormatLoginApiCheckChangePass),
 	REGISTERNATIVE(FormatLoginApiUserExistsGuest),
 	REGISTERNATIVE(Login_FormatCheckUserExist),
+	REGISTERNATIVE(Login_FormatCreateUserSession),
+	REGISTERNATIVE(Login_FormatLoadAccountData),
+	REGISTERNATIVE(Login_UsePassword),
+	REGISTERNATIVE(Login_GetPassword),
 	REGISTERNATIVE(APT_Init),
 	REGISTERNATIVE(APT_Destroy),
 	REGISTERNATIVE(APT_Add),

@@ -50,6 +50,18 @@ cell AMX_NATIVE_CALL PlayerData_Init(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(pdata[pid]->ip, addr, 16);
 	setName(pdata[pid], amx, params[3], params[4]);
+	pdata[pid]->userid = -1;
+	return 1;
+}
+
+/* native PlayerData_SetUserId(playerid, id) */
+cell AMX_NATIVE_CALL PlayerData_SetUserId(AMX *amx, cell *params)
+{
+	int pid = params[1];
+	if (pdata[pid] == NULL) {
+		return 0;
+	}
+	pdata[pid]->userid = params[2];
 	return 1;
 }
 

@@ -153,14 +153,24 @@ native PopDialogQueue(playerid, &dialogid, &style, caption[], info[], button1[],
 //@param name player's name
 //@param namelen length of {@param name}, excluding zero term
 //@seealso PlayerData_UpdateName
+//@seealso PlayerData_SetUserId
 //@seealso PlayerData_Clear
 native PlayerData_Init(playerid, ip[], name[], namelen)
+
+//@summary Updates the player's user ID
+//@param playerid player
+//@param id userid of the player
+//@seealso PlayerData_Init
+//@seealso PlayerData_Clear
+//@returns {@code 0} if there was no player data saved for {@param playerid}
+native PlayerData_SetUserId(playerid, id)
 
 //@summary Updates the stored player's name on the plugin side
 //@param playerid the playerid
 //@param name new name
 //@param namelen length of {@param name}, excluding zero term
 //@seealso PlayerData_Init
+//@seealso PlayerData_SetUserId
 //@seealso PlayerData_Clear
 //@returns {@code 0} if there was no player data saved for {@param playerid}
 native PlayerData_UpdateName(playerid, name[], namelen)
@@ -176,14 +186,6 @@ native PlayerData_Clear(playerid)
 //@param buf the buffer to store the resulting post data in (use {@code buf4096})
 //@returns {@code 0} on failure (no login data set for {@param playerid})
 native FormatLoginApiRegister(playerid, inputtext[], buf[])
-
-//@summary Format data to send to login api
-//@param playerid the player for who the call is
-//@param userid userid of the player
-//@param inputtext password as entered by player
-//@param buf the buffer to store the resulting post data in (use {@code buf4096})
-//@returns {@code 0} on failure (no login data set for {@param playerid})
-native FormatLoginApiLogin(playerid, userid, inputtext[], buf[])
 
 //@summary Format data to send to guest register api
 //@param playerid the player for who the call is
@@ -211,6 +213,27 @@ native FormatLoginApiUserExistsGuest(playerid, buf[])
 //@param buf buffer to store query in
 //@return {@code 0} if something failed and query could not be made
 native Login_FormatCheckUserExist(playerid, buf[]);
+
+//@summary Formats query to create session, and updates user last seen time
+//@param playerid player
+//@param buf buffer to store queries in
+//@remarks buffer will have two querys: on {@code buf[1]} and {@code buf[buf[0]]}
+native Login_FormatCreateUserSession(playerid, buf[])
+
+//@summary Formats query to load account data
+//@param userid user id
+//@param buf buffer to store query in
+native Login_FormatLoadAccountData(userid, buf[]);
+
+//@summary Stores the hashed password so it can be checked against later
+//@param playerid player
+//@param buf buffer containing password
+native Login_UsePassword(playerid, buf[]);
+
+//@summary Retrieves the hashed password
+//@param playerid player
+//@param buf buffer to put password in
+native Login_GetPassword(playerid, buf[]);
 
 //@summary Inits the airport table
 //@param amount amount of airports that will be created using {@link APT_Add}

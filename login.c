@@ -101,17 +101,6 @@ cell AMX_NATIVE_CALL FormatLoginApiRegister(AMX *amx, cell *params)
 	return appendEncodedPasswordAndIp(amx, params + 2, len, data + len, pdata[pid]->ip);
 }
 
-cell AMX_NATIVE_CALL FormatLoginApiLogin(AMX *amx, cell *params)
-{
-	int pid = params[1], uid = params[2], len;
-	char data[2 + 10 + 3 + (128 * 3) + 3 + 15 + 2];
-	if (pdata[pid] == NULL) {
-		return 0;
-	}
-	len = sprintf(data, "i=%d", uid);
-	return appendEncodedPasswordAndIp(amx, params + 3, len, data + len, pdata[pid]->ip);
-}
-
 cell AMX_NATIVE_CALL FormatLoginApiGuestRegister(AMX *amx, cell *params)
 {
 	int pid = params[1], uid = params[2], len;
@@ -177,17 +166,83 @@ cell AMX_NATIVE_CALL Login_FormatCheckUserExist(AMX *amx, cell *params)
 	int pid = params[1];
 	char data[512];
 	cell *addr;
-
 	if (pdata[pid] == NULL) {
 		return 0;
 	}
 	sprintf(data,
-		"SELECT "
-		"(SELECT count(u) AS c FROM fal WHERE t>UNIX_TIMESTAMP()-1800 AND j='%s') AS b,"
-		"(SELECT p FROM usr WHERE n='%s') AS p,"
-		"(SELECT i FROM usr WHERE n='%s') AS i", pdata[pid]->ip, pdata[pid]->name, pdata[pid]->name);
+	        "SELECT "
+	        "(SELECT count(u) AS c FROM fal WHERE t>UNIX_TIMESTAMP()-1800 AND j='%s') AS b,"
+	        "(SELECT p FROM usr WHERE n='%s') AS p,"
+	        "(SELECT i FROM usr WHERE n='%s') AS i", pdata[pid]->ip, pdata[pid]->name, pdata[pid]->name);
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, data, sizeof(data));
+	return 1;
+}
+
+/* native Login_FormatCreateUserSession(playerid, buf[]) */
+cell AMX_NATIVE_CALL Login_FormatCreateUserSession(AMX *amx, cell *params)
+{
+	int pid = params[1];
+	char data[255];
+	cell *addr;
+	int p;
+	if (pdata[pid] == NULL) {
+		return 0;
+	}
+	p = sprintf(data,
+	            "UPDATE usr SET l=UNIX_TIMESTAMP() WHERE i=%d LIMIT 1",
+	            (int) params[1]);
+	if (p < 0) {
+		return 0;
+	}
+	amx_GetAddr(amx, params[2], &addr);
+	p += 2;
+	*addr = p;
+	amx_SetUString(addr + 1, data, sizeof(data));
+	sprintf(data,
+	        "INSERT INTO ses(u,s,e,j) VALUES(%d,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'%s')",
+	        pdata[pid]->userid,
+	        pdata[pid]->ip);
+	amx_SetUString(addr + p, data, sizeof(data));
+	return 1;
+}
+
+/* native Login_FormatLoadAccountData(userid, buf[]) */
+cell AMX_NATIVE_CALL Login_FormatLoadAccountData(AMX *amx, cell *params)
+{
+	char data[512];
+	cell *addr;
+	sprintf(data, "SELECT s FROM usr WHERE i=%d", (int) params[1]);
+	amx_GetAddr(amx, params[2], &addr);
+	amx_SetUString(addr, data, sizeof(data));
+	return 1;
+}
+
+/* native Login_UsePassword(playerid, buf[]); */
+cell AMX_NATIVE_CALL Login_UsePassword(AMX *amx, cell *params)
+{
+	int playerid = params[1];
+	cell *inaddr = NULL;
+	if (pwdata[playerid] == NULL) {
+		pwdata[playerid] = (char *) malloc(PW_HASH_LENGTH * sizeof(char));
+	}
+	amx_GetAddr(amx, params[2], &inaddr);
+	amx_GetUString(pwdata[playerid], inaddr, PW_HASH_LENGTH);
+	return 1;
+}
+
+/* native Login_GetPassword(playerid, buf[]); */
+cell AMX_NATIVE_CALL Login_GetPassword(AMX *amx, cell *params)
+{
+	int playerid = params[1];
+	cell *outaddr = NULL;
+	const char dummy = 0;
+	amx_GetAddr(amx, params[2], &outaddr);
+	if (pwdata[playerid] == NULL) {
+		amx_SetUString(outaddr, &dummy, PW_HASH_LENGTH);
+		return 1;
+	}
+	amx_SetUString(outaddr, pwdata[playerid], PW_HASH_LENGTH);
 	return 1;
 }
 
