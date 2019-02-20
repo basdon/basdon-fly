@@ -218,6 +218,27 @@ cell AMX_NATIVE_CALL Login_FormatLoadAccountData(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Login_FormatRegisterGuestAccount(playerid, password[], buf[]) */
+cell AMX_NATIVE_CALL Login_FormatRegisterGuestAcc(AMX *amx, cell *params)
+{
+	int pid = params[1];
+	char pw[144], data[512];
+	cell *addr;
+	if (pdata[pid] == NULL) {
+		return 0;
+	}
+	amx_GetAddr(amx, params[2], &addr);
+	amx_GetUString(pw, addr, sizeof(pw));
+	sprintf(data,
+	        "UPDATE usr SET p='%s',n='%s',g=4 WHERE i=%d",
+	        pw,
+		pdata[pid]->name,
+	        pid);
+	amx_GetAddr(amx, params[3], &addr);
+	amx_SetUString(addr, data, sizeof(data));
+	return 1;
+}
+
 /* native Login_UsePassword(playerid, buf[]); */
 cell AMX_NATIVE_CALL Login_UsePassword(AMX *amx, cell *params)
 {
