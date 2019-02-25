@@ -251,8 +251,8 @@ cell AMX_NATIVE_CALL Login_FormatLoadAccountData(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Login_FormatRegisterGuestAccount(playerid, password[], buf[]) */
-cell AMX_NATIVE_CALL Login_FormatRegisterGuestAcc(AMX *amx, cell *params)
+/* native Login_FormatUpgradeGuestAcc(playerid, password[], buf[]) */
+cell AMX_NATIVE_CALL Login_FormatUpgradeGuestAcc(AMX *amx, cell *params)
 {
 	int pid = params[1];
 	char pw[144], data[512];
