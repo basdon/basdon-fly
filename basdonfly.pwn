@@ -220,6 +220,14 @@ native Login_FormatCheckUserExist(playerid, buf[]);
 //@remarks buffer will have two querys: on {@code buf[1]} and {@code buf[buf[0]]}
 native Login_FormatCreateUserSession(playerid, buf[])
 
+//@summary Formats text to show in guest register dialog box
+//@param playerid player to show for (will show current name)
+//@param buf buffer to store queries in
+//@param invalid_name_error whether to show the invalid name error msg (optional={@code 0})
+//@param pwmismatch whether to show the password mismatch error msg (optional={@code 0})
+//@param step current step ({@code 0}=choose name, {@code 1}=password, {@code 2}=confirm password)
+native Login_FormatGuestRegisterBox(playerid, buf[], invalid_name_error=0, pwmismatch=0, step)
+
 //@summary Formats query to load account data
 //@param userid user id
 //@param buf buffer to store query in

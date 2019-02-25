@@ -207,6 +207,39 @@ cell AMX_NATIVE_CALL Login_FormatCreateUserSession(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Login_FormatGuestRegisterBox(playerid, buf[], invalid_name_error=0, pwmismatch=0, step) */
+cell AMX_NATIVE_CALL Login_FormatGuestRegisterBox(AMX *amx, cell *params)
+{
+	int pid = params[1], invalid_name_error = params[3], pwmismatch = params[4], step = params[5];
+	char data[512];
+	char *d = &data[0];
+	cell *addr;
+	if (invalid_name_error) {
+		d += sprintf(d, ECOL_WARN"Invalid name or name is taken (press tab).\n\n");
+	} else if (pwmismatch) {
+		d += sprintf(d, ECOL_WARN"Passwords do not match, please try again.\n\n");
+	}
+	d += sprintf(d, step == 0 ? ECOL_INFO : ECOL_DIALOG_TEXT);
+	d += sprintf(d, "* choose a name");
+
+	if (step == 0) {
+		d += sprintf(d, " <<<<");
+		d += sprintf(d, "\n    must be 3-20 length, 0-9a-zA-Z=()[]$@._");
+		if (pdata[pid] != NULL) {
+			d += sprintf(d, "\n    Current name: %s", pdata[pid]->name);
+		}
+	}
+	d += sprintf(d, step == 1 ? ECOL_INFO"\n" : ECOL_DIALOG_TEXT"\n");
+	d += sprintf(d, "* choose a password");
+	if (step == 1) d += sprintf(d, " <<<<");
+	d += sprintf(d, step == 2 ? ECOL_INFO"\n" : ECOL_DIALOG_TEXT"\n");
+	d += sprintf(d, "* confirm your password");
+	if (step == 2) d += sprintf(d, " <<<<");
+	amx_GetAddr(amx, params[2], &addr);
+	amx_SetUString(addr, data, sizeof(data));
+	return 1;
+}
+
 /* native Login_FormatLoadAccountData(userid, buf[]) */
 cell AMX_NATIVE_CALL Login_FormatLoadAccountData(AMX *amx, cell *params)
 {
@@ -233,7 +266,7 @@ cell AMX_NATIVE_CALL Login_FormatRegisterGuestAcc(AMX *amx, cell *params)
 	        "UPDATE usr SET p='%s',n='%s',g=4 WHERE i=%d",
 	        pw,
 		pdata[pid]->name,
-	        pid);
+	        pdata[pid]->userid);
 	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, data, sizeof(data));
 	return 1;

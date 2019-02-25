@@ -19,6 +19,13 @@
 #define MAX_VEHICLES (2000)
 #endif
 
+#define ECOL_INFO "{3498db}"
+#define ECOL_WARN "{e84c3d}"
+#define ECOL_SUCC "{2cc36b}"
+#define ECOL_DIALOG_CAPTION "{d2d2d2}"
+#define ECOL_DIALOG_TEXT "{a9c4e4}"
+#define ECOL_DIALOG_BUTTON "{c8c8c8}"
+
 #define WARN "! "
 #define INFO "* "
 #define SUCC "+ "
