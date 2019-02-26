@@ -225,6 +225,7 @@ cell AMX_NATIVE_CALL Login_FormatGuestRegisterBox(AMX *amx, cell *params)
 	if (step == 0) {
 		d += sprintf(d, " <<<<");
 		d += sprintf(d, "\n    must be 3-20 length, 0-9a-zA-Z=()[]$@._");
+		d += sprintf(d, "\n    must not start with @");
 		if (pdata[pid] != NULL) {
 			d += sprintf(d, "\n    Current name: %s", pdata[pid]->name);
 		}
