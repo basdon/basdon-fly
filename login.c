@@ -252,6 +252,28 @@ cell AMX_NATIVE_CALL Login_FormatLoadAccountData(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Login_FormatOnJoinRegisterBox(buf[], .pwmismatch=0, step) */
+cell AMX_NATIVE_CALL Login_FormatOnJoinRegisterBox(AMX *amx, cell *params)
+{
+	int pwmismatch = params[2], step = params[3];
+	char data[512];
+	char *d = &data[0];
+	cell *addr;
+	if (pwmismatch) {
+		d += sprintf(d, ECOL_WARN"Passwords do not match!\n\n");
+	}
+	d += sprintf(d, ECOL_DIALOG_TEXT"Welcome! Register your account or continue as a guest.\n\n");
+	d += sprintf(d, step == 0 ? ECOL_INFO : ECOL_DIALOG_TEXT);
+	d += sprintf(d, "* choose a password");
+	if (step == 0) d += sprintf(d, " <<<<");
+	d += sprintf(d, step == 1 ? ECOL_INFO"\n" : ECOL_DIALOG_TEXT"\n");
+	d += sprintf(d, "* confirm your password");
+	if (step == 1) d += sprintf(d, " <<<<");
+	amx_GetAddr(amx, params[1], &addr);
+	amx_SetUString(addr, data, sizeof(data));
+	return 1;
+}
+
 /* native Login_FormatUpgradeGuestAcc(playerid, password[], buf[]) */
 cell AMX_NATIVE_CALL Login_FormatUpgradeGuestAcc(AMX *amx, cell *params)
 {

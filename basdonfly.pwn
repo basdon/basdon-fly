@@ -220,12 +220,13 @@ native Login_FormatCheckUserExist(playerid, buf[]);
 //@remarks buffer will have two querys: on {@code buf[1]} and {@code buf[buf[0]]}
 native Login_FormatCreateUserSession(playerid, buf[])
 
-//@summary Formats text to show in guest register dialog box
+//@summary Formats text to show in register dialog box {@b in a guest session}
 //@param playerid player to show for (will show current name)
-//@param buf buffer to store queries in
+//@param buf buffer to store result text in
 //@param invalid_name_error whether to show the invalid name error msg (optional={@code 0})
 //@param pwmismatch whether to show the password mismatch error msg (optional={@code 0})
 //@param step current step ({@code 0}=choose name, {@code 1}=password, {@code 2}=confirm password)
+//@seealso Login_FormatOnJoinRegisterBox
 native Login_FormatGuestRegisterBox(playerid, buf[], invalid_name_error=0, pwmismatch=0, step)
 
 //@summary Formats query to load account data
@@ -233,12 +234,19 @@ native Login_FormatGuestRegisterBox(playerid, buf[], invalid_name_error=0, pwmis
 //@param buf buffer to store query in
 native Login_FormatLoadAccountData(userid, buf[]);
 
+//@summary Formats text to show in register dialog box {@b on join}
+//@param buf buffer to store result text in
+//@param pwmismatch whether to show the password mismatch error msg (optional={@code 0})
+//@param step current step ({@code 0}=password, {@code 1}=confirm password)
+//@seealso Login_FormatGuestRegisterBox
+native Login_FormatOnJoinRegisterBox(buf[], pwmismatch=0, step)
+
 //@summary Formats query to upgrade a guest account to a real account
 //@param playerid player
 //@param password hashed password
 //@param buf buffer to store queries in
 //@returns {@code 0} on failure (but should not happen if login is inited for player)
-native Login_FormatRegisterGuestAcc(playerid, password[], buf[])
+native Login_FormatUpgradeGuestAcc(playerid, password[], buf[])
 
 //@summary Stores the hashed password so it can be checked against later
 //@param playerid player

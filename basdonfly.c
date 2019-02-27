@@ -57,6 +57,7 @@ FORWARD(Login_FormatCheckUserExist);
 FORWARD(Login_FormatCreateUserSession);
 FORWARD(Login_FormatGuestRegisterBox);
 FORWARD(Login_FormatLoadAccountData);
+FORWARD(Login_FormatOnJoinRegisterBox);
 FORWARD(Login_FormatUpgradeGuestAcc);
 FORWARD(Login_UsePassword);
 FORWARD(Login_GetPassword);
@@ -148,6 +149,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Login_FormatCreateUserSession),
 	REGISTERNATIVE(Login_FormatGuestRegisterBox),
 	REGISTERNATIVE(Login_FormatLoadAccountData),
+	REGISTERNATIVE(Login_FormatOnJoinRegisterBox),
 	REGISTERNATIVE(Login_FormatUpgradeGuestAcc),
 	REGISTERNATIVE(Login_UsePassword),
 	REGISTERNATIVE(Login_GetPassword),
