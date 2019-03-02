@@ -9,58 +9,17 @@
 #include <string.h>
 #include "playerdata.h"
 
+/* actual password, stored for later checking */
 static char *pwdata[MAX_PLAYERS];
+/* some hash of new password, stored between dialogs when player is changing password */
+static char *pwchangeconfirmdata[MAX_PLAYERS];
 
 void login_init()
 {
 	int i;
 	for (i = 0; i < MAX_PLAYERS; i++) {
-		pwdata[i] = NULL;
+		pwchangeconfirmdata[i] = pwdata[i] = NULL;
 	}
-}
-
-cell AMX_NATIVE_CALL ResetPasswordConfirmData(AMX *amx, cell *params)
-{
-	int playerid = params[1];
-	if (pwdata[playerid] != NULL) {
-		free(pwdata[playerid]);
-		pwdata[playerid] = NULL;
-	}
-	return 1;
-}
-
-cell AMX_NATIVE_CALL SetPasswordConfirmData(AMX *amx, cell *params)
-{
-	int playerid = params[1];
-	cell *inaddr = NULL;
-
-	if (pwdata[playerid] == NULL) {
-		pwdata[playerid] = (char *) malloc(PW_HASH_LENGTH * sizeof(char));
-	}
-	amx_GetAddr(amx, params[2], &inaddr);
-	amx_GetUString(pwdata[playerid], inaddr, PW_HASH_LENGTH);
-
-	return 1;
-}
-
-cell AMX_NATIVE_CALL ValidatePasswordConfirmData(AMX *amx, cell *params)
-{
-	int result;
-	int playerid = params[1];
-	cell *inaddr = NULL;
-	char pwdata2[PW_HASH_LENGTH];
-
-	if (pwdata[playerid] == NULL) {
-		return 0;
-	}
-	amx_GetAddr(amx, params[2], &inaddr);
-	amx_GetUString(pwdata2, inaddr, PW_HASH_LENGTH);
-
-	result = strcmp(pwdata[playerid], pwdata2);
-	free(pwdata[playerid]);
-	pwdata[playerid] = NULL;
-
-	return result == 0;
 }
 
 void urlenc(char *in, char *out)
@@ -124,24 +83,6 @@ cell AMX_NATIVE_CALL FormatLoginApiGuestRegister(AMX *amx, cell *params)
 	return 1;
 }
 
-cell AMX_NATIVE_CALL FormatLoginApiCheckChangePass(AMX *amx, cell *params)
-{
-	int uid = params[1], len;
-	char encpw[128 * 3 + 1];
-	char data[2 + 10 + 3 + (128 * 3) + 2];
-	cell *addr;
-
-	amx_GetAddr(amx, params[2], &addr);
-	amx_GetUString(data, addr, 129);
-	data[128] = 0;
-	urlenc(data, encpw);
-
-	len = sprintf(data, "i=%d&p=%s", uid, encpw);
-	amx_GetAddr(amx, params[3], &addr);
-	amx_SetUString(addr, data, len + 1);
-	return 1;
-}
-
 cell AMX_NATIVE_CALL FormatLoginApiUserExistsGuest(AMX *amx, cell *params)
 {
 	int pid = params[1], len;
@@ -157,6 +98,44 @@ cell AMX_NATIVE_CALL FormatLoginApiUserExistsGuest(AMX *amx, cell *params)
 	len = sprintf(data, "n=%s&j=%s", encname, pdata[pid]->ip);
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, data, len + 1);
+	return 1;
+}
+
+/* native Login_FormatChangePasswordBox(buf[], pwmismatch=0, step) */
+cell AMX_NATIVE_CALL Login_FormatChangePasswordBox(AMX *amx, cell *params)
+{
+	int pwmismatch = params[2], step = params[3];
+	char data[512];
+	char *d = &data[0];
+	cell *addr;
+	if (pwmismatch) {
+		d += sprintf(d, ECOL_WARN"New passwords do not match, please try again.\n\n");
+	}
+	d += sprintf(d, step == 0 ? ECOL_INFO : ECOL_DIALOG_TEXT);
+	d += sprintf(d, "* enter your current password");
+	if (step == 0) d += sprintf(d, " <<<<");
+	d += sprintf(d, step == 1 ? ECOL_INFO"\n" : ECOL_DIALOG_TEXT"\n");
+	d += sprintf(d, "* choose a new password");
+	if (step == 1) d += sprintf(d, " <<<<");
+	d += sprintf(d, step == 2 ? ECOL_INFO"\n" : ECOL_DIALOG_TEXT"\n");
+	d += sprintf(d, "* confirm your new password");
+	if (step == 2) d += sprintf(d, " <<<<");
+	amx_GetAddr(amx, params[1], &addr);
+	amx_SetUString(addr, data, sizeof(data));
+	return 1;
+}
+
+/* native Login_FormatChangePassword(userid, password[], buf[]) */
+cell AMX_NATIVE_CALL Login_FormatChangePassword(AMX *amx, cell *params)
+{
+	int uid = params[1];
+	char pw[PW_HASH_LENGTH], data[512];
+	cell *addr;
+	amx_GetAddr(amx, params[2], &addr);
+	amx_GetUString(pw, addr, sizeof(pw));
+	sprintf(data, "UPDATE usr SET p='%s' WHERE i=%d", pw, uid);
+	amx_GetAddr(amx, params[3], &addr);
+	amx_SetUString(addr, data, sizeof(data));
 	return 1;
 }
 
@@ -295,6 +274,77 @@ cell AMX_NATIVE_CALL Login_FormatUpgradeGuestAcc(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Login_FreePassword(playerid); */
+cell AMX_NATIVE_CALL Login_FreePassword(AMX *amx, cell *params)
+{
+	int playerid = params[1];
+	if (pwdata[playerid] != NULL) {
+		free(pwdata[playerid]);
+		pwdata[playerid] = NULL;
+	}
+	return 1;
+}
+
+/* native Login_GetPassword(playerid, buf[]); */
+cell AMX_NATIVE_CALL Login_GetPassword(AMX *amx, cell *params)
+{
+	int playerid = params[1];
+	cell *outaddr = NULL;
+	if (pwdata[playerid] == NULL) {
+		return 0;
+	}
+	amx_GetAddr(amx, params[2], &outaddr);
+	amx_SetUString(outaddr, pwdata[playerid], PW_HASH_LENGTH);
+	return 1;
+}
+
+/* native Login_PasswordConfirmFree(playerid) */
+cell AMX_NATIVE_CALL Login_PasswordConfirmFree(AMX *amx, cell *params)
+{
+	int playerid = params[1];
+	if (pwchangeconfirmdata[playerid] != NULL) {
+		free(pwchangeconfirmdata[playerid]);
+		pwchangeconfirmdata[playerid] = NULL;
+	}
+	return 1;
+}
+
+/* native Login_PasswordConfirmStore(playerid, pwhash[]) */
+cell AMX_NATIVE_CALL Login_PasswordConfirmStore(AMX *amx, cell *params)
+{
+	int playerid = params[1];
+	cell *inaddr = NULL;
+
+	if (pwchangeconfirmdata[playerid] == NULL) {
+		pwchangeconfirmdata[playerid] = (char *) malloc(PW_HASH_LENGTH * sizeof(char));
+	}
+	amx_GetAddr(amx, params[2], &inaddr);
+	amx_GetUString(pwchangeconfirmdata[playerid], inaddr, PW_HASH_LENGTH);
+
+	return 1;
+}
+
+/* native Login_PasswordConfirmValidate(playerid, pwhash[]) */
+cell AMX_NATIVE_CALL Login_PasswordConfirmValidate(AMX *amx, cell *params)
+{
+	int result;
+	int playerid = params[1];
+	cell *inaddr = NULL;
+	char second[PW_HASH_LENGTH];
+
+	if (pwchangeconfirmdata[playerid] == NULL) {
+		return 0;
+	}
+	amx_GetAddr(amx, params[2], &inaddr);
+	amx_GetUString(second, inaddr, PW_HASH_LENGTH);
+
+	result = strcmp(pwchangeconfirmdata[playerid], second);
+	free(pwchangeconfirmdata[playerid]);
+	pwchangeconfirmdata[playerid] = NULL;
+
+	return result == 0;
+}
+
 /* native Login_UsePassword(playerid, buf[]); */
 cell AMX_NATIVE_CALL Login_UsePassword(AMX *amx, cell *params)
 {
@@ -305,21 +355,6 @@ cell AMX_NATIVE_CALL Login_UsePassword(AMX *amx, cell *params)
 	}
 	amx_GetAddr(amx, params[2], &inaddr);
 	amx_GetUString(pwdata[playerid], inaddr, PW_HASH_LENGTH);
-	return 1;
-}
-
-/* native Login_GetPassword(playerid, buf[]); */
-cell AMX_NATIVE_CALL Login_GetPassword(AMX *amx, cell *params)
-{
-	int playerid = params[1];
-	cell *outaddr = NULL;
-	const char dummy = 0;
-	amx_GetAddr(amx, params[2], &outaddr);
-	if (pwdata[playerid] == NULL) {
-		amx_SetUString(outaddr, &dummy, PW_HASH_LENGTH);
-		return 1;
-	}
-	amx_SetUString(outaddr, pwdata[playerid], PW_HASH_LENGTH);
 	return 1;
 }
 

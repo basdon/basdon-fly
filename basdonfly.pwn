@@ -63,30 +63,6 @@ native IsHelicopter(model)
 //@returns {@code 0} if the model given is not a plane
 native IsPlane(model)
 
-//@summary Store password hash to confirm it later using {@link ValidatePasswordConfirmData}
-//@param playerid the player for which to store the hash
-//@param pwhash the hash to store
-//@remarks This will cause a memory leak if {@link ResetPasswordConfirmData} or {@link ValidatePasswordConfirmData} is not called before this is called again for the same {@param playerid}.
-//@seealso ResetPasswordConfirmData
-//@seealso ValidatePasswordConfirmData
-native SetPasswordConfirmData(playerid, pwhash[])
-
-//@summary Check if {@param pwhash} equals the previously saved hash
-//@param playerid the player for which the data was saved
-//@param pwhash the hash to check
-//@returns {@code 0} if the hash doesn't match the hash previously saved with {@link SetPasswordConfirmData}
-//@remarks The saved data gets reset after the check, so no need to call {@link ResetPasswordConfirmData}
-//@seealso SetPasswordConfirmData
-//@seealso ResetPasswordConfirmData
-native ValidatePasswordConfirmData(playerid, pwhash[])
-
-//@summary Free memory that was used to confirm a player's password
-//@param playerid the player for which the data was saved
-//@remarks Has no effect if the data was already reset
-//@seealso SetPasswordConfirmData
-//@seealso ValidatePasswordConfirmData
-native ResetPasswordConfirmData(playerid)
-
 //@summary Gets hash of command in entered command text (excluding params)
 //@param cmdtext command text to get hash of
 //@remarks End delimiter for calculation is either a zero terminator, or anything below {@code ' '}
@@ -195,18 +171,23 @@ native FormatLoginApiRegister(playerid, inputtext[], buf[])
 //@returns {@code 0} on failure (no login data set for {@param playerid})
 native FormatLoginApiGuestRegister(playerid, userid, inputtext[], buf[])
 
-//@summary Format data to send to check/change passowrd api (they expect the same data)
-//@param userid userid of the player
-//@param inputtext password as entered by player
-//@param buf the buffer to store the resulting post data in (use {@code buf4096})
-//@returns {@code 0} on failure (no login data set for {@param playerid})
-native FormatLoginApiCheckChangePass(userid, inputtext[], buf[])
-
 //@summary Format data to send to user exists/guest api (they expect the same data)
 //@param playerid playerid of the player
 //@param buf the buffer to store the resulting post data in (use {@code buf4096})
 //@returns {@code 0} on failure (no login data set for {@param playerid})
 native FormatLoginApiUserExistsGuest(playerid, buf[])
+
+//@summary Format query to change password
+//@param userid user id
+//@param password hashed password to set
+//@param buf the buffer to store the query in
+native Login_FormatChangePassword(userid, password[], buf[])
+
+//@summary Formats text to show in change password box {@b during gameplay}
+//@param buf buffer to store result text in
+//@param pwmismatch whether to show the password mismatch error msg (optional={@code 0})
+//@param step current step ({@code 0}=current pw, {@code 1}=password, {@code 2}=confirm password)
+native Login_FormatChangePasswordBox(buf[], pwmismatch=0, step)
 
 //@summary Formats query to check if user exists
 //@param playerid player
@@ -248,15 +229,49 @@ native Login_FormatOnJoinRegisterBox(buf[], pwmismatch=0, step)
 //@returns {@code 0} on failure (but should not happen if login is inited for player)
 native Login_FormatUpgradeGuestAcc(playerid, password[], buf[])
 
-//@summary Stores the hashed password so it can be checked against later
-//@param playerid player
-//@param buf buffer containing password
-native Login_UsePassword(playerid, buf[]);
+//@summary Frees the hashed password stored for player
+//@param playerid player to free stored password for
+//@seealso Login_GetPassword
+//@seealso Login_UsePassword
+native Login_FreePassword(playerid)
 
 //@summary Retrieves the hashed password
 //@param playerid player
 //@param buf buffer to put password in
+//@seealso Login_UsePassword
+//@seealso Login_FreePassword
+//@returns {@code 0} if there's no password stored for player
 native Login_GetPassword(playerid, buf[]);
+
+//@summary Free memory that was used to confirm a player's password
+//@param playerid the player for which the data was saved
+//@remarks Has no effect if the data was already reset
+//@seealso Login_PasswordConfirmStore
+//@seealso Login_PasswordConfirmValidate
+native Login_PasswordConfirmFree(playerid)
+
+//@summary Store password hash to confirm it later using {@link Login_PasswordConfirmValidate}
+//@param playerid the player for which to store the hash
+//@param pwhash the hash to store
+//@seealso Login_PasswordConfirmFree
+//@seealso Login_PasswordConfirmValidate
+native Login_PasswordConfirmStore(playerid, pwhash[])
+
+//@summary Check if {@param pwhash} equals the previously saved hash
+//@param playerid the player for which the data was saved
+//@param pwhash the hash to check
+//@returns {@code 0} if the hash doesn't match the hash previously saved with {@link Login_PasswordConfirmStore}
+//@remarks The saved data gets reset after the check, so no need to call {@link Login_PasswordConfirmFree}
+//@seealso Login_PasswordConfirmStore
+//@seealso Login_PasswordConfirmFree
+native Login_PasswordConfirmValidate(playerid, pwhash[])
+
+//@summary Stores the hashed password so it can be checked against later
+//@param playerid player
+//@param buf buffer containing password
+//@seealso Login_FreePassword
+//@seealso Login_GetPassword
+native Login_UsePassword(playerid, buf[]);
 
 //@summary Inits the airport table
 //@param amount amount of airports that will be created using {@link APT_Add}

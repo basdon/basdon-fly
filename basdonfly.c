@@ -46,21 +46,23 @@ FORWARD(IsAirVehicle);
 FORWARD(IsHelicopter);
 FORWARD(IsPlane);
 /* login.c */
-FORWARD(ResetPasswordConfirmData);
-FORWARD(SetPasswordConfirmData);
-FORWARD(ValidatePasswordConfirmData);
 FORWARD(FormatLoginApiRegister);
 FORWARD(FormatLoginApiGuestRegister);
-FORWARD(FormatLoginApiCheckChangePass);
 FORWARD(FormatLoginApiUserExistsGuest);
+FORWARD(Login_FreePassword);
+FORWARD(Login_GetPassword);
+FORWARD(Login_FormatChangePassword);
+FORWARD(Login_FormatChangePasswordBox);
 FORWARD(Login_FormatCheckUserExist);
 FORWARD(Login_FormatCreateUserSession);
 FORWARD(Login_FormatGuestRegisterBox);
 FORWARD(Login_FormatLoadAccountData);
 FORWARD(Login_FormatOnJoinRegisterBox);
+FORWARD(Login_PasswordConfirmFree);
+FORWARD(Login_PasswordConfirmStore);
+FORWARD(Login_PasswordConfirmValidate);
 FORWARD(Login_FormatUpgradeGuestAcc);
 FORWARD(Login_UsePassword);
-FORWARD(Login_GetPassword);
 /* nav.c */
 FORWARD(Nav_Reset);
 FORWARD(Nav_EnableADF);
@@ -126,9 +128,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(IsAirVehicle),
 	REGISTERNATIVE(IsHelicopter),
 	REGISTERNATIVE(IsPlane),
-	REGISTERNATIVE(ResetPasswordConfirmData),
-	REGISTERNATIVE(SetPasswordConfirmData),
-	REGISTERNATIVE(ValidatePasswordConfirmData),
 	REGISTERNATIVE(CommandHash),
 	REGISTERNATIVE(IsCommand),
 	REGISTERNATIVE(Params_GetPlayer),
@@ -143,16 +142,21 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PlayerData_UpdateName),
 	REGISTERNATIVE(FormatLoginApiRegister),
 	REGISTERNATIVE(FormatLoginApiGuestRegister),
-	REGISTERNATIVE(FormatLoginApiCheckChangePass),
 	REGISTERNATIVE(FormatLoginApiUserExistsGuest),
+	REGISTERNATIVE(Login_FreePassword),
+	REGISTERNATIVE(Login_GetPassword),
+	REGISTERNATIVE(Login_FormatChangePassword),
+	REGISTERNATIVE(Login_FormatChangePasswordBox),
 	REGISTERNATIVE(Login_FormatCheckUserExist),
 	REGISTERNATIVE(Login_FormatCreateUserSession),
 	REGISTERNATIVE(Login_FormatGuestRegisterBox),
 	REGISTERNATIVE(Login_FormatLoadAccountData),
 	REGISTERNATIVE(Login_FormatOnJoinRegisterBox),
 	REGISTERNATIVE(Login_FormatUpgradeGuestAcc),
+	REGISTERNATIVE(Login_PasswordConfirmFree),
+	REGISTERNATIVE(Login_PasswordConfirmStore),
+	REGISTERNATIVE(Login_PasswordConfirmValidate),
 	REGISTERNATIVE(Login_UsePassword),
-	REGISTERNATIVE(Login_GetPassword),
 	REGISTERNATIVE(APT_Init),
 	REGISTERNATIVE(APT_Destroy),
 	REGISTERNATIVE(APT_Add),
