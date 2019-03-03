@@ -312,7 +312,7 @@ native APT_Destroy()
 //@param y y position of player
 //@param buf the buffer to store the resulting list in (use {@code buf4096})
 //@remarks Despite being named 'nearest', it adds all airports, but sorted on distance.
-//@remarks Shown list order gets saved for follow-up, use {@link APT_ClearFlowCache} to free memory.
+//@remarks Shown list order gets saved for follow-up, use {@link APT_MapIndexFromListDialog} to free memory.
 native APT_FormatNearestList(playerid, Float:x, Float:y, buf[])
 
 //@summary Format beacon list in msgbox form
