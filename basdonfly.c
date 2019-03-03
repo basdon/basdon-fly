@@ -41,6 +41,8 @@ FORWARD(PlayerData_Init);
 FORWARD(PlayerData_Clear);
 FORWARD(PlayerData_SetUserId);
 FORWARD(PlayerData_UpdateName);
+/* playtime.c */
+FORWARD(Playtime_FormatUpdateTimes);
 /* game_sa.c */
 FORWARD(IsAirVehicle);
 FORWARD(IsHelicopter);
@@ -140,6 +142,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PlayerData_Clear),
 	REGISTERNATIVE(PlayerData_SetUserId),
 	REGISTERNATIVE(PlayerData_UpdateName),
+	REGISTERNATIVE(Playtime_FormatUpdateTimes),
 	REGISTERNATIVE(Login_FormatChangePassword),
 	REGISTERNATIVE(Login_FormatChangePasswordBox),
 	REGISTERNATIVE(Login_FormatCheckUserExist),
