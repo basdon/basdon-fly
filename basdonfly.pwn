@@ -156,27 +156,6 @@ native PlayerData_UpdateName(playerid, name[], namelen)
 //@seealso PlayerData_Init
 native PlayerData_Clear(playerid)
 
-//@summary Format data to send to register api
-//@param playerid the player for who the call is
-//@param inputtext password as entered by player
-//@param buf the buffer to store the resulting post data in (use {@code buf4096})
-//@returns {@code 0} on failure (no login data set for {@param playerid})
-native FormatLoginApiRegister(playerid, inputtext[], buf[])
-
-//@summary Format data to send to guest register api
-//@param playerid the player for who the call is
-//@param userid userid of the player
-//@param inputtext password as entered by player
-//@param buf the buffer to store the resulting post data in (use {@code buf4096})
-//@returns {@code 0} on failure (no login data set for {@param playerid})
-native FormatLoginApiGuestRegister(playerid, userid, inputtext[], buf[])
-
-//@summary Format data to send to user exists/guest api (they expect the same data)
-//@param playerid playerid of the player
-//@param buf the buffer to store the resulting post data in (use {@code buf4096})
-//@returns {@code 0} on failure (no login data set for {@param playerid})
-native FormatLoginApiUserExistsGuest(playerid, buf[])
-
 //@summary Format query to change password
 //@param userid user id
 //@param password hashed password to set
@@ -194,6 +173,20 @@ native Login_FormatChangePasswordBox(buf[], pwmismatch=0, step)
 //@param buf buffer to store query in
 //@returns {@code 0} if something failed and query could not be made
 native Login_FormatCheckUserExist(playerid, buf[]);
+
+//@summary Formats query to create a game session
+//@param playerid player
+//@param buf buffer to store query in
+//@returns {@code 0} if something failed and query could not be made
+native Login_FormatCreateSession(playerid, buf[])
+
+//@summary Formats query to create a user
+//@param playerid player
+//@param buf buffer to store query in
+//@param password password for user (hashed or empty for guest account)
+//@param group group for the new user
+//@returns {@code 0} if something failed (user has no data)
+native Login_FormatCreateUser(playerid, buf[], password[], group)
 
 //@summary Formats query to create session, and updates user last seen time
 //@param playerid player

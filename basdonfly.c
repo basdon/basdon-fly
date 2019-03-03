@@ -46,14 +46,13 @@ FORWARD(IsAirVehicle);
 FORWARD(IsHelicopter);
 FORWARD(IsPlane);
 /* login.c */
-FORWARD(FormatLoginApiRegister);
-FORWARD(FormatLoginApiGuestRegister);
-FORWARD(FormatLoginApiUserExistsGuest);
 FORWARD(Login_FreePassword);
 FORWARD(Login_GetPassword);
 FORWARD(Login_FormatChangePassword);
 FORWARD(Login_FormatChangePasswordBox);
 FORWARD(Login_FormatCheckUserExist);
+FORWARD(Login_FormatCreateSession);
+FORWARD(Login_FormatCreateUser);
 FORWARD(Login_FormatCreateUserSession);
 FORWARD(Login_FormatGuestRegisterBox);
 FORWARD(Login_FormatLoadAccountData);
@@ -140,14 +139,13 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PlayerData_Clear),
 	REGISTERNATIVE(PlayerData_SetUserId),
 	REGISTERNATIVE(PlayerData_UpdateName),
-	REGISTERNATIVE(FormatLoginApiRegister),
-	REGISTERNATIVE(FormatLoginApiGuestRegister),
-	REGISTERNATIVE(FormatLoginApiUserExistsGuest),
 	REGISTERNATIVE(Login_FreePassword),
 	REGISTERNATIVE(Login_GetPassword),
 	REGISTERNATIVE(Login_FormatChangePassword),
 	REGISTERNATIVE(Login_FormatChangePasswordBox),
 	REGISTERNATIVE(Login_FormatCheckUserExist),
+	REGISTERNATIVE(Login_FormatCreateSession),
+	REGISTERNATIVE(Login_FormatCreateUser),
 	REGISTERNATIVE(Login_FormatCreateUserSession),
 	REGISTERNATIVE(Login_FormatGuestRegisterBox),
 	REGISTERNATIVE(Login_FormatLoadAccountData),
