@@ -215,6 +215,12 @@ native Login_FormatLoadAccountData(userid, buf[]);
 //@seealso Login_FormatGuestRegisterBox
 native Login_FormatOnJoinRegisterBox(buf[], pwmismatch=0, step)
 
+//@summary Formats query to save a player's name
+//@param playerid player
+//@param buf buffer to store query in
+//@returns {@code 0} on failure
+native Login_FormatSavePlayerName(playerid, buf[])
+
 //@summary Formats query to upgrade a guest account to a real account
 //@param playerid player
 //@param password hashed password

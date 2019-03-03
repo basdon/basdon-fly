@@ -46,8 +46,6 @@ FORWARD(IsAirVehicle);
 FORWARD(IsHelicopter);
 FORWARD(IsPlane);
 /* login.c */
-FORWARD(Login_FreePassword);
-FORWARD(Login_GetPassword);
 FORWARD(Login_FormatChangePassword);
 FORWARD(Login_FormatChangePasswordBox);
 FORWARD(Login_FormatCheckUserExist);
@@ -57,11 +55,14 @@ FORWARD(Login_FormatCreateUserSession);
 FORWARD(Login_FormatGuestRegisterBox);
 FORWARD(Login_FormatLoadAccountData);
 FORWARD(Login_FormatOnJoinRegisterBox);
+FORWARD(Login_FormatSavePlayerName);
+FORWARD(Login_FormatUpgradeGuestAcc);
+FORWARD(Login_FreePassword);
+FORWARD(Login_GetPassword);
+FORWARD(Login_UsePassword);
 FORWARD(Login_PasswordConfirmFree);
 FORWARD(Login_PasswordConfirmStore);
 FORWARD(Login_PasswordConfirmValidate);
-FORWARD(Login_FormatUpgradeGuestAcc);
-FORWARD(Login_UsePassword);
 /* nav.c */
 FORWARD(Nav_Reset);
 FORWARD(Nav_EnableADF);
@@ -139,8 +140,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PlayerData_Clear),
 	REGISTERNATIVE(PlayerData_SetUserId),
 	REGISTERNATIVE(PlayerData_UpdateName),
-	REGISTERNATIVE(Login_FreePassword),
-	REGISTERNATIVE(Login_GetPassword),
 	REGISTERNATIVE(Login_FormatChangePassword),
 	REGISTERNATIVE(Login_FormatChangePasswordBox),
 	REGISTERNATIVE(Login_FormatCheckUserExist),
@@ -150,7 +149,10 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Login_FormatGuestRegisterBox),
 	REGISTERNATIVE(Login_FormatLoadAccountData),
 	REGISTERNATIVE(Login_FormatOnJoinRegisterBox),
+	REGISTERNATIVE(Login_FormatSavePlayerName),
 	REGISTERNATIVE(Login_FormatUpgradeGuestAcc),
+	REGISTERNATIVE(Login_FreePassword),
+	REGISTERNATIVE(Login_GetPassword),
 	REGISTERNATIVE(Login_PasswordConfirmFree),
 	REGISTERNATIVE(Login_PasswordConfirmStore),
 	REGISTERNATIVE(Login_PasswordConfirmValidate),

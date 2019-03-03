@@ -215,6 +215,24 @@ cell AMX_NATIVE_CALL Login_FormatOnJoinRegisterBox(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Login_FormatSavePlayerName(playerid, buf[]) */
+cell AMX_NATIVE_CALL Login_FormatSavePlayerName(AMX *amx, cell *params)
+{
+	int pid = params[1];
+	char data[144];
+	cell *addr;
+	if (pdata[pid] == NULL) {
+		return 0;
+	}
+	sprintf(data,
+	        "UPDATE usr SET n='%s' WHERE i=%d",
+	        pdata[pid]->name,
+	        pdata[pid]->userid);
+	amx_GetAddr(amx, params[2], &addr);
+	amx_SetUString(addr, data, sizeof(data));
+	return 1;
+}
+
 /* native Login_FormatUpgradeGuestAcc(playerid, password[], buf[]) */
 cell AMX_NATIVE_CALL Login_FormatUpgradeGuestAcc(AMX *amx, cell *params)
 {
