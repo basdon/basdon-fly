@@ -1,9 +1,9 @@
 
-HEADERS=common.h sharedsymbols.h playerdata.h game_sa.h zones.h
+HEADERS=common.h sharedsymbols.h playerdata.h game_sa.h vehicles.h zones.h
 FLAGS=-Wall -m32 -std=c89 -ansi
 
-build: out/basdonfly.o out/various.o out/panel.o out/amxplugin.o out/game_sa.o out/game_sa_data.o out/login.o out/commands.o out/dialog.o out/airport.o out/playerdata.o out/playtime.o out/zones.o out/zones_data.o out/nav.o out/timecyc.o
-	$(GCC) $(FLAGS) -shared -o out/basdonfly.$(PLUGINTYPE) out/basdonfly.o out/amxplugin.o out/various.o out/panel.o out/game_sa.o out/game_sa_data.o out/login.o out/commands.o out/dialog.o out/airport.o out/playerdata.o out/playtime.o out/zones.o out/zones_data.o out/nav.o out/timecyc.o
+build: out/basdonfly.o out/various.o out/panel.o out/amxplugin.o out/game_sa.o out/game_sa_data.o out/login.o out/commands.o out/dialog.o out/airport.o out/playerdata.o out/playtime.o out/vehicles.o out/zones.o out/zones_data.o out/nav.o out/timecyc.o
+	$(GCC) $(FLAGS) -shared -o out/basdonfly.$(PLUGINTYPE) out/basdonfly.o out/amxplugin.o out/various.o out/panel.o out/game_sa.o out/game_sa_data.o out/login.o out/commands.o out/dialog.o out/airport.o out/playerdata.o out/playtime.o out/vehicles.o out/zones.o out/zones_data.o out/nav.o out/timecyc.o
 
 out/amxplugin.o: vendor/SDK/plugincommon.h vendor/SDK/amxplugin.c
 	$(GCC) $(FLAGS) -x c -c vendor/SDK/amxplugin.c -o out/amxplugin.o
@@ -40,6 +40,9 @@ out/playerdata.o: playerdata.c $(HEADERS)
 
 out/playtime.o: playtime.c $(HEADERS)
 	$(GCC) $(FLAGS) -x c -c playtime.c -o out/playtime.o
+
+out/vehicles.o: timecyc.c $(HEADERS)
+	$(GCC) $(FLAGS) -x c -c vehicles.c -o out/vehicles.o
 
 out/zones.o: zones.c $(HEADERS)
 	$(GCC) $(FLAGS) -x c -c zones.c -o out/zones.o

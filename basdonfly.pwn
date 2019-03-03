@@ -488,3 +488,30 @@ native Timecyc_GetNextWeatherMsgQuery(nextweatherindex, bufmsg[], bufquery[])
 //@remarks {@link Timecyc_GetNextWeatherMsg} MUST be called at least once before invoking this function
 native Timecyc_GetCurrentWeatherMsg(buf[]);
 
+//@summary Adds a vehicle in the db vehicle table
+//@param id id of the vehicle in db
+//@param model model of the vehicle
+//@param owneruserid user id of the owning player
+//@param x saved x position
+//@param y saved y position
+//@param z saved z position
+//@param r saved z rotation
+//@param col1 first color
+//@param col2 second color
+//@param ownername name of the owner
+//@remarks table will be resized and reallocated if it's already full
+//@seealso Veh_Destroy
+//@seealso Veh_Init
+native Veh_Add(id, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, ownername[])
+
+//@summary Destroys the db vehicle table and frees used memory
+//@seealso Veh_Add
+//@seealso Veh_Init
+native Veh_Destroy();
+
+//@summary Inits the db vehicle table
+//@param dbvehiclecount initial size of the table
+//@seealso Veh_Add
+//@seealso Veh_Destroy
+native Veh_Init(dbvehiclecount)
+
