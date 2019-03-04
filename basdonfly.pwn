@@ -499,9 +499,11 @@ native Timecyc_GetCurrentWeatherMsg(buf[]);
 //@param col1 first color
 //@param col2 second color
 //@param ownername name of the owner
+//@returns the position of the vehicle in the vehicle table
 //@remarks table will be resized and reallocated if it's already full
 //@seealso Veh_Destroy
 //@seealso Veh_Init
+//@seealso Veh_UpdateSlot
 native Veh_Add(id, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, ownername[])
 
 //@summary Destroys the db vehicle table and frees used memory
@@ -514,4 +516,34 @@ native Veh_Destroy();
 //@seealso Veh_Add
 //@seealso Veh_Destroy
 native Veh_Init(dbvehiclecount)
+
+//@summary Check if there is a label on given vehicle for given player, {@b and unregister it}
+//@param vehicleid vehicle on which a label might be
+//@param playerid player for which the label would have been created
+//@param labelid the label id will be put in this variable if this returns positive
+//@returns {@code 1} if there is a label to delete, its id will be put in {@param labelid}
+native Veh_GetLabelToDelete(vehicleid, playerid, &PlayerText3D:labelid)
+
+//@summary Clears data when a player disconnects
+//@param playerid the player that disconnected
+native Veh_OnPlayerDisconnect(playerid)
+
+//@summary Let the plugin know a label was created on a vehicle for a player
+//@param vehicleid the vehicle the label is attached to
+//@param playerid the player the label was made for
+//@param labelid the label id assigned to the newly created label
+native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid)
+
+//@summary Check if a label should be created on a vehicle for a player
+//@param vehicleid vehicle on which the label would be attached
+//@param playerid player for which the label would show
+//@param buf buffer to store the label text in, if this returns positive
+//@returns {@code 1} if a label should be made, with given text in {@param buf}
+native Veh_ShouldCreateLabel(vehicleid, playerid, buf[])
+
+//@summary Let the plugin know a vehicle was created or destroyed
+//@param vehicleid the id of the vehicle in SA-MP
+//@param dbid id of the vehicle in the vehicle table (returned by {@link Veh_Add}), or {@code -1} if slot is now free
+//@seealso Veh_Add
+native Veh_UpdateSlot(vehicleid, dbid)
 

@@ -81,6 +81,11 @@ FORWARD(Timecyc_GetNextWeatherMsgQuery);
 FORWARD(Veh_Add);
 FORWARD(Veh_Destroy);
 FORWARD(Veh_Init);
+FORWARD(Veh_GetLabelToDelete);
+FORWARD(Veh_OnPlayerDisconnect);
+FORWARD(Veh_RegisterLabel);
+FORWARD(Veh_ShouldCreateLabel);
+FORWARD(Veh_UpdateSlot);
 /* zones.c */
 FORWARD(Zones_InvalidateForPlayer);
 FORWARD(Zones_UpdateForPlayer);
@@ -186,6 +191,11 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_Add),
 	REGISTERNATIVE(Veh_Destroy),
 	REGISTERNATIVE(Veh_Init),
+	REGISTERNATIVE(Veh_GetLabelToDelete),
+	REGISTERNATIVE(Veh_OnPlayerDisconnect),
+	REGISTERNATIVE(Veh_RegisterLabel),
+	REGISTERNATIVE(Veh_ShouldCreateLabel),
+	REGISTERNATIVE(Veh_UpdateSlot),
 	REGISTERNATIVE(Zones_InvalidateForPlayer),
 	REGISTERNATIVE(Zones_UpdateForPlayer),
 	REGISTERNATIVE(Zones_FormatForPlayer),
