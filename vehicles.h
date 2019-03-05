@@ -11,6 +11,5 @@ struct dbvehicle {
 };
 
 struct vehicle {
-	int id;
 	struct dbvehicle *dbvehicle;
 };

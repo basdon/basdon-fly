@@ -40,11 +40,12 @@ static void resizeDbVehicleTable()
 	nw = dbvehicles + dbvehiclealloc - 100;
 	while (i-- > 0) {
 		nw->ownerstring = NULL;
+		nw->owneruserid = 0;
 		nw++;
 	}
 }
 
-/* native Veh_Add(id, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, ownername[]) */
+/* native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, ownername[]) */
 cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 {
 	cell *ownernameaddr;
@@ -52,6 +53,7 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 	int model;
 	struct dbvehicle *veh;
 	if (dbvehiclenextid == dbvehiclealloc) {
+		logprintf("TODO: resizing the vehicle db table messes up pointers from gamevehicles :)");
 		resizeDbVehicleTable();
 	}
 	veh = dbvehicles + dbvehiclenextid;
@@ -71,9 +73,53 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 		veh->ownerstring = malloc((9 + strlen(vehnames[model - 400]) + strlen(ownername)) * sizeof(char));
 		sprintf(veh->ownerstring, "%s Owner\n%s", vehnames[model - 400], ownername);
 	} else {
+		veh->owneruserid = 0;
 		veh->ownerstring = NULL;
 	}
 	return dbvehiclenextid - 1;
+}
+
+/* native Veh_CollectPlayerVehicles(userid, buf[]) */
+cell AMX_NATIVE_CALL Veh_CollectPlayerVehicles(AMX *amx, cell *params)
+{
+	int amount = 0, userid = params[1];
+	struct dbvehicle *veh = dbvehicles;
+	int ctr = dbvehiclenextid;
+	cell *addr;
+	amx_GetAddr(amx, params[2], &addr);
+	while (ctr--) {
+		if (veh->owneruserid == userid) {
+			*(addr++) = veh->model;
+			*(addr++) = amx_ftoc(veh->x);
+			*(addr++) = amx_ftoc(veh->y);
+			*(addr++) = amx_ftoc(veh->z);
+			*(addr++) = amx_ftoc(veh->r);
+			*(addr++) = veh->col1;
+			*(addr++) = veh->col2;
+			*(addr++) = veh->id;
+			amount++;
+		}
+		veh++;
+	}
+	return amount;
+}
+
+/* native Veh_CollectSpawnedVehicles(userid, buf[]) */
+cell AMX_NATIVE_CALL Veh_CollectSpawnedVehicles(AMX *amx, cell *params)
+{
+	int amount = 0, userid = params[1];
+	cell *addr;
+	int i = MAX_VEHICLES;
+	amx_GetAddr(amx, params[2], &addr);
+	while (i--) {
+		if (gamevehicles[i].dbvehicle != NULL &&
+			gamevehicles[i].dbvehicle->owneruserid == userid)
+		{
+			*(addr++) = i;
+			amount++;
+		}
+	}
+	return amount;
 }
 
 /* native Veh_Destroy() */
@@ -102,10 +148,10 @@ cell AMX_NATIVE_CALL Veh_Init(AMX *amx, cell *params)
 	i = dbvehiclealloc;
 	while (i--) {
 		dbvehicles[i].ownerstring = NULL;
+		dbvehicles[i].owneruserid = 0;
 	}
 	i = 0;
 	while (i < MAX_VEHICLES) {
-		gamevehicles[i].id = i;
 		gamevehicles[i].dbvehicle = NULL;
 		i++;
 	}
@@ -178,6 +224,19 @@ cell AMX_NATIVE_CALL Veh_ShouldCreateLabel(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL Veh_UpdateSlot(AMX *amx, cell *params)
 {
 	int vehicleid = params[1], dbid = params[2];
-	gamevehicles[vehicleid].dbvehicle = dbid == -1 ? NULL : &dbvehicles[dbid];
-	return 1;
+	int i = dbvehiclealloc;
+	struct dbvehicle *veh = dbvehicles;
+	if (dbid == -1) {
+		gamevehicles[vehicleid].dbvehicle = NULL;
+		return 1;
+	}
+	while (i--) {
+		if (veh->id == dbid) {
+			gamevehicles[vehicleid].dbvehicle = veh;
+			return 1;
+		}
+		veh++;
+	}
+	logprintf("Veh_UpdateSlot: unknown dbid: %d", dbid);
+	return 0;
 }

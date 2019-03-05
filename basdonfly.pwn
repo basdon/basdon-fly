@@ -489,7 +489,7 @@ native Timecyc_GetNextWeatherMsgQuery(nextweatherindex, bufmsg[], bufquery[])
 native Timecyc_GetCurrentWeatherMsg(buf[]);
 
 //@summary Adds a vehicle in the db vehicle table
-//@param id id of the vehicle in db
+//@param dbid id of the vehicle in db
 //@param model model of the vehicle
 //@param owneruserid user id of the owning player
 //@param x saved x position
@@ -504,7 +504,19 @@ native Timecyc_GetCurrentWeatherMsg(buf[]);
 //@seealso Veh_Destroy
 //@seealso Veh_Init
 //@seealso Veh_UpdateSlot
-native Veh_Add(id, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, ownername[])
+native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, ownername[])
+
+//@summary Collects all vehicles from the table that are owned by a player
+//@param userid user id of the player of whom to collect all vehicles
+//@param buf buffer to put in the vehicle data
+//@returns the amount of vehicles that were placed in {@param buf}
+native Veh_CollectPlayerVehicles(userid, buf[])
+
+//@summary Collects all vehicle owned by player that are spawned
+//@param userid user id of the player of whom to collect spawned vehicles
+//@param buf buffer to put the vehicle ids in
+//@returns the amount of vehicles that were placed in {@param buf}
+native Veh_CollectSpawnedVehicles(playerid, buf[])
 
 //@summary Destroys the db vehicle table and frees used memory
 //@seealso Veh_Add
