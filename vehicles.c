@@ -89,13 +89,13 @@ cell AMX_NATIVE_CALL Veh_CollectPlayerVehicles(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[2], &addr);
 	while (ctr--) {
 		if (veh->owneruserid == userid) {
-			*(addr++) = veh->model;
-			*(addr++) = amx_ftoc(veh->x);
-			*(addr++) = amx_ftoc(veh->y);
-			*(addr++) = amx_ftoc(veh->z);
-			*(addr++) = amx_ftoc(veh->r);
-			*(addr++) = veh->col1;
 			*(addr++) = veh->col2;
+			*(addr++) = veh->col1;
+			*(addr++) = amx_ftoc(veh->r);
+			*(addr++) = amx_ftoc(veh->z);
+			*(addr++) = amx_ftoc(veh->y);
+			*(addr++) = amx_ftoc(veh->x);
+			*(addr++) = veh->model;
 			*(addr++) = veh->id;
 			amount++;
 		}

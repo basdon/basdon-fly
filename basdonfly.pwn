@@ -510,6 +510,7 @@ native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col
 //@param userid user id of the player of whom to collect all vehicles
 //@param buf buffer to put in the vehicle data
 //@returns the amount of vehicles that were placed in {@param buf}
+//@remarks vehicles are placed in buf in following order: {@code col2, col1, r, z, y, x, model, dbid}
 native Veh_CollectPlayerVehicles(userid, buf[])
 
 //@summary Collects all vehicle owned by player that are spawned
