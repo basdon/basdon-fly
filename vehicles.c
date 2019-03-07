@@ -18,6 +18,7 @@ struct dbvehicle {
 	int col1, col2;
 	char *ownerstring;
 	unsigned char ownerstringowneroffset;
+	short spawnedvehicleid;
 };
 
 struct vehicle {
@@ -47,13 +48,14 @@ static void freeDbVehicleTable()
 static void resizeDbVehicleTable()
 {
 	struct dbvehicle *nw;
-	int i = 100;
+	int i;
 	dbvehiclealloc += 100;
 	dbvehicles = realloc(dbvehicles, sizeof(struct dbvehicle) * dbvehiclealloc);
-	nw = dbvehicles + dbvehiclealloc - 100;
-	while (i-- > 0) {
-		nw->ownerstring = NULL;
-		nw->owneruserid = 0;
+	nw = dbvehicles;
+	for (i = 0; i < dbvehiclenextid; i++) {
+		if (nw->spawnedvehicleid != -1) {
+			gamevehicles[nw->spawnedvehicleid].dbvehicle = nw;
+		}
 		nw++;
 	}
 }
@@ -66,7 +68,6 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 	int model;
 	struct dbvehicle *veh;
 	if (dbvehiclenextid == dbvehiclealloc) {
-		logprintf("TODO: resizing the vehicle db table messes up pointers from gamevehicles :)");
 		resizeDbVehicleTable();
 	}
 	veh = dbvehicles + dbvehiclenextid;
@@ -90,6 +91,7 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 		veh->owneruserid = 0;
 		veh->ownerstring = NULL;
 	}
+	veh->spawnedvehicleid = -1;
 	return dbvehiclenextid - 1;
 }
 
@@ -161,11 +163,6 @@ cell AMX_NATIVE_CALL Veh_Init(AMX *amx, cell *params)
 		dbvehiclealloc = 100;
 	}
 	dbvehicles = malloc(sizeof(struct dbvehicle) * dbvehiclealloc);
-	i = dbvehiclealloc;
-	while (i--) {
-		dbvehicles[i].ownerstring = NULL;
-		dbvehicles[i].owneruserid = 0;
-	}
 	i = 0;
 	while (i < MAX_VEHICLES) {
 		gamevehicles[i].dbvehicle = NULL;
@@ -264,15 +261,22 @@ cell AMX_NATIVE_CALL Veh_UpdateSlot(AMX *amx, cell *params)
 	int i = dbvehiclealloc;
 	struct dbvehicle *veh = dbvehicles;
 	if (dbid == -1) {
+		if (gamevehicles[vehicleid].dbvehicle == NULL) {
+			logprintf("Veh_UpdateSlot: slot to empty was not empty");
+			return 1;
+		}
+		gamevehicles[vehicleid].dbvehicle->spawnedvehicleid = -1;
 		gamevehicles[vehicleid].dbvehicle = NULL;
 		return 1;
 	}
 	while (i--) {
 		if (veh->id == dbid) {
 			if (gamevehicles[vehicleid].dbvehicle != NULL) {
-				logprintf("Veh_UpdateSlot: slot was not empty");
+				logprintf("Veh_UpdateSlot: slot to assign was not empty");
+				gamevehicles[vehicleid].dbvehicle->spawnedvehicleid = -1;
 			}
 			gamevehicles[vehicleid].dbvehicle = veh;
+			veh->spawnedvehicleid = vehicleid;
 			return 1;
 		}
 		veh++;
