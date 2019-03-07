@@ -96,7 +96,8 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 /* native Veh_CollectPlayerVehicles(userid, buf[]) */
 cell AMX_NATIVE_CALL Veh_CollectPlayerVehicles(AMX *amx, cell *params)
 {
-	int amount = 0, userid = params[1];
+	const int userid = params[1];
+	int amount = 0;
 	struct dbvehicle *veh = dbvehicles;
 	int ctr = dbvehiclenextid;
 	cell *addr;
@@ -121,7 +122,8 @@ cell AMX_NATIVE_CALL Veh_CollectPlayerVehicles(AMX *amx, cell *params)
 /* native Veh_CollectSpawnedVehicles(userid, buf[]) */
 cell AMX_NATIVE_CALL Veh_CollectSpawnedVehicles(AMX *amx, cell *params)
 {
-	int amount = 0, userid = params[1];
+	const int userid = params[1];
+	int amount = 0;
 	cell *addr;
 	int i = MAX_VEHICLES;
 	amx_GetAddr(amx, params[2], &addr);
@@ -181,7 +183,7 @@ cell AMX_NATIVE_CALL Veh_Init(AMX *amx, cell *params)
 /* native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[]) */
 cell AMX_NATIVE_CALL Veh_IsPlayerAllowedInVehicle(AMX *amx, cell *params)
 {
-	int userid = params[1], vehicleid = params[2];
+	const int userid = params[1], vehicleid = params[2];
 	cell *addr;
 	char buf[144];
 	struct dbvehicle *veh;
@@ -202,8 +204,8 @@ cell AMX_NATIVE_CALL Veh_IsPlayerAllowedInVehicle(AMX *amx, cell *params)
 /* native Veh_GetLabelToDelete(vehicleid, playerid, &PlayerText3D:labelid) */
 cell AMX_NATIVE_CALL Veh_GetLabelToDelete(AMX *amx, cell *params)
 {
-	int vehicleid = params[1], playerid = params[2];
-	int labelid = labelids[playerid][vehicleid];
+	const int vehicleid = params[1], playerid = params[2];
+	const int labelid = labelids[playerid][vehicleid];
 	cell *addr;
 	if (labelid == -1) {
 		return 0;
@@ -229,7 +231,7 @@ cell AMX_NATIVE_CALL Veh_OnPlayerDisconnect(AMX *amx, cell *params)
 /* native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid) */
 cell AMX_NATIVE_CALL Veh_RegisterLabel(AMX *amx, cell *params)
 {
-	int vehicleid = params[1], playerid = params[2], labelid = params[3];
+	const int vehicleid = params[1], playerid = params[2], labelid = params[3];
 	labelids[playerid][vehicleid] = labelid;
 	return 1;
 }
@@ -237,9 +239,9 @@ cell AMX_NATIVE_CALL Veh_RegisterLabel(AMX *amx, cell *params)
 /* native Veh_ShouldCreateLabel(vehicleid, playerid, buf[]) */
 cell AMX_NATIVE_CALL Veh_ShouldCreateLabel(AMX *amx, cell *params)
 {
-	int vehicleid = params[1], playerid = params[2];
+	const int vehicleid = params[1], playerid = params[2];
+	const struct vehicle veh = gamevehicles[vehicleid];
 	cell *addr;
-	struct vehicle veh = gamevehicles[vehicleid];
 	if (veh.dbvehicle == NULL) {
 		logprintf("unknown vehicle streamed in for player");
 		return 0;
@@ -258,7 +260,7 @@ cell AMX_NATIVE_CALL Veh_ShouldCreateLabel(AMX *amx, cell *params)
 /* native Veh_UpdateSlot(vehicleid, dbid) */
 cell AMX_NATIVE_CALL Veh_UpdateSlot(AMX *amx, cell *params)
 {
-	int vehicleid = params[1], dbid = params[2];
+	const int vehicleid = params[1], dbid = params[2];
 	int i = dbvehiclealloc;
 	struct dbvehicle *veh = dbvehicles;
 	if (dbid == -1) {
