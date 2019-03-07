@@ -83,6 +83,7 @@ FORWARD(Veh_CollectPlayerVehicles);
 FORWARD(Veh_CollectSpawnedVehicles);
 FORWARD(Veh_Destroy);
 FORWARD(Veh_Init);
+FORWARD(Veh_IsPlayerAllowedInVehicle);
 FORWARD(Veh_GetLabelToDelete);
 FORWARD(Veh_OnPlayerDisconnect);
 FORWARD(Veh_RegisterLabel);
@@ -195,6 +196,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_CollectPlayerVehicles),
 	REGISTERNATIVE(Veh_Destroy),
 	REGISTERNATIVE(Veh_Init),
+	REGISTERNATIVE(Veh_IsPlayerAllowedInVehicle),
 	REGISTERNATIVE(Veh_GetLabelToDelete),
 	REGISTERNATIVE(Veh_OnPlayerDisconnect),
 	REGISTERNATIVE(Veh_RegisterLabel),

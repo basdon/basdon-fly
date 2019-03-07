@@ -8,6 +8,7 @@ struct dbvehicle {
 	float x, y, z, r;
 	int col1, col2;
 	char *ownerstring;
+	char ownerstringowneroffset;
 };
 
 struct vehicle {

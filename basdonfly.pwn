@@ -530,6 +530,13 @@ native Veh_Destroy();
 //@seealso Veh_Destroy
 native Veh_Init(dbvehiclecount)
 
+//@summary Checks if a player is allowed to be in a vehicle
+//@param userid user id of the player to check
+//@param vehicleid vehicle
+//@param buf[] if not allowed, errormessage will be placed in this buffer
+//@returns {@code 0} if that user is not allowed in the given vehicle (to send to player when trying to enter)
+native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[])
+
 //@summary Check if there is a label on given vehicle for given player, {@b and unregister it}
 //@param vehicleid vehicle on which a label might be
 //@param playerid player for which the label would have been created

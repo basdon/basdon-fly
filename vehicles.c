@@ -70,7 +70,8 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 	if (veh->owneruserid != 0 && 400 <= model && model <= 611) {
 		amx_GetAddr(amx, params[10], &ownernameaddr);
 		amx_GetUString(ownername, ownernameaddr, sizeof(ownername));
-		veh->ownerstring = malloc((9 + strlen(vehnames[model - 400]) + strlen(ownername)) * sizeof(char));
+		veh->ownerstringowneroffset = 7 + strlen(vehnames[model - 400]);
+		veh->ownerstring = malloc((veh->ownerstringowneroffset + strlen(ownername) + 1) * sizeof(char));
 		sprintf(veh->ownerstring, "%s Owner\n%s", vehnames[model - 400], ownername);
 	} else {
 		veh->owneruserid = 0;
@@ -164,6 +165,27 @@ cell AMX_NATIVE_CALL Veh_Init(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[]) */
+cell AMX_NATIVE_CALL Veh_IsPlayerAllowedInVehicle(AMX *amx, cell *params)
+{
+	int userid = params[1], vehicleid = params[2];
+	cell *addr;
+	char buf[144];
+	struct dbvehicle *veh;
+	if (gamevehicles[vehicleid].dbvehicle == NULL) {
+		logprintf("Veh_IsPlayerAllowedInVehicle: unknown vehicleid");
+		return 1;
+	}
+	veh = gamevehicles[vehicleid].dbvehicle;
+	if (veh->owneruserid == 0 || veh->owneruserid == userid) {
+		return 1;
+	}
+	sprintf(buf, WARN"This vehicle belongs to %s!", &veh->ownerstring[veh->ownerstringowneroffset]);
+	amx_GetAddr(amx, params[3], &addr);
+	amx_SetUString(addr, buf, sizeof(buf));
+	return 0;
+}
+
 /* native Veh_GetLabelToDelete(vehicleid, playerid, &PlayerText3D:labelid) */
 cell AMX_NATIVE_CALL Veh_GetLabelToDelete(AMX *amx, cell *params)
 {
@@ -232,6 +254,9 @@ cell AMX_NATIVE_CALL Veh_UpdateSlot(AMX *amx, cell *params)
 	}
 	while (i--) {
 		if (veh->id == dbid) {
+			if (gamevehicles[vehicleid].dbvehicle != NULL) {
+				logprintf("Veh_UpdateSlot: slot was not empty");
+			}
 			gamevehicles[vehicleid].dbvehicle = veh;
 			return 1;
 		}
