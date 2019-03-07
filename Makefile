@@ -1,5 +1,5 @@
 
-HEADERS=common.h sharedsymbols.h playerdata.h game_sa.h vehicles.h zones.h
+HEADERS=common.h sharedsymbols.h playerdata.h game_sa.h zones.h
 FLAGS=-Wall -m32 -std=c89 -ansi
 
 build: out/basdonfly.o out/various.o out/panel.o out/amxplugin.o out/game_sa.o out/game_sa_data.o out/login.o out/commands.o out/dialog.o out/airport.o out/playerdata.o out/playtime.o out/vehicles.o out/zones.o out/zones_data.o out/nav.o out/timecyc.o

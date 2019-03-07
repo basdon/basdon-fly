@@ -9,7 +9,20 @@
 #include <string.h>
 #include <math.h>
 #include "game_sa.h"
-#include "vehicles.h"
+
+struct dbvehicle {
+	int id;
+	int model;
+	int owneruserid;
+	float x, y, z, r;
+	int col1, col2;
+	char *ownerstring;
+	unsigned char ownerstringowneroffset;
+};
+
+struct vehicle {
+	struct dbvehicle *dbvehicle;
+};
 
 static struct dbvehicle *dbvehicles;
 int dbvehiclenextid, dbvehiclealloc;
