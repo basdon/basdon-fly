@@ -1,6 +1,13 @@
 
 // vim: set filetype=c ts=8 noexpandtab:
 
+//@summary Formats query to insert log into db
+//@param playerid player that triggered log
+//@param loggedstatus logged in status of the player
+//@param message message to put in log (not sqli safe)
+//@param buf the buffer where the query will be written into
+native Ac_FormatLog(playerid, loggedstatus, const message[], buf[])
+
 //@summary Validate the script and plugin {@code MAX_PLAYERS} has the same value
 //@param maxplayers should be {@code MAX_PLAYERS}
 //@returns {@code 0} if the values don't match

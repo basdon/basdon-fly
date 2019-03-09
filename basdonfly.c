@@ -19,6 +19,8 @@ FORWARD(APT_FormatBeaconList);
 FORWARD(APT_MapIndexFromListDialog);
 FORWARD(APT_FormatInfo);
 FORWARD(APT_FormatCodeAndName);
+/* anticheat.c */
+FORWARD(Ac_FormatLog);
 /* commands.c */
 FORWARD(CommandHash);
 FORWARD(IsCommand);
@@ -134,6 +136,8 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
+	/* anticheat.c */
+	REGISTERNATIVE(Ac_FormatLog),
 	REGISTERNATIVE(ValidateMaxPlayers),
 	REGISTERNATIVE(Urlencode),
 	REGISTERNATIVE(Panel_ResetCaches),
