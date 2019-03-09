@@ -39,22 +39,22 @@ void game_sa_init()
 	SETFLAGS(MODEL_DODO, PLANE);
 }
 
-/* native IsAirVehicle(model) */
-cell AMX_NATIVE_CALL IsAirVehicle(AMX *amx, cell *params)
+/* native Game_IsAirVehicle(model) */
+cell AMX_NATIVE_CALL Game_IsAirVehicle(AMX *amx, cell *params)
 {
 	int model = params[1] - 400;
 	return model != -400 && vehicleflags[model] & (HELI | PLANE);
 }
 
-/* native IsHelicopter(model) */
-cell AMX_NATIVE_CALL IsHelicopter(AMX *amx, cell *params)
+/* native Game_IsHelicopter(model) */
+cell AMX_NATIVE_CALL Game_IsHelicopter(AMX *amx, cell *params)
 {
 	int model = params[1] - 400;
 	return model != -400 && vehicleflags[model] & HELI;
 }
 
-/* native IsPlane(model) */
-cell AMX_NATIVE_CALL IsPlane(AMX *amx, cell *params)
+/* native Game_IsPlane(model) */
+cell AMX_NATIVE_CALL Game_IsPlane(AMX *amx, cell *params)
 {
 	int model = params[1] - 400;
 	return model != -400 && vehicleflags[model] & PLANE;

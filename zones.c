@@ -53,60 +53,11 @@ nr:
 	}
 }
 
-/* native Zones_InvalidateForPlayer(playerid) */
-cell AMX_NATIVE_CALL Zones_InvalidateForPlayer(AMX *amx, cell *params)
-{
-	lastzoneindex[params[1]] = lastzoneid[params[1]] = -1;
-	lastregionid[params[1]] = ZONE_INVALID;
-	return 1;
-}
-
 static int isinzone(float x, float y, float z, struct zone *zone)
 {
 	return zone->x1 <= x && x <= zone->x2 &&
 		zone->y1 <= y && y <= zone->y2 &&
 		zone->z1 <= z && z <= zone->z2;
-}
-
-/* native Zones_UpdateForPlayer(playerid, Float:x, Float:y, Float:z) */
-cell AMX_NATIVE_CALL Zones_UpdateForPlayer(AMX *amx, cell *params)
-{
-	int playerid = params[1];
-	struct region *r = regions, *rmax = regions + regioncount;
-	struct zone *pz;
-	int i;
-	int lrid = lastregionid[playerid];
-	int lzid = lastzoneid[playerid];
-	float x = amx_ctof(params[2]), y = amx_ctof(params[3]), z = amx_ctof(params[4]);
-
-	if (lastzoneindex[playerid] >= 0 && isinzone(x, y, z, zones + lastzoneindex[playerid])) {
-		return 0;
-	}
-
-	lastzoneindex[playerid] = -1;
-	r = regions;
-	rmax = regions + regioncount;
-
-	while (r < rmax) {
-		if (isinzone(x, y, z, &r->zone)) {
-			lastregionid[playerid] = r->zone.id;
-			for (i = r->minzone; i < r->maxzone; i++) {
-				pz = zones + i;
-				if (isinzone(x, y, z, pz)) {
-					lastzoneindex[playerid] = i;
-					lastzoneid[playerid] = pz->id;
-					goto ret;
-				}
-			}
-			lastzoneid[playerid] = -1;
-			goto ret;
-		}
-		r++;
-	}
-
-	lastregionid[playerid] = ZONE_NONE_NW + ((y < 0.0f) << 1) + (x > 0.0f);
-ret:
-	return lrid != lastregionid[playerid] || lzid != lastzoneid[playerid];
 }
 
 /* native Zones_FormatForPlayer(playerid, buf[]) */
@@ -157,4 +108,53 @@ cell AMX_NATIVE_CALL Zones_FormatLoc(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, result, sizeof(result));
 	return 1;
+}
+
+/* native Zones_InvalidateForPlayer(playerid) */
+cell AMX_NATIVE_CALL Zones_InvalidateForPlayer(AMX *amx, cell *params)
+{
+	lastzoneindex[params[1]] = lastzoneid[params[1]] = -1;
+	lastregionid[params[1]] = ZONE_INVALID;
+	return 1;
+}
+
+/* native Zones_UpdateForPlayer(playerid, Float:x, Float:y, Float:z) */
+cell AMX_NATIVE_CALL Zones_UpdateForPlayer(AMX *amx, cell *params)
+{
+	int playerid = params[1];
+	struct region *r = regions, *rmax = regions + regioncount;
+	struct zone *pz;
+	int i;
+	int lrid = lastregionid[playerid];
+	int lzid = lastzoneid[playerid];
+	float x = amx_ctof(params[2]), y = amx_ctof(params[3]), z = amx_ctof(params[4]);
+
+	if (lastzoneindex[playerid] >= 0 && isinzone(x, y, z, zones + lastzoneindex[playerid])) {
+		return 0;
+	}
+
+	lastzoneindex[playerid] = -1;
+	r = regions;
+	rmax = regions + regioncount;
+
+	while (r < rmax) {
+		if (isinzone(x, y, z, &r->zone)) {
+			lastregionid[playerid] = r->zone.id;
+			for (i = r->minzone; i < r->maxzone; i++) {
+				pz = zones + i;
+				if (isinzone(x, y, z, pz)) {
+					lastzoneindex[playerid] = i;
+					lastzoneid[playerid] = pz->id;
+					goto ret;
+				}
+			}
+			lastzoneid[playerid] = -1;
+			goto ret;
+		}
+		r++;
+	}
+
+	lastregionid[playerid] = ZONE_NONE_NW + ((y < 0.0f) << 1) + (x > 0.0f);
+ret:
+	return lrid != lastregionid[playerid] || lzid != lastzoneid[playerid];
 }

@@ -1,6 +1,75 @@
 
 // vim: set filetype=c ts=8 noexpandtab:
 
+/* airport.c */
+
+//@summary Inits the airport table
+//@param amount amount of airports that will be created using {@link APT_Add}
+//@seealso APT_Add
+//@seealso APT_Destroy
+native APT_Init(amount)
+
+//@summary Add an airport to the airports table
+//@param index the index in the table to add this airport
+//@param code airport's code, must not be longer than {@code 4} + zero term
+//@param enabled {@code 0} if the airport should not be usable
+//@param name airport's name, must not be longer than {@code MAX_AIRPORT_NAME} + zero term
+//@param beacon airport's beacon, must not be longer than {@code 4} + zero term
+//@param x beacon's x position
+//@param y beacon's y position
+//@param z beacon's z position
+//@seealso APT_Init
+//@seealso APT_AddRunway
+native APT_Add(index, code[], enabled, name[], beacon[], Float:x, Float:y, Float:z)
+
+//@summary Add a runway that belongs to an airport in the airports table
+//@param aptindex the index of the airport in the airport table this runway belongs to
+//@param specifier either {@code 'L'}, {@code 'C'}, {@code 'R'} or {@code 0}
+//@param heading heading of the runway
+//@param x beacon's x position
+//@param y beacon's y position
+//@param z beacon's z position
+//@param nav {@code 1} if the runway has navigation (VOR and ILS) abilities
+//@seealso APT_Add
+native APT_AddRunway(aptindex, specifier, Float:heading, Float:x, Float:y, Float:z, nav)
+
+//@summary Clear the airport table and free the used memory
+//@seealso APT_Init
+native APT_Destroy()
+
+//@summary Format airport list in tablist form, sorted by airport distance to given ({@param x},{@param y}) coordinates
+//@param playerid player that wants a list (used to store order for follow-up)
+//@param x x position of player
+//@param y y position of player
+//@param buf the buffer to store the resulting list in (use {@code buf4096})
+//@remarks Despite being named 'nearest', it adds all airports, but sorted on distance.
+//@remarks Shown list order gets saved for follow-up, use {@link APT_MapIndexFromListDialog} to free memory.
+native APT_FormatNearestList(playerid, Float:x, Float:y, buf[])
+
+//@summary Format beacon list in msgbox form
+//@param buf the buffer to store the resulting list in (use {@code buf4096})
+native APT_FormatBeaconList(buf[])
+
+//@summary Maps the clicked listitem (from {@link APT_FormatNearestList} to airport index.
+//@param playerid the playerid that clicked
+//@param listitem the listitem that the player clicked (optional={@code 0}
+//@remarks Call this even when it's not needed, it frees memory.
+native APT_MapIndexFromListDialog(playerid, listitem=0)
+
+//@summary Format an airport's info for a msgbox
+//@param aptidx index of the airport
+//@param buf the buffer to store the resulting list in (use {@code buf4096})
+//@returns {@code 0} if {@param aptidx} is invalid
+native APT_FormatInfo(aptidx, buf[])
+
+//@summary Format an airport's code and name for use in dialog titles etc
+//@param aptidx index of the airport
+//@param buf the buffer to store the resulting string in (use {@code buf64})
+//@returns {@code 0} if {@param aptidx} is invalid
+native APT_FormatCodeAndName(aptidx, buf[])
+
+/* anticheat.c */
+
 //@summary Formats query to insert log into db
 //@param playerid player that triggered log
 //@param loggedstatus logged in status of the player
@@ -8,72 +77,36 @@
 //@param buf the buffer where the query will be written into
 native Ac_FormatLog(playerid, loggedstatus, const message[], buf[])
 
+/* basdon.c */
+
 //@summary Validate the script and plugin {@code MAX_PLAYERS} has the same value
 //@param maxplayers should be {@code MAX_PLAYERS}
 //@returns {@code 0} if the values don't match
 native ValidateMaxPlayers(maxplayers)
 
-//@summary Url encodes given string.
-//@param data string to encode
-//@param len amount of characters in {@param data}
-//@param output buffer to store result in (should be {@code len * 3} of size)
-//@returns Amount of charactes written (excluding terminating zero byte).
-native Urlencode(const data[], len, output[])
+/* commands.c */
 
-//@summary Reset panel caches for player
-//@param playerid the player to reset panel caches for
-native Panel_ResetCaches(playerid)
+//@summary Scan the next part of {@param cmdtext} for a player reference
+//@param cmdtext command text
+//@param idx start location of the param in {@param cmdtext}, will be increased to next param's position if successful
+//@param player variable to store target player id in (will be {@code INVALID_PLAYER_ID} if player not online)
+//@returns {@code 0} if there's no next player param (whitespace followed by active id or part of player name)
+//@remarks the value in {@param player} will be modified, even if this returns {@code 0}
+//@remarks {@param idx} will not be increased if this returns {@code 0}
+native Command_GetPlayerParam(cmdtext[], &idx, &player)
 
-//@summary Formats text for altitude part of panel
-//@param playerid the player to update the altitude for
-//@param altitude the altitude as int
-//@param buf4 buffer for the altitude text, must be of length {@code 4}
-//@param buf13 buffer for the altitude small meter text, must be of length {@code 13}
-//@param buf44 buffer for the altitude large meter text, must be of length {@code 44}
-//@returns {@code 1} if an update is needed
-//@remarks {@code buf13[0]} will be set to {@code 0} if the small meter doesn't need to be updated
-//@remarks {@code buf44[0]} will be set to {@code 0} if the large meter doesn't need to be updated
-native Panel_FormatAltitude(playerid, altitude, buf4[], buf13[], buf44[])
-
-//@summary Formats text for speed part of panel
-//@param playerid the player to update the speed for
-//@param speed the speed as int
-//@param buf4 buffer for the speed text, must be of length {@code 4}
-//@param buf13 buffer for the speed small meter text, must be of length {@code 13}
-//@param buf44 buffer for the speed large meter text, must be of length {@code 44}
-//@returns {@code 1} if an update is needed
-//@remarks {@code buf13[0]} will be set to {@code 0} if the small meter doesn't need to be updated
-//@remarks {@code buf44[0]} will be set to {@code 0} if the large meter doesn't need to be updated
-//@remarks If the small meter doesn't need to be updated, the large meter won't need an update either
-native Panel_FormatSpeed(playerid, speed, buf4[], buf13[], buf44[])
-
-//@summary Formats text for heading part of panel
-//@param playerid the player to update the heading for
-//@param heading the heading as int
-//@param buf4 buffer for the speed text, must be of length {@code 4}
-//@param buf44 buffer for the speed large meter text, must be of length {@code 44}
-//@returns {@code 1} if an update is needed
-native Panel_FormatHeading(playerid, heading, buf4[], buf44[])
-
-//@summary Checks if a vehicle with specified model is an air vehicle
-//@param model the model of the vehicle to check, {@b MUST} be either a valid model or {@code 0}
-//@returns {@code 0} if the model given is not an air vehicle
-native IsAirVehicle(model)
-
-//@summary Checks if a vehicle with specified model is a heli
-//@param model the model of the vehicle to check, {@b MUST} be either a valid model or {@code 0}
-//@returns {@code 0} if the model given is not a heli
-native IsHelicopter(model)
-
-//@summary Checks if a vehicle with specified model is a plane
-//@param model the model of the vehicle to check, {@b MUST} be either a valid model or {@code 0}
-//@returns {@code 0} if the model given is not a plane
-native IsPlane(model)
+//@summary Scan the next part of {@param cmdtext} for a string
+//@param cmdtext command text
+//@param idx start location of the param in {@param cmdtext}, will be increased to next param's position if successful
+//@param buf buffer to store string in
+//@returns {@code 0} if there's no next string
+//@remarks {@param idx} will not be increased if this returns {@code 0}
+native Command_GetStringParam(cmdtext[], &idx, buf[])
 
 //@summary Gets hash of command in entered command text (excluding params)
 //@param cmdtext command text to get hash of
 //@remarks End delimiter for calculation is either a zero terminator, or anything below {@code ' '}
-native CommandHash(cmdtext[])
+native Command_Hash(cmdtext[])
 
 //@summary Checks if the entered cmd is {@param cmd}
 //@param cmdtext cmdtext entered by player
@@ -82,7 +115,9 @@ native CommandHash(cmdtext[])
 //@remarks don't exceed cmd length of 49
 //@remarks {@param idx} may be changed even if this returns {@code 0}
 //@remarks commands can't have spaces in them for obvious reasons
-native IsCommand(cmdtext[], const cmd[], &idx)
+native Command_Is(cmdtext[], const cmd[], &idx)
+
+/* dialog.c */
 
 //@summary Queue a dialog to show later
 //@param playerid see {@link ShowPlayerDialog}
@@ -98,14 +133,14 @@ native IsCommand(cmdtext[], const cmd[], &idx)
 //@seealso HasDialogsInQueue
 //@seealso DropDialogQueue
 //@seealso PopDialogQueue
-native QueueDialog(playerid, dialogid, style, caption[], info[], button1[], button2[], transactionid)
+native Dialog_Queue(playerid, dialogid, style, caption[], info[], button1[], button2[], transactionid)
 
 //@summary Drops the dialog queue for a player
 //@param playerid the playerid to drop the queue for
 //@seealso HasDialogsInQueue
 //@seealso QueueDialog
 //@seealso PopDialogQueue
-native DropDialogQueue(playerid)
+native Dialog_DropQueue(playerid)
 
 //@summary Check if there are dialogs queued for a player
 //@param playerid the playerid to check the queue for
@@ -113,7 +148,7 @@ native DropDialogQueue(playerid)
 //@seealso DropDialogQueue
 //@seealso QueueDialog
 //@seealso PopDialogQueue
-native HasDialogsInQueue(playerid)
+native Dialog_HasInQueue(playerid)
 
 //@summary Pop the first queued dialog for a player
 //@param playerid the playerid to pop for
@@ -128,54 +163,26 @@ native HasDialogsInQueue(playerid)
 //@seealso DropDialogQueue
 //@seealso QueueDialog
 //@seealso HasDialogsInQueue
-native PopDialogQueue(playerid, &dialogid, &style, caption[], info[], button1[], button2[], &transactionid)
+native Dialog_PopQueue(playerid, &dialogid, &style, caption[], info[], button1[], button2[], &transactionid)
 
-//@summary Stores a player's data
-//@param playerid the playerid
-//@param ip player's ip
-//@param name player's name
-//@param namelen length of {@param name}, excluding zero term
-//@seealso PlayerData_UpdateName
-//@seealso PlayerData_SetUserId
-//@seealso PlayerData_Clear
-native PlayerData_Init(playerid, ip[], name[], namelen)
+/* game_sa.c */
 
-//@summary Updates the player's user ID
-//@param playerid player
-//@param id userid of the player
-//@seealso PlayerData_Init
-//@seealso PlayerData_Clear
-//@returns {@code 0} if there was no player data saved for {@param playerid}
-native PlayerData_SetUserId(playerid, id)
+//@summary Checks if a vehicle with specified model is an air vehicle
+//@param model the model of the vehicle to check, {@b MUST} be either a valid model or {@code 0}
+//@returns {@code 0} if the model given is not an air vehicle
+native Game_IsAirVehicle(model)
 
-//@summary Updates the stored player's name on the plugin side
-//@param playerid the playerid
-//@param name new name
-//@param namelen length of {@param name}, excluding zero term
-//@seealso PlayerData_Init
-//@seealso PlayerData_SetUserId
-//@seealso PlayerData_Clear
-//@returns {@code 0} if there was no player data saved for {@param playerid}
-native PlayerData_UpdateName(playerid, name[], namelen)
+//@summary Checks if a vehicle with specified model is a heli
+//@param model the model of the vehicle to check, {@b MUST} be either a valid model or {@code 0}
+//@returns {@code 0} if the model given is not a heli
+native Game_IsHelicopter(model)
 
-//@summary Clears login data for a player
-//@param playerid player to clear login data for
-//@seealso PlayerData_Init
-native PlayerData_Clear(playerid)
+//@summary Checks if a vehicle with specified model is a plane
+//@param model the model of the vehicle to check, {@b MUST} be either a valid model or {@code 0}
+//@returns {@code 0} if the model given is not a plane
+native Game_IsPlane(model)
 
-//@summary Formats 0-3 queries to update a user's playtimes in the db
-//@param userid the userid of the player, may be {@code -1}
-//@param sessionid the sessionid of the player's current session, may be {@code -1}
-//@param playtimetoadd how much actual (non-afk) play time to add (is ignored when {@param isdisconnect} is {@code 1})
-//@param isdisconnect should be {@code 1} when updating the times during player disconnect
-//@param buf buffer to store queries in
-//@returns {@code 0} if userid is {@code -1}, meaning no queries must be executed!
-//@remarks {@code buf[2]} will have a query to update the player's online times
-//@remarks {@code buf[0]} is either {@code 0} when {@param sessionid} was {@code -1}, or contains the\
-		position of the query to update the session's endtime in {@param buf}
-//@remarks {@code buf[1]} is either {@code 0} when {@param sessionid} was {@code -1} or {@code isdisconnect} is {@code 0},\
-		or contains the position of the query to update a player's online time (accurate) in {@param buf}
-native Playtime_FormatUpdateTimes(userid, sessionid, playtimetoadd, isdisconnect, buf[])
+/* login.c */
 
 //@summary Format query to add failed login
 //@param playerid player id
@@ -300,119 +307,7 @@ native Login_PasswordConfirmValidate(playerid, pwhash[])
 //@seealso Login_GetPassword
 native Login_UsePassword(playerid, buf[]);
 
-//@summary Inits the airport table
-//@param amount amount of airports that will be created using {@link APT_Add}
-//@seealso APT_Add
-//@seealso APT_Destroy
-native APT_Init(amount)
-
-//@summary Add an airport to the airports table
-//@param index the index in the table to add this airport
-//@param code airport's code, must not be longer than {@code 4} + zero term
-//@param enabled {@code 0} if the airport should not be usable
-//@param name airport's name, must not be longer than {@code MAX_AIRPORT_NAME} + zero term
-//@param beacon airport's beacon, must not be longer than {@code 4} + zero term
-//@param x beacon's x position
-//@param y beacon's y position
-//@param z beacon's z position
-//@seealso APT_Init
-//@seealso APT_AddRunway
-native APT_Add(index, code[], enabled, name[], beacon[], Float:x, Float:y, Float:z)
-
-//@summary Add a runway that belongs to an airport in the airports table
-//@param aptindex the index of the airport in the airport table this runway belongs to
-//@param specifier either {@code 'L'}, {@code 'C'}, {@code 'R'} or {@code 0}
-//@param heading heading of the runway
-//@param x beacon's x position
-//@param y beacon's y position
-//@param z beacon's z position
-//@param nav {@code 1} if the runway has navigation (VOR and ILS) abilities
-//@seealso APT_Add
-native APT_AddRunway(aptindex, specifier, Float:heading, Float:x, Float:y, Float:z, nav)
-
-//@summary Clear the airport table and free the used memory
-//@seealso APT_Init
-native APT_Destroy()
-
-//@summary Format airport list in tablist form, sorted by airport distance to given ({@param x},{@param y}) coordinates
-//@param playerid player that wants a list (used to store order for follow-up)
-//@param x x position of player
-//@param y y position of player
-//@param buf the buffer to store the resulting list in (use {@code buf4096})
-//@remarks Despite being named 'nearest', it adds all airports, but sorted on distance.
-//@remarks Shown list order gets saved for follow-up, use {@link APT_MapIndexFromListDialog} to free memory.
-native APT_FormatNearestList(playerid, Float:x, Float:y, buf[])
-
-//@summary Format beacon list in msgbox form
-//@param buf the buffer to store the resulting list in (use {@code buf4096})
-native APT_FormatBeaconList(buf[])
-
-//@summary Maps the clicked listitem (from {@link APT_FormatNearestList} to airport index.
-//@param playerid the playerid that clicked
-//@param listitem the listitem that the player clicked (optional={@code 0}
-//@remarks Call this even when it's not needed, it frees memory.
-native APT_MapIndexFromListDialog(playerid, listitem=0)
-
-//@summary Format an airport's info for a msgbox
-//@param aptidx index of the airport
-//@param buf the buffer to store the resulting list in (use {@code buf4096})
-//@returns {@code 0} if {@param aptidx} is invalid
-native APT_FormatInfo(aptidx, buf[])
-
-//@summary Format an airport's code and name for use in dialog titles etc
-//@param aptidx index of the airport
-//@param buf the buffer to store the resulting string in (use {@code buf64})
-//@returns {@code 0} if {@param aptidx} is invalid
-native APT_FormatCodeAndName(aptidx, buf[])
-
-//@summary Check if the player's zone has changed.
-//@param playerid player to check
-//@param x x position of player
-//@param y y position of player
-//@param z z position of player
-//@returns {@code 0} if the player's zone did not change
-native Zones_UpdateForPlayer(playerid, Float:x, Float:y, Float:z)
-
-//@summary Invalidate cached zone for player
-//@param playerid player to invalidate cache for
-native Zones_InvalidateForPlayer(playerid)
-
-//@summary Insert the zone string for player in {@param buf}
-//@param playerid the playerid of which to get the zone
-//@param buf a buffer
-native Zones_FormatForPlayer(playerid, buf[])
-
-//@summary Inserts the formatted '/loc' text for a player
-//@param playerid the playerid whose '/loc' is needed
-//@param buf a buffer
-//@param z z position of player
-//@param model model of vehicle the player is in or {@code 0}
-//@param vx x-velocity of vehicle the player is in
-//@param vy y-velocity of vehicle the player is in
-//@param vz z-velocity of vehicle the player is in
-native Zones_FormatLoc(playerid, buf[], Float:z, model, Float:vx, Float:vy, Float:vz)
-
-//@summary Scan the next part of {@param cmdtext} for a player reference
-//@param cmdtext command text
-//@param idx start location of the param in {@param cmdtext}, will be increased to next param's position if successful
-//@param player variable to store target player id in (will be {@code INVALID_PLAYER_ID} if player not online)
-//@returns {@code 0} if there's no next player param (whitespace followed by active id or part of player name)
-//@remarks the value in {@param player} will be modified, even if this returns {@code 0}
-//@remarks {@param idx} will not be increased if this returns {@code 0}
-native Params_GetPlayer(cmdtext[], &idx, &player)
-
-//@summary Scan the next part of {@param cmdtext} for a string
-//@param cmdtext command text
-//@param idx start location of the param in {@param cmdtext}, will be increased to next param's position if successful
-//@param buf buffer to store string in
-//@returns {@code 0} if there's no next string
-//@remarks {@param idx} will not be increased if this returns {@code 0}
-native Params_GetString(cmdtext[], &idx, buf[])
-
-//@summary Resets all nav for a vehicle
-//@param vehicleid vehicle to reset nav for
-//@returns {@code 0} if nav was not enabled for vehicle
-native Nav_Reset(vehicleid)
+/* nav.c */
 
 //@summary Enables ADF navigation for a vehicle
 //@param vehicleid vehicle to enable ADF for
@@ -443,6 +338,32 @@ native Nav_EnableADF(vehicleid, cmdtext[], buf64[])
 //@seealso Nav_ToggleILS
 native Nav_EnableVOR(vehicleid, cmdtext[], buf64[])
 
+//@summary get the active nav in the specified vehicle
+//@param vehicleid the vehicle to query its nav system
+//@returns one of {@code NAV_NONE}, {@code NAV_ADF}, {@code NAV_VOR}, {@code NAV_ILS}
+//@remarks {@code NAV_ILS &amp; NAV_VOR == NAV_VOR}
+native Nav_GetActiveNavType(vehicleid)
+
+//@summary Update nav data for player
+//@param playerid player to update nav for
+//@param vehicleid vehicle of player
+//@param bufdist buffer for distance
+//@param bufalt buffer for altitude
+//@param bufcrs buffer for course
+//@param bufils buffer for ILS text
+//@param vorvalue variable to store vor offset in, will be {@code [320.0f-85.0f,320.0f+85.0f]} or {@code > 640.0f} if not active.
+//@returns {@code 0} if nothing needs to be updated, otherwise the first byte of each component will be {@code 0} if no update needed
+native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[], bufils[], &Float:vorvalue)
+
+//@summary Resets all nav for a vehicle
+//@param vehicleid vehicle to reset nav for
+//@returns {@code 0} if nav was not enabled for vehicle
+native Nav_Reset(vehicleid)
+
+//@summary Reset panel value indicators cache for a player
+//@param playerid player to reset cache for
+native Nav_ResetCache(playerid)
+
 //@summary Toggles ILS navigation for a vehicle
 //@param vehicleid vehicle to enable ILS for
 /// <returns>
@@ -467,26 +388,100 @@ native Nav_ToggleILS(vehicleid)
 //@returns {@code 0} if no nav is set for this vehicle
 native Nav_Update(vehicleid, Float:x, Float:y, Float:z, Float:heading)
 
-//@summary Update nav data for player
-//@param playerid player to update nav for
-//@param vehicleid vehicle of player
-//@param bufdist buffer for distance
-//@param bufalt buffer for altitude
-//@param bufcrs buffer for course
-//@param bufils buffer for ILS text
-//@param vorvalue variable to store vor offset in, will be {@code [320.0f-85.0f,320.0f+85.0f]} or {@code > 640.0f} if not active.
-//@returns {@code 0} if nothing needs to be updated, otherwise the first byte of each component will be {@code 0} if no update needed
-native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[], bufils[], &Float:vorvalue)
+/* panel.c */
 
-//@summary get the active nav in the specified vehicle
-//@param vehicleid the vehicle to query its nav system
-//@returns one of {@code NAV_NONE}, {@code NAV_ADF}, {@code NAV_VOR}, {@code NAV_ILS}
-//@remarks {@code NAV_ILS &amp; NAV_VOR == NAV_VOR}
-native Nav_GetActiveNavType(vehicleid)
+//@summary Formats text for altitude part of panel
+//@param playerid the player to update the altitude for
+//@param altitude the altitude as int
+//@param buf4 buffer for the altitude text, must be of length {@code 4}
+//@param buf13 buffer for the altitude small meter text, must be of length {@code 13}
+//@param buf44 buffer for the altitude large meter text, must be of length {@code 44}
+//@returns {@code 1} if an update is needed
+//@remarks {@code buf13[0]} will be set to {@code 0} if the small meter doesn't need to be updated
+//@remarks {@code buf44[0]} will be set to {@code 0} if the large meter doesn't need to be updated
+native Panel_FormatAltitude(playerid, altitude, buf4[], buf13[], buf44[])
 
-//@summary Reset panel value indicators cache for a player
-//@param playerid player to reset cache for
-native Nav_ResetCache(playerid)
+//@summary Formats text for heading part of panel
+//@param playerid the player to update the heading for
+//@param heading the heading as int
+//@param buf4 buffer for the speed text, must be of length {@code 4}
+//@param buf44 buffer for the speed large meter text, must be of length {@code 44}
+//@returns {@code 1} if an update is needed
+native Panel_FormatHeading(playerid, heading, buf4[], buf44[])
+
+//@summary Formats text for speed part of panel
+//@param playerid the player to update the speed for
+//@param speed the speed as int
+//@param buf4 buffer for the speed text, must be of length {@code 4}
+//@param buf13 buffer for the speed small meter text, must be of length {@code 13}
+//@param buf44 buffer for the speed large meter text, must be of length {@code 44}
+//@returns {@code 1} if an update is needed
+//@remarks {@code buf13[0]} will be set to {@code 0} if the small meter doesn't need to be updated
+//@remarks {@code buf44[0]} will be set to {@code 0} if the large meter doesn't need to be updated
+//@remarks If the small meter doesn't need to be updated, the large meter won't need an update either
+native Panel_FormatSpeed(playerid, speed, buf4[], buf13[], buf44[])
+
+//@summary Reset panel caches for player
+//@param playerid the player to reset panel caches for
+native Panel_ResetCaches(playerid)
+
+/* playerdata.c */
+
+//@summary Clears login data for a player
+//@param playerid player to clear login data for
+//@seealso PlayerData_Init
+native PlayerData_Clear(playerid)
+
+//@summary Stores a player's data
+//@param playerid the playerid
+//@param ip player's ip
+//@param name player's name
+//@param namelen length of {@param name}, excluding zero term
+//@seealso PlayerData_UpdateName
+//@seealso PlayerData_SetUserId
+//@seealso PlayerData_Clear
+native PlayerData_Init(playerid, ip[], name[], namelen)
+
+//@summary Updates the player's user ID
+//@param playerid player
+//@param id userid of the player
+//@seealso PlayerData_Init
+//@seealso PlayerData_Clear
+//@returns {@code 0} if there was no player data saved for {@param playerid}
+native PlayerData_SetUserId(playerid, id)
+
+//@summary Updates the stored player's name on the plugin side
+//@param playerid the playerid
+//@param name new name
+//@param namelen length of {@param name}, excluding zero term
+//@seealso PlayerData_Init
+//@seealso PlayerData_SetUserId
+//@seealso PlayerData_Clear
+//@returns {@code 0} if there was no player data saved for {@param playerid}
+native PlayerData_UpdateName(playerid, name[], namelen)
+
+/* playtime.c */
+
+//@summary Formats 0-3 queries to update a user's playtimes in the db
+//@param userid the userid of the player, may be {@code -1}
+//@param sessionid the sessionid of the player's current session, may be {@code -1}
+//@param playtimetoadd how much actual (non-afk) play time to add (is ignored when {@param isdisconnect} is {@code 1})
+//@param isdisconnect should be {@code 1} when updating the times during player disconnect
+//@param buf buffer to store queries in
+//@returns {@code 0} if userid is {@code -1}, meaning no queries must be executed!
+//@remarks {@code buf[2]} will have a query to update the player's online times
+//@remarks {@code buf[0]} is either {@code 0} when {@param sessionid} was {@code -1}, or contains the\
+		position of the query to update the session's endtime in {@param buf}
+//@remarks {@code buf[1]} is either {@code 0} when {@param sessionid} was {@code -1} or {@code isdisconnect} is {@code 0},\
+		or contains the position of the query to update a player's online time (accurate) in {@param buf}
+native Playtime_FormatUpdateTimes(userid, sessionid, playtimetoadd, isdisconnect, buf[])
+
+/* timecyc.c */
+
+//@summary Gets the current weather message
+//@param buf buffer to store message in (should be {@code buf144})
+//@remarks {@link Timecyc_GetNextWeatherMsg} MUST be called at least once before invoking this function
+native Timecyc_GetCurrentWeatherMsg(buf[]);
 
 //@summary Gets the next weather and the message to broadcast and query string to execute for weather stats
 //@param nextweatherindex index of next weather, MUST be from {@code 0} to {@code NEXT_WEATHER_POSSIBILITIES} (exclusive)
@@ -497,10 +492,16 @@ native Nav_ResetCache(playerid)
 //@remarks Also sets the current weather in the plugin for use in {@link Timecyc_GetCurrentWeatherMsg}
 native Timecyc_GetNextWeatherMsgQuery(nextweatherindex, bufmsg[], bufquery[])
 
-//@summary Gets the current weather message
-//@param buf buffer to store message in (should be {@code buf144})
-//@remarks {@link Timecyc_GetNextWeatherMsg} MUST be called at least once before invoking this function
-native Timecyc_GetCurrentWeatherMsg(buf[]);
+/* various.c */
+
+//@summary Url encodes given string.
+//@param data string to encode
+//@param len amount of characters in {@param data}
+//@param output buffer to store result in (should be {@code len * 3} of size)
+//@returns Amount of charactes written (excluding terminating zero byte).
+native Urlencode(const data[], len, output[])
+
+/* vehicles.c */
 
 //@summary Adds a vehicle in the db vehicle table
 //@param dbid id of the vehicle in db
@@ -580,4 +581,33 @@ native Veh_ShouldCreateLabel(vehicleid, playerid, buf[])
 //@param dbid id of the vehicle in the vehicle table (returned by {@link Veh_Add}), or {@code -1} if slot is now free
 //@seealso Veh_Add
 native Veh_UpdateSlot(vehicleid, dbid)
+
+/* zones.c */
+
+//@summary Insert the zone string for player in {@param buf}
+//@param playerid the playerid of which to get the zone
+//@param buf a buffer
+native Zones_FormatForPlayer(playerid, buf[])
+
+//@summary Inserts the formatted '/loc' text for a player
+//@param playerid the playerid whose '/loc' is needed
+//@param buf a buffer
+//@param z z position of player
+//@param model model of vehicle the player is in or {@code 0}
+//@param vx x-velocity of vehicle the player is in
+//@param vy y-velocity of vehicle the player is in
+//@param vz z-velocity of vehicle the player is in
+native Zones_FormatLoc(playerid, buf[], Float:z, model, Float:vx, Float:vy, Float:vz)
+
+//@summary Invalidate cached zone for player
+//@param playerid player to invalidate cache for
+native Zones_InvalidateForPlayer(playerid)
+
+//@summary Check if the player's zone has changed.
+//@param playerid player to check
+//@param x x position of player
+//@param y y position of player
+//@param z z position of player
+//@returns {@code 0} if the player's zone did not change
+native Zones_UpdateForPlayer(playerid, Float:x, Float:y, Float:z)
 

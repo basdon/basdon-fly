@@ -39,6 +39,17 @@ void setName(struct playerdata *data, AMX *amx, cell addrparam, int namelen)
 	}
 }
 
+/* native PlayerData_Clear(playerid) */
+cell AMX_NATIVE_CALL PlayerData_Clear(AMX *amx, cell *params)
+{
+	int pid = params[1];
+	if (pdata[pid] != NULL) {
+		free(pdata[pid]);
+		pdata[pid] = NULL;
+	}
+	return 1;
+}
+
 /* native PlayerData_Init(playerid, ip[], name[], namelen) */
 cell AMX_NATIVE_CALL PlayerData_Init(AMX *amx, cell *params)
 {
@@ -73,16 +84,5 @@ cell AMX_NATIVE_CALL PlayerData_UpdateName(AMX *amx, cell *params)
 		return 0;
 	}
 	setName(pdata[pid], amx, params[2], params[3]);
-	return 1;
-}
-
-/* native PlayerData_Clear(playerid) */
-cell AMX_NATIVE_CALL PlayerData_Clear(AMX *amx, cell *params)
-{
-	int pid = params[1];
-	if (pdata[pid] != NULL) {
-		free(pdata[pid]);
-		pdata[pid] = NULL;
-	}
 	return 1;
 }

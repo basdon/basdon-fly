@@ -21,34 +21,22 @@ FORWARD(APT_FormatInfo);
 FORWARD(APT_FormatCodeAndName);
 /* anticheat.c */
 FORWARD(Ac_FormatLog);
+/* basdon.c */
+FORWARD(ValidateMaxPlayers);
 /* commands.c */
-FORWARD(CommandHash);
-FORWARD(IsCommand);
-FORWARD(Params_GetPlayer);
-FORWARD(Params_GetString);
+FORWARD(Command_Hash);
+FORWARD(Command_Is);
+FORWARD(Command_GetPlayerParam);
+FORWARD(Command_GetStringParam);
 /* dialog.c */
-FORWARD(QueueDialog);
-FORWARD(DropDialogQueue);
-FORWARD(HasDialogsInQueue);
-FORWARD(PopDialogQueue);
-/* various.c */
-FORWARD(Urlencode);
-/* panel.c */
-FORWARD(Panel_ResetCaches);
-FORWARD(Panel_FormatAltitude);
-FORWARD(Panel_FormatSpeed);
-FORWARD(Panel_FormatHeading);
-/* playerdata.c */
-FORWARD(PlayerData_Init);
-FORWARD(PlayerData_Clear);
-FORWARD(PlayerData_SetUserId);
-FORWARD(PlayerData_UpdateName);
-/* playtime.c */
-FORWARD(Playtime_FormatUpdateTimes);
+FORWARD(Dialog_Queue);
+FORWARD(Dialog_DropQueue);
+FORWARD(Dialog_HasInQueue);
+FORWARD(Dialog_PopQueue);
 /* game_sa.c */
-FORWARD(IsAirVehicle);
-FORWARD(IsHelicopter);
-FORWARD(IsPlane);
+FORWARD(Game_IsAirVehicle);
+FORWARD(Game_IsHelicopter);
+FORWARD(Game_IsPlane);
 /* login.c */
 FORWARD(Login_FormatAddFailedLogin);
 FORWARD(Login_FormatChangePassword);
@@ -64,26 +52,40 @@ FORWARD(Login_FormatSavePlayerName);
 FORWARD(Login_FormatUpgradeGuestAcc);
 FORWARD(Login_FreePassword);
 FORWARD(Login_GetPassword);
-FORWARD(Login_UsePassword);
 FORWARD(Login_PasswordConfirmFree);
 FORWARD(Login_PasswordConfirmStore);
 FORWARD(Login_PasswordConfirmValidate);
+FORWARD(Login_UsePassword);
 /* nav.c */
-FORWARD(Nav_Reset);
 FORWARD(Nav_EnableADF);
 FORWARD(Nav_EnableVOR);
-FORWARD(Nav_ToggleILS);
-FORWARD(Nav_Format);
-FORWARD(Nav_Update);
 FORWARD(Nav_GetActiveNavType);
+FORWARD(Nav_Format);
+FORWARD(Nav_Reset);
 FORWARD(Nav_ResetCache);
+FORWARD(Nav_ToggleILS);
+FORWARD(Nav_Update);
+/* panel.c */
+FORWARD(Panel_FormatAltitude);
+FORWARD(Panel_FormatHeading);
+FORWARD(Panel_FormatSpeed);
+FORWARD(Panel_ResetCaches);
+/* playerdata.c */
+FORWARD(PlayerData_Clear);
+FORWARD(PlayerData_Init);
+FORWARD(PlayerData_SetUserId);
+FORWARD(PlayerData_UpdateName);
+/* playtime.c */
+FORWARD(Playtime_FormatUpdateTimes);
 /* timecyc.c */
 FORWARD(Timecyc_GetCurrentWeatherMsg);
 FORWARD(Timecyc_GetNextWeatherMsgQuery);
+/* various.c */
+FORWARD(Urlencode);
 /* vehicles.c */
 FORWARD(Veh_Add);
-FORWARD(Veh_CollectPlayerVehicles);
 FORWARD(Veh_CollectSpawnedVehicles);
+FORWARD(Veh_CollectPlayerVehicles);
 FORWARD(Veh_Destroy);
 FORWARD(Veh_Init);
 FORWARD(Veh_IsPlayerAllowedInVehicle);
@@ -93,10 +95,10 @@ FORWARD(Veh_RegisterLabel);
 FORWARD(Veh_ShouldCreateLabel);
 FORWARD(Veh_UpdateSlot);
 /* zones.c */
-FORWARD(Zones_InvalidateForPlayer);
-FORWARD(Zones_UpdateForPlayer);
 FORWARD(Zones_FormatForPlayer);
 FORWARD(Zones_FormatLoc);
+FORWARD(Zones_InvalidateForPlayer);
+FORWARD(Zones_UpdateForPlayer);
 
 cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
 {
@@ -136,30 +138,35 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
+	/* airport.c */
+	REGISTERNATIVE(APT_Init),
+	REGISTERNATIVE(APT_Destroy),
+	REGISTERNATIVE(APT_Add),
+	REGISTERNATIVE(APT_AddRunway),
+	REGISTERNATIVE(APT_FormatNearestList),
+	REGISTERNATIVE(APT_FormatBeaconList),
+	REGISTERNATIVE(APT_MapIndexFromListDialog),
+	REGISTERNATIVE(APT_FormatInfo),
+	REGISTERNATIVE(APT_FormatCodeAndName),
 	/* anticheat.c */
 	REGISTERNATIVE(Ac_FormatLog),
+	/* basdon.c */
 	REGISTERNATIVE(ValidateMaxPlayers),
-	REGISTERNATIVE(Urlencode),
-	REGISTERNATIVE(Panel_ResetCaches),
-	REGISTERNATIVE(Panel_FormatAltitude),
-	REGISTERNATIVE(Panel_FormatSpeed),
-	REGISTERNATIVE(Panel_FormatHeading),
-	REGISTERNATIVE(IsAirVehicle),
-	REGISTERNATIVE(IsHelicopter),
-	REGISTERNATIVE(IsPlane),
-	REGISTERNATIVE(CommandHash),
-	REGISTERNATIVE(IsCommand),
-	REGISTERNATIVE(Params_GetPlayer),
-	REGISTERNATIVE(Params_GetString),
-	REGISTERNATIVE(QueueDialog),
-	REGISTERNATIVE(DropDialogQueue),
-	REGISTERNATIVE(HasDialogsInQueue),
-	REGISTERNATIVE(PopDialogQueue),
-	REGISTERNATIVE(PlayerData_Init),
-	REGISTERNATIVE(PlayerData_Clear),
-	REGISTERNATIVE(PlayerData_SetUserId),
-	REGISTERNATIVE(PlayerData_UpdateName),
-	REGISTERNATIVE(Playtime_FormatUpdateTimes),
+	/* commands.c */
+	REGISTERNATIVE(Command_Hash),
+	REGISTERNATIVE(Command_Is),
+	REGISTERNATIVE(Command_GetPlayerParam),
+	REGISTERNATIVE(Command_GetStringParam),
+	/* dialog.c */
+	REGISTERNATIVE(Dialog_Queue),
+	REGISTERNATIVE(Dialog_DropQueue),
+	REGISTERNATIVE(Dialog_HasInQueue),
+	REGISTERNATIVE(Dialog_PopQueue),
+	/* game_sa.c */
+	REGISTERNATIVE(Game_IsAirVehicle),
+	REGISTERNATIVE(Game_IsHelicopter),
+	REGISTERNATIVE(Game_IsPlane),
+	/* login.c */
 	REGISTERNATIVE(Login_FormatAddFailedLogin),
 	REGISTERNATIVE(Login_FormatChangePassword),
 	REGISTERNATIVE(Login_FormatChangePasswordBox),
@@ -178,25 +185,33 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Login_PasswordConfirmStore),
 	REGISTERNATIVE(Login_PasswordConfirmValidate),
 	REGISTERNATIVE(Login_UsePassword),
-	REGISTERNATIVE(APT_Init),
-	REGISTERNATIVE(APT_Destroy),
-	REGISTERNATIVE(APT_Add),
-	REGISTERNATIVE(APT_AddRunway),
-	REGISTERNATIVE(APT_FormatNearestList),
-	REGISTERNATIVE(APT_FormatBeaconList),
-	REGISTERNATIVE(APT_MapIndexFromListDialog),
-	REGISTERNATIVE(APT_FormatInfo),
-	REGISTERNATIVE(APT_FormatCodeAndName),
-	REGISTERNATIVE(Nav_Reset),
+	/* nav.c */
 	REGISTERNATIVE(Nav_EnableADF),
 	REGISTERNATIVE(Nav_EnableVOR),
-	REGISTERNATIVE(Nav_ToggleILS),
-	REGISTERNATIVE(Nav_Format),
-	REGISTERNATIVE(Nav_Update),
 	REGISTERNATIVE(Nav_GetActiveNavType),
+	REGISTERNATIVE(Nav_Format),
+	REGISTERNATIVE(Nav_Reset),
 	REGISTERNATIVE(Nav_ResetCache),
+	REGISTERNATIVE(Nav_ToggleILS),
+	REGISTERNATIVE(Nav_Update),
+	/* panel.c */
+	REGISTERNATIVE(Panel_FormatAltitude),
+	REGISTERNATIVE(Panel_FormatHeading),
+	REGISTERNATIVE(Panel_FormatSpeed),
+	REGISTERNATIVE(Panel_ResetCaches),
+	/* playerdata.c */
+	REGISTERNATIVE(PlayerData_Clear),
+	REGISTERNATIVE(PlayerData_Init),
+	REGISTERNATIVE(PlayerData_SetUserId),
+	REGISTERNATIVE(PlayerData_UpdateName),
+	/* playtime.c */
+	REGISTERNATIVE(Playtime_FormatUpdateTimes),
+	/* timecyc.c */
 	REGISTERNATIVE(Timecyc_GetCurrentWeatherMsg),
 	REGISTERNATIVE(Timecyc_GetNextWeatherMsgQuery),
+	/* various.c */
+	REGISTERNATIVE(Urlencode),
+	/* vehicles.c */
 	REGISTERNATIVE(Veh_Add),
 	REGISTERNATIVE(Veh_CollectSpawnedVehicles),
 	REGISTERNATIVE(Veh_CollectPlayerVehicles),
@@ -208,10 +223,11 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_RegisterLabel),
 	REGISTERNATIVE(Veh_ShouldCreateLabel),
 	REGISTERNATIVE(Veh_UpdateSlot),
-	REGISTERNATIVE(Zones_InvalidateForPlayer),
-	REGISTERNATIVE(Zones_UpdateForPlayer),
+	/* zones.c */
 	REGISTERNATIVE(Zones_FormatForPlayer),
 	REGISTERNATIVE(Zones_FormatLoc),
+	REGISTERNATIVE(Zones_InvalidateForPlayer),
+	REGISTERNATIVE(Zones_UpdateForPlayer),
 	{0, 0}
 };
 
