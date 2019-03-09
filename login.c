@@ -22,6 +22,24 @@ void login_init()
 	}
 }
 
+/* native Login_FormatAddFailedLogin(playerid, buf[]) */
+cell AMX_NATIVE_CALL Login_FormatAddFailedLogin(AMX *amx, cell *params)
+{
+	const int pid = params[1];
+	cell *addr;
+	char buf[144];
+	if (pdata[pid] == NULL) {
+		return 0;
+	}
+	sprintf(buf,
+	        "INSERT INTO fal(u,t,j) VALUES(%d,UNIX_TIMESTAMP(),'%s')",
+	        pdata[pid]->userid,
+	        pdata[pid]->ip);
+	amx_GetAddr(amx, params[2], &addr);
+	amx_SetUString(addr, buf, sizeof(buf));
+	return 1;
+}
+
 /* native Login_FormatChangePasswordBox(buf[], pwmismatch=0, step) */
 cell AMX_NATIVE_CALL Login_FormatChangePasswordBox(AMX *amx, cell *params)
 {

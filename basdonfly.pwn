@@ -170,6 +170,13 @@ native PlayerData_Clear(playerid)
 		or contains the position of the query to update a player's online time (accurate) in {@param buf}
 native Playtime_FormatUpdateTimes(userid, sessionid, playtimetoadd, isdisconnect, buf[])
 
+//@summary Format query to add failed login
+//@param playerid player id
+//@param buf the buffer to store the query in
+//@returns {@code 0} on failure
+//@remarks user id and ip must be set to succeed!
+native Login_FormatAddFailedLogin(playerid, buf[])
+
 //@summary Format query to change password
 //@param userid user id
 //@param password hashed password to set

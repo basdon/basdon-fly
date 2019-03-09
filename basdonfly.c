@@ -48,6 +48,7 @@ FORWARD(IsAirVehicle);
 FORWARD(IsHelicopter);
 FORWARD(IsPlane);
 /* login.c */
+FORWARD(Login_FormatAddFailedLogin);
 FORWARD(Login_FormatChangePassword);
 FORWARD(Login_FormatChangePasswordBox);
 FORWARD(Login_FormatCheckUserExist);
@@ -155,6 +156,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PlayerData_SetUserId),
 	REGISTERNATIVE(PlayerData_UpdateName),
 	REGISTERNATIVE(Playtime_FormatUpdateTimes),
+	REGISTERNATIVE(Login_FormatAddFailedLogin),
 	REGISTERNATIVE(Login_FormatChangePassword),
 	REGISTERNATIVE(Login_FormatChangePasswordBox),
 	REGISTERNATIVE(Login_FormatCheckUserExist),
