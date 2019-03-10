@@ -240,7 +240,7 @@ cell AMX_NATIVE_CALL Veh_ShouldCreateLabel(AMX *amx, cell *params)
 	const struct vehicle veh = gamevehicles[vehicleid];
 	cell *addr;
 	if (veh.dbvehicle == NULL) {
-		logprintf("unknown vehicle streamed in for player");
+		logprintf("Veh_ShouldCreateLabel: unknown vehicle");
 		return 0;
 	}
 	if (labelids[playerid][vehicleid] != -1) {
