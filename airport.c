@@ -14,6 +14,7 @@ struct airport *airports;
 int airportscount;
 
 static int *indexmap[MAX_PLAYERS];
+static short indexmapsize[MAX_PLAYERS];
 
 void freeAirportTable()
 {
@@ -126,24 +127,29 @@ cell AMX_NATIVE_CALL APT_FormatNearestList(AMX *amx, cell *params)
 {
 	cell *addr;
 	int i = 0, idx = 0, pid = params[1];
+	int enabledairportscount = 0;
 	float dx, dy;
 	char buf[4096];
 	struct airport *ap;
 	struct apref *aps = malloc(sizeof(struct apref) * airportscount);
 	
 	while (i < airportscount) {
-		dx = airports[i].pos.x - amx_ctof(params[2]);
-		dy = airports[i].pos.y - amx_ctof(params[3]);
-		aps[i].distance = sqrt(dx * dx + dy * dy);
-		aps[i].index = i;
+		if (airports[i].enabled) {
+			dx = airports[enabledairportscount].pos.x - amx_ctof(params[2]);
+			dy = airports[enabledairportscount].pos.y - amx_ctof(params[3]);
+			aps[enabledairportscount].distance = sqrt(dx * dx + dy * dy);
+			aps[enabledairportscount].index = i;
+			enabledairportscount++;
+		}
 		i++;
 	}
-	qsort(aps, airportscount, sizeof(*aps), sortaprefs);
+	qsort(aps, enabledairportscount, sizeof(*aps), sortaprefs);
 	if (indexmap[pid] == NULL) {
-		indexmap[pid] = malloc(sizeof(indexmap[0]) * airportscount);
+		indexmap[pid] = malloc(sizeof(indexmap[0]) * enabledairportscount);
 	}
+	i = indexmapsize[pid] = enabledairportscount;
 	while (i--) {
-		*(indexmap[pid] + airportscount - i - 1) = aps[i].index;
+		*(indexmap[pid] + enabledairportscount - i - 1) = aps[i].index;
 		ap = airports + aps[i].index;
 		if (aps[i].distance < 1000.0f) {
 			idx += sprintf(buf + idx, "\n%.0f\t%s\t[%s]", aps[i].distance, ap->name, ap->code);
@@ -167,7 +173,9 @@ cell AMX_NATIVE_CALL APT_FormatBeaconList(AMX *amx, cell *params)
 	int count = airportscount, idx = 0;
 
 	while (count-- > 0) {
-		idx += sprintf(buf + idx, " %s", ap->beacon);
+		if (ap->enabled) {
+			idx += sprintf(buf + idx, " %s", ap->beacon);
+		}
 		ap++;
 	}
 
@@ -185,7 +193,7 @@ cell AMX_NATIVE_CALL APT_MapIndexFromListDialog(AMX *amx, cell *params)
 		return 0;
 	}
 
-	if (params[2] < 0 || airportscount <= params[2]) {
+	if (params[2] < 0 || indexmapsize[pid] <= params[2]) {
 		value = 0;
 	} else {
 		value = *(indexmap[pid] + params[2]);
