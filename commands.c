@@ -5,6 +5,46 @@
 #include "playerdata.h"
 #include <string.h>
 
+/* native Command_GetIntParam(cmdtext[], &idx, &value) */
+cell AMX_NATIVE_CALL Command_GetIntParam(AMX *amx, cell *params)
+{
+	char cmdtext[144], *pc = cmdtext;
+	cell *idx, *value;
+	int sign = 1;
+	int v;
+	amx_GetAddr(amx, params[1], &idx);
+	amx_GetUString(cmdtext, idx, sizeof(cmdtext));
+	amx_GetAddr(amx, params[2], &idx);
+	amx_GetAddr(amx, params[3], &value);
+	pc += *idx;
+	*value = 0;
+
+	while (*pc == ' ') {
+		pc++;
+	}
+	if (*pc == '+') {
+		pc++;
+	} else if (*pc == '-') {
+		sign = -1;
+		pc++;
+	} else if (*pc < '0' || '9' < *pc) {
+		return 0;
+	}
+
+	while (1) {
+		*value = *value * 10 + *pc - '0';
+		pc++;
+		if (*pc == 0 || *pc == ' ') {
+			*idx = pc - cmdtext - 1;
+			*value *= sign;
+			return 1;
+		}
+		if (*pc < '0' || '9' < *pc) {
+			return 0;
+		}
+	}
+}
+
 /* native Command_GetPlayerParam(cmdtext[], &idx, &player) */
 cell AMX_NATIVE_CALL Command_GetPlayerParam(AMX *amx, cell *params)
 {

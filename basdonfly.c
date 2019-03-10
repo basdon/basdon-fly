@@ -26,6 +26,7 @@ FORWARD(ValidateMaxPlayers);
 /* commands.c */
 FORWARD(Command_Hash);
 FORWARD(Command_Is);
+FORWARD(Command_GetIntParam);
 FORWARD(Command_GetPlayerParam);
 FORWARD(Command_GetStringParam);
 /* dialog.c */
@@ -155,6 +156,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* commands.c */
 	REGISTERNATIVE(Command_Hash),
 	REGISTERNATIVE(Command_Is),
+	REGISTERNATIVE(Command_GetIntParam),
 	REGISTERNATIVE(Command_GetPlayerParam),
 	REGISTERNATIVE(Command_GetStringParam),
 	/* dialog.c */

@@ -86,6 +86,15 @@ native ValidateMaxPlayers(maxplayers)
 
 /* commands.c */
 
+//@summary Scan the next part of {@param cmdtext} for an int
+//@param cmdtext command text
+//@param idx start location of the param in {@param cmdtext}, will be increased to next param's position if successful
+//@param value reference to store value in
+//@returns {@code 0} if there's no next int
+//@remarks the value in {@param value} will be modified, even if this returns {@code 0}
+//@remarks {@param idx} will not be increased if this returns {@code 0}
+native Command_GetIntParam(cmdtext[], &idx, &value)
+
 //@summary Scan the next part of {@param cmdtext} for a player reference
 //@param cmdtext command text
 //@param idx start location of the param in {@param cmdtext}, will be increased to next param's position if successful
