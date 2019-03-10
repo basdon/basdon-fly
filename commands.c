@@ -11,7 +11,6 @@ cell AMX_NATIVE_CALL Command_GetIntParam(AMX *amx, cell *params)
 	char cmdtext[144], *pc = cmdtext;
 	cell *idx, *value;
 	int sign = 1;
-	int v;
 	amx_GetAddr(amx, params[1], &idx);
 	amx_GetUString(cmdtext, idx, sizeof(cmdtext));
 	amx_GetAddr(amx, params[2], &idx);
