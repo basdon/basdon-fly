@@ -34,6 +34,7 @@ native APT_Add(index, code[], enabled, name[], beacon[], Float:x, Float:y, Float
 native APT_AddRunway(aptindex, specifier, Float:heading, Float:x, Float:y, Float:z, nav)
 
 //@summary Clear the airport table and free the used memory
+//@remarks Also clears mission points (which exists inside the airport table)
 //@seealso APT_Init
 native APT_Destroy()
 
@@ -315,6 +316,17 @@ native Login_PasswordConfirmValidate(playerid, pwhash[])
 //@seealso Login_FreePassword
 //@seealso Login_GetPassword
 native Login_UsePassword(playerid, buf[]);
+
+/* missions.c */
+
+//@summary Adds a mission point
+//@param aptindex index of the airport in the airports table this mission point belongs to
+//@param id the id of the mission point
+//@param x x coordinate
+//@param y y coordinate
+//@param z z coordinate
+//@param type type of missions this mission point is for
+native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type)
 
 /* nav.c */
 

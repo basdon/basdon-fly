@@ -57,6 +57,8 @@ FORWARD(Login_PasswordConfirmFree);
 FORWARD(Login_PasswordConfirmStore);
 FORWARD(Login_PasswordConfirmValidate);
 FORWARD(Login_UsePassword);
+/* missions.c */
+FORWARD(Missions_AddPoint);
 /* nav.c */
 FORWARD(Nav_EnableADF);
 FORWARD(Nav_EnableVOR);
@@ -187,6 +189,8 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Login_PasswordConfirmStore),
 	REGISTERNATIVE(Login_PasswordConfirmValidate),
 	REGISTERNATIVE(Login_UsePassword),
+	/* missions.c */
+	REGISTERNATIVE(Missions_AddPoint),
 	/* nav.c */
 	REGISTERNATIVE(Nav_EnableADF),
 	REGISTERNATIVE(Nav_EnableVOR),

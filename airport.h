@@ -18,6 +18,7 @@ struct airport {
 	char beacon[4 + 1];
 	char name[MAX_AIRPORT_NAME + 1];
 	struct runway *runways;
+	struct missionpoint *missionpoints;
 };
 
 extern struct airport *airports;

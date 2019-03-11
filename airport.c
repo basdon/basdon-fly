@@ -18,8 +18,11 @@ static short indexmapsize[MAX_PLAYERS];
 
 void freeAirportTable()
 {
+	void missions_freepoints();
 	struct airport *ap = airports;
 	struct runway *rnw;
+
+	missions_freepoints();
 	while (airportscount) {
 		airportscount--;
 		while (ap->runways != NULL) {

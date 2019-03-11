@@ -2,8 +2,8 @@
 HEADERS=common.h sharedsymbols.h playerdata.h game_sa.h zones.h
 FLAGS=-Wall -m32 -std=c89 -ansi
 
-build: out/anticheat.o out/basdonfly.o out/various.o out/panel.o out/amxplugin.o out/game_sa.o out/game_sa_data.o out/login.o out/commands.o out/dialog.o out/airport.o out/playerdata.o out/playtime.o out/vehicles.o out/zones.o out/zones_data.o out/nav.o out/timecyc.o
-	$(GCC) $(FLAGS) -shared -o out/basdonfly.$(PLUGINTYPE) out/anticheat.o out/basdonfly.o out/amxplugin.o out/various.o out/panel.o out/game_sa.o out/game_sa_data.o out/login.o out/commands.o out/dialog.o out/airport.o out/playerdata.o out/playtime.o out/vehicles.o out/zones.o out/zones_data.o out/nav.o out/timecyc.o
+build: out/anticheat.o out/basdonfly.o out/various.o out/panel.o out/amxplugin.o out/game_sa.o out/game_sa_data.o out/login.o out/missions.o out/commands.o out/dialog.o out/airport.o out/playerdata.o out/playtime.o out/vehicles.o out/zones.o out/zones_data.o out/nav.o out/timecyc.o
+	$(GCC) $(FLAGS) -shared -o out/basdonfly.$(PLUGINTYPE) out/anticheat.o out/basdonfly.o out/amxplugin.o out/various.o out/panel.o out/game_sa.o out/game_sa_data.o out/login.o out/missions.o out/commands.o out/dialog.o out/airport.o out/playerdata.o out/playtime.o out/vehicles.o out/zones.o out/zones_data.o out/nav.o out/timecyc.o
 
 out/anticheat.o: anticheat.c $(HEADERS)
 	$(GCC) $(FLAGS) -x c -c anticheat.c -o out/anticheat.o
@@ -28,6 +28,9 @@ out/game_sa_data.o: game_sa_data.c $(HEADERS)
 
 out/login.o: login.c $(HEADERS)
 	$(GCC) $(FLAGS) -x c -c login.c -o out/login.o
+
+out/missions.o: missions.c $(HEADERS)
+	$(GCC) $(FLAGS) -x c -c missions.c -o out/missions.o
 
 out/commands.o: commands.c $(HEADERS)
 	$(GCC) $(FLAGS) -x c -c commands.c -o out/commands.o
