@@ -9,9 +9,10 @@
 #include "airport.h"
 
 struct missionpoint {
-	unsigned int id;
+	unsigned short id;
 	float x, y, z;
 	unsigned int type;
+	unsigned short currentlyactivemissions;
 	struct missionpoint *next;
 };
 
@@ -44,18 +45,164 @@ cell AMX_NATIVE_CALL Missions_AddPoint(AMX *amx, cell *params)
 	newmp->x = amx_ctof(params[3]);
 	newmp->y = amx_ctof(params[4]);
 	newmp->z = amx_ctof(params[5]);
-	newmp->type = params[6];
+	ap->missiontypes |= newmp->type = params[6];
+	newmp->currentlyactivemissions = 0;
 	newmp->next = NULL;
 
-	if (ap->missionpoints == NULL) {
+	mp = ap->missionpoints;
+	if (mp == NULL) {
 		ap->missionpoints = newmp;
 		return 1;
 	}
 
-	mp = ap->missionpoints;
 	while (mp->next != NULL) {
 		mp = mp->next;
 	}
 	mp->next = newmp;
+	return 1;
+}
+
+struct missionpoint *getRandomEndPointForType(int missiontype, struct airport *blacklistedairport)
+{
+#define TMP_PT_SIZE 5
+	struct missionpoint *points[TMP_PT_SIZE], *msp;
+	int pointc = 0, leastamtofcurrentmissions = 1000000;
+	int randomap, applicableap;
+
+	randomap = applicableap = 4; // TODO actual random one
+	while ((airports + applicableap) == blacklistedairport ||
+		!((airports + applicableap)->missiontypes & missiontype))
+	{
+		applicableap++;
+		if (applicableap == airportscount) {
+			applicableap = 0;
+		}
+		if (randomap == randomap) {
+			return NULL;
+		}
+	}
+
+	msp = (airports + applicableap)->missionpoints;
+	while (msp != NULL) {
+		if (msp->type & missiontype) {
+			if (msp->currentlyactivemissions < leastamtofcurrentmissions) {
+				leastamtofcurrentmissions = msp->currentlyactivemissions;
+				pointc = 0;
+			}
+			if (pointc < TMP_PT_SIZE) {
+				points[pointc++] = msp;
+			}
+		}
+		msp = msp->next;
+	}
+
+	if (pointc == 0) {
+		return NULL;
+	}
+
+	if (pointc == 1) {
+		return points[0];
+	}
+
+	return points[1]; // TODO actual random
+#undef TMP_PT_SIZE
+}
+
+/* native Missions_Start(Float:x, Float:y, Float:z, vehiclemodel, msg[]) */
+cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
+{
+	cell *xaddr, *yaddr, *zaddr, *msgaddr;
+	char msg[144];
+	struct missionpoint *msp, *startpoint, *endpoint;
+	struct airport *ap = airports, *closestap = NULL;
+	int missiontype, i = airportscount;
+	float x, y, z, dx, dy, dz, dist, shortestdistance = 0x7F800000;
+
+	amx_GetAddr(amx, params[5], &msgaddr);
+	switch (params[4]) {
+	case MODEL_DODO: missiontype = 1; break;
+	case MODEL_SHAMAL:
+	case MODEL_BEAGLE: missiontype = 2; break;
+	case MODEL_NEVADA: missiontype = 16; break;
+	// TODO: complete me
+	default:
+		strcpy(msg, "This vehicle can't complete any type of missions!");
+		amx_SetUString(msgaddr, msg, sizeof(msg));
+		return 0;
+	}
+
+	amx_GetAddr(amx, params[1], &xaddr);
+	amx_GetAddr(amx, params[2], &yaddr);
+	amx_GetAddr(amx, params[3], &zaddr);
+	x = amx_ctof(*xaddr);
+	y = amx_ctof(*yaddr);
+	z = amx_ctof(*zaddr);
+
+	while (i--) {
+		if (ap->missiontypes & missiontype) {
+			dx = ap->pos.x - x;
+			dy = ap->pos.y - y;
+			dz = ap->pos.z - z;
+			if ((dist = dx * dx + dy * dy + dz * dz) < shortestdistance) {
+				shortestdistance = dist;
+				closestap = ap;
+			}
+		}
+		ap++;
+	}
+
+	if (closestap == NULL) {
+		strcpy(msg, "There are no missions available for this type of vehicle!");
+		amx_SetUString(msgaddr, msg, sizeof(msg));
+		return 0;
+	}
+
+	// startpoint should be the point with 1) least amount of active missions 2) shortest distance
+	startpoint = NULL;
+	i = 1000000;
+thisisworsethanbubblesort:
+	shortestdistance = 0x78F00000;
+	msp = closestap->missionpoints;
+	while (msp != NULL) {
+		if (msp->type & missiontype && msp->currentlyactivemissions <= i) {
+			dx = msp->x - x;
+			dy = msp->y - y;
+			dz = msp->z - z;
+			if ((dist = dx * dx + dy * dy + dz * dz) < shortestdistance) {
+				if (msp->currentlyactivemissions < i) {
+					i = msp->currentlyactivemissions;
+					goto thisisworsethanbubblesort;
+				}
+				shortestdistance = dist;
+				startpoint = msp;
+			}
+		}
+		msp = msp->next;
+	}
+
+	if (startpoint == NULL) {
+		// this should not be happening
+		logprintf("ERR: could not find suitable mission startpoint");
+		strcpy(msg, "Failed to find a starting point, please try again later.");
+		amx_SetUString(msgaddr, msg, sizeof(msg));
+		return 0;
+	}
+
+	// TODO: define end point :^)
+	*xaddr = amx_ftoc(startpoint->x);
+	*yaddr = amx_ftoc(startpoint->y);
+	*zaddr = amx_ftoc(startpoint->z);
+
+	endpoint = getRandomEndPointForType(missiontype, closestap);
+	if (endpoint == NULL) {
+		strcpy(msg, "There is no available destination for this type of plane at this time.");
+		amx_SetUString(msgaddr, msg, sizeof(msg));
+	}
+
+	// TODO: airport name
+	sprintf(msg, "xx from xx to xx");
+	amx_SetUString(msgaddr, msg, sizeof(msg));
+
+	// TODO store stuff (missiondata, queries)
 	return 1;
 }

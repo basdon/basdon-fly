@@ -328,6 +328,15 @@ native Login_UsePassword(playerid, buf[]);
 //@param type type of missions this mission point is for
 native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type)
 
+//@summary Starts a random mission for a player
+//@param x current x coordinate of player, will contain x coordinate of next checkpoint if returned succesfully
+//@param y current y coordinate of player, will contain y coordinate of next checkpoint if returned succesfully
+//@param z current z coordinate of player, will contain z coordinate of next checkpoint if returned succesfully
+//@param vehiclemodel model of the vehicle player is in
+//@param msg buffer used to put either success or error msg in
+//@returns {@code 0} if a mission could not be started, in that case warn msg {@param msg} should be sent to player
+native Missions_Start(&Float:x, &Float:y, &Float:z, vehiclemodel, msg[])
+
 /* nav.c */
 
 //@summary Enables ADF navigation for a vehicle

@@ -88,6 +88,8 @@ cell AMX_NATIVE_CALL APT_Add(AMX *amx, cell *params)
 	ap->pos.y = amx_ctof(params[7]);
 	ap->pos.z = amx_ctof(params[8]);
 	ap->runways = NULL;
+	ap->missionpoints = NULL;
+	ap->missiontypes = 0;
 	return 1;
 }
 
