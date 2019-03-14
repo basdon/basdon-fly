@@ -7,6 +7,7 @@
 //@param amount amount of airports that will be created using {@link APT_Add}
 //@seealso APT_Add
 //@seealso APT_Destroy
+//@remarks undefined behavior when less than {@param amount} APT_Add calls are made afterwards
 native APT_Init(amount)
 
 //@summary Add an airport to the airports table

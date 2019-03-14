@@ -7,12 +7,19 @@
 
 #include "common.h"
 #include "airport.h"
+#include <string.h>
+
+const char *destinationtype_gate = " gate";
+const char *destinationtype_cargo = " cargo";
+const char *destinationtype_heliport = " heliport";
+const char *destinationtype_none = "";
 
 struct missionpoint {
 	unsigned short id;
 	float x, y, z;
 	unsigned int type;
 	unsigned short currentlyactivemissions;
+	struct airport *ap;
 	struct missionpoint *next;
 };
 
@@ -47,6 +54,7 @@ cell AMX_NATIVE_CALL Missions_AddPoint(AMX *amx, cell *params)
 	newmp->z = amx_ctof(params[5]);
 	ap->missiontypes |= newmp->type = params[6];
 	newmp->currentlyactivemissions = 0;
+	newmp->ap = ap;
 	newmp->next = NULL;
 
 	mp = ap->missionpoints;
@@ -69,7 +77,7 @@ struct missionpoint *getRandomEndPointForType(int missiontype, struct airport *b
 	int pointc = 0, leastamtofcurrentmissions = 1000000;
 	int randomap, applicableap;
 
-	randomap = applicableap = 4; // TODO actual random one
+	randomap = applicableap = 4; /* TODO actual random one */
 	while ((airports + applicableap) == blacklistedairport ||
 		!((airports + applicableap)->missiontypes & missiontype))
 	{
@@ -77,7 +85,7 @@ struct missionpoint *getRandomEndPointForType(int missiontype, struct airport *b
 		if (applicableap == airportscount) {
 			applicableap = 0;
 		}
-		if (randomap == randomap) {
+		if (randomap == applicableap) {
 			return NULL;
 		}
 	}
@@ -104,7 +112,7 @@ struct missionpoint *getRandomEndPointForType(int missiontype, struct airport *b
 		return points[0];
 	}
 
-	return points[1]; // TODO actual random
+	return points[1]; /* TODO actual random	*/
 #undef TMP_PT_SIZE
 }
 
@@ -116,15 +124,27 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	struct missionpoint *msp, *startpoint, *endpoint;
 	struct airport *ap = airports, *closestap = NULL;
 	int missiontype, i = airportscount;
+	const char *msptypename = destinationtype_none;
 	float x, y, z, dx, dy, dz, dist, shortestdistance = 0x7F800000;
 
 	amx_GetAddr(amx, params[5], &msgaddr);
 	switch (params[4]) {
-	case MODEL_DODO: missiontype = 1; break;
+	case MODEL_DODO: missiontype = 1; msptypename = destinationtype_gate; break;
 	case MODEL_SHAMAL:
-	case MODEL_BEAGLE: missiontype = 2; break;
-	case MODEL_NEVADA: missiontype = 16; break;
-	// TODO: complete me
+	case MODEL_BEAGLE: missiontype = 2; msptypename = destinationtype_gate; break;
+	case MODEL_AT400:
+	case MODEL_ANDROM: missiontype = 4; msptypename = destinationtype_gate; break;
+	case MODEL_NEVADA: missiontype = 16; msptypename = destinationtype_cargo; break;
+	case MODEL_MAVERICK:
+	case MODEL_VCNMAV:
+	case MODEL_RAINDANC:
+	case MODEL_LEVIATHN:
+	case MODEL_POLMAV:
+	case MODEL_SPARROW: missiontype = 64; msptypename = destinationtype_heliport; break;
+	case MODEL_HUNTER:
+	case MODEL_CARGOBOB: missiontype = 256; msptypename = destinationtype_heliport; break;
+	case MODEL_HYDRA:
+	case MODEL_RUSTLER: missiontype = 512; break;
 	default:
 		strcpy(msg, "This vehicle can't complete any type of missions!");
 		amx_SetUString(msgaddr, msg, sizeof(msg));
@@ -157,7 +177,7 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 		return 0;
 	}
 
-	// startpoint should be the point with 1) least amount of active missions 2) shortest distance
+	/* startpoint should be the point with 1) least amount of active missions 2) shortest distance */
 	startpoint = NULL;
 	i = 1000000;
 thisisworsethanbubblesort:
@@ -181,14 +201,13 @@ thisisworsethanbubblesort:
 	}
 
 	if (startpoint == NULL) {
-		// this should not be happening
+		/* this should not be happening	*/
 		logprintf("ERR: could not find suitable mission startpoint");
 		strcpy(msg, "Failed to find a starting point, please try again later.");
 		amx_SetUString(msgaddr, msg, sizeof(msg));
 		return 0;
 	}
 
-	// TODO: define end point :^)
 	*xaddr = amx_ftoc(startpoint->x);
 	*yaddr = amx_ftoc(startpoint->y);
 	*zaddr = amx_ftoc(startpoint->z);
@@ -199,10 +218,14 @@ thisisworsethanbubblesort:
 		amx_SetUString(msgaddr, msg, sizeof(msg));
 	}
 
-	// TODO: airport name
-	sprintf(msg, "xx from xx to xx");
+	sprintf(msg,
+	        "Flight from %s%s to %s%s",
+	        closestap->name,
+		msptypename,
+	        endpoint->ap->name,
+		msptypename);
 	amx_SetUString(msgaddr, msg, sizeof(msg));
 
-	// TODO store stuff (missiondata, queries)
+	/* TODO store stuff (missiondata, queries) */
 	return 1;
 }
