@@ -33,15 +33,14 @@ short labelids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB+ of mapping errrr */
 static void freeDbVehicleTable()
 {
 	struct dbvehicle *veh = dbvehicles;
-	while (dbvehiclealloc) {
-		dbvehiclealloc--;
+	while (dbvehiclealloc--) {
 		if (veh->ownerstring != NULL) {
 			free(veh->ownerstring);
 			veh->ownerstring = NULL;
 		}
-		free(veh);
 		veh++;
 	}
+	free(dbvehicles);
         dbvehicles = NULL;
 }
 
