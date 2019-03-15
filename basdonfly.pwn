@@ -335,8 +335,10 @@ native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type)
 //@param z current z coordinate of player, will contain z coordinate of next checkpoint if returned succesfully
 //@param vehiclemodel model of the vehicle player is in
 //@param msg buffer used to put either success or error msg in
-//@returns {@code 0} if a mission could not be started, in that case warn msg {@param msg} should be sent to player
-native Missions_Start(&Float:x, &Float:y, &Float:z, vehiclemodel, msg[])
+//@param querybuf buffer to store queries in (only to be executed when returned {@code 1}), see remarks
+//@returns {@code 0} if a mission could not be started, in that case warn msg {@param msg} should be sent to player and no queries executed
+//@remarks queries in {@param querybuf} are at positions {@code 0}, {@code 200}
+native Missions_Start(&Float:x, &Float:y, &Float:z, vehiclemodel, msg[], querybuf[])
 
 /* nav.c */
 

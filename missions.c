@@ -116,18 +116,18 @@ struct missionpoint *getRandomEndPointForType(int missiontype, struct airport *b
 #undef TMP_PT_SIZE
 }
 
-/* native Missions_Start(Float:x, Float:y, Float:z, vehiclemodel, msg[]) */
+/* native Missions_Start(Float:x, Float:y, Float:z, vehiclemodel, msg[], querybuf[]) */
 cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 {
-	cell *xaddr, *yaddr, *zaddr, *msgaddr;
-	char msg[144];
+	cell *xaddr, *yaddr, *zaddr, *bufaddr;
+	char buf[144];
 	struct missionpoint *msp, *startpoint, *endpoint;
 	struct airport *ap = airports, *closestap = NULL;
 	int missiontype, i = airportscount;
 	const char *msptypename = destinationtype_none;
 	float x, y, z, dx, dy, dz, dist, shortestdistance = 0x7F800000;
 
-	amx_GetAddr(amx, params[5], &msgaddr);
+	amx_GetAddr(amx, params[5], &bufaddr);
 	switch (params[4]) {
 	case MODEL_DODO: missiontype = 1; msptypename = destinationtype_gate; break;
 	case MODEL_SHAMAL:
@@ -146,8 +146,8 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	case MODEL_HYDRA:
 	case MODEL_RUSTLER: missiontype = 512; break;
 	default:
-		strcpy(msg, "This vehicle can't complete any type of missions!");
-		amx_SetUString(msgaddr, msg, sizeof(msg));
+		strcpy(buf, "This vehicle can't complete any type of missions!");
+		amx_SetUString(bufaddr, buf, sizeof(buf));
 		return 0;
 	}
 
@@ -172,8 +172,8 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	}
 
 	if (closestap == NULL) {
-		strcpy(msg, "There are no missions available for this type of vehicle!");
-		amx_SetUString(msgaddr, msg, sizeof(msg));
+		strcpy(buf, "There are no missions available for this type of vehicle!");
+		amx_SetUString(bufaddr, buf, sizeof(buf));
 		return 0;
 	}
 
@@ -203,8 +203,8 @@ thisisworsethanbubblesort:
 	if (startpoint == NULL) {
 		/* this should not be happening	*/
 		logprintf("ERR: could not find suitable mission startpoint");
-		strcpy(msg, "Failed to find a starting point, please try again later.");
-		amx_SetUString(msgaddr, msg, sizeof(msg));
+		strcpy(buf, "Failed to find a starting point, please try again later.");
+		amx_SetUString(bufaddr, buf, sizeof(buf));
 		return 0;
 	}
 
@@ -214,17 +214,25 @@ thisisworsethanbubblesort:
 
 	endpoint = getRandomEndPointForType(missiontype, closestap);
 	if (endpoint == NULL) {
-		strcpy(msg, "There is no available destination for this type of plane at this time.");
-		amx_SetUString(msgaddr, msg, sizeof(msg));
+		strcpy(buf, "There is no available destination for this type of plane at this time.");
+		amx_SetUString(bufaddr, buf, sizeof(buf));
 	}
 
-	sprintf(msg,
+	sprintf(buf,
 	        "Flight from %s%s to %s%s",
 	        closestap->name,
 		msptypename,
 	        endpoint->ap->name,
 		msptypename);
-	amx_SetUString(msgaddr, msg, sizeof(msg));
+	amx_SetUString(bufaddr, buf, sizeof(buf));
+
+	amx_GetAddr(amx, params[6], &bufaddr);
+	startpoint->currentlyactivemissions++;
+	endpoint->currentlyactivemissions++;
+	sprintf(buf, "UPDATE msp SET o=o+1 WHERE i=%d", startpoint->id);
+	amx_SetUString(bufaddr, buf, sizeof(buf));
+	sprintf(buf, "UPDATE msp SET p=p+1 WHERE i=%d", endpoint->id);
+	amx_SetUString(bufaddr + 200, buf, sizeof(buf));
 
 	/* TODO store stuff (missiondata, queries) */
 	return 1;
