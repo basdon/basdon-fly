@@ -104,13 +104,27 @@ FORWARD(Zones_FormatLoc);
 FORWARD(Zones_InvalidateForPlayer);
 FORWARD(Zones_UpdateForPlayer);
 
-cell AMX_NATIVE_CALL ValidateMaxPlayers(AMX *amx, cell *params)
+static int getrandomidx;
+
+cell AMX_NATIVE_CALL Validate(AMX *amx, cell *params)
 {
 	if (MAX_PLAYERS != params[1]) {
-		logprintf("[FATAL] MAX_PLAYERS mistmatch: %d (plugin) vs %d (gm)", MAX_PLAYERS, params[1]);
+		logprintf("ERR: MAX_PLAYERS mistmatch: %d (plugin) vs %d (gm)", MAX_PLAYERS, params[1]);
+		return 0;
+	}
+	if (amx_FindPublic(amx, "getrandom", &getrandomidx)) {
+		logprintf("ERR: no getrandom public function");
 		return 0;
 	}
 	return MAX_PLAYERS;
+}
+
+cell Getrandom(AMX *amx, const cell max)
+{
+	cell result;
+	amx_Push(amx, max);
+	amx_Exec(amx, &result, getrandomidx);
+	return result;
 }
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
@@ -155,7 +169,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* anticheat.c */
 	REGISTERNATIVE(Ac_FormatLog),
 	/* basdon.c */
-	REGISTERNATIVE(ValidateMaxPlayers),
+	REGISTERNATIVE(Validate),
 	/* commands.c */
 	REGISTERNATIVE(Command_Hash),
 	REGISTERNATIVE(Command_Is),

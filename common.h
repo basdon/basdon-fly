@@ -24,3 +24,5 @@ struct vec3 {
 	float x, y, z;
 };
 
+cell Getrandom(AMX *amx, const cell max);
+

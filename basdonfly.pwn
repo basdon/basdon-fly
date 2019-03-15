@@ -81,10 +81,11 @@ native Ac_FormatLog(playerid, loggedstatus, const message[], buf[])
 
 /* basdon.c */
 
-//@summary Validate the script and plugin {@code MAX_PLAYERS} has the same value
-//@param maxplayers should be {@code MAX_PLAYERS}
-//@returns {@code 0} if the values don't match
-native ValidateMaxPlayers(maxplayers)
+//@summary Validate the script and plugin
+//@param maxplayers pass {@code MAX_PLAYERS}, to check if the plugin has the same value for it
+//@returns {@code 0} if something is off
+//@remarks plugin also checks if it can find the {@link getrandom} public function
+native Validate(maxplayers)
 
 /* commands.c */
 
