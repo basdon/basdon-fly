@@ -330,6 +330,9 @@ native Login_UsePassword(playerid, buf[]);
 //@param type type of missions this mission point is for
 native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type)
 
+//@summary Compute some mission point stuff, to be done after all points have been added
+native Missions_FinalizeAddPoints()
+
 //@summary Starts a random mission for a player
 //@param x current x coordinate of player, will contain x coordinate of next checkpoint if returned succesfully
 //@param y current y coordinate of player, will contain y coordinate of next checkpoint if returned succesfully

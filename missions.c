@@ -9,15 +9,15 @@
 #include "airport.h"
 #include <string.h>
 
-const char *destinationtype_gate = " gate";
-const char *destinationtype_cargo = " cargo";
-const char *destinationtype_heliport = " heliport";
-const char *destinationtype_none = "";
+const char *destinationtype_gate = "gate";
+const char *destinationtype_cargo = "cargo";
+const char *destinationtype_heliport = "heliport";
 
 struct missionpoint {
 	unsigned short id;
 	float x, y, z;
 	unsigned int type;
+	unsigned char numberofsametype;
 	unsigned short currentlyactivemissions;
 	struct airport *ap;
 	struct missionpoint *next;
@@ -58,15 +58,39 @@ cell AMX_NATIVE_CALL Missions_AddPoint(AMX *amx, cell *params)
 	newmp->next = NULL;
 
 	mp = ap->missionpoints;
-	if (mp == NULL) {
-		ap->missionpoints = newmp;
-		return 1;
+	if (mp != NULL) {
+		newmp->next = mp;
+	}
+	ap->missionpoints = newmp;
+	return 1;
+}
+
+/* native Missions_FinalizeAddPoints() */
+cell AMX_NATIVE_CALL Missions_FinalizeAddPoints(AMX *amx, cell *params)
+{
+	struct airport *ap = airports;
+	struct missionpoint *msp;
+	int i = airportscount;
+	unsigned char gate, cargo, heliport;
+
+	while (i--) {
+		gate = cargo = heliport = 1;
+		msp = ap->missionpoints;
+		while (msp != NULL) {
+			if (msp->type & (1 | 2 | 4)) {
+				msp->numberofsametype = gate++;
+			} else if (msp->type & (8 | 16 | 32)) {
+				msp->numberofsametype = cargo++;
+			} else if (msp->type & (64 | 128 | 256)) {
+				msp->numberofsametype = heliport++;
+			} else {
+				msp->numberofsametype = 1;
+			}
+			msp = msp->next;
+		}
+		ap++;
 	}
 
-	while (mp->next != NULL) {
-		mp = mp->next;
-	}
-	mp->next = newmp;
 	return 1;
 }
 
@@ -124,7 +148,7 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	struct missionpoint *msp, *startpoint, *endpoint;
 	struct airport *ap = airports, *closestap = NULL;
 	int missiontype, i = airportscount;
-	const char *msptypename = destinationtype_none;
+	const char *msptypename = NULL;
 	float x, y, z, dx, dy, dz, dist, shortestdistance = 0x7F800000;
 
 	amx_GetAddr(amx, params[5], &bufaddr);
@@ -218,12 +242,18 @@ thisisworsethanbubblesort:
 		amx_SetUString(bufaddr, buf, sizeof(buf));
 	}
 
-	sprintf(buf,
-	        "Flight from %s%s to %s%s",
-	        closestap->name,
-		msptypename,
-	        endpoint->ap->name,
-		msptypename);
+	if (msptypename == NULL) {
+		sprintf(buf, "Flight from %s to %s", closestap->name, endpoint->ap->name);
+	} else {
+		sprintf(buf,
+			"Flight from %s %s %d to %s %s %d",
+			closestap->name,
+			msptypename,
+			startpoint->numberofsametype,
+			endpoint->ap->name,
+			msptypename,
+			endpoint->numberofsametype);
+	}
 	amx_SetUString(bufaddr, buf, sizeof(buf));
 
 	amx_GetAddr(amx, params[6], &bufaddr);
