@@ -120,7 +120,7 @@ cell AMX_NATIVE_CALL Validate(AMX *amx, cell *params)
 	return MAX_PLAYERS;
 }
 
-cell Getrandom(AMX *amx, const cell max)
+cell getrandom(AMX *amx, const cell max)
 {
 	cell result;
 	amx_Push(amx, max);

@@ -94,14 +94,14 @@ cell AMX_NATIVE_CALL Missions_FinalizeAddPoints(AMX *amx, cell *params)
 	return 1;
 }
 
-struct missionpoint *getRandomEndPointForType(int missiontype, struct airport *blacklistedairport)
+struct missionpoint *getRandomEndPointForType(AMX *amx, int missiontype, struct airport *blacklistedairport)
 {
 #define TMP_PT_SIZE 5
 	struct missionpoint *points[TMP_PT_SIZE], *msp;
 	int pointc = 0, leastamtofcurrentmissions = 1000000;
 	int randomap, applicableap;
 
-	randomap = applicableap = 4; /* TODO actual random one */
+	randomap = applicableap = getrandom(amx, airportscount);
 	while ((airports + applicableap) == blacklistedairport ||
 		!((airports + applicableap)->missiontypes & missiontype))
 	{
@@ -136,7 +136,7 @@ struct missionpoint *getRandomEndPointForType(int missiontype, struct airport *b
 		return points[0];
 	}
 
-	return points[1]; /* TODO actual random	*/
+	return points[getrandom(amx, pointc)];
 #undef TMP_PT_SIZE
 }
 
@@ -236,7 +236,7 @@ thisisworsethanbubblesort:
 	*yaddr = amx_ftoc(startpoint->y);
 	*zaddr = amx_ftoc(startpoint->z);
 
-	endpoint = getRandomEndPointForType(missiontype, closestap);
+	endpoint = getRandomEndPointForType(amx, missiontype, closestap);
 	if (endpoint == NULL) {
 		strcpy(buf, "There is no available destination for this type of plane at this time.");
 		amx_SetUString(bufaddr, buf, sizeof(buf));
