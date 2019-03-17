@@ -1,7 +1,7 @@
 
 // vim: set filetype=c ts=8 noexpandtab:
 
-/* airport.c */
+#namespace "airports.c"
 
 //@summary Inits the airport table
 //@param amount amount of airports that will be created using {@link APT_Add}
@@ -70,7 +70,7 @@ native APT_FormatInfo(aptidx, buf[])
 //@returns {@code 0} if {@param aptidx} is invalid
 native APT_FormatCodeAndName(aptidx, buf[])
 
-/* anticheat.c */
+#namespace "anticheat.c"
 
 //@summary Formats query to insert log into db
 //@param playerid player that triggered log
@@ -79,7 +79,7 @@ native APT_FormatCodeAndName(aptidx, buf[])
 //@param buf the buffer where the query will be written into
 native Ac_FormatLog(playerid, loggedstatus, const message[], buf[])
 
-/* basdon.c */
+#namespace "basdon.c"
 
 //@summary Validate the script and plugin
 //@param maxplayers pass {@code MAX_PLAYERS}, to check if the plugin has the same value for it
@@ -87,7 +87,7 @@ native Ac_FormatLog(playerid, loggedstatus, const message[], buf[])
 //@remarks plugin also checks if it can find the {@link getrandom} public function
 native Validate(maxplayers)
 
-/* commands.c */
+#namespace "commands.c"
 
 //@summary Scan the next part of {@param cmdtext} for an int
 //@param cmdtext command text
@@ -129,7 +129,7 @@ native Command_Hash(cmdtext[])
 //@remarks commands can't have spaces in them for obvious reasons
 native Command_Is(cmdtext[], const cmd[], &idx)
 
-/* dialog.c */
+#namespace "dialog.c"
 
 //@summary Queue a dialog to show later
 //@param playerid see {@link ShowPlayerDialog}
@@ -177,7 +177,7 @@ native Dialog_HasInQueue(playerid)
 //@seealso HasDialogsInQueue
 native Dialog_PopQueue(playerid, &dialogid, &style, caption[], info[], button1[], button2[], &transactionid)
 
-/* game_sa.c */
+#namespace "game_sa.c"
 
 //@summary Checks if a vehicle with specified model is an air vehicle
 //@param model the model of the vehicle to check, {@b MUST} be either a valid model or {@code 0}
@@ -194,7 +194,7 @@ native Game_IsHelicopter(model)
 //@returns {@code 0} if the model given is not a plane
 native Game_IsPlane(model)
 
-/* login.c */
+#namespace "login.c"
 
 //@summary Format query to add failed login
 //@param playerid player id
@@ -319,7 +319,7 @@ native Login_PasswordConfirmValidate(playerid, pwhash[])
 //@seealso Login_GetPassword
 native Login_UsePassword(playerid, buf[]);
 
-/* missions.c */
+#namespace "missions.c"
 
 //@summary Adds a mission point
 //@param aptindex index of the airport in the airports table this mission point belongs to
@@ -361,7 +361,7 @@ native Missions_GetState(playerid)
 //@returns {@code 0} if there's no mission associated with the given player
 native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, msg[])
 
-/* nav.c */
+#namespace "nav.c"
 
 //@summary Enables ADF navigation for a vehicle
 //@param vehicleid vehicle to enable ADF for
@@ -442,7 +442,7 @@ native Nav_ToggleILS(vehicleid)
 //@returns {@code 0} if no nav is set for this vehicle
 native Nav_Update(vehicleid, Float:x, Float:y, Float:z, Float:heading)
 
-/* panel.c */
+#namespace "panel.c"
 
 //@summary Formats text for altitude part of panel
 //@param playerid the player to update the altitude for
@@ -479,7 +479,7 @@ native Panel_FormatSpeed(playerid, speed, buf4[], buf13[], buf44[])
 //@param playerid the player to reset panel caches for
 native Panel_ResetCaches(playerid)
 
-/* playerdata.c */
+#namespace "playerdata.c"
 
 //@summary Clears login data for a player
 //@param playerid player to clear login data for
@@ -514,7 +514,7 @@ native PlayerData_SetUserId(playerid, id)
 //@returns {@code 0} if there was no player data saved for {@param playerid}
 native PlayerData_UpdateName(playerid, name[], namelen)
 
-/* playtime.c */
+#namespace "playertime.c"
 
 //@summary Formats 0-3 queries to update a user's playtimes in the db
 //@param userid the userid of the player, may be {@code -1}
@@ -530,7 +530,7 @@ native PlayerData_UpdateName(playerid, name[], namelen)
 		or contains the position of the query to update a player's online time (accurate) in {@param buf}
 native Playtime_FormatUpdateTimes(userid, sessionid, playtimetoadd, isdisconnect, buf[])
 
-/* timecyc.c */
+#namespace "timecyc.c"
 
 //@summary Gets the current weather message
 //@param buf buffer to store message in (should be {@code buf144})
@@ -546,7 +546,7 @@ native Timecyc_GetCurrentWeatherMsg(buf[]);
 //@remarks Also sets the current weather in the plugin for use in {@link Timecyc_GetCurrentWeatherMsg}
 native Timecyc_GetNextWeatherMsgQuery(nextweatherindex, bufmsg[], bufquery[])
 
-/* various.c */
+#namespace "various.c"
 
 //@summary Url encodes given string.
 //@param data string to encode
@@ -555,7 +555,7 @@ native Timecyc_GetNextWeatherMsgQuery(nextweatherindex, bufmsg[], bufquery[])
 //@returns Amount of charactes written (excluding terminating zero byte).
 native Urlencode(const data[], len, output[])
 
-/* vehicles.c */
+#namespace "vehicles.c"
 
 //@summary Adds a vehicle in the db vehicle table
 //@param dbid id of the vehicle in db
@@ -636,7 +636,7 @@ native Veh_ShouldCreateLabel(vehicleid, playerid, buf[])
 //@seealso Veh_Add
 native Veh_UpdateSlot(vehicleid, dbid)
 
-/* zones.c */
+#namespace "zones.c"
 
 //@summary Insert the zone string for player in {@param buf}
 //@param playerid the playerid of which to get the zone
