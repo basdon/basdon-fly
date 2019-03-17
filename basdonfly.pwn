@@ -337,12 +337,13 @@ native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type)
 //@param z current z coordinate of player
 //@param vehicleid id of the vehicle player is in
 //@param vv vehicle reincarnation value (see {@link vv})
+//@param vehiclehp the safe health of {@param vehicleid}
 //@param msg buffer used to put error msg in (only to be sent when returned {@code 0})
 //@param querybuf buffer to store queries in (only to be executed when returned {@code 1}), see remarks
 //@returns {@code 0} if a mission could not be started, in that case warn msg {@param msg} should be sent to player and no queries executed
 //@remarks queries in {@param querybuf} are at positions {@code 0}, {@code 200}, {@code 400}
 //@remarks next step is to execute the queries and call {@link Missions_Start} after query@{@code buf[400]} returned last inserted id
-native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, msg[], querybuf[])
+native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, Float:vehiclehp, msg[], querybuf[])
 
 //@summary Try to advance any active mission for player when they entered a race checkpoint
 //@param playerid player that entered a checkpoint

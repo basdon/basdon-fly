@@ -36,6 +36,8 @@ struct mission {
 	struct dbvehicle *veh;
 	int vehicle_reincarnation_value;
 	time_t starttime;
+	short lastvehiclehp;
+	short damagetaken;
 };
 
 static struct mission *activemission[MAX_PLAYERS];
@@ -153,7 +155,7 @@ struct missionpoint *getRandomEndPointForType(AMX *amx, int missiontype, struct 
 #undef TMP_PT_SIZE
 }
 
-/* native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, msg[], querybuf[]) */
+/* native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, vehiclehp, msg[], querybuf[]) */
 cell AMX_NATIVE_CALL Missions_Create(AMX *amx, cell *params)
 {
 	cell *bufaddr;
@@ -166,7 +168,7 @@ cell AMX_NATIVE_CALL Missions_Create(AMX *amx, cell *params)
 	const int playerid = params[1], vehicleid = params[5], vv = params[6];
 	float x, y, z, dx, dy, dz, dist, shortestdistance = 0x7F800000;
 
-	amx_GetAddr(amx, params[7], &bufaddr);
+	amx_GetAddr(amx, params[8], &bufaddr);
 	if (activemission[playerid] != NULL) {
 		sprintf(buf,
 		        WARN"You're already working! Use /s to stop your current work first ($%d fine).",
@@ -264,7 +266,7 @@ thisisworsethanbubblesort:
 		return 0;
 	}
 
-	amx_GetAddr(amx, params[8], &bufaddr);
+	amx_GetAddr(amx, params[9], &bufaddr);
 	startpoint->currentlyactivemissions++;
 	endpoint->currentlyactivemissions++;
 	sprintf(buf, "UPDATE msp SET o=o+1 WHERE i=%d", startpoint->id);
@@ -296,6 +298,8 @@ thisisworsethanbubblesort:
 	mission->veh = veh;
 	mission->vehicle_reincarnation_value = vv;
 	mission->starttime = time(NULL);
+	mission->lastvehiclehp = amx_ftoc(params[7]);
+	mission->damagetaken = 0;
 	return 1;
 }
 
