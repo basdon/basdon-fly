@@ -1,2 +1,3 @@
 * eol=lf
+*.pwn linguist-language=PAWN
 vendor/* linguist-vendored
