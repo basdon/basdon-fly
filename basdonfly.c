@@ -60,7 +60,10 @@ FORWARD(Login_UsePassword);
 /* missions.c */
 FORWARD(Missions_AddPoint);
 FORWARD(Missions_Create);
+FORWARD(Missions_EnterCheckpoint);
 FORWARD(Missions_FinalizeAddPoints);
+FORWARD(Missions_GetState);
+FORWARD(Missions_PostLoad);
 FORWARD(Missions_Start);
 /* nav.c */
 FORWARD(Nav_EnableADF);
@@ -211,7 +214,10 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* missions.c */
 	REGISTERNATIVE(Missions_AddPoint),
 	REGISTERNATIVE(Missions_Create),
+	REGISTERNATIVE(Missions_EnterCheckpoint),
 	REGISTERNATIVE(Missions_FinalizeAddPoints),
+	REGISTERNATIVE(Missions_GetState),
+	REGISTERNATIVE(Missions_PostLoad),
 	REGISTERNATIVE(Missions_Start),
 	/* nav.c */
 	REGISTERNATIVE(Nav_EnableADF),

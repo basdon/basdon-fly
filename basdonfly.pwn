@@ -336,12 +336,28 @@ native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type)
 //@param y current y coordinate of player
 //@param z current z coordinate of player
 //@param vehicleid id of the vehicle player is in
+//@param vv vehicle reincarnation value (see {@link vv})
 //@param msg buffer used to put error msg in (only to be sent when returned {@code 0})
 //@param querybuf buffer to store queries in (only to be executed when returned {@code 1}), see remarks
 //@returns {@code 0} if a mission could not be started, in that case warn msg {@param msg} should be sent to player and no queries executed
 //@remarks queries in {@param querybuf} are at positions {@code 0}, {@code 200}, {@code 400}
 //@remarks next step is to execute the queries and call {@link Missions_Start} after query@{@code buf[400]} returned last inserted id
-native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, msg[], querybuf[])
+native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, msg[], querybuf[])
+
+//@summary Try to advance any active mission for player when they entered a race checkpoint
+//@param playerid player that entered a checkpoint
+//@param vehicleid vehicle id the player is in (may be {@code 0})
+//@param vv vehicle reincarnation value (see {@link vv})
+//@param x x velocity of the vehicle
+//@param y y velocity of the vehicle
+//@param z z velocity of the vehicle
+//@param errmsg buffer to store errormessage in to be sent if returnvalue is {@code MISSION_ENTERCHECKPOINTRES_ERR}
+//@returns {@code 0} if nothing should happen or one of <ul>\
+	<li>{@code MISSION_ENTERCHECKPOINTRES_LOAD} if player is now loading cargo</li>\
+	<li>{@code MISSION_ENTERCHECKPOINTRES_UNLOAD} if player is now unloading cargo</li>\
+	<li>{@code MISSION_ENTERCHECKPOINTRES_ERR} if vehicle does not match for player's mission, send {@param errmsg} to player</li></ul>
+//@remarks also checks if {@param vehicleid} is valid
+native Missions_EnterCheckpoint(playerid, vehicleid, vv, Float:x, Float:y, Float:z, errmsg[])
 
 //@summary Compute some mission point stuff, to be done after all points have been added
 native Missions_FinalizeAddPoints()
@@ -350,6 +366,15 @@ native Missions_FinalizeAddPoints()
 //@param player to get the mission state of
 //@returns {@code -1} if not in a mission, or one of the flight-statuses.txt constants
 native Missions_GetState(playerid)
+
+//@summary Advances mission stage after load, gets coordinates for unload point and update queries
+//@param playerid the player that has finished loading
+//@param x will contain x coordinate of unloading point on return
+//@param y will contain y coordinate of unloading point on return
+//@param z will contain z coordinate of unloading point on return
+//@param buf will contain update query to execute
+//@returns {@code 0} if something is wrong and nothing should happen
+native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z, buf[])
 
 //@summary Starts a mission for a player after the mission id has been retrieved
 //@param playerid the player to start the mission for

@@ -34,6 +34,7 @@ struct mission {
 	struct missionpoint *startpoint, *endpoint;
 	int passenger_satisfaction;
 	struct dbvehicle *veh;
+	int vehicle_reincarnation_value;
 	time_t starttime;
 };
 
@@ -135,7 +136,7 @@ struct missionpoint *getRandomEndPointForType(AMX *amx, int missiontype, struct 
 #undef TMP_PT_SIZE
 }
 
-/* native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, msg[], querybuf[]) */
+/* native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, msg[], querybuf[]) */
 cell AMX_NATIVE_CALL Missions_Create(AMX *amx, cell *params)
 {
 	cell *bufaddr;
@@ -145,10 +146,10 @@ cell AMX_NATIVE_CALL Missions_Create(AMX *amx, cell *params)
 	struct dbvehicle *veh;
 	struct mission *mission;
 	int missiontype, i = airportscount;
-	const int playerid = params[1], vehicleid = params[5];
+	const int playerid = params[1], vehicleid = params[5], vv = params[6];
 	float x, y, z, dx, dy, dz, dist, shortestdistance = 0x7F800000;
 
-	amx_GetAddr(amx, params[6], &bufaddr);
+	amx_GetAddr(amx, params[7], &bufaddr);
 	if (activemission[playerid] != NULL) {
 		sprintf(buf,
 		        WARN"You're already working! Use /s to stop your current work first ($%d fine).",
@@ -246,7 +247,7 @@ thisisworsethanbubblesort:
 		return 0;
 	}
 
-	amx_GetAddr(amx, params[7], &bufaddr);
+	amx_GetAddr(amx, params[8], &bufaddr);
 	startpoint->currentlyactivemissions++;
 	endpoint->currentlyactivemissions++;
 	sprintf(buf, "UPDATE msp SET o=o+1 WHERE i=%d", startpoint->id);
@@ -276,8 +277,63 @@ thisisworsethanbubblesort:
 	mission->endpoint = endpoint;
 	mission->passenger_satisfaction = 100;
 	mission->veh = veh;
+	mission->vehicle_reincarnation_value = vv;
 	mission->starttime = time(NULL);
 	return 1;
+}
+
+/* native Missions_EnterCheckpoint(playerid, vehicleid, vv, x, y, z, errmsg[]) */
+cell AMX_NATIVE_CALL Missions_EnterCheckpoint(AMX *amx, cell *params)
+{
+	const int playerid = params[1], vehicleid = params[2], vv = params[3];
+	float x, y, z;
+	struct mission *mission;
+	struct dbvehicle *veh;
+	cell *addr;
+	char msg[144];
+
+	if ((mission = activemission[playerid]) == NULL) {
+		return 0;
+	}
+
+	if (vehicleid == 0 ||
+		vv != mission->vehicle_reincarnation_value ||
+		(veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
+		veh->id != mission->veh->id)
+	{
+		strcpy(msg, WARN"You must be in the starting vehicle to continue!");
+		goto err;
+	}
+
+	x = amx_ctof(params[4]);
+	y = amx_ctof(params[5]);
+	z = amx_ctof(params[6]);
+
+#if VEL_VER != 2
+#error "recalc this"
+#endif
+	if (x * x + y * y + z * z > /*(35/VEL_TO_KTS_VAL)^2*/0.1307962) {
+		strcpy(msg, WARN"You need to slow down to load/unload! Re-enter the checkpoint.");
+		goto err;
+	}
+
+	switch (mission->stage) {
+	case MISSION_STAGE_PRELOAD:
+		mission->stage = MISSION_STAGE_LOAD;
+		return MISSION_ENTERCHECKPOINTRES_LOAD;
+	case MISSION_STAGE_FLIGHT:
+		mission->stage = MISSION_STAGE_UNLOAD;
+		return MISSION_ENTERCHECKPOINTRES_UNLOAD;
+	default:
+		logprintf("ERR: player entered mission checkpoint in invalid stage: %d",
+		          mission->stage);
+		return 0;
+	}
+
+err:
+	amx_GetAddr(amx, params[7], &addr);
+	amx_SetUString(addr, msg, sizeof(msg));
+	return MISSION_ENTERCHECKPOINTRES_ERR;
 }
 
 /* native Missions_FinalizeAddPoints() */
@@ -317,6 +373,35 @@ cell AMX_NATIVE_CALL Missions_GetState(AMX *amx, cell *params)
 		return mission->stage;
 	}
 	return -1;
+}
+
+/* native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z buf[]) */
+cell AMX_NATIVE_CALL Missions_PostLoad(AMX *amx, cell *params)
+{
+	const int playerid = params[1];
+	struct mission *mission;
+	cell *addr;
+	char buf[144];
+
+	if ((mission = activemission[playerid]) == NULL ||
+		mission->stage != MISSION_STAGE_LOAD)
+	{
+		return 0;
+	}
+
+	mission->stage = MISSION_STAGE_FLIGHT;
+	sprintf(buf,
+	        "UPDATE flg SET tload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP() WHERE id=%d",
+	        mission->id);
+	amx_GetAddr(amx, params[2], &addr);
+	*addr = amx_ftoc(mission->endpoint->x);
+	amx_GetAddr(amx, params[3], &addr);
+	*addr = amx_ftoc(mission->endpoint->y);
+	amx_GetAddr(amx, params[4], &addr);
+	*addr = amx_ftoc(mission->endpoint->z);
+	amx_GetAddr(amx, params[5], &addr);
+	amx_SetUString(addr, buf, sizeof(buf));
+	return 1;
 }
 
 /* native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, msg[]) */
