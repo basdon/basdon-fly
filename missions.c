@@ -90,27 +90,43 @@ cell AMX_NATIVE_CALL Missions_AddPoint(AMX *amx, cell *params)
 	return 1;
 }
 
-struct missionpoint *getRandomEndPointForType(AMX *amx, int missiontype, struct airport *blacklistedairport)
+struct airport *getRandomAirportForType(AMX *amx, int missiontype, struct airport *blacklistedairport)
 {
-#define TMP_PT_SIZE 5
-	struct missionpoint *points[TMP_PT_SIZE], *msp;
-	int pointc = 0, leastamtofcurrentmissions = 1000000;
-	int randomap, applicableap;
+	struct airport *ap = airports, **aps;
+	int apsc = 0;
+	int i = airportscount;
 
-	randomap = applicableap = getrandom(amx, airportscount);
-	while ((airports + applicableap) == blacklistedairport ||
-		!((airports + applicableap)->missiontypes & missiontype))
-	{
-		applicableap++;
-		if (applicableap == airportscount) {
-			applicableap = 0;
+	aps = malloc(sizeof(aps) * airportscount);
+
+	while (i--) {
+		if (ap != blacklistedairport && ap->missiontypes & missiontype) {
+			aps[apsc++] = ap;
 		}
-		if (randomap == applicableap) {
-			return NULL;
-		}
+		ap++;
 	}
 
-	msp = (airports + applicableap)->missionpoints;
+	switch (apsc) {
+	case 0: ap = NULL; break;
+	case 1: ap = aps[0]; break;
+	default: ap = aps[getrandom(amx, apsc)]; break;
+	}
+
+	free(aps);
+	return ap;
+}
+
+struct missionpoint *getRandomEndPointForType(AMX *amx, int missiontype, struct airport *blacklistedairport)
+{
+#define TMP_PT_SIZE 7
+	struct missionpoint *points[TMP_PT_SIZE], *msp;
+	int pointc = 0, leastamtofcurrentmissions = 1000000;
+	struct airport *airport = getRandomAirportForType(amx, missiontype, blacklistedairport);
+
+	if (airport == NULL) {
+		return NULL;
+	}
+
+	msp = airport->missionpoints;
 	while (msp != NULL) {
 		if (msp->type & missiontype) {
 			if (msp->currentlyactivemissions < leastamtofcurrentmissions) {
@@ -125,6 +141,7 @@ struct missionpoint *getRandomEndPointForType(AMX *amx, int missiontype, struct 
 	}
 
 	if (pointc == 0) {
+		/* should not happen */
 		return NULL;
 	}
 
