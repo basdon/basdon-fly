@@ -453,16 +453,20 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 
 	if (msptypename == NULL) {
 		sprintf(msg,
-		        "Flight from %s to %s",
+		        "Flight from %s (%s) to %s (%s)",
 		        mission->startpoint->ap->name,
-		        mission->endpoint->ap->name);
+		        mission->startpoint->ap->beacon,
+		        mission->endpoint->ap->name,
+		        mission->endpoint->ap->beacon);
 	} else {
 		sprintf(msg,
-			"Flight from %s %s %d to %s %s %d",
+			"Flight from %s (%s) %s %d to %s (%s) %s %d",
 			mission->startpoint->ap->name,
+			mission->startpoint->ap->beacon,
 			msptypename,
 			mission->startpoint->numberofsametype,
 			mission->endpoint->ap->name,
+			mission->endpoint->ap->beacon,
 			msptypename,
 			mission->endpoint->numberofsametype);
 	}
