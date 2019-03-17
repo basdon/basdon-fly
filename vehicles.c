@@ -9,25 +9,11 @@
 #include <string.h>
 #include <math.h>
 #include "game_sa.h"
-
-struct dbvehicle {
-	int id;
-	int model;
-	int owneruserid;
-	float x, y, z, r;
-	int col1, col2;
-	char *ownerstring;
-	unsigned char ownerstringowneroffset;
-	short spawnedvehicleid;
-};
-
-struct vehicle {
-	struct dbvehicle *dbvehicle;
-};
+#include "vehicles.h"
 
 static struct dbvehicle *dbvehicles;
 int dbvehiclenextid, dbvehiclealloc;
-static struct vehicle gamevehicles[MAX_VEHICLES];
+struct vehicle gamevehicles[MAX_VEHICLES];
 short labelids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB+ of mapping errrr */
 
 static void freeDbVehicleTable()

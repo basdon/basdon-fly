@@ -13,3 +13,4 @@ struct playerdata {
 
 extern struct playerdata *pdata[MAX_PLAYERS];
 
+extern void useridornull(int playerid, char *storage);

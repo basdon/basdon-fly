@@ -77,6 +77,7 @@ cell AMX_NATIVE_CALL APT_Add(AMX *amx, cell *params)
 	cell *addr;
 	struct airport *ap = airports + params[1];
 
+	ap->id = params[1];
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(ap->code, addr, sizeof(ap->code));
 	ap->enabled = params[3];

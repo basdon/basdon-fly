@@ -330,19 +330,36 @@ native Login_UsePassword(playerid, buf[]);
 //@param type type of missions this mission point is for
 native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type)
 
+//@summary Creates a random mission for a player
+//@param playerid player to create a random mission for
+//@param x current x coordinate of player
+//@param y current y coordinate of player
+//@param z current z coordinate of player
+//@param vehicleid id of the vehicle player is in
+//@param msg buffer used to put error msg in (only to be sent when returned {@code 0})
+//@param querybuf buffer to store queries in (only to be executed when returned {@code 1}), see remarks
+//@returns {@code 0} if a mission could not be started, in that case warn msg {@param msg} should be sent to player and no queries executed
+//@remarks queries in {@param querybuf} are at positions {@code 0}, {@code 200}, {@code 400}
+//@remarks next step is to execute the queries and call {@link Missions_Start} after query@{@code buf[400]} returned last inserted id
+native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, msg[], querybuf[])
+
 //@summary Compute some mission point stuff, to be done after all points have been added
 native Missions_FinalizeAddPoints()
 
-//@summary Starts a random mission for a player
-//@param x current x coordinate of player, will contain x coordinate of next checkpoint if returned succesfully
-//@param y current y coordinate of player, will contain y coordinate of next checkpoint if returned succesfully
-//@param z current z coordinate of player, will contain z coordinate of next checkpoint if returned succesfully
-//@param vehiclemodel model of the vehicle player is in
-//@param msg buffer used to put either success or error msg in
-//@param querybuf buffer to store queries in (only to be executed when returned {@code 1}), see remarks
-//@returns {@code 0} if a mission could not be started, in that case warn msg {@param msg} should be sent to player and no queries executed
-//@remarks queries in {@param querybuf} are at positions {@code 0}, {@code 200}
-native Missions_Start(&Float:x, &Float:y, &Float:z, vehiclemodel, msg[], querybuf[])
+//@summary Get mission state of a player
+//@param player to get the mission state of
+//@returns {@code -1} if not in a mission, or one of the flight-statuses.txt constants
+native Missions_GetState(playerid)
+
+//@summary Starts a mission for a player after the mission id has been retrieved
+//@param playerid the player to start the mission for
+//@param missionid the mission id
+//@param x will contain loading point x coordinate on return
+//@param y will contain loading point y coordinate on return
+//@param z will contain loading point z coordinate on return
+//@param msg buffer to store mission start msg in, to be sent to the player
+//@returns {@code 0} if there's no mission associated with the given player
+native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, msg[])
 
 /* nav.c */
 

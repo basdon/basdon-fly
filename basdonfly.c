@@ -59,6 +59,7 @@ FORWARD(Login_PasswordConfirmValidate);
 FORWARD(Login_UsePassword);
 /* missions.c */
 FORWARD(Missions_AddPoint);
+FORWARD(Missions_Create);
 FORWARD(Missions_FinalizeAddPoints);
 FORWARD(Missions_Start);
 /* nav.c */
@@ -136,6 +137,7 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
 	void game_sa_init(), login_init(), dialog_init(), zones_init(), nav_init();
+	void missions_init();
 
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
@@ -146,6 +148,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	pdata_init();
 	zones_init();
 	nav_init();
+	missions_init();
 
 	return 1;
 }
@@ -207,6 +210,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Login_UsePassword),
 	/* missions.c */
 	REGISTERNATIVE(Missions_AddPoint),
+	REGISTERNATIVE(Missions_Create),
 	REGISTERNATIVE(Missions_FinalizeAddPoints),
 	REGISTERNATIVE(Missions_Start),
 	/* nav.c */

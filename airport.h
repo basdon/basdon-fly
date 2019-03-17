@@ -12,6 +12,7 @@ struct runway {
 };
 
 struct airport {
+	int id;
 	struct vec3 pos;
 	char code[4 + 1];
 	char enabled;

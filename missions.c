@@ -6,8 +6,12 @@
 #endif
 
 #include "common.h"
-#include "airport.h"
+#include <math.h>
 #include <string.h>
+#include <time.h>
+#include "airport.h"
+#include "playerdata.h"
+#include "vehicles.h"
 
 const char *destinationtype_gate = "gate";
 const char *destinationtype_cargo = "cargo";
@@ -22,6 +26,26 @@ struct missionpoint {
 	struct airport *ap;
 	struct missionpoint *next;
 };
+
+struct mission {
+	int id;
+	int stage;
+	int missiontype;
+	struct missionpoint *startpoint, *endpoint;
+	int passenger_satisfaction;
+	struct dbvehicle *veh;
+	time_t starttime;
+};
+
+static struct mission *activemission[MAX_PLAYERS];
+
+void missions_init()
+{
+	int i = MAX_PLAYERS;
+	while (i--) {
+		activemission[i] = NULL;
+	}
+}
 
 void missions_freepoints()
 {
@@ -62,35 +86,6 @@ cell AMX_NATIVE_CALL Missions_AddPoint(AMX *amx, cell *params)
 		newmp->next = mp;
 	}
 	ap->missionpoints = newmp;
-	return 1;
-}
-
-/* native Missions_FinalizeAddPoints() */
-cell AMX_NATIVE_CALL Missions_FinalizeAddPoints(AMX *amx, cell *params)
-{
-	struct airport *ap = airports;
-	struct missionpoint *msp;
-	int i = airportscount;
-	unsigned char gate, cargo, heliport;
-
-	while (i--) {
-		gate = cargo = heliport = 1;
-		msp = ap->missionpoints;
-		while (msp != NULL) {
-			if (msp->type & (1 | 2 | 4)) {
-				msp->numberofsametype = gate++;
-			} else if (msp->type & (8 | 16 | 32)) {
-				msp->numberofsametype = cargo++;
-			} else if (msp->type & (64 | 128 | 256)) {
-				msp->numberofsametype = heliport++;
-			} else {
-				msp->numberofsametype = 1;
-			}
-			msp = msp->next;
-		}
-		ap++;
-	}
-
 	return 1;
 }
 
@@ -140,47 +135,59 @@ struct missionpoint *getRandomEndPointForType(AMX *amx, int missiontype, struct 
 #undef TMP_PT_SIZE
 }
 
-/* native Missions_Start(Float:x, Float:y, Float:z, vehiclemodel, msg[], querybuf[]) */
-cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
+/* native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, msg[], querybuf[]) */
+cell AMX_NATIVE_CALL Missions_Create(AMX *amx, cell *params)
 {
-	cell *xaddr, *yaddr, *zaddr, *bufaddr;
-	char buf[144];
+	cell *bufaddr;
+	char buf[255], tmpuseridornullbuf[12];
 	struct missionpoint *msp, *startpoint, *endpoint;
 	struct airport *ap = airports, *closestap = NULL;
+	struct dbvehicle *veh;
+	struct mission *mission;
 	int missiontype, i = airportscount;
-	const char *msptypename = NULL;
+	const int playerid = params[1], vehicleid = params[5];
 	float x, y, z, dx, dy, dz, dist, shortestdistance = 0x7F800000;
 
-	amx_GetAddr(amx, params[5], &bufaddr);
-	switch (params[4]) {
-	case MODEL_DODO: missiontype = 1; msptypename = destinationtype_gate; break;
+	amx_GetAddr(amx, params[6], &bufaddr);
+	if (activemission[playerid] != NULL) {
+		sprintf(buf,
+		        WARN"You're already working! Use /s to stop your current work first ($%d fine).",
+                        MISSION_CANCEL_FINE);
+		amx_SetUString(bufaddr, buf, sizeof(buf));
+		return 0;
+	}
+
+	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL) {
+		goto unknownvehicle;
+	}
+
+	switch (veh->model) {
+	case MODEL_DODO: missiontype = 1; break;
 	case MODEL_SHAMAL:
-	case MODEL_BEAGLE: missiontype = 2; msptypename = destinationtype_gate; break;
+	case MODEL_BEAGLE: missiontype = 2; break;
 	case MODEL_AT400:
-	case MODEL_ANDROM: missiontype = 4; msptypename = destinationtype_gate; break;
-	case MODEL_NEVADA: missiontype = 16; msptypename = destinationtype_cargo; break;
+	case MODEL_ANDROM: missiontype = 4; break;
+	case MODEL_NEVADA: missiontype = 16; break;
 	case MODEL_MAVERICK:
 	case MODEL_VCNMAV:
 	case MODEL_RAINDANC:
 	case MODEL_LEVIATHN:
 	case MODEL_POLMAV:
-	case MODEL_SPARROW: missiontype = 64; msptypename = destinationtype_heliport; break;
+	case MODEL_SPARROW: missiontype = 64; break;
 	case MODEL_HUNTER:
-	case MODEL_CARGOBOB: missiontype = 256; msptypename = destinationtype_heliport; break;
+	case MODEL_CARGOBOB: missiontype = 256; break;
 	case MODEL_HYDRA:
 	case MODEL_RUSTLER: missiontype = 512; break;
 	default:
-		strcpy(buf, "This vehicle can't complete any type of missions!");
+unknownvehicle:
+		strcpy(buf, WARN"This vehicle can't complete any type of missions!");
 		amx_SetUString(bufaddr, buf, sizeof(buf));
 		return 0;
 	}
 
-	amx_GetAddr(amx, params[1], &xaddr);
-	amx_GetAddr(amx, params[2], &yaddr);
-	amx_GetAddr(amx, params[3], &zaddr);
-	x = amx_ctof(*xaddr);
-	y = amx_ctof(*yaddr);
-	z = amx_ctof(*zaddr);
+	x = amx_ctof(params[2]);
+	y = amx_ctof(params[3]);
+	z = amx_ctof(params[4]);
 
 	while (i--) {
 		if (ap->missiontypes & missiontype) {
@@ -196,7 +203,7 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	}
 
 	if (closestap == NULL) {
-		strcpy(buf, "There are no missions available for this type of vehicle!");
+		strcpy(buf, WARN"There are no missions available for this type of vehicle!");
 		amx_SetUString(bufaddr, buf, sizeof(buf));
 		return 0;
 	}
@@ -227,43 +234,138 @@ thisisworsethanbubblesort:
 	if (startpoint == NULL) {
 		/* this should not be happening	*/
 		logprintf("ERR: could not find suitable mission startpoint");
-		strcpy(buf, "Failed to find a starting point, please try again later.");
+		strcpy(buf, WARN"Failed to find a starting point, please try again later.");
 		amx_SetUString(bufaddr, buf, sizeof(buf));
 		return 0;
 	}
 
-	*xaddr = amx_ftoc(startpoint->x);
-	*yaddr = amx_ftoc(startpoint->y);
-	*zaddr = amx_ftoc(startpoint->z);
-
 	endpoint = getRandomEndPointForType(amx, missiontype, closestap);
 	if (endpoint == NULL) {
-		strcpy(buf, "There is no available destination for this type of plane at this time.");
+		strcpy(buf, WARN"There is no available destination for this type of plane at this time.");
 		amx_SetUString(bufaddr, buf, sizeof(buf));
+		return 0;
 	}
 
-	if (msptypename == NULL) {
-		sprintf(buf, "Flight from %s to %s", closestap->name, endpoint->ap->name);
-	} else {
-		sprintf(buf,
-			"Flight from %s %s %d to %s %s %d",
-			closestap->name,
-			msptypename,
-			startpoint->numberofsametype,
-			endpoint->ap->name,
-			msptypename,
-			endpoint->numberofsametype);
-	}
-	amx_SetUString(bufaddr, buf, sizeof(buf));
-
-	amx_GetAddr(amx, params[6], &bufaddr);
+	amx_GetAddr(amx, params[7], &bufaddr);
 	startpoint->currentlyactivemissions++;
 	endpoint->currentlyactivemissions++;
 	sprintf(buf, "UPDATE msp SET o=o+1 WHERE i=%d", startpoint->id);
 	amx_SetUString(bufaddr, buf, sizeof(buf));
 	sprintf(buf, "UPDATE msp SET p=p+1 WHERE i=%d", endpoint->id);
 	amx_SetUString(bufaddr + 200, buf, sizeof(buf));
+	useridornull(playerid, tmpuseridornullbuf);
+	dx = startpoint->x - endpoint->x;
+	dy = startpoint->y - endpoint->y;
+	sprintf(buf,
+	        "INSERT INTO flg(player,vehicle,missiontype,fapt,tapt,fmsp,tmsp,distance,tstart,tlastupdate) "
+			"VALUES(%s,%d,%d,%d,%d,%d,%d,%.4f,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())",
+	        tmpuseridornullbuf,
+		veh->id,
+		missiontype,
+		startpoint->ap->id,
+		endpoint->ap->id,
+		startpoint->id,
+		endpoint->id,
+		sqrt(dx * dx + dy * dy));
+	amx_SetUString(bufaddr + 400, buf, sizeof(buf));
+	activemission[playerid] = mission = malloc(sizeof(struct mission));
+	mission->id = -1;
+	mission->stage = MISSION_STAGE_CREATE;
+	mission->missiontype = missiontype;
+	mission->startpoint = startpoint;
+	mission->endpoint = endpoint;
+	mission->passenger_satisfaction = 100;
+	mission->veh = veh;
+	mission->starttime = time(NULL);
+	return 1;
+}
 
-	/* TODO store stuff (missiondata, queries) */
+/* native Missions_FinalizeAddPoints() */
+cell AMX_NATIVE_CALL Missions_FinalizeAddPoints(AMX *amx, cell *params)
+{
+	struct airport *ap = airports;
+	struct missionpoint *msp;
+	int i = airportscount;
+	unsigned char gate, cargo, heliport;
+
+	while (i--) {
+		gate = cargo = heliport = 1;
+		msp = ap->missionpoints;
+		while (msp != NULL) {
+			if (msp->type & (1 | 2 | 4)) {
+				msp->numberofsametype = gate++;
+			} else if (msp->type & (8 | 16 | 32)) {
+				msp->numberofsametype = cargo++;
+			} else if (msp->type & (64 | 128 | 256)) {
+				msp->numberofsametype = heliport++;
+			} else {
+				msp->numberofsametype = 1;
+			}
+			msp = msp->next;
+		}
+		ap++;
+	}
+
+	return 1;
+}
+
+/* native Missions_GetState(playerid) */
+cell AMX_NATIVE_CALL Missions_GetState(AMX *amx, cell *params)
+{
+	struct mission *mission = activemission[params[1]];
+	if (mission != NULL) {
+		return mission->stage;
+	}
+	return -1;
+}
+
+/* native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, msg[]) */
+cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
+{
+	struct mission *mission = activemission[params[1]];
+	cell *addr;
+	char msg[144];
+	const char *msptypename = NULL;
+
+	if (mission == NULL) {
+		return 0;
+	}
+
+	mission->id = params[2];
+	mission->stage = MISSION_STAGE_PRELOAD;
+	amx_GetAddr(amx, params[3], &addr);
+	*addr = amx_ftoc(mission->startpoint->x);
+	amx_GetAddr(amx, params[4], &addr);
+	*addr = amx_ftoc(mission->startpoint->y);
+	amx_GetAddr(amx, params[5], &addr);
+	*addr = amx_ftoc(mission->startpoint->z);
+
+	switch (mission->missiontype) {
+	case 1: msptypename = destinationtype_gate; break;
+	case 2: msptypename = destinationtype_gate; break;
+	case 4: msptypename = destinationtype_gate; break;
+	case 16: msptypename = destinationtype_cargo; break;
+	case 64: msptypename = destinationtype_heliport; break;
+	case 256: msptypename = destinationtype_heliport; break;
+	}
+
+	if (msptypename == NULL) {
+		sprintf(msg,
+		        "Flight from %s to %s",
+		        mission->startpoint->ap->name,
+		        mission->endpoint->ap->name);
+	} else {
+		sprintf(msg,
+			"Flight from %s %s %d to %s %s %d",
+			mission->startpoint->ap->name,
+			msptypename,
+			mission->startpoint->numberofsametype,
+			mission->endpoint->ap->name,
+			msptypename,
+			mission->endpoint->numberofsametype);
+	}
+	amx_GetAddr(amx, params[6], &addr);
+	amx_SetUString(addr, msg, sizeof(msg));
+
 	return 1;
 }

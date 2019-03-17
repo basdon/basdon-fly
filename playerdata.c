@@ -39,6 +39,15 @@ void setName(struct playerdata *data, AMX *amx, cell addrparam, int namelen)
 	}
 }
 
+void useridornull(int playerid, char *storage)
+{
+	if (pdata[playerid] == NULL || pdata[playerid]->userid < 1) {
+		strcpy(storage, "NULL");
+		return;
+	}
+	sprintf(storage, "%d", pdata[playerid]->userid);
+}
+
 /* native PlayerData_Clear(playerid) */
 cell AMX_NATIVE_CALL PlayerData_Clear(AMX *amx, cell *params)
 {
