@@ -368,6 +368,10 @@ native Missions_FinalizeAddPoints()
 //@returns {@code -1} if not in a mission, or one of the flight-statuses.txt constants
 native Missions_GetState(playerid)
 
+//@summary Let mission logic know the weather has been changed, to give dangerous weather bonuses when appropriate
+//@param newweatherid the new weather
+native Missions_OnWeatherChanged(newweatherid)
+
 //@summary Advances mission stage after load, gets coordinates for unload point and update queries
 //@param playerid the player that has finished loading
 //@param x will contain x coordinate of unloading point on return

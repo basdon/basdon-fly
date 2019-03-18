@@ -38,6 +38,7 @@ struct mission {
 	time_t starttime;
 	short lastvehiclehp;
 	short damagetaken;
+	short weatherbonus;
 };
 
 static struct mission *activemission[MAX_PLAYERS];
@@ -300,6 +301,7 @@ thisisworsethanbubblesort:
 	mission->starttime = time(NULL);
 	mission->lastvehiclehp = amx_ftoc(params[7]);
 	mission->damagetaken = 0;
+	mission->weatherbonus = 0;
 	return 1;
 }
 
@@ -394,6 +396,28 @@ cell AMX_NATIVE_CALL Missions_GetState(AMX *amx, cell *params)
 		return mission->stage;
 	}
 	return -1;
+}
+
+/* native Missions_OnWeatherChanged(newweatherid) */
+cell AMX_NATIVE_CALL Missions_OnWeatherChanged(AMX *amx, cell *params)
+{
+	int bonusvalue, i = MAX_PLAYERS;
+
+	switch (params[1]) {
+	case WEATHER_SF_RAINY:
+	case WEATHER_CS_RAINY: bonusvalue = MISSION_WEATHERBONUS_RAINY; break;
+	case WEATHER_SF_FOGGY:
+	case WEATHER_UNDERWATER: bonusvalue = MISSION_WEATHERBONUS_FOGGY; break;
+	case WEATHER_DE_SANDSTORMS: bonusvalue = MISSION_WEATHERBONUS_SANDSTORM; break;
+	default: return 0;
+	}
+	bonusvalue += getrandom(amx, MISSION_WEATHERBONUS_DEVIATION);
+	while (i--) {
+		if (activemission[i] != NULL) {
+			activemission[i]->weatherbonus += bonusvalue;
+		}
+	}
+	return 1;
 }
 
 /* native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z buf[]) */
