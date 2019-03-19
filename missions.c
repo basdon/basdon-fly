@@ -325,7 +325,7 @@ cell AMX_NATIVE_CALL Missions_EnterCheckpoint(AMX *amx, cell *params)
 		veh->id != mission->veh->id)
 	{
 		strcpy(msg, WARN"You must be in the starting vehicle to continue!");
-		goto err;
+		goto exit_set_errmsg;
 	}
 
 	x = amx_ctof(params[4]);
@@ -337,7 +337,7 @@ cell AMX_NATIVE_CALL Missions_EnterCheckpoint(AMX *amx, cell *params)
 #endif
 	if (x * x + y * y + z * z > /*(35/VEL_TO_KTS_VAL)^2*/0.1307962) {
 		strcpy(msg, WARN"You need to slow down to load/unload! Re-enter the checkpoint.");
-		goto err;
+		goto exit_set_errmsg;
 	}
 
 	switch (mission->stage) {
@@ -353,7 +353,7 @@ cell AMX_NATIVE_CALL Missions_EnterCheckpoint(AMX *amx, cell *params)
 		return 0;
 	}
 
-err:
+exit_set_errmsg:
 	amx_GetAddr(amx, params[7], &addr);
 	amx_SetUString(addr, msg, sizeof(msg));
 	return MISSION_ENTERCHECKPOINTRES_ERR;
