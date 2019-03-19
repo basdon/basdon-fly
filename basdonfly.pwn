@@ -526,6 +526,13 @@ native PlayerData_Clear(playerid)
 //@seealso PlayerData_Clear
 native PlayerData_Init(playerid, ip[], name[], namelen)
 
+//@summary Formats query to update player's basic data
+//@param userid user id of the player to update stuff for
+//@param score score of the player to store
+//@param money money of the player to store
+//@param buf buffer to store query in
+native PlayerData_FormatUpdateQuery(userid, score, money, buf[])
+
 //@summary Updates the player's user ID
 //@param playerid player
 //@param id userid of the player

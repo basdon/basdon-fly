@@ -40,6 +40,7 @@
 
 /* login.c / login.pwn */
 #define PW_HASH_LENGTH (65) /* including zero term */
+#define MONEY_DEFAULTAMOUNT 15000
 
 /* game_sa.c / game_sa.pwn, global */
 #define MODEL_LANDSTAL (400)
