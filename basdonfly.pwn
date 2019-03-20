@@ -368,6 +368,13 @@ native Missions_FinalizeAddPoints()
 //@returns {@code -1} if not in a mission, or one of the flight-statuses.txt constants
 native Missions_GetState(playerid)
 
+//@summary Let the mission logic know a vehicle was repaired, to know the total damage inflicted during flight
+//@param playerid the player that repaired the vehicle, this might not be the driver but the mission script can take it
+//@param vehicleid the vehicle that was repaired
+//@param oldhp old hp of the vehicle
+//@param newhp new hp of the vehicle
+native Missions_OnVehicleRepaired(playerid, vehicleid, Float:oldhp, Float:newhp)
+
 //@summary Let mission logic know the weather has been changed, to give dangerous weather bonuses when appropriate
 //@param newweatherid the new weather
 native Missions_OnWeatherChanged(newweatherid)

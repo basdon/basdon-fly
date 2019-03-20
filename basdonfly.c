@@ -63,6 +63,7 @@ FORWARD(Missions_Create);
 FORWARD(Missions_EnterCheckpoint);
 FORWARD(Missions_FinalizeAddPoints);
 FORWARD(Missions_GetState);
+FORWARD(Missions_OnVehicleRepaired);
 FORWARD(Missions_OnWeatherChanged);
 FORWARD(Missions_PostLoad);
 FORWARD(Missions_Start);
@@ -219,6 +220,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Missions_EnterCheckpoint),
 	REGISTERNATIVE(Missions_FinalizeAddPoints),
 	REGISTERNATIVE(Missions_GetState),
+	REGISTERNATIVE(Missions_OnVehicleRepaired),
 	REGISTERNATIVE(Missions_OnWeatherChanged),
 	REGISTERNATIVE(Missions_PostLoad),
 	REGISTERNATIVE(Missions_Start),

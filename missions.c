@@ -398,6 +398,34 @@ cell AMX_NATIVE_CALL Missions_GetState(AMX *amx, cell *params)
 	return -1;
 }
 
+/* native Missions_OnVehicleRepaired(playerid, vehicleid, Float:oldhp, Float:newhp) */
+cell AMX_NATIVE_CALL Missions_OnVehicleRepaired(AMX *amx, cell *params)
+{
+	struct mission *miss;
+	int i = MAX_PLAYERS;
+	const int playerid = params[1], vehicleid = params[2];
+	const float newhp = amx_ctof(params[4]), hpdiff = newhp - amx_ctof(params[3]);
+
+	if ((miss = activemission[playerid]) != NULL &&
+		miss->veh->spawnedvehicleid == vehicleid)
+	{
+		goto add_to_miss_data;
+	}
+	while (i--) {
+		miss = activemission[i];
+		if (miss != NULL && miss->veh->spawnedvehicleid == vehicleid) {
+			goto add_to_miss_data;
+		}
+	}
+
+	return 1;
+add_to_miss_data:
+	miss->damagetaken += hpdiff;
+	miss->lastvehiclehp = newhp;
+	logprintf("dmgtaken %d last %d", miss->damagetaken, miss->lastvehiclehp);
+	return 1;
+}
+
 /* native Missions_OnWeatherChanged(newweatherid) */
 cell AMX_NATIVE_CALL Missions_OnWeatherChanged(AMX *amx, cell *params)
 {
