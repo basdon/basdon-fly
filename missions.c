@@ -305,6 +305,26 @@ thisisworsethanbubblesort:
 	return 1;
 }
 
+/* native Missions_EndUnfinished(playerid, reason, buf[]) */
+cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
+{
+	const int playerid = params[1], reason = params[2];
+	struct mission *mission;
+	cell *addr;
+	char buf[144];
+
+	if ((mission = activemission[playerid]) == NULL) {
+		return 0;
+	}
+
+	sprintf(buf, "UPDATE flg SET state=%d WHERE id=%d", reason, mission->id);
+	amx_GetAddr(amx, params[3], &addr);
+	amx_SetUString(addr, buf, sizeof(buf));
+	free(mission);
+	activemission[playerid] = NULL;
+	return 1;
+}
+
 /* native Missions_EnterCheckpoint(playerid, vehicleid, vv, x, y, z, errmsg[]) */
 cell AMX_NATIVE_CALL Missions_EnterCheckpoint(AMX *amx, cell *params)
 {

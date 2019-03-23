@@ -345,6 +345,13 @@ native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type)
 //@remarks next step is to execute the queries and call {@link Missions_Start} after query@{@code buf[400]} returned last inserted id
 native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, Float:vehiclehp, msg[], querybuf[])
 
+//@summary Ends the active mission for given player (when applicable)
+//@param playerid the playerid to cancel their mission for
+//@param reason the reason, see {@code MISSION_CANCELREASON_} constants
+//@param buf buffer for flg update query, only to be executed if this functions returns non-zero
+//@returns {@code 0} if no mission was active for player
+native Missions_EndUnfinished(playerid, reason, buf[])
+
 //@summary Try to advance any active mission for player when they entered a race checkpoint
 //@param playerid player that entered a checkpoint
 //@param vehicleid vehicle id the player is in (may be {@code 0})
