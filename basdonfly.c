@@ -67,6 +67,7 @@ FORWARD(Missions_GetState);
 FORWARD(Missions_OnVehicleRepaired);
 FORWARD(Missions_OnWeatherChanged);
 FORWARD(Missions_PostLoad);
+FORWARD(Missions_PostUnload);
 FORWARD(Missions_Start);
 /* nav.c */
 FORWARD(Nav_EnableADF);
@@ -225,6 +226,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Missions_OnVehicleRepaired),
 	REGISTERNATIVE(Missions_OnWeatherChanged),
 	REGISTERNATIVE(Missions_PostLoad),
+	REGISTERNATIVE(Missions_PostUnload),
 	REGISTERNATIVE(Missions_Start),
 	/* nav.c */
 	REGISTERNATIVE(Nav_EnableADF),

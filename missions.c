@@ -497,6 +497,27 @@ cell AMX_NATIVE_CALL Missions_PostLoad(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Missions_PostUnload(playerid, Float:vehiclehp) */
+cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
+{
+	struct mission *mission;
+	const int playerid = params[1];
+	float vehiclehp = amx_ctof(params[2]);
+
+	if ((mission = activemission[playerid]) == NULL) {
+		return 0;
+	}
+
+	mission->damagetaken += mission->lastvehiclehp - vehiclehp;
+	mission->lastvehiclehp = vehiclehp;
+
+	/* TODO: stuff */
+
+	free(mission);
+	activemission[playerid] = NULL;
+	return 1;
+}
+
 /* native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, msg[]) */
 cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 {

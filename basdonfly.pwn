@@ -395,6 +395,12 @@ native Missions_OnWeatherChanged(newweatherid)
 //@returns {@code 0} if something is wrong and nothing should happen
 native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z, buf[])
 
+//@summary Ends the mission after unloading has finished
+//@param playerid player to end their mission for
+//@param vehiclehp hp of the vehicle used for the mission
+//@returns {@code 0} on failure
+native Missions_PostUnload(playerid, Float:vehiclehp)
+
 //@summary Starts a mission for a player after the mission id has been retrieved
 //@param playerid the player to start the mission for
 //@param missionid the mission id
