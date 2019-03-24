@@ -445,7 +445,6 @@ native Nav_EnableVOR(vehicleid, cmdtext[], buf64[])
 //@summary get the active nav in the specified vehicle
 //@param vehicleid the vehicle to query its nav system
 //@returns one of {@code NAV_NONE}, {@code NAV_ADF}, {@code NAV_VOR}, {@code NAV_ILS}
-//@remarks {@code NAV_ILS &amp; NAV_VOR == NAV_VOR}
 native Nav_GetActiveNavType(vehicleid)
 
 //@summary Update nav data for player

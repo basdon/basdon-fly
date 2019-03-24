@@ -298,7 +298,7 @@
 #define NAV_NONE 0
 #define NAV_ADF 1
 #define NAV_VOR 2
-#define NAV_ILS 6
+#define NAV_ILS 4
 
 #define RESULT_ADF_OFF 0
 #define RESULT_ADF_ON 1
