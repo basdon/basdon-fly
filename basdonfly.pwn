@@ -52,9 +52,9 @@ native APT_FormatNearestList(playerid, Float:x, Float:y, buf[])
 //@param buf the buffer to store the resulting list in (use {@code buf4096})
 native APT_FormatBeaconList(buf[])
 
-//@summary Maps the clicked listitem (from {@link APT_FormatNearestList} to airport index.
+//@summary Maps the clicked listitem (from {@link APT_FormatNearestList}) to airport index.
 //@param playerid the playerid that clicked
-//@param listitem the listitem that the player clicked (optional={@code 0}
+//@param listitem the listitem that the player clicked (optional={@code 0})
 //@remarks Call this even when it's not needed, it frees memory.
 native APT_MapIndexFromListDialog(playerid, listitem=0)
 
@@ -398,8 +398,10 @@ native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z, buf[])
 //@summary Ends the mission after unloading has finished
 //@param playerid player to end their mission for
 //@param vehiclehp hp of the vehicle used for the mission
+//@param pay amount of money to be paid to player
+//@param buf buffer to put messages and queries in, only to be done when returned non-zero
 //@returns {@code 0} on failure
-native Missions_PostUnload(playerid, Float:vehiclehp)
+native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[])
 
 //@summary Starts a mission for a player after the mission id has been retrieved
 //@param playerid the player to start the mission for

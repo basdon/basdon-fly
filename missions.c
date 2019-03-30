@@ -32,6 +32,7 @@ struct mission {
 	int stage;
 	int missiontype;
 	struct missionpoint *startpoint, *endpoint;
+	float distance;
 	int passenger_satisfaction;
 	struct dbvehicle *veh;
 	int vehicle_reincarnation_value;
@@ -334,6 +335,24 @@ thisisworsethanbubblesort:
 		return 0;
 	}
 
+	dx = startpoint->x - endpoint->x;
+	dy = startpoint->y - endpoint->y;
+
+	activemission[playerid] = mission = malloc(sizeof(struct mission));
+	mission->id = -1;
+	mission->stage = MISSION_STAGE_CREATE;
+	mission->missiontype = missiontype;
+	mission->startpoint = startpoint;
+	mission->endpoint = endpoint;
+	mission->distance = sqrt(dx * dx + dy * dy);
+	mission->passenger_satisfaction = 100;
+	mission->veh = veh;
+	mission->vehicle_reincarnation_value = vv;
+	mission->starttime = time(NULL);
+	mission->lastvehiclehp = amx_ftoc(params[7]);
+	mission->damagetaken = 0;
+	mission->weatherbonus = 0;
+
 	amx_GetAddr(amx, params[9], &bufaddr);
 	startpoint->currentlyactivemissions++;
 	endpoint->currentlyactivemissions++;
@@ -342,8 +361,6 @@ thisisworsethanbubblesort:
 	sprintf(buf, "UPDATE msp SET p=p+1 WHERE i=%d", endpoint->id);
 	amx_SetUString(bufaddr + 200, buf, sizeof(buf));
 	useridornull(playerid, tmpuseridornullbuf);
-	dx = startpoint->x - endpoint->x;
-	dy = startpoint->y - endpoint->y;
 	sprintf(buf,
 	        "INSERT INTO flg(player,vehicle,missiontype,fapt,tapt,fmsp,tmsp,distance,tstart,tlastupdate) "
 			"VALUES(%s,%d,%d,%d,%d,%d,%d,%.4f,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())",
@@ -354,21 +371,8 @@ thisisworsethanbubblesort:
 		endpoint->ap->id,
 		startpoint->id,
 		endpoint->id,
-		sqrt(dx * dx + dy * dy));
+		mission->distance);
 	amx_SetUString(bufaddr + 400, buf, sizeof(buf));
-	activemission[playerid] = mission = malloc(sizeof(struct mission));
-	mission->id = -1;
-	mission->stage = MISSION_STAGE_CREATE;
-	mission->missiontype = missiontype;
-	mission->startpoint = startpoint;
-	mission->endpoint = endpoint;
-	mission->passenger_satisfaction = 100;
-	mission->veh = veh;
-	mission->vehicle_reincarnation_value = vv;
-	mission->starttime = time(NULL);
-	mission->lastvehiclehp = amx_ftoc(params[7]);
-	mission->damagetaken = 0;
-	mission->weatherbonus = 0;
 	return 1;
 }
 
@@ -564,12 +568,15 @@ cell AMX_NATIVE_CALL Missions_PostLoad(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Missions_PostUnload(playerid, Float:vehiclehp) */
+/* native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[]) */
 cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 {
 	struct mission *mission;
 	const int playerid = params[1];
 	float vehiclehp = amx_ctof(params[2]);
+	cell *addr;
+	char buf[4096];
+	int ptax, psatisfaction = 0, pdistance, pbonus, ptotal;
 
 	if ((mission = activemission[playerid]) == NULL) {
 		return 0;
@@ -578,6 +585,38 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	mission->damagetaken += mission->lastvehiclehp - vehiclehp;
 	mission->lastvehiclehp = vehiclehp;
 
+	ptax = calculate_airport_tax(mission->endpoint->ap, mission->missiontype);
+	pdistance = (int) (mission->distance * 1.635f);
+	if (mission->missiontype & (1 | 2 | 4)) {
+		if (mission->passenger_satisfaction == 100) {
+			psatisfaction = 1000;
+		} else {
+			psatisfaction = (mission->passenger_satisfaction - 100) * 40;
+		}
+	}
+	ptotal = ptax + mission->weatherbonus + psatisfaction + pdistance + pbonus;
+	amx_GetAddr(amx, params[3], &addr);
+	*addr = ptotal;
+
+	sprintf(buf,
+	        "UPDATE flg SET tunload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP(),"
+		"state=%d,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
+		"pdistance=%d,pbonus=%d,ptotal=%d,satisfaction=%d "
+		"WHERE id=%d",
+		MISSION_STATE_FINISHED,
+		ptax,
+		mission->weatherbonus,
+		psatisfaction,
+		pdistance,
+		pbonus,
+		ptotal,
+		mission->passenger_satisfaction,
+	        mission->id);
+	amx_GetAddr(amx, params[4], &addr);
+	amx_SetUString(addr, buf, sizeof(buf));
+
+	/* TODO: adistance */
+	/* TODO fuel */
 	/* TODO: stuff */
 
 	free(mission);
