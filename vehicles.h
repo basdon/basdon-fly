@@ -7,8 +7,10 @@ struct dbvehicle {
 	int owneruserid;
 	float x, y, z, r;
 	int col1, col2;
+	float odo;
 	char *ownerstring;
 	unsigned char ownerstringowneroffset;
+	unsigned char needsodoupdate;
 	short spawnedvehicleid;
 };
 

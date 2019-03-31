@@ -551,8 +551,9 @@ native PlayerData_Init(playerid, ip[], name[], namelen)
 //@param userid user id of the player to update stuff for
 //@param score score of the player to store
 //@param money money of the player to store
+//@param dis total distance flown (odo)
 //@param buf buffer to store query in
-native PlayerData_FormatUpdateQuery(userid, score, money, buf[])
+native PlayerData_FormatUpdateQuery(userid, score, money, Float:dis, buf[])
 
 //@summary Updates the player's user ID
 //@param playerid player
@@ -625,13 +626,27 @@ native Urlencode(const data[], len, output[])
 //@param r saved z rotation
 //@param col1 first color
 //@param col2 second color
+//@param odo odometer value
 //@param ownername name of the owner
 //@returns the position of the vehicle in the vehicle table
 //@remarks table will be resized and reallocated if it's already full
 //@seealso Veh_Destroy
 //@seealso Veh_Init
 //@seealso Veh_UpdateSlot
-native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, ownername[])
+native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, odo, ownername[])
+
+//@summary Add odo value to vehicle based on distance between given coords
+//@param vehicleid vehicle id to give odo to
+//@param playerid valid playerid that issued odo update (to update mission distance when applicable)
+//@param x1 first x-position
+//@param y1 first y-position
+//@param z1 first z-position
+//@param x2 second x-position
+//@param y2 second y-position
+//@param z2 second z-position
+//@param podo player odo value, only passed to add the added odo to remove the need for a {@link floatadd} call :)
+//@returns {@param podo} + the added odo value, even if there's no vehicle mapping for {@param vehicleid}
+native Float:Veh_AddOdo(vehicleid, playerid, Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2, Float:podo)
 
 //@summary Collects all vehicles from the table that are owned by a player
 //@param userid user id of the player of whom to collect all vehicles
@@ -651,6 +666,18 @@ native Veh_CollectSpawnedVehicles(playerid, buf[])
 //@seealso Veh_Init
 native Veh_Destroy();
 
+//@summary Check if there is a label on given vehicle for given player, {@b and unregister it}
+//@param vehicleid vehicle on which a label might be
+//@param playerid player for which the label would have been created
+//@param labelid the label id will be put in this variable if this returns positive
+//@returns {@code 1} if there is a label to delete, its id will be put in {@param labelid}
+native Veh_GetLabelToDelete(vehicleid, playerid, &PlayerText3D:labelid)
+
+//@summary Gets next queued query to update a vehicle in the db
+//@param buf buffer to store query in
+//@returns {@code 0} if the queue is empty
+native Veh_GetNextUpdateQuery(buf[])
+
 //@summary Inits the db vehicle table
 //@param dbvehiclecount initial size of the table
 //@seealso Veh_Add
@@ -663,13 +690,6 @@ native Veh_Init(dbvehiclecount)
 //@param buf[] if not allowed, errormessage will be placed in this buffer
 //@returns {@code 0} if that user is not allowed in the given vehicle (to send to player when trying to enter)
 native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[])
-
-//@summary Check if there is a label on given vehicle for given player, {@b and unregister it}
-//@param vehicleid vehicle on which a label might be
-//@param playerid player for which the label would have been created
-//@param labelid the label id will be put in this variable if this returns positive
-//@returns {@code 1} if there is a label to delete, its id will be put in {@param labelid}
-native Veh_GetLabelToDelete(vehicleid, playerid, &PlayerText3D:labelid)
 
 //@summary Clears data when a player disconnects
 //@param playerid the player that disconnected

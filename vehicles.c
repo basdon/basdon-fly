@@ -11,10 +11,21 @@
 #include "game_sa.h"
 #include "vehicles.h"
 
+struct vehnode {
+	struct dbvehicle *veh;
+	struct vehnode *next;
+};
+
+static struct vehnode *vehiclestoupdate;
 static struct dbvehicle *dbvehicles;
 int dbvehiclenextid, dbvehiclealloc;
 struct vehicle gamevehicles[MAX_VEHICLES];
 short labelids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB+ of mapping errrr */
+
+void veh_init()
+{
+	vehiclestoupdate = NULL;
+}
 
 static void freeDbVehicleTable()
 {
@@ -45,7 +56,7 @@ static void resizeDbVehicleTable()
 	}
 }
 
-/* native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, ownername[]) */
+/* native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, odo, ownername[]) */
 cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 {
 	cell *ownernameaddr;
@@ -66,8 +77,9 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 	veh->r = amx_ctof(params[7]);
 	veh->col1 = params[8];
 	veh->col2 = params[9];
+	veh->odo = (float) params[10];
 	if (veh->owneruserid != 0 && 400 <= model && model <= 611) {
-		amx_GetAddr(amx, params[10], &ownernameaddr);
+		amx_GetAddr(amx, params[11], &ownernameaddr);
 		amx_GetUString(ownername, ownernameaddr, sizeof(ownername));
 		veh->ownerstringowneroffset = 7 + strlen(vehnames[model - 400]);
 		veh->ownerstring = malloc((veh->ownerstringowneroffset + strlen(ownername) + 1) * sizeof(char));
@@ -78,6 +90,42 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 	}
 	veh->spawnedvehicleid = -1;
 	return dbvehiclenextid - 1;
+}
+
+/* native Float:Veh_AddOdo(vehicleid, playerid, Float:x1, Float:y1, Float:z1,
+                           Float:x2, Float:y2, Float:z2, Float:podo) */
+cell AMX_NATIVE_CALL Veh_AddOdo(AMX *amx, cell *params)
+{
+	void missions_add_distance(int, float);
+	struct dbvehicle *veh;
+	struct vehnode *updatequeue;
+	const int vehicleid = params[1], playerid = params[2];
+	const float dx = amx_ctof(params[3]) - amx_ctof(params[6]);
+	const float dy = amx_ctof(params[4]) - amx_ctof(params[7]);
+	const float dz = amx_ctof(params[5]) - amx_ctof(params[8]);
+	float vs = sqrt(dx * dx + dy * dy + dz * dz);
+
+	if ((veh = gamevehicles[vehicleid].dbvehicle) != NULL) {
+		veh->odo += vs;
+		if (!veh->needsodoupdate) {
+			veh->needsodoupdate = 1;
+			if (vehiclestoupdate == NULL) {
+				vehiclestoupdate = malloc(sizeof(struct vehnode));
+				vehiclestoupdate->veh = veh;
+			} else {
+				updatequeue = vehiclestoupdate;
+				while (updatequeue->next != NULL) {
+					updatequeue = updatequeue->next;
+				}
+				updatequeue->next = malloc(sizeof(struct vehnode));
+				updatequeue->next->veh = veh;
+			}
+		}
+	}
+
+	missions_add_distance(playerid, vs);
+	vs += amx_ctof(params[9]);
+	return amx_ftoc(vs);
 }
 
 /* native Veh_CollectPlayerVehicles(userid, buf[]) */
@@ -134,6 +182,43 @@ cell AMX_NATIVE_CALL Veh_Destroy(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Veh_GetLabelToDelete(vehicleid, playerid, &PlayerText3D:labelid) */
+cell AMX_NATIVE_CALL Veh_GetLabelToDelete(AMX *amx, cell *params)
+{
+	const int vehicleid = params[1], playerid = params[2];
+	const int labelid = labelids[playerid][vehicleid];
+	cell *addr;
+	if (labelid == -1) {
+		return 0;
+	}
+	labelids[playerid][vehicleid] = -1;
+	amx_GetAddr(amx, params[3], &addr);
+	*addr = labelid;
+	return 1;
+}
+
+/* native Veh_GetNextUpdateQuery(buf[]) */
+cell AMX_NATIVE_CALL Veh_GetNextUpdateQuery(AMX *amx, cell *params)
+{
+	cell *addr;
+	struct dbvehicle *veh;
+	struct vehnode *tofree;
+	char buf[80];
+
+	if (vehiclestoupdate == NULL) {
+		return 0;
+	}
+	veh = vehiclestoupdate->veh;
+	tofree = vehiclestoupdate;
+	vehiclestoupdate = vehiclestoupdate->next;
+	free(tofree);
+	veh->needsodoupdate = 0;
+	sprintf(buf, "UPDATE veh SET odo=%d WHERE i=%d", (int) veh->odo, veh->id);
+	amx_GetAddr(amx, params[1], &addr);
+	amx_SetUString(addr, buf, sizeof(buf));
+	return 1;
+}
+
 /* native Veh_Init(dbvehiclecount) */
 cell AMX_NATIVE_CALL Veh_Init(AMX *amx, cell *params)
 {
@@ -181,21 +266,6 @@ cell AMX_NATIVE_CALL Veh_IsPlayerAllowedInVehicle(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, buf, sizeof(buf));
 	return 0;
-}
-
-/* native Veh_GetLabelToDelete(vehicleid, playerid, &PlayerText3D:labelid) */
-cell AMX_NATIVE_CALL Veh_GetLabelToDelete(AMX *amx, cell *params)
-{
-	const int vehicleid = params[1], playerid = params[2];
-	const int labelid = labelids[playerid][vehicleid];
-	cell *addr;
-	if (labelid == -1) {
-		return 0;
-	}
-	labelids[playerid][vehicleid] = -1;
-	amx_GetAddr(amx, params[3], &addr);
-	*addr = labelid;
-	return 1;
 }
 
 /* native Veh_OnPlayerDisconnect(playerid) */
