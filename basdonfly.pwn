@@ -714,6 +714,14 @@ native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[])
 //@param playerid the player that disconnected
 native Veh_OnPlayerDisconnect(playerid)
 
+//@summary Refuels a vehicle within given fuel budget
+//@param vehicleid vehicle to refuel
+//@param priceperlitre price per litre
+//@param budget max amount of money to spend on fuel
+//@param msg buffer to store message in to send to player, use {@code COL_INFO} on non-zero return value, {@code COL_WARN} otherwise
+//@returns the actual amont of money it costed to refuel the vehicle, {@code 0} if error
+native Veh_Refuel(vehicleid, Float:priceperlitre, budget, msg[])
+
 //@summary Let the plugin know a label was created on a vehicle for a player
 //@param vehicleid the vehicle the label is attached to
 //@param playerid the player the label was made for

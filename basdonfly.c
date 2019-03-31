@@ -110,6 +110,7 @@ FORWARD(Veh_Init);
 FORWARD(Veh_IsFuelEmpty);
 FORWARD(Veh_IsPlayerAllowedInVehicle);
 FORWARD(Veh_OnPlayerDisconnect);
+FORWARD(Veh_Refuel);
 FORWARD(Veh_RegisterLabel);
 FORWARD(Veh_ShouldCreateLabel);
 FORWARD(Veh_UpdateSlot);
@@ -275,6 +276,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_IsFuelEmpty),
 	REGISTERNATIVE(Veh_IsPlayerAllowedInVehicle),
 	REGISTERNATIVE(Veh_OnPlayerDisconnect),
+	REGISTERNATIVE(Veh_Refuel),
 	REGISTERNATIVE(Veh_RegisterLabel),
 	REGISTERNATIVE(Veh_ShouldCreateLabel),
 	REGISTERNATIVE(Veh_UpdateSlot),

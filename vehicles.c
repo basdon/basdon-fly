@@ -376,6 +376,59 @@ cell AMX_NATIVE_CALL Veh_OnPlayerDisconnect(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Veh_Refuel(vehicleid, Float:priceperlitre, budget, msg[]) */
+cell AMX_NATIVE_CALL Veh_Refuel(AMX *amx, cell *params)
+{
+	struct dbvehicle *veh;
+	const int budget = params[3];
+	int cost;
+	const float priceperlitre = amx_ctof(params[2]);
+	float capacity, refuelamount;
+	cell *addr;
+	char buf1[11], buf[144];
+
+	amx_GetAddr(amx, params[4], &addr);
+	if ((veh = gamevehicles[params[1]].dbvehicle) == NULL ||
+		(refuelamount = (capacity = model_fuel_capacity(veh->model)) - veh->fuel) < 1.0f)
+	{
+		sprintf(buf,
+		        WARN"This vehicle is already fueled up! capacity: %.0f/%.0f",
+		        veh->fuel,
+		        capacity);
+		amx_SetUString(addr, buf, sizeof(buf));
+		return 0;
+	}
+
+	cost = 50 + (int) (refuelamount * priceperlitre);
+	if (cost > budget) {
+		refuelamount = (budget - 50) / priceperlitre;
+		if (refuelamount <= 0) {
+			sprintf(buf,
+			        WARN"You can't pay the refuel fee! capacity: %.0f/%.0f",
+			        veh->fuel,
+			        capacity);
+			amx_SetUString(addr, buf, sizeof(buf));
+			return 0;
+		}
+		cost = budget;
+		strcpy(buf1, "partially");
+	} else {
+		strcpy(buf1, "fully");
+	}
+
+	veh->fuel += refuelamount;
+	sprintf(buf,
+		INFO"Your vehicle has been %s refueled for $%d (%.2f litres @ $%.2f/litre) capacity: %.0f/%.0f",
+	        buf1,
+	        cost,
+	        refuelamount,
+	        priceperlitre,
+	        veh->fuel,
+	        capacity);
+	amx_SetUString(addr, buf, sizeof(buf));
+	return cost;
+}
+
 /* native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid) */
 cell AMX_NATIVE_CALL Veh_RegisterLabel(AMX *amx, cell *params)
 {
