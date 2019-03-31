@@ -81,34 +81,29 @@ int calculate_airport_tax(struct airport *ap, int missiontype)
 	struct missionpoint *msp;
 	struct runway *rnw;
 	int runwayendcount = 0;
-	int chargetype, costpercharge, tax = 500, chargernws = 0;
+	int costpercharge, tax = 500, chargernws = 0;
 
 	switch (missiontype) {
 	case 1: /* dodo, no rnw charge */
-		chargetype = 1;
 		costpercharge = 20;
 		break;
 	case 2: /* small passenger */
-		chargetype = 2;
 		costpercharge = 30;
 		chargernws = 1;
 		break;
 	case 4: /* big passenger */
-		chargetype = 4;
 		costpercharge = 50;
 		chargernws = 1;
 		break;
 	case 8:
 	case 16:
 	case 32: /* cargo */
-		chargetype = 8 | 16 | 32;
 		costpercharge = 40;
 		chargernws = 1;
 		break;
 	case 64:
 	case 128:
 	case 256: /* heli, only charge amount of heliports */
-		chargetype = 64 | 128 | 256;
 		costpercharge = 30;
 		break;
 	case 512: /* military is govt, and no tax for special missions */
@@ -396,7 +391,11 @@ cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 		return 0;
 	}
 
-	sprintf(buf, "UPDATE flg SET state=%d WHERE id=%d", reason, mission->id);
+	sprintf(buf,
+	        "UPDATE flg SET state=%d,tlastupdate=UNIX_TIMESTAMP(),adistance=%f WHERE id=%d",
+	        reason,
+		mission->actualdistance,
+	        mission->id);
 	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, buf, sizeof(buf));
 	free(mission);
