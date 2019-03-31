@@ -589,7 +589,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	float vehiclehp = amx_ctof(params[2]);
 	cell *addr;
 	char buf[4096];
-	int ptax, psatisfaction = 0, pdistance, pbonus = 0, ptotal;
+	int ptax, psatisfaction = 0, pdistance, pbonus = 0, ptotal, pdamage;
 
 	if ((mission = activemission[playerid]) == NULL) {
 		return 0;
@@ -599,7 +599,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	mission->lastvehiclehp = vehiclehp;
 	mission->fuelburned += mission->lastfuel - mission->veh->fuel;
 
-	ptax = calculate_airport_tax(mission->endpoint->ap, mission->missiontype);
+	ptax = -calculate_airport_tax(mission->endpoint->ap, mission->missiontype);
 	pdistance = 500 + (int) (mission->distance * 1.435f);
 	if (mission->missiontype & (1 | 2 | 4)) {
 		if (mission->passenger_satisfaction == 100) {
@@ -608,14 +608,15 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 			psatisfaction = (mission->passenger_satisfaction - 100) * 40;
 		}
 	}
-	ptotal = mission->weatherbonus + psatisfaction + pdistance + pbonus - ptax;
+	pdamage = -3 * mission->damagetaken;
+	ptotal = mission->weatherbonus + psatisfaction + pdistance + pbonus + ptax + pdamage;
 	amx_GetAddr(amx, params[3], &addr);
 	*addr = ptotal;
 
 	sprintf(buf,
 	        "UPDATE flg SET tunload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP(),"
 		"state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
-		"pdistance=%d,pbonus=%d,ptotal=%d,satisfaction=%d,adistance=%f "
+		"pdistance=%d,pdamage=%d,pbonus=%d,ptotal=%d,satisfaction=%d,adistance=%f "
 		"WHERE id=%d",
 		MISSION_STATE_FINISHED,
 		mission->fuelburned,
@@ -623,6 +624,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 		mission->weatherbonus,
 		psatisfaction,
 		pdistance,
+		pdamage,
 		pbonus,
 		ptotal,
 		mission->passenger_satisfaction,
@@ -631,7 +633,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[4], &addr);
 	amx_SetUString(addr, buf, sizeof(buf));
 
-	/* TODO fuel */
+	/* TODO: satisfaction */
 	/* TODO: stuff */
 
 	free(mission);
