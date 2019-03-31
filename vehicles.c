@@ -60,7 +60,7 @@ static float model_fuel_capacity(int modelid)
 {
 	switch (modelid)
 	{
-	default: return 1000.0f;
+	default: return 10.0f;
 	}
 }
 
@@ -218,14 +218,9 @@ cell AMX_NATIVE_CALL Veh_ConsumeFuel(AMX *amx, cell *params)
 	newpercentage = veh->fuel / fuelcapacity;
 	amx_GetAddr(amx, params[3], &addr);
 	*addr = 0;
-	if (lastpercentage > 0.2f && newpercentage <= 0.2f) {
-		strcpy(buf, WARN"Your vehicle has 20%% fuel left!");
-		amx_GetAddr(amx, params[4], &addr);
-		amx_SetUString(addr, buf, sizeof(buf));
-		return 1;
-	}
-	if (lastpercentage > 0.1f && newpercentage <= 0.1f) {
-		strcpy(buf, WARN"Your vehicle has 10%% fuel left!");
+	if (lastpercentage > 0.0f && newpercentage == 0.0f) {
+		*addr = 1;
+		strcpy(buf, WARN"Your vehicle ran out of fuel!");
 		amx_GetAddr(amx, params[4], &addr);
 		amx_SetUString(addr, buf, sizeof(buf));
 		return 1;
@@ -236,9 +231,14 @@ cell AMX_NATIVE_CALL Veh_ConsumeFuel(AMX *amx, cell *params)
 		amx_SetUString(addr, buf, sizeof(buf));
 		return 1;
 	}
-	if (lastpercentage > 0.0f && newpercentage == 0.0f) {
-		*addr = 1;
-		strcpy(buf, WARN"Your vehicle ran out of fuel!");
+	if (lastpercentage > 0.1f && newpercentage <= 0.1f) {
+		strcpy(buf, WARN"Your vehicle has 10%% fuel left!");
+		amx_GetAddr(amx, params[4], &addr);
+		amx_SetUString(addr, buf, sizeof(buf));
+		return 1;
+	}
+	if (lastpercentage > 0.2f && newpercentage <= 0.2f) {
+		strcpy(buf, WARN"Your vehicle has 20%% fuel left!");
 		amx_GetAddr(amx, params[4], &addr);
 		amx_SetUString(addr, buf, sizeof(buf));
 		return 1;
