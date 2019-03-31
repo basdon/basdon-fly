@@ -147,7 +147,7 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
 	void game_sa_init(), login_init(), dialog_init(), zones_init(), nav_init();
-	void missions_init();
+	void missions_init(), veh_init();
 
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
@@ -159,6 +159,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	zones_init();
 	nav_init();
 	missions_init();
+	veh_init();
 
 	return 1;
 }

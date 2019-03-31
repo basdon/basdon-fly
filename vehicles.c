@@ -105,6 +105,10 @@ cell AMX_NATIVE_CALL Veh_AddOdo(AMX *amx, cell *params)
 	const float dz = amx_ctof(params[5]) - amx_ctof(params[8]);
 	float vs = sqrt(dx * dx + dy * dy + dz * dz);
 
+	if (amx_ftoc(vs) & 0x7F80000 == 0x7F80000 && amx_ftoc(vs) & 0x007FFFFF == 0) {
+		vs = 0.0f;
+	}
+
 	if ((veh = gamevehicles[vehicleid].dbvehicle) != NULL) {
 		veh->odo += vs;
 		if (!veh->needsodoupdate) {
@@ -112,6 +116,7 @@ cell AMX_NATIVE_CALL Veh_AddOdo(AMX *amx, cell *params)
 			if (vehiclestoupdate == NULL) {
 				vehiclestoupdate = malloc(sizeof(struct vehnode));
 				vehiclestoupdate->veh = veh;
+				vehiclestoupdate->next = NULL;
 			} else {
 				updatequeue = vehiclestoupdate;
 				while (updatequeue->next != NULL) {
@@ -119,6 +124,7 @@ cell AMX_NATIVE_CALL Veh_AddOdo(AMX *amx, cell *params)
 				}
 				updatequeue->next = malloc(sizeof(struct vehnode));
 				updatequeue->next->veh = veh;
+				vehiclestoupdate->next = NULL;
 			}
 		}
 	}
