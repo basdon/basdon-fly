@@ -375,8 +375,14 @@ native Missions_FinalizeAddPoints()
 //@returns {@code -1} if not in a mission, or one of the flight-statuses.txt constants
 native Missions_GetState(playerid)
 
+//@summary Let the mission logic know a vehicle was refueled, to know the total fuel burned during flight
+//@param playerid the vehicle driver
+//@param vehicleid the vehicle that was refueled
+//@param refuelamount the amount of fuel that was loaded into the vehicle
+native Missions_OnVehicleRefueled(playerid, vehicleid, Float:refuelamount)
+
 //@summary Let the mission logic know a vehicle was repaired, to know the total damage inflicted during flight
-//@param playerid the player that repaired the vehicle, this might not be the driver but the mission script can take it
+//@param playerid the vehicle driver
 //@param vehicleid the vehicle that was repaired
 //@param oldhp old hp of the vehicle
 //@param newhp new hp of the vehicle
@@ -718,9 +724,10 @@ native Veh_OnPlayerDisconnect(playerid)
 //@param vehicleid vehicle to refuel
 //@param priceperlitre price per litre
 //@param budget max amount of money to spend on fuel
+//@param refuelamount amount of fuel that was loaded, passed by ref on non-zero return value
 //@param msg buffer to store message in to send to player, use {@code COL_INFO} on non-zero return value, {@code COL_WARN} otherwise
 //@returns the actual amont of money it costed to refuel the vehicle, {@code 0} if error
-native Veh_Refuel(vehicleid, Float:priceperlitre, budget, msg[])
+native Veh_Refuel(vehicleid, Float:priceperlitre, budget, &Float:refuelamount, msg[])
 
 //@summary Calculate cost and new hp of vehicle to repair it using given budget
 //@param budget max amount of money to spend on the rapir

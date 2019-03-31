@@ -376,7 +376,7 @@ cell AMX_NATIVE_CALL Veh_OnPlayerDisconnect(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Veh_Refuel(vehicleid, Float:priceperlitre, budget, msg[]) */
+/* native Veh_Refuel(vehicleid, Float:priceperlitre, budget, &refuelamount, msg[]) */
 cell AMX_NATIVE_CALL Veh_Refuel(AMX *amx, cell *params)
 {
 	struct dbvehicle *veh;
@@ -387,7 +387,7 @@ cell AMX_NATIVE_CALL Veh_Refuel(AMX *amx, cell *params)
 	cell *addr;
 	char buf1[11], buf[144];
 
-	amx_GetAddr(amx, params[4], &addr);
+	amx_GetAddr(amx, params[5], &addr);
 	if ((veh = gamevehicles[params[1]].dbvehicle) == NULL ||
 		(refuelamount = (capacity = model_fuel_capacity(veh->model)) - veh->fuel) < 1.0f)
 	{
@@ -426,6 +426,9 @@ cell AMX_NATIVE_CALL Veh_Refuel(AMX *amx, cell *params)
 	        veh->fuel,
 	        capacity);
 	amx_SetUString(addr, buf, sizeof(buf));
+
+	amx_GetAddr(amx, params[4], &addr);
+	*addr = amx_ftoc(refuelamount);
 	return cost;
 }
 

@@ -37,8 +37,8 @@ struct mission {
 	struct dbvehicle *veh;
 	int vehicle_reincarnation_value;
 	time_t starttime;
-	short lastvehiclehp;
-	short damagetaken;
+	short lastvehiclehp, damagetaken;
+	float lastfuel, fuelburned;
 	short weatherbonus;
 };
 
@@ -354,6 +354,8 @@ thisisworsethanbubblesort:
 	mission->starttime = time(NULL);
 	mission->lastvehiclehp = amx_ftoc(params[7]);
 	mission->damagetaken = 0;
+	mission->lastfuel = veh->fuel;
+	mission->fuelburned = 0.0f;
 	mission->weatherbonus = 0;
 
 	amx_GetAddr(amx, params[9], &bufaddr);
@@ -496,31 +498,35 @@ cell AMX_NATIVE_CALL Missions_GetState(AMX *amx, cell *params)
 	return -1;
 }
 
+/* native Missions_OnVehicleRefueled(playerid, vehicleid, Float:refuelamount) */
+cell AMX_NATIVE_CALL Missions_OnVehicleRefueled(AMX *amx, cell *params)
+{
+	struct mission *miss;
+	const int playerid = params[1], vehicleid = params[2];
+	const float refuelamount = amx_ctof(params[3]);
+
+	if ((miss = activemission[playerid]) != NULL &&
+		miss->veh->spawnedvehicleid == vehicleid)
+	{
+		miss->fuelburned += refuelamount;
+		miss->lastfuel = miss->veh->fuel;
+	}
+	return 1;
+}
+
 /* native Missions_OnVehicleRepaired(playerid, vehicleid, Float:oldhp, Float:newhp) */
 cell AMX_NATIVE_CALL Missions_OnVehicleRepaired(AMX *amx, cell *params)
 {
 	struct mission *miss;
-	int i = MAX_PLAYERS;
 	const int playerid = params[1], vehicleid = params[2];
 	const float newhp = amx_ctof(params[4]), hpdiff = newhp - amx_ctof(params[3]);
 
 	if ((miss = activemission[playerid]) != NULL &&
 		miss->veh->spawnedvehicleid == vehicleid)
 	{
-		goto add_to_miss_data;
+		miss->damagetaken += hpdiff;
+		miss->lastvehiclehp = newhp;
 	}
-	while (i--) {
-		miss = activemission[i];
-		if (miss != NULL && miss->veh->spawnedvehicleid == vehicleid) {
-			goto add_to_miss_data;
-		}
-	}
-
-	return 1;
-add_to_miss_data:
-	miss->damagetaken += hpdiff;
-	miss->lastvehiclehp = newhp;
-	logprintf("dmgtaken %d last %d", miss->damagetaken, miss->lastvehiclehp);
 	return 1;
 }
 
@@ -591,6 +597,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 
 	mission->damagetaken += mission->lastvehiclehp - vehiclehp;
 	mission->lastvehiclehp = vehiclehp;
+	mission->fuelburned += mission->lastfuel - mission->veh->fuel;
 
 	ptax = calculate_airport_tax(mission->endpoint->ap, mission->missiontype);
 	pdistance = 500 + (int) (mission->distance * 1.435f);
@@ -607,10 +614,11 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 
 	sprintf(buf,
 	        "UPDATE flg SET tunload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP(),"
-		"state=%d,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
+		"state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
 		"pdistance=%d,pbonus=%d,ptotal=%d,satisfaction=%d,adistance=%f "
 		"WHERE id=%d",
 		MISSION_STATE_FINISHED,
+		mission->fuelburned,
 		ptax,
 		mission->weatherbonus,
 		psatisfaction,
