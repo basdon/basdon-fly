@@ -593,7 +593,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	mission->lastvehiclehp = vehiclehp;
 
 	ptax = calculate_airport_tax(mission->endpoint->ap, mission->missiontype);
-	pdistance = (int) (mission->distance * 1.635f);
+	pdistance = 500 + (int) (mission->distance * 1.435f);
 	if (mission->missiontype & (1 | 2 | 4)) {
 		if (mission->passenger_satisfaction == 100) {
 			psatisfaction = 1000;
@@ -601,7 +601,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 			psatisfaction = (mission->passenger_satisfaction - 100) * 40;
 		}
 	}
-	ptotal = ptax + mission->weatherbonus + psatisfaction + pdistance + pbonus;
+	ptotal = mission->weatherbonus + psatisfaction + pdistance + pbonus - ptax;
 	amx_GetAddr(amx, params[3], &addr);
 	*addr = ptotal;
 
