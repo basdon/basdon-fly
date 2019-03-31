@@ -429,6 +429,47 @@ cell AMX_NATIVE_CALL Veh_Refuel(AMX *amx, cell *params)
 	return cost;
 }
 
+/* native Veh_Repair(budget, Float:hp, &Float:newhp, buf[]) */
+cell AMX_NATIVE_CALL Veh_Repair(AMX *amx, cell *params)
+{
+	const int budget = params[1];
+	cell *addr;
+	const float hp = amx_ctof(params[2]);
+	float fixamount;
+	int cost;
+	char buf1[11], buf[144];
+
+	amx_GetAddr(amx, params[4], &addr);
+	if (hp > 999.9f) {
+		strcpy(buf, "Your vehicle doesn't need to be repaired!");
+		amx_SetUString(addr, buf, sizeof(buf));
+		return 0;
+	}
+
+	fixamount = 1000.0f - hp;
+	cost = 150 + (int) (fixamount * 2.0f);
+	if (cost > budget) {
+		fixamount = (float) ((budget - 150) / 2);
+		if (fixamount <= 0.0f) {
+			strcpy(buf, "You can't afford the repair fee!");
+			amx_SetUString(addr, buf, sizeof(buf));
+			return 0;
+		}
+		cost = budget;
+		strcpy(buf1, "partially");
+	} else {
+		strcpy(buf1, "fully");
+	}
+
+	sprintf(buf, INFO"Your vehicle has been %s repaired for $%d", buf1, cost);
+	amx_SetUString(addr, buf, sizeof(buf));
+
+	amx_GetAddr(amx, params[3], &addr);
+	fixamount += hp;
+	*addr = amx_ftoc(fixamount);
+	return cost;
+}
+
 /* native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid) */
 cell AMX_NATIVE_CALL Veh_RegisterLabel(AMX *amx, cell *params)
 {
