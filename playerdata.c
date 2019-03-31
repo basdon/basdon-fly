@@ -74,15 +74,21 @@ cell AMX_NATIVE_CALL PlayerData_Init(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native PlayerData_FormatUpdateQuery(userid, score, money, Float:dis, buf[]) */
+/* native PlayerData_FormatUpdateQuery(userid, score, money, Float:dis, flighttime, buf[]) */
 cell AMX_NATIVE_CALL PlayerData_FormatUpdateQuery(AMX *amx, cell *params)
 {
 	const int userid = params[1], score = params[2], money = params[3];
-	const int dis = (int) amx_ctof(params[4]);
+	const int dis = (int) amx_ctof(params[4]), flighttime = params[5];
 	char buf[144];
 	cell *addr;
-	sprintf(buf, "UPDATE usr SET s=%d,mon=%d,dis=%d WHERE i=%d", score, money, dis, userid);
-	amx_GetAddr(amx, params[5], &addr);
+	sprintf(buf,
+	        "UPDATE usr SET s=%d,mon=%d,dis=%d,f=%d WHERE i=%d",
+	        score,
+	        money,
+	        dis,
+	        flighttime,
+	        userid);
+	amx_GetAddr(amx, params[6], &addr);
 	amx_SetUString(addr, buf, sizeof(buf));
 	return 1;
 }

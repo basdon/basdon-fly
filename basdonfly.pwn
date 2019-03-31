@@ -552,8 +552,9 @@ native PlayerData_Init(playerid, ip[], name[], namelen)
 //@param score score of the player to store
 //@param money money of the player to store
 //@param dis total distance flown (odo)
+//@param flighttime total seconds spent flying
 //@param buf buffer to store query in
-native PlayerData_FormatUpdateQuery(userid, score, money, Float:dis, buf[])
+native PlayerData_FormatUpdateQuery(userid, score, money, Float:dis, flighttime, buf[])
 
 //@summary Updates the player's user ID
 //@param playerid player
