@@ -56,6 +56,22 @@ static void resizeDbVehicleTable()
 	}
 }
 
+static float model_fuel_capacity(int modelid)
+{
+	switch (modelid)
+	{
+	default: return 1000.0f;
+	}
+}
+
+static float model_fuel_usage(int modelid)
+{
+	switch (modelid)
+	{
+	default: return 1.0f;
+	}
+}
+
 /* native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, odo, ownername[]) */
 cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 {
@@ -78,6 +94,7 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 	veh->col1 = params[8];
 	veh->col2 = params[9];
 	veh->odo = (float) params[10];
+	veh->fuel = model_fuel_capacity(model);
 	if (veh->owneruserid != 0 && 400 <= model && model <= 611) {
 		amx_GetAddr(amx, params[11], &ownernameaddr);
 		amx_GetUString(ownername, ownernameaddr, sizeof(ownername));
@@ -105,7 +122,7 @@ cell AMX_NATIVE_CALL Veh_AddOdo(AMX *amx, cell *params)
 	const float dz = amx_ctof(params[5]) - amx_ctof(params[8]);
 	float vs = sqrt(dx * dx + dy * dy + dz * dz);
 
-	if (amx_ftoc(vs) & 0x7F80000 == 0x7F80000 && amx_ftoc(vs) & 0x007FFFFF == 0) {
+	if ((amx_ftoc(vs) & 0x7F80000) == 0x7F80000 && (amx_ftoc(vs) & 0x007FFFFF) == 0) {
 		vs = 0.0f;
 	}
 
@@ -179,11 +196,74 @@ cell AMX_NATIVE_CALL Veh_CollectSpawnedVehicles(AMX *amx, cell *params)
 	return amount;
 }
 
+/* native Veh_ConsumeFuel(vehicleid, throttle, &ranOutOfFuel, buf[]) */
+cell AMX_NATIVE_CALL Veh_ConsumeFuel(AMX *amx, cell *params)
+{
+	const float consumptionmp = params[2] ? 1.0f : 0.2f;
+	struct dbvehicle *veh;
+	float fuelcapacity, lastpercentage, newpercentage;
+	cell *addr;
+	char buf[80];
+
+	if ((veh = gamevehicles[params[1]].dbvehicle) == NULL) {
+		return 0;
+	}
+
+	fuelcapacity = model_fuel_capacity(veh->model);
+	lastpercentage = veh->fuel / fuelcapacity;
+	veh->fuel -= model_fuel_usage(veh->model) * consumptionmp;
+	if (veh->fuel < 0.0f) {
+		veh->fuel = 0.0f;
+	}
+	newpercentage = veh->fuel / fuelcapacity;
+	amx_GetAddr(amx, params[3], &addr);
+	*addr = 0;
+	if (lastpercentage > 0.2f && newpercentage <= 0.2f) {
+		strcpy(buf, WARN"Your vehicle has 20%% fuel left!");
+		amx_GetAddr(amx, params[4], &addr);
+		amx_SetUString(addr, buf, sizeof(buf));
+		return 1;
+	}
+	if (lastpercentage > 0.1f && newpercentage <= 0.1f) {
+		strcpy(buf, WARN"Your vehicle has 10%% fuel left!");
+		amx_GetAddr(amx, params[4], &addr);
+		amx_SetUString(addr, buf, sizeof(buf));
+		return 1;
+	}
+	if (lastpercentage > 0.05f && newpercentage <= 0.05f) {
+		strcpy(buf, WARN"Your vehicle has 5%% fuel left!");
+		amx_GetAddr(amx, params[4], &addr);
+		amx_SetUString(addr, buf, sizeof(buf));
+		return 1;
+	}
+	if (lastpercentage > 0.0f && newpercentage == 0.0f) {
+		*addr = 1;
+		strcpy(buf, WARN"Your vehicle ran out of fuel!");
+		amx_GetAddr(amx, params[4], &addr);
+		amx_SetUString(addr, buf, sizeof(buf));
+		return 1;
+	}
+	return 0;
+}
+
 /* native Veh_Destroy() */
 cell AMX_NATIVE_CALL Veh_Destroy(AMX *amx, cell *params)
 {
 	if (dbvehicles != NULL) {
 		freeDbVehicleTable();
+	}
+	return 1;
+}
+
+/* native Veh_EnsureHasFuel(vehicleid) */
+cell AMX_NATIVE_CALL Veh_EnsureHasFuel(AMX *amx, cell *params)
+{
+	struct dbvehicle *veh;
+	float minamount;
+	if ((veh = gamevehicles[params[1]].dbvehicle) != NULL) {
+		if (veh->fuel < (minamount = model_fuel_capacity(veh->model) * .1f)) {
+			veh->fuel = minamount;
+		}
 	}
 	return 1;
 }
@@ -251,6 +331,16 @@ cell AMX_NATIVE_CALL Veh_Init(AMX *amx, cell *params)
 		}
 	}
 	return 1;
+}
+
+/* native Veh_IsFuelEmpty(vehicleid) */
+cell AMX_NATIVE_CALL Veh_IsFuelEmpty(AMX *amx, cell *params)
+{
+	struct dbvehicle *veh;
+	if ((veh = gamevehicles[params[1]].dbvehicle) == NULL) {
+		return 0;
+	}
+	return veh->fuel == 0.0f;
 }
 
 /* native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[]) */

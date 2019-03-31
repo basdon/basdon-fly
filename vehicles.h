@@ -8,6 +8,7 @@ struct dbvehicle {
 	float x, y, z, r;
 	int col1, col2;
 	float odo;
+	float fuel;
 	char *ownerstring;
 	unsigned char ownerstringowneroffset;
 	unsigned char needsodoupdate;

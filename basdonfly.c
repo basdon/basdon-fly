@@ -101,10 +101,13 @@ FORWARD(Veh_Add);
 FORWARD(Veh_AddOdo);
 FORWARD(Veh_CollectSpawnedVehicles);
 FORWARD(Veh_CollectPlayerVehicles);
+FORWARD(Veh_ConsumeFuel);
 FORWARD(Veh_Destroy);
+FORWARD(Veh_EnsureHasFuel);
 FORWARD(Veh_GetLabelToDelete);
 FORWARD(Veh_GetNextUpdateQuery);
 FORWARD(Veh_Init);
+FORWARD(Veh_IsFuelEmpty);
 FORWARD(Veh_IsPlayerAllowedInVehicle);
 FORWARD(Veh_OnPlayerDisconnect);
 FORWARD(Veh_RegisterLabel);
@@ -263,10 +266,13 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_AddOdo),
 	REGISTERNATIVE(Veh_CollectSpawnedVehicles),
 	REGISTERNATIVE(Veh_CollectPlayerVehicles),
+	REGISTERNATIVE(Veh_ConsumeFuel),
 	REGISTERNATIVE(Veh_Destroy),
+	REGISTERNATIVE(Veh_EnsureHasFuel),
 	REGISTERNATIVE(Veh_GetLabelToDelete),
 	REGISTERNATIVE(Veh_GetNextUpdateQuery),
 	REGISTERNATIVE(Veh_Init),
+	REGISTERNATIVE(Veh_IsFuelEmpty),
 	REGISTERNATIVE(Veh_IsPlayerAllowedInVehicle),
 	REGISTERNATIVE(Veh_OnPlayerDisconnect),
 	REGISTERNATIVE(Veh_RegisterLabel),

@@ -662,10 +662,23 @@ native Veh_CollectPlayerVehicles(userid, buf[])
 //@returns the amount of vehicles that were placed in {@param buf}
 native Veh_CollectSpawnedVehicles(playerid, buf[])
 
+//@summary Make a vehicle consume fuel, to be called each second when a player is in control
+//@param vehicleid the vehicle
+//@param throttle whether throttle is down or not
+//@param isOutOfFuel will be set to non-zero when the vehicle ran out of fuel by calling this, to shutdown the engine.\
+	will only be non-zero when this function also returns non-zero.
+//@param buf buffer that will hold message to send to player, when returning non-zero
+//@returns non-zero if {@param buf} contains a message to be sent to the player, {@param isOutOfFuel} might also be non-zero in this case.
+native Veh_ConsumeFuel(vehicleid, throttle, &isOutOfFuel, buf[])
+
 //@summary Destroys the db vehicle table and frees used memory
 //@seealso Veh_Add
 //@seealso Veh_Init
 native Veh_Destroy();
+
+//@summary Sets vehicle fuel to 10% of its capacity if it's any lower than that, to make sure no vehicle gets respawned empty
+//@param vehicleid vehicle to ensure fuel level for
+native Veh_EnsureHasFuel(vehicleid)
 
 //@summary Check if there is a label on given vehicle for given player, {@b and unregister it}
 //@param vehicleid vehicle on which a label might be
@@ -684,6 +697,11 @@ native Veh_GetNextUpdateQuery(buf[])
 //@seealso Veh_Add
 //@seealso Veh_Destroy
 native Veh_Init(dbvehiclecount)
+
+//@summary Check if a vehicle has no fuel anymore
+//@param vehicleid vehicle to check
+//@returns {@code 0} if the vehicle still has fuel
+native Veh_IsFuelEmpty(vehicleid)
 
 //@summary Checks if a player is allowed to be in a vehicle
 //@param userid user id of the player to check
