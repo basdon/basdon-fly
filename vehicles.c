@@ -60,7 +60,7 @@ static float model_fuel_capacity(int modelid)
 {
 	switch (modelid)
 	{
-	default: return 10.0f;
+	default: return 1000.0f;
 	}
 }
 
@@ -141,7 +141,7 @@ cell AMX_NATIVE_CALL Veh_AddOdo(AMX *amx, cell *params)
 				}
 				updatequeue->next = malloc(sizeof(struct vehnode));
 				updatequeue->next->veh = veh;
-				vehiclestoupdate->next = NULL;
+				updatequeue->next->next = NULL;
 			}
 		}
 	}
