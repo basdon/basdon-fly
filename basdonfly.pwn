@@ -419,6 +419,16 @@ native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[])
 //@returns {@code 0} if there's no mission associated with the given player
 native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, msg[])
 
+//@summary Updates passenger satisfaction. Should be called every second.\
+	Has no effect when player is not in a mission (or in a mission that has no passengers).
+//@param playerid player that may or may not be on a mission
+//@param vehicleid vehicle the player is in
+//@param qw vehicle w rotation
+//@param qx vehicle x rotation
+//@param qy vehicle y rotation
+//@param qz vehicle z rotation
+native Missions_UpdateSatisfaction(playerid, vehicleid, Float:qw, Float:qx, Float:qy, Float:qz)
+
 #namespace "nav.c"
 
 //@summary Enables ADF navigation for a vehicle

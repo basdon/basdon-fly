@@ -605,7 +605,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 		if (mission->passenger_satisfaction == 100) {
 			psatisfaction = 1000;
 		} else {
-			psatisfaction = (mission->passenger_satisfaction - 100) * 40;
+			psatisfaction = (mission->passenger_satisfaction - 100) * 60;
 		}
 	}
 	pdamage = -3 * mission->damagetaken;
@@ -692,6 +692,40 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	}
 	amx_GetAddr(amx, params[6], &addr);
 	amx_SetUString(addr, msg, sizeof(msg));
+
+	return 1;
+}
+
+/* native Missions_UpdateSatisfaction(playerid, vehicleid, Float:qw, Float:qx, Float:qy, Float:qz) */
+cell AMX_NATIVE_CALL Missions_UpdateSatisfaction(AMX *amx, cell *params)
+{
+	struct mission *miss;
+	const int playerid = params[1], vehicleid = params[2];
+	float qw, qx, qy, qz;
+	float value = 0.0f;
+
+	if ((miss = activemission[playerid]) != NULL &&
+		miss->veh->spawnedvehicleid == vehicleid)
+	{
+		qw = amx_ctof(params[3]);
+		qx = amx_ctof(params[4]);
+		qy = amx_ctof(params[5]);
+		qz = amx_ctof(params[6]);
+		value = fabs(100.0f * 2.0f * (qy * qz - qw * qx)) - 45.0;
+		if (value > 0.0) {
+			miss->passenger_satisfaction -= (int) (value / 2.0f);
+			if (miss->passenger_satisfaction < 0) {
+				miss->passenger_satisfaction = 0;
+			}
+		}
+		value = fabs(100.0f * 2.0f * (qx * qz + qw * qy)) - 60.0f;
+		if (value > 0.0) {
+			miss->passenger_satisfaction -= (int) (value / 2.0f);
+			if (miss->passenger_satisfaction < 0) {
+				miss->passenger_satisfaction = 0;
+			}
+		}
+	}
 
 	return 1;
 }

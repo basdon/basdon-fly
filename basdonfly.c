@@ -70,6 +70,7 @@ FORWARD(Missions_OnWeatherChanged);
 FORWARD(Missions_PostLoad);
 FORWARD(Missions_PostUnload);
 FORWARD(Missions_Start);
+FORWARD(Missions_UpdateSatisfaction);
 /* nav.c */
 FORWARD(Nav_EnableADF);
 FORWARD(Nav_EnableVOR);
@@ -238,6 +239,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Missions_PostLoad),
 	REGISTERNATIVE(Missions_PostUnload),
 	REGISTERNATIVE(Missions_Start),
+	REGISTERNATIVE(Missions_UpdateSatisfaction),
 	/* nav.c */
 	REGISTERNATIVE(Nav_EnableADF),
 	REGISTERNATIVE(Nav_EnableVOR),
