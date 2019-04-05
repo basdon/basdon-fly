@@ -352,7 +352,7 @@ thisisworsethanbubblesort:
 	mission->veh = veh;
 	mission->vehicle_reincarnation_value = vv;
 	mission->starttime = time(NULL);
-	mission->lastvehiclehp = amx_ftoc(params[7]);
+	mission->lastvehiclehp = amx_ctof(params[7]);
 	mission->damagetaken = 0;
 	mission->lastfuel = veh->fuel;
 	mission->fuelburned = 0.0f;
@@ -586,16 +586,20 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 {
 	struct mission *mission;
 	const int playerid = params[1];
-	float vehiclehp = amx_ctof(params[2]);
+	const float vehiclehp = amx_ctof(params[2]);
 	cell *addr;
 	char buf[4096];
-	int ptax, psatisfaction = 0, pdistance, pbonus = 0, ptotal, pdamage;
+	int ptax, psatisfaction = 0, pdistance, pbonus = 0, ptotal, pdamage, tmp;
 
 	if ((mission = activemission[playerid]) == NULL) {
 		return 0;
 	}
 
-	mission->damagetaken += mission->lastvehiclehp - vehiclehp;
+	tmp = mission->lastvehiclehp - vehiclehp;
+	if (tmp < 0) {
+		tmp = 0;
+	}
+	mission->damagetaken += tmp;
 	mission->lastvehiclehp = vehiclehp;
 	mission->fuelburned += mission->lastfuel - mission->veh->fuel;
 
@@ -605,7 +609,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 		if (mission->passenger_satisfaction == 100) {
 			psatisfaction = 1000;
 		} else {
-			psatisfaction = (mission->passenger_satisfaction - 100) * 60;
+			psatisfaction = (mission->passenger_satisfaction - 100) * 30;
 		}
 	}
 	pdamage = -3 * mission->damagetaken;
