@@ -407,6 +407,9 @@ native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z, buf[])
 //@param pay amount of money to be paid to player
 //@param buf buffer to put messages and queries in, only to be done when returned non-zero
 //@returns {@code 0} on failure
+//@remarks {@param buf} data: <ul>\
+	<li>{@code buf}: global mission msg</li><li>{@code buf+200}: flg query</li>\
+	<li>{@code buf+1000}: result dialog text</li></ul>
 native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[])
 
 //@summary Starts a mission for a player after the mission id has been retrieved

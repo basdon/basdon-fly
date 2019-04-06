@@ -25,6 +25,7 @@
 #define ECOL_DIALOG_CAPTION "{d2d2d2}"
 #define ECOL_DIALOG_TEXT "{a9c4e4}"
 #define ECOL_DIALOG_BUTTON "{c8c8c8}"
+#define ECOL_MISSION "{ff9900}"
 
 #define WARN "! "
 #define INFO "* "

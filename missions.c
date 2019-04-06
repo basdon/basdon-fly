@@ -59,6 +59,40 @@ void missions_add_distance(int playerid, float distance)
 	}
 }
 
+/* returns amount of characters appended */
+static int mission_append_pay(char *buf, char *description, int amount)
+{
+	char tmp[12], *ptmp;
+	int len, p = sprintf(buf, "%s", description);
+	if (amount < 0) {
+		if (amount < -2147483647) {
+			amount = -2147483647;
+		}
+		amount = -amount;
+		buf[p++] = '{'; buf[p++] = 'F'; buf[p++] = '6'; buf[p++] = '0';
+		buf[p++] = '0'; buf[p++] = '0'; buf[p++] = '0'; buf[p++] = '}';
+		buf[p++] = '-';
+	} else {
+		if (amount > 2147483647) {
+			amount = 2147483647;
+		}
+		buf[p++] = '{'; buf[p++] = '0'; buf[p++] = '0'; buf[p++] = 'F';
+		buf[p++] = '6'; buf[p++] = '0'; buf[p++] = '0'; buf[p++] = '}';
+	}
+	buf[p++] = '$';
+	sprintf(tmp, "%d", amount);
+	ptmp = tmp;
+	len = strlen(tmp);
+	while (len-- > 0) {
+		buf[p++] = *(ptmp++);
+		if (len % 3 == 0 && len) {
+			buf[p++] = ',';
+		}
+	}
+	buf[p++] = '\n';
+	return p;
+}
+
 void missions_freepoints()
 {
 	int i = airportscount;
@@ -590,8 +624,10 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	cell *addr;
 	char buf[4096];
 	int ptax, psatisfaction = 0, pdistance, pbonus = 0, ptotal, pdamage, tmp;
+	int totaltime, duration_h, duration_m;
+	int p;
 
-	if ((mission = activemission[playerid]) == NULL) {
+	if ((mission = activemission[playerid]) == NULL || pdata[playerid] == NULL) {
 		return 0;
 	}
 
@@ -603,11 +639,15 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	mission->lastvehiclehp = vehiclehp;
 	mission->fuelburned += mission->lastfuel - mission->veh->fuel;
 
+	totaltime = (int) difftime(time(NULL), mission->starttime);
+	duration_m = totaltime % 60;
+	duration_h = (totaltime - duration_m) / 60;
+
 	ptax = -calculate_airport_tax(mission->endpoint->ap, mission->missiontype);
 	pdistance = 500 + (int) (mission->distance * 1.435f);
 	if (mission->missiontype & (1 | 2 | 4)) {
 		if (mission->passenger_satisfaction == 100) {
-			psatisfaction = 1000;
+			psatisfaction = 500;
 		} else {
 			psatisfaction = (mission->passenger_satisfaction - 100) * 30;
 		}
@@ -617,6 +657,18 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[3], &addr);
 	*addr = ptotal;
 
+	amx_GetAddr(amx, params[4], &addr);
+	sprintf(buf,
+		"%s completed flight #%d from %s (%s) to %s (%s) in %dh%02dm",
+		pdata[playerid]->name,
+	        mission->id,
+		mission->startpoint->ap->name,
+	        mission->startpoint->ap->beacon,
+	        mission->endpoint->ap->name,
+	        mission->endpoint->ap->beacon,
+	        duration_h,
+	        duration_m);
+	amx_SetUString(addr, buf, sizeof(buf));
 	sprintf(buf,
 	        "UPDATE flg SET tunload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP(),"
 		"state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
@@ -634,11 +686,52 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 		mission->passenger_satisfaction,
 		mission->actualdistance,
 	        mission->id);
-	amx_GetAddr(amx, params[4], &addr);
-	amx_SetUString(addr, buf, sizeof(buf));
-
-	/* TODO: satisfaction */
-	/* TODO: stuff */
+	amx_SetUString(addr + 200, buf, sizeof(buf));
+	p = 0;
+	p += sprintf(buf,
+	             "{ffffff}Origin:\t\t\t"ECOL_MISSION"%s\n"
+	             "{ffffff}Destination:\t\t"ECOL_MISSION"%s\n"
+	             "{ffffff}Distance (pt to pt):\t"ECOL_MISSION"%.0fm\n"
+	             "{ffffff}Distance (actual):\t"ECOL_MISSION"%.0fm\n"
+	             "{ffffff}Duration:\t\t"ECOL_MISSION"%dh%02dm\n"
+	             "{ffffff}Fuel Burned:\t\t"ECOL_MISSION"%.1fL\n",
+	             mission->startpoint->ap->name,
+	             mission->endpoint->ap->name,
+	             mission->distance,
+	             mission->actualdistance,
+	             duration_h,
+	             duration_m,
+		     mission->fuelburned);
+	if (mission->missiontype & (1 | 2 | 4)) {
+		p += sprintf(buf + p,
+		             "{ffffff}Passenger Satisfaction:\t"ECOL_MISSION"%d%%\n",
+		             mission->passenger_satisfaction);
+	}
+	buf[p++] = '\n';
+	buf[p++] = '\n';
+	if (ptax) {
+		p += mission_append_pay(buf + p, "{ffffff}Airport Tax:\t\t", ptax);
+	}
+	if (mission->weatherbonus) {
+		p += mission_append_pay(buf + p, "{ffffff}Weather bonus:\t\t", mission->weatherbonus);
+	}
+	p += mission_append_pay(buf + p, "{ffffff}Distance Pay:\t\t", pdistance);
+	if (mission->missiontype & (1 | 2 | 4)) {
+		if (psatisfaction > 0) {
+			p += mission_append_pay(buf + p, "{ffffff}Satisfaction Bonus:\t", psatisfaction);
+		} else {
+			p += mission_append_pay(buf + p, "{ffffff}Satisfaction Penalty:\t", psatisfaction);
+		}
+	}
+	if (pdamage) {
+		p += mission_append_pay(buf + p, "{ffffff}Damage Penalty:\t", pdamage);
+	}
+	if (pbonus) {
+		p += mission_append_pay(buf + p, "{ffffff}Bonus:\t\t\t", pbonus);
+	}
+	p += mission_append_pay(buf + p, "\n\n\t\t{ffffff}Total Pay: ", ptotal);
+	buf[--p] = 0;
+	amx_SetUString(addr + 1000, buf, sizeof(buf));
 
 	free(mission);
 	activemission[playerid] = NULL;
