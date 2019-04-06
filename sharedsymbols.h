@@ -270,6 +270,8 @@
 
 /* missions.c / missions.pwn */
 
+#define PASSENGER_MISSIONTYPES (1 | 2 | 4 | 8192)
+
 #define MISSION_STAGE_CREATE	1
 #define MISSION_STAGE_PRELOAD	2
 #define MISSION_STAGE_LOAD	4

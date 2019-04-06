@@ -115,42 +115,47 @@ int calculate_airport_tax(struct airport *ap, int missiontype)
 	struct missionpoint *msp;
 	struct runway *rnw;
 	int runwayendcount = 0;
-	int costpercharge, tax = 500, chargernws = 0;
+	int costpermsp, tax = 500, chargernws = 0;
 
 	switch (missiontype) {
 	case 1: /* dodo, no rnw charge */
-		costpercharge = 20;
+		costpermsp = 20;
 		break;
 	case 2: /* small passenger */
-		costpercharge = 30;
+		costpermsp = 30;
 		chargernws = 1;
 		break;
 	case 4: /* big passenger */
-		costpercharge = 50;
+		costpermsp = 50;
 		chargernws = 1;
 		break;
 	case 8:
 	case 16:
 	case 32: /* cargo */
-		costpercharge = 40;
+		costpermsp = 40;
 		chargernws = 1;
 		break;
 	case 64:
 	case 128:
 	case 256: /* heli, only charge amount of heliports */
-		costpercharge = 30;
+		costpermsp = 30;
 		break;
 	case 512: /* military is govt, and no tax for special missions */
 	case 1024:
 	case 2048:
 	case 4096:
+	default:
 		return 0;
+	case 8192: /* skimmer, also for runways (lights maintenance etc) */
+		costpermsp = 15;
+		chargernws = 1;
+		break;
 	}
 
 	msp = ap->missionpoints;
 	while (msp != NULL) {
 		if (msp->type & (64 | 128 | 256)) {
-			tax += costpercharge;
+			tax += costpermsp;
 		}
 		msp = msp->next;
 	}
@@ -303,6 +308,7 @@ cell AMX_NATIVE_CALL Missions_Create(AMX *amx, cell *params)
 	case MODEL_CARGOBOB: missiontype = 256; break;
 	case MODEL_HYDRA:
 	case MODEL_RUSTLER: missiontype = 512; break;
+	case MODEL_SKIMMER: missiontype = 8192; break;
 	default:
 unknownvehicle:
 		strcpy(buf, WARN"This vehicle can't complete any type of missions!");
@@ -645,7 +651,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 
 	ptax = -calculate_airport_tax(mission->endpoint->ap, mission->missiontype);
 	pdistance = 500 + (int) (mission->distance * 1.435f);
-	if (mission->missiontype & (1 | 2 | 4)) {
+	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
 		if (mission->passenger_satisfaction == 100) {
 			psatisfaction = 500;
 		} else {
@@ -702,7 +708,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	             duration_h,
 	             duration_m,
 		     mission->fuelburned);
-	if (mission->missiontype & (1 | 2 | 4)) {
+	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
 		p += sprintf(buf + p,
 		             "{ffffff}Passenger Satisfaction:\t"ECOL_MISSION"%d%%\n",
 		             mission->passenger_satisfaction);
@@ -716,7 +722,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 		p += mission_append_pay(buf + p, "{ffffff}Weather bonus:\t\t", mission->weatherbonus);
 	}
 	p += mission_append_pay(buf + p, "{ffffff}Distance Pay:\t\t", pdistance);
-	if (mission->missiontype & (1 | 2 | 4)) {
+	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
 		if (psatisfaction > 0) {
 			p += mission_append_pay(buf + p, "{ffffff}Satisfaction Bonus:\t", psatisfaction);
 		} else {
