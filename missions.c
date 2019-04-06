@@ -110,6 +110,34 @@ void missions_freepoints()
 	}
 }
 
+static float mission_get_vehicle_paymp(int model)
+{
+	const float heli_mp = 1.18f;
+
+	switch (model) {
+	case MODEL_DODO: return 270.0f / 140.0f;
+	case MODEL_SHAMAL: return 1.0f;
+	case MODEL_BEAGLE: return 270.0f / 125.0f;
+	case MODEL_AT400: return 1.15f;
+	case MODEL_ANDROM: return 1.1f;
+	case MODEL_NEVADA: return 270.0f / 185.0f;
+	case MODEL_MAVERICK:
+	case MODEL_VCNMAV: return heli_mp * 270.0f / 154.0f;
+	case MODEL_RAINDANC: return heli_mp * 270.0f / 113.0f;
+	case MODEL_LEVIATHN: return heli_mp * 270.0f / 108.0f;
+	case MODEL_POLMAV: return heli_mp * 270.0f / 154.0f;
+	case MODEL_SPARROW: return heli_mp * 270.0f / 106.0f;
+	case MODEL_HUNTER: return heli_mp * 270.0f / 190.0f;
+	case MODEL_CARGOBOB: return heli_mp * 270.0f / 126.0f;
+	case MODEL_HYDRA: return 0.9f;
+	case MODEL_RUSTLER: return 270.0f / 235.0f;
+	case MODEL_SKIMMER: return 270.0f / 135.0f;
+	default:
+		logprintf("mission_get_vehicle_paymp: unknown model: %d", model);
+		return 1.0f;
+	}
+}
+
 int calculate_airport_tax(struct airport *ap, int missiontype)
 {
 	struct missionpoint *msp;
@@ -627,6 +655,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	struct mission *mission;
 	const int playerid = params[1];
 	const float vehiclehp = amx_ctof(params[2]);
+	float paymp;
 	cell *addr;
 	char buf[4096];
 	int ptax, psatisfaction = 0, pdistance, pbonus = 0, ptotal, pdamage, tmp;
@@ -649,8 +678,10 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	duration_m = totaltime % 60;
 	duration_h = (totaltime - duration_m) / 60;
 
+	paymp = mission_get_vehicle_paymp(mission->veh->model);
 	ptax = -calculate_airport_tax(mission->endpoint->ap, mission->missiontype);
-	pdistance = 500 + (int) (mission->distance * 1.435f);
+	pdistance = 500 + (int) (mission->distance * 1.135f);
+	pdistance = (int) (pdistance * paymp);
 	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
 		if (mission->passenger_satisfaction == 100) {
 			psatisfaction = 500;
@@ -677,20 +708,21 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	amx_SetUString(addr, buf, sizeof(buf));
 	sprintf(buf,
 	        "UPDATE flg SET tunload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP(),"
-		"state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
-		"pdistance=%d,pdamage=%d,pbonus=%d,ptotal=%d,satisfaction=%d,adistance=%f "
-		"WHERE id=%d",
-		MISSION_STATE_FINISHED,
-		mission->fuelburned,
-		ptax,
-		mission->weatherbonus,
-		psatisfaction,
-		pdistance,
-		pdamage,
-		pbonus,
-		ptotal,
-		mission->passenger_satisfaction,
-		mission->actualdistance,
+	        "state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
+	        "pdistance=%d,pdamage=%d,pbonus=%d,ptotal=%d,satisfaction=%d,adistance=%f,"
+	        "paymp=%f WHERE id=%d",
+	        MISSION_STATE_FINISHED,
+	        mission->fuelburned,
+	        ptax,
+	        mission->weatherbonus,
+	        psatisfaction,
+	        pdistance,
+	        pdamage,
+	        pbonus,
+	        ptotal,
+	        mission->passenger_satisfaction,
+	        mission->actualdistance,
+	        paymp,
 	        mission->id);
 	amx_SetUString(addr + 200, buf, sizeof(buf));
 	p = 0;
@@ -700,14 +732,16 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	             "{ffffff}Distance (pt to pt):\t"ECOL_MISSION"%.0fm\n"
 	             "{ffffff}Distance (actual):\t"ECOL_MISSION"%.0fm\n"
 	             "{ffffff}Duration:\t\t"ECOL_MISSION"%dh%02dm\n"
-	             "{ffffff}Fuel Burned:\t\t"ECOL_MISSION"%.1fL\n",
+	             "{ffffff}Fuel Burned:\t\t"ECOL_MISSION"%.1fL\n"
+	             "{ffffff}Vehicle pay category:\t"ECOL_MISSION"%.1fx\n",
 	             mission->startpoint->ap->name,
 	             mission->endpoint->ap->name,
 	             mission->distance,
 	             mission->actualdistance,
 	             duration_h,
 	             duration_m,
-		     mission->fuelburned);
+		     mission->fuelburned,
+	             paymp);
 	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
 		p += sprintf(buf + p,
 		             "{ffffff}Passenger Satisfaction:\t"ECOL_MISSION"%d%%\n",
