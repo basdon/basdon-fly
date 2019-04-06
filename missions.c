@@ -802,6 +802,7 @@ cell AMX_NATIVE_CALL Missions_UpdateSatisfaction(AMX *amx, cell *params)
 	float value = 0.0f;
 
 	if ((miss = activemission[playerid]) != NULL &&
+		miss->stage == MISSION_STAGE_FLIGHT &&
 		miss->veh->spawnedvehicleid == vehicleid)
 	{
 		qw = amx_ctof(params[3]);
