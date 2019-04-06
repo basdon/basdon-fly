@@ -769,7 +769,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	if (pbonus) {
 		p += mission_append_pay(buf + p, "{ffffff}Bonus:\t\t\t", pbonus);
 	}
-	p += mission_append_pay(buf + p, "\n\n\t\t{ffffff}Total Pay: ", ptotal);
+	p += mission_append_pay(buf + p, "\n\n\t{ffffff}Total Pay: ", ptotal);
 	buf[--p] = 0;
 	amx_SetUString(addr + 1000, buf, sizeof(buf));
 
