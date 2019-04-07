@@ -572,8 +572,9 @@ native PlayerData_Init(playerid, ip[], name[], namelen)
 //@param money money of the player to store
 //@param dis total distance flown (odo)
 //@param flighttime total seconds spent flying
+//@param prefs player's preferences
 //@param buf buffer to store query in
-native PlayerData_FormatUpdateQuery(userid, score, money, Float:dis, flighttime, buf[])
+native PlayerData_FormatUpdateQuery(userid, score, money, Float:dis, flighttime, prefs, buf[])
 
 //@summary Updates the player's user ID
 //@param playerid player
@@ -608,6 +609,19 @@ native PlayerData_UpdateName(playerid, name[], namelen)
 //@remarks {@code buf[1]} is either {@code 0} when {@param sessionid} was {@code -1} or {@code isdisconnect} is {@code 0},\
 		or contains the position of the query to update a player's online time (accurate) in {@param buf}
 native Playtime_FormatUpdateTimes(userid, sessionid, playtimetoadd, isdisconnect, buf[])
+
+#namespace "prefs.c"
+
+//@summary Change {@param playerprefs} value depending on the selected {@param listitem} when responding to dialog shown by {@link Prefs_FormatDialog}
+//@param listitem the selected row from the list dialog
+//@param playerprefs {@code prefs} of the player, passed by reference
+//@returns {@code 0} if {@param listitem} was not valid
+native Prefs_DoActionForRow(listitem, &playerprefs)
+
+//@summary Formats text to show in preferences list item dialog
+//@param playerprefs {@code prefs} value for the player
+//@param buf buffer to store text in
+native Prefs_FormatDialog(playerprefs, buf[])
 
 #namespace "timecyc.c"
 

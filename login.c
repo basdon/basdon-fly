@@ -132,10 +132,11 @@ cell AMX_NATIVE_CALL Login_FormatCreateUser(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[3], &addr);
 	amx_GetUString(pw, addr, sizeof(pw));
 	sprintf(data,
-	        "INSERT INTO usr(n,p,r,l,g) VALUES('%s','%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),%d)",
+	        "INSERT INTO usr(n,p,r,l,g,prefs) VALUES('%s','%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),%d,%d)",
 	        pdata[pid]->name,
 		pw,
-		group);
+		group,
+	        DEFAULTPREFS);
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, data, sizeof(data));
 	return 1;
@@ -205,7 +206,7 @@ cell AMX_NATIVE_CALL Login_FormatLoadAccountData(AMX *amx, cell *params)
 {
 	char data[512];
 	cell *addr;
-	sprintf(data, "SELECT s,mon,dis,f FROM usr WHERE i=%d", (int) params[1]);
+	sprintf(data, "SELECT s,mon,dis,f,prefs FROM usr WHERE i=%d", (int) params[1]);
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, data, sizeof(data));
 	return 1;

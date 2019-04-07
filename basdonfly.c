@@ -93,6 +93,9 @@ FORWARD(PlayerData_SetUserId);
 FORWARD(PlayerData_UpdateName);
 /* playtime.c */
 FORWARD(Playtime_FormatUpdateTimes);
+/* prefs.c */
+FORWARD(Prefs_DoActionForRow);
+FORWARD(Prefs_FormatDialog);
 /* timecyc.c */
 FORWARD(Timecyc_GetCurrentWeatherMsg);
 FORWARD(Timecyc_GetNextWeatherMsgQuery);
@@ -262,6 +265,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PlayerData_UpdateName),
 	/* playtime.c */
 	REGISTERNATIVE(Playtime_FormatUpdateTimes),
+	/* prefs.c */
+	REGISTERNATIVE(Prefs_DoActionForRow),
+	REGISTERNATIVE(Prefs_FormatDialog),
 	/* timecyc.c */
 	REGISTERNATIVE(Timecyc_GetCurrentWeatherMsg),
 	REGISTERNATIVE(Timecyc_GetNextWeatherMsgQuery),

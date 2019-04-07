@@ -316,6 +316,13 @@
 #define RESULT_ILS_NOVOR 2
 #define RESULT_ILS_NOILS 3
 
+/* prefs.c / prefs.pwn */
+#define PREF_ENABLE_PM 1
+#define PREF_SHOW_MISSION_MSGS 2
+#define PREF_CONSTANT_WORK 4
+
+#define DEFAULTPREFS (PREF_ENABLE_PM | PREF_SHOW_MISSION_MSGS)
+
 /* timecyc.c / timecyc.pwn */
 #define NEXT_WEATHER_POSSIBILITIES (35)
 
