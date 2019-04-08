@@ -328,6 +328,7 @@ native Login_UsePassword(playerid, buf[]);
 //@param y y coordinate
 //@param z z coordinate
 //@param type type of missions this mission point is for
+//@seealso Missions_FinalizeAddPoints
 native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type)
 
 //@summary Creates a random mission for a player
@@ -368,6 +369,7 @@ native Missions_EndUnfinished(playerid, reason, buf[])
 native Missions_EnterCheckpoint(playerid, vehicleid, vv, Float:x, Float:y, Float:z, errmsg[])
 
 //@summary Compute some mission point stuff, to be done after all points have been added
+//@seealso Missions_AddPoint
 native Missions_FinalizeAddPoints()
 
 //@summary Get data to enable navigation for a mission
@@ -376,10 +378,11 @@ native Missions_FinalizeAddPoints()
 //@param vehiclemodel variable to store mission vehicle model in
 //@param airportidx variable to store next airport idx in
 //@returns {@code 0} if something did not work
+//@seealso Nav_NavigateToMission
 native Missions_GetMissionNavData(playerid, &vehicleid, &vehiclemodel, &airportidx)
 
 //@summary Get mission state of a player
-//@param player to get the mission state of
+//@param playerid player to get the mission state of
 //@returns {@code -1} if not in a mission, or one of the flight-statuses.txt constants
 native Missions_GetState(playerid)
 
@@ -452,6 +455,7 @@ native Missions_UpdateSatisfaction(playerid, vehicleid, Float:qw, Float:qx, Floa
 //@summary Enables ADF navigation for a vehicle
 //@param vehicleid vehicle to enable ADF for
 //@param cmdtext beacon to navigate to (may have whitespace in front)
+//@param buf64 buffer to store error message in, to be sent when result is {@code RESULT_ADF_ERR}
 /// <returns>
 ///   <ul>
 ///     <li><b><c>RESULT_ADF_OFF</c></b> - ADF is now disabled</li>
@@ -466,7 +470,7 @@ native Nav_EnableADF(vehicleid, cmdtext[], buf64[])
 //@summary Enables VOR navigation for a vehicle
 //@param vehicleid vehicle to enable VOR for
 //@param cmdtext beacon+runway to navigate to (optionally prepended by whitespace and white space between beacon and runway)
-//@param buf64 buffer to store custom error message in
+//@param buf64 buffer to store error message in, to be sent when result is {@code RESULT_VOR_ERR}
 /// <returns>
 ///   <ul>
 ///     <li><b><c>RESULT_VOR_OFF</c></b> - VOR is now disabled</li>
@@ -502,6 +506,7 @@ native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[], bufils[], 
 //@param y current y position of the player, to determine closest runway if needed
 //@param z current z position of the player, to determine closest runway if needed
 //@returns {@code 0} or {@code NAV_ADF} or {@code NAV_VOR}, specifying what kind of nav is set active
+//@seealso Missions_GetMissionNavData
 native Nav_NavigateToMission(vehicleid, vehiclemodel, airportidx, Float:x, Float:y, Float:z)
 
 //@summary Resets all nav for a vehicle
@@ -718,7 +723,7 @@ native Veh_CollectPlayerVehicles(userid, buf[])
 //@param userid user id of the player of whom to collect spawned vehicles
 //@param buf buffer to put the vehicle ids in
 //@returns the amount of vehicles that were placed in {@param buf}
-native Veh_CollectSpawnedVehicles(playerid, buf[])
+native Veh_CollectSpawnedVehicles(userid, buf[])
 
 //@summary Make a vehicle consume fuel, to be called each second when a player is in control
 //@param vehicleid the vehicle
@@ -772,7 +777,7 @@ native Veh_IsFuelEmpty(vehicleid)
 //@summary Checks if a player is allowed to be in a vehicle
 //@param userid user id of the player to check
 //@param vehicleid vehicle
-//@param buf[] if not allowed, errormessage will be placed in this buffer
+//@param buf if not allowed, errormessage will be placed in this buffer
 //@returns {@code 0} if that user is not allowed in the given vehicle (to send to player when trying to enter)
 native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[])
 
@@ -799,7 +804,7 @@ native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid)
 //@param budget max amount of money to spend on the rapir
 //@param hp current hp of the vehicle
 //@param newhp new hp to set, when returned non-zero
-//@param msg buffer to store message in to send to player, use {@code COL_INFO} on non-zero return value, {@code COL_WARN} otherwise
+//@param buf buffer to store message in to send to player, use {@code COL_INFO} on non-zero return value, {@code COL_WARN} otherwise
 //@returns the actual amont of money it costs to repair the vehicle, {@code 0} if error
 native Veh_Repair(budget, Float:hp, &Float:newhp, buf[])
 
