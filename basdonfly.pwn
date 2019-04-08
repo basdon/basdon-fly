@@ -420,6 +420,11 @@ native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z, buf[])
 	<li>{@code buf+1000}: result dialog text</li></ul>
 native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[])
 
+//@summary Check if the satisfaction textdraw should be shown for a player
+//@param playerid player to check
+//@returns {@code 1} if the satisfaction textdraw should be shown
+native Missions_ShouldShowSatisfaction(playerid)
+
 //@summary Starts a mission for a player after the mission id has been retrieved
 //@param playerid the player to start the mission for
 //@param missionid the mission id
@@ -438,7 +443,9 @@ native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, msg[])
 //@param qx vehicle x rotation
 //@param qy vehicle y rotation
 //@param qz vehicle z rotation
-native Missions_UpdateSatisfaction(playerid, vehicleid, Float:qw, Float:qx, Float:qy, Float:qz)
+//@param buf buffer to store satisfaction string in
+//@returns {@code 1} if the satisfaction textdraw should be updated
+native Missions_UpdateSatisfaction(playerid, vehicleid, Float:qw, Float:qx, Float:qy, Float:qz, buf[])
 
 #namespace "nav.c"
 
@@ -478,7 +485,7 @@ native Nav_GetActiveNavType(vehicleid)
 
 //@summary Update nav data for player
 //@param playerid player to update nav for
-//@param vehicleid vehicle of player
+//@param vehicleid vehicle the player is in
 //@param bufdist buffer for distance
 //@param bufalt buffer for altitude
 //@param bufcrs buffer for course
@@ -731,6 +738,14 @@ native Veh_Destroy();
 //@param vehicleid vehicle to ensure fuel level for
 native Veh_EnsureHasFuel(vehicleid)
 
+//@summary Formats vehicle hp/fuel level text for display in the panel
+//@param playerid the playerid for which to draw the text
+//@param vehicleid the vehicle the player is in
+//@param vehiclehp hp of the vehicle
+//@param buf buffer in which to store the text
+//@returns {@code 0} if no text update is needed since last call
+native Veh_FormatPanelText(playerid, vehicleid, Float:vehiclehp, buf[])
+
 //@summary Check if there is a label on given vehicle for given player, {@b and unregister it}
 //@param vehicleid vehicle on which a label might be
 //@param playerid player for which the label would have been created
@@ -774,6 +789,12 @@ native Veh_OnPlayerDisconnect(playerid)
 //@returns the actual amont of money it costed to refuel the vehicle, {@code 0} if error
 native Veh_Refuel(vehicleid, Float:priceperlitre, budget, &Float:refuelamount, msg[])
 
+//@summary Let the plugin know a label was created on a vehicle for a player
+//@param vehicleid the vehicle the label is attached to
+//@param playerid the player the label was made for
+//@param labelid the label id assigned to the newly created label
+native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid)
+
 //@summary Calculate cost and new hp of vehicle to repair it using given budget
 //@param budget max amount of money to spend on the rapir
 //@param hp current hp of the vehicle
@@ -782,11 +803,9 @@ native Veh_Refuel(vehicleid, Float:priceperlitre, budget, &Float:refuelamount, m
 //@returns the actual amont of money it costs to repair the vehicle, {@code 0} if error
 native Veh_Repair(budget, Float:hp, &Float:newhp, buf[])
 
-//@summary Let the plugin know a label was created on a vehicle for a player
-//@param vehicleid the vehicle the label is attached to
-//@param playerid the player the label was made for
-//@param labelid the label id assigned to the newly created label
-native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid)
+//@summary Reset cache for text displayed on panel
+//@param playerid player for which to reset the cache
+native Veh_ResetPanelTextCache(playerid)
 
 //@summary Check if a label should be created on a vehicle for a player
 //@param vehicleid vehicle on which the label would be attached

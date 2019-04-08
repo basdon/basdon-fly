@@ -802,6 +802,14 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Missions_ShouldShowSatisfaction(playerid) */
+cell AMX_NATIVE_CALL Missions_ShouldShowSatisfaction(AMX *amx, cell *params)
+{
+	const int playerid = params[1];
+	return activemission[playerid] != NULL &&
+		activemission[playerid]->missiontype & PASSENGER_MISSIONTYPES;
+}
+
 /* native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, msg[]) */
 cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 {
@@ -857,18 +865,22 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Missions_UpdateSatisfaction(playerid, vehicleid, Float:qw, Float:qx, Float:qy, Float:qz) */
+/* native Missions_UpdateSatisfaction(playerid, vehicleid, Float:qw, Float:qx, Float:qy, Float:qz, buf[]) */
 cell AMX_NATIVE_CALL Missions_UpdateSatisfaction(AMX *amx, cell *params)
 {
 	struct mission *miss;
 	const int playerid = params[1], vehicleid = params[2];
+	cell *addr;
+	int lastval;
 	float qw, qx, qy, qz;
 	float value = 0.0f;
+	char buf[144];
 
 	if ((miss = activemission[playerid]) != NULL &&
 		miss->stage == MISSION_STAGE_FLIGHT &&
 		miss->veh->spawnedvehicleid == vehicleid)
 	{
+		lastval = miss->passenger_satisfaction;
 		qw = amx_ctof(params[3]);
 		qx = amx_ctof(params[4]);
 		qy = amx_ctof(params[5]);
@@ -887,7 +899,12 @@ cell AMX_NATIVE_CALL Missions_UpdateSatisfaction(AMX *amx, cell *params)
 				miss->passenger_satisfaction = 0;
 			}
 		}
+		if (lastval != miss->passenger_satisfaction) {
+			sprintf(buf, "Passenger~n~Satisfaction: %d%%", miss->passenger_satisfaction);
+			amx_GetAddr(amx, params[7], &addr);
+			amx_SetUString(addr, buf, sizeof(buf));
+			return 1;
+		}
 	}
-
-	return 1;
+	return 0;
 }
