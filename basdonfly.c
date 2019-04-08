@@ -111,6 +111,7 @@ FORWARD(Veh_CollectPlayerVehicles);
 FORWARD(Veh_ConsumeFuel);
 FORWARD(Veh_Destroy);
 FORWARD(Veh_EnsureHasFuel);
+FORWARD(Veh_FormatPanelText);
 FORWARD(Veh_GetLabelToDelete);
 FORWARD(Veh_GetNextUpdateQuery);
 FORWARD(Veh_Init);
@@ -118,8 +119,9 @@ FORWARD(Veh_IsFuelEmpty);
 FORWARD(Veh_IsPlayerAllowedInVehicle);
 FORWARD(Veh_OnPlayerDisconnect);
 FORWARD(Veh_Refuel);
-FORWARD(Veh_Repair);
 FORWARD(Veh_RegisterLabel);
+FORWARD(Veh_Repair);
+FORWARD(Veh_ResetPanelTextCache);
 FORWARD(Veh_ShouldCreateLabel);
 FORWARD(Veh_UpdateSlot);
 /* zones.c */
@@ -285,6 +287,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_ConsumeFuel),
 	REGISTERNATIVE(Veh_Destroy),
 	REGISTERNATIVE(Veh_EnsureHasFuel),
+	REGISTERNATIVE(Veh_FormatPanelText),
 	REGISTERNATIVE(Veh_GetLabelToDelete),
 	REGISTERNATIVE(Veh_GetNextUpdateQuery),
 	REGISTERNATIVE(Veh_Init),
@@ -292,8 +295,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_IsPlayerAllowedInVehicle),
 	REGISTERNATIVE(Veh_OnPlayerDisconnect),
 	REGISTERNATIVE(Veh_Refuel),
-	REGISTERNATIVE(Veh_Repair),
 	REGISTERNATIVE(Veh_RegisterLabel),
+	REGISTERNATIVE(Veh_Repair),
+	REGISTERNATIVE(Veh_ResetPanelTextCache),
 	REGISTERNATIVE(Veh_ShouldCreateLabel),
 	REGISTERNATIVE(Veh_UpdateSlot),
 	/* zones.c */

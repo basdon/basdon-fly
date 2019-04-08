@@ -21,6 +21,9 @@ static struct dbvehicle *dbvehicles;
 int dbvehiclenextid, dbvehiclealloc;
 struct vehicle gamevehicles[MAX_VEHICLES];
 short labelids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB+ of mapping errrr */
+int hpflcache[MAX_PLAYERS];
+
+#define INVALID_HPFL_CACHE 2147483647
 
 void veh_init()
 {
@@ -268,6 +271,40 @@ cell AMX_NATIVE_CALL Veh_EnsureHasFuel(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Veh_FormatPanelText(int playerid, int vehicleid, Float:vehiclehp, buf[]) */
+cell AMX_NATIVE_CALL Veh_FormatPanelText(AMX *amx, cell *params)
+{
+	struct dbvehicle *veh;
+	const int pid = params[1], vid = params[2];
+	const int vehiclehp = amx_ctof(params[3]);
+	cell *addr;
+	char buf[42];
+	int fuel, fuelcapacity, hpflcachevalue;
+
+	fuel = fuelcapacity = 0;
+	if ((veh = gamevehicles[vid].dbvehicle) != NULL) {
+		fuel = veh->fuel;
+		fuelcapacity = model_fuel_capacity(veh->model);
+	}
+
+	hpflcachevalue = fuel * 10000 + vehiclehp;
+	if (hpflcachevalue == hpflcache[pid]) {
+		return 0;
+	}
+	hpflcache[pid] = hpflcachevalue;
+
+	sprintf(buf, "HP: ~g~%4d/1000  ~W~FL: ~g~%d/%d", vehiclehp, fuel, fuelcapacity);
+	if (vehiclehp < 350) {
+		buf[5] = 'r';
+	}
+	if (fuel <= (int) ((float) fuelcapacity * 0.2f)) {
+		buf[26] = 'r';
+	}
+	amx_GetAddr(amx, params[4], &addr);
+	amx_SetUString(addr, buf, sizeof(buf));
+	return 1;
+}
+
 /* native Veh_GetLabelToDelete(vehicleid, playerid, &PlayerText3D:labelid) */
 cell AMX_NATIVE_CALL Veh_GetLabelToDelete(AMX *amx, cell *params)
 {
@@ -432,6 +469,14 @@ cell AMX_NATIVE_CALL Veh_Refuel(AMX *amx, cell *params)
 	return cost;
 }
 
+/* native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid) */
+cell AMX_NATIVE_CALL Veh_RegisterLabel(AMX *amx, cell *params)
+{
+	const int vehicleid = params[1], playerid = params[2], labelid = params[3];
+	labelids[playerid][vehicleid] = labelid;
+	return 1;
+}
+
 /* native Veh_Repair(budget, Float:hp, &Float:newhp, buf[]) */
 cell AMX_NATIVE_CALL Veh_Repair(AMX *amx, cell *params)
 {
@@ -473,11 +518,10 @@ cell AMX_NATIVE_CALL Veh_Repair(AMX *amx, cell *params)
 	return cost;
 }
 
-/* native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid) */
-cell AMX_NATIVE_CALL Veh_RegisterLabel(AMX *amx, cell *params)
+/* native Veh_ResetPanelTextCache(playerid) */
+cell AMX_NATIVE_CALL Veh_ResetPanelTextCache(AMX *amx, cell *params)
 {
-	const int vehicleid = params[1], playerid = params[2], labelid = params[3];
-	labelids[playerid][vehicleid] = labelid;
+	hpflcache[params[1]] = INVALID_HPFL_CACHE;
 	return 1;
 }
 
