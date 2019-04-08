@@ -5,10 +5,7 @@
 #include <string.h>
 #include "game_sa.h"
 
-static unsigned int vehicleflags[MODEL_TOTAL];
-
-#define PLANE 0x1
-#define HELI 0x2
+unsigned int vehicleflags[MODEL_TOTAL];
 
 void game_sa_init()
 {

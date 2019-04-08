@@ -63,6 +63,7 @@ FORWARD(Missions_Create);
 FORWARD(Missions_EndUnfinished);
 FORWARD(Missions_EnterCheckpoint);
 FORWARD(Missions_FinalizeAddPoints);
+FORWARD(Missions_GetMissionNavData);
 FORWARD(Missions_GetState);
 FORWARD(Missions_OnVehicleRefueled);
 FORWARD(Missions_OnVehicleRepaired);
@@ -76,6 +77,7 @@ FORWARD(Nav_EnableADF);
 FORWARD(Nav_EnableVOR);
 FORWARD(Nav_GetActiveNavType);
 FORWARD(Nav_Format);
+FORWARD(Nav_NavigateToMission);
 FORWARD(Nav_Reset);
 FORWARD(Nav_ResetCache);
 FORWARD(Nav_ToggleILS);
@@ -235,6 +237,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Missions_EndUnfinished),
 	REGISTERNATIVE(Missions_EnterCheckpoint),
 	REGISTERNATIVE(Missions_FinalizeAddPoints),
+	REGISTERNATIVE(Missions_GetMissionNavData),
 	REGISTERNATIVE(Missions_GetState),
 	REGISTERNATIVE(Missions_OnVehicleRefueled),
 	REGISTERNATIVE(Missions_OnVehicleRepaired),
@@ -248,6 +251,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Nav_EnableVOR),
 	REGISTERNATIVE(Nav_GetActiveNavType),
 	REGISTERNATIVE(Nav_Format),
+	REGISTERNATIVE(Nav_NavigateToMission),
 	REGISTERNATIVE(Nav_Reset),
 	REGISTERNATIVE(Nav_ResetCache),
 	REGISTERNATIVE(Nav_ToggleILS),

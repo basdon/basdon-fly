@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include "airport.h"
+#include "game_sa.h"
 #include <string.h>
 #include <math.h>
 
@@ -319,6 +320,63 @@ cell AMX_NATIVE_CALL Nav_GetActiveNavType(AMX *amx, cell *params)
 		return NAV_VOR | (NAV_ILS * nav[vid]->ils);
 	}
 	return NAV_NONE;
+}
+
+/* native Nav_NavigateToMission(vehicleid, vehiclemodel, airportidx, Float:x, Float:y, Float:z) */
+cell AMX_NATIVE_CALL Nav_NavigateToMission(AMX *amx, cell *params)
+{
+	const int vid = params[1], vehiclemodel = params[2] - 400;
+	struct airport *ap = airports + params[3];
+	struct runway *rw, *shortestrw, *shortestilsrw;
+	float x, y, z, dx, dy, dz, dist, mindistall, mindistils;
+
+	/* if plane, try VOR if available, prioritizing ILS runways */
+	if (0 <= vehiclemodel && vehiclemodel < MODEL_TOTAL && vehicleflags[vehiclemodel] & PLANE) {
+		rw = ap->runways;
+		mindistall = mindistils = 0x7F800000;
+		shortestrw = shortestilsrw = NULL;
+		x = amx_ctof(params[4]);
+		y = amx_ctof(params[5]);
+		z = amx_ctof(params[6]);
+		while (rw != NULL) {
+			dx = rw->pos.x - x;
+			dy = rw->pos.y - y;
+			dz = rw->pos.z - z;
+			dist = dx * dx + dy * dy + dz * dz;
+			if (rw->nav & NAV_VOR && dist < mindistall) {
+				mindistall = dist;
+				shortestrw = rw;
+			}
+			if (rw->nav & NAV_ILS && dist < mindistils) {
+				mindistils = dist;
+				shortestilsrw = rw;
+			}
+			rw = rw->next;
+		}
+		if (shortestrw != NULL) {
+			if (shortestilsrw != NULL) {
+				shortestrw = shortestilsrw;
+			}
+			if (nav[vid] == NULL) {
+				nav[vid] = malloc(sizeof(struct navdata));
+				nav[vid]->alt = nav[vid]->crs = nav[vid]->dist = 0.0f;
+			}
+			nav[vid]->beacon = NULL;
+			nav[vid]->ils = 0;
+			nav[vid]->vor = shortestrw;
+			return NAV_VOR;
+		}
+	}
+
+	/* if heli of no VOR runways, do ADF */
+	if (nav[vid] == NULL) {
+		nav[vid] = malloc(sizeof(struct navdata));
+		nav[vid]->alt = nav[vid]->crs = nav[vid]->dist = 0.0f;
+	}
+	nav[vid]->beacon = ap;
+	nav[vid]->ils = 0;
+	nav[vid]->vor = NULL;
+	return NAV_ADF;
 }
 
 /* native Nav_Reset(vehicleid) */

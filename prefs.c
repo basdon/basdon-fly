@@ -33,10 +33,9 @@ cell AMX_NATIVE_CALL Prefs_DoActionForRow(AMX *amx, cell *params)
 
 	amx_GetAddr(amx, params[2], &addr);
 	/* must be same order as in Prefs_FormatDialog */
-	switch (listitem) {
-	case 0: *addr ^= PREF_CONSTANT_WORK; return 1;
-	case 1: *addr ^= PREF_ENABLE_PM; return 1;
-	case 2: *addr ^= PREF_SHOW_MISSION_MSGS; return 1;
+	if (0 <= listitem && listitem <= 3) {
+		*addr ^= 1 << listitem;
+		return 1;
 	}
 	return 0;
 }
@@ -52,6 +51,7 @@ cell AMX_NATIVE_CALL Prefs_FormatDialog(AMX *amx, cell *params)
 	bp = prefs_append_pref(bp, "Constant Work", playerprefs & PREF_CONSTANT_WORK);
 	bp = prefs_append_pref(bp, "Accepting PMs", playerprefs & PREF_ENABLE_PM);
 	bp = prefs_append_pref(bp, "Mission Messages", playerprefs & PREF_SHOW_MISSION_MSGS);
+	bp = prefs_append_pref(bp, "Auto engage nav when working", playerprefs & PREF_WORK_AUTONAV);
 	*(--bp) = 0;
 
 	amx_GetAddr(amx, params[2], &addr);

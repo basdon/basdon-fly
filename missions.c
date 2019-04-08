@@ -371,7 +371,7 @@ unknownvehicle:
 	startpoint = NULL;
 	i = 1000000;
 thisisworsethanbubblesort:
-	shortestdistance = 0x78F00000;
+	shortestdistance = 0x7F800000;
 	msp = closestap->missionpoints;
 	while (msp != NULL) {
 		if (msp->type & missiontype && msp->currentlyactivemissions <= i) {
@@ -554,6 +554,30 @@ cell AMX_NATIVE_CALL Missions_FinalizeAddPoints(AMX *amx, cell *params)
 	}
 
 	return 1;
+}
+
+/* native Missions_GetMissionNavData(playerid, &vehicleid, &vehiclemodel, &airportidx) */
+cell AMX_NATIVE_CALL Missions_GetMissionNavData(AMX *amx, cell *params)
+{
+	const int playerid = params[1];
+	cell *addr;
+	struct mission *miss;
+	if ((miss = activemission[playerid]) != NULL) {
+		amx_GetAddr(amx, params[2], &addr);
+		if ((*addr = miss->veh->spawnedvehicleid) == -1) {
+			return 0;
+		}
+		amx_GetAddr(amx, params[3], &addr);
+		*addr = miss->veh->model;
+		amx_GetAddr(amx, params[4], &addr);
+		if (miss->stage <= MISSION_STAGE_PRELOAD) {
+			*addr = miss->startpoint->ap->id;
+		} else {
+			*addr = miss->endpoint->ap->id;
+		}
+		return 1;
+	}
+	return 0;
 }
 
 /* native Missions_GetState(playerid) */
