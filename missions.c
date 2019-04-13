@@ -795,6 +795,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	amx_SetUString(addr + 200, buf, sizeof(buf));
 	p = 0;
 	p += sprintf(buf,
+	             "{ffffff}Flight:\t\t\t"ECOL_MISSION"#%d\n"
 	             "{ffffff}Origin:\t\t\t"ECOL_MISSION"%s\n"
 	             "{ffffff}Destination:\t\t"ECOL_MISSION"%s\n"
 	             "{ffffff}Distance (pt to pt):\t"ECOL_MISSION"%.0fm\n"
@@ -802,6 +803,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	             "{ffffff}Duration:\t\t"ECOL_MISSION"%dh%02dm\n"
 	             "{ffffff}Fuel Burned:\t\t"ECOL_MISSION"%.1fL\n"
 	             "{ffffff}Vehicle pay category:\t"ECOL_MISSION"%.1fx\n",
+	             mission->id,
 	             mission->startpoint->ap->name,
 	             mission->endpoint->ap->name,
 	             mission->distance,
