@@ -110,6 +110,34 @@ void missions_freepoints()
 	}
 }
 
+/* in units/s */
+static float mission_get_vehicle_maximum_speed(int model)
+{
+	/* max horizontal speed is about 81.6 */
+	switch (model) {
+	case MODEL_DODO: return 140.0f / 270.0f * 81.6f;
+	case MODEL_BEAGLE: return 125.0f / 270.0f * 81.6f;
+	case MODEL_NEVADA: return 185.0f / 270.0f * 81.6f;
+	case MODEL_MAVERICK:
+	case MODEL_VCNMAV: return 154.0f / 270.0f * 81.6f;
+	case MODEL_RAINDANC: return 113.0f / 270.0f * 81.6f;
+	case MODEL_LEVIATHN: return 108.0f / 270.0f * 81.6f;
+	case MODEL_POLMAV: return 154.0f / 270.0f * 81.6f;
+	case MODEL_SPARROW: return 106.0f / 270.0f * 81.6f;
+	case MODEL_HUNTER: return 190.0f / 270.0f * 81.6f;
+	case MODEL_CARGOBOB: return 126.0f / 270.0f * 81.6f;
+	case MODEL_RUSTLER: return 235.0f / 270.0f * 81.6f;
+	case MODEL_SKIMMER: return 135.0f / 270.0f * 81.6f;
+	default:
+		logprintf("mission_get_vehicle_minimum_missiontime: unknown model: %d", model);
+	case MODEL_SHAMAL:
+	case MODEL_HYDRA:
+	case MODEL_ANDROM:
+	case MODEL_AT400:
+		return 81.6f;
+	}
+}
+
 static float mission_get_vehicle_paymp(int model)
 {
 	const float heli_mp = 1.18f;
@@ -682,13 +710,16 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	float paymp;
 	cell *addr;
 	char buf[4096];
-	int ptax, psatisfaction = 0, pdistance, pbonus = 0, ptotal, pdamage, tmp;
+	int ptax, psatisfaction = 0, pdistance, pbonus = 0, ptotal, pdamage, pcheat = 0, tmp;
 	int totaltime, duration_h, duration_m;
 	int p;
+	float mintime;
 
 	if ((mission = activemission[playerid]) == NULL || pdata[playerid] == NULL) {
 		return 0;
 	}
+
+	amx_GetAddr(amx, params[4], &addr);
 
 	tmp = mission->lastvehiclehp - vehiclehp;
 	if (tmp < 0) {
@@ -702,6 +733,16 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	duration_m = totaltime % 60;
 	duration_h = (totaltime - duration_m) / 60;
 
+	/* don't use adistance because it also includes z changes */
+	mintime = mission->distance / mission_get_vehicle_maximum_speed(mission->veh->model);
+	if (totaltime < mintime) {
+		pcheat -= 250000;
+		sprintf(buf, "too fast flg(#%d): min: %d actual: %d", mission->id, mintime, totaltime);
+		amx_SetUString(addr + 2000, buf, sizeof(buf));
+	} else {
+		*(addr + 2000) = 0; /* ac log speed cheat */
+	}
+
 	paymp = mission_get_vehicle_paymp(mission->veh->model);
 	ptax = -calculate_airport_tax(mission->endpoint->ap, mission->missiontype);
 	pdistance = 500 + (int) (mission->distance * 1.135f);
@@ -714,11 +755,8 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 		}
 	}
 	pdamage = -3 * mission->damagetaken;
-	ptotal = mission->weatherbonus + psatisfaction + pdistance + pbonus + ptax + pdamage;
-	amx_GetAddr(amx, params[3], &addr);
-	*addr = ptotal;
+	ptotal = mission->weatherbonus + psatisfaction + pdistance + pbonus + ptax + pdamage + pcheat;
 
-	amx_GetAddr(amx, params[4], &addr);
 	sprintf(buf,
 		"%s completed flight #%d from %s (%s) to %s (%s) in %dh%02dm",
 		pdata[playerid]->name,
@@ -733,7 +771,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	sprintf(buf,
 	        "UPDATE flg SET tunload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP(),"
 	        "state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
-	        "pdistance=%d,pdamage=%d,pbonus=%d,ptotal=%d,satisfaction=%d,adistance=%f,"
+	        "pdistance=%d,pdamage=%d,pcheat=%d,pbonus=%d,ptotal=%d,satisfaction=%d,adistance=%f,"
 	        "paymp=%f WHERE id=%d",
 	        MISSION_STATE_FINISHED,
 	        mission->fuelburned,
@@ -742,6 +780,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	        psatisfaction,
 	        pdistance,
 	        pdamage,
+		pcheat,
 	        pbonus,
 	        ptotal,
 	        mission->passenger_satisfaction,
@@ -790,12 +829,18 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	if (pdamage) {
 		p += mission_append_pay(buf + p, "{ffffff}Damage Penalty:\t", pdamage);
 	}
+	if (pcheat) {
+		p += mission_append_pay(buf + p, "{ffffff}Cheat Penalty:\t", pcheat);
+	}
 	if (pbonus) {
 		p += mission_append_pay(buf + p, "{ffffff}Bonus:\t\t\t", pbonus);
 	}
 	p += mission_append_pay(buf + p, "\n\n\t{ffffff}Total Pay: ", ptotal);
 	buf[--p] = 0;
 	amx_SetUString(addr + 1000, buf, sizeof(buf));
+
+	amx_GetAddr(amx, params[3], &addr);
+	*addr = ptotal;
 
 	free(mission);
 	activemission[playerid] = NULL;

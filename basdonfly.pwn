@@ -420,7 +420,8 @@ native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z, buf[])
 //@returns {@code 0} on failure
 //@remarks {@param buf} data: <ul>\
 	<li>{@code buf}: global mission msg</li><li>{@code buf+200}: flg query</li>\
-	<li>{@code buf+1000}: result dialog text</li></ul>
+	<li>{@code buf+1000}: result dialog text</li></ul>\
+	<li>{@code buf+2000}: optional ac speed cheat msg (use {@link Ac_FormatLog}) (only if first char is non-zero)</li></ul>
 native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[])
 
 //@summary Check if the satisfaction textdraw should be shown for a player
