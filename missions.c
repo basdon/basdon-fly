@@ -724,6 +724,11 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	tmp = mission->lastvehiclehp - vehiclehp;
 	if (tmp < 0) {
 		tmp = 0;
+		pcheat -= 250000;
+		sprintf(buf, "flg(#%d) vhh: was: %hd now: %.0f", mission->id, mission->lastvehiclehp, vehiclehp);
+		amx_SetUString(addr + 2100, buf, sizeof(buf));
+	} else {
+		*(addr + 2100) = 0; /* ac log hp cheat */
 	}
 	mission->damagetaken += tmp;
 	mission->lastvehiclehp = vehiclehp;
@@ -737,7 +742,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	mintime = mission->distance / mission_get_vehicle_maximum_speed(mission->veh->model);
 	if (totaltime < mintime) {
 		pcheat -= 250000;
-		sprintf(buf, "too fast flg(#%d): min: %d actual: %d", mission->id, mintime, totaltime);
+		sprintf(buf, "flg(#%d) too fast: min: %d actual: %d", mission->id, mintime, totaltime);
 		amx_SetUString(addr + 2000, buf, sizeof(buf));
 	} else {
 		*(addr + 2000) = 0; /* ac log speed cheat */
@@ -830,7 +835,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 		p += mission_append_pay(buf + p, "{ffffff}Damage Penalty:\t", pdamage);
 	}
 	if (pcheat) {
-		p += mission_append_pay(buf + p, "{ffffff}Cheat Penalty:\t", pcheat);
+		p += mission_append_pay(buf + p, "{ffffff}Cheat Penalty:\t\t", pcheat);
 	}
 	if (pbonus) {
 		p += mission_append_pay(buf + p, "{ffffff}Bonus:\t\t\t", pbonus);
