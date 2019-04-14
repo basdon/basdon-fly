@@ -111,9 +111,9 @@ function spate_generate($template_dir, $template)
 				$suffix = '?>';
 				goto directive_parse_conditionbody__start;
 			case "@unsafe":
-				$result .= '<?php echo ';
-				$j += 11;
-				$suffix = ';?>';
+				$result .= '<?= ';
+				$j += 4;
+				$suffix = ' ?>';
 				goto directive_parse_conditionbody__start;
 			case "@foreach":
 				$result .= '<?php foreach(';
