@@ -1,0 +1,93 @@
+#wrapper {
+	max-width: 120ex;
+	margin: 0 auto;
+}
+hr {
+	height: 1px;
+}
+header h1 {
+	margin-bottom: .1em;
+}
+header p {
+	text-align: right;
+	margin: 0;
+}
+header small, footer small {
+	font-size: small;
+	float: right;
+}
+#main {
+	float: right;
+	width: calc(100% - 27ex);
+}
+aside {
+	float: left;
+	width: 25ex;
+}
+@media (max-width: 90ex) {
+	#main {
+		width: auto;
+		max-width: 90ex;
+	}
+	aside {
+		width: auto;
+	}
+	aside div {
+		padding-right: 1ex;
+		float: left;
+		width: 25ex;
+	}
+}
+aside table {
+	font-size: .9em;
+}
+aside table td + td {
+	text-align: right;
+}
+h2, h3, h4, h5, h6 {
+	border-bottom: 1px solid #000;
+	margin-bottom: .4em;
+	margin-top: .5em;
+}
+h2 {
+	font-size: 1.2em;
+}
+h3 {
+	font-size: 1.1em;
+}
+h4 {
+	font-size: 1em;
+}
+h5 {
+	font-size: .9em;
+}
+h6 {
+	font-size: .8em;
+}
+#skip {
+	position: absolute;
+	overflow: hidden;
+	width: 0;
+	height: 0;
+	padding: 0;
+	background-color: #ccc;
+}
+#skip:focus {
+	width: auto;
+	height: auto;
+	padding: .3em;
+}
+img.missing {
+	width: 100%;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -o-crisp-edges;
+	image-rendering: -webkit-pixelated;
+	image-rendering: pixelated;
+}
+.clear {
+	clear: both;
+}
+footer p {
+	line-height: 1.1em;
+	font-size: x-small;
+}

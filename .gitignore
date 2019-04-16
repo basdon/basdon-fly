@@ -1,2 +1,4 @@
 /www/db.creds.php
 **/.ignored.*
+/www/gen/**
+/www/conf.php
