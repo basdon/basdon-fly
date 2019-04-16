@@ -79,9 +79,9 @@ function spate_generate($template_dir, $template)
 			$c = $in[++$i];
 			$suffix = '){?>';
 			if ($c == '$') {
-				$result .= '<?php echo htmlentities($';
-				$j += 25;
-				$suffix = ',ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE);?>';
+				$result .= '<?=htmlentities($';
+				$j += 17;
+				$suffix = ',ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE)?>';
 				goto directive_parse_conditionbody__start;
 			}
 			if ($c != '@') {
@@ -111,9 +111,9 @@ function spate_generate($template_dir, $template)
 				$suffix = '?>';
 				goto directive_parse_conditionbody__start;
 			case "@unsafe":
-				$result .= '<?= ';
-				$j += 4;
-				$suffix = ' ?>';
+				$result .= '<?=';
+				$j += 3;
+				$suffix = '?>';
 				goto directive_parse_conditionbody__start;
 			case "@foreach":
 				$result .= '<?php foreach(';
