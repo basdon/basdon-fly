@@ -1,18 +1,16 @@
 <?php
 
-require 'db.creds.php';
-
 $db = null;
 $db_querycount = 0;
 $lastdberr = '000000';
 try {
 	$db = new PDO("mysql:host={$db_host};dbname={$db_name}", $db_uname, $db_passw);
 	$db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
-	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	$db->exec('SET NAMES utf8');
 	++$db_querycount;
 } catch (PDOException $e) {
-	// TODO: do something about it
+	$__msgs[] = "Cannot connect to db.";
 }
 
 function output_nonnull_5byte_num($num)

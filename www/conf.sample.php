@@ -1,6 +1,9 @@
 <?php
 
-$__timer = microtime(true);
+$db_host = '127.0.0.1';
+$db_name = '';
+$db_uname = '';
+$db_passw = '';
 
 $BASEPATH = 'https://example.com';
 $STATICPATH = 'https://static.example.com';
