@@ -1,5 +1,5 @@
 #wrapper {
-	max-width: 120ex;
+	max-width: 1000px;
 	margin: 0 auto;
 }
 hr {
@@ -18,16 +18,16 @@ header small, footer small {
 }
 #main {
 	float: right;
-	width: calc(100% - 27ex);
+	width: calc(100% - 240px);
 }
 aside {
 	float: left;
-	width: 25ex;
+	width: 220px;
 }
-@media (max-width: 90ex) {
+@media (max-width: 800px) {
 	#main {
 		width: auto;
-		max-width: 90ex;
+		max-width: 800px;
 	}
 	aside {
 		width: auto;
@@ -35,7 +35,7 @@ aside {
 	aside div {
 		padding-right: 1ex;
 		float: left;
-		width: 25ex;
+		width: 220px;
 	}
 }
 aside table {
