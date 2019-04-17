@@ -6,3 +6,6 @@
 	<p><a href="index.php">Home</a> :: <a href="flights.php">Flights</a> :: <a href="map.php">Live Map</a> :: <a href="articles.php">Articles</a> :: <a href="bbs.php">Message Board</a></p>
 	<hr/>
 </header>
+{@foreach $__msgs as $msg}
+	<p style="color:red">{$msg}</p>
+{@endforeach}

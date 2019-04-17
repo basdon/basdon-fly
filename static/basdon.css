@@ -38,8 +38,11 @@ aside {
 		width: 220px;
 	}
 }
-aside table {
+aside table, aside p {
 	font-size: .8em;
+}
+aside p {
+	text-align: center;
 }
 aside table td + td {
 	text-align: right;

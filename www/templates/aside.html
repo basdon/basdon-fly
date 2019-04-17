@@ -4,29 +4,87 @@
 		<img src="{@unsafe $STATICPATH}/missing.png" class="missing" />
 		<h6>Currently online (0)</h6>
 		<table border="0" width="100%">
-			<tr><td>robin_be</td><td>835</td></tr>
-			<tr><td>OhYeah</td><td>52</td></tr>
-		</table>
-	</div>
-	<div>
-		<h5>Server World</h5>
-		<table border="0" width="100%">
-			<tr><td>Time:</td><td>23:15</td></tr>
-			<tr><td>Weather:</td><td>Sunny</td></tr>
+<?php 
+$players = [new stdClass()];
+$players[0]->name = "robin_be";
+$players[0]->score = 42;
+?>
+			{@foreach $players as $p}
+				<tr><td><a href="user.php?name={$p->name}">{$p->name}</a></td><td>{@unsafe $p->score}</td></tr>
+			{@endforeach}
 		</table>
 	</div>
 	<div>
 		<h5>Active Flights</h5>
+		<table border="0" width="100%">
+<?php 
+try {
+	$r = $db->query("SELECT id,_u.n,_a.c f,_b.c t,state FROM flg _f JOIN usr _u ON _f.player=_u.i JOIN apt _a ON _a.i=_f.fapt JOIN apt _b ON _b.i=_f.tapt WHERE state=1 ORDER BY id DESC LIMIT 10");
+	if ($r !== false && ($r = $r->fetchAll()) !== false) {
+		?>
+		{@if count($r)}
+			<table border="0" width="100%">
+				{@foreach $r as $f}
+					<tr>
+						<td><a href="flight.php?id={@unsafe $f->id}">#{@unsafe $f->id}</a></td>
+						<td>{@unsafe $f->f} -&gt; {@unsafe $f->t}</td>
+						<td><a href="user.php?name={$f->n}">{$f->n}</a></td>
+					</tr>
+				{@endforeach}
+			</table>
+		{@else}
+			<p>None</p>
+		{@endif}
+		<?php 
+	}
+} catch (PDOException $e) {}
+?>
 	</div>
 	<div>
-		<h5>Last 10 Finished Flights</h5>
+		<h5>Last 7 Finished Flights</h5>
+<?php 
+try {
+	$r = $db->query("SELECT id,_u.n,_a.c f,_b.c t FROM flg _f JOIN usr _u ON _f.player=_u.i JOIN apt _a ON _a.i=_f.fapt JOIN apt _b ON _b.i=_f.tapt WHERE state=8 ORDER BY id DESC LIMIT 7");
+	if ($r !== false && ($r = $r->fetchAll()) !== false) {
+		?>
+		{@if count($r)}
+			<table border="0" width="100%">
+				{@foreach $r as $f}
+					<tr>
+						<td><a href="flight.php?id={@unsafe $f->id}">#{@unsafe $f->id}</a></td>
+						<td>{@unsafe $f->f} -&gt; {@unsafe $f->t}</td>
+						<td><a href="user.php?name={$f->n}">{$f->n}</a></td>
+					</tr>
+				{@endforeach}
+			</table>
+		{@else}
+			<p>None?</p>
+		{@endif}
+		<?php 
+	}
+} catch (PDOException $e) {}
+?>
+		<p><a href="flights.php">All flights</a></p>
 	</div>
 	<div>
 		<h5>Members</h5>
 		<table border="0" width="100%">
-			<tr><td>Guest sessions:</td><td>40000</td></tr>
-			<tr><td>Registered users:</td><td>2</td></tr>
-			<tr><td>Latest:</td><td>You</td></tr>
+<?php 
+try {
+	$r = $db->query("SELECT COUNT(s.i) c FROM ses s JOIN usr u ON s.i=u.i WHERE u.g=0");
+	if ($r !== false && ($r = $r->fetch()) !== false) {
+		?><tr><td>Guest sessions:</td><td>{@unsafe $r->c}</td></tr><?php 
+	}
+	$r = $db->query("SELECT COUNT(i) c FROM usr WHERE g!=0");
+	if ($r !== false && ($r = $r->fetch()) !== false) {
+		?><tr><td>Registered users:</td><td>{@unsafe $r->c}</td></tr><?php 
+	}
+	$r = $db->query("SELECT n FROM usr WHERE g!=0 ORDER BY i DESC LIMIT 1");
+	if ($r !== false && ($r = $r->fetch()) !== false) {
+		?><tr><td>Latest:</td><td><a href="user.php?name={$r->n}">{$r->n}</a></td></tr><?php 
+	}
+} catch (PDOException $e) {}
+?>
 		</table>
 	</div>
 </aside>
