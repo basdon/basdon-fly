@@ -119,6 +119,10 @@ function spate_generate($template_dir, $template)
 				$result .= '<?php foreach(';
 				$j += 14;
 				goto directive_parse_conditionbody__start;
+			case "@else":
+				$result .= '<?php }else{ ?>';
+				$j += 15;
+				goto next;
 			case "@elseif":
 				$result .= '<?php }else if(';
 				$j += 15;
@@ -150,6 +154,7 @@ render_parse_name:
 				goto render_parse_name;
 			default:
 				$result[++$j] = '?';
+				++$j;
 				goto next;
 			}
 directive_parse_conditionbody__start:
