@@ -1,6 +1,6 @@
 <aside>
 	<div>
-		<h5>Players</h5>
+		<h5>Players (last 48h)</h5>
 		<img src="{@unsafe $STATICPATH}/missing.png" class="missing" />
 		<h6>Currently online (0)</h6>
 		<table border="0" width="100%">
@@ -19,7 +19,7 @@ $players[0]->score = 42;
 		<table border="0" width="100%">
 <?php 
 try {
-	$r = $db->query("SELECT id,_u.n,_a.c f,_b.c t,state FROM flg _f JOIN usr _u ON _f.player=_u.i JOIN apt _a ON _a.i=_f.fapt JOIN apt _b ON _b.i=_f.tapt WHERE state=1 ORDER BY id DESC LIMIT 10");
+	$r = $db->query("SELECT id,_u.n,_a.c f,_b.c t,state FROM flg _f JOIN usr _u ON _f.player=_u.i JOIN apt _a ON _a.i=_f.fapt JOIN apt _b ON _b.i=_f.tapt WHERE state=1 ORDER BY tunload DESC LIMIT 10");
 	if ($r !== false && ($r = $r->fetchAll()) !== false) {
 		?>
 		{@if count($r)}
