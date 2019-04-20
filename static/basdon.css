@@ -23,6 +23,7 @@ header small, footer small {
 aside {
 	float: left;
 	width: 220px;
+	padding-bottom: 1em;
 }
 @media (max-width: 800px) {
 	#main {
@@ -49,8 +50,6 @@ aside table td + td {
 }
 h2, h3, h4, h5, h6 {
 	border-bottom: 1px solid #000;
-	margin-bottom: .4em;
-	margin-top: .5em;
 }
 h2 {
 	font-size: 1.2em;
@@ -66,6 +65,9 @@ h5 {
 }
 h6 {
 	font-size: .8em;
+}
+aside h4, aside h5, aside h6 {
+	margin-bottom: 0;
 }
 #skip {
 	position: absolute;
@@ -86,6 +88,18 @@ img.missing {
 	image-rendering: -o-crisp-edges;
 	image-rendering: -webkit-pixelated;
 	image-rendering: pixelated;
+}
+table {
+	border-spacing: 0;
+}
+td {
+	border-bottom: 1px solid #ccc;
+}
+tr:nth-child(odd) {
+	background: #f8f8f8;
+}
+tr:hover {
+	background: #f3f3f3;
 }
 .clear {
 	clear: both;
