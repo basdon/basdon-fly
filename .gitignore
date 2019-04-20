@@ -1,4 +1,9 @@
 /www/db.creds.php
 **/.ignored.*
 /www/gen/**
+!/www/gen/
+!/www/gen/.gitkeep
+/static/gen/**
+!/static/gen/
+!/static/gen/.gitkeep
 /www/conf.php
