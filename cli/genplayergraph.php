@@ -18,7 +18,7 @@ $color_text = imagecolorallocate($im, 0, 0, 0);
 $max = 0;
 $val = 0;
 $te = time() - 60;
-$ts = $te - 3600 * 24;
+$ts = $te - 3600 * 48;
 $values = [];
 try {
 	foreach ($db->query("(SELECT s AS stamp,-1 AS t FROM ses WHERE e>$ts)
