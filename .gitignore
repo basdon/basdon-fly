@@ -6,4 +6,4 @@
 /static/gen/**
 !/static/gen/
 !/static/gen/.gitkeep
-/www/conf.php
+/www/inc/conf.php

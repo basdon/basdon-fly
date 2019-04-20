@@ -1,6 +1,6 @@
 <?php
 
-include('bootstrap.php');
+include('inc/bootstrap.php');
 
 if ($__REPARSE__) {
 	include('inc/spate.php');

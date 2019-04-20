@@ -3,6 +3,6 @@ $__timer = microtime(true);
 
 $__msgs = [];
 
-require('conf.php');
-include('db.php');
+require('inc/conf.php');
+include('inc/db.php');
 
