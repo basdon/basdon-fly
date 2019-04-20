@@ -18,7 +18,7 @@ $players[0]->score = 42;
 		<h5>Active Flights</h5>
 <?php 
 try {
-	$r = $db->query("SELECT id,_u.n,_a.c f,_b.c t,state 
+	$r = $db->query("SELECT id,_u.n,_a.c f,_b.c t 
 	                 FROM flg _f 
 	                 JOIN usr _u ON _f.player=_u.i 
 	                 JOIN apt _a ON _a.i=_f.fapt 
