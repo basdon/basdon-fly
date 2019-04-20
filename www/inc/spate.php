@@ -1,5 +1,10 @@
 <?php
 
+function spate_default_generate($name)
+{
+	file_put_contents("gen/{$name}.php", spate_generate('./templates/', "{$name}.html"));
+}
+
 /**
  * @param $template_dir directory with trailing slash
  * @param $template name with extension

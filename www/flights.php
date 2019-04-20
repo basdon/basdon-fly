@@ -4,7 +4,7 @@ include('inc/bootstrap.php');
 
 if ($__REPARSE__) {
 	include('inc/spate.php');
-	spate_default_generate('index');
+	spate_default_generate('flights');
 }
 
-include('gen/index.php');
+include('gen/flights.php');
