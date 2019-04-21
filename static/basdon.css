@@ -32,9 +32,12 @@ aside {
 	width: 220px;
 	padding-bottom: 1em;
 }
+#main {
+	padding-bottom: 1em;
+}
 @media (max-width: 800px) {
 	#main {
-		width: auto;
+		width: 100%;
 		max-width: 800px;
 	}
 	aside {
@@ -101,6 +104,10 @@ table {
 }
 td {
 	border-bottom: 1px solid #ccc;
+	padding: .1em .5em;
+}
+th {
+	border-bottom: 1px solid #000;
 }
 tr:nth-child(odd) {
 	background: #f8f8f8;
@@ -114,4 +121,26 @@ tr:hover {
 footer p {
 	line-height: 1.1em;
 	font-size: x-small;
+}
+.pagination {
+	text-align: right;
+	font-size: .8em;
+}
+.flight-state {
+	padding: 0;
+}
+.flight-state-1 {
+	background: #ddf;
+}
+.flight-state-8 {
+	background: #dfd;
+}
+.flight-state-2, .flight-state-4, .flight-state-32 {
+	background: #fdd;
+}
+.flight-state-16 {
+	background: #fdb;
+}
+.flight-state-64 {
+	background: #edf;
 }
