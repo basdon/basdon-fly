@@ -12,8 +12,7 @@
 	{@render skip.html}
 	<div id="wrapper">
 		{@render defaultheader.html}
-		<div id="main">
-			<h2>Flights</h2>
+		<h2>Flights</h2>
 <?php 
 $page = 1;
 if (isset($_GET['page'])) {
@@ -29,23 +28,26 @@ try {
 	if ($r !== false && ($r = $r->fetchAll()) !== false && count($r)) {
 		$totalrows = $r[0]->c;
 	}
-	$r = $db->query('SELECT id,_u.n,_a.c f,_b.c t,state,tload,tlastupdate,adistance 
+	$r = $db->query('SELECT id,_u.n,_a.c f,_b.c t,state,tload,tlastupdate,adistance,_v.m vehmodel 
 	                 FROM flg _f 
 	                 JOIN usr _u ON _f.player=_u.i 
 	                 JOIN apt _a ON _a.i=_f.fapt 
 	                 JOIN apt _b ON _b.i=_f.tapt 
+	                 JOIN veh _v ON _v.i=_f.vehicle 
 	                 ORDER BY id DESC 
 	                 LIMIT 50 OFFSET ' . $paginationoffset);
 	if ($r !== false && ($r = $r->fetchAll()) !== false) {
 		?>
 		{@if count($r)}
 			{@render flightstatuses.php}
+			{@render aircrafts.php}
 			{@unsafe $pagination = simple_pagination('flights.php?page=', $page, round($totalrows / 50) + 1)}
 			<table border="0" width="100%" id="flights">
 				<thead>
 					<tr>
 						<th>Date</th>
 						<th>Pilot</th>
+						<th>Aircraft</th>
 						<th>Departure</th>
 						<th>Arrival</th>
 						<th>Distance</th>
@@ -58,6 +60,7 @@ try {
 						<tr>
 							<td>{@unsafe date('j M H:i', $f->tlastupdate)}</td>
 							<td><a href="user.php?name={$f->n}">{$f->n}</a></td>
+							<td>{@unsafe aircraft_name($f->vehmodel)}</td>
 							<td><a href="airport.php?code={@unsafe $f->f}">{@unsafe $f->f}</a></td>
 							<td><a href="airport.php?code={@unsafe $f->t}">{@unsafe $f->t}</a></td>
 							<td>{@if $f->state != 1}{@unsafe round($f->adistance)}m{@endif}</td>
@@ -83,8 +86,6 @@ try {
 	}
 } catch (PDOException $e) {}
 ?>
-		</div>
-		{@render aside.html}
 		{@render defaultfooter.html}
 	</div>
 </body>
