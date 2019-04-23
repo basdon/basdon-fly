@@ -477,6 +477,62 @@ thisisworsethanbubblesort:
 	return 1;
 }
 
+/* native Missions_CreateTrackerMessage(playerid, vid, Float:hp,
+                                        Float:vx, Float:vy, Float:vz, Float:alt, buf[]) */
+cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
+{
+	const int playerid = params[1], vehicleid = params[2];
+	cell *addr;
+	char buf[50];
+	struct mission *mission;
+	float vx, vy, vz;
+	short spd, alt, hp;
+
+	if ((mission = activemission[playerid]) == NULL || mission->veh->spawnedvehicleid != vehicleid) {
+		return 0;
+	}
+
+	vx = amx_ctof(params[4]);
+	vy = amx_ctof(params[5]);
+	vz = amx_ctof(params[6]);
+	hp = (short) params[3];
+	spd = (short) (VEL_TO_KTS_VAL * sqrt(vx * vx + vy * vy + vz * vz));
+	alt = (short) amx_ctof(params[7]);
+
+	/* flight tracker packet 2 */
+	buf[0] = 'F';
+	buf[1] = 'L';
+	buf[2] = 'Y';
+	buf[3] = 2;
+	buf[4] = 0x40 | (*((char*)&mission->id) & 0xF);
+	buf[5] = 0x40 | ((*((char*)&mission->id) >> 4) & 0xF);
+	buf[6] = 0x40 | (*((char*)&mission->id + 1) & 0xF);
+	buf[7] = 0x40 | ((*((char*)&mission->id + 1) >> 4) & 0xF);
+	buf[8] = 0x40 | (*((char*)&mission->id + 2) & 0xF);
+	buf[9] = 0x40 | ((*((char*)&mission->id + 2) >> 4) & 0xF);
+	buf[10] = 0x40 | (*((char*)&mission->id + 3) & 0xF);
+	buf[11] = 0x40 | ((*((char*)&mission->id + 3) >> 4) & 0xF);
+	buf[12] = 0x40 | (*((char*)&spd) & 0xF);
+	buf[13] = 0x40 | ((*((char*)&spd) >> 4) & 0xF);
+	buf[14] = 0x40 | (*((char*)&spd + 1) & 0xF);
+	buf[15] = 0x40 | ((*((char*)&spd + 1) >> 4) & 0xF);
+	buf[16] = 0x40 | (*((char*)&alt) & 0xF);
+	buf[17] = 0x40 | ((*((char*)&alt) >> 4) & 0xF);
+	buf[18] = 0x40 | (*((char*)&alt + 1) & 0xF);
+	buf[19] = 0x40 | ((*((char*)&alt + 1) >> 4) & 0xF);
+	buf[20] = 0x40 | (*((char*)&mission->passenger_satisfaction) & 0xF);
+	buf[21] = 0x40 | ((*((char*)&mission->passenger_satisfaction) >> 4) & 0xF);
+	buf[22] = 0x40 | (*((char*)&hp) & 0xF);
+	buf[23] = 0x40 | ((*((char*)&hp) >> 4) & 0xF);
+	buf[24] = 0x40 | (*((char*)&hp + 1) & 0xF);
+	buf[25] = 0x40 | ((*((char*)&hp + 1) >> 4) & 0xF);
+	buf[26] = 0;
+	amx_GetAddr(amx, params[8], &addr);
+	*addr = 26;
+	amx_SetUString(addr + 1, buf, sizeof(buf));
+	return 1;
+}
+
 /* native Missions_EndUnfinished(playerid, reason, buf[]) */
 cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 {
@@ -496,6 +552,24 @@ cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 	        mission->id);
 	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, buf, sizeof(buf));
+
+	/* flight tracker packet 3 */
+	buf[0] = 'F';
+	buf[1] = 'L';
+	buf[2] = 'Y';
+	buf[3] = 3;
+	buf[4] = 0x40 | (*((char*)&mission->id) & 0xF);
+	buf[5] = 0x40 | ((*((char*)&mission->id) >> 4) & 0xF);
+	buf[6] = 0x40 | (*((char*)&mission->id + 1) & 0xF);
+	buf[7] = 0x40 | ((*((char*)&mission->id + 1) >> 4) & 0xF);
+	buf[8] = 0x40 | (*((char*)&mission->id + 2) & 0xF);
+	buf[9] = 0x40 | ((*((char*)&mission->id + 2) >> 4) & 0xF);
+	buf[10] = 0x40 | (*((char*)&mission->id + 3) & 0xF);
+	buf[11] = 0x40 | ((*((char*)&mission->id + 3) >> 4) & 0xF);
+	buf[12] = 0;
+	*(addr + 500) = 12;
+	amx_SetUString(addr + 501, buf, sizeof(buf));
+
 	free(mission);
 	activemission[playerid] = NULL;
 	return 1;
@@ -846,6 +920,23 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	buf[--p] = 0;
 	amx_SetUString(addr + 1000, buf, sizeof(buf));
 
+	/* flight tracker packet 3 */
+	buf[0] = 'F';
+	buf[1] = 'L';
+	buf[2] = 'Y';
+	buf[3] = 3;
+	buf[4] = 0x40 | (*((char*)&mission->id) & 0xF);
+	buf[5] = 0x40 | ((*((char*)&mission->id) >> 4) & 0xF);
+	buf[6] = 0x40 | (*((char*)&mission->id + 1) & 0xF);
+	buf[7] = 0x40 | ((*((char*)&mission->id + 1) >> 4) & 0xF);
+	buf[8] = 0x40 | (*((char*)&mission->id + 2) & 0xF);
+	buf[9] = 0x40 | ((*((char*)&mission->id + 2) >> 4) & 0xF);
+	buf[10] = 0x40 | (*((char*)&mission->id + 3) & 0xF);
+	buf[11] = 0x40 | ((*((char*)&mission->id + 3) >> 4) & 0xF);
+	buf[12] = 0;
+	*(addr + 2200) = 12;
+	amx_SetUString(addr + 2201, buf, sizeof(buf));
+
 	amx_GetAddr(amx, params[3], &addr);
 	*addr = ptotal;
 
@@ -862,10 +953,11 @@ cell AMX_NATIVE_CALL Missions_ShouldShowSatisfaction(AMX *amx, cell *params)
 		activemission[playerid]->missiontype & PASSENGER_MISSIONTYPES;
 }
 
-/* native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, msg[]) */
+/* native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, buf[]) */
 cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 {
-	struct mission *mission = activemission[params[1]];
+	const int playerid = params[1];
+	struct mission *mission = activemission[playerid];
 	cell *addr;
 	char msg[144];
 	const char *msptypename = NULL;
@@ -913,6 +1005,31 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	}
 	amx_GetAddr(amx, params[6], &addr);
 	amx_SetUString(addr, msg, sizeof(msg));
+
+	/* flight tracker packet 1 */
+	msg[0] = 'F';
+	msg[1] = 'L';
+	msg[2] = 'Y';
+	msg[3] = 1;
+	msg[4] = 0x40 | (*((char*)&mission->id) & 0xF);
+	msg[5] = 0x40 | ((*((char*)&mission->id) >> 4) & 0xF);
+	msg[6] = 0x40 | (*((char*)&mission->id + 1) & 0xF);
+	msg[7] = 0x40 | ((*((char*)&mission->id + 1) >> 4) & 0xF);
+	msg[8] = 0x40 | (*((char*)&mission->id + 2) & 0xF);
+	msg[9] = 0x40 | ((*((char*)&mission->id + 2) >> 4) & 0xF);
+	msg[10] = 0x40 | (*((char*)&mission->id + 3) & 0xF);
+	msg[11] = 0x40 | ((*((char*)&mission->id + 3) >> 4) & 0xF);
+	if (pdata[playerid] != NULL) {
+		msg[12] = pdata[playerid]->namelen;
+		strcpy(msg + 13, pdata[playerid]->name);
+		*(addr + 200) = 13 + pdata[playerid]->namelen;
+	} else {
+		msg[12] = 1;
+		msg[13] = '?';
+		msg[14] = 0;
+		*(addr + 200) = 14;
+	}
+	amx_SetUString(addr + 201, msg, sizeof(msg));
 
 	return 1;
 }

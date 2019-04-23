@@ -346,11 +346,27 @@ native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type)
 //@remarks next step is to execute the queries and call {@link Missions_Start} after query@{@code buf[400]} returned last inserted id
 native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, Float:vehiclehp, msg[], querybuf[])
 
+//@summary Creates a message to be sent to the flighttracker
+//@param playerid playerid that is on a mission
+//@param vid vehicle id
+//@param hp health of the vehicle
+//@param vx x-velocity of the vehicle
+//@param vy y-velocity of the vehicle
+//@param vz z-velocity of the vehicle
+//@param alt altitude (z-pos) of the vehicle
+//@param buf buffer to store message in (length at index {@code 0}, message starts at index {@code 1})
+//@returns {@code 0} if something doesn't add up and there's no message to be sent
+native Missions_CreateTrackerMessage(playerid, vid, Float:hp, Float:vx, Float:vy, Float:vz, Float:alt, buf[])
+
 //@summary Ends the active mission for given player (when applicable)
 //@param playerid the playerid to cancel their mission for
 //@param reason the reason, see {@code MISSION_CANCELREASON_} constants
-//@param buf buffer for flg update query, only to be executed if this functions returns non-zero
+//@param buf buffer
 //@returns {@code 0} if no mission was active for player
+//@remarks {@param buf} data: <ul>\
+	<li>{@code buf}: flg update query, only when returned non-zero</li>\
+	<li>{@code buf+500}: length of tracker data to send</li>\
+	<li>{@code buf+501}: tracker data to be sent to flight tracker, only when returned non-zero</li></ul>
 native Missions_EndUnfinished(playerid, reason, buf[])
 
 //@summary Try to advance any active mission for player when they entered a race checkpoint
@@ -418,11 +434,15 @@ native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z, buf[])
 //@param pay amount of money to be paid to player
 //@param buf buffer to put messages and queries in, only to be done when returned non-zero
 //@returns {@code 0} on failure
-//@remarks {@param buf} data: <ul>\
-	<li>{@code buf}: global mission msg</li><li>{@code buf+200}: flg query</li>\
-	<li>{@code buf+1000}: result dialog text</li>\
-	<li>{@code buf+2000}: optional ac speed cheat msg (use {@link Ac_FormatLog}) (only if first char is non-zero)</li>\
-	<li>{@code buf+2100}: optional ac vhh cheat msg (use {@link Ac_FormatLog}) (only if first char is non-zero)</li></ul>
+/// <remarks>
+///   <ul>
+///     <li>{@code buf}: global mission msg</li><li>{@code buf+200}: flg query</li>
+///     <li>{@code buf+1000}: result dialog text</li>
+///     <li>{@code buf+2000}: optional ac speed cheat msg (use {@link Ac_FormatLog}) (only if first char is non-zero)</li>
+///     <li>{@code buf+2100}: optional ac vhh cheat msg (use {@link Ac_FormatLog}) (only if first char is non-zero)</li>
+///     <li>{@code buf+2200}: tracker data to be sent to flight tracker</li>
+///   </ul>
+/// </remarks>
 native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[])
 
 //@summary Check if the satisfaction textdraw should be shown for a player
@@ -436,9 +456,13 @@ native Missions_ShouldShowSatisfaction(playerid)
 //@param x will contain loading point x coordinate on return
 //@param y will contain loading point y coordinate on return
 //@param z will contain loading point z coordinate on return
-//@param msg buffer to store mission start msg in, to be sent to the player
+//@param buf buffer to store data in (see remarks)
 //@returns {@code 0} if there's no mission associated with the given player
-native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, msg[])
+//@remarks {@param buf} data: <ul>\
+	<li>{@code buf}: mission start msg in, to be sent to the player</li>\
+	<li>{@code buf+200}: length of tracker data to be sent to flight tracker</li>\
+	<li>{@code buf+201}: tracker data to be sent to flight tracker</li></ul>
+native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, buf[])
 
 //@summary Updates passenger satisfaction. Should be called every second.\
 	Has no effect when player is not in a mission (or in a mission that has no passengers).
