@@ -101,9 +101,6 @@ function spate_generate($template_dir, $template)
 			} while ($c != ' ' && $c != '}');
 			switch ($directive) {
 			case "@pre":
-			echo '-';
-			echo $indent;
-			echo '-';
 				$dopre = true;
 				$preindent = $indent;
 				goto next;
@@ -118,7 +115,7 @@ function spate_generate($template_dir, $template)
 			case "@unsafe":
 				$result .= '<?=';
 				$j += 3;
-				$suffix = '?>';
+				$suffix = '~>';
 				goto directive_parse_conditionbody__start;
 			case "@foreach":
 				$result .= '<?php foreach(';
@@ -191,10 +188,12 @@ directive_parse_conditionbody:
 		if ($wasescape) $result[++$j] = '\\';
 		$result[++$j] = $c;
 next:
+
 	}
 
 _return:
 	$depth--;
 	$result = str_replace('?><?php', '', $result);
+	$result = str_replace('~>', '?>', $result);
 	return $parsed_cache[$template] = $result;
 }

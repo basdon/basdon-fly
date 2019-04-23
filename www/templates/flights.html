@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>basdon.net aviation server :: home</title>
+	<title>basdon.net aviation server :: flights</title>
 	{@render defaulthead.html}
 	<style type="text/css">
 		#flights td{text-align:center}
@@ -38,10 +38,10 @@ try {
 	                 LIMIT 50 OFFSET ' . $paginationoffset);
 	if ($r !== false && ($r = $r->fetchAll()) !== false) {
 		?>
+		{@unsafe $pagination = simple_pagination('flights.php?page=', $page, round($totalrows / 50) + 1)}
 		{@if count($r)}
 			{@render flightstatuses.php}
 			{@render aircrafts.php}
-			{@unsafe $pagination = simple_pagination('flights.php?page=', $page, round($totalrows / 50) + 1)}
 			<table border="0" width="100%" id="flights">
 				<thead>
 					<tr>
@@ -68,7 +68,7 @@ try {
 								{@if $f->state == 1 && $f->tload == 0}
 									Started
 								{@elseif array_key_exists($f->state, $flightstatuses)}
-									{@unsafe $flightstatuses[$f->state]} 
+									{@unsafe $flightstatuses[$f->state]}
 								{@else}
 									Unknown?
 								{@endif}
@@ -78,10 +78,10 @@ try {
 					{@endforeach}
 				</tbody>
 			</table>
-			{@unsafe $pagination} 
 		{@else}
 			<p>None</p>
 		{@endif}
+		{@unsafe $pagination}
 		<?php 
 	}
 } catch (PDOException $e) {}
