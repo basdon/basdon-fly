@@ -38,13 +38,7 @@ public class FlightTracker
 				Log.error("error reading flighttracker.path file", e);
 			}
 		} finally {
-			for (FileOutputStream os : missionFiles.values()) {
-				try {
-					os.close();
-				} catch (Throwable t) {
-					Log.error("main: failed to close outputstream");
-				}
-			}
+			closeAllFiles();
 		}
 	}
 
@@ -53,6 +47,18 @@ public class FlightTracker
 
 	static File directory;
 	static boolean exit;
+
+	static void closeAllFiles()
+	{
+		for (FileOutputStream os : missionFiles.values()) {
+			try {
+				os.close();
+			} catch (Throwable t) {
+				Log.error("main: failed to close outputstream");
+			}
+		}
+		missionFiles.clear();
+	}
 
 	static void run()
 	{
@@ -105,6 +111,8 @@ public class FlightTracker
 		case 1: handleMissionStart(length); return;
 		case 2: handleMissionData(length); return;
 		case 3: handleMissionEnd(length); return;
+		case 4:
+		case 5: closeAllFiles(); return;
 		default:
 			Log.warn("unknown packet type: " + Integer.toHexString(buf[3]));
 		}
