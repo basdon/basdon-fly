@@ -112,15 +112,15 @@ public class FlightTracker
 
 	static void handleMissionStart(int length)
 	{
-		if (length < 11) {
-			Log.warn("missionstart: packet should be at least len 11, is: " + length);
+		if (length < 14) {
+			Log.warn("missionstart: packet should be at least len 14, is: " + length);
 			return;
 		}
 		FileOutputStream os = outputStreamForMission(4);
 		if (os == null) {
 			return;
 		}
-		byte nameLen = buf[8];
+		byte nameLen = buf[12];
 		if (nameLen < 1 || 24 < nameLen) {
 			Log.warn("missionstart: invalid name length: " + nameLen);
 			return;
@@ -131,7 +131,7 @@ public class FlightTracker
 			if (position != 5) {
 				channel.position(5);
 			}
-			channel.write(ByteBuffer.wrap(buf, 8, nameLen + 1));
+			channel.write(ByteBuffer.wrap(buf, 12, nameLen + 1));
 			channel.position(position);
 			os.flush();
 		} catch (IOException e) {
@@ -141,8 +141,8 @@ public class FlightTracker
 
 	static void handleMissionData(int length)
 	{
-		if (length != 15) {
-			Log.warn("missiondata: packet should len 15, is: " + length);
+		if (length != 26) {
+			Log.warn("missiondata: packet should len 26, is: " + length);
 			return;
 		}
 		FileOutputStream os = outputStreamForMission(4);
@@ -155,7 +155,12 @@ public class FlightTracker
 			os.write((time >> 8) & 0xFF);
 			os.write((time >> 16) & 0xFF);
 			os.write((time >> 24) & 0xFF);
-			os.write(buf, 8, 7);
+			for (int i = 0; i < 7; i++) {
+				buf[12 + i] = (byte)
+					((buf[12 + 2 * i] & 0xF) |
+					((buf[13 + 2 * i] & 0xF) << 4));
+			}
+			os.write(buf, 12, 7);
 			os.flush();
 		} catch (IOException e) {
 			Log.error("missiondata: failed to write", e);
@@ -164,13 +169,13 @@ public class FlightTracker
 
 	static void handleMissionEnd(int length)
 	{
-		if (length != 8) {
-			Log.warn("missionend: packet should len 8, is: " + length);
+		if (length != 12) {
+			Log.warn("missionend: packet should len 12, is: " + length);
 			return;
 		}
 		FileOutputStream os = outputStreamForMission(4);
 		if (os != null) {
-			missionFiles.remove(new Integer(i32(4)));
+			missionFiles.remove(new Integer(i32ln(4)));
 			try {
 				os.close();
 			} catch (IOException e) {
@@ -184,7 +189,7 @@ public class FlightTracker
 	@Nullable
 	static FileOutputStream outputStreamForMission(int missionIdOffset)
 	{
-		int id = i32(missionIdOffset);
+		int id = i32ln(missionIdOffset);
 		Integer key = new Integer(id);
 		FileOutputStream os = missionFiles.get(key);
 		if (os == null) {
@@ -201,7 +206,10 @@ public class FlightTracker
 			}
 			try {
 				os.write(1);
-				os.write(buf, missionIdOffset, 4);
+				os.write(id & 0xFF);
+				os.write((id >> 8) & 0xFF);
+				os.write((id >> 16) & 0xFF);
+				os.write((id >> 24) & 0xFF);
 				os.write(1);
 				os.write('?');
 				os.write(new byte[23]);
@@ -213,13 +221,25 @@ public class FlightTracker
 		return os;
 	}
 
-	static int i16(int pos)
+	static short i16ln(int pos)
 	{
-		return buf[pos] | (buf[pos + 1] << 8);
+		return (short)
+			((buf[pos] & 0xF) |
+			((buf[pos + 1] & 0xF) << 4) |
+			((buf[pos + 2] & 0xF) << 8) |
+			((buf[pos + 3] & 0xF) << 12));
 	}
 
-	static int i32(int pos)
+	static int i32ln(int pos)
 	{
-		return buf[pos] | (buf[pos + 1] << 8) | (buf[pos + 2] << 16) | (buf[pos + 3] << 24);
+		return
+			(buf[pos] & 0xF) |
+			((buf[pos + 1] & 0xF) << 4) |
+			((buf[pos + 2] & 0xF) << 8) |
+			((buf[pos + 3] & 0xF) << 12) |
+			((buf[pos + 4] & 0xF) << 16) |
+			((buf[pos + 5] & 0xF) << 20) |
+			((buf[pos + 6] & 0xF) << 24) |
+			((buf[pos + 7] & 0xF) << 28);
 	}
 }

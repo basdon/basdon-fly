@@ -65,13 +65,13 @@ public class Test
 	{
 		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 7766);
 		buf[3] = 1;
-		i32(missionid, 4);
-		buf[8] = (byte) name.length();
+		i32ln(missionid, 4);
+		buf[12] = (byte) name.length();
 		char[] c = name.toCharArray();
 		for (int i = 0; i < c.length; i++) {
-			buf[9 + i] = (byte) c[i];
+			buf[13 + i] = (byte) c[i];
 		}
-		packet.setLength(10 + c.length);
+		packet.setLength(14 + c.length);
 		return packet;
 	}
 
@@ -79,12 +79,12 @@ public class Test
 	{
 		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 7766);
 		buf[3] = 2;
-		i32(missionid, 4);
-		i16(spd, 8);
-		i16(alt, 10);
-		buf[12] = sat;
-		i16(hp, 13);
-		packet.setLength(15);
+		i32ln(missionid, 4);
+		i16ln(spd, 12);
+		i16ln(alt, 16);
+		i8ln(sat, 20);
+		i16ln(hp, 22);
+		packet.setLength(26);
 		return packet;
 	}
 
@@ -92,22 +92,34 @@ public class Test
 	{
 		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 7766);
 		buf[3] = 3;
-		i32(missionid, 4);
-		packet.setLength(8);
+		i32ln(missionid, 4);
+		packet.setLength(12);
 		return packet;
 	}
 
-	static void i32(int i, int pos)
+	static void i32ln(int i, int pos)
 	{
-		buf[pos++] = (byte) (i & 0xFF);
-		buf[pos++] = (byte) ((i >> 8) & 0xFF);
-		buf[pos++] = (byte) ((i >> 16) & 0xFF);
-		buf[pos] = (byte) ((i >> 24) & 0xFF);
+		buf[pos++] = (byte) (0x40 | (i & 0xF));
+		buf[pos++] = (byte) (0x40 | ((i >> 4) & 0xF));
+		buf[pos++] = (byte) (0x40 | ((i >> 8) & 0xF));
+		buf[pos++] = (byte) (0x40 | ((i >> 12) & 0xF));
+		buf[pos++] = (byte) (0x40 | ((i >> 16) & 0xF));
+		buf[pos++] = (byte) (0x40 | ((i >> 20) & 0xF));
+		buf[pos++] = (byte) (0x40 | ((i >> 24) & 0xF));
+		buf[pos] = (byte) (0x40 | ((i >> 28) & 0xF));
 	}
 
-	static void i16(short i, int pos)
+	static void i16ln(short i, int pos)
 	{
-		buf[pos++] = (byte) (i & 0xFF);
-		buf[pos] = (byte) ((i >> 8) & 0xFF);
+		buf[pos++] = (byte) (0x40 | (i & 0xF));
+		buf[pos++] = (byte) (0x40 | ((i >> 4) & 0xF));
+		buf[pos++] = (byte) (0x40 | ((i >> 8) & 0xF));
+		buf[pos] = (byte) (0x40 | ((i >> 12) & 0xF));
+	}
+
+	static void i8ln(byte i, int pos)
+	{
+		buf[pos++] = (byte) (0x40 | (i & 0xF));
+		buf[pos] = (byte) (0x40 | ((i >> 4) & 0xF));
 	}
 }
