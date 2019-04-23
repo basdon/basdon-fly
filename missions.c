@@ -785,9 +785,8 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	cell *addr;
 	char buf[4096];
 	int ptax, psatisfaction = 0, pdistance, pbonus = 0, ptotal, pdamage, pcheat = 0, tmp;
-	int totaltime, duration_h, duration_m;
+	int totaltime, mintime, duration_h, duration_m;
 	int p;
-	float mintime;
 
 	if ((mission = activemission[playerid]) == NULL || pdata[playerid] == NULL) {
 		return 0;
@@ -813,7 +812,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	duration_h = (totaltime - duration_m) / 60;
 
 	/* don't use adistance because it also includes z changes */
-	mintime = mission->distance / mission_get_vehicle_maximum_speed(mission->veh->model);
+	mintime = (int) (mission->distance / mission_get_vehicle_maximum_speed(mission->veh->model));
 	if (totaltime < mintime) {
 		pcheat -= 250000;
 		sprintf(buf, "flg(#%d) too fast: min: %d actual: %d", mission->id, mintime, totaltime);
