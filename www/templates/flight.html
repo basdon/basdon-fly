@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<?php 
+$id = -1;
+if (isset($_GET['id'])) {
+	$id = (int) $_GET['id'];
+	$id++;
+	$id--;
+}
+$returnpage = -1;
+if (isset($_GET['rp'])) {
+	$returnpage = (int) $_GET['rp'];
+	$returnpage++;
+	$returnpage--;
+}
+?>
+<html>
+<head>
+	<title>basdon.net aviation server :: flight #{@unsafe $id} details</title>
+	{@render defaulthead.html}
+	<style type="text/css">
+		#flights td{text-align:center}
+		#flights td:nth-child(5){text-align:right}
+	</style>
+</head>
+<body>
+	{@render skip.html}
+	<div id="wrapper">
+		{@render defaultheader.html}
+		<p><a href="flights.php{@if $returnpage != -1}?page={@unsafe $returnpage}{@endif}">Flights</a> &gt; Flight #{@unsafe $id}</p>
+		<h2>Flight #{@unsafe $id} details</h2>
+		<p>Flight not found!</p>
+		{@render defaultfooter.html}
+	</div>
+</body>
+</html>

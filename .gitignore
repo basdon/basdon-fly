@@ -7,3 +7,4 @@
 !/static/gen/
 !/static/gen/.gitkeep
 /www/inc/conf.php
+/static/fdr/*.flight

@@ -56,6 +56,7 @@ try {
 					</tr>
 				</thead>
 				<tbody>
+					{@eval $rp = $page != 1 ? "&rp=$page" : "";}
 					{@foreach $r as $f}
 						<tr>
 							<td>{@unsafe date('j M H:i', $f->tlastupdate)}</td>
@@ -73,7 +74,7 @@ try {
 									Unknown?
 								{@endif}
 							</td>
-							<td><a href="flight.php?id={@unsafe $f->id}">Flight #{@unsafe $f->id} details</a></td>
+							<td><a href="flight.php?id={@unsafe $f->id . $rp}">Flight #{@unsafe $f->id} details</a></td>
 						</tr>
 					{@endforeach}
 				</tbody>
