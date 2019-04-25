@@ -30,7 +30,7 @@ public class FlightTracker
 				Path path = Paths.get(".", "flighttracker.path").toAbsolutePath();
 				List<String> l = Files.readAllLines(path);
 				if (l.isEmpty() || !(directory = new File(l.get(0))).isDirectory()) {
-					Log.error("no path in flighttracker.path is not a directory");
+					Log.error("path in flighttracker.path is not a directory");
 				} else {
 					run();
 				}
