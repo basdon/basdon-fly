@@ -18,6 +18,7 @@ $color_text = imagecolorallocate($im, 0, 0, 0);
 
 $max = 0;
 $val = 0;
+$rightvalue = 0;
 $te = time() - 60;
 $ts = $te - 3600 * 48;
 $values = [];
@@ -30,6 +31,8 @@ try {
 		$r->value = $val;
 		if ($r->stamp < $te) {
 			$values[] = $r;
+		} else {
+			$rightvalue = $val;
 		}
 	}
 } catch (PDOException $e) {
@@ -45,13 +48,11 @@ $peakranges = [];
 $inpeak = false;
 $maxy = $imgh - 12;
 if ($max > 0) {
-	if ($values[0]->stamp < $te) {
-		$o = new stdclass();
-		$o->stamp = $te;
-		$o->value = 0;
-		array_unshift($values, $o);
-	}
-	$value = $values[0]->value;
+	$o = new stdclass();
+	$o->stamp = $te;
+	$o->value = $rightvalue;
+	array_unshift($values, $o);
+	$value = $rightvalue;
 	$idx = 0;
 	$lasty = -1;
 	for ($x = $imgw - 1; $x >= 0; $x--) {
