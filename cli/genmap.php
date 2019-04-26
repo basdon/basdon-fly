@@ -1,6 +1,7 @@
 <?php
 
-require 'tempdb.php';
+require '../inc/conf.php';
+require '../inc/db.php';
 
 $ILS_DIST = 1500;
 $imgwh = 900;

@@ -1,6 +1,7 @@
 <?php
 
-require 'tempdb.php';
+require '../inc/conf.php';
+require '../inc/db.php';
 
 $imgw = 220;
 $imgh = 80;
