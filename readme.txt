@@ -1,3 +1,2 @@
-- restrict access to gen,inc,templates
 - cron cli/genplayergraph.php
 - cache control static/gen

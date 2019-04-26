@@ -3,8 +3,8 @@ $__timer = microtime(true);
 
 $__msgs = [];
 
-require('inc/conf.php');
-include('inc/db.php');
+require('../inc/conf.php');
+include('../inc/db.php');
 
 function simple_pagination($urlWithParam, $currentPageFromOne, $totalPages)
 {
