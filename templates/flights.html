@@ -60,7 +60,7 @@ try {
 					{@foreach $r as $f}
 						<tr>
 							<td>{@unsafe date('j M H:i', $f->tlastupdate)}</td>
-							<td><a href="user.php?name={$f->n}">{$f->n}</a></td>
+							<td><a href="user.php?name={@urlencode $f->n}">{$f->n}</a></td>
 							<td>{@unsafe aircraft_name($f->vehmodel)}</td>
 							<td><a href="airport.php?code={@unsafe $f->f}">{@unsafe $f->f}</a></td>
 							<td><a href="airport.php?code={@unsafe $f->t}">{@unsafe $f->t}</a></td>

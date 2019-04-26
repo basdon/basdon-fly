@@ -117,6 +117,11 @@ function spate_generate($template_dir, $template)
 				$j += 3;
 				$suffix = '~>';
 				goto directive_parse_conditionbody__start;
+			case "@urlencode":
+				$result .= '<?=urlencode(';
+				$j += 13;
+				$suffix = ')~>';
+				goto directive_parse_conditionbody__start;
 			case "@foreach":
 				$result .= '<?php foreach(';
 				$j += 14;
