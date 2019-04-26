@@ -2,17 +2,31 @@
 	<div>
 		<h5>Players (last 48h)</h5>
 		<img src="{@unsafe $STATICPATH}/gen/playergraph.png" />
-		<h6>Currently online (0)</h6>
-		<table border="0" width="100%">
 <?php 
-$players = [new stdClass()];
-$players[0]->name = "robin_be";
-$players[0]->score = 42;
+$players = [];
+try {
+	$r = $db->query("SELECT _s.u id,_u.n name,_u.s score 
+	                 FROM ses _s 
+	                 JOIN usr _u ON _s.u=_u.i 
+	                 WHERE _s.e>UNIX_TIMESTAMP()-40");
+	if ($r !== false && ($r = $r->fetchAll()) !== false) {
+		$players = $r;
+	}
 ?>
+		<h6>Currently online ({@unsafe count($players)})</h6>
+		<table border="0" width="100%">
 			{@foreach $players as $p}
-				<tr><td><a href="user.php?name={$p->name}">{$p->name}</a></td><td>{@unsafe $p->score}</td></tr>
+				<tr><td><a href="user.php?id={$p->id}">{$p->name}</a></td><td>{@unsafe $p->score}</td></tr>
 			{@endforeach}
 		</table>
+<?php 
+} catch (PDOException $e) {
+?>
+		<h6>Currently online</h6>
+		<p style="color:red">Failed to get online players</p>
+<?php 
+}
+?>
 	</div>
 	<div>
 		<h5>Active Flights</h5>
