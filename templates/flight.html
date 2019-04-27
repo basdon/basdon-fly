@@ -28,7 +28,38 @@ if (isset($_GET['rp'])) {
 		{@render defaultheader.html}
 		<p><a href="flights.php{@if $returnpage != -1}?page={@unsafe $returnpage}{@endif}">Flights</a> &gt; Flight #{@unsafe $id}</p>
 		<h2>Flight #{@unsafe $id} details</h2>
-		<p>Flight not found!</p>
+<?php 
+try{
+	$r = $db->query('SELECT _f.*,_u.n playername,_a.n fromname,_a.c fromcode,_b.n toname,_b.c tocode,_v.m vehmodel 
+	                 FROM flg _f 
+	                 JOIN usr _u ON _f.player=_u.i 
+	                 JOIN apt _a ON _f.fapt=_a.i 
+	                 JOIN apt _b ON _f.tapt=_b.i 
+	                 JOIN veh _v ON _f.vehicle=_v.i 
+	                 WHERE id=' . $id);
+	if ($r === false || ($r = $r->fetchAll()) === false || empty($r)) {
+		echo '<p>Flight not found (or something went wrong)!</p>';
+	} else {
+		$r = $r[0];
+?>
+		{@render flightstatuses.php}
+		{@render aircrafts.php}
+		<ul>
+			<li><strong>Status:</strong> {@unsafe fmt_flight_status($r->state, $r->tload)}</li>
+			<li><strong>Pilot:</strong> <a href="user.php?name={@urlencode $r->playername}">{@unsafe $r->playername}</a></li>
+			<li><strong>Departure Airport:</strong> <a href="airport.php?code={@unsafe $r->fromcode}">{@unsafe $r->fromname} ({@unsafe $r->fromcode})</a></li>
+			<li><strong>Arrival Airport:</strong> <a href="airport.php?code={@unsafe $r->tocode}">{@unsafe $r->toname} ({@unsafe $r->tocode})</a></li>
+			<li><strong>Point-to-point distance:</strong> {@unsafe $r->distance}m</li>
+			<li><strong>Actual flown distance:</strong> {@unsafe $r->adistance}m</li>
+			<li><strong>Flight duration:</strong> {@unsafe $r->tlastupdate - $r->tstart}s</li>
+			<li><strong>Aircraft:</strong> {@unsafe aircraft_name($r->vehmodel)}</li>
+		</ul>
+<?php 
+	}
+} catch (PDOException $e) {
+?>
+		<p style="color:red;">Failed to load flight info!</p>
+<?php } ?>
 		{@render defaultfooter.html}
 	</div>
 </body>

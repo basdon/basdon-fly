@@ -65,15 +65,7 @@ try {
 							<td><a href="airport.php?code={@unsafe $f->f}">{@unsafe $f->f}</a></td>
 							<td><a href="airport.php?code={@unsafe $f->t}">{@unsafe $f->t}</a></td>
 							<td>{@if $f->state != 1}{@unsafe round($f->adistance)}m{@endif}</td>
-							<td class="flight-state flight-state-{@unsafe $f->state}">
-								{@if $f->state == 1 && $f->tload == 0}
-									Started
-								{@elseif array_key_exists($f->state, $flightstatuses)}
-									{@unsafe $flightstatuses[$f->state]}
-								{@else}
-									Unknown?
-								{@endif}
-							</td>
+							<td class="flight-state flight-state-{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
 							<td><a href="flight.php?id={@unsafe $f->id . $rp}">Flight #{@unsafe $f->id} details</a></td>
 						</tr>
 					{@endforeach}
