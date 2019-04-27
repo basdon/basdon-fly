@@ -43,7 +43,7 @@ try{
 		$r = $r[0];
 ?>
 		{@render flightstatuses.php}
-		{@render aircrafts.php}
+		{@render aircraftnames.php}
 		<ul>
 			<li><strong>Status:</strong> {@unsafe fmt_flight_status($r->state, $r->tload)}</li>
 			<li><strong>Pilot:</strong> <a href="user.php?name={@urlencode $r->playername}">{@unsafe $r->playername}</a></li>

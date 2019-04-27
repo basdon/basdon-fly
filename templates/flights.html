@@ -41,7 +41,7 @@ try {
 		{@unsafe $pagination = simple_pagination('flights.php?page=', $page, round($totalrows / 50) + 1)}
 		{@if count($r)}
 			{@render flightstatuses.php}
-			{@render aircrafts.php}
+			{@render aircraftnames.php}
 			<table border="0" width="100%" id="flights">
 				<thead>
 					<tr>
