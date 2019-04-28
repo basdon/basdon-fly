@@ -149,8 +149,8 @@ public class FlightTracker
 
 	static void handleMissionData(int length)
 	{
-		if (length != 26) {
-			Log.warn("missiondata: packet should len 26, is: " + length);
+		if (length != 42) {
+			Log.warn("missiondata: packet should len 42, is: " + length);
 			return;
 		}
 		FileOutputStream os = outputStreamForMission(4);
@@ -163,12 +163,12 @@ public class FlightTracker
 			os.write((time >> 8) & 0xFF);
 			os.write((time >> 16) & 0xFF);
 			os.write((time >> 24) & 0xFF);
-			for (int i = 0; i < 7; i++) {
+			for (int i = 0; i < 15; i++) {
 				buf[12 + i] = (byte)
 					((buf[12 + 2 * i] & 0xF) |
 					((buf[13 + 2 * i] & 0xF) << 4));
 			}
-			os.write(buf, 12, 7);
+			os.write(buf, 12, 15);
 			os.flush();
 		} catch (IOException e) {
 			Log.error("missiondata: failed to write", e);

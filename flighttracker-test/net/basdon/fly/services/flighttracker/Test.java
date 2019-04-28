@@ -31,25 +31,25 @@ public class Test
 
 			socket.send(start(4, "Name"));
 			sleep(1000);
-			socket.send(data(4, (short) 20, (short) 30, (byte) 40, (short) 50));
+			socket.send(data(4, (short) 20, (short) 30, (byte) 40, (short) 50, 1f, 2f));
 			sleep(1000);
-			socket.send(data(4, (short) 60, (short) -20, (byte) 80, (short) 90));
+			socket.send(data(4, (short) 60, (short) -20, (byte) 80, (short) 90, 5f, 6f));
 			sleep(1000);
 			socket.send(end(4));
 			sleep(1000);
 
-			socket.send(data(6, (short) 20, (short) 30, (byte) 40, (short) 50));
+			socket.send(data(6, (short) 20, (short) 30, (byte) 40, (short) 50, -1f, -90f));
 			sleep(1000);
 			socket.send(start(6, "Hei"));
 			sleep(1000);
 			socket.send(end(6));
 			sleep(1000);
 
-			socket.send(data(7, (short) 20, (short) 30, (byte) 40, (short) 50));
+			socket.send(data(7, (short) 20, (short) 30, (byte) 40, (short) 50, 100f, 200f));
 			sleep(1000);
 			socket.send(end(7));
 			sleep(1000);
-			socket.send(data(7, (short) 20, (short) 30, (byte) 40, (short) 50));
+			socket.send(data(7, (short) 20, (short) 30, (byte) 40, (short) 50, -80f, -70f));
 			sleep(1000);
 
 			socket.send(start(8, "boo"));
@@ -75,7 +75,8 @@ public class Test
 		return packet;
 	}
 
-	static DatagramPacket data(int missionid, short spd, short alt, byte sat, short hp)
+	static DatagramPacket data(int missionid, short spd, short alt, byte sat, short hp,
+	                           float x, float y)
 	{
 		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 7766);
 		buf[3] = 2;
@@ -84,7 +85,9 @@ public class Test
 		i16ln(alt, 16);
 		i8ln(sat, 20);
 		i16ln(hp, 22);
-		packet.setLength(26);
+		f32ln(x, 26);
+		f32ln(y, 34);
+		packet.setLength(42);
 		return packet;
 	}
 
@@ -95,6 +98,11 @@ public class Test
 		i32ln(missionid, 4);
 		packet.setLength(12);
 		return packet;
+	}
+
+	static void f32ln(float f, int pos)
+	{
+		i32ln(Float.floatToIntBits(f), pos);
 	}
 
 	static void i32ln(int i, int pos)
