@@ -13,7 +13,7 @@ if (isset($_GET['rp'])) {
 	$returnpage--;
 }
 ?>
-<html>
+<html lang="en">
 <head>
 	<title>basdon.net aviation server :: flight #{@unsafe $id} details</title>
 	{@render defaulthead.html}
@@ -29,7 +29,7 @@ if (isset($_GET['rp'])) {
 	<div id="wrapper">
 		{@render defaultheader.html}
 		<p><a href="flights.php{@if $returnpage != -1}?page={@unsafe $returnpage}{@endif}">Flights</a> &gt; Flight #{@unsafe $id}</p>
-		<h2>Flight #{@unsafe $id} details</h2>
+		<h2 id="main">Flight #{@unsafe $id} details</h2>
 <?php 
 try{
 	$r = $db->query('SELECT _f.*,_u.n playername,_a.n fromname,_a.c fromcode,_b.n toname,_b.c tocode,_v.m vehmodel 

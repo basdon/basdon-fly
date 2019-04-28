@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 	<title>basdon.net aviation server :: flights</title>
 	{@render defaulthead.html}
-	<style type="text/css">
+	<style>
 		#flights td{text-align:center}
 		#flights td:nth-child(5){text-align:right}
 	</style>
@@ -12,7 +12,7 @@
 	{@render skip.html}
 	<div id="wrapper">
 		{@render defaultheader.html}
-		<h2>Flights</h2>
+		<h2 id="main">Flights</h2>
 <?php 
 $page = 1;
 if (isset($_GET['page'])) {

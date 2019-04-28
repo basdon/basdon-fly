@@ -23,7 +23,7 @@ header small, footer small {
 	font-size: small;
 	float: right;
 }
-#main {
+div#main {
 	float: right;
 	width: calc(100% - 240px);
 }
@@ -32,7 +32,7 @@ aside {
 	width: 220px;
 	padding-bottom: 1em;
 }
-#main {
+div#main {
 	padding-bottom: 1em;
 }
 .fr49 {
@@ -44,7 +44,7 @@ aside {
 	width: 49%;
 }
 @media (max-width: 800px) {
-	#main {
+	div#main {
 		width: 100%;
 		max-width: 800px;
 	}
