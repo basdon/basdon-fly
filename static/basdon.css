@@ -35,6 +35,14 @@ aside {
 #main {
 	padding-bottom: 1em;
 }
+.fr49 {
+	float: right;
+	width: 49%;
+}
+.fl49 {
+	float: left;
+	width: 49%;
+}
 @media (max-width: 800px) {
 	#main {
 		width: 100%;
@@ -47,6 +55,10 @@ aside {
 		padding-right: 1ex;
 		float: left;
 		width: 220px;
+	}
+	.fr49, .fl49 {
+		float: none;
+		width: 100%;
 	}
 }
 aside table, aside p {
