@@ -478,6 +478,7 @@ thisisworsethanbubblesort:
 }
 
 /* native Missions_CreateTrackerMessage(playerid, vid, Float:hp,
+                                        Float:x, Float:y,
                                         Float:vx, Float:vy, Float:vz, Float:alt, buf[]) */
 cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
 {
@@ -485,19 +486,21 @@ cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
 	cell *addr;
 	char buf[50];
 	struct mission *mission;
-	float vx, vy, vz;
+	float x, y, vx, vy, vz;
 	short spd, alt, hp;
 
 	if ((mission = activemission[playerid]) == NULL || mission->veh->spawnedvehicleid != vehicleid) {
 		return 0;
 	}
 
-	vx = amx_ctof(params[4]);
-	vy = amx_ctof(params[5]);
-	vz = amx_ctof(params[6]);
+	x = amx_ctof(params[4]);
+	y = amx_ctof(params[5]);
+	vx = amx_ctof(params[6]);
+	vy = amx_ctof(params[7]);
+	vz = amx_ctof(params[8]);
 	hp = (short) params[3];
 	spd = (short) (VEL_TO_KTS_VAL * sqrt(vx * vx + vy * vy + vz * vz));
-	alt = (short) amx_ctof(params[7]);
+	alt = (short) amx_ctof(params[9]);
 
 	/* flight tracker packet 2 */
 	buf[0] = 'F';
@@ -526,9 +529,25 @@ cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
 	buf[23] = 0x40 | ((*((char*)&hp) >> 4) & 0xF);
 	buf[24] = 0x40 | (*((char*)&hp + 1) & 0xF);
 	buf[25] = 0x40 | ((*((char*)&hp + 1) >> 4) & 0xF);
-	buf[26] = 0;
-	amx_GetAddr(amx, params[8], &addr);
-	*addr = 26;
+	buf[26] = 0x40 | (*((char*)&x) & 0xF);
+	buf[27] = 0x40 | ((*((char*)&x) >> 4) & 0xF);
+	buf[28] = 0x40 | (*((char*)&x + 1) & 0xF);
+	buf[29] = 0x40 | ((*((char*)&x + 1) >> 4) & 0xF);
+	buf[30] = 0x40 | (*((char*)&x + 2) & 0xF);
+	buf[31] = 0x40 | ((*((char*)&x + 2) >> 4) & 0xF);
+	buf[32] = 0x40 | (*((char*)&x + 3) & 0xF);
+	buf[33] = 0x40 | ((*((char*)&x + 3) >> 4) & 0xF);
+	buf[34] = 0x40 | (*((char*)&y) & 0xF);
+	buf[35] = 0x40 | ((*((char*)&y) >> 4) & 0xF);
+	buf[36] = 0x40 | (*((char*)&y + 1) & 0xF);
+	buf[37] = 0x40 | ((*((char*)&y + 1) >> 4) & 0xF);
+	buf[38] = 0x40 | (*((char*)&y + 2) & 0xF);
+	buf[39] = 0x40 | ((*((char*)&y + 2) >> 4) & 0xF);
+	buf[40] = 0x40 | (*((char*)&y + 3) & 0xF);
+	buf[41] = 0x40 | ((*((char*)&y + 3) >> 4) & 0xF);
+	buf[42] = 0;
+	amx_GetAddr(amx, params[10], &addr);
+	*addr = 42;
 	amx_SetUString(addr + 1, buf, sizeof(buf));
 	return 1;
 }
