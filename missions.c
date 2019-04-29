@@ -869,7 +869,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	        "UPDATE flg SET tunload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP(),"
 	        "state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
 	        "pdistance=%d,pdamage=%d,pcheat=%d,pbonus=%d,ptotal=%d,satisfaction=%d,adistance=%f,"
-	        "paymp=%f WHERE id=%d",
+	        "paymp=%f,damage=%d WHERE id=%d",
 	        MISSION_STATE_FINISHED,
 	        mission->fuelburned,
 	        ptax,
@@ -883,6 +883,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	        mission->passenger_satisfaction,
 	        mission->actualdistance,
 	        paymp,
+	        mission->damagetaken,
 	        mission->id);
 	amx_SetUString(addr + 200, buf, sizeof(buf));
 	p = 0;
