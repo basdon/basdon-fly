@@ -498,7 +498,7 @@ cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
 	vx = amx_ctof(params[6]);
 	vy = amx_ctof(params[7]);
 	vz = amx_ctof(params[8]);
-	hp = (short) params[3];
+	hp = (short) amx_ctof(params[3]);
 	spd = (short) (VEL_TO_KTS_VAL * sqrt(vx * vx + vy * vy + vz * vz));
 	alt = (short) amx_ctof(params[9]);
 
