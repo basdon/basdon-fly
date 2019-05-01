@@ -1,2 +1,3 @@
 - cron cli/genplayergraph.php
 - cache control static/gen
+- static: ErrorDocument 404 "404 Not Found"

@@ -38,7 +38,7 @@ try {
 	                 LIMIT 50 OFFSET ' . $paginationoffset);
 	if ($r !== false && ($r = $r->fetchAll()) !== false) {
 		?>
-		{@unsafe $pagination = simple_pagination('flights.php?page=', $page, round($totalrows / 50) + 1)}
+		{@unsafe $pagination = simple_pagination('flights.php?page=', $page, floor($totalrows / 50) + 1)}
 		{@if count($r)}
 			{@render flightstatuses.php}
 			{@render aircraftnames.php}
