@@ -6,6 +6,11 @@ $__msgs = [];
 require('../inc/conf.php');
 include('../inc/db.php');
 
+if (!isset($p_accent_color_a)) {
+	$p_accent_color_a = 'ddd';
+	$p_accent_color_b = 'bbb';
+}
+
 function simple_pagination($urlWithParam, $currentPageFromOne, $totalPages)
 {
 	$str = '<p class="pagination">Page:';

@@ -10,8 +10,8 @@
 </head>
 <body>
 	{@render skip.html}
-	<div id="wrapper">
-		{@render defaultheader.html}
+	{@render defaultheader.html}
+	<div class="singlebody">
 		<h2 id="main">Flights</h2>
 <?php 
 $page = 1;
@@ -79,7 +79,7 @@ try {
 	}
 } catch (PDOException $e) {}
 ?>
-		{@render defaultfooter.html}
 	</div>
+	{@render defaultfooter.html}
 </body>
 </html>

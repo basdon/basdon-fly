@@ -50,8 +50,8 @@ if (isset($_GET['rp'])) {
 </head>
 <body>
 	{@render skip.html}
-	<div id="wrapper">
-		{@render defaultheader.html}
+	{@render defaultheader.html}
+	<div class="singlebody">
 		<p><a href="flights.php{@if $returnpage != -1}?page={@unsafe $returnpage}{@endif}">Flights</a> &gt; Flight #{@unsafe $id}</p>
 		<h2 id="main">Flight #{@unsafe $id} details</h2>
 <?php 
@@ -188,7 +188,7 @@ function fmt_pay($amount)
 		</div>
 		<script src="{@unsafe $STATICPATH}/flightmap.js"></script>
 		<script>flightmap('{@unsafe $STATICPATH}', {@unsafe $id})</script>
-		{@render defaultfooter.html}
 	</div>
+	{@render defaultfooter.html}
 </body>
 </html>

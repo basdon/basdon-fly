@@ -1,8 +1,17 @@
-#wrapper {
+body {
+	background: #444;
+}
+body > div {
+	background: #fff;
 	max-width: 1000px;
+	padding: 0 10px;
 	margin: 0 auto;
 }
-#wrapper > .msg {
+body > div.singlebody {
+	padding-top: .3em;
+	padding-bottom: .3em;
+}
+body > div > .msg {
 	background: #ffe1e1;
 	border: 1px solid #f11;
 	margin: 0;
@@ -11,6 +20,9 @@
 }
 hr {
 	height: 1px;
+}
+header {
+	padding-bottom: .5em;
 }
 header h1 {
 	margin-bottom: .1em;
@@ -129,6 +141,9 @@ tr:hover {
 }
 .clear {
 	clear: both;
+}
+footer {
+	padding: .5em 0;
 }
 footer p {
 	line-height: 1.1em;

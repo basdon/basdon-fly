@@ -6,8 +6,8 @@
 </head>
 <body>
 	{@render skip.html}
-	<div id="wrapper">
-		{@render defaultheader.html}
+	{@render defaultheader.html}
+	<div>
 		<div id="main">
 			<h2>Welcome!</h2>
 			<p>
@@ -18,7 +18,8 @@
 			</p>
 		</div>
 		{@render aside.html}
-		{@render defaultfooter.html}
+		<div class="clear"></div>
 	</div>
+	{@render defaultfooter.html}
 </body>
 </html>
