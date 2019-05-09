@@ -16,7 +16,7 @@ if (isset($_GET['rp'])) {
 <html lang="en">
 <head>
 	<title>basdon.net aviation server :: flight #{@unsafe $id} details</title>
-	{@render defaulthead.html}
+	{@render defaulthead.tpl}
 	<style>
 		#paytable td + td{
 			border-left:1px solid #ccc;
@@ -49,8 +49,8 @@ if (isset($_GET['rp'])) {
 	</style>
 </head>
 <body>
-	{@render skip.html}
-	{@render defaultheader.html}
+	{@render skip.tpl}
+	{@render defaultheader.tpl}
 	<div class="singlebody">
 		<p><a href="flights.php{@if $returnpage != -1}?page={@unsafe $returnpage}{@endif}">Flights</a> &gt; Flight #{@unsafe $id}</p>
 		<h2 id="main">Flight #{@unsafe $id} details</h2>
@@ -189,6 +189,6 @@ function fmt_pay($amount)
 		<script src="{@unsafe $STATICPATH}/flightmap.js"></script>
 		<script>flightmap('{@unsafe $STATICPATH}', {@unsafe $id})</script>
 	</div>
-	{@render defaultfooter.html}
+	{@render defaultfooter.tpl}
 </body>
 </html>

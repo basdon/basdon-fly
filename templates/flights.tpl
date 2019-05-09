@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
 	<title>basdon.net aviation server :: flights</title>
-	{@render defaulthead.html}
+	{@render defaulthead.tpl}
 	<style>
 		#flights td{text-align:center}
 		#flights td:nth-child(5){text-align:right}
 	</style>
 </head>
 <body>
-	{@render skip.html}
-	{@render defaultheader.html}
+	{@render skip.tpl}
+	{@render defaultheader.tpl}
 	<div class="singlebody">
 		<h2 id="main">Flights</h2>
 <?php 
@@ -80,6 +80,6 @@ try {
 } catch (PDOException $e) {}
 ?>
 	</div>
-	{@render defaultfooter.html}
+	{@render defaultfooter.tpl}
 </body>
 </html>

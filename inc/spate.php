@@ -2,7 +2,7 @@
 
 function spate_default_generate($name)
 {
-	file_put_contents("../gen/{$name}.php", spate_generate('../templates/', "{$name}.html"));
+	file_put_contents("../gen/{$name}.php", spate_generate('../templates/', "{$name}.tpl"));
 }
 
 /**

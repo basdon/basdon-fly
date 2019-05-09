@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 	<title>basdon.net aviation server :: home</title>
-	{@render defaulthead.html}
+	{@render defaulthead.tpl}
 </head>
 <body>
-	{@render skip.html}
-	{@render defaultheader.html}
+	{@render skip.tpl}
+	{@render defaultheader.tpl}
 	<div>
 		<div id="main">
 			<h2>Welcome!</h2>
@@ -17,9 +17,9 @@
 				Start your flight and have fun!
 			</p>
 		</div>
-		{@render aside.html}
+		{@render aside.tpl}
 		<div class="clear"></div>
 	</div>
-	{@render defaultfooter.html}
+	{@render defaultfooter.tpl}
 </body>
 </html>
