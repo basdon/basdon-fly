@@ -138,6 +138,15 @@ function spate_generate($template_dir, $template)
 				$result .= '<?php if(';
 				$j += 9;
 				goto directive_parse_conditionbody__start;
+			case "@try":
+				$result .= '<?php try{ ?>';
+				$j += 13;
+				goto next;
+			case "@catch":
+				$result .= '<?php }catch(';
+				$j += 13;
+				goto directive_parse_conditionbody__start;
+			case "@endtry":
 			case "@endforeach":
 			case "@endif":
 				$result .= '<?php } ?>';
