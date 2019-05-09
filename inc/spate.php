@@ -110,7 +110,7 @@ function spate_generate($template_dir, $template)
 			case "@eval":
 				$result .= '<?php ';
 				$j += 6;
-				$suffix = '?>';
+				$suffix = ';?>';
 				goto directive_parse_conditionbody__start;
 			case "@unsafe":
 				$result .= '<?=';
