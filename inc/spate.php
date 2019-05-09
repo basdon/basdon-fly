@@ -86,7 +86,7 @@ function spate_generate($template_dir, $template)
 			if ($c == '$') {
 				$result .= '<?=htmlentities($';
 				$j += 17;
-				$suffix = ',ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE)?>';
+				$suffix = ',ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE)~>';
 				goto directive_parse_conditionbody__start;
 			}
 			if ($c != '@') {
