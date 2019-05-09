@@ -1,18 +1,4 @@
 <!DOCTYPE html>
-<?php 
-$id = -1;
-if (isset($_GET['id'])) {
-	$id = (int) $_GET['id'];
-	$id++;
-	$id--;
-}
-$returnpage = -1;
-if (isset($_GET['rp'])) {
-	$returnpage = (int) $_GET['rp'];
-	$returnpage++;
-	$returnpage--;
-}
-?>
 <html lang="en">
 <head>
 	<title>basdon.net aviation server :: flight #{@unsafe $id} details</title>
