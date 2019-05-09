@@ -11,12 +11,11 @@ body > div.singlebody {
 	padding-top: .3em;
 	padding-bottom: .3em;
 }
-body > div > .msg {
-	background: #ffe1e1;
-	border: 1px solid #f11;
-	margin: 0;
-	padding: .3em;
-	color: #f00;
+body > .msg {
+	max-width: 1000px;
+	background: #faa;
+	margin: 0 auto;
+	padding: .3em 10px;
 }
 hr {
 	height: 1px;
