@@ -19,4 +19,5 @@ function fmt_mission_type($missiontype)
 	default: return 'Unknown';
 	}
 }
+$passenger_mission_types = (1 | 2 | 4 | 8192);
 ?>
