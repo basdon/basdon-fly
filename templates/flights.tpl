@@ -28,6 +28,7 @@ try {
 	if ($r !== false && ($r = $r->fetchAll()) !== false && count($r)) {
 		$totalrows = $r[0]->c;
 	}
+	++$db_querycount;
 	$r = $db->query('SELECT id,_u.n,_a.c f,_b.c t,state,tload,tlastupdate,adistance,_v.m vehmodel 
 	                 FROM flg _f 
 	                 JOIN usr _u ON _f.player=_u.i 

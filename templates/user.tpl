@@ -15,6 +15,7 @@
 			{@else}
 				<h2>Profile of {$name} ({@unsafe $id})</h2>
 				{@try}
+					{@eval ++$db_querycount}
 					{@eval $r = $db->query('SELECT r,l,s,t,a,f,dis FROM usr WHERE i=' . $id . ' LIMIT 1')}
 					{@if $r !== false && ($r = $r->fetchAll()) !== false && count($r)}
 						{@eval $r = $r[0]}
@@ -37,6 +38,7 @@
 						</ul>
 						<ul>
 							{@render missiontypes.php}
+							{@eval ++$db_querycount}
 							{@eval $flg = $db->query('SELECT
 							                          (SELECT COUNT(id) FROM flg WHERE player='.$id.' AND state!=1 AND state!=64) totalflights,
 							                          (SELECT COUNT(id) FROM flg WHERE player='.$id.' AND state=8) finishedflights')}
@@ -45,6 +47,7 @@
 								<li><strong>Finished flights:</strong> {@unsafe $flg->finishedflights}</li>
 								<li><strong>Total flights:</strong> {@unsafe $flg->totalflights}</li>
 							{@endif}
+							{@eval ++$db_querycount}
 							{@eval $avgpst = $db->query('SELECT AVG(satisfaction) a,COUNT(id) c FROM flg WHERE player=' . $id . ' AND missiontype&' . $passenger_mission_types)}
 							{@if $avgpst !== false && ($avgpst = $avgpst->fetchAll()) !== false && count($avgpst) && ($avgpst = $avgpst[0]->a) != null}
 								<li><strong>Average passenger satisfaction:</strong> {@unsafe round($avgpst, 2)}%</li>

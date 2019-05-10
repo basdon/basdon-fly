@@ -3,6 +3,7 @@
 		<h5>Players (last 48h)</h5>
 		<img src="{@unsafe $STATICPATH}/gen/playergraph.png" />
 		{@try}
+			{@eval ++$db_querycount}
 			{@eval $players = []}
 			{@eval $r = $db->query("SELECT _u.n name,_u.s score
 			                        FROM ses _s
@@ -25,14 +26,15 @@
 	<div>
 		<h5>Active Flights</h5>
 		{@try}
-		{@eval $r = $db->query("SELECT id,_u.n,_a.c f,_b.c t
-		                        FROM flg _f
-		                        JOIN usr _u ON _f.player=_u.i
-		                        JOIN apt _a ON _a.i=_f.fapt
-		                        JOIN apt _b ON _b.i=_f.tapt
-		                        WHERE state=1
-		                        ORDER BY tunload DESC
-		                        LIMIT 10")}
+			{@eval ++$db_querycount}
+			{@eval $r = $db->query("SELECT id,_u.n,_a.c f,_b.c t
+		                                FROM flg _f
+		                                JOIN usr _u ON _f.player=_u.i
+		                                JOIN apt _a ON _a.i=_f.fapt
+		                                JOIN apt _b ON _b.i=_f.tapt
+		                                WHERE state=1
+		                                ORDER BY tunload DESC
+		                                LIMIT 10")}
 			{@if $r !== false && ($r = $r->fetchAll()) !== false}
 				{@if count($r)}
 					<table border="0" width="100%">
@@ -54,6 +56,7 @@
 	<div>
 		<h5>Last 7 Finished Flights</h5>
 		{@try}
+			{@eval ++$db_querycount}
 			{@eval $r = $db->query("SELECT id,_u.n,_a.c f,_b.c t
 			                        FROM flg _f
 			                        JOIN usr _u ON _f.player=_u.i
@@ -85,14 +88,17 @@
 		<h5>Members</h5>
 		<table border="0" width="100%">
 		{@try}
+			{@eval ++$db_querycount}
 			{@eval $r = $db->query("SELECT COUNT(s.i) c FROM ses s JOIN usr u ON s.i=u.i WHERE u.g=0")}
 			{@if $r !== false && ($r = $r->fetch()) !== false}
 				<tr><td>Guest sessions:</td><td>{@unsafe $r->c}</td></tr>
 			{@endif}
+			{@eval ++$db_querycount}
 			{@eval $r = $db->query("SELECT COUNT(i) c FROM usr WHERE g!=0")}
 			{@if $r !== false && ($r = $r->fetch()) !== false}
 				<tr><td>Registered users:</td><td>{@unsafe $r->c}</td></tr>
 			{@endif}
+			{@eval ++$db_querycount}
 			{@eval $r = $db->query("SELECT n FROM usr WHERE g!=0 ORDER BY i DESC LIMIT 1")}
 			{@if $r !== false && ($r = $r->fetch()) !== false}
 				<tr><td>Latest:</td><td><a href="user.php?name={@urlencode $r->n}">{$r->n}</a></td></tr>

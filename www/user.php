@@ -21,6 +21,7 @@ if (isset($_GET['id'])) {
 		$name = $r[0]->n;
 	}
 }
+++$db_querycount;
 
 $__script = 'user';
 include('../inc/output.php');

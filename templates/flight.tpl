@@ -42,6 +42,7 @@
 		<h2 id="main">Flight #{@unsafe $id} details</h2>
 <?php 
 try{
+	++$db_querycount;
 	$r = $db->query('SELECT _f.*,_u.n playername,_a.n fromname,_a.c fromcode,_b.n toname,_b.c tocode,_v.m vehmodel 
 	                 FROM flg _f 
 	                 JOIN usr _u ON _f.player=_u.i 
