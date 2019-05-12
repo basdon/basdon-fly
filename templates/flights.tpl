@@ -14,14 +14,9 @@
 	<div class="singlebody">
 		<h2 id="main">Flights</h2>
 <?php 
-$page = 1;
-if (isset($_GET['page'])) {
-	$page = (int)($_GET['page']);
-	$page++;
-	$page--;
-	$page = max($page, 1);
-}
+$page = get_page();
 try {
+	++$db_querycount;
 	$r = $db->query('SELECT COUNT(id) c FROM flg');
 	$paginationoffset = ($page - 1) * 50;
 	$totalrows = 0;

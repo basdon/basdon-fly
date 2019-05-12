@@ -3,6 +3,10 @@
 <head>
 	<title>basdon.net aviation server :: {@if $id == -1}user not found{@else}profile of {$name} ({@unsafe $id}){@endif}</title>
 	{@render defaulthead.tpl}
+	<style>
+		#flights td{text-align:center}
+		#flights td:nth-child(5){text-align:right}
+	</style>
 </head>
 <body>
 	{@render skip.tpl}
@@ -53,6 +57,60 @@
 								<li><strong>Average passenger satisfaction:</strong> {@unsafe round($avgpst, 2)}%</li>
 							{@endif}
 						</ul>
+						<h3>All flights by this user</h3>
+						{@render flightstatuses.php}
+						{@render aircraftnames.php}
+
+						{@<?php}
+							$page = get_page();
+							$paginationoffset = ($page - 1) * 50;
+							$totalrows=1;
+							++$db_querycount;
+							$amtflights = $db->query('SELECT COUNT(id) c FROM flg WHERE player='.$id);
+							if ($amtflights !== false && ($amtflights = $amtflights->fetchAll()) !== false && count($amtflights)) {
+								$totalrows = $amtflights[0]->c;
+							}
+						{@?>}
+
+						{@eval ++$db_querycount}
+						{@eval $flights = $db->query('SELECT id,_a.c f,_b.c t,state,tload,tlastupdate,adistance,_v.m vehmodel
+								                     FROM flg _f
+								                     JOIN apt _a ON _a.i=_f.fapt
+								                     JOIN apt _b ON _b.i=_f.tapt
+								                     JOIN veh _v ON _v.i=_f.vehicle
+								                     WHERE player='.$id.'
+								                     ORDER BY id DESC
+								                     LIMIT 50 OFFSET ' . $paginationoffset)}
+						{@if $flights !== false}
+						{@unsafe $pagination = simple_pagination('user.php?'.$userqueryparam.'&page=', $page, floor($totalrows / 50) + 1)}
+							<table border="0" width="100%" id="flights">
+								<thead>
+									<tr>
+										<th>Date</th>
+										<th>Aircraft</th>
+										<th>Departure</th>
+										<th>Arrival</th>
+										<th>Distance</th>
+										<th>Status</th>
+										<th>Details</th>
+									</tr>
+								</thead>
+								<tbody>
+									{@foreach $flights as $f}
+										<tr>
+											<td>{@unsafe date('j M Y H:i', $f->tlastupdate)}</td>
+											<td>{@unsafe aircraft_name($f->vehmodel)}</td>
+											<td><a href="airport.php?code={@unsafe $f->f}">{@unsafe $f->f}</a></td>
+											<td><a href="airport.php?code={@unsafe $f->t}">{@unsafe $f->t}</a></td>
+											<td>{@if $f->state != 1}{@unsafe round($f->adistance)}m{@endif}</td>
+											<td class="flight-state flight-state-{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
+											<td><a href="flight.php?id={@unsafe $f->id}">Flight #{@unsafe $f->id} details</a></td>
+										</tr>
+									{@endforeach}
+								</tbody>
+							</table>
+						{@unsafe $pagination = simple_pagination('user.php?'.$userqueryparam.'&page=', $page, floor($totalrows / 50) + 1)}
+						{@endif}
 					{@endif}
 				{@catch PDOException $e}
 					<p>Something went wrong while retrieving the user's data.</p>

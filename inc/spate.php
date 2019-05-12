@@ -112,6 +112,14 @@ function spate_generate($template_dir, $template)
 				$j += 6;
 				$suffix = ';?>';
 				goto directive_parse_conditionbody__start;
+			case "@<?php":
+				$result .= '<?php ';
+				$j += 6;
+				goto next;
+			case "@?>":
+				$result .= '?>';
+				$j += 2;
+				goto next;
 			case "@unsafe":
 				$result .= '<?=';
 				$j += 3;

@@ -86,6 +86,17 @@ function format_time_since($time)
 	return $str . ' ago';
 }
 
+function get_page()
+{
+	if (isset($_GET['page'])) {
+		$page = (int)($_GET['page']);
+		$page++;
+		$page--;
+		return max($page, 1);
+	}
+	return 1;
+}
+
 if (isset($__script)) {
 	include('../inc/output.php');
 }
