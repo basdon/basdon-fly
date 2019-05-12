@@ -14,5 +14,5 @@ if (isset($_GET['rp'])) {
 	$returnpage--;
 }
 
-$__script = 'flight';
+$__script = '_flight';
 include('../inc/output.php');

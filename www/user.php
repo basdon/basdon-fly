@@ -26,5 +26,5 @@ if (isset($_GET['id'])) {
 }
 ++$db_querycount;
 
-$__script = 'user';
+$__script = '_user';
 include('../inc/output.php');

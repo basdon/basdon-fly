@@ -1,3 +1,3 @@
 <?php
-$__script = 'flights';
+$__script = '_flights';
 include('../inc/bootstrap.php');
