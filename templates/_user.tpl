@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>basdon.net aviation server :: {@if $id == -1}user not found{@else}profile of {$name} ({@unsafe $id}){@endif}</title>
+	<title>{@if $id == -1}user not found{@else}profile of {$name} ({@unsafe $id}){@endif} :: basdon aviation server</title>
 	{@render defaulthead.tpl}
 	<style>
 		#flights td{text-align:center}

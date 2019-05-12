@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>basdon.net aviation server :: home</title>
+	<title>home :: basdon.net aviation server</title>
 	{@render defaulthead.tpl}
 </head>
 <body>

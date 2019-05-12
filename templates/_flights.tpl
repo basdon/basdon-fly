@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>basdon.net aviation server :: flights</title>
+	<title>flights :: basdon.net aviation server</title>
 	{@render defaulthead.tpl}
 	<style>
 		#flights td{text-align:center}

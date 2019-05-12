@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>basdon.net aviation server :: flight #{@unsafe $id} details</title>
+	<title>flight #{@unsafe $id} details :: basdon.net aviation server</title>
 	{@render defaulthead.tpl}
 	<style>
 		#paytable td + td{
