@@ -57,7 +57,8 @@ function flightmap(staticpath, id)
 			mc.lineCap = mc.lineJoin = 'round';
 			mc.lineWidth = 7.5;
 			for (var i = 1; i < tim.length; i++) {
-				var v = (alt[i] - minalt) / (maxalt - minalt);
+				var dalt = (maxalt - minalt);
+				var v = dalt == 0 ? 0 : (alt[i] - minalt) / dalt;
 				var h = (1 - v) * 240 / 360;
 				mc.strokeStyle = "rgb("+hue(h + 1/3)+","+hue(h)+","+hue(h - 1/3)+")";
 				mc.beginPath();
