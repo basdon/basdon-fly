@@ -215,7 +215,9 @@ next:
 
 _return:
 	$depth--;
-	$result = str_replace('?><?php', '', $result);
-	$result = str_replace('~>', '?>', $result);
-	return $parsed_cache[$template] = $result;
+	if ($depth == 0) {
+		$result = str_replace('?><?php', '', $result);
+		$result = str_replace('~>', '?>', $result);
+	}
+	return /*$parsed_cache[$template] = */$result;
 }
