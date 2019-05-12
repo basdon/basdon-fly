@@ -5,3 +5,4 @@
 !/**/gen/.gitkeep
 /inc/conf.php
 /static/fdr/*.flight
+/articles/tohtml.sed

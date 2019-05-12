@@ -1,0 +1,4 @@
+this is the main page
+
+{@b info:} {@u testing}
+
