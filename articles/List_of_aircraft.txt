@@ -1,0 +1,66 @@
+{@ul
+  {@li {@#=Passenger_cargo_planes Passenger/Cargo planes}
+    {@ul
+      {@li {@#=Andromada Andromada}}
+      {@li {@#=AT-400 AT-400}}
+      {@li {@#=Beagle Beagle}}
+      {@li {@#=Dodo Dodo}}
+      {@li {@#=Nevada Nevada}}
+      {@li {@#=Shamal Shamal}}
+      {@li {@#=Skimmer Skimmer}}
+    }
+  }
+  {@li {@#=Other_planes Other planes}
+    {@ul
+      {@li {@#=Crop_duster Crop duster}}
+      {@li {@#=Stuntplane Stuntplane}}
+    }
+  }
+  {@li {@#=Helicopters Helicopters}
+    {@ul
+      {@li {@#=Leviathan Leviathan}}
+      {@li {@#=Maverick Maverick}}
+      {@li {@#=Police_maverick Police maverick}}
+      {@li {@#=Raindance Raindance}}
+      {@li {@#=San_news_heli San News heli}}
+      {@li {@#=Sparrow Sparrow}}
+      {@li {@#=Seasparrow Seasparrow}}
+    }
+  }
+  {@li {@#=Military_aircrafts Military aircrafts}
+    {@ul
+      {@li {@#=Cargobob Cargobob}}
+      {@li {@#=Hunter Hunter}}
+      {@li {@#=Hydra Hydra}}
+      {@li {@#=Rustler Rustler}}
+    }
+  }
+}
+
+{@h3(id="Passenger_cargo_planes") Passenger/Cargo planes}
+{@h4(id="Andromada") Andromada}
+{@h4(id="AT-400") AT-400}
+{@h4(id="Beagle") Beagle}
+{@h4(id="Dodo") Dodo}
+{@h4(id="Nevada") Nevada}
+{@h4(id="Shamal") Shamal}
+{@h4(id="Skimmer") Skimmer}
+
+{@h3(id="Other_planes") Other planes}
+{@h4(id="Crop_duster") Crop duster}
+{@h4(id="Stuntplane") Stuntplane}
+
+{@h3(id="Helicopters") Helicopters}
+{@h4(id="Leviathan") Leviathan}
+{@h4(id="Maverick") Maverick}
+{@h4(id="Police_maverick") Police maverick}
+{@h4(id="Raindance") Raindance}
+{@h4(id="San_news_heli") San news heli}
+{@h4(id="Sparrow") Sparrow}
+{@h4(id="Seasparrow") Seasparrow}
+
+{@h3(id="Military_aircrafts") Military aircrafts}
+{@h4(id="Cargobob") Cargobob}
+{@h4(id="Hunter") Hunter}
+{@h4(id="Hydra") Hydra}
+{@h4(id="Rustler") Rustler}

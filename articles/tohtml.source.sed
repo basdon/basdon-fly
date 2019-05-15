@@ -110,7 +110,7 @@ s/\\}/~ESCAPEDENDTAG~/g
 		g
 		s/\(.*\)\n.*$/\1\n<\/a>/
 		x
-		s_.*\n\(.*\){@ia=\([^ ]*\) \?\(.*\)_\1<a href="i<?=$BASEPATH?>/\2">\3_
+		s_.*\n\(.*\){@ia=\([^ ]*\) \?\(.*\)_\1<a href="<?=$BASEPATH?>/\2">\3_
 		b nexttag
 	}
 
@@ -132,18 +132,12 @@ s/\\}/~ESCAPEDENDTAG~/g
 		b nexttag
 	}
 
-	/{@#=.*|/ {
-		H
-		s/^.*{@#=//
-		s/|.*$//
-		# this should be the same as the regex in indexgen.sed!
-		s/[^a-zA-Z0-9_.-]//g
-		s/^/~~@#~~/
+	/{@#=[^ ]*\( \|$\)/ {
 		H
 		g
-		s_\(.*\)\n.*$_\1\n</a>_
+		s/\(.*\)\n.*$/\1\n<\/a>/
 		x
-		s/.*\n\(.*\){@#=\([^|]*\)| \?\(.*\)~~@#~~\(.*\)$/\1<a href="#\4">\3/
+		s_.*\n\(.*\){@#=\([^ ]*\) \?\(.*\)_\1<a href="#\2">\3_
 		b nexttag
 	}
 
