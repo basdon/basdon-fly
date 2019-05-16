@@ -42,9 +42,34 @@
 {@h4(id="AT-400") AT-400}
 {@h4(id="Beagle") Beagle}
 {@h4(id="Dodo") Dodo}
+{@infoboxright
+  {@aimg=dodo.png;Dodo;Dodo}
+  <small>Dodo</small>
+}
+{@b In-game name:} Dodo<br/>
+{@b Based on:} Cessna 152<br/>
+{@b Fuel capacity, usage:} 144L, 1L/s<br/>
+{@b Info:} Small and light short-range sportsplane with a single engine. The Dodo is very maneuverable
+and can take-off and land on a very short runway, which can even be grass or dirt.<br/>
+{@b See also:} {@#=Skimmer Skimmer}<br/>
+{@b Trivia:} The {@nfa=https://en.wikipedia.org/wiki/Dodo Dodo} is an extinct bird that cannot fly.<br/>
+{@clear}
 {@h4(id="Nevada") Nevada}
 {@h4(id="Shamal") Shamal}
 {@h4(id="Skimmer") Skimmer}
+{@b In-game name:} Skimmer<br/>
+{@infoboxright
+  {@aimg=skimmer.png;Skimmer;Skimmer}
+  <small>Skimmer</small>
+}
+{@b Based on:} Cessna 185<br/>
+{@b Fuel capacity, usage:} 144L, 1L/s<br/>
+{@b Info:} Variant of the {@#=Dodo Dodo} with floats, it can only take off and land on water.<br/>
+{@b Trivia:} To be able to lift off, the game's FPS may not be higher than 30. 25 is recommended.
+One can use the {@code /fpslimit 25} client-side command to do this (make sure the 'FPS limiter' is ON
+in the game's display settings).<br/>
+{@b See also:} {@#=Dodo Dodo}<br/>
+{@clear}
 
 {@h3(id="Other_planes") Other planes}
 {@h4(id="Crop_duster") Crop duster}
@@ -64,3 +89,6 @@
 {@h4(id="Hunter") Hunter}
 {@h4(id="Hydra") Hydra}
 {@h4(id="Rustler") Rustler}
+
+{@h3 See also}
+{@article=Fuel Fuel}

@@ -46,6 +46,8 @@ s/\\}/~ESCAPEDENDTAG~/g
 
 :moretags
 
+s_{@clear}_<div class="clear"></div>_
+
 /^[^}]*{@/ {
 
 	s/{@/~FIRSTTAG~/
@@ -95,11 +97,22 @@ s/\\}/~ESCAPEDENDTAG~/g
 		b nexttag
 	}
 
+	/{@infoboxright/ {
+		H
+		g
+		s/\(.*\)\n.*$/\1\n<\/div>/
+		x
+		s/.*\n\(.*\){@infoboxright\(.*\)/\1<div class="infobox" style="float:right;">\2/
+		b nexttag
+	}
+
+	s_{@aimg=\([^;]*\);\([^;]*\);\([^;]*\);\(.*\)}_{@img=<?=$STATICPATH?>/articles/\1;\2;\3;\4}_
 	/{@img=[^;]*;[^;]*;[^;]*;.*}/ {
 		s_{@img=\([^;]*\);\([^;]*\);\([^;]*\);\(.*\)}_<p class="img"><img src="\1" alt="\2" title="\3"/><br/>\4</p>_
 		b nexttag
 	}
 
+	s_{@aimg=\([^;]*\);\([^;]*\);\([^;]*\)}_{@img=<?=$STATICPATH?>/articles/\1;\2;\3}_
 	/{@img=[^;]*;[^;]*;.*}/ {
 		s_{@img=\([^;]*\);\([^;]*\);\(.*\)}_<p class="img"><img src="\1" alt="\2" title="\3"/></p>_
 		b nexttag
@@ -138,6 +151,15 @@ s/\\}/~ESCAPEDENDTAG~/g
 		s/\(.*\)\n.*$/\1\n<\/a>/
 		x
 		s_.*\n\(.*\){@#=\([^ ]*\) \?\(.*\)_\1<a href="#\2">\3_
+		b nexttag
+	}
+
+	/{@article=[^ ]*\( \|$\)/ {
+		H
+		g
+		s/\(.*\)\n.*$/\1\n<\/a>/
+		x
+		s_.*\n\(.*\){@article=\([^ ]*\) \?\(.*\)_\1<a href="article.php?title=\2">\3_
 		b nexttag
 	}
 

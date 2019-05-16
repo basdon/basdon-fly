@@ -1,0 +1,10 @@
+.infobox {
+	background: #f6f6ff;
+	border: 1px solid #b5cdff;
+	margin: .4em;
+	padding: .4em;
+}
+.infobox .img {
+	padding: 0;
+	margin: 0;
+}

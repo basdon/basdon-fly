@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 	<title>{$article_title} :: basdon.net aviation server</title>
+	<link rel="stylesheet" href="{@unsafe $STATICPATH}/article.{@unsafe $CSS_SUFFIX}" type="text/css" />
 	{@render defaulthead.tpl}
 </head>
 <body>

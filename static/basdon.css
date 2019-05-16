@@ -170,3 +170,9 @@ footer p {
 .flight-state-64 {
 	background: #edf;
 }
+code {
+	font-family: 'Courier new', monospace;
+	background: #ddd;
+	border-radius: 2px;
+	padding: 2px;
+}

@@ -1,0 +1,6 @@
+Flying consumes fuel. Each aircraft has its own fuel capacity and fuel usage, which can be seen on the
+{@article=List_of_aircraft list of aircraft} page. Indicated fuel usage is applicable when throttle is
+applied, if the engine(s) is/are idle, the actual fuel usage is 1/5th of the indicated fuel usage.
+
+{@h3 See also}
+{@article=List_of_aircraft List of aircraft}
