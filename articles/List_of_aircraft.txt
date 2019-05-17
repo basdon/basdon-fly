@@ -27,7 +27,7 @@
       {@li {@#=Seasparrow Seasparrow}}
     }
   }
-  {@li {@#=Military_aircrafts Military aircrafts}
+  {@li {@#=Military_aircraft Military aircraft}
     {@ul
       {@li {@#=Cargobob Cargobob}}
       {@li {@#=Hunter Hunter}}
@@ -39,6 +39,18 @@
 
 {@h3(id="Passenger_cargo_planes") Passenger/Cargo planes}
 {@h4(id="Andromada") Andromada}
+{@infoboxright
+  {@aimg=andromada.png;Andromada;Andromada}
+  <small>Andromada</small>
+}
+
+Large cargo plane with four engines. The Andromada has a tailgate which can be opened,
+but it's sadly not possible to actually place anything inside its cargo hold.
+
+{@b Based on:} Lockheed C-5 Galaxy<br/>
+{@b Fuel capacity:} 100 000L<br/>
+{@b Fuel usage:} 10L/s<br/>
+{@clear}
 {@h4(id="AT-400") AT-400}
 {@h4(id="Beagle") Beagle}
 {@h4(id="Dodo") Dodo}
@@ -46,25 +58,29 @@
   {@aimg=dodo.png;Dodo;Dodo}
   <small>Dodo</small>
 }
-{@b In-game name:} Dodo<br/>
+
+Small and light short-range sportsplane with a single engine. The Dodo is very maneuverable
+and can take-off and land on a very short runway, which can even be grass or dirt.
+
 {@b Based on:} Cessna 152<br/>
-{@b Fuel capacity, usage:} 144L, 1L/s<br/>
-{@b Info:} Small and light short-range sportsplane with a single engine. The Dodo is very maneuverable
-and can take-off and land on a very short runway, which can even be grass or dirt.<br/>
+{@b Fuel capacity:} 144L<br/>
+{@b Fuel usage:} 1L/s<br/>
 {@b See also:} {@#=Skimmer Skimmer}<br/>
 {@b Trivia:} The {@nfa=https://en.wikipedia.org/wiki/Dodo Dodo} is an extinct bird that cannot fly.<br/>
 {@clear}
 {@h4(id="Nevada") Nevada}
 {@h4(id="Shamal") Shamal}
 {@h4(id="Skimmer") Skimmer}
-{@b In-game name:} Skimmer<br/>
 {@infoboxright
   {@aimg=skimmer.png;Skimmer;Skimmer}
   <small>Skimmer</small>
 }
+
+Variant of the {@#=Dodo Dodo} with floats, it can only take off and land on water.
+
 {@b Based on:} Cessna 185<br/>
-{@b Fuel capacity, usage:} 144L, 1L/s<br/>
-{@b Info:} Variant of the {@#=Dodo Dodo} with floats, it can only take off and land on water.<br/>
+{@b Fuel capacity:} 144L<br/>
+{@b Fuel usage:} 1L/s<br/>
 {@b Trivia:} To be able to lift off, the game's FPS may not be higher than 30. 25 is recommended.
 One can use the {@code /fpslimit 25} client-side command to do this (make sure the 'FPS limiter' is ON
 in the game's display settings).<br/>
@@ -84,7 +100,7 @@ in the game's display settings).<br/>
 {@h4(id="Sparrow") Sparrow}
 {@h4(id="Seasparrow") Seasparrow}
 
-{@h3(id="Military_aircrafts") Military aircrafts}
+{@h3(id="Military_aircraft") Military aircraft}
 {@h4(id="Cargobob") Cargobob}
 {@h4(id="Hunter") Hunter}
 {@h4(id="Hydra") Hydra}
