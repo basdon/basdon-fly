@@ -38,6 +38,7 @@
 }
 
 {@h3(id="Passenger_cargo_planes") Passenger/Cargo planes}
+
 {@h4(id="Andromada") Andromada}
 {@infoboxright
   {@aimg=andromada.png;Andromada;Andromada}
@@ -45,14 +46,43 @@
 }
 
 Large cargo plane with four engines. The Andromada has a tailgate which can be opened,
-but it's sadly not possible to actually place anything inside its cargo hold.
+but sadly it's not possible to actually place anything inside its cargo hold.
 
 {@b Based on:} Lockheed C-5 Galaxy<br/>
 {@b Fuel capacity:} 100 000L<br/>
 {@b Fuel usage:} 10L/s<br/>
 {@clear}
+
 {@h4(id="AT-400") AT-400}
+{@infoboxright
+  {@aimg=at-400.png;AT-400;AT-400}
+  <small>AT-400</small>
+}
+
+Large passenger plane with two engines. The AT-400 is very maneuverable in the air but is unhandy
+to taxi with. Getting in might be a challenge, as it requires stairs. Fortunately, players can use the
+{@code /at400} command to get warped into the plane when the player is nearby.
+
+{@b Based on:} Being 737-500<br/>
+{@b Fuel capacity:} 23 000L<br/>
+{@b Fuel usage:} 10L/s<br/>
+{@clear}
+
 {@h4(id="Beagle") Beagle}
+{@infoboxright
+  {@aimg=beagle.png;Beagle;Beagle}
+  <small>Beagle</small>
+}
+
+Twin-engine propellor passenger plane, for medium distances. Has a fixed landing gear and can perform
+landings and takeoffs on grass or dirt, but this requires some skill.
+
+{@b Based on:} Britten-Norman Islander<br/>
+{@b Fuel capacity:} 518L<br/>
+{@b Fuel usage:} 2L/s<br/>
+{@b Trivia:} The {@a=https://en.wikipedia.org/wiki/Beagle beagle} is a breed of small hound.<br/>
+{@clear}
+
 {@h4(id="Dodo") Dodo}
 {@infoboxright
   {@aimg=dodo.png;Dodo;Dodo}
@@ -68,8 +98,36 @@ and can take-off and land on a very short runway, which can even be grass or dir
 {@b See also:} {@#=Skimmer Skimmer}<br/>
 {@b Trivia:} The {@nfa=https://en.wikipedia.org/wiki/Dodo Dodo} is an extinct bird that cannot fly.<br/>
 {@clear}
+
 {@h4(id="Nevada") Nevada}
+{@infoboxright
+  {@aimg=nevada.png;Nevada;Nevada}
+  <small>Nevada</small>
+}
+
+Twin-engine propellor cargo plane, for medium distances. The landing gears are situated below the wings
+and one attached at the end of the tail.
+
+{@b Based on:} Douglas CC-129 Dakota<br/>
+{@b Fuel capacity:} 3224L<br/>
+{@b Fuel usage:} 3L/s<br/>
+{@b Trivia:} It's named after the American state, as is the plane that it's based on.<br/>
+{@clear}
+
 {@h4(id="Shamal") Shamal}
+{@infoboxright
+  {@aimg=shamal.png;Shamal;Shamal}
+  <small>Shamal</small>
+}
+
+Private, luxury passenger aircraft with two turbojet engines.
+
+{@b Based on:} Bombardier learjet 55<br/>
+{@b Fuel capacity:} 4160L<br/>
+{@b Fuel usage:} 5L/s<br/>
+{@b Trivia:} A shamal is a hot, dry northwesterly wind across the Persian Gulf.<br/>
+{@clear}
+
 {@h4(id="Skimmer") Skimmer}
 {@infoboxright
   {@aimg=skimmer.png;Skimmer;Skimmer}
