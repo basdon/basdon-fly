@@ -147,7 +147,37 @@ in the game's display settings).<br/>
 
 {@h3(id="Other_planes") Other planes}
 {@h4(id="Crop_duster") Crop duster}
+{@infoboxright
+  {@aimg=cropduster.png;Crop duster;Crop duster}
+  <small>Crop duster</small>
+}
+
+Very small plane meant to spray crops. It's very easy to control and doesn't require a paved runway to
+takeoff or land.
+
+{@b Based on:} Grumman G-164 Ag-Cat<br/>
+{@b Fuel capacity:} 132L<br/>
+{@b Fuel usage:} 0.6L/s<br/>
+{@b Trivia:} Players can press the submission key (default: {@code 2} or {@code numpad +}) to enable
+the nozzles.<br/>
+{@clear}
+
 {@h4(id="Stuntplane") Stuntplane}
+{@infoboxright
+  {@aimg=stuntplane.png;Stuntplane;Stuntplane}
+  <small>Stuntplane</small>
+}
+
+Very light and small plane with a high controlling sensitivity. Very agile, meant to perform stunts
+such as loopings or barrel-rolls and the like.
+
+{@b Based on:} Pitts S-2B<br/>
+{@b Fuel capacity:} 91L<br/>
+{@b Fuel usage:} 0.8L/s<br/>
+{@b Trivia:} Players can press the submission key (default: {@code 2} or {@code numpad +}) to enable
+a red-colored smoke trail.<br/>
+{@clear}
+
 
 {@h3(id="Helicopters") Helicopters}
 {@h4(id="Leviathan") Leviathan}
