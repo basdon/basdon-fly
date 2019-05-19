@@ -60,6 +60,7 @@ div#main {
 		max-width: 800px;
 	}
 	aside {
+		border-top: 5px dashed #000;
 		width: auto;
 	}
 	aside div {
