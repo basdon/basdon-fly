@@ -164,8 +164,8 @@ takeoff or land.
 {@b Based on:} Grumman G-164 Ag-Cat<br/>
 {@b Fuel capacity:} 132L<br/>
 {@b Fuel usage:} 0.6L/s<br/>
-{@b Trivia:} Players can press the submission key (default: {@code 2} or {@code numpad +}) to enable
-the nozzles, a white-colored smoke trail will be visible.<br/>
+{@b Trivia:} Players can press the submission key (default: {@code 2} or {@code numpad&nbsp;+}) to
+enable the nozzles, a white-colored smoke trail will be visible.<br/>
 {@clear}
 
 {@h4(id="Stuntplane") Stuntplane}
@@ -226,7 +226,8 @@ Light helicopter with 3 passenger seats. Since it's light, winds can make it dri
 }
 
 Adapted version of the {@#=Maverick Maverick} for police usage. Has a spotlight which can be activated
-at night by pressing the horn button (default: {@code H}).
+at night by pressing the horn button (default: {@code H}). There is no radio except for a police radio.
+The Police maveick is slightly faster than the standard Maverick.
 
 {@b Based on:} Bell 206 LongRanger<br/>
 {@b Fuel capacity:} 416L<br/>
@@ -295,12 +296,70 @@ also has a powerful machine gun.
 {@b See also:} {@#=Sparrow Sparrow}<br/>
 {@clear}
 
-
 {@h3(id="Military_aircraft") Military aircraft}
+
+Military aircraft are only available to players spawned as the Army class. Most of the aircraft in this
+category have some or more forms of weaponry. {@b Players are not allowed to shoot at other players.}
+
 {@h4(id="Cargobob") Cargobob}
+{@infoboxright
+  {@aimg=cargobob.png;Cargobob;Cargobob}
+  <small>Cargobob</small>
+}
+
+Military cargo helicopter. Has one extra seat for a passenger.
+
+{@b Based on:} Unknown, HH-53?<br/>
+{@b Fuel capacity:} 5510L<br/>
+{@b Fuel usage:} 4L/s<br/>
+{@clear}
+
 {@h4(id="Hunter") Hunter}
+{@infoboxright
+  {@aimg=hunter.png;Hunter;Hunter}
+  <small>Hunter</small>
+}
+
+Deadly attack helicopter with 30 mm M230 cannons and AGM-114 Hellfire-rockets. Has a police radio.
+
+{@b Based on:} AH-64 Apache<br/>
+{@b Fuel capacity:} 2400L<br/>
+{@b Fuel usage:} 2.6L/s<br/>
+{@clear}
+
 {@h4(id="Hydra") Hydra}
+{@infoboxright
+  {@aimg=hydra.png;Hydra;Hydra}
+  <small>Hydra</small>
+}
+
+Vertical take-off and landing jetfighter. The thrusters can be rotated to switch between hover and
+flying mode by using the 'special ctrl up/down' keys (default:
+{@code numpad&nbsp;8}/{@code numpad&nbsp;2}). The Hydra has homing missiles and also flares, as a
+countermeasure to not get hit by missiles.
+
+{@b Based on:} Hawker Siddeley Harrier<br/>
+{@b Fuel capacity:} 2986L<br/>
+{@b Fuel usage:} 6L/s<br/>
+{@b Trivia:} A {@a=https://en.wikipedia.org/wiki/Lernaean_Hydra Hydra} is a many-headed serpent in
+Greek mythology.<br/>
+{@b Tribia:} The tail has DMA printed on it, for 'DMA Design', which is the former name of
+'Rockstar North'.<br/>
+{@clear}
+
 {@h4(id="Rustler") Rustler}
+{@infoboxright
+  {@aimg=rustler.png;Rustler;Rustler}
+  <small>Rustler</small>
+}
+
+A single prop engine plane equipped with two machine guns. Very agile, used a lot for dogfights.
+
+{@b Based on:} P-51 Mustang<br/>
+{@b Fuel capacity:} 1018L<br/>
+{@b Fuel usage:} 2.1L/s<br/>
+{@b Trivia:} A rustler is someone who steals cattle.<br/>
+{@clear}
 
 {@h3 See also}
 {@article=Fuel Fuel}
