@@ -63,12 +63,36 @@ s_{@clear}_<div class="clear"></div>_
 	#SIMPLETAG ul
 	#SIMPLETAG li
 	#SIMPLETAG code
-	#SIMPLETAG b
-	#SIMPLETAG i
-	#SIMPLETAG u
 	#SIMPLETAG blockquote
 	#SIMPLETAG sup
 	#SIMPLETAG sub
+
+	/{@b / {
+		H
+		g
+		s/\(.*\)\n.*$/\1\n<\/strong>/
+		x
+		s/.*\n\(.*\){@b \(.*\)/\1<strong>\2/
+		b nexttag
+	}
+
+	/{@u / {
+		H
+		g
+		s/\(.*\)\n.*$/\1\n<\/span>/
+		x
+		s/.*\n\(.*\){@u \(.*\)/\1<span class="u">\2/
+		b nexttag
+	}
+
+	/{@em / {
+		H
+		g
+		s/\(.*\)\n.*$/\1\n<\/em>/
+		x
+		s/.*\n\(.*\){@em \(.*\)/\1<em>\2/
+		b nexttag
+	}
 
 	/{@small\( \|$\)/ {
 		H
@@ -221,7 +245,7 @@ s/~ESCAPEDENDTAG~/}/g
 # append a </p> and remove the @ from hold space
 
 # check if <p> can be prepended
-/^\(<a\|<span\|[^<]\)/ {
+/^\(<a\|<span\|<strong\|[^<]\)/ {
 	x
 	/^!/ {
 		x

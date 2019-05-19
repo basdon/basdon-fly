@@ -1,4 +1,33 @@
-this is the main page
+<div style="text-align:center">
+{@h2(style="border:2px solid #000;background:#ffa500") Welcome to basdon.net articles!}
 
-{@b info:} {@u testing}
+{@b Here you can find resources to learn and enchance your experience on this server.}
 
+</div>
+<style>
+.article thead tr{
+	text-align:center;
+	background:#ffa500
+\}
+.article tbody tr{
+	background:#ddd;
+\}
+.article table{
+	border-spacing:1px
+\}
+.article th,.article td{
+	border:0
+\}
+</style>
+<table width="100%">
+	<thead>
+		<tr>
+			<th>{@ia=article.php?category=Basics Basics}</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr><td><ul>
+			{@li {@ia=article.php?title=List_of_aircraft List of aircraft}}
+		</ul></td></tr>
+	</tbody>
+</table>
