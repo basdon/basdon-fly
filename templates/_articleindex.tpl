@@ -8,7 +8,7 @@
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
 	<div>
-		<div class="mainright article">
+		<div id="main" class="article">
 			<h2>Article index</h2>
 			{@if $articles === false}
 				<p>Failed to get list of articles.</p>
