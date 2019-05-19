@@ -30,6 +30,23 @@
 				{@else}
 					{@eval include($file)}
 				{@endif}
+				{@if count($article_categories)}
+					<div class="artcat">
+						{@foreach $article_categories as $c}
+							<p style="background:#{@unsafe $c->color}">
+								Category: <a href="article.php?category={@unsafe $c->name}">{@unsafe $c->name}</a>
+							</p>
+							<p>
+								{@eval $bull = ''}
+								{@foreach $c->articles as $a}
+									{@unsafe $bull}
+									<a href="article.php?title={@unsafe $a->name}">{@unsafe $a->title}</a>
+									{@eval $bull = ' &bull; '}
+								{@endforeach}
+							</p>
+						{@endforeach}
+					</div>
+				{@endif}
 			{@endif}
 			<p style="text-align:right">
 				<small>

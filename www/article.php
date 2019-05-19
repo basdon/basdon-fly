@@ -30,6 +30,11 @@ nextparentcat:
 		++$db_querycount;
 		if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 			array_push($article_categories, $r[0]);
+			++$db_querycount;
+			$arts = $db->query('SELECT name,title FROM art WHERE cat=' . $cat);
+			if ($arts != null) {
+				$r[0]->articles = $arts->fetchAll();
+			}
 			if (($cat = $r[0]->parent) != null) {
 				goto nextparentcat;
 			}
