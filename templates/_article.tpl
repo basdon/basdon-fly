@@ -34,7 +34,7 @@
 			<p style="text-align:right">
 				<small>
 					{@if $article_pageviews != null}This article has been accessed {@unsafe $article_pageviews} time(s).<br/>{@endif}
-					<a href="article.php">Main page</a> <a href="articlesindex.php">Articles index</a>
+					<a href="article.php">Main page</a> <a href="articleindex.php">Article index</a>
 				</small>
 			</p>
 		</div>
