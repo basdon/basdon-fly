@@ -39,6 +39,9 @@
 
 {@h3(id="Passenger_cargo_planes") Passenger/Cargo planes}
 
+These planes are available for use by the general public and are used to transport either passengers or
+cargo.
+
 {@h4(id="Andromada") Andromada}
 {@infoboxright
   {@aimg=andromada.png;Andromada;Andromada}
@@ -146,6 +149,9 @@ in the game's display settings).<br/>
 {@clear}
 
 {@h3(id="Other_planes") Other planes}
+
+Apart from passenger and cargo planes, there are two other civilian planes that have a specific purpose.
+
 {@h4(id="Crop_duster") Crop duster}
 {@infoboxright
   {@aimg=cropduster.png;Crop duster;Crop duster}
@@ -159,7 +165,7 @@ takeoff or land.
 {@b Fuel capacity:} 132L<br/>
 {@b Fuel usage:} 0.6L/s<br/>
 {@b Trivia:} Players can press the submission key (default: {@code 2} or {@code numpad +}) to enable
-the nozzles.<br/>
+the nozzles, a white-colored smoke trail will be visible.<br/>
 {@clear}
 
 {@h4(id="Stuntplane") Stuntplane}
@@ -178,15 +184,117 @@ such as loopings or barrel-rolls and the like.
 a red-colored smoke trail.<br/>
 {@clear}
 
-
 {@h3(id="Helicopters") Helicopters}
+
+Less popular than planes, but they are great to access areas that don't have enough space for landing
+strips, such as oil rigs.
+
 {@h4(id="Leviathan") Leviathan}
+{@infoboxright
+  {@aimg=leviathan.png;Leviathan;Leviathan}
+  <small>Leviathan</small>
+}
+
+Heavy but stable helicopter. Has floats to make it possible to land on water. Even though it can land
+on water, it's hard or even impossible to get in as a swimming player.
+
+{@b Based on:} Sikorsky Sea King<br/>
+{@b Fuel capacity:} 2925L<br/>
+{@b Fuel usage:} 1.4L/s<br/>
+{@b Trivia:} The {@a=https://en.wikipedia.org/wiki/Leviathan Leviathan} is a Biblical sea monster.<br/>
+{@clear}
+
 {@h4(id="Maverick") Maverick}
+{@infoboxright
+  {@aimg=maverick.png;Maverick;Maverick}
+  <small>Maverick</small>
+}
+
+Light helicopter with 3 passenger seats. Since it's light, winds can make it drift off very easily.
+
+{@b Based on:} Bell 206 LongRanger<br/>
+{@b Fuel capacity:} 416L<br/>
+{@b Fuel usage:} 1L/s<br/>
+{@b See also:} {@#=Police_maverick Police maverick}<br/>
+{@b See also:} {@#=San_news_heli San News heli}<br/>
+{@clear}
+
 {@h4(id="Police_maverick") Police maverick}
+{@infoboxright
+  {@aimg=polmav.png;Police maverick;Police maverick}
+  <small>Police maverick</small>
+}
+
+Adapted version of the {@#=Maverick Maverick} for police usage. Has a spotlight which can be activated
+at night by pressing the horn button (default: {@code H}).
+
+{@b Based on:} Bell 206 LongRanger<br/>
+{@b Fuel capacity:} 416L<br/>
+{@b Fuel usage:} 1L/s<br/>
+{@b See also:} {@#=Maverick Maverick}<br/>
+{@b See also:} {@#=San_news_heli San News heli}<br/>
+{@b Trivia:} In single player, SWAT can come down ropes from this helicopter when the player has a
+wanted level of at least 3.<br/>
+{@clear}
+
 {@h4(id="Raindance") Raindance}
-{@h4(id="San_news_heli") San news heli}
+{@infoboxright
+  {@aimg=raindance.png;Raindance;Raindance}
+  <small>Raindance</small>
+}
+
+SAFD fire helicopter. Quite bulky, but not too hard on the controls.
+
+{@b Based on:} Sikorsky S-70A Firehawk<br/>
+{@b Fuel capacity:} 1360L<br/>
+{@b Fuel usage:} 3L/s<br/>
+{@clear}
+
+{@h4(id="San_news_heli") San News heli}
+{@infoboxright
+  {@aimg=newschopper.png;San News heli;San News heli}
+  <small>San News heli</small>
+}
+
+Adapted version of the {@#=Maverick Maverick} used by San News to report news. San News is also equiped
+with a Newsvan, which is an adapted Pony vehicle with a satellite dish.
+
+{@b Based on:} Bell 206 LongRanger<br/>
+{@b Fuel capacity:} 416L<br/>
+{@b Fuel usage:} 1L/s<br/>
+{@b See also:} {@#=Maverick Maverick}<br/>
+{@b See also:} {@#=Police_maverick Police maverick}<br/>
+{@clear}
+
 {@h4(id="Sparrow") Sparrow}
+{@infoboxright
+  {@aimg=sparrow.png;Sparrow;Sparrow}
+  <small>Sparrow</small>
+}
+
+Extremely small and light helicopter, although it has one extra seat for a passenger.
+
+{@b Based on:} Bell 47<br/>
+{@b Fuel capacity:} 106L<br/>
+{@b Fuel usage:} 0.4L/s<br/>
+{@b See also:} {@#=Seasparrow Seasparrow}<br/>
+{@clear}
+
 {@h4(id="Seasparrow") Seasparrow}
+{@infoboxright
+  {@aimg=seasparrow.png;Seasparrow;Seasparrow}
+  <small>Seasparrow</small>
+}
+
+Variant of the {@#=Sparrow Sparrow} with floats, giving it the ability to land on water. This version
+also has a powerful machine gun.
+
+{@b Based on:} Bell 47<br/>
+{@b Fuel capacity:} 106L<br/>
+{@b Fuel usage:} 0.4L/s<br/>
+{@b See also:} {@#=Sparrow Sparrow}<br/>
+{@clear}
+
 
 {@h3(id="Military_aircraft") Military aircraft}
 {@h4(id="Cargobob") Cargobob}
