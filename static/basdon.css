@@ -55,7 +55,7 @@ div#main {
 	width: 49%;
 }
 @media (max-width: 800px) {
-	div#main {
+	div#main,.mainright {
 		width: 100%;
 		max-width: 800px;
 	}
