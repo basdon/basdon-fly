@@ -34,7 +34,7 @@ header small, footer small {
 	font-size: small;
 	float: right;
 }
-div#main {
+div#main,.mainright {
 	float: right;
 	width: calc(100% - 240px);
 }

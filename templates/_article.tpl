@@ -9,12 +9,21 @@
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
 	<div>
-		<div id="main">
+		<div class="mainright">
+			<p>
+				<a href="article.php">Articles</a>
+				{@foreach $article_categories as $c}
+					&#32;&gt;&#32;
+					<a href="article.php?category={@unsafe $c->name}">{@unsafe $c->name}</a>
+				{@endforeach}
+				&#32;&gt;&#32;
+				<a href="article.php?title={$article_name}">{$article_name}</a>
+			</p>
 			{@if $article_pageviews == null}
-				<h2>Article not found!</h2>
-				<p>The article with name '{@unsafe $article_name}' was not found.</p>
+				<h2 id="main">Article not found!</h2>
+				<p>The article with name '{$article_name}' was not found.</p>
 			{@else}
-				<h2>{@unsafe $article_title}</h2>
+				<h2 id="main">{@unsafe $article_title}</h2>
 				{@eval $file = '../articles/gen/' . $article_name . '.html'}
 				{@if !is_file($file)}
 					<p style="color:red">Failed to get article contents.</p>
