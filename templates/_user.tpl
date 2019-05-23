@@ -25,10 +25,10 @@
 						{@eval $r = $r[0]}
 						<ul>
 							<li><strong>Score:</strong> {@unsafe $r->s}</li>
+							<li><strong>Online time:</strong> {@unsafe format_duration_short($r->t)}</li>
 							<li><strong>Play time:</strong> {@unsafe format_duration_short($r->a)}</li>
 							<li><strong>Flight time:</strong> {@unsafe format_duration_short($r->f)}</li>
-							<li><strong>Total online time:</strong> {@unsafe format_duration_short($r->t)}</li>
-							<li><strong>Total distance flown:</strong> {@unsafe round($r->dis / 1000, 1)}km</li>
+							<li><strong>Distance flown:</strong> {@unsafe round($r->dis / 1000, 1)}km</li>
 						</ul>
 						<ul>
 							<li><strong>Registered since:</strong> {@unsafe date('j M Y H:i', $r->r)} ({@unsafe format_time_since($r->r)})</li>
@@ -57,6 +57,40 @@
 								<li><strong>Average passenger satisfaction:</strong> {@unsafe round($avgpst, 2)}%</li>
 							{@endif}
 						</ul>
+						<h3>Sessions</h3>
+						{@eval ++$db_querycount}
+						{@eval $ls = $db->query('SELECT s,e FROM ses WHERE u='.$id.' ORDER BY e-s DESC LIMIT 1')}
+						{@if $ls !== false && ($ls = $ls->fetchAll()) !== false && count($ls)}
+							{@eval $len = round(($ls[0]->e - $ls[0]->s) / 60)}
+							{@eval $lenm = $len % 60}
+							{@eval $lenh = floor(($len - $lenm) / 60)}
+							<p>Longest in-game session: {@if $lenh > 0}{@unsafe $lenh}h, {@endif}{@unsafe $lenm}m set on {@unsafe date('l jS \of F, Y', $ls[0]->s)}.</p>
+						{@endif}
+
+						<table>
+							<thead>
+								<tr><th>Latest sessions</th><th>Duration</th></tr>
+							</thead>
+							<tbody>
+								{@eval $ls = $db->query('SELECT s,e FROM ses WHERE u='.$id.' ORDER BY i DESC LIMIT 5')}
+								{@if $ls !== false}
+									{@foreach $ls as $s}
+										<tr>
+											<td>
+												{@unsafe date('F jS, Y - H:i', $s->s)}
+											</td>
+											<td>
+												{@eval $len = round(($s->e - $s->s) / 60)}
+												{@eval $lenm = $len % 60}
+												{@eval $lenh = floor(($len - $lenm) / 60)}
+												{@unsafe $lenh}h{@unsafe $lenm}m
+											</td>
+										</tr>
+									{@endforeach}
+								{@endif}
+							</tbody>
+						</table>
+
 						<h3>All flights by this user</h3>
 
 						{@<?php}
