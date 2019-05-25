@@ -1073,14 +1073,16 @@ cell AMX_NATIVE_CALL Missions_UpdateSatisfaction(AMX *amx, cell *params)
 		qx = amx_ctof(params[4]);
 		qy = amx_ctof(params[5]);
 		qz = amx_ctof(params[6]);
-		value = fabs(100.0f * 2.0f * (qy * qz - qw * qx)) - 45.0;
+		/* pitch */
+		value = fabs(100.0f * 2.0f * (qy * qz - qw * qx)) - 46.0;
 		if (value > 0.0) {
 			miss->passenger_satisfaction -= (int) (value / 2.0f);
 			if (miss->passenger_satisfaction < 0) {
 				miss->passenger_satisfaction = 0;
 			}
 		}
-		value = fabs(100.0f * 2.0f * (qx * qz + qw * qy)) - 60.0f;
+		/* roll */
+		value = fabs(100.0f * 2.0f * (qx * qz + qw * qy)) - 61.0f;
 		if (value > 0.0) {
 			miss->passenger_satisfaction -= (int) (value / 2.0f);
 			if (miss->passenger_satisfaction < 0) {
