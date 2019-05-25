@@ -21,9 +21,11 @@ static struct dbvehicle *dbvehicles;
 int dbvehiclenextid, dbvehiclealloc;
 struct vehicle gamevehicles[MAX_VEHICLES];
 short labelids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB+ of mapping errrr */
-int hpflcache[MAX_PLAYERS];
+int panel_hpflcache[MAX_PLAYERS];
+int panel_odocache[MAX_PLAYERS];
 
 #define INVALID_HPFL_CACHE 2147483647
+#define INVALID_ODO_CACHE INVALID_HPFL_CACHE
 
 void veh_init()
 {
@@ -278,22 +280,32 @@ cell AMX_NATIVE_CALL Veh_FormatPanelText(AMX *amx, cell *params)
 	const int pid = params[1], vid = params[2];
 	const int vehiclehp = amx_ctof(params[3]);
 	cell *addr;
-	char buf[42];
-	int fuel, fuelcapacity, hpflcachevalue;
+	char buf[85];
+	int fuel, fuelcapacity, panel_hpflcachevalue, panel_odocachevalue;
+	float odo = 0.0f;
 
 	fuel = fuelcapacity = 0;
 	if ((veh = gamevehicles[vid].dbvehicle) != NULL) {
 		fuel = veh->fuel;
 		fuelcapacity = model_fuel_capacity(veh->model);
+		odo = veh->odo / 1000.0f;
 	}
 
-	hpflcachevalue = fuel * 10000 + vehiclehp;
-	if (hpflcachevalue == hpflcache[pid]) {
+	;
+	if ((panel_hpflcachevalue = fuel * 10000 + vehiclehp) == panel_hpflcache[pid] &&
+	    (panel_odocachevalue = odo * 10.0f) == panel_odocache[pid])
+	{
 		return 0;
 	}
-	hpflcache[pid] = hpflcachevalue;
+	panel_hpflcache[pid] = panel_hpflcachevalue;
+	panel_odocache[pid] = panel_odocachevalue;
 
-	sprintf(buf, "HP: ~g~%4d/1000  ~W~FL: ~g~%d/%d", vehiclehp, fuel, fuelcapacity);
+	sprintf(buf,
+	        "HP: ~g~%4d/1000  ~w~FL: ~g~%d/%d~n~~w~ODO: %08.1fkm",
+	        vehiclehp,
+	        fuel,
+	        fuelcapacity,
+	        odo);
 	if (vehiclehp < 350) {
 		buf[5] = 'r';
 	}
@@ -521,7 +533,9 @@ cell AMX_NATIVE_CALL Veh_Repair(AMX *amx, cell *params)
 /* native Veh_ResetPanelTextCache(playerid) */
 cell AMX_NATIVE_CALL Veh_ResetPanelTextCache(AMX *amx, cell *params)
 {
-	hpflcache[params[1]] = INVALID_HPFL_CACHE;
+	const int pid = params[1];
+	panel_hpflcache[pid] = INVALID_HPFL_CACHE;
+	panel_odocache[pid] = INVALID_ODO_CACHE;
 	return 1;
 }
 
