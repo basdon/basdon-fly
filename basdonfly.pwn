@@ -805,8 +805,8 @@ native Veh_IsFuelEmpty(vehicleid)
 //@summary Checks if a player is allowed to be in a vehicle
 //@param userid user id of the player to check
 //@param vehicleid vehicle
-//@param buf if not allowed, errormessage will be placed in this buffer
-//@returns {@code 0} if that user is not allowed in the given vehicle (to send to player when trying to enter)
+//@param buf if not allowed, errormessage will be placed in this buffer (to send to player when trying to enter)
+//@returns {@code 0} if that user is not allowed in the given vehicle
 native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[])
 
 //@summary Clears data when a player disconnects
