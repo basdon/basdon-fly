@@ -738,6 +738,8 @@ native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col
 //@param z2 second z-position
 //@param podo player odo value, only passed to add the added odo to remove the need for a {@link floatadd} call :)
 //@returns {@param podo} + the added odo value, even if there's no vehicle mapping for {@param vehicleid}
+//@remarks All values are in km.
+//@remarks This will also add travelled distance to player's current mission, if applicable.
 native Float:Veh_AddOdo(vehicleid, playerid, Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2, Float:podo)
 
 //@summary Collects all vehicles from the table that are owned by a player

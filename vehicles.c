@@ -125,7 +125,7 @@ cell AMX_NATIVE_CALL Veh_AddOdo(AMX *amx, cell *params)
 	const float dx = amx_ctof(params[3]) - amx_ctof(params[6]);
 	const float dy = amx_ctof(params[4]) - amx_ctof(params[7]);
 	const float dz = amx_ctof(params[5]) - amx_ctof(params[8]);
-	float vs = sqrt(dx * dx + dy * dy + dz * dz);
+	float vs = sqrt(dx * dx + dy * dy + dz * dz) / 1000.0f;
 
 	if ((amx_ftoc(vs) & 0x7F80000) == 0x7F80000 && (amx_ftoc(vs) & 0x007FFFFF) == 0) {
 		vs = 0.0f;
@@ -151,7 +151,7 @@ cell AMX_NATIVE_CALL Veh_AddOdo(AMX *amx, cell *params)
 		}
 	}
 
-	missions_add_distance(playerid, vs);
+	missions_add_distance(playerid, vs * 1000.0);
 	vs += amx_ctof(params[9]);
 	return amx_ftoc(vs);
 }
@@ -288,7 +288,7 @@ cell AMX_NATIVE_CALL Veh_FormatPanelText(AMX *amx, cell *params)
 	if ((veh = gamevehicles[vid].dbvehicle) != NULL) {
 		fuel = veh->fuel;
 		fuelcapacity = model_fuel_capacity(veh->model);
-		odo = veh->odo / 1000.0f;
+		odo = veh->odo;
 	}
 
 	;

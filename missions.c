@@ -52,10 +52,10 @@ void missions_init()
 	}
 }
 
-void missions_add_distance(int playerid, float distance)
+void missions_add_distance(int playerid, float distance_in_m)
 {
 	if (activemission[playerid] != NULL) {
-		activemission[playerid]->actualdistance += distance;
+		activemission[playerid]->actualdistance += distance_in_m;
 	}
 }
 
