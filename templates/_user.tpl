@@ -83,7 +83,7 @@
 												{@eval $len = round(($s->e - $s->s) / 60)}
 												{@eval $lenm = $len % 60}
 												{@eval $lenh = floor(($len - $lenm) / 60)}
-												{@unsafe $lenh}h{@unsafe $lenm}m
+												{@unsafe $lenh}h{@if $lenm < 10}0{@endif}{@unsafe $lenm}m
 											</td>
 										</tr>
 									{@endforeach}
