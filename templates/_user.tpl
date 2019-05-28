@@ -28,7 +28,7 @@
 							<li><strong>Online time:</strong> {@unsafe format_duration_short($r->t)}</li>
 							<li><strong>Play time:</strong> {@unsafe format_duration_short($r->a)}</li>
 							<li><strong>Flight time:</strong> {@unsafe format_duration_short($r->f)}</li>
-							<li><strong>Distance flown:</strong> {@unsafe round($r->dis / 1000, 1)}km</li>
+							<li><strong>Distance flown:</strong> {@unsafe round($r->dis, 1)}km</li>
 						</ul>
 						<ul>
 							<li><strong>Registered since:</strong> {@unsafe date('j M Y H:i', $r->r)} ({@unsafe format_time_since($r->r)})</li>
