@@ -291,7 +291,6 @@ cell AMX_NATIVE_CALL Veh_FormatPanelText(AMX *amx, cell *params)
 		odo = veh->odo;
 	}
 
-	;
 	if ((panel_hpflcachevalue = fuel * 10000 + vehiclehp) == panel_hpflcache[pid] &&
 	    (panel_odocachevalue = odo * 10.0f) == panel_odocache[pid])
 	{
