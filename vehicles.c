@@ -65,6 +65,26 @@ static float model_fuel_capacity(int modelid)
 {
 	switch (modelid)
 	{
+	case MODEL_ANDROM: return 95000.0f;
+	case MODEL_AT400: return 23000.0f;
+	case MODEL_BEAGLE: return 518.0f;
+	case MODEL_DODO: return 285.0f;
+	case MODEL_NEVADA: return 3224.0f;
+	case MODEL_SHAMAL: return 4160.0f;
+	case MODEL_SKIMMER: return 285.0f;
+	case MODEL_CROPDUST: return 132.0f;
+	case MODEL_STUNT: return 91.0f;
+	case MODEL_LEVIATHN: return 2925.0f;
+	case MODEL_MAVERICK: return 416.0f;
+	case MODEL_POLMAV: return 416.0f;
+	case MODEL_RAINDANC: return 1360.0f;
+	case MODEL_VCNMAV: return 416.0f;
+	case MODEL_SPARROW: return 106.0f;
+	case MODEL_SEASPAR: return 106.0f;
+	case MODEL_CARGOBOB: return 5510.0f;
+	case MODEL_HUNTER: return 2400.0f;
+	case MODEL_HYDRA: return 3754.0f;
+	case MODEL_RUSTLER: return 1018.0f;
 	default: return 1000.0f;
 	}
 }
@@ -73,7 +93,27 @@ static float model_fuel_usage(int modelid)
 {
 	switch (modelid)
 	{
-	default: return 1.0f;
+	case MODEL_ANDROM: return 10.0f;
+	case MODEL_AT400: return 10.0f;
+	case MODEL_BEAGLE: return 1.1f;
+	case MODEL_DODO: return 0.2f;
+	case MODEL_NEVADA: return 2.3f;
+	case MODEL_SHAMAL: return 3.6f;
+	case MODEL_SKIMMER: return 0.1f;
+	case MODEL_CROPDUST: return 0.1f;
+	case MODEL_STUNT: return 0.1f;
+	case MODEL_LEVIATHN: return 1.7f;
+	case MODEL_MAVERICK: return 0.6f;
+	case MODEL_POLMAV: return 0.6f;
+	case MODEL_RAINDANC: return 1.7f;
+	case MODEL_VCNMAV: return 0.6f;
+	case MODEL_SPARROW: return 0.2f;
+	case MODEL_SEASPAR: return 0.2f;
+	case MODEL_CARGOBOB: return 3.2f;
+	case MODEL_HUNTER: return 2.3f;
+	case MODEL_HYDRA: return 4.5f;
+	case MODEL_RUSTLER: return 0.9f;
+	default: return 1;
 	}
 }
 
@@ -300,16 +340,16 @@ cell AMX_NATIVE_CALL Veh_FormatPanelText(AMX *amx, cell *params)
 	panel_odocache[pid] = panel_odocachevalue;
 
 	sprintf(buf,
-	        "HP: ~g~%4d/1000  ~w~FL: ~g~%d/%d~n~~w~ODO: %08.1fkm",
+	        "HP:~g~%4d/1000 ~w~FL:~g~%d/%d~n~~w~ODO: %08.1fkm",
 	        vehiclehp,
 	        fuel,
 	        fuelcapacity,
 	        odo);
 	if (vehiclehp < 350) {
-		buf[5] = 'r';
+		buf[4] = 'r';
 	}
 	if (fuel <= (int) ((float) fuelcapacity * 0.2f)) {
-		buf[26] = 'r';
+		buf[23] = 'r';
 	}
 	amx_GetAddr(amx, params[4], &addr);
 	amx_SetUString(addr, buf, sizeof(buf));
