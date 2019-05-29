@@ -52,7 +52,7 @@ Large cargo plane with four engines. The Andromada has a tailgate which can be o
 but sadly it's not possible to actually place anything inside its cargo hold.
 
 {@b Based on:} Lockheed C-5 Galaxy<br/>
-{@b Fuel capacity:} 100 000L<br/>
+{@b Fuel capacity:} 95 000L<br/>
 {@b Fuel usage:} 10L/s<br/>
 {@clear}
 
@@ -82,7 +82,7 @@ landings and takeoffs on grass or dirt, but this requires some skill.
 
 {@b Based on:} Britten-Norman Islander<br/>
 {@b Fuel capacity:} 518L<br/>
-{@b Fuel usage:} 2L/s<br/>
+{@b Fuel usage:} 1.1L/s<br/>
 {@b Trivia:} The {@a=https://en.wikipedia.org/wiki/Beagle beagle} is a breed of small hound.<br/>
 {@clear}
 
@@ -96,8 +96,8 @@ Small and light short-range sportsplane with a single engine. The Dodo is very m
 and can take-off and land on a very short runway, which can even be grass or dirt.
 
 {@b Based on:} Cessna 152<br/>
-{@b Fuel capacity:} 144L<br/>
-{@b Fuel usage:} 1L/s<br/>
+{@b Fuel capacity:} 285L<br/>
+{@b Fuel usage:} 0.2L/s<br/>
 {@b See also:} {@#=Skimmer Skimmer}<br/>
 {@b Trivia:} The {@nfa=https://en.wikipedia.org/wiki/Dodo Dodo} is an extinct bird that cannot fly.<br/>
 {@clear}
@@ -113,7 +113,7 @@ and one attached at the end of the tail.
 
 {@b Based on:} Douglas CC-129 Dakota<br/>
 {@b Fuel capacity:} 3224L<br/>
-{@b Fuel usage:} 3L/s<br/>
+{@b Fuel usage:} 2.3L/s<br/>
 {@b Trivia:} It's named after the American state, as is the plane that it's based on.<br/>
 {@clear}
 
@@ -127,7 +127,7 @@ Private, luxury passenger aircraft with two turbojet engines.
 
 {@b Based on:} Bombardier learjet 55<br/>
 {@b Fuel capacity:} 4160L<br/>
-{@b Fuel usage:} 5L/s<br/>
+{@b Fuel usage:} 3.6L/s<br/>
 {@b Trivia:} A shamal is a hot, dry northwesterly wind across the Persian Gulf.<br/>
 {@clear}
 
@@ -140,8 +140,8 @@ Private, luxury passenger aircraft with two turbojet engines.
 Variant of the {@#=Dodo Dodo} with floats, it can only take off and land on water.
 
 {@b Based on:} Cessna 185<br/>
-{@b Fuel capacity:} 144L<br/>
-{@b Fuel usage:} 1L/s<br/>
+{@b Fuel capacity:} 285L<br/>
+{@b Fuel usage:} 0.1L/s<br/>
 {@b Trivia:} To be able to lift off, the game's FPS may not be higher than 30. 25 is recommended.
 One can use the {@code /fpslimit 25} client-side command to do this (make sure the 'FPS limiter' is ON
 in the game's display settings).<br/>
@@ -163,7 +163,7 @@ takeoff or land.
 
 {@b Based on:} Grumman G-164 Ag-Cat<br/>
 {@b Fuel capacity:} 132L<br/>
-{@b Fuel usage:} 0.6L/s<br/>
+{@b Fuel usage:} 0.1L/s<br/>
 {@b Trivia:} Players can press the submission key (default: {@code 2} or {@code numpad&nbsp;+}) to
 enable the nozzles, a white-colored smoke trail will be visible.<br/>
 {@clear}
@@ -179,7 +179,7 @@ such as loopings or barrel-rolls and the like.
 
 {@b Based on:} Pitts S-2B<br/>
 {@b Fuel capacity:} 91L<br/>
-{@b Fuel usage:} 0.8L/s<br/>
+{@b Fuel usage:} 0.1L/s<br/>
 {@b Trivia:} Players can press the submission key (default: {@code 2} or {@code numpad +}) to enable
 a red-colored smoke trail.<br/>
 {@clear}
@@ -200,7 +200,7 @@ on water, it's hard or even impossible to get in as a swimming player.
 
 {@b Based on:} Sikorsky Sea King<br/>
 {@b Fuel capacity:} 2925L<br/>
-{@b Fuel usage:} 1.4L/s<br/>
+{@b Fuel usage:} 1.7L/s<br/>
 {@b Trivia:} The {@a=https://en.wikipedia.org/wiki/Leviathan Leviathan} is a Biblical sea monster.<br/>
 {@clear}
 
@@ -214,7 +214,7 @@ Light helicopter with 3 passenger seats. Since it's light, winds can make it dri
 
 {@b Based on:} Bell 206 LongRanger<br/>
 {@b Fuel capacity:} 416L<br/>
-{@b Fuel usage:} 1L/s<br/>
+{@b Fuel usage:} 0.6L/s<br/>
 {@b See also:} {@#=Police_maverick Police maverick}<br/>
 {@b See also:} {@#=San_news_heli San News heli}<br/>
 {@clear}
@@ -231,7 +231,7 @@ The Police maveick is slightly faster than the standard Maverick.
 
 {@b Based on:} Bell 206 LongRanger<br/>
 {@b Fuel capacity:} 416L<br/>
-{@b Fuel usage:} 1L/s<br/>
+{@b Fuel usage:} 0.6L/s<br/>
 {@b See also:} {@#=Maverick Maverick}<br/>
 {@b See also:} {@#=San_news_heli San News heli}<br/>
 {@b Trivia:} In single player, SWAT can come down ropes from this helicopter when the player has a
@@ -248,7 +248,7 @@ SAFD fire helicopter. Quite bulky, but not too hard on the controls.
 
 {@b Based on:} Sikorsky S-70A Firehawk<br/>
 {@b Fuel capacity:} 1360L<br/>
-{@b Fuel usage:} 3L/s<br/>
+{@b Fuel usage:} 1.7L/s<br/>
 {@clear}
 
 {@h4(id="San_news_heli") San News heli}
@@ -262,7 +262,7 @@ with a Newsvan, which is an adapted Pony vehicle with a satellite dish.
 
 {@b Based on:} Bell 206 LongRanger<br/>
 {@b Fuel capacity:} 416L<br/>
-{@b Fuel usage:} 1L/s<br/>
+{@b Fuel usage:} 0.6L/s<br/>
 {@b See also:} {@#=Maverick Maverick}<br/>
 {@b See also:} {@#=Police_maverick Police maverick}<br/>
 {@clear}
@@ -277,7 +277,7 @@ Extremely small and light helicopter, although it has one extra seat for a passe
 
 {@b Based on:} Bell 47<br/>
 {@b Fuel capacity:} 106L<br/>
-{@b Fuel usage:} 0.4L/s<br/>
+{@b Fuel usage:} 0.2L/s<br/>
 {@b See also:} {@#=Seasparrow Seasparrow}<br/>
 {@clear}
 
@@ -292,7 +292,7 @@ also has a powerful machine gun.
 
 {@b Based on:} Bell 47<br/>
 {@b Fuel capacity:} 106L<br/>
-{@b Fuel usage:} 0.4L/s<br/>
+{@b Fuel usage:} 0.2L/s<br/>
 {@b See also:} {@#=Sparrow Sparrow}<br/>
 {@clear}
 
@@ -311,7 +311,7 @@ Military cargo helicopter. Has one extra seat for a passenger.
 
 {@b Based on:} Unknown, HH-53?<br/>
 {@b Fuel capacity:} 5510L<br/>
-{@b Fuel usage:} 4L/s<br/>
+{@b Fuel usage:} 3.2L/s<br/>
 {@clear}
 
 {@h4(id="Hunter") Hunter}
@@ -324,7 +324,7 @@ Deadly attack helicopter with 30 mm M230 cannons and AGM-114 Hellfire-rockets. H
 
 {@b Based on:} AH-64 Apache<br/>
 {@b Fuel capacity:} 2400L<br/>
-{@b Fuel usage:} 2.6L/s<br/>
+{@b Fuel usage:} 2.3L/s<br/>
 {@clear}
 
 {@h4(id="Hydra") Hydra}
@@ -339,8 +339,8 @@ flying mode by using the 'special ctrl up/down' keys (default:
 countermeasure to not get hit by missiles.
 
 {@b Based on:} Hawker Siddeley Harrier<br/>
-{@b Fuel capacity:} 2986L<br/>
-{@b Fuel usage:} 6L/s<br/>
+{@b Fuel capacity:} 3754L<br/>
+{@b Fuel usage:} 4.5L/s<br/>
 {@b Trivia:} A {@a=https://en.wikipedia.org/wiki/Lernaean_Hydra Hydra} is a many-headed serpent in
 Greek mythology.<br/>
 {@b Tribia:} The tail has DMA printed on it, for 'DMA Design', which is the former name of
@@ -357,7 +357,7 @@ A single prop engine plane equipped with two machine guns. Very agile, used a lo
 
 {@b Based on:} P-51 Mustang<br/>
 {@b Fuel capacity:} 1018L<br/>
-{@b Fuel usage:} 2.1L/s<br/>
+{@b Fuel usage:} 0.9L/s<br/>
 {@b Trivia:} A rustler is someone who steals cattle.<br/>
 {@clear}
 
