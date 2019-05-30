@@ -108,6 +108,7 @@ FORWARD(Urlencode);
 /* vehicles.c */
 FORWARD(Veh_Add);
 FORWARD(Veh_AddOdo);
+FORWARD(Veh_AddServicePoint);
 FORWARD(Veh_CollectSpawnedVehicles);
 FORWARD(Veh_CollectPlayerVehicles);
 FORWARD(Veh_ConsumeFuel);
@@ -117,6 +118,7 @@ FORWARD(Veh_FormatPanelText);
 FORWARD(Veh_GetLabelToDelete);
 FORWARD(Veh_GetNextUpdateQuery);
 FORWARD(Veh_Init);
+FORWARD(Veh_InitServicePoints);
 FORWARD(Veh_IsFuelEmpty);
 FORWARD(Veh_IsPlayerAllowedInVehicle);
 FORWARD(Veh_OnPlayerDisconnect);
@@ -286,6 +288,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* vehicles.c */
 	REGISTERNATIVE(Veh_Add),
 	REGISTERNATIVE(Veh_AddOdo),
+	REGISTERNATIVE(Veh_AddServicePoint),
 	REGISTERNATIVE(Veh_CollectSpawnedVehicles),
 	REGISTERNATIVE(Veh_CollectPlayerVehicles),
 	REGISTERNATIVE(Veh_ConsumeFuel),
@@ -295,6 +298,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_GetLabelToDelete),
 	REGISTERNATIVE(Veh_GetNextUpdateQuery),
 	REGISTERNATIVE(Veh_Init),
+	REGISTERNATIVE(Veh_InitServicePoints),
 	REGISTERNATIVE(Veh_IsFuelEmpty),
 	REGISTERNATIVE(Veh_IsPlayerAllowedInVehicle),
 	REGISTERNATIVE(Veh_OnPlayerDisconnect),

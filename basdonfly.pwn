@@ -742,6 +742,15 @@ native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col
 //@remarks This will also add travelled distance to player's current mission, if applicable.
 native Float:Veh_AddOdo(vehicleid, playerid, Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2, Float:podo)
 
+//@summary Add a service point to the service point table
+//@param index index in the servicepoints table to store this point
+//@param id id of the service point
+//@param x x-coord
+//@param y y-coord
+//@param z z-coord
+//@seealso Veh_InitServicePoints
+native Veh_AddServicePoint(index, id, Float:x, Float:y, Float:z)
+
 //@summary Collects all vehicles from the table that are owned by a player
 //@param userid user id of the player of whom to collect all vehicles
 //@param buf buffer to put in the vehicle data
@@ -764,9 +773,11 @@ native Veh_CollectSpawnedVehicles(userid, buf[])
 //@returns non-zero if {@param buf} contains a message to be sent to the player, {@param isOutOfFuel} might also be non-zero in this case.
 native Veh_ConsumeFuel(vehicleid, throttle, &isOutOfFuel, buf[])
 
-//@summary Destroys the db vehicle table and frees used memory
+//@summary Destroys the db vehicle table and service points table and frees used memory
 //@seealso Veh_Add
+//@seealso Veh_AddServicePoint
 //@seealso Veh_Init
+//@seealso Veh_InitServicePoints
 native Veh_Destroy();
 
 //@summary Sets vehicle fuel to 10% of its capacity if it's any lower than that, to make sure no vehicle gets respawned empty
@@ -799,6 +810,12 @@ native Veh_GetNextUpdateQuery(buf[])
 //@seealso Veh_Destroy
 native Veh_Init(dbvehiclecount)
 
+//@summary Inits the service points table
+//@param servicepointscount amount of service points
+//@seealso Veh_AddServicePoint
+//@seealso Veh_Init
+native Veh_InitServicePoints(servicepointscount)
+
 //@summary Check if a vehicle has no fuel anymore
 //@param vehicleid vehicle to check
 //@returns {@code 0} if the vehicle still has fuel
@@ -816,13 +833,18 @@ native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[])
 native Veh_OnPlayerDisconnect(playerid)
 
 //@summary Refuels a vehicle within given fuel budget
+//@param x x-position of vehicle
+//@param y y-position of vehicle
+//@param z z-position of vehicle
 //@param vehicleid vehicle to refuel
+//@param playerid player that wants to refuel the vehicle
 //@param priceperlitre price per litre
 //@param budget max amount of money to spend on fuel
 //@param refuelamount amount of fuel that was loaded, passed by ref on non-zero return value
 //@param msg buffer to store message in to send to player, use {@code COL_INFO} on non-zero return value, {@code COL_WARN} otherwise
+//@param querybuf buffer to store log query in to execute when returned non-zero {@b and} first element is non-zero
 //@returns the actual amont of money it costed to refuel the vehicle, {@code 0} if error
-native Veh_Refuel(vehicleid, Float:priceperlitre, budget, &Float:refuelamount, msg[])
+native Veh_Refuel(Float:x, Float:y, Float:z, vehicleid, playerid, Float:priceperlitre, budget, &Float:refuelamount, msg[], querybuf[])
 
 //@summary Let the plugin know a label was created on a vehicle for a player
 //@param vehicleid the vehicle the label is attached to
@@ -831,12 +853,18 @@ native Veh_Refuel(vehicleid, Float:priceperlitre, budget, &Float:refuelamount, m
 native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid)
 
 //@summary Calculate cost and new hp of vehicle to repair it using given budget
-//@param budget max amount of money to spend on the rapir
+//@param x x-position of vehicle
+//@param y y-position of vehicle
+//@param z z-position of vehicle
+//@param vehicleid vehicle to repair
+//@param playerid player that wants to repair the vehicle
+//@param budget max amount of money to spend on the repair
 //@param hp current hp of the vehicle
 //@param newhp new hp to set, when returned non-zero
 //@param buf buffer to store message in to send to player, use {@code COL_INFO} on non-zero return value, {@code COL_WARN} otherwise
+//@param querybuf buffer to store log query in to execute when returned non-zero {@b and} first element is non-zero
 //@returns the actual amont of money it costs to repair the vehicle, {@code 0} if error
-native Veh_Repair(budget, Float:hp, &Float:newhp, buf[])
+native Veh_Repair(Float:x, Float:y, Float:z, vehicleid, playerid, budget, Float:hp, &Float:newhp, buf[], querybuf[])
 
 //@summary Reset cache for text displayed on panel
 //@param playerid player for which to reset the cache

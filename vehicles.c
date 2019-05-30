@@ -9,6 +9,7 @@
 #include <string.h>
 #include <math.h>
 #include "game_sa.h"
+#include "playerdata.h"
 #include "vehicles.h"
 
 struct vehnode {
@@ -16,6 +17,13 @@ struct vehnode {
 	struct vehnode *next;
 };
 
+struct servicepoint {
+	int id;
+	float x, y, z;
+};
+
+static int servicepointc;
+static struct servicepoint *servicepoints;
 static struct vehnode *vehiclestoupdate;
 static struct dbvehicle *dbvehicles;
 int dbvehiclenextid, dbvehiclealloc;
@@ -30,6 +38,25 @@ int panel_odocache[MAX_PLAYERS];
 void veh_init()
 {
 	vehiclestoupdate = NULL;
+	servicepoints = NULL;
+	servicepointc = 0;
+	dbvehicles = NULL;
+}
+
+static int findServicePoint(float x, float y, float z)
+{
+	float dx, dy, dz;
+	int i = servicepointc;
+
+	while (i--) {
+		dx = x - servicepoints[i].x;
+		dy = y - servicepoints[i].y;
+		dz = z - servicepoints[i].z;
+		if (dx * dx + dy * dy + dz * dz < 25.0f * 25.0f) {
+			return servicepoints[i].id;
+		}
+	}
+	return -1;
 }
 
 static void freeDbVehicleTable()
@@ -196,6 +223,17 @@ cell AMX_NATIVE_CALL Veh_AddOdo(AMX *amx, cell *params)
 	return amx_ftoc(vs);
 }
 
+/* native Veh_AddServicePoint(index, id, Float:x, Float:y, Float:z) */
+cell AMX_NATIVE_CALL Veh_AddServicePoint(AMX *amx, cell *params)
+{
+	struct servicepoint *svp = servicepoints + params[1];
+	svp->id = params[2];
+	svp->x = amx_ctof(params[3]);
+	svp->y = amx_ctof(params[4]);
+	svp->z = amx_ctof(params[5]);
+	return 1;
+}
+
 /* native Veh_CollectPlayerVehicles(userid, buf[]) */
 cell AMX_NATIVE_CALL Veh_CollectPlayerVehicles(AMX *amx, cell *params)
 {
@@ -296,6 +334,11 @@ cell AMX_NATIVE_CALL Veh_Destroy(AMX *amx, cell *params)
 {
 	if (dbvehicles != NULL) {
 		freeDbVehicleTable();
+	}
+	if (servicepoints != NULL) {
+		free(servicepoints);
+		servicepoints = NULL;
+		servicepointc = 0;
 	}
 	return 1;
 }
@@ -421,6 +464,18 @@ cell AMX_NATIVE_CALL Veh_Init(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native Veh_InitServicePoints(servicepointscount) */
+cell AMX_NATIVE_CALL Veh_InitServicePoints(AMX *amx, cell *params)
+{
+	if (servicepoints != NULL) {
+		logprintf("Veh_InitServicePoints: servicepoints table was not empty");
+		free(servicepoints);
+	}
+	servicepointc = params[1];
+	servicepoints = malloc(sizeof(struct servicepoint) * servicepointc);
+	return 1;
+}
+
 /* native Veh_IsFuelEmpty(vehicleid) */
 cell AMX_NATIVE_CALL Veh_IsFuelEmpty(AMX *amx, cell *params)
 {
@@ -464,19 +519,25 @@ cell AMX_NATIVE_CALL Veh_OnPlayerDisconnect(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Veh_Refuel(vehicleid, Float:priceperlitre, budget, &refuelamount, msg[]) */
+/* native Veh_Refuel(Float:x, Float:y, Float:z, vehicleid, playerid, Float:priceperlitre,
+                     budget, &refuelamount, msg[], querybuf[]) */
 cell AMX_NATIVE_CALL Veh_Refuel(AMX *amx, cell *params)
 {
 	struct dbvehicle *veh;
-	const int budget = params[3];
-	int cost;
-	const float priceperlitre = amx_ctof(params[2]);
+	const int vehicleid = params[4], playerid = params[5], budget = params[7];
+	int cost, svpid, userid;
+	const float priceperlitre = amx_ctof(params[6]);
 	float capacity, refuelamount;
 	cell *addr;
 	char buf1[11], buf[144];
 
-	amx_GetAddr(amx, params[5], &addr);
-	if ((veh = gamevehicles[params[1]].dbvehicle) == NULL ||
+	amx_GetAddr(amx, params[9], &addr);
+	if ((svpid = findServicePoint(amx_ctof(params[1]), amx_ctof(params[2]), amx_ctof(params[3]))) == -1) {
+		strcpy(buf, WARN"You need to be at a service point to do this!");
+		amx_SetUString(addr, buf, sizeof(buf));
+		return 0;
+	}
+	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
 		(refuelamount = (capacity = model_fuel_capacity(veh->model)) - veh->fuel) < 1.0f)
 	{
 		sprintf(buf,
@@ -515,8 +576,27 @@ cell AMX_NATIVE_CALL Veh_Refuel(AMX *amx, cell *params)
 	        capacity);
 	amx_SetUString(addr, buf, sizeof(buf));
 
-	amx_GetAddr(amx, params[4], &addr);
+	amx_GetAddr(amx, params[8], &addr);
 	*addr = amx_ftoc(refuelamount);
+
+	amx_GetAddr(amx, params[10], &addr);
+	if (veh == NULL ||
+		pdata[playerid] == NULL ||
+		(userid = pdata[playerid]->userid) < 1)
+	{
+		logprintf("Veh_Repair: unknown vehicle or unknown playerid");
+		*addr = 0;
+		return cost;
+	}
+	sprintf(buf,
+	        "INSERT INTO refuellog(stamp,vehicle,player,svp,paid,fuel) "
+	        "VALUES (UNIX_TIMESTAMP(),%d,%d,%d,%d,%.4f)",
+	        veh->id,
+		userid,
+		svpid,
+		cost,
+		refuelamount);
+	amx_SetUString(addr, buf, sizeof(buf));
 	return cost;
 }
 
@@ -528,17 +608,24 @@ cell AMX_NATIVE_CALL Veh_RegisterLabel(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Veh_Repair(budget, Float:hp, &Float:newhp, buf[]) */
+/* native Veh_Repair(Float:x, Float:y, Float:z, vehicleid, playerid, budget,
+                     Float:hp, &Float:newhp, buf[], querybuf[]) */
 cell AMX_NATIVE_CALL Veh_Repair(AMX *amx, cell *params)
 {
-	const int budget = params[1];
+	struct dbvehicle *veh;
+	const int vehicleid = params[4], playerid = params[5], budget = params[6];
 	cell *addr;
-	const float hp = amx_ctof(params[2]);
-	float fixamount;
-	int cost;
+	const float hp = amx_ctof(params[7]);
+	float fixamount, newhp;
+	int cost, svpid, userid;
 	char buf1[11], buf[144];
 
-	amx_GetAddr(amx, params[4], &addr);
+	amx_GetAddr(amx, params[9], &addr);
+	if ((svpid = findServicePoint(amx_ctof(params[1]), amx_ctof(params[2]), amx_ctof(params[3]))) == -1) {
+		strcpy(buf, WARN"You need to be at a service point to do this!");
+		amx_SetUString(addr, buf, sizeof(buf));
+		return 0;
+	}
 	if (hp > 999.9f) {
 		strcpy(buf, "Your vehicle doesn't need to be repaired!");
 		amx_SetUString(addr, buf, sizeof(buf));
@@ -559,13 +646,32 @@ cell AMX_NATIVE_CALL Veh_Repair(AMX *amx, cell *params)
 	} else {
 		strcpy(buf1, "fully");
 	}
+	newhp = fixamount + hp;
 
 	sprintf(buf, INFO"Your vehicle has been %s repaired for $%d", buf1, cost);
 	amx_SetUString(addr, buf, sizeof(buf));
 
-	amx_GetAddr(amx, params[3], &addr);
-	fixamount += hp;
-	*addr = amx_ftoc(fixamount);
+	amx_GetAddr(amx, params[8], &addr);
+	*addr = amx_ftoc(newhp);
+
+	amx_GetAddr(amx, params[10], &addr);
+	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
+		pdata[playerid] == NULL ||
+		(userid = pdata[playerid]->userid) < 1)
+	{
+		logprintf("Veh_Repair: unknown vehicle or unknown playerid");
+		*addr = 0;
+		return cost;
+	}
+	sprintf(buf,
+	        "INSERT INTO repairlog(stamp,vehicle,player,svp,paid,damage) "
+	        "VALUES (UNIX_TIMESTAMP(),%d,%d,%d,%d,%d)",
+	        veh->id,
+		userid,
+		svpid,
+		cost,
+		(int) fixamount);
+	amx_SetUString(addr, buf, sizeof(buf));
 	return cost;
 }
 
