@@ -127,6 +127,8 @@ FORWARD(Veh_RegisterLabel);
 FORWARD(Veh_Repair);
 FORWARD(Veh_ResetPanelTextCache);
 FORWARD(Veh_ShouldCreateLabel);
+FORWARD(Veh_UpdateServicePointTextId);
+FORWARD(Veh_UpdateServicePtsVisibility);
 FORWARD(Veh_UpdateSlot);
 /* zones.c */
 FORWARD(Zones_FormatForPlayer);
@@ -307,6 +309,8 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_Repair),
 	REGISTERNATIVE(Veh_ResetPanelTextCache),
 	REGISTERNATIVE(Veh_ShouldCreateLabel),
+	REGISTERNATIVE(Veh_UpdateServicePointTextId),
+	REGISTERNATIVE(Veh_UpdateServicePtsVisibility),
 	REGISTERNATIVE(Veh_UpdateSlot),
 	/* zones.c */
 	REGISTERNATIVE(Zones_FormatForPlayer),

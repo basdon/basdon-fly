@@ -12,6 +12,10 @@
 #include "playerdata.h"
 #include "vehicles.h"
 
+#define SERVICE_MAP_DISTANCE 350.0f
+#define INVALID_HPFL_CACHE 2147483647
+#define INVALID_ODO_CACHE INVALID_HPFL_CACHE
+
 struct vehnode {
 	struct dbvehicle *veh;
 	struct vehnode *next;
@@ -22,6 +26,12 @@ struct servicepoint {
 	float x, y, z;
 };
 
+struct mapservicepoint {
+	struct servicepoint *svp;
+	int textid;
+};
+
+static struct mapservicepoint mapservicepoints[MAX_PLAYERS][MAX_SERVICE_MAP_ICONS];
 static int servicepointc;
 static struct servicepoint *servicepoints;
 static struct vehnode *vehiclestoupdate;
@@ -32,11 +42,15 @@ short labelids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB+ of mapping errrr */
 int panel_hpflcache[MAX_PLAYERS];
 int panel_odocache[MAX_PLAYERS];
 
-#define INVALID_HPFL_CACHE 2147483647
-#define INVALID_ODO_CACHE INVALID_HPFL_CACHE
-
 void veh_init()
 {
+	int i = MAX_PLAYERS, j;
+	while (i--) {
+		j = MAX_SERVICE_MAP_ICONS;
+		while (j--) {
+			mapservicepoints[i][j].svp = NULL;
+		}
+	}
 	vehiclestoupdate = NULL;
 	servicepoints = NULL;
 	servicepointc = 0;
@@ -52,7 +66,7 @@ static int findServicePoint(float x, float y, float z)
 		dx = x - servicepoints[i].x;
 		dy = y - servicepoints[i].y;
 		dz = z - servicepoints[i].z;
-		if (dx * dx + dy * dy + dz * dz < 25.0f * 25.0f) {
+		if (dx * dx + dy * dy + dz * dz < 50.0f * 50.0f) {
 			return servicepoints[i].id;
 		}
 	}
@@ -703,6 +717,89 @@ cell AMX_NATIVE_CALL Veh_ShouldCreateLabel(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, veh.dbvehicle->ownerstring, 144);
 	return 1;
+}
+
+/* native Veh_UpdateServicePointTextId(playerid, index, PlayerText3D:textid) */
+cell AMX_NATIVE_CALL Veh_UpdateServicePointTextId(AMX *amx, cell *params)
+{
+	const int playerid = params[1], index = params[2], textid = params[3];
+
+	if (0 <= index && index < MAX_SERVICE_MAP_ICONS) {
+		mapservicepoints[playerid][index].textid = textid;
+	}
+
+	return 1;
+}
+
+/* native Veh_UpdateServicePtsVisibility(playerid, Float:x, Float:y, data[]) */
+cell AMX_NATIVE_CALL Veh_UpdateServicePtsVisibility(AMX *amx, cell *params)
+{
+	struct servicepoint *pt;
+	const int playerid = params[1];
+	struct mapservicepoint *msvp = mapservicepoints[playerid];
+	const float x = amx_ctof(params[2]), y = amx_ctof(params[3]);
+	int amount = 0, i, j, existing[MAX_SERVICE_MAP_ICONS], existingc = 0;
+	float dx, dy;
+	cell *addr;
+
+	amx_GetAddr(amx, params[4], &addr);
+	i = MAX_SERVICE_MAP_ICONS;
+	while (i--) {
+		*(addr + i * 5) = -2;
+	}
+
+	/* remove old, now out of range ones */
+	i = MAX_SERVICE_MAP_ICONS;
+	while (i--) {
+		if ((pt = msvp[i].svp) != NULL) {
+			dx = pt->x - x;
+			dy = pt->y - y;
+			if (dx * dx + dy * dy > SERVICE_MAP_DISTANCE * SERVICE_MAP_DISTANCE) {
+				*(addr++) = msvp[i].textid;
+				*addr = i;
+				addr += 4;
+				msvp[i].svp = NULL;
+				amount++;
+			} else {
+				existing[existingc++] = pt->id;
+			}
+		}
+	}
+
+	/* add new ones */
+	i = servicepointc;
+	while (1) {
+nextsvp:
+		if (!i--) {
+			return amount;
+		}
+		dx = x - servicepoints[i].x;
+		dy = y - servicepoints[i].y;
+		if (dx * dx + dy * dy < SERVICE_MAP_DISTANCE * SERVICE_MAP_DISTANCE) {
+			j = existingc;
+			while (j--) {
+				if (existing[j] == servicepoints[i].id) {
+					goto nextsvp;
+				}
+			}
+			j = MAX_SERVICE_MAP_ICONS;
+			while (j--) {
+				if (msvp[j].svp == NULL) {
+					msvp[j].svp = servicepoints + i;
+					*(addr++) = -1;
+					*(addr++) = j;
+					*(addr++) = amx_ftoc(servicepoints[i].x);
+					*(addr++) = amx_ftoc(servicepoints[i].y);
+					*(addr++) = amx_ftoc(servicepoints[i].z);
+					amount++;
+					goto nextsvp;
+				}
+			}
+			return amount;
+		}
+	}
+
+	return amount;
 }
 
 /* native Veh_UpdateSlot(vehicleid, dbid) */

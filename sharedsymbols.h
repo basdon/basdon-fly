@@ -351,3 +351,6 @@
 #define WEATHERS 21
 
 #define WEATHER_INVALID 255
+
+/* vehicles.c / vehicles.pwn */
+#define MAX_SERVICE_MAP_ICONS 4

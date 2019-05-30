@@ -877,6 +877,24 @@ native Veh_ResetPanelTextCache(playerid)
 //@returns {@code 1} if a label should be made, with given text in {@param buf}
 native Veh_ShouldCreateLabel(vehicleid, playerid, buf[])
 
+//@summary Store the id of the 3D text created for a service point in the plugin's data.
+//@param playerid player the text was made for
+//@param index index of the per-player service point pool this text is for
+//@param textid the id of the created 3D text
+native Veh_UpdateServicePointTextId(playerid, index, PlayerText3D:textid)
+
+//@summary Collect map icons and 3D texts that need to be created/destroyed for service points.
+//@param playerid player to update
+//@param x x-position of the player
+//@param y y-position of the player
+//@param data buffer to store data in (should be of minimum size {@code MAX_SERVICE_MAP_ICONS * 2 * 5})
+//@remarks Data is stored as: {@code 0:3dtextid, 1:mapiconid, 2:x, 3:y, 4:z}, for {@code MAX_SERVICE_MAP_ICONS} times.
+//@remarks {@param buf} id meaning (only applicable to mapiconid): <ul>\
+	<li>{@code -2}: nothing needs to happen</li>\
+	<li>{@code -1}: create map icon and 3d text, report id of 3d text using {@link Veh_UpdateServicePointTextId}</li>\
+	<li>{@code 0+}: delete this icon and 3d text (ids given)</li></ul>
+native Veh_UpdateServicePtsVisibility(playerid, Float:x, Float:y, data[])
+
 //@summary Let the plugin know a vehicle was created or destroyed
 //@param vehicleid the id of the vehicle in SA-MP
 //@param dbid id of the vehicle in the vehicle table (returned by {@link Veh_Add}), or {@code -1} if slot is now free
