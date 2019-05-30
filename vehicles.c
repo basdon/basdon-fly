@@ -304,10 +304,10 @@ cell AMX_NATIVE_CALL Veh_Destroy(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL Veh_EnsureHasFuel(AMX *amx, cell *params)
 {
 	struct dbvehicle *veh;
-	float minamount;
+	float default_amount;
 	if ((veh = gamevehicles[params[1]].dbvehicle) != NULL) {
-		if (veh->fuel < (minamount = model_fuel_capacity(veh->model) * .1f)) {
-			veh->fuel = minamount;
+		if (veh->fuel < (default_amount = model_fuel_capacity(veh->model) * .4f)) {
+			veh->fuel = default_amount;
 		}
 	}
 	return 1;
