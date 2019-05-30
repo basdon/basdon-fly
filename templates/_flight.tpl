@@ -100,41 +100,21 @@ try{
 				<p>Flight is not finished, no payment information available.</p>
 			{@else}
 				<table id="paytable" style="border:1px solid #ccc;border-bottom:none;text-align:right">
-<?php 
-function fmt_pay($amount)
-{
-	$s = '<span style="color:#';
-	if ($amount < 0) {
-		$s .= 'c22">-$';
-		$amount = -$amount;
-	} else {
-		$s .= '2a2">$';
-	}
-	$amount = "$amount";
-	$l = $len = strlen($amount);
-	while ($l--) {
-		$s .= $amount[$len - $l - 1];
-		if ($l && $l % 3 == 0) {
-			$s .= ',';
-		}
-	}
-	return $s . '</span>';
-}
-?>
-					{@if $r->ptax}<tr><td>Airport tax</td><td>{@unsafe fmt_pay($r->ptax)}</tr>{@endif}
-					{@if $r->pweatherbonus}<tr><td>Weather bonus</td><td>{@unsafe fmt_pay($r->pweatherbonus)}</tr>{@endif}
-					{@if $r->pdistance}<tr><td>Distance pay</td><td>{@unsafe fmt_pay($r->pdistance)}</tr>{@endif}
+					{@render fmt_money.php}
+					{@if $r->ptax}<tr><td>Airport tax</td><td>{@unsafe fmy_money($r->ptax)}</tr>{@endif}
+					{@if $r->pweatherbonus}<tr><td>Weather bonus</td><td>{@unsafe fmy_money($r->pweatherbonus)}</tr>{@endif}
+					{@if $r->pdistance}<tr><td>Distance pay</td><td>{@unsafe fmy_money($r->pdistance)}</tr>{@endif}
 					{@if $r->psatisfaction > 0}
-						<tr><td>Satisfaction bonus</td><td>{@unsafe fmt_pay($r->psatisfaction)}</tr>
+						<tr><td>Satisfaction bonus</td><td>{@unsafe fmy_money($r->psatisfaction)}</tr>
 					{@elseif $r->psatisfaction < 0}
-						<tr><td>Satisfaction penalty</td><td>{@unsafe fmt_pay($r->psatisfaction)}</tr>
+						<tr><td>Satisfaction penalty</td><td>{@unsafe fmy_money($r->psatisfaction)}</tr>
 					{@endif}
-					{@if $r->pdamage}<tr><td>Damage penalty</td><td>{@unsafe fmt_pay($r->pdamage)}</tr>{@endif}
-					{@if $r->pcheat}<tr><td>Cheat penalty</td><td>{@unsafe fmt_pay($r->pcheat)}</tr>{@endif}
-					{@if $r->pbonus}<tr><td>Bonus</td><td>{@unsafe fmt_pay($r->pbonus)}</tr>{@endif}
+					{@if $r->pdamage}<tr><td>Damage penalty</td><td>{@unsafe fmy_money($r->pdamage)}</tr>{@endif}
+					{@if $r->pcheat}<tr><td>Cheat penalty</td><td>{@unsafe fmt_money($r->pcheat)}</tr>{@endif}
+					{@if $r->pbonus}<tr><td>Bonus</td><td>{@unsafe fmt_money($r->pbonus)}</tr>{@endif}
 					<tr>
 						<td style="border-top:1px solid #ccc"><strong>Total</strong></td>
-						<td style="border-top:1px solid #ccc"><strong>{@unsafe fmt_pay($r->ptotal)}</strong></td>
+						<td style="border-top:1px solid #ccc"><strong>{@unsafe fmy_money($r->ptotal)}</strong></td>
 					</tr>
 				</table>
 			{@endif}

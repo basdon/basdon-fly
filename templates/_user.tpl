@@ -20,7 +20,7 @@
 				<h2>Profile of {$name} ({@unsafe $id})</h2>
 				{@try}
 					{@eval ++$db_querycount}
-					{@eval $r = $db->query('SELECT r,l,s,t,a,f,dis FROM usr WHERE i=' . $id . ' LIMIT 1')}
+					{@eval $r = $db->query('SELECT r,l,s,t,a,f,dis,mon FROM usr WHERE i=' . $id . ' LIMIT 1')}
 					{@if $r !== false && ($r = $r->fetchAll()) !== false && count($r)}
 						{@eval $r = $r[0]}
 						<ul>
@@ -56,6 +56,20 @@
 							{@if $avgpst !== false && ($avgpst = $avgpst->fetchAll()) !== false && count($avgpst) && ($avgpst = $avgpst[0]->a) != null}
 								<li><strong>Average passenger satisfaction:</strong> {@unsafe round($avgpst, 2)}%</li>
 							{@endif}
+						</ul>
+						<ul>
+							{@render fmt_money.php}
+							{@eval ++$db_querycount}
+							{@eval $rp = $db->query('SELECT SUM(paid) s FROM refuellog WHERE player='.$id)}
+							{@if $rp !== false && ($rp = $rp->fetchAll()) !== false && count($rp)}
+								<li><strong>Refuel budget:</strong> {@unsafe fmt_money(-$rp[0]->s)}</li>
+							{@endif}
+							{@eval ++$db_querycount}
+							{@eval $rp = $db->query('SELECT SUM(paid) s FROM repairlog WHERE player='.$id)}
+							{@if $rp !== false && ($rp = $rp->fetchAll()) !== false && count($rp)}
+								<li><strong>Repair budget:</strong> {@unsafe fmt_money(-$rp[0]->s)}</li>
+							{@endif}
+							<li><strong>Money in hand:</strong> {@unsafe fmt_money($r->mon)}</li>
 						</ul>
 						<h3>Sessions</h3>
 						{@eval ++$db_querycount}
