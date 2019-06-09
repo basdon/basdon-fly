@@ -31,12 +31,12 @@ $weather_names = [
 $weather_categorymapping = [0, 1, 0, 1, 2, 1, 0, 2, 3, 4, 1, 0, 2, 0, 1, 2, 3, 0, 1, 5, 4];
 $weather_categorynames = ['Clear', 'Light clouds', 'Overcast', 'Thunderstorms', 'Thick fog', 'Sandstorms'];
 $weather_totalcount = 0;
-$wth = $db->query('SELECT w, SUM(w) s FROM wth GROUP BY w ORDER BY s DESC');
+$wth = $db->query('SELECT w, COUNT(w) c FROM wth GROUP BY w ORDER BY c DESC');
 if ($wth !== false && ($weathercats = $wth->fetchAll())) {
 	foreach ($weathercats as $w) {
-		$weather_totalcount += $w->s;
-		$weather_all[$w->w] = $w->s;
-		$weather_percategory[$weather_categorymapping[$w->w]] += $w->s;
+		$weather_totalcount += $w->c;
+		$weather_all[$w->w] = $w->c;
+		$weather_percategory[$weather_categorymapping[$w->w]] += $w->c;
 	}
 }
 arsort($weather_percategory);
