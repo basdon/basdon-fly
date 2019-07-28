@@ -16,12 +16,14 @@ import static net.basdon.anna.api.Util.*;
 public class Mod implements IMod, Consumer<String>
 {
 private static final String OPT_FDR_PATH = "fdr.path";
+private static final String OPT_MSG_CHAN = "critical.output.channel";
 private static final Properties defaultprops;
 
 static
 {
 	defaultprops = new Properties();
 	defaultprops.setProperty(OPT_FDR_PATH, "/path/to/fdr");
+	defaultprops.setProperty(OPT_MSG_CHAN, "");
 }
 
 private IAnna anna;
@@ -96,7 +98,7 @@ boolean on_enable(IAnna anna, char[] replytarget)
 	File fdrdir;
 	if (!anna.load_mod_conf(this) ||
 		defaultprops.getProperty(OPT_FDR_PATH).equals(this.fdr_path) ||
-		(!(fdrdir = new File(this.fdr_path)).exists() && !fdrdir.mkdirs()))
+		(!(fdrdir = new File(this.fdr_path)).isDirectory() && !fdrdir.mkdirs()))
 	{
 		anna.privmsg(replytarget, "mod_bas_ft: check fdr.path in config".toCharArray());
 		return false;
@@ -136,6 +138,10 @@ public
 void config_loaded(Config conf)
 {
 	this.fdr_path = conf.getStr(OPT_FDR_PATH);
+	String msgchan = conf.getStr(OPT_MSG_CHAN);
+	if (msgchan != null && !msgchan.isEmpty()) {
+		this.outtarget = msgchan.toCharArray();
+	}
 }
 
 @Override
