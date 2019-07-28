@@ -63,6 +63,8 @@ throws IOException
 	}
 
 	o.print(" running: " + (ft.isAlive() ? "yes\n" : "no\n"));
+	o.print(" packets recv: " + ft.packets_received + ", bytes: " + ft.bytes_received + "\n");
+	o.print(" last packet: " + format_time(ft.last_packet) + "\n");
 	o.print(" uncaught exceptions: " + ft.data_handle_issue_count);
 	Throwable t = ft.last_handle_issue;
 	o.print(", last: " + (t == null ? "N/A" : t.getClass().getSimpleName()) + " @ ");

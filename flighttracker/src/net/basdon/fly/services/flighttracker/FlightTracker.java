@@ -34,6 +34,9 @@ public int mission_file_already_existed_count;
 public int io_issue_count;
 public IOException last_io_issue;
 public long last_issue;
+public long last_packet;
+public int packets_received;
+public int bytes_received;
 
 public
 FlightTracker(File fdr_directory, Consumer<String> logreceiver)
@@ -53,6 +56,9 @@ void run()
 				for (;;) {
 					DatagramPacket packet = new DatagramPacket(buf, buf.length);
 					socket.receive(packet);
+					packets_received++;
+					bytes_received += packet.getLength();
+					last_packet = System.currentTimeMillis();
 					try {
 						if (!handle(packet)) {
 							last_issue = System.currentTimeMillis();
@@ -62,7 +68,7 @@ void run()
 					} catch (Throwable e) {
 						last_handle_issue = e;
 						data_handle_issue_count++;
-						last_issue = System.currentTimeMillis();
+						last_issue = last_packet;
 					}
 				}
 			} catch (SocketException e) {
