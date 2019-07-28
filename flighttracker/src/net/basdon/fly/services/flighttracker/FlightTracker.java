@@ -25,15 +25,18 @@ byte[] buf = new byte[255];
 final HashMap<Integer, FileOutputStream> missionFiles = new HashMap<>();
 
 public DatagramSocket socket;
-public int data_handle_issue_count;
-public Throwable last_handle_issue;
+public int data_handle_err_count;
+public Throwable last_handle_err;
 public int invalid_packet_count;
 public int invalid_packet_type_count;
 public int packet_wrong_length_count;
 public int mission_file_already_existed_count;
+public int handle_issue_count;
 public int io_issue_count;
 public IOException last_io_issue;
-public long last_issue;
+public long last_io_issue_time;
+public long last_handle_err_time;
+public long last_issue_time;
 public long last_packet;
 public int packets_received;
 public int bytes_received;
@@ -61,14 +64,15 @@ void run()
 					last_packet = System.currentTimeMillis();
 					try {
 						if (!handle(packet)) {
-							last_issue = System.currentTimeMillis();
+							handle_issue_count++;
+							last_issue_time = System.currentTimeMillis();
 						}
 					} catch (InterruptedIOException e) {
 						return;
 					} catch (Throwable e) {
-						last_handle_issue = e;
-						data_handle_issue_count++;
-						last_issue = last_packet;
+						last_handle_err = e;
+						data_handle_err_count++;
+						last_handle_err_time = last_packet;
 					}
 				}
 			} catch (SocketException e) {
@@ -142,7 +146,7 @@ throws InterruptedIOException
 	case 5: closeAllFiles(); return true;
 	default:
 		invalid_packet_type_count++;
-		last_issue = System.currentTimeMillis();
+		last_issue_time = System.currentTimeMillis();
 		return false;
 	}
 }
@@ -179,6 +183,7 @@ throws InterruptedIOException
 		throw e;
 	} catch (IOException e) {
 		last_io_issue = e;
+		last_io_issue_time = System.currentTimeMillis();
 		io_issue_count++;
 	}
 	return false;
@@ -216,6 +221,7 @@ throws InterruptedIOException
 		throw e;
 	} catch (IOException e) {
 		last_io_issue = e;
+		last_io_issue_time = System.currentTimeMillis();
 		io_issue_count++;
 	}
 	return false;
@@ -241,6 +247,7 @@ throws InterruptedIOException
 			throw e;
 		} catch (IOException e) {
 			last_io_issue = e;
+			last_io_issue_time = System.currentTimeMillis();
 			io_issue_count++;
 		}
 	}
@@ -281,6 +288,7 @@ throws InterruptedIOException
 			throw e;
 		} catch (IOException e) {
 			last_io_issue = e;
+			last_io_issue_time = System.currentTimeMillis();
 			io_issue_count++;
 			return null;
 		}

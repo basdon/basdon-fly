@@ -65,21 +65,23 @@ throws IOException
 	o.print(" running: " + (ft.isAlive() ? "yes\n" : "no\n"));
 	o.print(" packets recv: " + ft.packets_received + ", bytes: " + ft.bytes_received + "\n");
 	o.print(" last packet: " + (ft.last_packet == 0 ? "N/A" : format_time(ft.last_packet)) + "\n");
-	o.print(" uncaught exceptions: " + ft.data_handle_issue_count);
-	Throwable t = ft.last_handle_issue;
+	o.print(" uncaught exceptions: " + ft.data_handle_err_count);
+	Throwable t = ft.last_handle_err;
 	o.print(", last: " + (t == null ? "N/A" : t.getClass().getSimpleName()) + " @ ");
-	o.print((ft.last_issue == 0 ? "N/A" : format_time(ft.last_issue)) + "\n");
+	o.print((ft.last_handle_err_time == 0 ? "N/A" : format_time(ft.last_handle_err_time)) + "\n");
 	t = ft.last_io_issue;
 	o.print(" i/o exceptions: " + ft.io_issue_count);
 	o.print(", last: " + (t == null ? "N/A" : t.getClass().getSimpleName()));
-	o.print(": " + (t == null ? "N/A" : t.getMessage()) + "\n");
+	o.print(": " + (t == null ? "N/A" : t.getMessage()) + " @ ");
+	o.print((ft.last_io_issue_time == 0 ? "N/A" : format_time(ft.last_io_issue_time)) + "\n");
 	int c =
-		ft.data_handle_issue_count +
+		ft.handle_issue_count +
 		ft.invalid_packet_count +
 		ft.invalid_packet_type_count +
 		ft.mission_file_already_existed_count +
 		ft.packet_wrong_length_count;
-	o.print(" other issues count: " + c + "\n");
+	o.print(" other issues count: " + c + ", last: ");
+	o.print((ft.last_issue_time == 0 ? "N/A" : format_time(ft.last_issue_time)) + "\n");
 	Integer[] m = ft.activeMissionIDs();
 	o.print(" active flights: " + m.length + "\n");
 	if (m.length > 0) {
