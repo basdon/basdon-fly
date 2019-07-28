@@ -24,8 +24,8 @@ byte[] buf = new byte[255];
 final HashMap<Integer, FileOutputStream> missionFiles = new HashMap<>();
 
 File directory;
-boolean exit;
 
+public DatagramSocket socket;
 public int data_handle_issue_count;
 public Throwable last_handle_issue;
 public int invalid_packet_count;
@@ -49,6 +49,7 @@ void run()
 	try {
 		for (;;) {
 			try (DatagramSocket socket = new DatagramSocket(7766)) {
+				this.socket = socket;
 				for (;;) {
 					DatagramPacket packet = new DatagramPacket(buf, buf.length);
 					socket.receive(packet);
@@ -65,6 +66,9 @@ void run()
 					}
 				}
 			} catch (SocketException e) {
+				if (this.isInterrupted()) {
+					return;
+				}
 				logreceiver.accept("mod_bas_ft: socket issue, restarting socket");
 			} catch (InterruptedIOException e) {
 				return;

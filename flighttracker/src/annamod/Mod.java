@@ -123,10 +123,13 @@ void on_disable()
 {
 	if (ft != null) {
 		ft.interrupt();
+		ft.socket.close();
 		try {
 			ft.join(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		} catch (InterruptedException ignored) {}
+		if (ft.isAlive()) {
+			anna.log_error("flighttracker is still active!");
+			anna.privmsg(outtarget, "flighttracker is still active!".toCharArray());
 		}
 		ft.closeAllFiles();
 		ft = null;
