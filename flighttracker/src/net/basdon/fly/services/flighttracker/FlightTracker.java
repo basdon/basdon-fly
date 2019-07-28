@@ -18,12 +18,11 @@ import java.util.function.Consumer;
 
 public class FlightTracker extends Thread
 {
+private final File fdr_directory;
 private final Consumer<String> logreceiver;
 
 byte[] buf = new byte[255];
 final HashMap<Integer, FileOutputStream> missionFiles = new HashMap<>();
-
-File directory;
 
 public DatagramSocket socket;
 public int data_handle_issue_count;
@@ -37,9 +36,10 @@ public IOException last_io_issue;
 public long last_issue;
 
 public
-FlightTracker(Consumer<String> logreceiver)
+FlightTracker(File fdr_directory, Consumer<String> logreceiver)
 {
 	this.logreceiver = logreceiver;
+	this.fdr_directory = fdr_directory;
 }
 
 @Override
@@ -251,7 +251,7 @@ throws InterruptedIOException
 	Integer key = new Integer(id);
 	FileOutputStream os = missionFiles.get(key);
 	if (os == null) {
-		File file = new File(directory, id + ".flight");
+		File file = new File(fdr_directory, id + ".flight");
 		if (file.exists()) {
 			mission_file_already_existed_count++;
 			return null;

@@ -106,7 +106,7 @@ boolean on_enable(IAnna anna, char[] replytarget)
 
 	this.anna = anna;
 	this.outtarget = replytarget;
-	this.ft = new FlightTracker(this);
+	this.ft = new FlightTracker(fdrdir, this);
 	this.ft.start();
 	return true;
 }
