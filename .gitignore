@@ -1,6 +1,5 @@
-.classpath
-.project
-.settings/
-bin/
-log.txt
-flighttracker.path
+**/.classpath
+**/.project
+**/.settings/
+**/bin/
+**/bin-test/
