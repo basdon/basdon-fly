@@ -10,3 +10,9 @@ fdr.path                -- directory where to save the fdr files. will attempt
 critical.output.channel -- channel where to send critical messages, defaults to
                            the channel where this mod was enabled when its value
                            is an empty string.
+
+commands
+--------
+ft                      -- prints status of flight tracker, with currently
+                           active flights. If the flighttracker is not running
+                           for whatever reason, it will attempt to restart it.

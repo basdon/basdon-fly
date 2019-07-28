@@ -29,6 +29,7 @@ static
 private IAnna anna;
 private char[] outtarget;
 private String fdr_path;
+private File fdr_dir;
 private FlightTracker ft;
 
 @Override
@@ -86,7 +87,7 @@ throws IOException
 	o.print(" active flights: " + m.length + "\n");
 	if (m.length > 0) {
 		o.print("  ");
-		o.print(String.valueOf(m[0].intValue()));
+		o.print(m[0].toString());
 		for (int i = 1; i < m.length; i++) {
 			o.print(", ");
 			o.print(String.valueOf(m[i].intValue()));
@@ -99,10 +100,9 @@ throws IOException
 public
 boolean on_enable(IAnna anna, char[] replytarget)
 {
-	File fdrdir;
 	if (!anna.load_mod_conf(this) ||
 		defaultprops.getProperty(OPT_FDR_PATH).equals(this.fdr_path) ||
-		(!(fdrdir = new File(this.fdr_path)).isDirectory() && !fdrdir.mkdirs()))
+		(!(this.fdr_dir = new File(this.fdr_path)).isDirectory() && !this.fdr_dir.mkdirs()))
 	{
 		anna.privmsg(replytarget, "mod_bas_ft: check fdr.path in config".toCharArray());
 		return false;
@@ -110,7 +110,7 @@ boolean on_enable(IAnna anna, char[] replytarget)
 
 	this.anna = anna;
 	this.outtarget = replytarget;
-	this.ft = new FlightTracker(fdrdir, this);
+	this.ft = new FlightTracker(this.fdr_dir, this);
 	this.ft.start();
 	return true;
 }
@@ -149,6 +149,37 @@ void config_loaded(Config conf)
 	if (msgchan != null && !msgchan.isEmpty()) {
 		this.outtarget = msgchan.toCharArray();
 	}
+}
+
+@Override
+public
+boolean on_command(User user, char[] target, char[] replytarget,
+                   char[] message, char[] cmd, char[] params)
+{
+	if (strcmp(cmd, 'f','t')) {
+		if (ft == null || !ft.isAlive()) {
+			anna.privmsg(replytarget, "flighttracker is dead, rebooting".toCharArray());
+			this.ft = new FlightTracker(this.fdr_dir, this);
+			this.ft.start();
+		}
+		StringBuilder sb = new StringBuilder("flighttracker is ");
+		if (this.ft.isAlive()) {
+			sb.append("running");
+		} else {
+			sb.append("dead");
+		}
+		Integer[] ids = this.ft.activeMissionIDs();
+		sb.append(", ").append(ids.length).append(" active flights");
+		if (ids.length > 0) {
+			sb.append(": ").append(ids[0].toString());
+			for (int i = 1; i < ids.length; i++) {
+				sb.append(", ").append(ids[i].toString());
+			}
+		}
+		anna.privmsg(replytarget, chars(sb));
+		return true;
+	}
+	return false;
 }
 
 @Override
