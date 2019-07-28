@@ -70,7 +70,7 @@ throws IOException
 	t = ft.last_io_issue;
 	o.print(" i/o exceptions: " + ft.io_issue_count);
 	o.print(", last: " + (t == null ? "N/A" : t.getClass().getSimpleName()));
-	o.print(": " + t.getMessage() + "\n");
+	o.print(": " + (t == null ? "N/A" : t.getMessage()) + "\n");
 	int c =
 		ft.data_handle_issue_count +
 		ft.invalid_packet_count +
