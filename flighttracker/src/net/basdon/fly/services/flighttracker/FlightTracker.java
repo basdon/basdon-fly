@@ -14,9 +14,12 @@ import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 public class FlightTracker extends Thread
 {
+private final Consumer<String> logreceiver;
+
 byte[] buf = new byte[255];
 final HashMap<Integer, FileOutputStream> missionFiles = new HashMap<>();
 
@@ -32,6 +35,12 @@ public int mission_file_already_existed_count;
 public int io_issue_count;
 public IOException last_io_issue;
 public long last_issue;
+
+public
+FlightTracker(Consumer<String> logreceiver)
+{
+	this.logreceiver = logreceiver;
+}
 
 @Override
 public
@@ -56,11 +65,11 @@ void run()
 					}
 				}
 			} catch (SocketException e) {
-				System.err.println("bas_ft: socket issue, restarting socket");
+				logreceiver.accept("mod_bas_ft: socket issue, restarting socket");
 			} catch (InterruptedIOException e) {
 				return;
 			} catch (IOException e) {
-				System.err.println("bas_ft: data receive issue, restarting socket");
+				logreceiver.accept("mod_bas_ft: data receive issue, restarting socket");
 			}
 			Thread.sleep(3000);
 		}
@@ -87,7 +96,7 @@ boolean closeAllFiles()
 		try {
 			os.close();
 		} catch (Throwable t) {
-			System.err.println("main: failed to close outputstream");
+			logreceiver.accept("mod_bas_ft: failed to close outputstream");
 			res = false;
 		}
 	}
@@ -103,7 +112,7 @@ throws InterruptedIOException
 {
 	InetAddress a = packet.getAddress();
 	if (!a.isLoopbackAddress()) {
-		System.out.println("bas_ft: received packet from non-loopback: " + a.getHostAddress());
+		logreceiver.accept("mod_bas_ft: got packet from non-loopback: " + a.getHostAddress());
 		return true; // don't mark as issue, just ignore
 	}
 	int length = packet.getLength();

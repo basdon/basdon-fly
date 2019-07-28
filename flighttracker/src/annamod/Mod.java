@@ -5,6 +5,7 @@ package annamod;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.function.Consumer;
 
 import net.basdon.anna.api.*;
 import net.basdon.anna.api.IAnna.Output;
@@ -12,7 +13,7 @@ import net.basdon.fly.services.flighttracker.FlightTracker;
 
 import static net.basdon.anna.api.Util.*;
 
-public class Mod implements IMod
+public class Mod implements IMod, Consumer<String>
 {
 private static final String OPT_FDR_PATH = "fdr.path";
 private static final Properties defaultprops;
@@ -23,6 +24,8 @@ static
 	defaultprops.setProperty(OPT_FDR_PATH, "/path/to/fdr");
 }
 
+private IAnna anna;
+private char[] outtarget;
 private String fdr_path;
 private FlightTracker ft;
 
@@ -30,7 +33,7 @@ private FlightTracker ft;
 public
 String getName()
 {
-	return "bas_ft";
+	return "mod_bas_ft";
 }
 
 @Override
@@ -95,12 +98,14 @@ boolean on_enable(IAnna anna, char[] replytarget)
 		defaultprops.getProperty(OPT_FDR_PATH).equals(this.fdr_path) ||
 		(!(fdrdir = new File(this.fdr_path)).exists() && !fdrdir.mkdirs()))
 	{
-		anna.privmsg(replytarget, "bas_ft: check fdr.path in config".toCharArray());
+		anna.privmsg(replytarget, "mod_bas_ft: check fdr.path in config".toCharArray());
 		return false;
 	}
 
-	ft = new FlightTracker();
-	ft.run();
+	this.anna = anna;
+	this.outtarget = replytarget;
+	this.ft = new FlightTracker(this);
+	this.ft.run();
 	return true;
 }
 
@@ -131,5 +136,14 @@ public
 void config_loaded(Config conf)
 {
 	this.fdr_path = conf.getStr(OPT_FDR_PATH);
+}
+
+@Override
+public
+void /*Consumer.*/accept(String t)
+{
+	this.anna.sync_exec(() -> {
+		this.anna.privmsg(outtarget, t.toCharArray());
+	});
 }
 } /*Mod*/
