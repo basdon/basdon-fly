@@ -6,248 +6,279 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 
-import net.basdon.Log;
-import net.basdon.Nullable;
-
-public class FlightTracker
+public class FlightTracker extends Thread
 {
-	public static void main(String[] args)
-	{
-		try (Log unused = new Log()) {
-			try {
-				Path path = Paths.get(".", "flighttracker.path").toAbsolutePath();
-				List<String> l = Files.readAllLines(path);
-				if (l.isEmpty() || !(directory = new File(l.get(0))).isDirectory()) {
-					Log.error("path in flighttracker.path is not a directory");
-				} else {
-					run();
-				}
-			} catch (IOException e) {
-				Log.error("error reading flighttracker.path file", e);
-			}
-		} finally {
-			closeAllFiles();
-		}
-	}
+byte[] buf = new byte[255];
+final HashMap<Integer, FileOutputStream> missionFiles = new HashMap<>();
 
-	static final byte[] buf = new byte[255];
-	static final HashMap<Integer, FileOutputStream> missionFiles = new HashMap<>(); 
+File directory;
+boolean exit;
 
-	static File directory;
-	static boolean exit;
+public int data_handle_issue_count;
+public Throwable last_handle_issue;
+public int invalid_packet_count;
+public int invalid_packet_type_count;
+public int packet_wrong_length_count;
+public int mission_file_already_existed_count;
+public int io_issue_count;
+public IOException last_io_issue;
+public long last_issue;
 
-	static void closeAllFiles()
-	{
-		for (FileOutputStream os : missionFiles.values()) {
-			try {
-				os.close();
-			} catch (Throwable t) {
-				Log.error("main: failed to close outputstream");
-			}
-		}
-		missionFiles.clear();
-	}
-
-	static void run()
-	{
+@Override
+public
+void run()
+{
+	try {
 		for (;;) {
 			try (DatagramSocket socket = new DatagramSocket(7766)) {
-				Log.info("we have a socket");
-				while (!exit) {
+				for (;;) {
 					DatagramPacket packet = new DatagramPacket(buf, buf.length);
 					socket.receive(packet);
 					try {
-						handle(packet);
+						if (!handle(packet)) {
+							last_issue = System.currentTimeMillis();
+						}
+					} catch (InterruptedIOException e) {
+						return;
 					} catch (Throwable e) {
-						Log.error("run: data handling issue", e);
+						last_handle_issue = e;
+						data_handle_issue_count++;
+						last_issue = System.currentTimeMillis();
 					}
 				}
 			} catch (SocketException e) {
-				Log.error("run: socket issue, restarting socket", e);
+				System.err.println("bas_ft: socket issue, restarting socket");
+			} catch (InterruptedIOException e) {
+				return;
 			} catch (IOException e) {
-				Log.error("run: data receive issue, restarting socket", e);
+				System.err.println("bas_ft: data receive issue, restarting socket");
 			}
-			if (exit) {
-				break;
-			}
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {}
+			Thread.sleep(3000);
 		}
-	}
+	} catch (InterruptedException e) {}
+}
 
-	static void handle(DatagramPacket packet)
-	{
-		InetAddress addr = packet.getAddress();
-		if (!addr.isLoopbackAddress()) {
-			Log.warn("received packet from non-loopback: " + addr.getHostAddress());
-			return;
-		}
-		int length = packet.getLength();
-		if (length < 4) {
-			Log.warn("packet len too short: " + length);
-			return;
-		}
-		if (buf[0] != 'F' || buf[1] != 'L' || buf[2] != 'Y') {
-			Log.warn(
-				"unknown packet, magic is: "
-				+ String.format("%02X %02X %02X", buf[0], buf[1], buf[2])
-			);
-			return;
-		}
-		switch (buf[3]) {
-		case 1: handleMissionStart(length); return;
-		case 2: handleMissionData(length); return;
-		case 3: handleMissionEnd(length); return;
-		case 4:
-		case 5: closeAllFiles(); return;
-		default:
-			Log.warn("unknown packet type: " + Integer.toHexString(buf[3]));
-		}
-	}
+/**
+ * @return array with mission ids that are currently active
+ */
+public
+Integer[] activeMissionIDs()
+{
+	return this.missionFiles.keySet().toArray(new Integer[0]);
+}
 
-	static void handleMissionStart(int length)
-	{
-		if (length < 14) {
-			Log.warn("missionstart: packet should be at least len 14, is: " + length);
-			return;
-		}
-		FileOutputStream os = outputStreamForMission(4);
-		if (os == null) {
-			return;
-		}
-		byte nameLen = buf[12];
-		if (nameLen < 1 || 24 < nameLen) {
-			Log.warn("missionstart: invalid name length: " + nameLen);
-			return;
-		}
+/**
+ * @return {@code false} if an IOException occurs while closing any of the open streams
+ */
+public
+boolean closeAllFiles()
+{
+	boolean res = true;
+	for (FileOutputStream os : missionFiles.values()) {
 		try {
-			FileChannel channel = os.getChannel();
-			long position = channel.position();
-			if (position != 5) {
-				channel.position(5);
-			}
-			channel.write(ByteBuffer.wrap(buf, 12, nameLen + 1));
-			channel.position(position);
-			os.flush();
-		} catch (IOException e) {
-			Log.error("missionstart: failed to write", e);
+			os.close();
+		} catch (Throwable t) {
+			System.err.println("main: failed to close outputstream");
+			res = false;
 		}
 	}
+	missionFiles.clear();
+	return res;
+}
 
-	static void handleMissionData(int length)
-	{
-		if (length != 42) {
-			Log.warn("missiondata: packet should len 42, is: " + length);
-			return;
-		}
-		FileOutputStream os = outputStreamForMission(4);
-		if (os == null) {
-			return;
-		}
-		try {
-			int time = (int) (System.currentTimeMillis() / 1000);
-			os.write(time & 0xFF);
-			os.write((time >> 8) & 0xFF);
-			os.write((time >> 16) & 0xFF);
-			os.write((time >> 24) & 0xFF);
-			for (int i = 0; i < 15; i++) {
-				buf[12 + i] = (byte)
-					((buf[12 + 2 * i] & 0xF) |
-					((buf[13 + 2 * i] & 0xF) << 4));
-			}
-			os.write(buf, 12, 15);
-			os.flush();
-		} catch (IOException e) {
-			Log.error("missiondata: failed to write", e);
-		}
+/**
+ * @return {@code false} if the packet was invalid or an IOException occurred
+ */
+boolean handle(DatagramPacket packet)
+throws InterruptedIOException
+{
+	InetAddress a = packet.getAddress();
+	if (!a.isLoopbackAddress()) {
+		System.out.println("bas_ft: received packet from non-loopback: " + a.getHostAddress());
+		return true; // don't mark as issue, just ignore
 	}
-
-	static void handleMissionEnd(int length)
-	{
-		if (length != 12) {
-			Log.warn("missionend: packet should len 12, is: " + length);
-			return;
-		}
-		FileOutputStream os = outputStreamForMission(4);
-		if (os != null) {
-			missionFiles.remove(new Integer(i32ln(4)));
-			try {
-				os.close();
-			} catch (IOException e) {
-				Log.error("missionend: failed to close outpustream", e);
-			}
-		} else {
-			Log.warn("missionend: no existing outputstream");
-		}
+	int length = packet.getLength();
+	if (length < 4) {
+		packet_wrong_length_count++;
+		return false;
 	}
-
-	@Nullable
-	static FileOutputStream outputStreamForMission(int missionIdOffset)
-	{
-		int id = i32ln(missionIdOffset);
-		Integer key = new Integer(id);
-		FileOutputStream os = missionFiles.get(key);
-		if (os == null) {
-			File file = new File(directory, id + ".flight");
-			if (file.exists()) {
-				Log.warn("flight file already exists, not opening new outpustream");
-				return null;
-			}
-			try {
-				missionFiles.put(key, os = new FileOutputStream(file));
-			} catch (FileNotFoundException e) {
-				Log.error("could not open file outputstream", e);
-				return null;
-			}
-			try {
-				os.write(1);
-				os.write(id & 0xFF);
-				os.write((id >> 8) & 0xFF);
-				os.write((id >> 16) & 0xFF);
-				os.write((id >> 24) & 0xFF);
-				os.write(1);
-				os.write('?');
-				os.write(new byte[23]);
-			} catch (IOException e) {
-				Log.error("could not write file header", e);
-				return null;
-			}
-		}
-		return os;
+	if (buf[0] != 'F' || buf[1] != 'L' || buf[2] != 'Y') {
+		invalid_packet_count++;
+		return false;
 	}
-
-	static short i16ln(int pos)
-	{
-		return (short)
-			((buf[pos] & 0xF) |
-			((buf[pos + 1] & 0xF) << 4) |
-			((buf[pos + 2] & 0xF) << 8) |
-			((buf[pos + 3] & 0xF) << 12));
-	}
-
-	static int i32ln(int pos)
-	{
-		return
-			(buf[pos] & 0xF) |
-			((buf[pos + 1] & 0xF) << 4) |
-			((buf[pos + 2] & 0xF) << 8) |
-			((buf[pos + 3] & 0xF) << 12) |
-			((buf[pos + 4] & 0xF) << 16) |
-			((buf[pos + 5] & 0xF) << 20) |
-			((buf[pos + 6] & 0xF) << 24) |
-			((buf[pos + 7] & 0xF) << 28);
+	switch (buf[3]) {
+	case 1: return handleMissionStart(length);
+	case 2: return handleMissionData(length);
+	case 3: return handleMissionEnd(length);
+	case 4:
+	case 5: closeAllFiles(); return true;
+	default:
+		invalid_packet_type_count++;
+		last_issue = System.currentTimeMillis();
+		return false;
 	}
 }
+
+/**
+ * @return {@code false} if the packet was invalid or an IOException occurred
+ */
+boolean handleMissionStart(int length)
+throws InterruptedIOException
+{
+	if (length < 14) {
+		packet_wrong_length_count++;
+		return false;
+	}
+	FileOutputStream os = outputStreamForMission(4);
+	if (os == null) {
+		return false;
+	}
+	byte nameLen = buf[12];
+	if (nameLen < 1 || 24 < nameLen) {
+		return false;
+	}
+	try {
+		FileChannel channel = os.getChannel();
+		long position = channel.position();
+		if (position != 5) {
+			channel.position(5);
+		}
+		channel.write(ByteBuffer.wrap(buf, 12, nameLen + 1));
+		channel.position(position);
+		os.flush();
+		return true;
+	} catch (InterruptedIOException e) {
+		throw e;
+	} catch (IOException e) {
+		last_io_issue = e;
+		io_issue_count++;
+	}
+	return false;
+}
+
+/**
+ * @return {@code false} if the packet was invalid or an IOException occurred
+ */
+boolean handleMissionData(int length)
+throws InterruptedIOException
+{
+	if (length != 42) {
+		packet_wrong_length_count++;
+		return false;
+	}
+	FileOutputStream os = outputStreamForMission(4);
+	if (os == null) {
+		return false;
+	}
+	try {
+		int time = (int) (System.currentTimeMillis() / 1000);
+		os.write(time & 0xFF);
+		os.write((time >> 8) & 0xFF);
+		os.write((time >> 16) & 0xFF);
+		os.write((time >> 24) & 0xFF);
+		for (int i = 0; i < 15; i++) {
+			buf[12 + i] = (byte)
+				((buf[12 + 2 * i] & 0xF) |
+				((buf[13 + 2 * i] & 0xF) << 4));
+		}
+		os.write(buf, 12, 15);
+		os.flush();
+		return true;
+	} catch (InterruptedIOException e) {
+		throw e;
+	} catch (IOException e) {
+		last_io_issue = e;
+		io_issue_count++;
+	}
+	return false;
+}
+
+/**
+ * @return {@code false} if the packet was invalid or an IOException occurred
+ */
+boolean handleMissionEnd(int length)
+throws InterruptedIOException
+{
+	if (length != 12) {
+		packet_wrong_length_count++;
+		return false;
+	}
+	FileOutputStream os = outputStreamForMission(4);
+	if (os != null) {
+		missionFiles.remove(new Integer(i32ln(4)));
+		try {
+			os.close();
+			return true;
+		} catch (InterruptedIOException e) {
+			throw e;
+		} catch (IOException e) {
+			last_io_issue = e;
+			io_issue_count++;
+		}
+	}
+	return false;
+}
+
+/**
+ * @return an open outputstream or {@code null} when it either already existed or could not be opened
+ */
+FileOutputStream outputStreamForMission(int missionIdOffset)
+throws InterruptedIOException
+{
+	int id = i32ln(missionIdOffset);
+	Integer key = new Integer(id);
+	FileOutputStream os = missionFiles.get(key);
+	if (os == null) {
+		File file = new File(directory, id + ".flight");
+		if (file.exists()) {
+			mission_file_already_existed_count++;
+			return null;
+		}
+		try {
+			missionFiles.put(key, os = new FileOutputStream(file));
+		} catch (FileNotFoundException e) {
+			io_issue_count++;
+			return null;
+		}
+		try {
+			os.write(1);
+			os.write(id & 0xFF);
+			os.write((id >> 8) & 0xFF);
+			os.write((id >> 16) & 0xFF);
+			os.write((id >> 24) & 0xFF);
+			os.write(1);
+			os.write('?');
+			os.write(new byte[23]);
+		} catch (InterruptedIOException e) {
+			throw e;
+		} catch (IOException e) {
+			last_io_issue = e;
+			io_issue_count++;
+			return null;
+		}
+	}
+	return os;
+}
+
+int i32ln(int pos)
+{
+	return
+		(buf[pos] & 0xF) |
+		((buf[pos + 1] & 0xF) << 4) |
+		((buf[pos + 2] & 0xF) << 8) |
+		((buf[pos + 3] & 0xF) << 12) |
+		((buf[pos + 4] & 0xF) << 16) |
+		((buf[pos + 5] & 0xF) << 20) |
+		((buf[pos + 6] & 0xF) << 24) |
+		((buf[pos + 7] & 0xF) << 28);
+}
+} /*FlightTracker*/
