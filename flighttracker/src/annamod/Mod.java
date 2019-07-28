@@ -63,6 +63,7 @@ throws IOException
 		return;
 	}
 
+	o.print(" boot: " + format_time(ft.boot) + "\n");
 	o.print(" running: " + (ft.isAlive() ? "yes\n" : "no\n"));
 	o.print(" packets recv: " + ft.packets_received + ", bytes: " + ft.bytes_received + "\n");
 	o.print(" last packet: " + (ft.last_packet == 0 ? "N/A" : format_time(ft.last_packet)) + "\n");

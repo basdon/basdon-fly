@@ -40,12 +40,14 @@ public long last_issue_time;
 public long last_packet;
 public int packets_received;
 public int bytes_received;
+public long boot;
 
 public
 FlightTracker(File fdr_directory, Consumer<String> logreceiver)
 {
 	this.logreceiver = logreceiver;
 	this.fdr_directory = fdr_directory;
+	this.boot = System.currentTimeMillis();
 }
 
 @Override
