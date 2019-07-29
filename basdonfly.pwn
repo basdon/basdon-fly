@@ -356,7 +356,7 @@ native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, Float
 //@param vy y-velocity of the vehicle
 //@param vz z-velocity of the vehicle
 //@param alt altitude (z-pos) of the vehicle
-//@param buf buffer to store message in (length at index {@code 0}, message starts at index {@code 1})
+//@param buf buffer to store message in (always 24 bytes)
 //@returns {@code 0} if something doesn't add up and there's no message to be sent
 native Missions_CreateTrackerMessage(playerid, vid, Float:hp, Float:x, Float:y, Float:vx, Float:vy, Float:vz, Float:alt, buf[])
 
@@ -367,8 +367,7 @@ native Missions_CreateTrackerMessage(playerid, vid, Float:hp, Float:x, Float:y, 
 //@returns {@code 0} if no mission was active for player
 //@remarks {@param buf} data: <ul>\
 	<li>{@code buf}: flg update query, only when returned non-zero</li>\
-	<li>{@code buf+500}: length of tracker data to send</li>\
-	<li>{@code buf+501}: tracker data to be sent to flight tracker, only when returned non-zero</li></ul>
+	<li>{@code buf+500}: tracker data to be sent to flight tracker, only when returned non-zero (always 8 bytes)</li></ul>
 native Missions_EndUnfinished(playerid, reason, buf[])
 
 //@summary Try to advance any active mission for player when they entered a race checkpoint
@@ -462,8 +461,7 @@ native Missions_ShouldShowSatisfaction(playerid)
 //@returns {@code 0} if there's no mission associated with the given player
 //@remarks {@param buf} data: <ul>\
 	<li>{@code buf}: mission start msg in, to be sent to the player</li>\
-	<li>{@code buf+200}: length of tracker data to be sent to flight tracker</li>\
-	<li>{@code buf+201}: tracker data to be sent to flight tracker</li></ul>
+	<li>{@code buf+200}: tracker data to be sent to flight tracker (always 36 bytes)</li></ul>
 native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, buf[])
 
 //@summary Updates passenger satisfaction. Should be called every second.\

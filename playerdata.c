@@ -27,7 +27,11 @@ void setName(struct playerdata *data, AMX *amx, cell addrparam, int namelen)
 	cell *addr;
 	amx_GetAddr(amx, addrparam, &addr);
 	amx_GetUString(data->name, addr, MAX_PLAYER_NAME + 1);
-	data->namelen = namelen;
+	if (namelen < 0 || MAX_PLAYER_NAME < namelen) {
+		data->namelen = 24;
+	} else {
+		data->namelen = (char) namelen;
+	}
 	while(1) {
 		t = *nin++;
 		if ('A' <= t && t <= 'Z') {
