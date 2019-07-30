@@ -86,6 +86,7 @@ try{
 				{@if $r->tload > 0}
 					<li><strong>{@unsafe date('H:i:s', $r->tload)}</strong> cargo loaded</li>
 				{@endif}
+				<li id="rmt" style="display:none"></li>
 				{@if $r->tunload > 0}
 					<li><strong>{@unsafe date('H:i:s', $r->tunload)}</strong> cargo unloaded, flight ended</li>
 				{@endif}
@@ -154,7 +155,7 @@ try{
 			<div class="clear"></div>
 		</div>
 		<script src="{@unsafe $STATICPATH}/flightmap.js"></script>
-		<script>flightmap('{@unsafe $STATICPATH}', {@unsafe $id})</script>
+		<script>UTCoffset={@unsafe date('Z')};flightmap('{@unsafe $STATICPATH}', {@unsafe $id})</script>
 	</div>
 	{@render defaultfooter.tpl}
 </body>
