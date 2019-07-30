@@ -110,6 +110,7 @@ function flightmap(staticpath, id)
 			g('#9f9', 'crma', alt, maxalt);
 			g('#f99', 'crmh', hp, 1000);
 			g('#f9f', 'crmp', sat, 100);
+			g('#ff9', 'crmf', fuel, maxfuel);
 		}
 		map.onload = function()
 		{

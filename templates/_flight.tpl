@@ -152,6 +152,10 @@ try{
 				<h4>Passenger satisfaction</h4>
 				<canvas id="crmp" width="500" height="200"></canvas>
 			</div>
+			<div class="rmi">
+				<h4>Fuel</h4>
+				<canvas id="crmf" width="500" height="200"></canvas>
+			</div>
 			<div class="clear"></div>
 		</div>
 		<script src="{@unsafe $STATICPATH}/flightmap.js"></script>
