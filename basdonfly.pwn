@@ -356,9 +356,10 @@ native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, Float
 //@param vy y-velocity of the vehicle
 //@param vz z-velocity of the vehicle
 //@param alt altitude (z-pos) of the vehicle
+//@param isafk whether the player is afk or not
 //@param buf buffer to store message in (always 24 bytes)
 //@returns {@code 0} if something doesn't add up and there's no message to be sent
-native Missions_CreateTrackerMessage(playerid, vid, Float:hp, Float:x, Float:y, Float:vx, Float:vy, Float:vz, Float:alt, buf[])
+native Missions_CreateTrackerMessage(playerid, vid, Float:hp, Float:x, Float:y, Float:vx, Float:vy, Float:vz, Float:alt, isafk, buf[])
 
 //@summary Ends the active mission for given player (when applicable)
 //@param playerid the playerid to cancel their mission for

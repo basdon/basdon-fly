@@ -43,6 +43,8 @@ struct mission {
 };
 
 static struct mission *activemission[MAX_PLAYERS];
+/*whether one flightdata data packet with afk flag has been sent already*/
+static char afk_tracker_packet_sent[MAX_PLAYERS];
 
 void missions_init()
 {
@@ -479,19 +481,26 @@ thisisworsethanbubblesort:
 
 /* native Missions_CreateTrackerMessage(playerid, vid, Float:hp,
                                         Float:x, Float:y,
-                                        Float:vx, Float:vy, Float:vz, Float:alt, buf[]) */
+                                        Float:vx, Float:vy, Float:vz, Float:alt,
+					isafk, buf[]) */
 cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
 {
-	const int playerid = params[1], vehicleid = params[2];
+	const int playerid = params[1], vehicleid = params[2], isafk = params[10];
 	cell *addr;
 	char *trackermsg;
 	struct mission *mission;
 	float x, y, vx, vy, vz;
 	short spd, alt, hp;
+	int flags;
 
 	if ((mission = activemission[playerid]) == NULL || mission->veh->spawnedvehicleid != vehicleid) {
 		return 0;
 	}
+
+	if (isafk && afk_tracker_packet_sent[playerid]) {
+		return 0;
+	}
+	afk_tracker_packet_sent[playerid] = flags = isafk == 1;
 
 	x = amx_ctof(params[4]);
 	y = amx_ctof(params[5]);
@@ -503,14 +512,14 @@ cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
 	alt = (short) amx_ctof(params[9]);
 
 	/* flight tracker packet 2 */
-	amx_GetAddr(amx, params[10], &addr);
+	amx_GetAddr(amx, params[11], &addr);
 	trackermsg = (char*) addr;
 	trackermsg[0] = 'F';
 	trackermsg[1] = 'L';
 	trackermsg[2] = 'Y';
 	trackermsg[3] = 2;
 	memcpy(trackermsg + 4, &mission->id, 4);
-	trackermsg[8] = 0;
+	trackermsg[8] = flags;
 	trackermsg[9] = (char) mission->passenger_satisfaction;
 	memcpy(trackermsg + 10, &spd, 2);
 	memcpy(trackermsg + 12, &alt, 2);
@@ -939,6 +948,8 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	if (mission == NULL) {
 		return 0;
 	}
+
+	afk_tracker_packet_sent[playerid] = 0;
 
 	mission->id = params[2];
 	mission->stage = MISSION_STAGE_PRELOAD;
