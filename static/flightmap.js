@@ -7,46 +7,49 @@ function flightmap(staticpath, id)
 	var loadmap = function(ab, errcb)
 	{
 		var dv = new DataView(req.response);
-		if (dv.getInt8(0) != 1 || dv.getInt32(1, 1) != id) {
-			return errcb();
+		if (dv.getInt32(0, 1) != 0x594C4603 || dv.getInt32(4, 1) != id) {
+			return errcb('incorrect version or wrong flight id');
 		}
 		var len = req.response.byteLength;
-		if (len < 69) {
-			return errcb();
+		if (len < 96) {
+			return errcb('no data');
 		}
+		var fuelcap = dv.getFloat32(8, 1);
 		var mc = e('crmm').getContext('2d');
 		mc.fillStyle = "#6486A4";
 		mc.fillRect(0, 0, 1000, 1000);
 		var map = new Image();
 		map.onerror = function()
 		{
-			var dp = (len - 30);
-			if (dp % 19) {
-				return errcb();
+			var dp = (len - 40);
+			if (dp % 24) {
+				return errcb('extra bytes: ' + (dp % 24));
 			}
-			dp /= 19;
-			var mintim = 0, maxtim = 0, minspd, maxspd, minalt, maxalt, minsat, maxsat, minhp, maxhp;
-			var tim = [], spd = [], alt = [], sat = [], hp = [], pos = [];
-			dv = new DataView(req.response, 30);
+			dp /= 24;
+			var mintim = 0, maxtim = 0, minspd, maxspd, minalt, maxalt, minsat, maxsat, minhp, maxhp, maxfuel;
+			var tim = [], spd = [], alt = [], sat = [], hp = [], pos = [], fuel = [], flags = [];
 			for (var i = 0; i < dp; i++) {
-				var t, o = i * 19;
-				tim.push(maxtim = dv.getInt32(o, 1));
+				var t, dv = new DataView(req.response, 40 + i * 24);
+				tim.push(maxtim = dv.getInt32(0, 1));
 				if (!mintim) {
 					mintim = maxtim;
 				}
-				spd.push(t = dv.getInt16(4 + o, 1));
-				if (!minspd || t < minspd) minspd = t;
-				if (!maxspd || t > maxspd) maxspd = t;
-				alt.push(t = dv.getInt16(6 + o, 1));
-				if (!minalt || t < minalt) minalt = t;
-				if (!maxalt || t > maxalt) maxalt = t;
-				sat.push(t = dv.getInt8(8 + o, 1));
+				flags.push(t = dv.getInt8(4));
+				sat.push(t = dv.getInt8(5));
 				if (!minsat || t < minsat) minsat = t;
 				if (!maxsat || t > maxsat) maxsat = t;
-				hp.push(t = dv.getInt16(9 + o, 1));
+				spd.push(t = dv.getInt16(6, 1));
+				if (!minspd || t < minspd) minspd = t;
+				if (!maxspd || t > maxspd) maxspd = t;
+				alt.push(t = dv.getInt16(8, 1));
+				if (!minalt || t < minalt) minalt = t;
+				if (!maxalt || t > maxalt) maxalt = t;
+				hp.push(t = dv.getInt16(10, 1));
 				if (!minhp || t < minhp) minhp = t;
 				if (!maxhp || t > maxhp) maxhp = t;
-				pos.push({x: dv.getFloat32(11 + o, 1) / 6.66 + 500, y: -dv.getFloat32(15 + o, 1) / 6.66 + 500});
+				fuel.push(t = dv.getFloat32(12, 1));
+				if (!maxfuel || t > maxfuel) maxfuel = t;
+				pos.push({x: dv.getFloat32(16, 1) / 6.66 + 500, y: -dv.getFloat32(20, 1) / 6.66 + 500});
 			}
 			var t = [];
 			for (var i = 0; i < tim.length; i++) {
@@ -98,8 +101,8 @@ function flightmap(staticpath, id)
 	req.onload = function()
 	{
 		if (this.status >= 200 && this.status < 300) {
-			loadmap(req.response, function() {
-				rmmsg.innerHTML = '<p>Route info for this flight is corrupted, try again later.</p>';
+			loadmap(req.response, function(what) {
+				rmmsg.innerHTML = '<p>Route info for this flight is corrupted ('+what+'), try again later.</p>';
 			});
 		}
 		else rmmsg.innerHTML = '<p>There is no route info for this flight.</p>';
