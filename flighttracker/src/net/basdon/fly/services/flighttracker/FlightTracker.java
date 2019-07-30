@@ -24,6 +24,7 @@ private final Consumer<String> logreceiver;
 byte[] buf = new byte[255];
 final HashMap<Integer, FileOutputStream> missionFiles = new HashMap<>();
 
+public boolean debug;
 public DatagramSocket socket;
 public int data_handle_err_count;
 public Throwable last_handle_err;
@@ -132,6 +133,12 @@ throws InterruptedIOException
 		return true; // don't mark as issue, just ignore
 	}
 	int length = packet.getLength();
+	if (debug) {
+		for (int i = 0; i < length; i++) {
+			System.out.printf("%02X ", buf[i]);
+		}
+		System.out.println();
+	}
 	if (length < 4) {
 		packet_wrong_length_count++;
 		return false;

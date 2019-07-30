@@ -16,3 +16,5 @@ commands
 ft                      -- prints status of flight tracker, with currently
                            active flights. If the flighttracker is not running
                            for whatever reason, it will attempt to restart it.
+ft-debug                -- toggles debug output, currently only prints incoming
+                           packets. Only available for users with owner perms.

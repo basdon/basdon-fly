@@ -180,6 +180,13 @@ boolean on_command(User user, char[] target, char[] replytarget,
 		anna.privmsg(replytarget, chars(sb));
 		return true;
 	}
+	if (strcmp(cmd, 'f','t','-','d','e','b','u','g') && anna.is_owner(user)) {
+		if (ft != null) {
+			String msg = "debug is now " + ((ft.debug = !ft.debug) ? "on" : "off");
+			anna.privmsg(replytarget, msg.toCharArray());
+		}
+		return true;
+	}
 	return false;
 }
 
