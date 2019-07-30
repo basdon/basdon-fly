@@ -166,7 +166,7 @@ throws InterruptedIOException
 boolean handleMissionStart(int length)
 throws InterruptedIOException
 {
-	if (length < 10) {
+	if (length < 15) {
 		packet_wrong_length_count++;
 		return false;
 	}
@@ -174,17 +174,17 @@ throws InterruptedIOException
 	if (os == null) {
 		return false;
 	}
-	byte nameLen = buf[8];
+	byte nameLen = buf[14];
 	if (nameLen < 1 || 24 < nameLen) {
 		return false;
 	}
 	try {
 		FileChannel channel = os.getChannel();
 		long position = channel.position();
-		if (position != 5) {
-			channel.position(5);
+		if (position != 8) {
+			channel.position(8);
 		}
-		channel.write(ByteBuffer.wrap(buf, 12, nameLen + 1));
+		channel.write(ByteBuffer.wrap(buf, 8, 6 + 1 + nameLen));
 		channel.position(position);
 		os.flush();
 		return true;
@@ -204,7 +204,7 @@ throws InterruptedIOException
 boolean handleMissionData(int length)
 throws InterruptedIOException
 {
-	if (length != 24) {
+	if (length != 28) {
 		packet_wrong_length_count++;
 		return false;
 	}
@@ -219,7 +219,7 @@ throws InterruptedIOException
 		os.write((time >> 8) & 0xFF);
 		os.write((time >> 16) & 0xFF);
 		os.write((time >> 24) & 0xFF);
-		os.write(buf, 4, 20);
+		os.write(buf, 4, 24);
 		os.flush();
 		return true;
 	} catch (InterruptedIOException e) {
@@ -281,11 +281,16 @@ throws InterruptedIOException
 			return null;
 		}
 		try {
-			os.write(2);
+			os.write(3);
+			os.write('F');
+			os.write('L');
+			os.write('Y');
 			os.write(buf, missionIdOffset, 4);
-			os.write(1);
-			os.write('?');
-			os.write(new byte[23]);
+			os.write(new byte[6]); // vehicle fuel cap / vehicle model id
+			os.write(1); // player name len
+			os.write('?'); // player name
+			os.write(new byte[23]); // pad
+			os.flush();
 		} catch (InterruptedIOException e) {
 			throw e;
 		} catch (IOException e) {
