@@ -215,11 +215,10 @@ throws InterruptedIOException
 	try {
 		int time = (int) (System.currentTimeMillis() / 1000);
 		os.write(time & 0xFF);
-		os.write(buf, 4, 20);
 		os.write((time >> 8) & 0xFF);
 		os.write((time >> 16) & 0xFF);
 		os.write((time >> 24) & 0xFF);
-		os.write(buf, 4, 24);
+		os.write(buf, 8, 20);
 		os.flush();
 		return true;
 	} catch (InterruptedIOException e) {
@@ -289,7 +288,7 @@ throws InterruptedIOException
 			os.write(new byte[6]); // vehicle fuel cap / vehicle model id
 			os.write(1); // player name len
 			os.write('?'); // player name
-			os.write(new byte[23]); // pad
+			os.write(new byte[24]); // pad
 			os.flush();
 		} catch (InterruptedIOException e) {
 			throw e;
