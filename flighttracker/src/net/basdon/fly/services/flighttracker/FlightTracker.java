@@ -159,7 +159,7 @@ throws InterruptedIOException
 boolean handleMissionStart(int length)
 throws InterruptedIOException
 {
-	if (length < 14) {
+	if (length < 10) {
 		packet_wrong_length_count++;
 		return false;
 	}
@@ -167,7 +167,7 @@ throws InterruptedIOException
 	if (os == null) {
 		return false;
 	}
-	byte nameLen = buf[12];
+	byte nameLen = buf[8];
 	if (nameLen < 1 || 24 < nameLen) {
 		return false;
 	}
@@ -197,7 +197,7 @@ throws InterruptedIOException
 boolean handleMissionData(int length)
 throws InterruptedIOException
 {
-	if (length != 42) {
+	if (length != 24) {
 		packet_wrong_length_count++;
 		return false;
 	}
@@ -208,15 +208,11 @@ throws InterruptedIOException
 	try {
 		int time = (int) (System.currentTimeMillis() / 1000);
 		os.write(time & 0xFF);
+		os.write(buf, 4, 20);
 		os.write((time >> 8) & 0xFF);
 		os.write((time >> 16) & 0xFF);
 		os.write((time >> 24) & 0xFF);
-		for (int i = 0; i < 15; i++) {
-			buf[12 + i] = (byte)
-				((buf[12 + 2 * i] & 0xF) |
-				((buf[13 + 2 * i] & 0xF) << 4));
-		}
-		os.write(buf, 12, 15);
+		os.write(buf, 4, 20);
 		os.flush();
 		return true;
 	} catch (InterruptedIOException e) {
@@ -235,13 +231,13 @@ throws InterruptedIOException
 boolean handleMissionEnd(int length)
 throws InterruptedIOException
 {
-	if (length != 12) {
+	if (length != 8) {
 		packet_wrong_length_count++;
 		return false;
 	}
 	FileOutputStream os = outputStreamForMission(4);
 	if (os != null) {
-		missionFiles.remove(new Integer(i32ln(4)));
+		missionFiles.remove(new Integer(i32(4)));
 		try {
 			os.close();
 			return true;
@@ -262,7 +258,7 @@ throws InterruptedIOException
 FileOutputStream outputStreamForMission(int missionIdOffset)
 throws InterruptedIOException
 {
-	int id = i32ln(missionIdOffset);
+	int id = i32(missionIdOffset);
 	Integer key = new Integer(id);
 	FileOutputStream os = missionFiles.get(key);
 	if (os == null) {
@@ -278,11 +274,8 @@ throws InterruptedIOException
 			return null;
 		}
 		try {
-			os.write(1);
-			os.write(id & 0xFF);
-			os.write((id >> 8) & 0xFF);
-			os.write((id >> 16) & 0xFF);
-			os.write((id >> 24) & 0xFF);
+			os.write(2);
+			os.write(buf, missionIdOffset, 4);
 			os.write(1);
 			os.write('?');
 			os.write(new byte[23]);
@@ -298,16 +291,12 @@ throws InterruptedIOException
 	return os;
 }
 
-int i32ln(int pos)
+int i32(int pos)
 {
 	return
-		(buf[pos] & 0xF) |
-		((buf[pos + 1] & 0xF) << 4) |
-		((buf[pos + 2] & 0xF) << 8) |
-		((buf[pos + 3] & 0xF) << 12) |
-		((buf[pos + 4] & 0xF) << 16) |
-		((buf[pos + 5] & 0xF) << 20) |
-		((buf[pos + 6] & 0xF) << 24) |
-		((buf[pos + 7] & 0xF) << 28);
+		(buf[pos] & 0xFF) |
+		((buf[pos + 1] & 0xFF) << 8) |
+		((buf[pos + 2] & 0xFF) << 16) |
+		((buf[pos + 3] & 0xFF) << 24);
 }
 } /*FlightTracker*/
