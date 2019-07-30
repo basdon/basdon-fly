@@ -356,10 +356,11 @@ native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, Float
 //@param vy y-velocity of the vehicle
 //@param vz z-velocity of the vehicle
 //@param alt altitude (z-pos) of the vehicle
-//@param isafk whether the player is afk or not
-//@param buf buffer to store message in (always 24 bytes)
+//@param isafk whether the player is afk
+//@param engine whether the engine is on
+//@param buf buffer to store message in (always 28 bytes)
 //@returns {@code 0} if something doesn't add up and there's no message to be sent
-native Missions_CreateTrackerMessage(playerid, vid, Float:hp, Float:x, Float:y, Float:vx, Float:vy, Float:vz, Float:alt, isafk, buf[])
+native Missions_CreateTrackerMessage(playerid, vid, Float:hp, Float:x, Float:y, Float:vx, Float:vy, Float:vz, Float:alt, isafk, engine, buf[])
 
 //@summary Ends the active mission for given player (when applicable)
 //@param playerid the playerid to cancel their mission for
@@ -457,7 +458,7 @@ native Missions_ShouldShowSatisfaction(playerid)
 //@param y will contain loading point y coordinate on return
 //@param z will contain loading point z coordinate on return
 //@param querybuf buffer to store query in
-//@param trackerbuf buffer to store tracker packet data in (always 36 bytes)
+//@param trackerbuf buffer to store tracker packet data in (always 40 bytes)
 //@returns {@code 0} if there's no mission associated with the given player
 native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, querybuf[], trackerbuf[])
 

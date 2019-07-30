@@ -102,7 +102,7 @@ static void resizeDbVehicleTable()
 	}
 }
 
-static float model_fuel_capacity(int modelid)
+float model_fuel_capacity(int modelid)
 {
 	switch (modelid)
 	{

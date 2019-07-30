@@ -482,10 +482,11 @@ thisisworsethanbubblesort:
 /* native Missions_CreateTrackerMessage(playerid, vid, Float:hp,
                                         Float:x, Float:y,
                                         Float:vx, Float:vy, Float:vz, Float:alt,
-					isafk, buf[]) */
+					isafk, engine, buf[]) */
 cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
 {
 	const int playerid = params[1], vehicleid = params[2], isafk = params[10];
+	const int engine = params[11];
 	cell *addr;
 	char *trackermsg;
 	struct mission *mission;
@@ -501,6 +502,9 @@ cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
 		return 0;
 	}
 	afk_tracker_packet_sent[playerid] = flags = isafk == 1;
+	if (engine) {
+		flags |= 2;
+	}
 
 	x = amx_ctof(params[4]);
 	y = amx_ctof(params[5]);
@@ -512,7 +516,7 @@ cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
 	alt = (short) amx_ctof(params[9]);
 
 	/* flight tracker packet 2 */
-	amx_GetAddr(amx, params[11], &addr);
+	amx_GetAddr(amx, params[12], &addr);
 	trackermsg = (char*) addr;
 	trackermsg[0] = 'F';
 	trackermsg[1] = 'L';
@@ -524,8 +528,9 @@ cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
 	memcpy(trackermsg + 10, &spd, 2);
 	memcpy(trackermsg + 12, &alt, 2);
 	memcpy(trackermsg + 14, &hp, 2);
-	memcpy(trackermsg + 16, &x, 4);
-	memcpy(trackermsg + 20, &y, 4);
+	memcpy(trackermsg + 16, &mission->veh->fuel, 4);
+	memcpy(trackermsg + 20, &x, 4);
+	memcpy(trackermsg + 24, &y, 4);
 	return 1;
 }
 
@@ -940,6 +945,8 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
 	struct mission *mission = activemission[playerid];
+	int vehmodel;
+	float fuelcapacity;
 	cell *addr;
 	char *trackermsg;
 	char msg[144];
@@ -999,13 +1006,16 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	trackermsg[2] = 'Y';
 	trackermsg[3] = 1;
 	memcpy(trackermsg + 4, &mission->id, 4);
-	memset(trackermsg + 9, 0, 26); /* don't leak random data */
+	fuelcapacity = model_fuel_capacity(vehmodel = mission->veh->model);
+	memcpy(trackermsg + 8, &fuelcapacity, 4);
+	memcpy(trackermsg + 12, &vehmodel, 2);
+	memset(trackermsg + 15, 0, 24); /* don't leak random data */
 	if (pdata[playerid] != NULL) {
-		trackermsg[8] = pdata[playerid]->namelen;
-		strcpy(trackermsg + 9, pdata[playerid]->name);
+		trackermsg[14] = pdata[playerid]->namelen;
+		strcpy(trackermsg + 15, pdata[playerid]->name);
 	} else {
-		trackermsg[8] = 1;
-		trackermsg[9] = '?';
+		trackermsg[14] = 1;
+		trackermsg[15] = '?';
 	}
 
 	return 1;

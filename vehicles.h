@@ -20,3 +20,5 @@ struct vehicle {
 };
 
 extern struct vehicle gamevehicles[MAX_VEHICLES];
+
+float model_fuel_capacity(int modelid);
