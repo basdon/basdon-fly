@@ -93,24 +93,25 @@ function flightmap(staticpath, id)
 				mc.lineTo(pos[i].x, pos[i].y);
 				mc.stroke();
 			}
-			var g = function(fill, id, vals, max)
+			var g = function(fill, id, vals, min, max)
 			{
+				max += min;
 				var mc = e(id).getContext('2d');
 				mc.fillStyle = fill;
 				mc.beginPath();
 				mc.moveTo(0, 200);
 				for (var i = 0; i < t.length; i++) {
-					mc.lineTo(500 * t[i], 200 * (1 - vals[i] / max));
+					mc.lineTo(500 * t[i], 200 * (1 - (vals[i] - min) / max));
 				}
 				mc.lineTo(500, 200);
 				mc.closePath();
 				mc.fill();
 			};
-			g('#99f', 'crms', spd, 145);
-			g('#9f9', 'crma', alt, maxalt);
-			g('#f99', 'crmh', hp, 1000);
-			g('#f9f', 'crmp', sat, 100);
-			g('#ff9', 'crmf', fuel, maxfuel);
+			g('#99f', 'crms', spd, 0, 145);
+			g('#9f9', 'crma', alt, Math.min(0, minalt), 850);
+			g('#f99', 'crmh', hp, 0, 1000);
+			g('#f9f', 'crmp', sat, 0, 100);
+			g('#ff9', 'crmf', fuel, 0, maxfuel);
 		}
 		map.onload = function()
 		{
