@@ -363,12 +363,10 @@ native Missions_CreateTrackerMessage(playerid, vid, Float:hp, Float:x, Float:y, 
 //@summary Ends the active mission for given player (when applicable)
 //@param playerid the playerid to cancel their mission for
 //@param reason the reason, see {@code MISSION_CANCELREASON_} constants
-//@param buf buffer
+//@param querybuf buffer for query
+//@param trackerbuf buffer for tracker packet data (always 8 bytes)
 //@returns {@code 0} if no mission was active for player
-//@remarks {@param buf} data: <ul>\
-	<li>{@code buf}: flg update query, only when returned non-zero</li>\
-	<li>{@code buf+500}: tracker data to be sent to flight tracker, only when returned non-zero (always 8 bytes)</li></ul>
-native Missions_EndUnfinished(playerid, reason, buf[])
+native Missions_EndUnfinished(playerid, reason, querybuf[], trackerbuf[])
 
 //@summary Try to advance any active mission for player when they entered a race checkpoint
 //@param playerid player that entered a checkpoint
@@ -457,12 +455,10 @@ native Missions_ShouldShowSatisfaction(playerid)
 //@param x will contain loading point x coordinate on return
 //@param y will contain loading point y coordinate on return
 //@param z will contain loading point z coordinate on return
-//@param buf buffer to store data in (see remarks)
+//@param querybuf buffer to store query in
+//@param trackerbuf buffer to store tracker packet data in (always 36 bytes)
 //@returns {@code 0} if there's no mission associated with the given player
-//@remarks {@param buf} data: <ul>\
-	<li>{@code buf}: mission start msg in, to be sent to the player</li>\
-	<li>{@code buf+200}: tracker data to be sent to flight tracker (always 36 bytes)</li></ul>
-native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, buf[])
+native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, querybuf[], trackerbuf[])
 
 //@summary Updates passenger satisfaction. Should be called every second.\
 	Has no effect when player is not in a mission (or in a mission that has no passengers).

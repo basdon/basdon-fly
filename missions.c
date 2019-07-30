@@ -520,7 +520,7 @@ cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Missions_EndUnfinished(playerid, reason, buf[]) */
+/* native Missions_EndUnfinished(playerid, reason, querybuf[], trackerbuf[]) */
 cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 {
 	const int playerid = params[1], reason = params[2];
@@ -542,7 +542,8 @@ cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 	amx_SetUString(addr, buf, sizeof(buf));
 
 	/* flight tracker packet 3 */
-	trackermsg = (char*) (addr + 500);
+	amx_GetAddr(amx, params[4], &addr);
+	trackermsg = (char*) addr;
 	trackermsg[0] = 'F';
 	trackermsg[1] = 'L';
 	trackermsg[2] = 'Y';
@@ -924,7 +925,8 @@ cell AMX_NATIVE_CALL Missions_ShouldShowSatisfaction(AMX *amx, cell *params)
 		activemission[playerid]->missiontype & PASSENGER_MISSIONTYPES;
 }
 
-/* native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, buf[]) */
+/* native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z,
+                         querybuf[], trackerbuf[]) */
 cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
@@ -979,12 +981,14 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	amx_SetUString(addr, msg, sizeof(msg));
 
 	/* flight tracker packet 1 */
-	trackermsg = (char*) (addr + 200);
+	amx_GetAddr(amx, params[7], &addr);
+	trackermsg = (char*) addr;
 	trackermsg[0] = 'F';
 	trackermsg[1] = 'L';
 	trackermsg[2] = 'Y';
 	trackermsg[3] = 1;
 	memcpy(trackermsg + 4, &mission->id, 4);
+	memset(trackermsg + 9, 0, 26); /* don't leak random data */
 	if (pdata[playerid] != NULL) {
 		trackermsg[8] = pdata[playerid]->namelen;
 		strcpy(trackermsg + 9, pdata[playerid]->name);
