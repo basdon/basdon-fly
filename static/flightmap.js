@@ -121,7 +121,7 @@ function flightmap(staticpath, id)
 				mc.fill();
 			};
 			g('#99f', 'crms', spd, 0, 145);
-			g('#9f9', 'crma', alt, Math.min(0, minalt), 850);
+			g('#9f9', 'crma', alt, Math.min(0, minalt), 900);
 			g('#f99', 'crmh', hp, 0, 1000);
 			g('#f9f', 'crmp', sat, 0, 100);
 			g('#dd9', 'crmf', fuel, 0, maxfuel);
