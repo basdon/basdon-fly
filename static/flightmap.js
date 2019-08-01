@@ -30,9 +30,10 @@ function flightmap(staticpath, id)
 			var engine = 2, paused = 0, lastfuel, lasthp;
 			var mintim = 0, maxtim = 0, minspd, maxspd, minalt, maxalt, minsat, maxsat, minhp, maxhp, maxfuel;
 			var tim = [], spd = [], alt = [], sat = [], hp = [], pos = [], fuel = [], flags = [];
+			var pausetime, pausetimes = [], timeoffset = 0;
 			for (var i = 0; i < dp; i++) {
 				var t, dv = new DataView(req.response, 40 + i * 24);
-				tim.push(maxtim = dv.getInt32(0, 1));
+				tim.push((maxtim = dv.getInt32(0, 1)) - timeoffset);
 				if (!mintim) {
 					mintim = maxtim;
 				}
@@ -44,6 +45,17 @@ function flightmap(staticpath, id)
 				var p = t & 1, en = t & 2;
 				if (p != paused) {
 					events += '<li>'+dd+'player '+(p?'':'un')+'paused</li>';
+					if (p) {
+						if (!pausetime) {
+							pausetime = maxtim;
+						}
+					} else if (pausetime) {
+						var d =  maxtim - pausetime - 1;
+						timeoffset += d;
+						tim[tim.length - 1] -= d;
+						pausetime = 0;
+					}
+					pausetimes.push(maxtim - timeoffset);
 					paused = p;
 				}
 				if (en != engine) {
@@ -75,10 +87,12 @@ function flightmap(staticpath, id)
 				pos.push({x: dv.getFloat32(16, 1) / 6.66 + 500, y: -dv.getFloat32(20, 1) / 6.66 + 500});
 			}
 			e('rmt').outerHTML = events;
+			var totaltime = maxtim - timeoffset - mintim;
 			var t = [];
 			for (var i = 0; i < tim.length; i++) {
-				t[i] = (tim[i] - mintim) / (maxtim - mintim);
+				t[i] = (tim[i] - mintim) / totaltime;
 			}
+			console.log(t);
 			e('rm').style.display = 'block';
 			rmmsg.innerHTML = '';
 			mc.lineCap = mc.lineJoin = 'round';
@@ -106,12 +120,20 @@ function flightmap(staticpath, id)
 				mc.lineTo(500, 200);
 				mc.closePath();
 				mc.fill();
+				for (var i = 0; i < pausetimes.length; i++) {
+					var p = ((pausetimes[i] - mintim) / totaltime) * 500;
+					mc.strokeStyle = '#555';
+					mc.beginPath()
+					mc.moveTo(p, 0);
+					mc.lineTo(p, 200);
+					mc.stroke();
+				}
 			};
 			g('#99f', 'crms', spd, 0, 145);
 			g('#9f9', 'crma', alt, Math.min(0, minalt), 850);
 			g('#f99', 'crmh', hp, 0, 1000);
 			g('#f9f', 'crmp', sat, 0, 100);
-			g('#ff9', 'crmf', fuel, 0, maxfuel);
+			g('#dd9', 'crmf', fuel, 0, maxfuel);
 		}
 		map.onload = function()
 		{
