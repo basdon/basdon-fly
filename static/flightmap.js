@@ -91,7 +91,6 @@ function flightmap(staticpath, id)
 			for (var i = 0; i < tim.length; i++) {
 				t[i] = (tim[i] - mintim) / totaltime;
 			}
-			console.log(t);
 			e('rm').style.display = 'block';
 			rmmsg.innerHTML = '';
 			mc.lineCap = mc.lineJoin = 'round';
