@@ -30,7 +30,7 @@ function flightmap(staticpath, id)
 			var engine = 2, paused = 0, lastfuel, lasthp;
 			var mintim = 0, maxtim = 0, minspd, maxspd, minalt, maxalt, minsat, maxsat, minhp, maxhp, maxfuel;
 			var tim = [], spd = [], alt = [], sat = [], hp = [], pos = [], fuel = [], flags = [];
-			var pausetime, pausetimes = [], timeoffset = 0;
+			var pausetime, timeoffset = 0;
 			for (var i = 0; i < dp; i++) {
 				var t, dv = new DataView(req.response, 40 + i * 24);
 				tim.push((maxtim = dv.getInt32(0, 1)) - timeoffset);
@@ -55,7 +55,6 @@ function flightmap(staticpath, id)
 						tim[tim.length - 1] -= d;
 						pausetime = 0;
 					}
-					pausetimes.push(maxtim - timeoffset);
 					paused = p;
 				}
 				if (en != engine) {
@@ -120,14 +119,6 @@ function flightmap(staticpath, id)
 				mc.lineTo(500, 200);
 				mc.closePath();
 				mc.fill();
-				for (var i = 0; i < pausetimes.length; i++) {
-					var p = ((pausetimes[i] - mintim) / totaltime) * 500;
-					mc.strokeStyle = '#555';
-					mc.beginPath()
-					mc.moveTo(p, 0);
-					mc.lineTo(p, 200);
-					mc.stroke();
-				}
 			};
 			g('#99f', 'crms', spd, 0, 145);
 			g('#9f9', 'crma', alt, Math.min(0, minalt), 850);
