@@ -24,7 +24,7 @@
 				margin-right: 0;
 			}
 		}
-		form p {
+		#login p {
 			text-align: center;
 		}
 	</style>
@@ -42,6 +42,11 @@
 				<label><span>Stay logged in:</span><input type="checkbox" name="stay" /></label>
 				<p><input type="submit" value="Login"/></p>
 			</form>
+			<p>
+				Don't have an account?<br/>
+				Register now by joining in-game: <a href="samp://basdon.net:7777">basdon.net:7777</a><br/>
+				Need help? <a href="article.php?title=How_To_Join">How to join</a> or <a href="contact.php">contact us</a>.
+			</p>
 		</div>
 	</div>
 	{@render defaultfooter.tpl}
