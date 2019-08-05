@@ -33,6 +33,7 @@ header p {
 header small, footer small {
 	font-size: small;
 	float: right;
+	text-align: right;
 }
 div#main,.mainright {
 	float: right;
