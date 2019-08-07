@@ -36,11 +36,11 @@
 		<div id="login">
 			<h2 id="main">Login</h2>
 			<form method="post" action="login.php">
-				<label><span>Nickname:</span><input type="text" name="usr" /></label><br/>
-				<label><span>Password:</span><input type="password" name="pwd" /></label><br/>
-				<label><span>Accept cookies (required):</span><input type="checkbox" name="yummie" checked="checked" /></label><br/>
-				<label><span>Stay logged in:</span><input type="checkbox" name="stay" /></label>
-				<p><input type="submit" value="Login"/></p>
+				<label><span>Nickname:</span>{@input text usr}</label><br/>
+				<label><span>Password:</span>{@input password pwd}</label><br/>
+				<label><span>Accept cookies (required):</span>{@input checkbox yummie checked}</label><br/>
+				<label><span>Stay logged in:</span>{@input checkbox stay}</label>
+				<p>{@input submit Login}</p>
 			</form>
 			<p>
 				Don't have an account?<br/>

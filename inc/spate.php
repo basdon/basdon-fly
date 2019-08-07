@@ -125,6 +125,17 @@ function spate_generate($template_dir, $template)
 				$j += 3;
 				$suffix = '~>';
 				goto directive_parse_conditionbody__start;
+			case "@input":
+				if ($c == '}') die('empty @input');
+				$args = '';
+				$c = '';
+				do {
+					$args .= $c;
+					$c = $in[++$i];
+				} while ($c != '}');
+				$result .= $input = makeinput($args);
+				$j += strlen($input);
+				goto next;
 			case "@urlencode":
 				$result .= '<?=urlencode(';
 				$j += 13;
@@ -220,4 +231,28 @@ _return:
 		$result = str_replace('~>', '?>', $result);
 	}
 	return /*$parsed_cache[$template] = */$result;
+}
+
+/**
+ * @param $args arguments of @input
+ * @return an input tag
+ */
+function makeinput($args)
+{
+	$args = explode(' ', $args);
+	$type = $args[0];
+	$name = $args[1];
+	if ($type == 'submit') {
+		$name = '_form';
+	}
+	$result = '<input type="' . $type . '" name="' . $name . '"';
+	if ($type == 'checkbox') {
+		$defaultchecked = count($args) > 2 && $args[2] == 'checked';
+		$result .= '<?php form_checkbox(\''.$name.'\','.($defaultchecked?1:0).') ~>';
+	} else if ($type == 'text') {
+		$result .= '<?php form_input(\''.$name.'\') ~>';
+	} else if ($type == 'submit') {
+		$result .= ' value="' . $args[1] . '"';
+	}
+	return $result . '/>';
 }
