@@ -7,6 +7,11 @@ $db_passw = '';
 
 $BASEPATH = 'https://example.com';
 $STATICPATH = 'https://static.example.com';
+$SESSIONCOOKIENAME1 = 'jsessionid';
+$SESSIONCOOKIENAME2 = 'ASP.NET_SessionId';
+$COOKIEPATH = '';
+$COOKIEDOMAIN = '';
+$COOKIEHTTPS = false;
 
 $CSS_SUFFIX = 'css';
 // uncomment to use minified css files

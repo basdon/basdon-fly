@@ -11,6 +11,33 @@ if (!isset($p_accent_color_a)) {
 	$p_accent_color_b = 'bbb';
 }
 
+$__clientip = $_SERVER['REMOTE_ADDR'];
+
+session_name($SESSIONCOOKIENAME2);
+
+function ensure_session()
+{
+	global $COOKIEPATH, $COOKIEDOMAIN;
+	static $ensured = false;
+	if (!$ensured) {
+		$ensured = true;
+		session_set_params(0, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
+		session_start();
+	}
+}
+
+function generate_random_key()
+{
+	$key = '';
+	for ($i = 0; $i < 32; $i++) {
+		do {
+			$n = rand(48, 122);
+		} while((57 < $n && $n < 65) || (90 < $n && $n < 97));
+		$key .= chr($n);
+	}
+	return $key;
+}
+
 function simple_pagination($urlWithParam, $currentPageFromOne, $totalPages)
 {
 	$str = '<p class="pagination">Page:';

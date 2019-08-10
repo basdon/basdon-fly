@@ -35,6 +35,9 @@
 	<div class="singlebody">
 		<div id="login">
 			<h2 id="main">Login</h2>
+			{@if isset($loginerr)}
+				<p class="msg error">{$loginerr}</p>
+			{@endif}
 			<form method="post" action="login.php">
 				<label><span>Nickname:</span>{@input text usr}</label><br/>
 				<label><span>Password:</span>{@input password pwd}</label><br/>

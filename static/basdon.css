@@ -181,3 +181,23 @@ code {
 span.u {
 	text-decoration: underline;
 }
+p.msg {
+	text-align: left;
+	padding: .3em;
+}
+p.msg.error {
+	border: 1px solid #600;
+	background: #fbb;
+}
+p.msg.info {
+	border: 1px solid #00529b;
+	background: #cdf;
+}
+p.msg.warning {
+	border: 1px solid #9d6000;
+	background: #FCD0B3;
+}
+p.msg.success {
+	border: 1px solid #060;
+	background: #bfb;
+ }
