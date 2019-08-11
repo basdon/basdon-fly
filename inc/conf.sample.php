@@ -7,8 +7,7 @@ $db_passw = '';
 
 $BASEPATH = 'https://example.com';
 $STATICPATH = 'https://static.example.com';
-$SESSIONCOOKIENAME1 = 'jsessionid';
-$SESSIONCOOKIENAME2 = 'ASP.NET_SessionId';
+$COOKIENAME = 'jsessionid';
 $COOKIEPATH = '';
 $COOKIEDOMAIN = '';
 $COOKIEHTTPS = false;

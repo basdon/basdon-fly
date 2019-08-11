@@ -13,16 +13,16 @@ if (!isset($p_accent_color_a)) {
 
 $__clientip = $_SERVER['REMOTE_ADDR'];
 
-session_name($SESSIONCOOKIENAME2);
-
-function ensure_session()
-{
-	global $COOKIEPATH, $COOKIEDOMAIN;
-	static $ensured = false;
-	if (!$ensured) {
-		$ensured = true;
-		session_set_params(0, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
-		session_start();
+if (isset($_COOKIE[$COOKIENAME]) && strlen($sesid = $_COOKIE[$COOKIENAME]) == 32) {
+	++$db_querycount;
+	$s = $db->prepare('SELECT stay,u.i uid,u.n name,u.g groups FROM webses w JOIN usr u ON w.usr=u.i WHERE id=?');
+	$s->bindValue(1, $sesid);
+	if ($s->execute() && ($r = $s->fetchAll()) && count($r)) {
+		$loggeduser = $r[0];
+		$expire = $loggeduser->stay ? (time() + 30 * 24 * 3600) : 0;
+		setcookie($COOKIENAME, $sesid, $expire, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
+		++$db_querycount;
+		$db->query('UPDATE webses SET lastupdate=UNIX_TIMESTAMP() WHERE id=\''.$sesid.'\'');
 	}
 }
 
