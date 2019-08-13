@@ -1,4 +1,4 @@
-<div style="background:#{@unsafe $p_accent_color_a};border-bottom:3px solid #{@unsafe $p_accent_color_b}">
+<div>
 	<header>
 		<small>
 			{@if isset($loggeduser)}

@@ -4,12 +4,7 @@ body {
 body > div {
 	background: #fff;
 	max-width: 1000px;
-	padding: 0 10px;
 	margin: 0 auto;
-}
-body > div.singlebody {
-	padding-top: .3em;
-	padding-bottom: .3em;
 }
 body > .msg {
 	max-width: 1000px;
@@ -21,13 +16,16 @@ hr {
 	height: 1px;
 }
 header {
-	padding-bottom: .5em;
+	border-bottom: 10px solid #444;
+	padding: 10px;
 }
 header h1 {
-	margin-bottom: .1em;
+	margin: .1em 0;
 }
 header p {
 	text-align: right;
+}
+header p, footer p {
 	margin: 0;
 }
 header small, footer small {
@@ -35,17 +33,30 @@ header small, footer small {
 	float: right;
 	text-align: right;
 }
+footer {
+	border-top: 10px solid #444;
+	padding: 10px;
+}
+footer p {
+	line-height: 1.1em;
+	font-size: x-small;
+}
 div#main,.mainright {
 	float: right;
-	width: calc(100% - 240px);
+	width: calc(100% - 270px);
 }
 aside {
 	float: left;
 	width: 220px;
-	padding-bottom: 1em;
+	border-right: 10px solid #444;
 }
-div#main {
-	padding-bottom: 1em;
+div#main,.mainright,aside,div.singlebody {
+	padding: 10px;
+	padding-top: 0px;
+}
+div.singlebody {
+	max-width: calc(1000px - 20px);
+	padding-top: 1px;
 }
 .fr49 {
 	float: right;
@@ -142,13 +153,6 @@ tr:hover {
 }
 .clear {
 	clear: both;
-}
-footer {
-	padding: .5em 0;
-}
-footer p {
-	line-height: 1.1em;
-	font-size: x-small;
 }
 .pagination {
 	text-align: right;

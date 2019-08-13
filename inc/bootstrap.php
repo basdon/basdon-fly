@@ -6,11 +6,6 @@ $__msgs = [];
 require('../inc/conf.php');
 include('../inc/db.php');
 
-if (!isset($p_accent_color_a)) {
-	$p_accent_color_a = 'ddd';
-	$p_accent_color_b = 'bbb';
-}
-
 $__clientip = $_SERVER['REMOTE_ADDR'];
 
 if (isset($_COOKIE[$COOKIENAME]) && strlen($sesid = $_COOKIE[$COOKIENAME]) == 32) {
