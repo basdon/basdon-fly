@@ -28,6 +28,9 @@ header p {
 header p, footer p {
 	margin: 0;
 }
+header #ip {
+	float: left;
+}
 header small, footer small {
 	font-size: small;
 	float: right;
@@ -43,14 +46,14 @@ footer p {
 }
 div#main,.mainright {
 	float: right;
-	width: calc(100% - 270px);
+	width: calc(100% - 250px);
 }
 aside {
 	float: left;
 	width: 220px;
 	border-right: 10px solid #444;
 }
-div#main,.mainright,aside,div.singlebody {
+div#main,.mainright,div.singlebody {
 	padding: 10px;
 	padding-top: 0px;
 }
@@ -67,12 +70,22 @@ div.singlebody {
 	width: 49%;
 }
 @media (max-width: 800px) {
-	div#main,.mainright {
-		width: 100%;
-		max-width: 800px;
+	div#main,div.mainright {
+		width: calc(100% - 20px);
+	}
+	header #ip {
+		float: none;
+		text-align: left;
+	}
+	header small, footer small {
+		float: none;
+		display: block;
+		text-align: right;
 	}
 	aside {
 		border-top: 5px dashed #000;
+		border-right: 0;
+		padding: 10px;
 		width: auto;
 	}
 	aside div {
@@ -114,6 +127,7 @@ h6 {
 }
 aside h4, aside h5, aside h6 {
 	margin-bottom: 0;
+	text-align: center;
 }
 #skip {
 	position: absolute;

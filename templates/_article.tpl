@@ -9,7 +9,7 @@
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
 	<div>
-		<div class="mainright article">
+		<div class="mainright">
 			<p>
 				<a href="article.php">Articles</a>
 				{@foreach $article_categories as $c}
