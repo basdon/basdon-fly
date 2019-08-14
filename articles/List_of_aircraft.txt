@@ -227,7 +227,7 @@ Light helicopter with 3 passenger seats. Since it's light, winds can make it dri
 
 Adapted version of the {@#=Maverick Maverick} for police usage. Has a spotlight which can be activated
 at night by pressing the horn button (default: {@code H}). There is no radio except for a police radio.
-The Police maveick is slightly faster than the standard Maverick.
+The Police maverick is slightly faster than the standard Maverick.
 
 {@b Based on:} Bell 206 LongRanger<br/>
 {@b Fuel capacity:} 416L<br/>
@@ -343,7 +343,7 @@ countermeasure to not get hit by missiles.
 {@b Fuel usage:} 4.5L/s<br/>
 {@b Trivia:} A {@a=https://en.wikipedia.org/wiki/Lernaean_Hydra Hydra} is a many-headed serpent in
 Greek mythology.<br/>
-{@b Tribia:} The tail has DMA printed on it, for 'DMA Design', which is the former name of
+{@b Trivia:} The tail has DMA printed on it, for 'DMA Design', which is the former name of
 'Rockstar North'.<br/>
 {@clear}
 
