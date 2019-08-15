@@ -2,7 +2,7 @@
 	<header>
 		<small>
 			{@if isset($loggeduser)}
-				Welcome, {$loggeduser->name}
+				Welcome, {$loggeduser->name} <a href="logout.php?k={@unsafe $loggeduser->logoutkey}">[Log out]</a>
 			{@else}
 				<a href="login.php">[Log In]</a>
 			{@endif}

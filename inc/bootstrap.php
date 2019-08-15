@@ -8,16 +8,19 @@ include('../inc/db.php');
 
 $__clientip = $_SERVER['REMOTE_ADDR'];
 
-if (isset($_COOKIE[$COOKIENAME]) && strlen($sesid = $_COOKIE[$COOKIENAME]) == 32) {
+if (isset($_COOKIE[$COOKIENAME]) && strlen($__sesid = $_COOKIE[$COOKIENAME]) == 32) {
 	++$db_querycount;
 	$s = $db->prepare('SELECT stay,u.i uid,u.n name,u.g groups FROM webses w JOIN usr u ON w.usr=u.i WHERE id=?');
-	$s->bindValue(1, $sesid);
+	$s->bindValue(1, $__sesid);
 	if ($s->execute() && ($r = $s->fetchAll()) && count($r)) {
 		$loggeduser = $r[0];
+		$loggeduser->logoutkey = md5($SECRET1 . $__sesid);
 		$expire = $loggeduser->stay ? (time() + 30 * 24 * 3600) : 0;
-		setcookie($COOKIENAME, $sesid, $expire, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
+		setcookie($COOKIENAME, $__sesid, $expire, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
 		++$db_querycount;
-		$db->query('UPDATE webses SET lastupdate=UNIX_TIMESTAMP() WHERE id=\''.$sesid.'\'');
+		$db->query('UPDATE webses SET lastupdate=UNIX_TIMESTAMP() WHERE id=\''.$__sesid.'\'');
+	} else {
+		setcookie($COOKIENAME, '', 0, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
 	}
 }
 

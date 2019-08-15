@@ -34,22 +34,26 @@
 	{@render defaultheader.tpl}
 	<div class="singlebody">
 		<div id="login">
-			<h2 id="main">Login</h2>
-			{@if isset($loginerr)}
-				<p class="msg error">{$loginerr}</p>
+			{@if isset($loggeduser)}
+				<p>You're already logged in! <a href="logout.php?k={@unsafe $loggeduser->logoutkey}">Logout</a></p>
+			{@else}
+				<h2 id="main">Login</h2>
+				{@if isset($loginerr)}
+					<p class="msg error">{$loginerr}</p>
+				{@endif}
+				<form method="post" action="login.php">
+					<label><span>Nickname:</span>{@input text usr}</label><br/>
+					<label><span>Password:</span>{@input password pwd}</label><br/>
+					<label><span>Accept cookies (required):</span>{@input checkbox yummie checked}</label><br/>
+					<label><span>Stay logged in:</span>{@input checkbox stay}</label>
+					<p>{@input submit Login}</p>
+				</form>
+				<p>
+					Don't have an account?<br/>
+					Register now by joining in-game: <a href="samp://basdon.net:7777">basdon.net:7777</a><br/>
+					Need help? <a href="article.php?title=How_To_Join">How to join</a> or <a href="contact.php">contact us</a>.
+				</p>
 			{@endif}
-			<form method="post" action="login.php">
-				<label><span>Nickname:</span>{@input text usr}</label><br/>
-				<label><span>Password:</span>{@input password pwd}</label><br/>
-				<label><span>Accept cookies (required):</span>{@input checkbox yummie checked}</label><br/>
-				<label><span>Stay logged in:</span>{@input checkbox stay}</label>
-				<p>{@input submit Login}</p>
-			</form>
-			<p>
-				Don't have an account?<br/>
-				Register now by joining in-game: <a href="samp://basdon.net:7777">basdon.net:7777</a><br/>
-				Need help? <a href="article.php?title=How_To_Join">How to join</a> or <a href="contact.php">contact us</a>.
-			</p>
 		</div>
 	</div>
 	{@render defaultfooter.tpl}
