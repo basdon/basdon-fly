@@ -6,11 +6,12 @@ body > div {
 	max-width: 1000px;
 	margin: 0 auto;
 }
-body > .msg {
+body > p.msg {
 	max-width: 1000px;
 	background: #faa;
 	margin: 0 auto;
-	padding: .3em 10px;
+	padding: .2em 0;
+	text-align: center;
 }
 hr {
 	height: 1px;
