@@ -322,6 +322,7 @@ cell AMX_NATIVE_CALL Veh_ConsumeFuel(AMX *amx, cell *params)
 	*addr = 0;
 	if (lastpercentage > 0.0f && newpercentage == 0.0f) {
 		buf = MSG_FUEL_0;
+		*addr = 1;
 	} else if (lastpercentage > 0.05f && newpercentage <= 0.05f) {
 		buf = MSG_FUEL_5;
 	} else if (lastpercentage > 0.1f && newpercentage <= 0.1f) {
