@@ -47,11 +47,13 @@ footer p {
 div#main,.mainright {
 	float: right;
 	width: calc(100% - 250px);
+	border-left: 10px solid #444;
 }
 aside {
 	float: left;
 	width: 220px;
 	border-right: 10px solid #444;
+	margin-right: -10px;
 }
 div#main,.mainright,div.singlebody {
 	padding: 10px;
