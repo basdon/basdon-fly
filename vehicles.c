@@ -293,6 +293,11 @@ cell AMX_NATIVE_CALL Veh_CollectSpawnedVehicles(AMX *amx, cell *params)
 	return amount;
 }
 
+static const char *MSG_FUEL_0 = WARN"Your vehicle ran out of fuel!";
+static const char *MSG_FUEL_5 = WARN"Your vehicle has 5%% fuel left!";
+static const char *MSG_FUEL_10 = WARN"Your vehicle has 10%% fuel left!";
+static const char *MSG_FUEL_20 = WARN"Your vehicle has 20%% fuel left!";
+
 /* native Veh_ConsumeFuel(vehicleid, throttle, &ranOutOfFuel, buf[]) */
 cell AMX_NATIVE_CALL Veh_ConsumeFuel(AMX *amx, cell *params)
 {
@@ -300,7 +305,7 @@ cell AMX_NATIVE_CALL Veh_ConsumeFuel(AMX *amx, cell *params)
 	struct dbvehicle *veh;
 	float fuelcapacity, lastpercentage, newpercentage;
 	cell *addr;
-	char buf[80];
+	const char *buf;
 
 	if ((veh = gamevehicles[params[1]].dbvehicle) == NULL) {
 		return 0;
@@ -316,18 +321,18 @@ cell AMX_NATIVE_CALL Veh_ConsumeFuel(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[3], &addr);
 	*addr = 0;
 	if (lastpercentage > 0.0f && newpercentage == 0.0f) {
-		strcpy(buf, WARN"Your vehicle ran out of fuel!");
+		buf = MSG_FUEL_0;
 	} else if (lastpercentage > 0.05f && newpercentage <= 0.05f) {
-		strcpy(buf, WARN"Your vehicle has 5%% fuel left!");
+		buf = MSG_FUEL_5;
 	} else if (lastpercentage > 0.1f && newpercentage <= 0.1f) {
-		strcpy(buf, WARN"Your vehicle has 10%% fuel left!");
+		buf = MSG_FUEL_10;
 	} else if (lastpercentage > 0.2f && newpercentage <= 0.2f) {
-		strcpy(buf, WARN"Your vehicle has 20%% fuel left!");
+		buf = MSG_FUEL_20;
 	} else {
 		return 0;
 	}
 	amx_GetAddr(amx, params[4], &addr);
-	amx_SetUString(addr, buf, sizeof(buf));
+	amx_SetUString(addr, buf, 80);
 	return 1;
 }
 

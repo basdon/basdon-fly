@@ -25,7 +25,8 @@ cell AMX_NATIVE_CALL Playtime_FormatUpdateTimes(AMX *amx, cell *params)
 	*addr = 0;
 	*(addr + 1) = 0;
 	position += 1 + sprintf(data,
-		"UPDATE usr SET l=UNIX_TIMESTAMP(),t=t+%d,a=a+%d WHERE i=%d",
+		"UPDATE usr SET lastseengame=UNIX_TIMESTAMP(),onlinetime=onlinetime+%d,"
+		"playtime=playtime+%d WHERE i=%d",
 		isdisconnect ? 0 : 30,
 		playtimetoadd,
 		userid);
@@ -43,7 +44,7 @@ cell AMX_NATIVE_CALL Playtime_FormatUpdateTimes(AMX *amx, cell *params)
 	*(addr + 1) = position;
 	adjustedaddr = addr + position;
 	sprintf(data,
-		"UPDATE usr SET t=(SELECT SUM(e-s) FROM ses WHERE u=usr.i) WHERE i=%d",
+		"UPDATE usr SET onlinetime=(SELECT SUM(e-s) FROM ses WHERE u=usr.i) WHERE i=%d",
 		userid);
 	amx_SetUString(adjustedaddr, data, sizeof(data));
 	return 1;

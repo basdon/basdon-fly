@@ -32,7 +32,7 @@ cell AMX_NATIVE_CALL Login_FormatAddFailedLogin(AMX *amx, cell *params)
 		return 0;
 	}
 	sprintf(buf,
-	        "INSERT INTO fal(u,t,j) VALUES(%d,UNIX_TIMESTAMP(),'%s')",
+	        "INSERT INTO fal(u,stamp,ip) VALUES(%d,UNIX_TIMESTAMP(),'%s')",
 	        pdata[pid]->userid,
 	        pdata[pid]->ip);
 	amx_GetAddr(amx, params[2], &addr);
@@ -72,7 +72,7 @@ cell AMX_NATIVE_CALL Login_FormatChangePassword(AMX *amx, cell *params)
 	cell *addr;
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(pw, addr, sizeof(pw));
-	sprintf(data, "UPDATE usr SET p='%s' WHERE i=%d", pw, uid);
+	sprintf(data, "UPDATE usr SET pw='%s' WHERE i=%d", pw, uid);
 	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, data, sizeof(data));
 	return 1;
@@ -89,9 +89,9 @@ cell AMX_NATIVE_CALL Login_FormatCheckUserExist(AMX *amx, cell *params)
 	}
 	sprintf(data,
 	        "SELECT "
-	        "(SELECT count(u) AS c FROM fal WHERE t>UNIX_TIMESTAMP()-1800 AND j='%s') AS b,"
-	        "(SELECT p FROM usr WHERE n='%s') AS p,"
-	        "(SELECT i FROM usr WHERE n='%s') AS i", pdata[pid]->ip, pdata[pid]->name, pdata[pid]->name);
+	        "(SELECT count(u) AS c FROM fal WHERE stamp>UNIX_TIMESTAMP()-1800 AND ip='%s') AS b,"
+	        "(SELECT pw FROM usr WHERE name='%s') AS p,"
+	        "(SELECT i FROM usr WHERE name='%s') AS i", pdata[pid]->ip, pdata[pid]->name, pdata[pid]->name);
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, data, sizeof(data));
 	return 1;
@@ -100,7 +100,7 @@ cell AMX_NATIVE_CALL Login_FormatCheckUserExist(AMX *amx, cell *params)
 void formatCreateSessionQuery(char *buf, struct playerdata *pd)
 {
 	sprintf(buf,
-	        "INSERT INTO ses(u,s,e,j) VALUES(%d,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'%s')",
+	        "INSERT INTO ses(u,s,e,ip) VALUES(%d,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'%s')",
 	        pd->userid,
 	        pd->ip);
 }
@@ -132,7 +132,8 @@ cell AMX_NATIVE_CALL Login_FormatCreateUser(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[3], &addr);
 	amx_GetUString(pw, addr, sizeof(pw));
 	sprintf(data,
-	        "INSERT INTO usr(n,p,r,l,g,prefs) VALUES('%s','%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),%d,%d)",
+	        "INSERT INTO usr(name,pw,registertime,lastseengame,groups,prefs)"
+		"VALUES('%s','%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),%d,%d)",
 	        pdata[pid]->name,
 		pw,
 		group,
@@ -153,7 +154,7 @@ cell AMX_NATIVE_CALL Login_FormatCreateUserSession(AMX *amx, cell *params)
 		return 0;
 	}
 	p = sprintf(data,
-	            "UPDATE usr SET l=UNIX_TIMESTAMP() WHERE i=%d LIMIT 1",
+	            "UPDATE usr SET lastseengame=UNIX_TIMESTAMP() WHERE i=%d LIMIT 1",
 	            (int) params[1]);
 	if (p < 0) {
 		return 0;
@@ -206,7 +207,7 @@ cell AMX_NATIVE_CALL Login_FormatLoadAccountData(AMX *amx, cell *params)
 {
 	char data[512];
 	cell *addr;
-	sprintf(data, "SELECT s,mon,dis,f,prefs FROM usr WHERE i=%d", (int) params[1]);
+	sprintf(data, "SELECT score,cash,distance,flighttime,prefs FROM usr WHERE i=%d", (int) params[1]);
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, data, sizeof(data));
 	return 1;
@@ -244,7 +245,7 @@ cell AMX_NATIVE_CALL Login_FormatSavePlayerName(AMX *amx, cell *params)
 		return 0;
 	}
 	sprintf(data,
-	        "UPDATE usr SET n='%s' WHERE i=%d",
+	        "UPDATE usr SET name='%s' WHERE i=%d",
 	        pdata[pid]->name,
 	        pdata[pid]->userid);
 	amx_GetAddr(amx, params[2], &addr);
@@ -264,9 +265,10 @@ cell AMX_NATIVE_CALL Login_FormatUpgradeGuestAcc(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(pw, addr, sizeof(pw));
 	sprintf(data,
-	        "UPDATE usr SET p='%s',n='%s',g=4 WHERE i=%d",
+		"UPDATE usr SET pw='%s',name='%s',groups=%d WHERE i=%d",
 	        pw,
 		pdata[pid]->name,
+		GROUP_MEMBER,
 	        pdata[pid]->userid);
 	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, data, sizeof(data));

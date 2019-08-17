@@ -86,7 +86,7 @@ cell AMX_NATIVE_CALL PlayerData_FormatUpdateQuery(AMX *amx, cell *params)
 	char buf[144];
 	cell *addr;
 	sprintf(buf,
-	        "UPDATE usr SET s=%d,mon=%d,dis=%d,f=%d,prefs=%d WHERE i=%d",
+	        "UPDATE usr SET score=%d,cash=%d,distance=%d,flighttime=%d,prefs=%d WHERE i=%d",
 	        score,
 	        money,
 	        dis,

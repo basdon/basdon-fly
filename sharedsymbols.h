@@ -43,6 +43,12 @@
 #define PW_HASH_LENGTH (65) /* including zero term */
 #define MONEY_DEFAULTAMOUNT 15000
 
+#define GROUP_GUEST (0)
+#define GROUP_BANNED (1)
+#define GROUP_MEMBER (4)
+#define GROUP_ADMIN (268435456)
+#define GROUP_OWNER (1073741824)
+
 /* game_sa.c / game_sa.pwn, global */
 #define MODEL_LANDSTAL (400)
 #define MODEL_BRAVURA (401)
