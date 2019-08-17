@@ -22,7 +22,7 @@
 			{@foreach $flightlist as $f}
 				<tr>
 					<td>{@unsafe date($flightlist_date_format, $f->tlastupdate)}</td>
-					{@if $flightlist_show_user}<td><a href="user.php?name={@urlencode $f->n}">{$f->n}</a></td>{@endif}
+					{@if $flightlist_show_user}<td><a href="user.php?name={@urlencode $f->name}">{$f->name}</a></td>{@endif}
 					<td>{@unsafe aircraft_name($f->vehmodel)}</td>
 					<td><a href="airport.php?code={@unsafe $f->f}">{@unsafe $f->f}</a></td>
 					<td><a href="airport.php?code={@unsafe $f->t}">{@unsafe $f->t}</a></td>

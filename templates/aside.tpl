@@ -5,7 +5,7 @@
 		{@try}
 			{@eval ++$db_querycount}
 			{@eval $players = []}
-			{@eval $r = $db->query("SELECT _u.n name,_u.s score
+			{@eval $r = $db->query("SELECT _u.name,_u.score
 			                        FROM ses _s
 			                        JOIN usr _u ON _s.u=_u.i
 			                        WHERE _s.e>UNIX_TIMESTAMP()-40")}
@@ -27,7 +27,7 @@
 		<h5>Active Flights</h5>
 		{@try}
 			{@eval ++$db_querycount}
-			{@eval $r = $db->query("SELECT id,_u.n,_a.c f,_b.c t
+			{@eval $r = $db->query("SELECT id,_u.name,_a.c f,_b.c t
 		                                FROM flg _f
 		                                JOIN usr _u ON _f.player=_u.i
 		                                JOIN apt _a ON _a.i=_f.fapt
@@ -42,7 +42,7 @@
 							<tr>
 								<td><a href="flight.php?id={@unsafe $f->id}">#{@unsafe $f->id}</a></td>
 								<td>{@unsafe $f->f} -&gt; {@unsafe $f->t}</td>
-								<td><a href="user.php?name={@urlencode $f->n}">{$f->n}</a></td>
+								<td><a href="user.php?name={@urlencode $f->name}">{$f->name}</a></td>
 							</tr>
 						{@endforeach}
 					</table>
@@ -57,7 +57,7 @@
 		<h5>Last 7 Finished Flights</h5>
 		{@try}
 			{@eval ++$db_querycount}
-			{@eval $r = $db->query("SELECT id,_u.n,_a.c f,_b.c t
+			{@eval $r = $db->query("SELECT id,_u.name,_a.c f,_b.c t
 			                        FROM flg _f
 			                        JOIN usr _u ON _f.player=_u.i
 			                        JOIN apt _a ON _a.i=_f.fapt
@@ -72,7 +72,7 @@
 							<tr>
 								<td><a href="flight.php?id={@unsafe $f->id}">#{@unsafe $f->id}</a></td>
 								<td>{@unsafe $f->f} -&gt; {@unsafe $f->t}</td>
-								<td><a href="user.php?name={@urlencode $f->n}">{$f->n}</a></td>
+								<td><a href="user.php?name={@urlencode $f->name}">{$f->name}</a></td>
 							</tr>
 						{@endforeach}
 					</table>
@@ -89,17 +89,17 @@
 		<table border="0" width="100%">
 		{@try}
 			{@eval ++$db_querycount}
-			{@eval $r = $db->query("SELECT COUNT(s.i) c FROM ses s JOIN usr u ON s.i=u.i WHERE u.g=0")}
+			{@eval $r = $db->query("SELECT COUNT(s.i) c FROM ses s JOIN usr u ON s.i=u.i WHERE u.groups=0")}
 			{@if $r !== false && ($r = $r->fetch()) !== false}
 				<tr><td>Guest sessions:</td><td>{@unsafe $r->c}</td></tr>
 			{@endif}
 			{@eval ++$db_querycount}
-			{@eval $r = $db->query("SELECT COUNT(i) c FROM usr WHERE g!=0")}
+			{@eval $r = $db->query("SELECT COUNT(i) c FROM usr WHERE groups!=0")}
 			{@if $r !== false && ($r = $r->fetch()) !== false}
 				<tr><td>Registered users:</td><td>{@unsafe $r->c}</td></tr>
 			{@endif}
 			{@eval ++$db_querycount}
-			{@eval $r = $db->query("SELECT n FROM usr WHERE g!=0 ORDER BY i DESC LIMIT 1")}
+			{@eval $r = $db->query("SELECT n FROM usr WHERE groups!=0 ORDER BY i DESC LIMIT 1")}
 			{@if $r !== false && ($r = $r->fetch()) !== false}
 				<tr><td>Latest:</td><td><a href="user.php?name={@urlencode $r->n}">{$r->n}</a></td></tr>
 			{@endif}

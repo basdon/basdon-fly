@@ -20,23 +20,23 @@
 				<h2>Profile of {$name} ({@unsafe $id})</h2>
 				{@try}
 					{@eval ++$db_querycount}
-					{@eval $r = $db->query('SELECT r,l,s,t,a,f,dis,mon FROM usr WHERE i=' . $id . ' LIMIT 1')}
+					{@eval $r = $db->query('SELECT registertime,lastseengame,score,onlinetime,playtime,flighttime,distance,cash FROM usr WHERE i=' . $id . ' LIMIT 1')}
 					{@if $r !== false && ($r = $r->fetchAll()) !== false && count($r)}
 						{@eval $r = $r[0]}
 						<ul>
-							<li><strong>Score:</strong> {@unsafe $r->s}</li>
-							<li><strong>Online time:</strong> {@unsafe format_duration_short($r->t)}</li>
-							<li><strong>Play time:</strong> {@unsafe format_duration_short($r->a)}</li>
-							<li><strong>Flight time:</strong> {@unsafe format_duration_short($r->f)}</li>
-							<li><strong>Distance flown:</strong> {@unsafe round($r->dis, 1)}km</li>
+							<li><strong>Score:</strong> {@unsafe $r->score}</li>
+							<li><strong>Online time:</strong> {@unsafe format_duration_short($r->onlinetime)}</li>
+							<li><strong>Play time:</strong> {@unsafe format_duration_short($r->playtime)}</li>
+							<li><strong>Flight time:</strong> {@unsafe format_duration_short($r->flighttime)}</li>
+							<li><strong>Distance flown:</strong> {@unsafe round($r->distance, 1)}km</li>
 						</ul>
 						<ul>
-							<li><strong>Registered since:</strong> {@unsafe date('j M Y H:i', $r->r)} ({@unsafe format_time_since($r->r)})</li>
+							<li><strong>Registered since:</strong> {@unsafe date('j M Y H:i', $r->registertime)} ({@unsafe format_time_since($r->registertime)})</li>
 							<li><strong>Last seen: </strong>
-								{@if time() - $r->l < 50}
+								{@if time() - $r->lastseengame < 50}
 									<strong style="color:#0b0">online now</strong>
 								{@else}
-									{@unsafe date('j M Y H:i', $r->l)} ({@unsafe format_time_since($r->l)})
+									{@unsafe date('j M Y H:i', $r->lastseengame)} ({@unsafe format_time_since($r->lastseengame)})
 								{@endif}
 							</li>
 						</ul>
@@ -69,7 +69,7 @@
 							{@if $rp !== false && ($rp = $rp->fetchAll()) !== false && count($rp)}
 								<li><strong>Repair budget:</strong> {@unsafe fmt_money(-$rp[0]->s)}</li>
 							{@endif}
-							<li><strong>Money in hand:</strong> {@unsafe fmt_money($r->mon)}</li>
+							<li><strong>Money in hand:</strong> {@unsafe fmt_money($r->cash)}</li>
 						</ul>
 						<h3>Sessions</h3>
 						{@eval ++$db_querycount}

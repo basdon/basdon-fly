@@ -24,7 +24,7 @@
 					$totalrows = $r[0]->c;
 				}
 				++$db_querycount;
-				$r = $db->query('SELECT id,_u.n,_a.c f,_b.c t,state,tload,tlastupdate,adistance,_v.m vehmodel 
+				$r = $db->query('SELECT id,_u.name,_a.c f,_b.c t,state,tload,tlastupdate,adistance,_v.m vehmodel 
 						 FROM flg _f 
 						 JOIN usr _u ON _f.player=_u.i 
 						 JOIN apt _a ON _a.i=_f.fapt 

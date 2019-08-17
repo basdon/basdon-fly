@@ -8,7 +8,7 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 		goto skiplogin;
 	}
 	++$db_querycount;
-	$stmt = $db->prepare('SELECT i,p FROM usr WHERE n=? LIMIT 1');
+	$stmt = $db->prepare('SELECT i,pw FROM usr WHERE n=? LIMIT 1');
 	$stmt->bindValue(1, $_POST['usr']);
 	if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 		$r = $r[0];
@@ -28,7 +28,7 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 			die('redirecting');
 		}
 		++$db_querycount;
-		$stmt = $db->prepare('INSERT INTO fal(u,t,j,isweb) VALUES(?,UNIX_TIMESTAMP(),?,1)');
+		$stmt = $db->prepare('INSERT INTO fal(u,t,ip,isweb) VALUES(?,UNIX_TIMESTAMP(),?,1)');
 		$stmt->bindValue(1, $id);
 		$stmt->bindValue(2, $__clientip);
 		$stmt->execute();

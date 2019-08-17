@@ -43,7 +43,7 @@
 <?php 
 try{
 	++$db_querycount;
-	$r = $db->query('SELECT _f.*,_u.n playername,_a.n fromname,_a.c fromcode,_b.n toname,_b.c tocode,_v.m vehmodel 
+	$r = $db->query('SELECT _f.*,_u.name,_a.n fromname,_a.c fromcode,_b.n toname,_b.c tocode,_v.m vehmodel 
 	                 FROM flg _f 
 	                 JOIN usr _u ON _f.player=_u.i 
 	                 JOIN apt _a ON _f.fapt=_a.i 
@@ -62,7 +62,7 @@ try{
 			<h3>Overview</h3>
 			<ul>
 				<li><strong>Status:</strong> <span class="flight-state-{@unsafe $r->state}" style="padding:.1em .4em">{@unsafe fmt_flight_status($r->state, $r->tload)}</span></li>
-				<li><strong>Pilot:</strong> <a href="user.php?name={@urlencode $r->playername}">{@unsafe $r->playername}</a></li>
+				<li><strong>Pilot:</strong> <a href="user.php?name={@urlencode $r->name}">{@unsafe $r->name}</a></li>
 				<li><strong>Departure Airport:</strong> <a href="airport.php?code={@unsafe $r->fromcode}">{@unsafe $r->fromname} ({@unsafe $r->fromcode})</a></li>
 				<li><strong>Arrival Airport:</strong> <a href="airport.php?code={@unsafe $r->tocode}">{@unsafe $r->toname} ({@unsafe $r->tocode})</a></li>
 				<li><strong>Point-to-point distance:</strong> {@unsafe $r->distance}m</li>
