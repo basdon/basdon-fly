@@ -23,9 +23,9 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 		$r = $r[0];
 		$id = $r->i;
 
-		// another block check, but on per-account base (max 6 in 30m)
+		// another block check, but on per-account base (max 4 in 30m)
 		$stmt = $db->query('SELECT COUNT(u) AS c FROM fal WHERE stamp>UNIX_TIMESTAMP()-1800 AND u='.$id);
-		if ($stmt->execute() && ($_r = $stmt->fetchAll()) && $_r[0]->c > 6) {
+		if ($stmt->execute() && ($_r = $stmt->fetchAll()) && $_r[0]->c > 4) {
 			$loginerr = 'Too many recent failed login attempts, please try again later.';
 			goto skiplogin;
 		}
