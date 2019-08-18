@@ -17,10 +17,10 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 	}
 
 	++$db_querycount;
-	$stmt = $db->prepare('SELECT i,pw FROM usr WHERE name=? LIMIT 1');
+	$stmt = $db->prepare('SELECT i,pw,falng,falnw,name,groups FROM usr WHERE name=? LIMIT 1');
 	$stmt->bindValue(1, $_POST['usr']);
 	if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
-		$r = $r[0];
+		$loggeduser = $r = $r[0];
 		$id = $r->i;
 
 		// another block check, but on per-account base (max 4 in 30m)
@@ -41,7 +41,19 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 			$stmt->execute();
 			$expire = $stay ? (time() + 30 * 24 * 3600) : 0;
 			setcookie($COOKIENAME, $__sesid, $expire, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
-			header('Location: ' . $BASEPATH . '/');
+
+			// check for new failed logins first
+			$stmt = $db->query('SELECT stamp,ip,isweb FROM fal WHERE u='.$id.' AND stamp>'.max($r->falnw,$r->falng).' ORDER BY stamp DESC');
+			if ($stmt && ($failedlogins = $stmt->fetchAll()) && count($failedlogins)) {
+				// failed logins, show them on this page (login)
+				$db->exec('UPDATE usr SET falnw=UNIX_TIMESTAMP(),falng=UNIX_TIMESTAMP() WHERE i='.$id);
+				goto skiplogin;
+			}
+
+			if (isset($_GET['ret'])) {
+				header('Location: '.$BASEPATH.'/'.$_GET['ret']);
+			}
+			header('Location: '.$BASEPATH.'/'.$nextloc);
 			die('redirecting');
 		}
 
