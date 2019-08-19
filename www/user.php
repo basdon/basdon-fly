@@ -1,6 +1,8 @@
 <?php
 include('../inc/bootstrap.php');
 
+$id = -1;
+$name = '';
 if (isset($_GET['id'])) {
 	$id = (int) $_GET['id'];
 	$id++;

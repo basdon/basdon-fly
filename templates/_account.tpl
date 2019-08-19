@@ -18,7 +18,9 @@
 	{@render defaultheader.tpl}
 	<div>
 		<aside>
-			<p>hi</p>
+			{@if isset($loggeduser)}
+				<p>hi</p>
+			{@endif}
 		</aside>
 		<div id="main">
 			<?php include('../gen/^account_' . $action . '.php'); ?>

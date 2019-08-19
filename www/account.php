@@ -7,7 +7,10 @@ if (isset($_GET['action']) && array_key_exists($_GET['action'], $actions)) {
 	$action = $actions;
 }
 
-if ($action == 'publicprofile') {
+if (!isset($loggeduser)) {
+	$targetaction = $action;
+	$action = 'notloggedin';
+} else if ($action == 'publicprofile') {
 	$id = $loggeduser->i;
 	$name = $loggeduser->name;
 	$paginationbaseurl = 'account.php?action=publicprofile';
