@@ -1,10 +1,5 @@
 <?php
 
-function spate_default_generate($name)
-{
-	file_put_contents("../gen/{$name}.php", spate_generate('../templates/', "{$name}.tpl"));
-}
-
 /**
  * @param $template_dir directory with trailing slash
  * @param $template name with extension
@@ -125,6 +120,12 @@ function spate_generate($template_dir, $template)
 				$j += 3;
 				$suffix = '~>';
 				goto directive_parse_conditionbody__start;
+			case "@rem":
+				$pos = strpos($in, '@}', $i);
+				if ($pos !== false) {
+					$i = $pos + 2;
+				}
+				goto next;
 			case "@input":
 				if ($c == '}') die('empty @input');
 				$args = '';
