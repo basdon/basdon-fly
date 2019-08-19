@@ -52,8 +52,9 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 
 			if (isset($_GET['ret'])) {
 				header('Location: '.$BASEPATH.'/'.$_GET['ret']);
+			} else {
+				header('Location: '.$BASEPATH.'/'.$nextloc);
 			}
-			header('Location: '.$BASEPATH.'/'.$nextloc);
 			die('redirecting');
 		}
 
