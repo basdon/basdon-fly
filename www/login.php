@@ -20,10 +20,11 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 	$stmt = $db->prepare('SELECT i,pw,falng,falnw,name,groups FROM usr WHERE name=? LIMIT 1');
 	$stmt->bindValue(1, $_POST['usr']);
 	if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
-		$loggeduser = $r = $r[0];
+		$r = $r[0];
 		$id = $r->i;
 
 		// another block check, but on per-account base (max 4 in 30m)
+		++$db_querycount;
 		$stmt = $db->query('SELECT COUNT(u) AS c FROM fal WHERE stamp>UNIX_TIMESTAMP()-1800 AND u='.$id);
 		if ($stmt->execute() && ($_r = $stmt->fetchAll()) && $_r[0]->c > 4) {
 			$loginerr = 'Too many recent failed login attempts, please try again later.';
@@ -33,6 +34,7 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 		if (password_verify($_POST['pwd'], $r->pw)) {
 			$stay = isset($_POST['stay']);
 			$__sesid = generate_random_key();
+			++$db_querycount;
 			$stmt = $db->prepare('INSERT INTO webses(id,usr,stamp,lastupdate,stay,ip) VALUES(?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),?,?)');
 			$stmt->bindValue(1, $__sesid);
 			$stmt->bindValue(2, $id);
@@ -43,10 +45,14 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 			setcookie($COOKIENAME, $__sesid, $expire, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
 
 			// check for new failed logins first
+			++$db_querycount;
 			$stmt = $db->query('SELECT stamp,ip,isweb FROM fal WHERE u='.$id.' AND stamp>'.max($r->falnw,$r->falng).' ORDER BY stamp DESC LIMIT 500');
 			if ($stmt && ($failedlogins = $stmt->fetchAll()) && count($failedlogins)) {
 				// failed logins, show them on this page (login)
+				++$db_querycount;
 				$db->exec('UPDATE usr SET falnw=UNIX_TIMESTAMP(),falng=UNIX_TIMESTAMP() WHERE i='.$id);
+				$loggeduser = $r;
+				$loggeduser->logoutkey = md5($SECRET1 . $__sesid);
 				goto skiplogin;
 			}
 
@@ -64,6 +70,9 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 		$stmt->bindValue(2, $__clientip);
 		$stmt->execute();
 		$loginerr = 'Password incorrect';
+		unset($id);
+		unset($r);
+		unset($loggeduser);
 		unset($_POST['pwd']);
 	} else {
 		$loginerr = 'User not found';
