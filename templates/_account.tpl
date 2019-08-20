@@ -4,13 +4,15 @@
 	<title>my account :: basdon.net aviation server</title>
 	{@render defaulthead.tpl}
 	<style>
-	@media (max-width: 800px) {
-		aside {
-			border-top: 0;
-			border-bottom: 2px solid #444;
-			width: 100%;
+		@media (max-width: 800px) {
+			aside {
+				border-top: 0;
+				border-bottom: 2px solid #444;
+				width: 100%;
+			}
 		}
-	}
+		#flights td{text-align:center}
+		#flights td:nth-child(5){text-align:right}
 	</style>
 </head>
 <body>
@@ -19,10 +21,26 @@
 	<div>
 		<aside>
 			{@if isset($loggeduser)}
-				<p>hi</p>
+				<?php
+				function acclink($name, $target) {
+					global $action,$BASEPATH;
+					if ($action == $target) {
+						echo('<strong>'.$name.'</strong>');
+					} else {
+						echo('<a href="account.php?action='.$target.'">'.$name.'</a>');
+					}
+				}
+				?>
+				<ul>
+					<li><?php acclink('Public profile', 'publicprofile'); ?></li>
+					<li><?php acclink('Failed logins', 'fal'); ?></li>
+				</ul>
 			{@endif}
 		</aside>
 		<div id="main">
+			{@mayrequire ^account_notloggedin}
+			{@mayrequire ^account_publicprofile}
+			{@mayrequire ^account_fal}
 			<?php include('../gen/^account_' . $action . '.php'); ?>
 		</div>
 		<div class="clear"></div>

@@ -43,7 +43,7 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 			setcookie($COOKIENAME, $__sesid, $expire, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
 
 			// check for new failed logins first
-			$stmt = $db->query('SELECT stamp,ip,isweb FROM fal WHERE u='.$id.' AND stamp>'.max($r->falnw,$r->falng).' ORDER BY stamp DESC');
+			$stmt = $db->query('SELECT stamp,ip,isweb FROM fal WHERE u='.$id.' AND stamp>'.max($r->falnw,$r->falng).' ORDER BY stamp DESC LIMIT 500');
 			if ($stmt && ($failedlogins = $stmt->fetchAll()) && count($failedlogins)) {
 				// failed logins, show them on this page (login)
 				$db->exec('UPDATE usr SET falnw=UNIX_TIMESTAMP(),falng=UNIX_TIMESTAMP() WHERE i='.$id);

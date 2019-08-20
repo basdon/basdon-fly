@@ -1,5 +1,10 @@
 <?php
 
+function spate_default_generate($name)
+{
+	file_put_contents("../gen/{$name}.php", spate_generate('../templates/', "{$name}.tpl"));
+}
+
 /**
  * @param $template_dir directory with trailing slash
  * @param $template name with extension
@@ -142,6 +147,16 @@ function spate_generate($template_dir, $template)
 				$j += 13;
 				$suffix = ')~>';
 				goto directive_parse_conditionbody__start;
+			case "@mayrequire":
+				$pos = strpos($in, '}', $i);
+				if ($pos !== false) {
+					$d = $depth;
+					$depth = 0;
+					spate_default_generate(substr($in, $i + 1, $pos - $i - 1));
+					$depth = $d;
+					$i = $pos + 1;
+				}
+				goto next;
 			case "@foreach":
 				$result .= '<?php foreach(';
 				$j += 14;

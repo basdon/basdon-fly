@@ -4,4 +4,4 @@ if (count($argv) != 2) {
 	die('need file');
 }
 $gen = str_replace('.tpl', '.php', $argv[1]);
-file_put_contents("../gen/{$gen}", spate_generate('../templates/', $argv[1]));
+spate_default_generate(substr($argv[1], 0, -4));

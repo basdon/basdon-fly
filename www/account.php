@@ -2,19 +2,28 @@
 include('../inc/bootstrap.php');
 
 $action = 'publicprofile';
-$actions = ['publicprofile', 'fal'];
-if (isset($_GET['action']) && array_key_exists($_GET['action'], $actions)) {
-	$action = $actions;
+if (isset($_GET['action']) && in_array($_GET['action'], ['publicprofile', 'fal'])) {
+	$action = $_GET['action'];
 }
 
 if (!isset($loggeduser)) {
 	$targetaction = $action;
 	$action = 'notloggedin';
 } else if ($action == 'publicprofile') {
+	// flight list vars
 	$id = $loggeduser->i;
 	$name = $loggeduser->name;
 	$paginationbaseurl = 'account.php?action=publicprofile';
 } else if ($action == 'fal') {
+	$clearkey = md5($__sesid . $SECRET1);
+	if (isset($_GET['clear'], $_GET['confirm'], $_GET['cleartime']) && $clearkey === $_GET['confirm']) {
+		$t = $_GET['cleartime'];
+		$t++;
+		$t--;
+		++$db_querycount;
+		$db->query('UPDATE usr SET falnw='.((int)$t).' WHERE i='.$loggeduser->i);
+		$falcleared = true;
+	}
 }
 
 $__script = '_account';
