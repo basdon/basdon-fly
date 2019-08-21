@@ -75,7 +75,7 @@ function format_duration_short($time)
 function format_time_since($time)
 {
 	$tdiff = time() - $time;
-	if (date('j') == date('j', $time)) {
+	if ($tdiff < 86400 && date('j') == date('j', $time)) {
 		return 'today';
 	}
 	if ($tdiff < 172800) {
