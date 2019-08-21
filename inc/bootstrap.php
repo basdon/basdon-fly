@@ -11,8 +11,7 @@ $__clientip = $_SERVER['REMOTE_ADDR'];
 if (isset($_COOKIE[$COOKIENAME]) && strlen($__sesid = $_COOKIE[$COOKIENAME]) == 32) {
 	if (!isset($__extrauserfields)) $__extrauserfields = '';
 	++$db_querycount;
-	// when selecting more columns here (v), also add them in www/login.php (for failedlogins)
-	$s = $db->prepare('SELECT stay,u.i,u.name,u.groups FROM webses w JOIN usr u ON w.usr=u.i WHERE id=?');
+	$s = $db->prepare('SELECT stay,u.i,u.name,u.groups,lastfal,falnw,falng FROM webses w JOIN usr u ON w.usr=u.i WHERE id=?');
 	$s->bindValue(1, $__sesid);
 	if ($s->execute() && ($r = $s->fetchAll()) && count($r)) {
 		$loggeduser = $r[0];

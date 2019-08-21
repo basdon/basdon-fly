@@ -20,8 +20,10 @@ if (!isset($loggeduser)) {
 		$t = $_GET['cleartime'];
 		$t++;
 		$t--;
+		$t = (int) $t;
 		++$db_querycount;
-		$db->query('UPDATE usr SET falnw='.((int)$t).' WHERE i='.$loggeduser->i);
+		$db->query('UPDATE usr SET falnw='.$t.' WHERE i='.$loggeduser->i);
+		$loggeduser->falnw = $t;
 		$falcleared = true;
 	}
 }

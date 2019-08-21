@@ -21,11 +21,10 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 	$stmt->bindValue(1, $_POST['usr']);
 	if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 		$r = $r[0];
-		$id = $r->i;
 
 		// another block check, but on per-account base (max 4 in 30m)
 		++$db_querycount;
-		$stmt = $db->query('SELECT COUNT(u) AS c FROM fal WHERE stamp>UNIX_TIMESTAMP()-1800 AND u='.$id);
+		$stmt = $db->query('SELECT COUNT(u) AS c FROM fal WHERE stamp>UNIX_TIMESTAMP()-1800 AND u='.$r->i);
 		if ($stmt->execute() && ($_r = $stmt->fetchAll()) && $_r[0]->c > 4) {
 			$loginerr = 'Too many recent failed login attempts, please try again later.';
 			goto skiplogin;
@@ -37,42 +36,29 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 			++$db_querycount;
 			$stmt = $db->prepare('INSERT INTO webses(id,usr,stamp,lastupdate,stay,ip) VALUES(?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),?,?)');
 			$stmt->bindValue(1, $__sesid);
-			$stmt->bindValue(2, $id);
+			$stmt->bindValue(2, $r->i);
 			$stmt->bindValue(3, $stay ? 1 : 0);
 			$stmt->bindValue(4, $__clientip);
 			$stmt->execute();
 			$expire = $stay ? (time() + 30 * 24 * 3600) : 0;
 			setcookie($COOKIENAME, $__sesid, $expire, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
 
-			// check for new failed logins first
-			++$db_querycount;
-			$stmt = $db->query('SELECT stamp,ip,isweb FROM fal WHERE u='.$id.' AND stamp>'.max($r->falnw,$r->falng).' ORDER BY stamp DESC LIMIT 500');
-			if ($stmt && ($failedlogins = $stmt->fetchAll()) && count($failedlogins)) {
-				// failed logins, show them on this page (login)
-				++$db_querycount;
-				$db->exec('UPDATE usr SET falnw=UNIX_TIMESTAMP(),falng=UNIX_TIMESTAMP() WHERE i='.$id);
-				$loggeduser = $r;
-				$loggeduser->logoutkey = md5($SECRET1 . $__sesid);
-				goto skiplogin;
-			}
-
 			if (isset($_GET['ret'])) {
 				header('Location: '.$BASEPATH.'/'.$_GET['ret']);
 			} else {
-				header('Location: '.$BASEPATH.'/'.$nextloc);
+				header('Location: '.$BASEPATH.'/');
 			}
 			die('redirecting');
 		}
 
-		++$db_querycount;
+		$db_querycount += 2;
+		$db->query('UPDATE usr SET lastfal=UNIX_TIMESTAMP() WHERE i='.$r->i);
 		$stmt = $db->prepare('INSERT INTO fal(u,stamp,ip,isweb) VALUES(?,UNIX_TIMESTAMP(),?,1)');
-		$stmt->bindValue(1, $id);
+		$stmt->bindValue(1, $r->i);
 		$stmt->bindValue(2, $__clientip);
 		$stmt->execute();
 		$loginerr = 'Password incorrect';
-		unset($id);
 		unset($r);
-		unset($loggeduser);
 		unset($_POST['pwd']);
 	} else {
 		$loginerr = 'User not found';

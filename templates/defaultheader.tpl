@@ -2,7 +2,10 @@
 	<header>
 		<small>
 			{@if isset($loggeduser)}
-				Welcome, {$loggeduser->name} <a href="account.php">[My account]</a> <a href="logout.php?k={@unsafe $loggeduser->logoutkey}">[Log out]</a>
+				Welcome, {$loggeduser->name}&#32;
+				<a href="account.php">[My account]</a>&#32;
+				{@if $loggeduser->lastfal>max($loggeduser->falnw,$loggeduser->falng)}<a href="account.php?action=fal"><strong>[New failed logins]</strong></a>&#32;{@endif}
+				<a href="logout.php?k={@unsafe $loggeduser->logoutkey}">[Log out]</a>
 			{@else}
 				<a href="login.php">[Log In]</a>
 			{@endif}

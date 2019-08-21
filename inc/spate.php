@@ -84,8 +84,8 @@ function spate_generate($template_dir, $template)
 			$c = $in[++$i];
 			$suffix = '){?>';
 			if ($c == '$') {
-				$result .= '<?=htmlentities($';
-				$j += 17;
+				$result .= '<?=htmlspecialchars($';
+				$j += 21;
 				$suffix = ',ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE)~>';
 				goto directive_parse_conditionbody__start;
 			}
