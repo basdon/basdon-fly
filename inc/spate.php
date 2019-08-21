@@ -157,9 +157,32 @@ function spate_generate($template_dir, $template)
 					$i = $pos + 1;
 				}
 				goto next;
+			case "@label":
+				$result .= '<?php ';
+				$j += 6;
+				$suffix = ':~>';
+				goto directive_parse_conditionbody__start;
+			case "@goto":
+				$result .= '<?php goto ';
+				$j += 11;
+				$suffix = ';~>';
+				goto directive_parse_conditionbody__start;
 			case "@foreach":
 				$result .= '<?php foreach(';
 				$j += 14;
+				goto directive_parse_conditionbody__start;
+			case "@do":
+				$result .= '<?php do{~>';
+				$j += 11;
+				goto next;
+			case "@enddowhile":
+				$result .= '<?php }while(';
+				$suffix = ');~>';
+				$j += 13;
+				goto directive_parse_conditionbody__start;
+			case "@while":
+				$result .= '<?php while(';
+				$j += 12;
 				goto directive_parse_conditionbody__start;
 			case "@else":
 				$result .= '<?php }else{ ?>';
@@ -183,6 +206,7 @@ function spate_generate($template_dir, $template)
 				goto directive_parse_conditionbody__start;
 			case "@endtry":
 			case "@endforeach":
+			case "@endwhile":
 			case "@endif":
 				$result .= '<?php } ?>';
 				$j += 10;

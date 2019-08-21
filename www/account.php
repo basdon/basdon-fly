@@ -26,6 +26,13 @@ if (!isset($loggeduser)) {
 		$loggeduser->falnw = $t;
 		$falcleared = true;
 	}
+	$lastseen = max($loggeduser->falnw, $loggeduser->falng);
+	$page = get_page();
+	$db_querycount += 2;
+	$pages = $db->query('SELECT COUNT(u) AS c FROM fal WHERE u='.$loggeduser->i)->fetchAll()[0]->c;
+	$pages = floor($pages / 50) + 1;
+	$failedlogins = $db->query('SELECT stamp,ip,isweb FROM fal WHERE u='.$loggeduser->i.' ORDER BY stamp DESC LIMIT 50 OFFSET '.(($page - 1) * 50));
+	$pagination = simple_pagination('account.php?action=fal&amp;page=', $page, $pages);
 }
 
 $__script = '_account';

@@ -113,7 +113,7 @@
 		{@eval $flightlist_date_format = 'j M Y H:i'}
 		{@eval $flightlist_show_user = 0}
 		{@eval $flightlist_url_returnpage = 0}
-		{@eval $flightlist_pagination_url = $paginationbaseurl.'&page='}
+		{@eval $flightlist_pagination_url = $paginationbaseurl.'&amp;page='}
 		{@render flightlist.tpl}
 	{@endif}
 {@catch PDOException $e}
