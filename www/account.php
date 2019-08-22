@@ -22,7 +22,7 @@ if (!isset($loggeduser)) {
 		$t--;
 		$t = (int) $t;
 		++$db_querycount;
-		$db->query('UPDATE usr SET falnw='.$t.' WHERE i='.$loggeduser->i);
+		$db->query('UPDATE usr SET falnw='.$t.',falng='.$t.' WHERE i='.$loggeduser->i);
 		$loggeduser->falnw = $t;
 		$falcleared = true;
 	}
