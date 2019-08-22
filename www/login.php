@@ -51,9 +51,10 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 			die('redirecting');
 		}
 
+		$time = time();
 		$db_querycount += 2;
-		$db->query('UPDATE usr SET lastfal=UNIX_TIMESTAMP() WHERE i='.$r->i);
-		$stmt = $db->prepare('INSERT INTO fal(u,stamp,ip,isweb) VALUES(?,UNIX_TIMESTAMP(),?,1)');
+		$db->query('UPDATE usr SET lastfal='.$time.' WHERE i='.$r->i);
+		$stmt = $db->prepare('INSERT INTO fal(u,stamp,ip,isweb) VALUES(?,'.$time.',?,1)');
 		$stmt->bindValue(1, $r->i);
 		$stmt->bindValue(2, $__clientip);
 		$stmt->execute();
