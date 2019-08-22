@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include <string.h>
+#include <time.h>
 #include "playerdata.h"
 
 /* actual password, stored for later checking */
@@ -22,20 +23,28 @@ void login_init()
 	}
 }
 
-/* native Login_FormatAddFailedLogin(playerid, buf[]) */
+/* native Login_FormatAddFailedLogin(playerid, bufq1[], bufq2[]) */
 cell AMX_NATIVE_CALL Login_FormatAddFailedLogin(AMX *amx, cell *params)
 {
 	const int pid = params[1];
 	cell *addr;
 	char buf[144];
+	long int t = (long int) time(NULL);
 	if (pdata[pid] == NULL) {
 		return 0;
 	}
 	sprintf(buf,
-	        "INSERT INTO fal(u,stamp,ip) VALUES(%d,UNIX_TIMESTAMP(),'%s')",
+	        "INSERT INTO fal(u,stamp,ip) VALUES(%d,%ld,'%s')",
 	        pdata[pid]->userid,
+	        t,
 	        pdata[pid]->ip);
 	amx_GetAddr(amx, params[2], &addr);
+	amx_SetUString(addr, buf, sizeof(buf));
+	sprintf(buf,
+	        "UPDATE usr SET lastfal=%ld WHERE i=%d",
+	        t,
+	        pdata[pid]->userid);
+	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, buf, sizeof(buf));
 	return 1;
 }

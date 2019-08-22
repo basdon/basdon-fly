@@ -198,10 +198,11 @@ native Game_IsPlane(model)
 
 //@summary Format query to add failed login
 //@param playerid player id
-//@param buf the buffer to store the query in
+//@param bufq1 buffer for query to insert failed login
+//@param bufq2 buffer for query to update lastfal column
 //@returns {@code 0} on failure
 //@remarks user id and ip must be set to succeed!
-native Login_FormatAddFailedLogin(playerid, buf[])
+native Login_FormatAddFailedLogin(playerid, bufq1[], bufq2[])
 
 //@summary Format query to change password
 //@param userid user id
