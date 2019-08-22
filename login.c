@@ -216,7 +216,9 @@ cell AMX_NATIVE_CALL Login_FormatLoadAccountData(AMX *amx, cell *params)
 {
 	char data[512];
 	cell *addr;
-	sprintf(data, "SELECT score,cash,distance,flighttime,prefs FROM usr WHERE i=%d", (int) params[1]);
+	sprintf(data,
+	        "SELECT score,cash,distance,flighttime,prefs,falng,lastfal FROM usr WHERE i=%d",
+	        (int) params[1]);
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, data, sizeof(data));
 	return 1;
@@ -258,6 +260,21 @@ cell AMX_NATIVE_CALL Login_FormatSavePlayerName(AMX *amx, cell *params)
 	        pdata[pid]->name,
 	        pdata[pid]->userid);
 	amx_GetAddr(amx, params[2], &addr);
+	amx_SetUString(addr, data, sizeof(data));
+	return 1;
+}
+
+/* native Login_FormatUpdateFalng(playerid, lastfal, buf[]) */
+cell AMX_NATIVE_CALL Login_FormatUpdateFalng(AMX *amx, cell *params)
+{
+	const int pid = params[1], lastfal = params[2];
+	char data[64];
+	cell *addr;
+	if (pdata[pid] == NULL) {
+		return 0;
+	}
+	sprintf(data, "UPDATE usr SET falng=%d WHERE i=%d", lastfal, pdata[pid]->userid);
+	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, data, sizeof(data));
 	return 1;
 }

@@ -269,6 +269,13 @@ native Login_FormatOnJoinRegisterBox(buf[], pwmismatch=0, step)
 //@returns {@code 0} on failure
 native Login_FormatSavePlayerName(playerid, buf[])
 
+//@summary Formats query to update a user's last in-game failed login notice time
+//@param playerid player
+//@param lastfal timestamp of the last failed login that the player has now seen in-game
+//@param buf144 buffer to store query in
+//@returns {@code 0} on failure (no data for playerid, shouldn't happen)
+native Login_FormatUpdateFalng(playerid, lastfal, buf144[])
+
 //@summary Formats query to upgrade a guest account to a real account
 //@param playerid player
 //@param password hashed password

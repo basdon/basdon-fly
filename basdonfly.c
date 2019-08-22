@@ -50,6 +50,7 @@ FORWARD(Login_FormatGuestRegisterBox);
 FORWARD(Login_FormatLoadAccountData);
 FORWARD(Login_FormatOnJoinRegisterBox);
 FORWARD(Login_FormatSavePlayerName);
+FORWARD(Login_FormatUpdateFalng);
 FORWARD(Login_FormatUpgradeGuestAcc);
 FORWARD(Login_FreePassword);
 FORWARD(Login_GetPassword);
@@ -232,6 +233,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Login_FormatLoadAccountData),
 	REGISTERNATIVE(Login_FormatOnJoinRegisterBox),
 	REGISTERNATIVE(Login_FormatSavePlayerName),
+	REGISTERNATIVE(Login_FormatUpdateFalng),
 	REGISTERNATIVE(Login_FormatUpgradeGuestAcc),
 	REGISTERNATIVE(Login_FreePassword),
 	REGISTERNATIVE(Login_GetPassword),
