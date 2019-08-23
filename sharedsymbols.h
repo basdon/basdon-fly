@@ -33,6 +33,9 @@
 
 /* airport.c / airport.pwn */
 #define MAX_AIRPORT_NAME (24)
+
+#define RUNWAY_SURFACE_ASPHALT (1)
+#define RUNWAY_SURFACE_DIRT (2)
 /* dialog.c / dialog.pwn */
 #define LIMIT_DIALOG_CAPTION (64)
 #define LIMIT_DIALOG_TEXT (4096)
