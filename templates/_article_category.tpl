@@ -17,12 +17,17 @@
 					<a href="article.php?category={@unsafe $c}">{@unsafe $c}</a>
 				{@endforeach}
 			</p>
-			<h2 id="main" style="background:#{@unsafe $category_color}">Category:{@unsafe $category}</h2>
-			<ul>
-				{@foreach $articles as $a}
-					<li><a href="article.php?title={@unsafe $a->name}">{$a->title}</a></li>
-				{@endforeach}
-			</ul>
+			<h2 id="main">Category:{@unsafe $category}</h2>
+			<div class="artcat">
+				<p style="background:#{@unsafe $category_color}">Category: {@unsafe $category}</p>
+				<p>
+					{@eval $bull = ''}
+					{@foreach $articles as $a}
+						{@unsafe $bull}<a href="article.php?title={@unsafe $a->name}">{$a->title}</a>
+						{@eval $bull = ' &bull; '}
+					{@endforeach}
+				</p>
+			</div>
 			<p style="text-align:right">
 				<small>
 					<a href="article.php">Main page</a> <a href="articleindex.php">Article index</a>

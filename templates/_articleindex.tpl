@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 	<title>Article Index :: basdon.net aviation server</title>
+	<link rel="stylesheet" href="{@unsafe $STATICPATH}/article.{@unsafe $CSS_SUFFIX}" type="text/css" />
 	{@render defaulthead.tpl}
 </head>
 <body>
@@ -13,11 +14,11 @@
 			{@if $articles === false}
 				<p>Failed to get list of articles.</p>
 			{@else}
-				{@eval $lastcat = -1; $ul_open = false}
+				{@eval $lastcat = -1; $div_open = false; $bull = ''}
 				{@foreach $articles as $a}
 					{@if $a->cat != $lastcat}
-						{@if $ul_open}</ul>{@endif}
-						{@eval $lastcat = $a->cat; $ul_open = true}
+						{@if $div_open}</p></div>{@endif}
+						{@eval $lastcat = $a->cat; $div_open = true}
 						{@if $lastcat != null && array_key_exists($lastcat, $article_categories)}
 							{@eval $cat = $article_categories[$lastcat]}
 						{@else}
@@ -26,14 +27,17 @@
 							       $cat->parent = null;
 							       $cat->color = 'dddddd'}
 						{@endif}
-						<h3 style="background:#{@unsafe $cat->color}">
-							<a href="article.php?category={@unsafe $cat->name}">{@unsafe $cat->name}</a>
-						</h3>
-						<ul>
+						<div class="artcat">
+							<p style="background:#{@unsafe $cat->color}">
+								Category: <a href="article.php?category={@unsafe $cat->name}">{@unsafe $cat->name}</a>
+							</p>
+							<p>
+						{@eval $bull = ''}
 					{@endif}
-					<li><a href="article.php?title={@unsafe $a->name}">{$a->title}</a></li>
+					{@unsafe $bull}<a href="article.php?title={@unsafe $a->name}">{@unsafe $a->title}</a>
+					{@eval $bull = ' &bull; '}
 				{@endforeach}
-				{@if $ul_open}</ul>{@endif}
+				{@if $div_open}</p></div>{@endif}
 			{@endif}
 		</div>
 		{@render aside.tpl}

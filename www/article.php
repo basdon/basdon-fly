@@ -31,13 +31,13 @@ nextparentcat4catpage:
 				}
 			}
 		}
-
 		++$db_querycount;
-		$stmt = $db->prepare('SELECT name,title FROM art WHERE cat=?');
-		$stmt->bindValue(1, $categoryid);
-		if ($stmt->execute()) {
-			$articles = $stmt;
-		}
+		$articles = $db->prepare('SELECT name,title FROM art WHERE cat=? ORDER BY name ASC');
+		$articles->bindValue(1, $categoryid);
+		$articles->execute();
+	} else {
+		++$db_querycount;
+		$articles = $db->query('SELECT name,title FROM art WHERE ISNULL(cat) ORDER BY name ASC');
 	}
 
 	$__script = '_article_category';
