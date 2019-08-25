@@ -279,6 +279,7 @@ Extremely small and light helicopter, although it has one extra seat for a passe
 {@b Fuel capacity:} 106L<br/>
 {@b Fuel usage:} 0.2L/s<br/>
 {@b See also:} {@#=Seasparrow Seasparrow}<br/>
+{@b Trivia:} A sparrow is a small bird.
 {@clear}
 
 {@h4(id="Seasparrow") Seasparrow}
