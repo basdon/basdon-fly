@@ -36,6 +36,10 @@
 
 #define RUNWAY_SURFACE_ASPHALT (1)
 #define RUNWAY_SURFACE_DIRT (2)
+#define RUNWAY_SURFACE_CONCRETE (3)
+
+#define RUNWAY_TYPE_RUNWAY (1)
+#define RUNWAY_TYPE_HELIPAD (2)
 /* dialog.c / dialog.pwn */
 #define LIMIT_DIALOG_CAPTION (64)
 #define LIMIT_DIALOG_TEXT (4096)
