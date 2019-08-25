@@ -83,7 +83,7 @@ $im = imagecreate($imgw, $imgh);
 $color_white = $bg = imagecolorallocate($im, 255, 255, 255);
 $color_black = imagecolorallocate($im, 0, 0, 0);
 $color_rnw = imagecolorallocate($im, 11, 136, 192);
-$color_service_inner = imagecolorallocate($im, 225, 225, 225);
+$color_svp_inner = imagecolorallocate($im, 225, 225, 225);
 $color_veh = imagecolorallocate($im, 91, 104, 119);
 $color_veh_outline = imagecolorallocate($im, 64, 64, 64);
 $color_msp = imagecolorallocate($im, 170, 0, 0);
@@ -177,6 +177,37 @@ foreach ($vehicles as $v) {
 	$y = ycoord($v->y);
 	$vehs[$v->m]++;
 	rect($x, $y, $vehsize, $color_veh_outline, $color_veh);
+}
+
+// service points, sweet icon
+foreach ($servicepoints as $svp) {
+	$x = xcoord($svp->x) - 6;
+	$y = ycoord($svp->y) - 8;
+	imagefilledrectangle($im, $x + 2, $y + 2, $x + 9, $y + 13, $color_svp_inner);
+	imagefilledrectangle($im, $x + 2, $y, $x + 9, $y + 1, $color_black);
+	imagefilledrectangle($im, $x, $y + 2, $x + 1, $y + 7, $color_black);
+	imagefilledrectangle($im, $x + 10, $y + 2, $x + 11, $y + 6, $color_black);
+	imagefilledrectangle($im, $x + 2, $y + 14, $x + 9, $y + 15, $color_black);
+	imagefilledrectangle($im, $x, $y + 9, $x + 1, $y + 13, $color_black);
+	imagefilledrectangle($im, $x + 10, $y + 8, $x + 11, $y + 13, $color_black);
+	imagesetpixel($im, $x + 1, $y + 1, $color_black);
+	imagesetpixel($im, $x + 2, $y + 2, $color_black);
+	imagesetpixel($im, $x + 10, $y + 1, $color_black);
+	imagesetpixel($im, $x + 9, $y + 2, $color_black);
+	imagesetpixel($im, $x + 1, $y + 14, $color_black);
+	imagesetpixel($im, $x + 10, $y + 14, $color_black);
+	imagesetpixel($im, $x + 2, $y + 13, $color_black);
+	imagesetpixel($im, $x + 9, $y + 13, $color_black);
+	imagefilledrectangle($im, $x + 4, $y + 4, $x + 7, $y + 5, $color_black);
+	imagefilledrectangle($im, $x + 4, $y + 10, $x + 7, $y + 11, $color_black);
+	imagefilledrectangle($im, $x + 8, $y + 6, $x + 10, $y + 7, $color_black);
+	imagefilledrectangle($im, $x + 1, $y + 8, $x + 3, $y + 9, $color_black);
+	imagesetpixel($im, $x + 2, $y + 7, $color_black);
+	imagesetpixel($im, $x + 9, $y + 8, $color_black);
+	imagesetpixel($im, $x + 6, $y + 6, $color_black);
+	imagesetpixel($im, $x + 7, $y + 6, $color_black);
+	imagesetpixel($im, $x + 4, $y + 9, $color_black);
+	imagesetpixel($im, $x + 5, $y + 9, $color_black);
 }
 
 $y = 2;
