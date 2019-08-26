@@ -82,7 +82,7 @@ $sqrt2 = sqrt(2);
 $im = imagecreate($imgw, $imgh);
 $color_white = $bg = imagecolorallocate($im, 255, 255, 255);
 $color_black = imagecolorallocate($im, 0, 0, 0);
-$color_rnw = imagecolorallocate($im, 11, 136, 192);
+$color_rnw_towered = imagecolorallocate($im, 12, 136, 192);
 $color_svp_inner = imagecolorallocate($im, 225, 225, 225);
 $color_veh = imagecolorallocate($im, 91, 104, 119);
 $color_veh_outline = imagecolorallocate($im, 64, 64, 64);
@@ -108,13 +108,23 @@ foreach ($runway_ends as $r) {
 			$oy - $w * sin($angle + $PI4),
 			$ox - $w * cos($angle - $PI4),
 			$oy - $w * sin($angle - $PI4)];
-		imagefilledpolygon($im, $pts, 4, $color_rnw);
+		imagefilledpolygon($im, $pts, 4, $color_rnw_towered);
+		$w /= 3;
+		$pts = [$x + $w * cos($angle + $PI4),
+			$y + $w * sin($angle + $PI4),
+			$x + $w * cos($angle - $PI4),
+			$y + $w * sin($angle - $PI4),
+			$ox - $w * cos($angle + $PI4),
+			$oy - $w * sin($angle + $PI4),
+			$ox - $w * cos($angle - $PI4),
+			$oy - $w * sin($angle - $PI4)];
+		imagefilledpolygon($im, $pts, 4, $bg);
 	} else {
 
 	}
 }
 
-$mspsize = 7;
+$mspsize = 5;
 $vehsize = 3;
 
 function rect($x, $y, $size, $col_outline, $col)

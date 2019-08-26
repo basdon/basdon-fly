@@ -44,7 +44,7 @@ $im = imagecreate($imgwh, $imgwh);
 
 if (!isset($_GET['watercolors'])) {
 	$bg = imagecolorallocate($im, 255, 255, 255);
-	$color_ap = imagecolorallocate($im, 11, 136, 192);
+	$color_ap = imagecolorallocate($im, 12, 136, 192);
 	$color_ndb_a = imagecolorallocate($im, 157, 108, 159);
 	$color_ndb_b = imagecolorallocate($im, 194, 164, 194);
 	$color_ils = imagecolorallocate($im, 0, 255, 0);
