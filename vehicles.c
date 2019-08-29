@@ -573,6 +573,8 @@ cell AMX_NATIVE_CALL Veh_Park(AMX *amx, cell *params)
 	return 1;
 }
 
+static const char *MSG_REFUEL_NEED_SVP = WARN"You need to be at a service point to do this!";
+
 /* native Veh_Refuel(Float:x, Float:y, Float:z, vehicleid, playerid, Float:priceperlitre,
                      budget, &refuelamount, msg[], querybuf[]) */
 cell AMX_NATIVE_CALL Veh_Refuel(AMX *amx, cell *params)
@@ -587,8 +589,7 @@ cell AMX_NATIVE_CALL Veh_Refuel(AMX *amx, cell *params)
 
 	amx_GetAddr(amx, params[9], &addr);
 	if ((svpid = findServicePoint(amx_ctof(params[1]), amx_ctof(params[2]), amx_ctof(params[3]))) == -1) {
-		strcpy(buf, WARN"You need to be at a service point to do this!");
-		amx_SetUString(addr, buf, sizeof(buf));
+		amx_SetUString(addr, MSG_REFUEL_NEED_SVP, 144);
 		return 0;
 	}
 	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
@@ -662,6 +663,9 @@ cell AMX_NATIVE_CALL Veh_RegisterLabel(AMX *amx, cell *params)
 	return 1;
 }
 
+static const char *MSG_REPAIR_NONEED = WARN"Your vehicle doesn't need to be repaired!";
+static const char *MSG_REPAIR_NOAFFORD = WARN"You can't afford the repair fee!";
+
 /* native Veh_Repair(Float:x, Float:y, Float:z, vehicleid, playerid, budget,
                      Float:hp, &Float:newhp, buf[], querybuf[]) */
 cell AMX_NATIVE_CALL Veh_Repair(AMX *amx, cell *params)
@@ -676,13 +680,11 @@ cell AMX_NATIVE_CALL Veh_Repair(AMX *amx, cell *params)
 
 	amx_GetAddr(amx, params[9], &addr);
 	if ((svpid = findServicePoint(amx_ctof(params[1]), amx_ctof(params[2]), amx_ctof(params[3]))) == -1) {
-		strcpy(buf, WARN"You need to be at a service point to do this!");
-		amx_SetUString(addr, buf, sizeof(buf));
+		amx_SetUString(addr, MSG_REFUEL_NEED_SVP, 144);
 		return 0;
 	}
 	if (hp > 999.9f) {
-		strcpy(buf, "Your vehicle doesn't need to be repaired!");
-		amx_SetUString(addr, buf, sizeof(buf));
+		amx_SetUString(addr, MSG_REPAIR_NONEED, 144);
 		return 0;
 	}
 
@@ -691,8 +693,7 @@ cell AMX_NATIVE_CALL Veh_Repair(AMX *amx, cell *params)
 	if (cost > budget) {
 		fixamount = (float) ((budget - 150) / 2);
 		if (fixamount <= 0.0f) {
-			strcpy(buf, "You can't afford the repair fee!");
-			amx_SetUString(addr, buf, sizeof(buf));
+			amx_SetUString(addr, MSG_REPAIR_NOAFFORD, 144);
 			return 0;
 		}
 		cost = budget;
