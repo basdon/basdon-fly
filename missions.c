@@ -612,7 +612,8 @@ cell AMX_NATIVE_CALL Missions_EnterCheckpoint(AMX *amx, cell *params)
 		mission->stage = MISSION_STAGE_UNLOAD;
 		return MISSION_ENTERCHECKPOINTRES_UNLOAD;
 	default:
-		logprintf("ERR: player entered mission checkpoint in invalid stage: %d",
+		logprintf("ERR: player uid %d entered mission checkpoint in invalid stage: %d",
+		          pdata[playerid] == NULL ? -1 : pdata[playerid]->userid,
 		          mission->stage);
 		return 0;
 	}
