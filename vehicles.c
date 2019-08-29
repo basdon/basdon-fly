@@ -527,6 +527,52 @@ cell AMX_NATIVE_CALL Veh_OnPlayerDisconnect(AMX *amx, cell *params)
 	return 1;
 }
 
+static const char *MSG_VEH_PARKED = SUCC"Vehicle parked!";
+static const char *MSG_VEH_NOPARK = WARN"You don't own this vehicle!";
+static const char *MSG_VEH_NOVEH = WARN"You need to be in a vehicle to use this command!";
+
+/* native Veh_Park(playerid, vehicleid, Float:x, Float:y, Float:z, Float:r, querybuf[], &msgcol, msgbuf[]) */
+cell AMX_NATIVE_CALL Veh_Park(AMX *amx, cell *params)
+{
+	const int playerid = params[1], vehicleid = params[2];
+	float x, y, z, r;
+	char buf[144];
+	cell *addrcol, *addrmsg;
+	struct dbvehicle *veh;
+
+	amx_GetAddr(amx, params[8], &addrcol);
+	amx_GetAddr(amx, params[9], &addrmsg);
+	if (!vehicleid || (veh = gamevehicles[vehicleid].dbvehicle) == NULL) {
+		*addrcol = COL_WARN;
+		amx_SetUString(addrmsg, MSG_VEH_NOVEH, 144);
+		return 0;
+	} else if (pdata[playerid] == NULL || veh->owneruserid != pdata[playerid]->userid) {
+		*addrcol = COL_WARN;
+		amx_SetUString(addrmsg, MSG_VEH_NOPARK, 144);
+		return 0;
+	}
+
+	x = amx_ctof(params[3]);
+	y = amx_ctof(params[4]);
+	z = amx_ctof(params[5]);
+	r = amx_ctof(params[6]);
+	if (356.0f < r || r < 4.0f) {
+		r = 0.0f;
+	} else if (86.0f < r && r < 94.0f) {
+		r = 90.0f;
+	} else if (176.0f < r && r < 184.0f) {
+		r = 180.0f;
+	} else if (266.0f < r && r < 274.0f) {
+		r = 270.0f;
+	}
+	*addrcol = COL_SUCC;
+	amx_SetUString(addrmsg, MSG_VEH_PARKED, 144);
+	sprintf(buf, "UPDATE veh SET x=%f,y=%f,z=%f,r=%f WHERE i=%d", x, y, z, r, veh->id);
+	amx_GetAddr(amx, params[7], &addrmsg);
+	amx_SetUString(addrmsg, buf, sizeof(buf));
+	return 1;
+}
+
 /* native Veh_Refuel(Float:x, Float:y, Float:z, vehicleid, playerid, Float:priceperlitre,
                      budget, &refuelamount, msg[], querybuf[]) */
 cell AMX_NATIVE_CALL Veh_Refuel(AMX *amx, cell *params)

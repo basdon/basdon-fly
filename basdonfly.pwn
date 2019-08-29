@@ -836,6 +836,19 @@ native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[])
 //@param playerid the player that disconnected
 native Veh_OnPlayerDisconnect(playerid)
 
+//@summary Save current position of a vehicle as its parked position
+//@param playerid player attempting to park the vehicle
+//@param vehicleid vehicle the player is attempting to park, may be {@code 0}
+//@param x x position of the vehicle
+//@param y y position of the vehicle
+//@param z z position of the vehicle
+//@param r z rotation of the vehicle
+//@param querybuf buffer to store query in, to be executed when returned {@code 1}
+//@param msgcol color of the message in {@param msgbuf} to send
+//@param msgbuf buffer to store message in, always to be sent
+//@returns {@code 1} on success (execute query)
+native Veh_Park(playerid, vehicleid, Float:x, Float:y, Float:z, Float:r, querybuf[], &msgcol,msgbuf[])
+
 //@summary Refuels a vehicle within given fuel budget
 //@param x x-position of vehicle
 //@param y y-position of vehicle
