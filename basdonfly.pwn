@@ -646,6 +646,12 @@ native PlayerData_FormatUpdateQuery(userid, score, money, Float:dis, flighttime,
 //@returns {@code 0} if there was no player data saved for {@param playerid}
 native PlayerData_SetUserId(playerid, id)
 
+//@summary Update the player's group
+//@param playerid player
+//@param group new groups mask of the player (see {@code GROUP_*} constants)
+//@returns {@code 0} if there was no player data saved for {@param playerid}
+native PlayerData_UpdateGroup(playerid, group)
+
 //@summary Updates the stored player's name on the plugin side
 //@param playerid the playerid
 //@param name new name

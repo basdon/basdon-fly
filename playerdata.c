@@ -67,14 +67,16 @@ cell AMX_NATIVE_CALL PlayerData_Clear(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL PlayerData_Init(AMX *amx, cell *params)
 {
 	int pid = params[1];
+	struct playerdata *pd;
 	cell *addr;
 	if (pdata[pid] == NULL) {
-		pdata[pid] = malloc(sizeof(struct playerdata));
+		pd = pdata[pid] = malloc(sizeof(struct playerdata));
 	}
 	amx_GetAddr(amx, params[2], &addr);
-	amx_GetUString(pdata[pid]->ip, addr, 16);
-	setName(pdata[pid], amx, params[3], params[4]);
-	pdata[pid]->userid = -1;
+	amx_GetUString(pd->ip, addr, 16);
+	setName(pd, amx, params[3], params[4]);
+	pd->userid = -1;
+	pd->groups = GROUP_GUEST;
 	return 1;
 }
 
@@ -106,6 +108,17 @@ cell AMX_NATIVE_CALL PlayerData_SetUserId(AMX *amx, cell *params)
 		return 0;
 	}
 	pdata[pid]->userid = params[2];
+	return 1;
+}
+
+/* native PlayerData_UpdateGroup(playerid, groups) */
+cell AMX_NATIVE_CALL PlayerData_UpdateGroup(AMX *amx, cell *params)
+{
+	const int pid = params[1], groups = params[2];
+	if (pdata[pid] == NULL) {
+		return 0;
+	}
+	pdata[pid]->groups = groups;
 	return 1;
 }
 

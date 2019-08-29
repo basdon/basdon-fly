@@ -217,7 +217,7 @@ cell AMX_NATIVE_CALL Login_FormatLoadAccountData(AMX *amx, cell *params)
 	char data[512];
 	cell *addr;
 	sprintf(data,
-	        "SELECT score,cash,distance,flighttime,prefs,falng,lastfal FROM usr WHERE i=%d",
+	        "SELECT score,cash,distance,flighttime,prefs,falng,lastfal,groups FROM usr WHERE i=%d",
 	        (int) params[1]);
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, data, sizeof(data));

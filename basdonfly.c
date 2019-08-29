@@ -95,6 +95,7 @@ FORWARD(PlayerData_Clear);
 FORWARD(PlayerData_Init);
 FORWARD(PlayerData_FormatUpdateQuery);
 FORWARD(PlayerData_SetUserId);
+FORWARD(PlayerData_UpdateGroup);
 FORWARD(PlayerData_UpdateName);
 /* playtime.c */
 FORWARD(Playtime_FormatUpdateTimes);
@@ -279,6 +280,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PlayerData_Init),
 	REGISTERNATIVE(PlayerData_FormatUpdateQuery),
 	REGISTERNATIVE(PlayerData_SetUserId),
+	REGISTERNATIVE(PlayerData_UpdateGroup),
 	REGISTERNATIVE(PlayerData_UpdateName),
 	/* playtime.c */
 	REGISTERNATIVE(Playtime_FormatUpdateTimes),

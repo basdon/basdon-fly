@@ -8,7 +8,7 @@ struct playerdata {
 	char name[MAX_PLAYER_NAME + 1];
 	char normname[MAX_PLAYER_NAME + 1];
 	char namelen;
-	int userid;
+	int userid, groups;
 };
 
 extern struct playerdata *pdata[MAX_PLAYERS];
