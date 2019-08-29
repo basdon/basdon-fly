@@ -57,6 +57,7 @@
 
 #define RUNWAY_TYPE_RUNWAY (1)
 #define RUNWAY_TYPE_HELIPAD (2)
+
 /* dialog.c / dialog.pwn */
 #define LIMIT_DIALOG_CAPTION (64)
 #define LIMIT_DIALOG_TEXT (4096)
@@ -72,6 +73,12 @@
 #define GROUP_MEMBER (4)
 #define GROUP_ADMIN (268435456)
 #define GROUP_OWNER (1073741824)
+
+#ifdef _samp_included
+#define GROUPS_ISADMIN(%1) ((%1) >= GROUP_ADMIN)
+#else
+#define GROUPS_ISADMIN(X) ((X) >= GROUP_ADMIN)
+#endif /*_samp_included*/
 
 /* game_sa.c / game_sa.pwn, global */
 #define MODEL_LANDSTAL (400)

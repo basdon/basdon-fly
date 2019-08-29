@@ -528,7 +528,7 @@ cell AMX_NATIVE_CALL Veh_OnPlayerDisconnect(AMX *amx, cell *params)
 }
 
 static const char *MSG_VEH_PARKED = SUCC"Vehicle parked!";
-static const char *MSG_VEH_NOPARK = WARN"You don't own this vehicle!";
+static const char *MSG_VEH_NOOWN = WARN"You don't own this vehicle!";
 static const char *MSG_VEH_NOVEH = WARN"You need to be in a vehicle to use this command!";
 
 /* native Veh_Park(playerid, vehicleid, Float:x, Float:y, Float:z, Float:r, querybuf[], &msgcol, msgbuf[]) */
@@ -538,7 +538,8 @@ cell AMX_NATIVE_CALL Veh_Park(AMX *amx, cell *params)
 	float x, y, z, r;
 	char buf[144];
 	cell *addrcol, *addrmsg;
-	struct dbvehicle *veh;
+	const struct dbvehicle *veh;
+	const struct playerdata *pd;
 
 	amx_GetAddr(amx, params[8], &addrcol);
 	amx_GetAddr(amx, params[9], &addrmsg);
@@ -546,9 +547,11 @@ cell AMX_NATIVE_CALL Veh_Park(AMX *amx, cell *params)
 		*addrcol = COL_WARN;
 		amx_SetUString(addrmsg, MSG_VEH_NOVEH, 144);
 		return 0;
-	} else if (pdata[playerid] == NULL || veh->owneruserid != pdata[playerid]->userid) {
+	} else if ((pd = pdata[playerid]) == NULL ||
+		(veh->owneruserid != pd->userid && !GROUPS_ISADMIN(pd->groups)))
+	{
 		*addrcol = COL_WARN;
-		amx_SetUString(addrmsg, MSG_VEH_NOPARK, 144);
+		amx_SetUString(addrmsg, MSG_VEH_NOOWN, 144);
 		return 0;
 	}
 
