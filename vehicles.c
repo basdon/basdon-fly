@@ -814,6 +814,9 @@ cell AMX_NATIVE_CALL Veh_ShouldCreateLabel(AMX *amx, cell *params)
 /* native Veh_ShouldRecreate(vehicleid, &dbid, &model, &Float:x, &Float:y, &Float:z, &Float:r, &col1, &col2) */
 cell AMX_NATIVE_CALL Veh_ShouldRecreate(AMX *amx, cell *params)
 {
+#if CLEAR_RECREATE_FLAG_VER != 1
+#error "update Veh_ShouldRecreate for Veh_ClearRecreateFlag"
+#endif
 	const int vehicleid = params[1];
 	const struct dbvehicle *veh;
 	cell *addr;
