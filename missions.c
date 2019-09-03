@@ -661,18 +661,17 @@ cell AMX_NATIVE_CALL Missions_GetMissionNavData(AMX *amx, cell *params)
 	struct mission *miss;
 	if ((miss = activemission[playerid]) != NULL) {
 		amx_GetAddr(amx, params[2], &addr);
-		if ((*addr = miss->veh->spawnedvehicleid) == -1) {
-			return 0;
+		if ((*addr = miss->veh->spawnedvehicleid)) {
+			amx_GetAddr(amx, params[3], &addr);
+			*addr = miss->veh->model;
+			amx_GetAddr(amx, params[4], &addr);
+			if (miss->stage <= MISSION_STAGE_PRELOAD) {
+				*addr = miss->startpoint->ap->id;
+			} else {
+				*addr = miss->endpoint->ap->id;
+			}
+			return 1;
 		}
-		amx_GetAddr(amx, params[3], &addr);
-		*addr = miss->veh->model;
-		amx_GetAddr(amx, params[4], &addr);
-		if (miss->stage <= MISSION_STAGE_PRELOAD) {
-			*addr = miss->startpoint->ap->id;
-		} else {
-			*addr = miss->endpoint->ap->id;
-		}
-		return 1;
 	}
 	return 0;
 }
