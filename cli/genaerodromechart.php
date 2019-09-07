@@ -120,7 +120,16 @@ foreach ($runway_ends as $r) {
 			$oy - $w * sin($angle - $PI4)];
 		imagefilledpolygon($im, $pts, 4, $bg);
 	} else {
-
+		// helipad
+		$r = $r[0];
+		$x = xcoord($r->x);
+		$y = ycoord($r->y);
+		$w2 = $r->w / 2;
+		imagefilledarc($im, xcoord($r->x), ycoord($r->y), $r->w, $r->w, 0, 360, $color_rnw_towered, IMG_ARC_PIE);
+		$w4 = $r->w / 4;
+		imagefilledrectangle($im, $x - 3, $y - $w4, $x - 8, $y + $w4, $color_white);
+		imagefilledrectangle($im, $x + 3, $y - $w4, $x + 8, $y + $w4, $color_white);
+		imagefilledrectangle($im, $x - 3, $y - 3, $x + 3, $y + 3, $color_white);
 	}
 }
 
