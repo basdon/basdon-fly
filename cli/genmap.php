@@ -104,7 +104,7 @@ try {
 	$ox = 0;
 	$oy = 0;
 	$draw = false;
-	foreach ($db->query('SELECT r.x rx,r.y ry,r.n,r.h,r.s,a.c,a.b,a.x ax,a.y ay FROM rnw r JOIN apt a ON r.a=a.i ORDER BY r.a,r.i') as $r) {
+	foreach ($db->query('SELECT r.x rx,r.y ry,r.n,r.h,r.s,a.c,a.b,a.x ax,a.y ay FROM rnw r JOIN apt a ON r.a=a.i WHERE r.type=1 ORDER BY r.a,r.i') as $r) {
 		$code = $r->c;
 		if (array_key_exists($code, $appos)) {
 			$appos[$code][0] = max($appos[$code][0], xcoord($r->rx));
