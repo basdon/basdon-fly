@@ -92,12 +92,32 @@ $color_msp = imagecolorallocate($im, 170, 0, 0);
 $color_msp_outline = $color_black;
 $color_ndb_a = imagecolorallocate($im, 157, 108, 159);
 $color_ndb_b = imagecolorallocate($im, 194, 164, 194);
+$color_ils = imagecolorallocate($im, 0, 255, 0);
 $font = 2;
 
 $runway_fillings = [];
 $runway_texts = [];
 foreach ($runway_ends as $r) {
 	if (count($r) == 2) {
+
+		// ils feathers
+		for ($i = 0; $i < 2; $i++) {
+			if ($r[$i]->n & 4) {
+				$h = deg2rad($r[$i]->h) + $PI2;
+				$x = (int) xcoord($r[$i]->x) - cos($h) * 30;
+				$y = (int) ycoord($r[$i]->y) - sin($h) * 30;
+				$ILS_DIST = 1500;
+				$d1 = $scale * $ILS_DIST;
+				$d2 = $scale * ($ILS_DIST - 160);
+				$w = $scale * 90;
+				$pts = [$x, $y,
+					$x + $d1 * cos($h) + $w * cos($h + $PI2), $y + $d1 * sin($h) + $w * sin($h + $PI2),
+					$x + $d2 * cos($h), $y + $d2 * sin($h),
+					$x + $d1 * cos($h) + $w * cos($h - $PI2), $y + $d1 * sin($h) + $w * sin($h - $PI2)];
+				imagepolygon($im, $pts, 4, $color_ils);
+			}
+		}
+
 		$ox = (int) xcoord($r[0]->x);
 		$oy = (int) ycoord($r[0]->y);
 		$x = (int) xcoord($r[1]->x);
@@ -105,6 +125,7 @@ foreach ($runway_ends as $r) {
 		$angle = atan2($y - $oy, $x - $ox);
 		$anglePI4 = $angle + $PI4;
 		$angle_PI4 = $angle + $PI4;
+
 		$w = $sqrt2 * $r[0]->w / 2 * $scale;
 		$pts = [$x + $w * cos($angle + $PI4),
 			$y + $w * sin($angle + $PI4),
