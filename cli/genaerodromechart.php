@@ -21,6 +21,9 @@ $minx = 100000;
 $miny = 100000;
 
 $apid = $_GET['id'];
+
+$apt= $db->query('SELECT b,x,y,z FROM apt WHERE i='.$apid)->fetchAll()[0];
+
 $runway_ends = [];
 foreach ($db->query('SELECT x,y,z,w,i FROM rnw WHERE a='.$apid.' ORDER BY i') as $r) {
 	if (!isset($runway_ends[$r->i])) {
@@ -87,6 +90,8 @@ $color_veh = imagecolorallocate($im, 91, 104, 119);
 $color_veh_outline = imagecolorallocate($im, 64, 64, 64);
 $color_msp = imagecolorallocate($im, 170, 0, 0);
 $color_msp_outline = $color_black;
+$color_ndb_a = imagecolorallocate($im, 157, 108, 159);
+$color_ndb_b = imagecolorallocate($im, 194, 164, 194);
 $font = 2;
 
 $runway_fillings = [];
@@ -137,6 +142,35 @@ foreach ($runway_fillings as $rf)
 {
 	imagefilledpolygon($im, $rf, 4, $bg);
 }
+
+// ndb
+$x = xcoord($apt->x);
+$y = ycoord($apt->y);
+// +
+imageline($im, $x -1, $y, $x + 1, $y, $color_ndb_a);
+imageline($im, $x, $y - 1, $x, $y + 1, $color_ndb_a);
+// o
+imageellipse($im, $x, $y, 6, 6, $color_ndb_a);
+// dots
+$NDBSIZE = 24;
+for ($i = 6; $i < $NDBSIZE; $i += 2) {
+	$amt = pi() * $i;
+	$dang = 2 * pi() / $amt;
+	for ($ang = 0; $amt >= 0; $amt--, $ang += $dang) {
+		imagesetpixel($im, $x + cos($ang) * $i, $y + sin($ang) * $i, $color_ndb_b);
+	}
+}
+$off = $NDBSIZE * sqrt(2) / 2;
+$w = strlen($apt->b) * imagefontwidth($font);
+$h = imagefontheight($font);
+$x -= $off + $w;
+$y -= $off + $h - 2;
+// text white background
+imagefilledrectangle($im, $x - 1, $y - 1, $x + $w - 1, $y + $h - 3, $bg);
+// text border
+imagerectangle($im, $x - 2, $y - 1, $x + $w, $y + $h - 3, $color_ndb_a);
+// text
+imagestring($im, $font, $x, $y - 2, $apt->b, $color_ndb_a);
 
 $mspsize = 5;
 $vehsize = 3;
