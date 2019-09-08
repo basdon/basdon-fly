@@ -25,7 +25,7 @@ $apid = $_GET['id'];
 $apt= $db->query('SELECT b,x,y,z FROM apt WHERE i='.$apid)->fetchAll()[0];
 
 $runway_ends = [];
-foreach ($db->query('SELECT x,y,z,w,i FROM rnw WHERE a='.$apid.' ORDER BY i') as $r) {
+foreach ($db->query('SELECT x,y,z,w,i,h,s,n FROM rnw WHERE a='.$apid.' ORDER BY i') as $r) {
 	if (!isset($runway_ends[$r->i])) {
 		$runway_ends[$r->i] = [$r];
 	} else {
@@ -95,6 +95,7 @@ $color_ndb_b = imagecolorallocate($im, 194, 164, 194);
 $font = 2;
 
 $runway_fillings = [];
+$runway_texts = [];
 foreach ($runway_ends as $r) {
 	if (count($r) == 2) {
 		$ox = (int) xcoord($r[0]->x);
@@ -124,6 +125,22 @@ foreach ($runway_ends as $r) {
 			$ox - $w * cos($angle - $PI4),
 			$oy - $w * sin($angle - $PI4)];
 		$runway_fillings[] = $pts;
+		$txt = new stdClass();
+		$txt->angle = $angle + pi();
+		$txt->x = $ox;
+		$txt->y = $oy;
+		$txt->h = $r[0]->h;
+		$txt->s = $r[0]->s;
+		$txt->n = $r[0]->n;
+		$runway_texts[] = $txt;
+		$txt = new stdClass();
+		$txt->angle = $angle;
+		$txt->x = $x;
+		$txt->y = $y;
+		$txt->h = $r[1]->h;
+		$txt->s = $r[1]->s;
+		$txt->n = $r[1]->n;
+		$runway_texts[] = $txt;
 	} else {
 		// helipad
 		$r = $r[0];
@@ -143,6 +160,35 @@ foreach ($runway_fillings as $rf)
 	imagefilledpolygon($im, $rf, 4, $bg);
 }
 
+function bordered_text($x, $y, $txt, $col)
+{
+	global $im, $font, $bg;
+	$w = strlen($txt) * imagefontwidth($font);
+	$h = imagefontheight($font);
+	$x -= $w / 2;
+	$y -= $h / 2 - 2;
+	// text white background
+	imagefilledrectangle($im, $x - 1, $y - 1, $x + $w - 1, $y + $h - 3, $bg);
+	// text border
+	imagerectangle($im, $x - 2, $y - 1, $x + $w, $y + $h - 3, $col);
+	// text
+	imagestring($im, $font, $x, $y - 2, $txt, $col);
+}
+
+foreach ($runway_texts as $t)
+{
+	$x = $t->x + 30 * cos($t->angle);
+	$y = $t->y + 30 * sin($t->angle);
+	$txt = ' ' . sprintf('%02d', round($t->h / 10)) . $t->s;
+	if ($t->n & 2) {
+		$txt[0] = '^';
+	}
+	if ($t->n & 4) {
+		$txt[0] = '*';
+	}
+	bordered_text($x, $y, $txt, $color_rnw_towered);
+}
+
 // ndb
 $x = xcoord($apt->x);
 $y = ycoord($apt->y);
@@ -160,17 +206,8 @@ for ($i = 6; $i < $NDBSIZE; $i += 2) {
 		imagesetpixel($im, $x + cos($ang) * $i, $y + sin($ang) * $i, $color_ndb_b);
 	}
 }
-$off = $NDBSIZE * sqrt(2) / 2;
-$w = strlen($apt->b) * imagefontwidth($font);
-$h = imagefontheight($font);
-$x -= $off + $w;
-$y -= $off + $h - 2;
-// text white background
-imagefilledrectangle($im, $x - 1, $y - 1, $x + $w - 1, $y + $h - 3, $bg);
-// text border
-imagerectangle($im, $x - 2, $y - 1, $x + $w, $y + $h - 3, $color_ndb_a);
-// text
-imagestring($im, $font, $x, $y - 2, $apt->b, $color_ndb_a);
+$off = $NDBSIZE * sqrt(2) / 2 + 7;
+bordered_text($x - $off, $y - $off, $apt->b, $color_ndb_a);
 
 $mspsize = 5;
 $vehsize = 3;
