@@ -248,17 +248,17 @@ foreach ($missionpoints as $p) {
 	rect($x, $y, $mspsize, $color_msp_outline, $color_msp);
 	$txt = '?';
 	if ($p->t & (1 | 2 | 4)) {
- 		$txt = 'p';
- 	} else if ($p->t & (8 | 16 | 32)) {
- 		$txt = 'c';
- 	} else if ($p->t & (64 | 128)) {
- 		$txt = 'h';
- 	} else if ($p->t & (256)) {
- 		$txt = 'm';
- 	} else if ($p->t & (512)) {
- 		$txt = 'm';
- 	}
-	imagestring($im, $font, $x - imagefontwidth($font) / 2, $y - $mspsize - 1, $txt, $bg);
+		$txt = 'p';
+	} else if ($p->t & (8 | 16 | 32)) {
+		$txt = 'c';
+	} else if ($p->t & (64 | 128)) {
+		$txt = 'h';
+	} else if ($p->t & (256)) {
+		$txt = 'mh';
+	} else if ($p->t & (512)) {
+		$txt = 'm';
+	}
+	imagestring($im, $font, $x - imagefontwidth($font) / 2 * strlen($txt) + 1, $y - $mspsize - 1, $txt, $bg);
 }
 
 foreach ($vehicles as $v) {
