@@ -72,10 +72,15 @@ $miny -= 50;
 $imgw = 500;
 $sizex = $maxx - $minx;
 $sizey = $maxy - $miny;
+$offx = $offy = 0;
+if ($sizex < 700) {
+	$offx = (700 - $sizex) / 2;
+	$sizex = 700;
+}
 $scale = $imgw / $sizex;
 $imgh = $sizey * $scale;
-$offx = -$minx;
-$offy = -$miny;
+$offx -= $minx;
+$offy -= $miny;
 
 $PI2 = pi() / 2;
 $PI4 = pi() / 4;
