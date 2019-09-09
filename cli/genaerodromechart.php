@@ -22,7 +22,7 @@ $miny = 100000;
 
 $apid = $_GET['id'];
 
-$apt= $db->query('SELECT b,x,y,z FROM apt WHERE i='.$apid)->fetchAll()[0];
+$apt= $db->query('SELECT n,b,x,y,z FROM apt WHERE i='.$apid)->fetchAll()[0];
 
 $runway_ends = [];
 foreach ($db->query('SELECT x,y,z,w,i,h,s,n FROM rnw WHERE a='.$apid.' ORDER BY i') as $r) {
@@ -230,7 +230,7 @@ for ($i = 6; $i < $NDBSIZE; $i += 2) {
 $off = $NDBSIZE * sqrt(2) / 2 + 7;
 bordered_text($x - $off, $y - $off, $apt->b, $color_ndb_a);
 
-$mspsize = 5;
+$mspsize = 6;
 $vehsize = 3;
 
 function rect($x, $y, $size, $col_outline, $col)
@@ -246,6 +246,19 @@ foreach ($missionpoints as $p) {
 	$x = xcoord($p->x);
 	$y = ycoord($p->y);
 	rect($x, $y, $mspsize, $color_msp_outline, $color_msp);
+	$txt = '?';
+	if ($p->t & (1 | 2 | 4)) {
+ 		$txt = 'p';
+ 	} else if ($p->t & (8 | 16 | 32)) {
+ 		$txt = 'c';
+ 	} else if ($p->t & (64 | 128)) {
+ 		$txt = 'h';
+ 	} else if ($p->t & (256)) {
+ 		$txt = 'm';
+ 	} else if ($p->t & (512)) {
+ 		$txt = 'm';
+ 	}
+	imagestring($im, $font, $x - imagefontwidth($font) / 2, $y - $mspsize - 1, $txt, $bg);
 }
 
 foreach ($vehicles as $v) {
@@ -284,6 +297,9 @@ foreach ($servicepoints as $svp) {
 	imagesetpixel($im, $x + 4, $y + 9, $color_black);
 	imagesetpixel($im, $x + 5, $y + 9, $color_black);
 }
+
+// ap name
+bordered_text($imgw / 2, imagefontheight($font) / 2, $apt->n, $color_black);
 
 if (!isset($_GET['d'])) header('Content-Type: image/png');
 
