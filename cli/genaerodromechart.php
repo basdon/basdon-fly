@@ -15,14 +15,29 @@ function ycoord($y)
 	return $imgh - ($y + $offy) * $scale;
 }
 
+$aptcodes = [];
+if (isset($_GET['id'])) {
+	$aptcodes[] = $db->query('SELECT c FROM apt WHERE i='.$_GET['id'])->fetchAll()[0]->c;
+} else {
+	foreach ($db->query('SELECT c FROM apt') as $r) {
+		$aptcodes[] = $r->c;
+	}
+}
+
+nextap:
+
+$apcode = array_pop($aptcodes);
+if ($apcode == null) {
+	exit();
+}
+
 $maxx = -100000;
 $maxy = -100000;
 $minx = 100000;
 $miny = 100000;
 
-$apid = $_GET['id'];
-
-$apt= $db->query('SELECT n,b,x,y,z FROM apt WHERE i='.$apid)->fetchAll()[0];
+$apt = $db->query('SELECT i,c,n,b,x,y,z FROM apt WHERE c=\''.$apcode.'\'')->fetchAll()[0];
+$apid = $apt->i;
 
 $runway_ends = [];
 foreach ($db->query('SELECT x,y,z,w,i,h,s,n FROM rnw WHERE a='.$apid.' ORDER BY i') as $r) {
@@ -306,12 +321,19 @@ foreach ($servicepoints as $svp) {
 // ap name
 bordered_text($imgw / 2, imagefontheight($font) / 2, $apt->n, $color_black);
 
-if (!isset($_GET['d'])) header('Content-Type: image/png');
+if (isset($_GET['web'])) {
+	if (!isset($_GET['d'])) header('Content-Type: image/png');
+}
 
 ob_start();
 imagepng($im);
-file_put_contents('map.png', ob_get_contents());
-ob_end_flush();
+file_put_contents('../static/gen/aerodrome_'.$apt->c.'.png', ob_get_contents());
+if (isset($_GET['web'])) {
+	ob_end_flush();
+} else {
+	ob_end_clean();
+}
 
 imagedestroy($im);
 
+goto nextap;
