@@ -45,13 +45,19 @@ $servicepointcount = $db->query('SELECT COUNT(*) c FROM svp WHERE apt='.$apid)->
 $vehiclecount = $db->query('SELECT COUNT(*) c FROM veh WHERE e=1 AND ap='.$apid)->fetchAll()[0]->c;
 
 $types = ['Public', 'Civil', 'Military', 'Civil/Military'];
-$type = 0;
+$t = 0;
 foreach ($db->query('SELECT t FROM msp WHERE a='.$apid) as $msp) {
-	if ($msp->t & (/*ignore military heli for now256 | */512 | 1024)) {
-		$type |= 2;
-	} else {
-		$type |= 1;
-	}
+	$t |= $msp->t;
+}
+if ($t & ~256) {
+	// ignore military heli for now if there are other types
+	$t &= ~256;
+}
+$type = 0;
+if ($t & (512 | 1024)) {
+	$type |= 2;
+} else {
+	$type |= 1;
 }
 
 function rnw($heading, $specifier)
@@ -77,7 +83,6 @@ echo '<tr class="fsh"><td colspan="3">' . $apt->n . '</td></tr>';
 echo '<tr><td colspan="3" style="font-weight:bold;text-align:center">Airport Code: ' . $apt->c . '</td></tr>';
 echo '<tr class="fsh"><td colspan="3">Summary</td></tr>';
 echo '<tr><td colspan="2"><strong>Type</strong></td><td>' . $types[$type] . '</td></tr>';
-echo '<tr><td colspan="2"><strong>Beacon</strong></td><td>' . $apt->b . '</td></tr>';
 echo '<tr><td colspan="2"><strong>Elevation</strong></td><td>' . round($apt->z) . 'ft</td></tr>';
 echo '<tr><td colspan="2"><strong>Mission points</strong></td><td>' . $missionpointcount . '</td></tr>';
 echo '<tr><td colspan="2"><strong>Service points</strong></td><td>' . $servicepointcount . '</td></tr>';
