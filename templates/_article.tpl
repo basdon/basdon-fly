@@ -18,6 +18,9 @@
 				{@endforeach}
 				&#32;&gt;&#32;
 				<a href="article.php?title={$article_name}">{$article_name}</a>
+				{@if $article_redirected_from != null}
+					<small> (Redirected from {@unsafe $article_redirected_from})</small>
+				{@endif}
 			</p>
 			{@if $article_pageviews == null}
 				<h2 id="main">Article not found!</h2>

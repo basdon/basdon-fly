@@ -52,6 +52,7 @@ if (isset($_GET['title'])) {
 $article_title = 'Article not found';
 $article_pageviews = null;
 $article_categories = [];
+$article_redirected_from = null;
 
 ++$db_querycount;
 $stmt = $db->prepare('SELECT id,name,title,pageviews,cat FROM art WHERE name=? LIMIT 1');
@@ -65,6 +66,14 @@ if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 	$article_name = $r->name;
 	$article_title = $r->title;
 	$article_pageviews = $r->pageviews + 1;
+
+	if (isset($_GET['from'])) {
+		$stmt = $db->prepare('SELECT art,alt FROM artalt WHERE alt=?');
+		$stmt->bindValue(1, $_GET['from']);
+		if ($stmt->execute() && ($r2 = $stmt->fetchAll()) && count($r2) && $r2[0]->art == $r->id) {
+			$article_redirected_from = $r2[0]->alt;
+		}
+	}
 
 	$cat = $r->cat;
 	if ($cat != null) {
@@ -83,6 +92,14 @@ nextparentcat:
 				goto nextparentcat;
 			}
 		}
+	}
+} else {
+	$stmt = $db->prepare('SELECT art.name FROM art JOIN artalt ON art.id = artalt.art WHERE artalt.alt=?');
+	$stmt->bindValue(1, $article_name);
+	if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
+		http_response_code(301);
+		header('Location: '.$BASEPATH.'/article.php?title='.$r[0]->name.'&from='.$article_name);
+		die();
 	}
 }
 
