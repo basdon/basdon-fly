@@ -22,3 +22,10 @@
 	margin: 0;
 	padding: .5em 1em;
 }
+tr.fsh {
+	background: #69c;
+	font-weight: bold;
+	color: #fff;
+	text-align: center;
+	font-size: 110%;
+}

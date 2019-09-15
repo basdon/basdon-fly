@@ -1,13 +1,16 @@
 
-.PHONY: .templates .aerodromcharts .articles all
+.PHONY: .templates .aerodromcharts .apfactsheets .articles all
 
-all: .templates .aerodromecharts .articles
+all: .templates .aerodromecharts .apfactsheets .articles
 
 .templates:
 	cd templates && make
 
 .aerodromecharts:
 	cd cli && php genaerodromechart.php
+
+.apfactsheets:
+	cd cli && php genapfactsheet.php
 
 .articles:
 	cd articles && make
