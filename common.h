@@ -7,6 +7,7 @@
 #include "vendor/SDK/amx/amx.h"
 #include "vendor/SDK/plugincommon.h"
 #include "sharedsymbols.h"
+#include "natives.h"
 
 typedef void (*logprintf_t)(char* format, ...);
 
@@ -23,6 +24,4 @@ extern logprintf_t logprintf;
 struct vec3 {
 	float x, y, z;
 };
-
-cell getrandom(AMX *amx, const cell max);
 

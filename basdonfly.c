@@ -141,27 +141,24 @@ FORWARD(Zones_FormatLoc);
 FORWARD(Zones_InvalidateForPlayer);
 FORWARD(Zones_UpdateForPlayer);
 
-static int getrandomidx;
+int n_random;
+static cell nc_params_d[20];
+static cell nc_result_d;
+cell *nc_params = nc_params_d;
+cell *nc_result = &nc_result_d;
 
 cell AMX_NATIVE_CALL Validate(AMX *amx, cell *params)
 {
+	amx_FindNative(amx, "random", &n_random);
+	if (n_random == 0x7FFFFFFF) {
+		logprintf("ERR: no random native");
+		return 0;
+	}
 	if (MAX_PLAYERS != params[1]) {
 		logprintf("ERR: MAX_PLAYERS mistmatch: %d (plugin) vs %d (gm)", MAX_PLAYERS, params[1]);
 		return 0;
 	}
-	if (amx_FindPublic(amx, "getrandom", &getrandomidx)) {
-		logprintf("ERR: no getrandom public function");
-		return 0;
-	}
 	return MAX_PLAYERS;
-}
-
-cell getrandom(AMX *amx, const cell max)
-{
-	cell result;
-	amx_Push(amx, max);
-	amx_Exec(amx, &result, getrandomidx);
-	return result;
 }
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()

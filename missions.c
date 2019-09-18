@@ -278,7 +278,10 @@ struct airport *getRandomAirportForType(AMX *amx, int missiontype, struct airpor
 	switch (apsc) {
 	case 0: ap = NULL; break;
 	case 1: ap = aps[0]; break;
-	default: ap = aps[getrandom(amx, apsc)]; break;
+	default:
+		NativeCall_random(apsc);
+		ap = aps[*nc_result];
+		break;
 	}
 
 	free(aps);
@@ -319,7 +322,8 @@ struct missionpoint *getRandomEndPointForType(AMX *amx, int missiontype, struct 
 		return points[0];
 	}
 
-	return points[getrandom(amx, pointc)];
+	NativeCall_random(pointc);
+	return points[*nc_result];
 #undef TMP_PT_SIZE
 }
 
@@ -731,7 +735,8 @@ cell AMX_NATIVE_CALL Missions_OnWeatherChanged(AMX *amx, cell *params)
 	case WEATHER_DE_SANDSTORMS: bonusvalue = MISSION_WEATHERBONUS_SANDSTORM; break;
 	default: return 0;
 	}
-	bonusvalue += getrandom(amx, MISSION_WEATHERBONUS_DEVIATION);
+	NativeCall_random(MISSION_WEATHERBONUS_DEVIATION);
+	bonusvalue += *nc_result;
 	while (i--) {
 		if (activemission[i] != NULL) {
 			activemission[i]->weatherbonus += bonusvalue;
