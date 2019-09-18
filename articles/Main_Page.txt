@@ -23,12 +23,18 @@
 	<thead>
 		<tr>
 			<th>{@ia=article.php?category=Basics Basics}</th>
+			<th>{@ia=article.php?category=Airports Airports}</th>
 		</tr>
 	</thead>
 	<tbody>
-		<tr><td><ul>
-			{@li {@ia=article.php?title=Fuel Fuel}}
-			{@li {@ia=article.php?title=List_of_aircraft List of aircraft}}
-		</ul></td></tr>
+		<tr valign="top">
+			<td><ul>
+				{@li {@ia=article.php?title=Fuel Fuel}}
+				{@li {@ia=article.php?title=List_of_aircraft List of aircraft}}
+			</ul></td>
+			<td><ul>
+				{@li {@ia=article.php?title=Los_Santos_Airport Los Santos Airport}}
+			</ul></td>
+		</tr>
 	</tbody>
 </table>

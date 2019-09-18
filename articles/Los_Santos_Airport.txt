@@ -1,0 +1,10 @@
+<div class="articleright">
+	<?php include('../articles/gen/apfactsheet_SALS.html') ?>
+</div>
+Is an airport.
+
+{@h3 Aerodrome Chart}
+{@simg=gen/aerodrome_SALS.png;SALS aerodrome chart;SALS aerodrome chart}
+
+{@clear}
+

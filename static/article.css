@@ -22,10 +22,21 @@
 	margin: 0;
 	padding: .5em 1em;
 }
+.article table {
+	border: 1px solid #a2a9b1;
+	border-spacing: 2px;
+}
 tr.fsh {
 	background: #69c;
 	font-weight: bold;
 	color: #fff;
 	text-align: center;
 	font-size: 110%;
+}
+div.articleright {
+	float: right;
+	padding-left: 1em;
+}
+.article h3, .article h4 {
+	overflow: hidden;
 }
