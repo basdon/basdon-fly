@@ -2,7 +2,7 @@
 {@if $flightlist !== false}
 	{@render flightstatuses.php}
 	{@render aircraftnames.php}
-	<table border="0" width="100%" id="flights">
+	<table border="0" width="100%" id="flights" class="default">
 		<thead>
 			<tr>
 				<th>Date</th>

@@ -152,20 +152,20 @@ img.missing {
 	image-rendering: -webkit-pixelated;
 	image-rendering: pixelated;
 }
-table {
+table.default {
 	border-spacing: 0;
 }
-td {
+table.default td {
 	border-bottom: 1px solid #ccc;
 	padding: .1em .5em;
 }
-th {
+table.default th {
 	border-bottom: 1px solid #000;
 }
-tr:nth-child(odd) {
+table.default tr:nth-child(odd) {
 	background: #f8f8f8;
 }
-tr:hover {
+table.default tr:hover {
 	background: #f3f3f3;
 }
 .clear {
