@@ -143,9 +143,8 @@ FORWARD(Zones_UpdateForPlayer);
 
 int n_random;
 static cell nc_params_d[20];
-static cell nc_result_d;
 cell *nc_params = nc_params_d;
-cell *nc_result = &nc_result_d;
+cell nc_result;
 
 cell AMX_NATIVE_CALL Validate(AMX *amx, cell *params)
 {
