@@ -54,6 +54,7 @@ but sadly it's not possible to actually place anything inside its cargo hold.
 {@b Based on:} Lockheed C-5 Galaxy<br/>
 {@b Fuel capacity:} 95 000L<br/>
 {@b Fuel usage:} 10L/s<br/>
+
 {@clear}
 
 {@h4(id="AT-400") AT-400}
@@ -69,6 +70,7 @@ to taxi with. Getting in might be a challenge, as it requires stairs. Fortunatel
 {@b Based on:} Being 737-500<br/>
 {@b Fuel capacity:} 23 000L<br/>
 {@b Fuel usage:} 10L/s<br/>
+
 {@clear}
 
 {@h4(id="Beagle") Beagle}
@@ -84,6 +86,7 @@ landings and takeoffs on grass or dirt, but this requires some skill.
 {@b Fuel capacity:} 518L<br/>
 {@b Fuel usage:} 1.1L/s<br/>
 {@b Trivia:} The {@a=https://en.wikipedia.org/wiki/Beagle beagle} is a breed of small hound.<br/>
+
 {@clear}
 
 {@h4(id="Dodo") Dodo}
@@ -100,6 +103,7 @@ and can take-off and land on a very short runway, which can even be grass or dir
 {@b Fuel usage:} 0.2L/s<br/>
 {@b See also:} {@#=Skimmer Skimmer}<br/>
 {@b Trivia:} The {@nfa=https://en.wikipedia.org/wiki/Dodo Dodo} is an extinct bird that cannot fly.<br/>
+
 {@clear}
 
 {@h4(id="Nevada") Nevada}
@@ -115,6 +119,7 @@ and one attached at the end of the tail.
 {@b Fuel capacity:} 3224L<br/>
 {@b Fuel usage:} 2.3L/s<br/>
 {@b Trivia:} It's named after the American state, as is the plane that it's based on.<br/>
+
 {@clear}
 
 {@h4(id="Shamal") Shamal}
@@ -129,6 +134,7 @@ Private, luxury passenger aircraft with two turbojet engines.
 {@b Fuel capacity:} 4160L<br/>
 {@b Fuel usage:} 3.6L/s<br/>
 {@b Trivia:} A shamal is a hot, dry northwesterly wind across the Persian Gulf.<br/>
+
 {@clear}
 
 {@h4(id="Skimmer") Skimmer}
@@ -146,6 +152,7 @@ Variant of the {@#=Dodo Dodo} with floats, it can only take off and land on wate
 One can use the {@code /fpslimit 25} client-side command to do this (make sure the 'FPS limiter' is ON
 in the game's display settings).<br/>
 {@b See also:} {@#=Dodo Dodo}<br/>
+
 {@clear}
 
 {@h3(id="Other_planes") Other planes}
@@ -166,6 +173,7 @@ takeoff or land.
 {@b Fuel usage:} 0.1L/s<br/>
 {@b Trivia:} Players can press the submission key (default: {@code 2} or {@code numpad&nbsp;+}) to
 enable the nozzles, a white-colored smoke trail will be visible.<br/>
+
 {@clear}
 
 {@h4(id="Stuntplane") Stuntplane}
@@ -182,6 +190,7 @@ such as loopings or barrel-rolls and the like.
 {@b Fuel usage:} 0.1L/s<br/>
 {@b Trivia:} Players can press the submission key (default: {@code 2} or {@code numpad +}) to enable
 a red-colored smoke trail.<br/>
+
 {@clear}
 
 {@h3(id="Helicopters") Helicopters}
@@ -202,6 +211,7 @@ on water, it's hard or even impossible to get in as a swimming player.
 {@b Fuel capacity:} 2925L<br/>
 {@b Fuel usage:} 1.7L/s<br/>
 {@b Trivia:} The {@a=https://en.wikipedia.org/wiki/Leviathan Leviathan} is a Biblical sea monster.<br/>
+
 {@clear}
 
 {@h4(id="Maverick") Maverick}
@@ -217,6 +227,7 @@ Light helicopter with 3 passenger seats. Since it's light, winds can make it dri
 {@b Fuel usage:} 0.6L/s<br/>
 {@b See also:} {@#=Police_maverick Police maverick}<br/>
 {@b See also:} {@#=San_news_heli San News heli}<br/>
+
 {@clear}
 
 {@h4(id="Police_maverick") Police maverick}
@@ -236,6 +247,7 @@ The Police maverick is slightly faster than the standard Maverick.
 {@b See also:} {@#=San_news_heli San News heli}<br/>
 {@b Trivia:} In single player, SWAT can come down ropes from this helicopter when the player has a
 wanted level of at least 3.<br/>
+
 {@clear}
 
 {@h4(id="Raindance") Raindance}
@@ -249,6 +261,7 @@ SAFD fire helicopter. Quite bulky, but not too hard on the controls.
 {@b Based on:} Sikorsky S-70A Firehawk<br/>
 {@b Fuel capacity:} 1360L<br/>
 {@b Fuel usage:} 1.7L/s<br/>
+
 {@clear}
 
 {@h4(id="San_news_heli") San News heli}
@@ -265,6 +278,7 @@ with a Newsvan, which is an adapted Pony vehicle with a satellite dish.
 {@b Fuel usage:} 0.6L/s<br/>
 {@b See also:} {@#=Maverick Maverick}<br/>
 {@b See also:} {@#=Police_maverick Police maverick}<br/>
+
 {@clear}
 
 {@h4(id="Sparrow") Sparrow}
@@ -280,6 +294,7 @@ Extremely small and light helicopter, although it has one extra seat for a passe
 {@b Fuel usage:} 0.2L/s<br/>
 {@b See also:} {@#=Seasparrow Seasparrow}<br/>
 {@b Trivia:} A sparrow is a small bird.
+
 {@clear}
 
 {@h4(id="Seasparrow") Seasparrow}
@@ -295,6 +310,7 @@ also has a powerful machine gun.
 {@b Fuel capacity:} 106L<br/>
 {@b Fuel usage:} 0.2L/s<br/>
 {@b See also:} {@#=Sparrow Sparrow}<br/>
+
 {@clear}
 
 {@h3(id="Military_aircraft") Military aircraft}
@@ -313,6 +329,7 @@ Military cargo helicopter. Has one extra seat for a passenger.
 {@b Based on:} Unknown, HH-53?<br/>
 {@b Fuel capacity:} 5510L<br/>
 {@b Fuel usage:} 3.2L/s<br/>
+
 {@clear}
 
 {@h4(id="Hunter") Hunter}
@@ -326,6 +343,7 @@ Deadly attack helicopter with 30 mm M230 cannons and AGM-114 Hellfire-rockets. H
 {@b Based on:} AH-64 Apache<br/>
 {@b Fuel capacity:} 2400L<br/>
 {@b Fuel usage:} 2.3L/s<br/>
+
 {@clear}
 
 {@h4(id="Hydra") Hydra}
@@ -346,6 +364,7 @@ countermeasure to not get hit by missiles.
 Greek mythology.<br/>
 {@b Trivia:} The tail has DMA printed on it, for 'DMA Design', which is the former name of
 'Rockstar North'.<br/>
+
 {@clear}
 
 {@h4(id="Rustler") Rustler}
@@ -360,6 +379,7 @@ A single prop engine plane equipped with two machine guns. Very agile, used a lo
 {@b Fuel capacity:} 1018L<br/>
 {@b Fuel usage:} 0.9L/s<br/>
 {@b Trivia:} A rustler is someone who steals cattle.<br/>
+
 {@clear}
 
 {@h3 See also}
