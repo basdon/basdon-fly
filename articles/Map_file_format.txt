@@ -1,0 +1,28 @@
+This is the specification of the {@code .map} file format used to store/load maps (clusters of objects).
+
+<pre>
+byte 0-3: spec version
+</pre>
+
+The rest is dependent on the spec version:
+
+{@ul
+  {@li {@#=v1 Version 1}}
+}
+
+{@h3(id="v1") Version 1}
+
+May contain maximum 900 objects.
+
+<pre>
+(repeated x times from byte 4)
+	byte 0-3: model (DWORD)
+	byte 4-7: x (FLOAT)
+	byte 8-11: y (FLOAT)
+	byte 12-15: z (FLOAT)
+	byte 16-19: rx (FLOAT)
+	byte 20-23: ry (FLOAT)
+	byte 24-27: rz (FLOAT)
+	byte 28-31: drawdistance (FLOAT)
+</pre>
+
