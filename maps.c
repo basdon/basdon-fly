@@ -37,7 +37,7 @@ void maps_load_from_db(AMX *amx)
 		maps = malloc(nummaps * sizeof(struct MAP));
 		while (rowcount--) {
 			map = maps + rowcount;
-			NC_cache_get_row_int(rowcount, 0, &map->id);
+			NC_cache_get_row_int(rowcount, 0, (cell*) &map->id);
 			NC_cache_get_row_str(rowcount, 1, buf32a);
 			NC_cache_get_row_flt(rowcount, 2, &f1);
 			NC_cache_get_row_flt(rowcount, 3, &f2);
