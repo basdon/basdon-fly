@@ -11,22 +11,6 @@ short playeronlineflag[MAX_PLAYERS];
 short players[MAX_PLAYERS];
 int playercount;
 
-int n_cache_delete;
-int n_cache_get_row;
-int n_cache_get_row_count;
-int n_cache_get_row_float;
-int n_cache_get_row_int;
-int n_printf;
-int n_mysql_query;
-int n_random;
-
-static cell nc_params_d[20];
-cell *nc_params = nc_params_d;
-cell nc_result;
-
-cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
-cell *emptystring, *buf32, *buf32_1, *buf64, *buf144, *buf4096;
-
 /* native B_Validate(maxplayers, buf4096[], buf144[], buf64[], buf32[],
                      buf32_1[], emptystring) */
 cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
@@ -43,46 +27,10 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 	amx_GetAddr(amx, buf32a = params[5], &buf32);
 	amx_GetAddr(amx, buf32_1a = params[6], &buf32_1);
 
-	amx_FindNative(amx, "cache_delete", &n_cache_delete);
-	if (n_cache_delete == 0x7FFFFFFF) {
-		logprintf("ERR: no cache_delete native");
+	if (!natives_find(amx)) {
 		return 0;
 	}
-	amx_FindNative(amx, "cache_get_row", &n_cache_get_row);
-	if (n_cache_get_row == 0x7FFFFFFF) {
-		logprintf("ERR: no cache_get_row native");
-		return 0;
-	}
-	amx_FindNative(amx, "cache_get_row_count", &n_cache_get_row_count);
-	if (n_cache_get_row_count == 0x7FFFFFFF) {
-		logprintf("ERR: no cache_get_row_count native");
-		return 0;
-	}
-	amx_FindNative(amx, "cache_get_row_float", &n_cache_get_row_float);
-	if (n_cache_get_row_float == 0x7FFFFFFF) {
-		logprintf("ERR: no cache_get_row_float native");
-		return 0;
-	}
-	amx_FindNative(amx, "cache_get_row_int", &n_cache_get_row_int);
-	if (n_cache_get_row_int == 0x7FFFFFFF) {
-		logprintf("ERR: no cache_get_row_int native");
-		return 0;
-	}
-	amx_FindNative(amx, "printf", &n_printf);
-	if (n_printf == 0x7FFFFFFF) {
-		logprintf("ERR: no printf native");
-		return 0;
-	}
-	amx_FindNative(amx, "mysql_query", &n_mysql_query);
-	if (n_mysql_query == 0x7FFFFFFF) {
-		logprintf("ERR: no mysql_query native");
-		return 0;
-	}
-	amx_FindNative(amx, "random", &n_random);
-	if (n_random == 0x7FFFFFFF) {
-		logprintf("ERR: no random native");
-		return 0;
-	}
+
 	if (MAX_PLAYERS != params[1]) {
 		logprintf(
 			"ERR: MAX_PLAYERS mismatch: %d (plugin) vs %d (gm)",

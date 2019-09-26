@@ -1,6 +1,8 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+int natives_find(AMX *amx);
+
 extern int n_cache_delete;
 extern int n_cache_get_row;
 extern int n_cache_get_row_count;
