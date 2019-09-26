@@ -21,8 +21,6 @@ FORWARD(APT_FormatInfo);
 FORWARD(APT_FormatCodeAndName);
 /* anticheat.c */
 FORWARD(Ac_FormatLog);
-/* basdon.c */
-FORWARD(ValidateMaxPlayers);
 /* commands.c */
 FORWARD(Command_Hash);
 FORWARD(Command_Is);
@@ -141,24 +139,8 @@ FORWARD(Zones_FormatLoc);
 FORWARD(Zones_InvalidateForPlayer);
 FORWARD(Zones_UpdateForPlayer);
 
-int n_random;
-static cell nc_params_d[20];
-cell *nc_params = nc_params_d;
-cell nc_result;
-
-cell AMX_NATIVE_CALL Validate(AMX *amx, cell *params)
-{
-	amx_FindNative(amx, "random", &n_random);
-	if (n_random == 0x7FFFFFFF) {
-		logprintf("ERR: no random native");
-		return 0;
-	}
-	if (MAX_PLAYERS != params[1]) {
-		logprintf("ERR: MAX_PLAYERS mistmatch: %d (plugin) vs %d (gm)", MAX_PLAYERS, params[1]);
-		return 0;
-	}
-	return MAX_PLAYERS;
-}
+#define IN_BASDONFLY
+#include "basdon.c"
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {
@@ -167,8 +149,8 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
-	void game_sa_init(), login_init(), dialog_init(), zones_init(), nav_init();
-	void missions_init(), veh_init();
+	void game_sa_init(), login_init(), dialog_init(), zones_init();
+	void nav_init(), missions_init(), veh_init();
 
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
@@ -205,7 +187,11 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* anticheat.c */
 	REGISTERNATIVE(Ac_FormatLog),
 	/* basdon.c */
-	REGISTERNATIVE(Validate),
+	REGISTERNATIVE(B_Loop25),
+	REGISTERNATIVE(B_OnGameModeInit),
+	REGISTERNATIVE(B_OnPlayerConnect),
+	REGISTERNATIVE(B_OnPlayerDisconnect),
+	REGISTERNATIVE(B_Validate),
 	/* commands.c */
 	REGISTERNATIVE(Command_Hash),
 	REGISTERNATIVE(Command_Is),

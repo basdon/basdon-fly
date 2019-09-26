@@ -81,11 +81,30 @@ native Ac_FormatLog(playerid, loggedstatus, const message[], buf[])
 
 #namespace "basdon.c"
 
+//@summary Loop callback that should be called each 25ms
+native B_Loop25()
+
+//@summary Plugin callback for {@link OnGameModeInit}
+//@remarks call after db has been initialized
+native B_OnGameModeInit()
+
+//@summary Plugin callback for {@link OnPlayerConnect}
+native B_OnPlayerConnect(playerid)
+
+//@summary Plugin callback for {@link OnPlayerDisconnect}
+native B_OnPlayerDisconnect(playerid, reason)
+
 //@summary Validate the script and plugin
 //@param maxplayers pass {@code MAX_PLAYERS}, to check if the plugin has the same value for it
+//@param buf4096 the 4096 sized buffer that's on the heap
+//@param buf144 the 144 sized buffer that's on the heap
+//@param buf64 the 64 sized buffer that's on the heap
+//@param buf32 the 32 sized buffer that's on the heap
+//@param buf32_1 the 2nd 32 sized buffer that's on the heap
+//@param emptystring empty buffer on the heap
 //@returns {@code 0} if something is off
 //@remarks plugin also checks if it can find the {@link getrandom} public function
-native Validate(maxplayers)
+native B_Validate(maxplayers, buf4096[], buf144[], buf64[], buf32[], buf32_1[], emptystring[])
 
 #namespace "commands.c"
 
