@@ -3,6 +3,7 @@
 
 #include "common.h"
 
+int n_GetPlayerPos;
 int n_cache_delete;
 int n_cache_get_row;
 int n_cache_get_row_count;
@@ -26,6 +27,7 @@ int natives_find(AMX *amx)
 		int *var;
 	};
 	struct NATIVE natives[] = {
+		{ "GetPlayerPos", &n_GetPlayerPos },
 		{ "cache_delete", &n_cache_delete },
 		{ "cache_get_row", &n_cache_get_row },
 		{ "cache_get_row_count", &n_cache_get_row_count },

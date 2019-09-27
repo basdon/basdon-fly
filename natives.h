@@ -3,6 +3,7 @@
 
 int natives_find(AMX *amx);
 
+extern int n_GetPlayerPos;
 extern int n_cache_delete;
 extern int n_cache_get_row;
 extern int n_cache_get_row_count;
@@ -15,6 +16,11 @@ extern cell *nc_params;
 extern cell nc_result;
 
 /* NC = NativeCall */
+
+#define NC_GetPlayerPos(PLAYERID,FREFX,FREFY,FREFZ) nc_params[0]=4;\
+	nc_params[1]=PLAYERID;nc_params[2]=FREFX;nc_params[3]=FREFY;\
+	nc_params[4]=FREFZ;\
+	amx_Callback(amx,n_GetPlayerPos,&nc_result,nc_params)
 
 #define NC_cache_delete(ID) nc_params[0]=2;nc_params[1]=ID;nc_params[2]=1;\
 	amx_Callback(amx,n_cache_delete,&nc_result,nc_params)

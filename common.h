@@ -30,7 +30,8 @@ extern cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
 /* physical addresses of buffers */
 extern cell *emptystring, *buf32, *buf32_1, *buf64, *buf144, *buf4096;
 
-extern short playeronlineflag[MAX_PLAYERS];
+/* element at index playerid is either 0 or 1 */
+extern char playeronlineflag[MAX_PLAYERS];
 /* contains 'playercount' elements, ids of connected players (not sorted) */
 extern short players[MAX_PLAYERS];
 extern int playercount;

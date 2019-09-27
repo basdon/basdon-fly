@@ -7,7 +7,7 @@ for the IN_BASDONFLY macro to only compile this
 when we're inside basdonfly.c*/
 #ifdef IN_BASDONFLY
 
-short playeronlineflag[MAX_PLAYERS];
+char playeronlineflag[MAX_PLAYERS];
 short players[MAX_PLAYERS];
 int playercount;
 
@@ -44,14 +44,14 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 /* native B_Loop25() */
 cell AMX_NATIVE_CALL B_Loop25(AMX *amx, cell *params)
 {
-	void maps_process_tick();
+	void maps_process_tick(AMX *amx);
 
 	static int loop25invoccount = 0;
 
 	if (loop25invoccount > 3) {
 		loop25invoccount = 1;
 		/*loop100*/
-		maps_process_tick();
+		maps_process_tick(amx);
 	} else {
 		loop25invoccount++;
 	}
