@@ -87,8 +87,12 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 /* native B_OnPlayerDisconnect(playerid, reason)*/
 cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 {
+	void maps_OnPlayerDisconnect(int playerid);
+
 	const int playerid = params[1];
 	int i;
+
+	maps_OnPlayerDisconnect(playerid);
 
 	playeronlineflag[playerid] = 0;
 

@@ -63,7 +63,6 @@ void maps_stream_for_player(AMX *amx, int playerid)
 	float dx, dy, dist;
 	struct MAP *map = maps + nummaps;
 
-	/*todo: handle player disconnects*/
 	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
 	while (map-- != maps) {
 		dx = map->x - amx_ctof(*buf32);
@@ -113,5 +112,13 @@ void maps_process_tick(AMX *amx)
 			}
 			maps_stream_for_player(amx, players[currentplayeridx]);
 		}
+	}
+}
+
+void maps_OnPlayerDisconnect(int playerid)
+{
+	struct MAP *map = maps + nummaps;
+	while (map-- != maps) {
+		map->streamstatus[playerid] = 0;
 	}
 }
