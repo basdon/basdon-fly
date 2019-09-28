@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+int n_CreatePlayerObject;
+int n_DestroyPlayerObject;
 int n_GetPlayerPos;
 int n_cache_delete;
 int n_cache_get_row;
@@ -27,6 +29,8 @@ int natives_find(AMX *amx)
 		int *var;
 	};
 	struct NATIVE natives[] = {
+		{ "CreatePlayerObject", &n_CreatePlayerObject },
+		{ "DestroyPlayerObject", &n_DestroyPlayerObject },
 		{ "GetPlayerPos", &n_GetPlayerPos },
 		{ "cache_delete", &n_cache_delete },
 		{ "cache_get_row", &n_cache_get_row },

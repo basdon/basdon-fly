@@ -18,6 +18,16 @@
 #else
 #define MAX_VEHICLES (2000)
 #endif
+#ifdef MAX_OBJECTS
+#assert MAX_OBJECTS == 1000
+#else
+#define MAX_OBJECTS (1000)
+#endif
+#ifdef INVALID_OBJECT_ID
+#assert INVALID_OBJECT_ID == 0xFFFF
+#else
+#define INVALID_OBJECT_ID (0xFFFF)
+#endif
 
 #define ECOL_INFO "{3498db}"
 #define ECOL_WARN "{e84c3d}"

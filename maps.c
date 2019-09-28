@@ -7,11 +7,15 @@
 #include "common.h"
 
 #define MAP_MAX_FILENAME (24) /*see db col*/
+/*define to print msg to console each time map streams in/out*/
+/*#define MAPS_LOG_STREAMING*/
 
+#pragma pack(push,1)
 struct OBJECT {
 	int model;
-	float x, y, z, rx, ry, rz;
+	cell x, y, z, rx, ry, rz, drawdistance;
 };
+#pragma pack(pop)
 
 struct MAP {
 	int id;
@@ -26,6 +30,9 @@ struct MAP {
 
 static int nummaps;
 static struct MAP *maps;
+/*maps object id to a map id*/
+/*using MAX_OBJECTS+1 because object ideas start at 1*/
+static int object_map_id[MAX_PLAYERS][MAX_OBJECTS+1];
 
 int maps_load_from_file(struct MAP *map)
 {
@@ -58,6 +65,14 @@ int maps_load_from_file(struct MAP *map)
 				goto corrupted;
 			}
 		}
+		/*coordinates are kept as cells to use as params as is*/
+		obj->x = amx_ftoc(obj->x);
+		obj->y = amx_ftoc(obj->y);
+		obj->z = amx_ftoc(obj->z);
+		obj->rx = amx_ftoc(obj->rx);
+		obj->ry = amx_ftoc(obj->ry);
+		obj->rz = amx_ftoc(obj->rz);
+		obj->drawdistance = amx_ftoc(obj->drawdistance);
 		obj++;
 	} while (obj - map->objects < 900);
 	logprintf("warn: map %s truncated to 900 objects", filename);
@@ -83,6 +98,17 @@ void maps_load_from_db(AMX *amx)
 	cell f1, f2, f3, f4;
 	struct MAP *map, *m;
 	const struct MAP *end;
+
+	if (sizeof(struct OBJECT) != sizeof(cell) * 8) {
+		logprintf("ERR: struct OBJECT invalid size");
+		nummaps = 0;
+		return;
+	}
+	if (sizeof(cell) != 4) {
+		logprintf("ERR: sizeof cell is not 4");
+		nummaps = 0;
+		return;
+	}
 
 	amx_SetUString(buf4096, q, sizeof(q));
 	NC_mysql_query_(buf4096a, &cacheid);
@@ -129,6 +155,46 @@ void maps_load_from_db(AMX *amx)
 	}
 }
 
+void maps_stream_in_for_player(AMX *amx, int playerid, struct MAP *map)
+{
+	const int mapid = map->id;
+	int *player_object_map_id = object_map_id[playerid];
+	struct OBJECT *obj = map->objects, *end = obj + map->numobjects;
+
+	nc_params[0] = 9;
+	nc_params[1] = playerid;
+	while (obj != end) {
+		memcpy(nc_params + 2, obj, sizeof(cell) * 8);
+		NC(n_CreatePlayerObject);
+		if (nc_result == INVALID_OBJECT_ID) {
+			logprintf(
+				"obj limit hit while streaming map %s",
+				map->name);
+			break;
+		}
+		player_object_map_id[nc_result] = mapid;
+		obj++;
+	}
+}
+
+void maps_stream_out_for_player(AMX *amx, int playerid, struct MAP *map)
+{
+	const int mapid = map->id;
+	int *start = object_map_id[playerid], *player_object_map_id = start;
+	const int *end = object_map_id[playerid] + MAX_OBJECTS + 1;
+
+	nc_params[0] = 2;
+	nc_params[1] = playerid;
+	while (player_object_map_id != end) {
+		if (*player_object_map_id == mapid) {
+			nc_params[2] = player_object_map_id - start;
+			NC(n_DestroyPlayerObject);
+			*player_object_map_id = -1;
+		}
+		player_object_map_id++;
+	}
+}
+
 void maps_stream_for_player(AMX *amx, int playerid)
 {
 	float dx, dy, dist;
@@ -141,19 +207,23 @@ void maps_stream_for_player(AMX *amx, int playerid)
 		dist = dx * dx + dy * dy;
 		if (map->streamstatus[playerid]) {
 			if (dist > map->radius_out_sq) {
-				/*stream out*/
 				map->streamstatus[playerid] = 0;
-				logprintf("map %d streamed out for %d",
-					map->id,
+				maps_stream_out_for_player(amx, playerid, map);
+#ifdef MAPS_LOG_STREAMING
+				logprintf("map %s streamed out for %d",
+					map->name,
 					playerid);
+#endif
 			}
 		} else  {
 			if (dist < map->radius_in_sq) {
-				/*stream in*/
 				map->streamstatus[playerid] = 1;
-				logprintf("map %d streamed in for %d",
-					map->id,
+				maps_stream_in_for_player(amx, playerid, map);
+#ifdef MAPS_LOG_STREAMING
+				logprintf("map %s streamed in for %d",
+					map->name,
 					playerid);
+#endif
 			}
 		}
 	}
