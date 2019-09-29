@@ -8,6 +8,7 @@
 #include "vendor/SDK/plugincommon.h"
 #include "sharedsymbols.h"
 #include "natives.h"
+#include "publics.h"
 
 typedef void (*logprintf_t)(char* format, ...);
 

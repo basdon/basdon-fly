@@ -22,7 +22,6 @@ FORWARD(APT_FormatCodeAndName);
 /* anticheat.c */
 FORWARD(Ac_FormatLog);
 /* commands.c */
-FORWARD(Command_Hash);
 FORWARD(Command_Is);
 FORWARD(Command_GetIntParam);
 FORWARD(Command_GetPlayerParam);
@@ -189,11 +188,11 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* basdon.c */
 	REGISTERNATIVE(B_Loop25),
 	REGISTERNATIVE(B_OnGameModeInit),
+	REGISTERNATIVE(B_OnPlayerCommandText),
 	REGISTERNATIVE(B_OnPlayerConnect),
 	REGISTERNATIVE(B_OnPlayerDisconnect),
 	REGISTERNATIVE(B_Validate),
 	/* commands.c */
-	REGISTERNATIVE(Command_Hash),
 	REGISTERNATIVE(Command_Is),
 	REGISTERNATIVE(Command_GetIntParam),
 	REGISTERNATIVE(Command_GetPlayerParam),

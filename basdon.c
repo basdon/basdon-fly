@@ -27,7 +27,7 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 	amx_GetAddr(amx, buf32a = params[5], &buf32);
 	amx_GetAddr(amx, buf32_1a = params[6], &buf32_1);
 
-	if (!natives_find(amx)) {
+	if (!natives_find(amx) || !publics_find(amx)) {
 		return 0;
 	}
 
@@ -65,6 +65,23 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 
 	maps_load_from_db(amx);
 	return 1;
+}
+
+/* native B_OnPlayerCommandText(playerid, cmdtext[]) */
+cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
+{
+	int command_hash(char *cmdtext);
+
+	const int playerid = params[1];
+	char cmdtext[145];
+	cell *addr;
+	int cmdhash;
+
+	amx_GetAddr(amx, params[2], &addr);
+	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
+	cmdhash = commands_hash(cmdtext);
+	PC_OnPlayerCommandTextHash(playerid, cmdhash, params[2]);
+	return pc_result;
 }
 
 /* native B_OnPlayerConnect(playerid) */

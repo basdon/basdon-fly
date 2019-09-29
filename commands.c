@@ -5,6 +5,26 @@
 #include "playerdata.h"
 #include <string.h>
 
+/*
+Hashes command part of command text (case-insensitive).
+End delimiter for the command part is either a zero terminator, or anything
+with a value below the space character.
+*/
+int commands_hash(char *cmdtext)
+{
+	int val, pos = 0, result = 0;
+
+	/* same as hashCode in Java (but case insensitive) */
+	while (cmdtext[pos] != 0 && cmdtext[pos] > ' ') {
+		val = cmdtext[pos++];
+		if ('A' <= val && val <= 'Z') {
+			val |= 0x20;
+		}
+		result = 31 * result + val;
+	}
+	return result;
+}
+
 /* native Command_GetIntParam(cmdtext[], &idx, &value) */
 cell AMX_NATIVE_CALL Command_GetIntParam(AMX *amx, cell *params)
 {
@@ -146,28 +166,6 @@ cell AMX_NATIVE_CALL Command_GetStringParam(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, trimmedparam, sizeof(param) + param - trimmedparam);
 	return 1;
-}
-
-/* native Command_Hash(cmdtext[]) */
-cell AMX_NATIVE_CALL Command_Hash(AMX *amx, cell *params)
-{
-	char buf[144];
-	int val, pos = 0, result = 0;
-
-	cell *inaddr = NULL;
-	amx_GetAddr(amx, params[1], &inaddr);
-	amx_GetUString(buf, inaddr, 144);
-
-	/* same as hashCode in Java (but case insensitive) */
-	while (buf[pos] != 0 && buf[pos] > ' ') {
-		val = buf[pos++];
-		if ('A' <= val && val <= 'Z') {
-			val |= 0x20;
-		}
-		result = 31 * result + val;
-	}
-
-	return result;
 }
 
 /* native Command_Is(cmdtext[], const cmd[], &idx) */

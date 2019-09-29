@@ -1,8 +1,8 @@
 
 SOURCES := $(wildcard *.c)
 OBJECTS := $(patsubst %.c, out/%.o, $(SOURCES))
+HEADERS := $(wildcard *.h)
 
-HEADERS=common.h sharedsymbols.h playerdata.h game_sa.h vehicles.h zones.h
 FLAGS=-Wall -m32 -std=c89
 
 build: $(OBJECTS) out/amxplugin.o

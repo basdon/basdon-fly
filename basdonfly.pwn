@@ -88,6 +88,10 @@ native B_Loop25()
 //@remarks call after db has been initialized
 native B_OnGameModeInit()
 
+//@summary Plugin callback for {@link OnPlayerCommandText}
+//@remarks will call {@link OnPlayerCommandTextHash}
+native B_OnPlayerCommandText(playerid, cmdtext[])
+
 //@summary Plugin callback for {@link OnPlayerConnect}
 native B_OnPlayerConnect(playerid)
 
@@ -133,11 +137,6 @@ native Command_GetPlayerParam(cmdtext[], &idx, &player)
 //@returns {@code 0} if there's no next string
 //@remarks {@param idx} will not be increased if this returns {@code 0}
 native Command_GetStringParam(cmdtext[], &idx, buf[])
-
-//@summary Gets hash of command in entered command text (excluding params)
-//@param cmdtext command text to get hash of
-//@remarks End delimiter for calculation is either a zero terminator, or anything below {@code ' '}
-native Command_Hash(cmdtext[])
 
 //@summary Checks if the entered cmd is {@param cmd}
 //@param cmdtext cmdtext entered by player
