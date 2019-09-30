@@ -10,7 +10,7 @@ Hashes command part of command text (case-insensitive).
 End delimiter for the command part is either a zero terminator, or anything
 with a value below the space character.
 */
-int commands_hash(char *cmdtext)
+int cmds_hash(const char *cmdtext)
 {
 	int val, pos = 0, result = 0;
 
@@ -23,6 +23,33 @@ int commands_hash(char *cmdtext)
 		result = 31 * result + val;
 	}
 	return result;
+}
+
+/*
+Check if the command in cmdtext is same as cmd (case insensensitive).
+Parseidx is not written to if it didn't match.
+On match, parseidx is the index right after the command, so either space or \0.
+*/
+static int cmds_is(const char *cmdtext, const char *cmd, int *parseidx)
+{
+	int pos = 0;
+
+nextchar:
+	/* starts checking at 1 because 0 is always a forward slash */
+	++pos;
+	if (cmdtext[pos] == cmd[pos]) {
+		if (cmdtext[pos] == 0) {
+			*parseidx = pos;
+			return 1;
+		}
+		goto nextchar;
+	}
+	if ('A' <= cmdtext[pos] && cmdtext[pos] <= 'Z' &&
+		(cmdtext[pos] | 0x20) == cmd[pos])
+	{
+		goto nextchar;
+	}
+	return 0;
 }
 
 /* native Command_GetIntParam(cmdtext[], &idx, &value) */
@@ -172,33 +199,73 @@ cell AMX_NATIVE_CALL Command_GetStringParam(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL Command_Is(AMX *amx, cell *params)
 {
 	char cmdtext[50], cmd[50];
+	cell *addr;
 	int len;
 
-	cell *addrofcmdtext = NULL, *addrofcmd = NULL;
-	amx_GetAddr(amx, params[1], &addrofcmdtext);
-	amx_GetAddr(amx, params[2], &addrofcmd);
-	amx_GetUString(cmdtext, addrofcmdtext, 50);
-	amx_GetUString(cmd, addrofcmd, 50);
-	amx_StrLen(addrofcmd, &len);
+	amx_GetAddr(amx, params[1], &addr);
+	amx_GetUString(cmdtext, addr, 50);
+	amx_GetAddr(amx, params[2], &addr);
+	amx_GetUString(cmd, addr, 50);
+	amx_StrLen(addr, &len);
 
-	if (cmdtext[len] > ' ') {
+	if (len > 49) {
 		return 0;
 	}
+	amx_GetAddr(amx, params[3], &addr);
+	return cmds_is(cmdtext, cmd, (int*) addr);
+}
 
-	amx_GetAddr(amx, params[3], &addrofcmd);
-	*addrofcmd = len;
+#define CMDPARAMS const int playerid, const char *cmdtext, int parseidx
 
-	/* gt 0 because no need to check / */
-	while (--len > 0) {
-		if (cmdtext[len] == cmd[len]) {
-			continue;
-		}
-		if ('A' <= cmdtext[len] && cmdtext[len] <= 'Z' && (cmdtext[len] | 0x20) == cmd[len]) {
-			continue;
-		}
-		return 0;
-	}
-
+int cmd_admin_spray(CMDPARAMS)
+{
+	logprintf("respray");
 	return 1;
+}
+
+struct COMMAND {
+	int hash;
+	const char *cmd;
+	const int groups;
+	int (*handler)(int, const char*, int);
+};
+
+/* see sharedsymbols.h for GROUPS_ definitions */
+/* command must prefixed by forward slash and be lower case */
+struct COMMAND cmds[] = {
+	{ 0, "//spray", GROUPS_ALL, cmd_admin_spray },
+}, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
+
+/*
+Precalcs all command hashes.
+*/
+void cmds_init()
+{
+	struct COMMAND *c = cmds;
+
+	while (c != cmds_end) {
+		c->hash = cmds_hash(c->cmd);
+		c++;
+	}
+}
+
+/*
+Checks incoming command and calls handler if one found and group matched.
+*/
+int cmds_check(const int playerid, const int hash, const char *cmdtext)
+{
+	struct COMMAND *c = cmds;
+	int parseidx;
+
+	while (c != cmds_end) {
+		if (hash == c->hash &&
+			(pdata[playerid]->groups & c->groups) &&
+			cmds_is(cmdtext, c->cmd, &parseidx))
+		{
+			return c->handler(playerid, cmdtext, parseidx);
+		}
+		c++;
+	}
+	return 0;
 }
 
