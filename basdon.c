@@ -70,8 +70,8 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 /* native B_OnPlayerCommandText(playerid, cmdtext[]) */
 cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 {
-	int cmds_check(const int playerid, const int hash, const char *cmdtext);
-	int cmds_hash(char *cmdtext);
+	int cmd_check(const int, const int, const char*);
+	int cmd_hash(char*);
 
 	const int playerid = params[1];
 	char cmdtext[145];
@@ -80,9 +80,9 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
-	hash = cmds_hash(cmdtext);
+	hash = cmd_hash(cmdtext);
 
-	if (cmds_check(playerid, hash, cmdtext)) {
+	if (cmd_check(playerid, hash, cmdtext)) {
 		return 1;
 	}
 

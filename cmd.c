@@ -5,12 +5,30 @@
 #include "playerdata.h"
 #include <string.h>
 
+#define CMDPARAMS const int playerid, const char *cmdtext, int parseidx
+
+struct COMMAND {
+	int hash;
+	const char *cmd;
+	const int groups;
+	int (*handler)(int, const char*, int);
+};
+
+#define IN_CMD
+#include "cmdhandlers.c"
+
+/* see sharedsymbols.h for GROUPS_ definitions */
+/* command must prefixed by forward slash and be lower case */
+struct COMMAND cmds[] = {
+	{ 0, "//spray", GROUPS_ALL, cmd_admin_spray },
+}, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
+
 /*
 Hashes command part of command text (case-insensitive).
 End delimiter for the command part is either a zero terminator, or anything
 with a value below the space character.
 */
-int cmds_hash(const char *cmdtext)
+int cmd_hash(const char *cmdtext)
 {
 	int val, pos = 0, result = 0;
 
@@ -30,7 +48,7 @@ Check if the command in cmdtext is same as cmd (case insensensitive).
 Parseidx is not written to if it didn't match.
 On match, parseidx is the index right after the command, so either space or \0.
 */
-static int cmds_is(const char *cmdtext, const char *cmd, int *parseidx)
+static int cmd_is(const char *cmdtext, const char *cmd, int *parseidx)
 {
 	int pos = 0;
 
@@ -212,39 +230,18 @@ cell AMX_NATIVE_CALL Command_Is(AMX *amx, cell *params)
 		return 0;
 	}
 	amx_GetAddr(amx, params[3], &addr);
-	return cmds_is(cmdtext, cmd, (int*) addr);
+	return cmd_is(cmdtext, cmd, (int*) addr);
 }
-
-#define CMDPARAMS const int playerid, const char *cmdtext, int parseidx
-
-int cmd_admin_spray(CMDPARAMS)
-{
-	logprintf("respray");
-	return 1;
-}
-
-struct COMMAND {
-	int hash;
-	const char *cmd;
-	const int groups;
-	int (*handler)(int, const char*, int);
-};
-
-/* see sharedsymbols.h for GROUPS_ definitions */
-/* command must prefixed by forward slash and be lower case */
-struct COMMAND cmds[] = {
-	{ 0, "//spray", GROUPS_ALL, cmd_admin_spray },
-}, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
 
 /*
 Precalcs all command hashes.
 */
-void cmds_init()
+void cmd_init()
 {
 	struct COMMAND *c = cmds;
 
 	while (c != cmds_end) {
-		c->hash = cmds_hash(c->cmd);
+		c->hash = cmd_hash(c->cmd);
 		c++;
 	}
 }
@@ -252,7 +249,7 @@ void cmds_init()
 /*
 Checks incoming command and calls handler if one found and group matched.
 */
-int cmds_check(const int playerid, const int hash, const char *cmdtext)
+int cmd_check(const int playerid, const int hash, const char *cmdtext)
 {
 	struct COMMAND *c = cmds;
 	int parseidx;
@@ -260,7 +257,7 @@ int cmds_check(const int playerid, const int hash, const char *cmdtext)
 	while (c != cmds_end) {
 		if (hash == c->hash &&
 			(pdata[playerid]->groups & c->groups) &&
-			cmds_is(cmdtext, c->cmd, &parseidx))
+			cmd_is(cmdtext, c->cmd, &parseidx))
 		{
 			return c->handler(playerid, cmdtext, parseidx);
 		}
