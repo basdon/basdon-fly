@@ -7,6 +7,7 @@ for the IN_CMD macro to only compile this
 when we're inside cmd.c*/
 #ifdef IN_CMD
 
+#ifdef DEV
 static int
 cmd_dev_testparpl(CMDPARAMS)
 {
@@ -27,6 +28,7 @@ cmd_dev_testparpl(CMDPARAMS)
 	}
 	return 1;
 }
+#endif /*DEV*/
 
 static int
 cmd_admin_spray(CMDPARAMS)

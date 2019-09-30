@@ -161,7 +161,9 @@ struct COMMAND {
 /* see sharedsymbols.h for GROUPS_ definitions */
 /* command must prefixed by forward slash and be lower case */
 static struct COMMAND cmds[] = {
+#ifdef DEV
 	{ 0, "/testparpl", GROUPS_ALL, cmd_dev_testparpl },
+#endif /*DEV*/
 	{ 0, "//spray", GROUPS_ALL, cmd_admin_spray },
 }, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
 

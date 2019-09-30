@@ -6,6 +6,7 @@
 int n_CreatePlayerObject;
 int n_DestroyPlayerObject;
 int n_GetPlayerPos;
+int n_SendClientMessage;
 int n_cache_delete;
 int n_cache_get_row;
 int n_cache_get_row_count;
@@ -32,6 +33,7 @@ int natives_find(AMX *amx)
 		{ "CreatePlayerObject", &n_CreatePlayerObject },
 		{ "DestroyPlayerObject", &n_DestroyPlayerObject },
 		{ "GetPlayerPos", &n_GetPlayerPos },
+		{ "SendClientMessage", &n_SendClientMessage },
 		{ "cache_delete", &n_cache_delete },
 		{ "cache_get_row", &n_cache_get_row },
 		{ "cache_get_row_count", &n_cache_get_row_count },

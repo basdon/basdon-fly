@@ -96,6 +96,11 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	const int playerid = params[1];
 	int i;
 
+#ifdef DEV
+	amx_SetUString(buf144, "PL: DEVELOPMENT BUILD", 144);
+	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+#endif /*DEV*/
+
 	playeronlineflag[playerid] = 1;
 
 	for (i = 0; i < playercount; ){
