@@ -187,6 +187,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* anticheat.c */
 	REGISTERNATIVE(Ac_FormatLog),
 	/* basdon.c */
+	REGISTERNATIVE(B_Loop1000),
 	REGISTERNATIVE(B_Loop25),
 	REGISTERNATIVE(B_OnGameModeInit),
 	REGISTERNATIVE(B_OnPlayerCommandText),

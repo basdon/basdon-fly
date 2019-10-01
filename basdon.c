@@ -41,17 +41,31 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 	return MAX_PLAYERS;
 }
 
+/* native B_Loop1000() */
+cell AMX_NATIVE_CALL B_Loop1000(AMX *amx, cell *params)
+{
+	return 1;
+}
+
+void loop100(AMX *amx)
+{
+	void maps_process_tick(AMX *amx);
+#ifdef DEV
+	void dev_missions_update_closest_point(AMX*);
+
+	dev_missions_update_closest_point(amx);
+#endif /*DEV*/
+	maps_process_tick(amx);
+}
+
 /* native B_Loop25() */
 cell AMX_NATIVE_CALL B_Loop25(AMX *amx, cell *params)
 {
-	void maps_process_tick(AMX *amx);
-
 	static int loop25invoccount = 0;
 
 	if (loop25invoccount > 3) {
 		loop25invoccount = 1;
-		/*loop100*/
-		maps_process_tick(amx);
+		loop100(amx);
 	} else {
 		loop25invoccount++;
 	}
@@ -70,7 +84,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 /* native B_OnPlayerCommandText(playerid, cmdtext[]) */
 cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 {
-	int cmd_check(const int, const int, const char*);
+	int cmd_check(AMX*, const int, const int, const char*);
 	int cmd_hash(char*);
 
 	const int playerid = params[1];
@@ -82,7 +96,7 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
 	hash = cmd_hash(cmdtext);
 
-	if (cmd_check(playerid, hash, cmdtext)) {
+	if (cmd_check(amx, playerid, hash, cmdtext)) {
 		return 1;
 	}
 

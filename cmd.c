@@ -146,13 +146,13 @@ cmd_get_str_param(const char* cmdtext, int *parseidx, char *buf)
 	return 0;
 }
 
-#define CMDPARAMS const int playerid, const char *cmdtext, int parseidx
+#define CMDPARAMS AMX *amx,const int playerid,const char *cmdtext,int parseidx
 
 struct COMMAND {
 	int hash;
 	const char *cmd;
 	const int groups;
-	int (*handler)(const int, const char*, int);
+	int (*handler)(AMX*, const int, const char*, int);
 };
 
 #define IN_CMD
@@ -163,6 +163,7 @@ struct COMMAND {
 static struct COMMAND cmds[] = {
 #ifdef DEV
 	{ 0, "/testparpl", GROUPS_ALL, cmd_dev_testparpl },
+	{ 0, "//closestmp", GROUPS_ALL, cmd_dev_closestmp },
 #endif /*DEV*/
 	{ 0, "//spray", GROUPS_ALL, cmd_admin_spray },
 }, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
@@ -294,7 +295,8 @@ void cmd_init()
 /*
 Checks incoming command and calls handler if one found and group matched.
 */
-int cmd_check(const int playerid, const int hash, const char *cmdtext)
+int
+cmd_check(AMX *amx, const int playerid, const int hash, const char *cmdtext)
 {
 	struct COMMAND *c = cmds;
 	int parseidx;
@@ -304,7 +306,7 @@ int cmd_check(const int playerid, const int hash, const char *cmdtext)
 			(pdata[playerid]->groups & c->groups) &&
 			cmd_is(cmdtext, c->cmd, &parseidx))
 		{
-			return c->handler(playerid, cmdtext, parseidx);
+			return c->handler(amx, playerid, cmdtext, parseidx);
 		}
 		c++;
 	}

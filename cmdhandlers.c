@@ -8,6 +8,17 @@ when we're inside cmd.c*/
 #ifdef IN_CMD
 
 #ifdef DEV
+/**
+Toggles constantly showing the closest mission checkpoint for every player.
+*/
+static int
+cmd_dev_closestmp(CMDPARAMS)
+{
+	void dev_missions_toggle_closest_point(AMX*);
+	dev_missions_toggle_closest_point(amx);
+	return 1;
+}
+
 static int
 cmd_dev_testparpl(CMDPARAMS)
 {

@@ -235,6 +235,103 @@ int calculate_airport_tax(struct airport *ap, int missiontype)
 	return tax;
 }
 
+#ifdef DEV
+/**
+@see dev_missions_toggle_closest_point
+@see dev_missions_update_closest_point
+*/
+static int dev_show_closest_point = 0;
+
+/**
+Toggles showing closest missionpoint. Will send a message to all players when
+called.
+
+@see dev_missions_update_closest_point
+*/
+void dev_missions_toggle_closest_point(AMX *amx)
+{
+	int i;
+	char buf[144];
+	if (!(dev_show_closest_point ^= 1)) {
+		for (i = 0; i < playercount; i++) {
+			NC_DisablePlayerRaceCheckpoint(players[i]);
+		}
+	}
+	sprintf(buf, "showing mission points: %d", dev_show_closest_point);
+	amx_SetUString(buf144, buf, sizeof(buf));
+	NC_SendClientMessageToAll(-1, buf144a);
+
+}
+
+/**
+Dev function that will set every player's race checkpoint to whatever
+missionpoint is closest to them.
+*/
+void dev_missions_update_closest_point(AMX *amx)
+{
+	static struct missionpoint *dev_closest_point[MAX_PLAYERS];
+
+	const float size = 11.0f;
+	int i, playerid;
+	float px, py, dx, dy, shortestdistance, dist;
+	struct airport *ap, *apend, *closestap;
+	struct missionpoint *mp, *closestmp;
+
+	if (!dev_show_closest_point) {
+		return;
+	}
+
+	apend = airports + airportscount;
+
+	for (i = 0; i < playercount; i++) {
+		playerid = players[i];
+		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
+		px = amx_ctof(*buf32);
+		py = amx_ctof(*buf64);
+		shortestdistance = 0x7F800000;
+		closestap = NULL;
+		ap = airports;
+		while (ap != apend) {
+			dx = ap->pos.x - px;
+			dy = ap->pos.y - py;
+			dist = dx * dx + dy * dy;
+			if (dist < shortestdistance) {
+				shortestdistance = dist;
+				closestap = ap;
+			}
+			ap++;
+		}
+		if (closestap == NULL) {
+			continue;
+		}
+		shortestdistance = 0x7F800000;
+		closestmp = NULL;
+		mp = closestap->missionpoints;
+		while (mp) {
+			dx = mp->x - px;
+			dy = mp->y - py;
+			dist = dx * dx + dy * dy;
+			if (dist < shortestdistance) {
+				shortestdistance = dist;
+				closestmp = mp;
+			}
+			mp = mp->next;
+		}
+		if (closestmp && dev_closest_point[playerid] != closestmp) {
+			dev_closest_point[playerid] = closestmp;
+			nc_params[0] = 9;
+			nc_params[1] = playerid;
+			nc_params[2] = 2;
+			nc_params[3] = nc_params[6] = amx_ftoc(closestmp->x);
+			nc_params[4] = nc_params[7] = amx_ftoc(closestmp->y);
+			nc_params[5] = nc_params[8] = amx_ftoc(closestmp->z);
+			nc_params[9] = amx_ftoc(size);
+			NC(n_SetPlayerRaceCheckpoint);
+		}
+	}
+}
+#endif /*DEV*/
+
 /* native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type) */
 cell AMX_NATIVE_CALL Missions_AddPoint(AMX *amx, cell *params)
 {
