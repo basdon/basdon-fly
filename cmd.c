@@ -165,6 +165,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/testparpl", GROUPS_ALL, cmd_dev_testparpl },
 	{ 0, "//closestmp", GROUPS_ALL, cmd_dev_closestmp },
 #endif /*DEV*/
+	{ 0, "//respawn", GROUPS_ADMIN, cmd_admin_respawn },
 	{ 0, "//spray", GROUPS_ALL, cmd_admin_spray },
 }, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
 

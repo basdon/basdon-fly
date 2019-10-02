@@ -7,9 +7,11 @@ extern int n_CreatePlayerObject;
 extern int n_DestroyPlayerObject;
 extern int n_DisablePlayerRaceCheckpoint;
 extern int n_GetPlayerPos;
+extern int n_GetPlayerVehicleID;
 extern int n_SendClientMessage;
 extern int n_SendClientMessageToAll;
 extern int n_SetPlayerRaceCheckpoint;
+extern int n_SetVehicleToRespawn;
 extern int n_cache_delete;
 extern int n_cache_get_row;
 extern int n_cache_get_row_count;
@@ -44,6 +46,10 @@ extern cell nc_result;
 	nc_params[4]=FREFZ;\
 	amx_Callback(amx,n_GetPlayerPos,&nc_result,nc_params)
 
+#define NC_GetPlayerVehicleID(PLAYERID) \
+	nc_params[0]=1;nc_params[1]=PLAYERID;\
+	amx_Callback(amx,n_GetPlayerVehicleID,&nc_result,nc_params)
+
 #define NC_SendClientMessage(PLAYERID,COLOR,BUF) \
 	nc_params[0]=3;\
 	nc_params[1]=PLAYERID;nc_params[2]=COLOR;nc_params[3]=BUF;\
@@ -58,6 +64,10 @@ extern cell nc_result;
 	nc_params[3]=FX;nc_params[4]=FY;nc_params[5]=FZ;nc_params[6]=FNX;\
 	nc_params[7]=FNY;nc_params[8]=FNZ;nc_params[9]=FSIZE;\
 	amx_Callback(amx,n_SetPlayerRaceCheckpoint,&nc_result,nc_params)
+
+#define NC_SetVehicleToRespawn(VEHICLEID) \
+	nc_params[0]=1;nc_params[1]=VEHICLEID;\
+	amx_Callback(amx,n_SetVehicleToRespawn,&nc_result,nc_params)
 
 #define NC_cache_delete(ID) nc_params[0]=2;nc_params[1]=ID;nc_params[2]=1;\
 	amx_Callback(amx,n_cache_delete,&nc_result,nc_params)
