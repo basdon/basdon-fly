@@ -18,6 +18,7 @@ extern int n_cache_get_row;
 extern int n_cache_get_row_count;
 extern int n_cache_get_row_float;
 extern int n_cache_get_row_int;
+extern int n_mysql_tquery;
 extern int n_mysql_query;
 extern int n_printf;
 extern int n_random;
@@ -98,6 +99,10 @@ extern cell nc_result;
 	nc_params[2]=BUF;nc_params[3]=1;\
 	amx_Callback(amx,n_mysql_query,RESULT,nc_params)
 #define NC_mysql_query(BUF) NC_mysql_query_(BUF,&nc_result)
+
+#define NC_mysql_tquery_nocb(BUF) nc_params[0]=4;nc_params[1]=1;\
+	nc_params[2]=BUF;nc_params[3]=nc_params[4]=emptystringa;\
+	amx_Callback(amx,n_mysql_tquery,&nc_result,nc_params)
 
 #define NC_random_(MAX,RESULT) nc_params[0]=1;nc_params[1]=MAX;\
 	amx_Callback(amx,n_random,RESULT,nc_params)

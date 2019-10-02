@@ -19,6 +19,7 @@ int n_cache_get_row_count;
 int n_cache_get_row_float;
 int n_cache_get_row_int;
 int n_printf;
+int n_mysql_tquery;
 int n_mysql_query;
 int n_random;
 
@@ -53,6 +54,7 @@ int natives_find(AMX *amx)
 		{ "cache_get_row_float", &n_cache_get_row_float },
 		{ "cache_get_row_int", &n_cache_get_row_int },
 		{ "printf", &n_printf },
+		{ "mysql_tquery", &n_mysql_tquery },
 		{ "mysql_query", &n_mysql_query },
 		{ "random", &n_random },
 	};

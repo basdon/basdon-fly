@@ -94,6 +94,12 @@ rand2nd:
 			NC_random_(256, &col2);
 		}
 		NC_ChangeVehicleColor(nc_result, col1, col2);
+		veh->col1 = col1;
+		veh->col2 = col2;
+		sprintf(buf, "UPDATE veh SET col1=%d,col2=%d WHERE i=%d",
+			col1, col2, veh->id);
+		amx_SetUString(buf144, buf, sizeof(buf));
+		NC_mysql_tquery_nocb(buf144a);
 	}
 	return 1;
 }
