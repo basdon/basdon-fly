@@ -102,6 +102,11 @@ native B_OnPlayerConnect(playerid)
 //@summary Plugin callback for {@link OnPlayerDisconnect}
 native B_OnPlayerDisconnect(playerid, reason)
 
+//@summary Plugin callback for {@link OnVehicleSpawn}
+//@remarks {@paramref vehicleid} is passed-by-reference because the vehicle \
+           might be recreated, in which case the id will be changed
+native B_OnVehicleSpawn(&vehicleid)
+
 //@summary Validate the script and plugin
 //@param maxplayers pass {@code MAX_PLAYERS}, to check if the plugin has the same value for it
 //@param buf4096 the 4096 sized buffer that's on the heap
@@ -816,10 +821,6 @@ native Veh_ConsumeFuel(vehicleid, throttle, &isOutOfFuel, buf[])
 //@seealso Veh_Init
 //@seealso Veh_InitServicePoints
 native Veh_Destroy();
-
-//@summary Sets vehicle fuel to 10% of its capacity if it's any lower than that, to make sure no vehicle gets respawned empty
-//@param vehicleid vehicle to ensure fuel level for
-native Veh_EnsureHasFuel(vehicleid)
 
 //@summary Formats vehicle hp/fuel level text for display in the panel
 //@param playerid the playerid for which to draw the text

@@ -70,11 +70,11 @@ cmd_spray(CMDPARAMS)
 {
 	char buf[144];
 	struct dbvehicle *veh;
-	int userid, col1, col2;
+	int vehicleid, userid, col1, col2;
 
-	NC_GetPlayerVehicleID(playerid);
-	if (nc_result) {
-		if ((veh = gamevehicles[nc_result].dbvehicle) &&
+	NC_GetPlayerVehicleID_(playerid, &vehicleid);
+	if (vehicleid) {
+		if ((veh = gamevehicles[vehicleid].dbvehicle) &&
 			pdata[playerid]->userid != veh->owneruserid &&
 			!(pdata[playerid]->groups & GROUPS_ADMIN))
 		{
@@ -93,9 +93,10 @@ cmd_spray(CMDPARAMS)
 rand2nd:
 			NC_random_(256, &col2);
 		}
-		NC_ChangeVehicleColor(nc_result, col1, col2);
+		NC_ChangeVehicleColor(vehicleid, col1, col2);
 		veh->col1 = col1;
 		veh->col2 = col2;
+		gamevehicles[vehicleid].need_recreation = 1;
 		sprintf(buf, "UPDATE veh SET col1=%d,col2=%d WHERE i=%d",
 			col1, col2, veh->id);
 		amx_SetUString(buf144, buf, sizeof(buf));

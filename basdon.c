@@ -148,4 +148,14 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native B_OnVehicleSpawn(&vehicleid) */
+cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
+{
+	cell *addr;
+
+	amx_GetAddr(amx, params[1], &addr);
+	*addr = veh_OnVehicleSpawn(amx, *addr);
+	return 1;
+}
+
 #endif /*IN_BASDONFLY*/

@@ -57,6 +57,11 @@ void veh_init()
 			mapservicepoints[i][j].svp = NULL;
 		}
 	}
+	for (i = 0; i < MAX_VEHICLES; i++) {
+		gamevehicles[i].dbvehicle = NULL;
+		gamevehicles[i].reincarnation = 0;
+		gamevehicles[i].need_recreation = 0;
+	}
 	vehiclestoupdate = NULL;
 	servicepoints = NULL;
 	servicepointc = 0;
@@ -376,19 +381,6 @@ cell AMX_NATIVE_CALL Veh_Destroy(AMX *amx, cell *params)
 		free(servicepoints);
 		servicepoints = NULL;
 		servicepointc = 0;
-	}
-	return 1;
-}
-
-/* native Veh_EnsureHasFuel(vehicleid) */
-cell AMX_NATIVE_CALL Veh_EnsureHasFuel(AMX *amx, cell *params)
-{
-	struct dbvehicle *veh;
-	float default_amount;
-	if ((veh = gamevehicles[params[1]].dbvehicle) != NULL) {
-		if (veh->fuel < (default_amount = model_fuel_capacity(veh->model) * .4f)) {
-			veh->fuel = default_amount;
-		}
 	}
 	return 1;
 }
@@ -935,13 +927,14 @@ cell AMX_NATIVE_CALL Veh_UpdateSlot(AMX *amx, cell *params)
 	const int vehicleid = params[1], dbid = params[2];
 	int i = dbvehiclealloc;
 	struct dbvehicle *veh = dbvehicles;
+
 	if (dbid == -1) {
 		if (gamevehicles[vehicleid].dbvehicle == NULL) {
-			logprintf("Veh_UpdateSlot: slot to empty was not empty");
+			logprintf("Veh_UpdateSlot: slot to empty was empty");
 			return 1;
 		}
-		gamevehicles[vehicleid].dbvehicle->spawnedvehicleid = 0;
 		gamevehicles[vehicleid].dbvehicle = NULL;
+		gamevehicles[vehicleid].dbvehicle->spawnedvehicleid = 0;
 		return 1;
 	}
 	while (i--) {
@@ -956,6 +949,93 @@ cell AMX_NATIVE_CALL Veh_UpdateSlot(AMX *amx, cell *params)
 		}
 		veh++;
 	}
+	gamevehicles[vehicleid].dbvehicle = NULL;
 	logprintf("Veh_UpdateSlot: unknown dbid: %d", dbid);
 	return 0;
+}
+
+/**
+Creates a vehicle (see CreateVehicle doc).
+
+@remarks Resets values of gamevehicles struct reflecting the created vehicle.
+*/
+int
+veh_NC_CreateVehicle(AMX *amx, int model, float x, float y, float z,
+		     float r, int col1, int col2, int respawn_delay,
+		     int addsiren)
+{
+	int vehicleid;
+
+	nc_params[0] = 9;
+	nc_params[1] = model;
+	nc_params[2] = amx_ftoc(x);
+	nc_params[3] = amx_ftoc(y);
+	nc_params[4] = amx_ftoc(z);
+	nc_params[5] = amx_ftoc(r);
+	nc_params[6] = col1;
+	nc_params[7] = col2;
+	nc_params[8] = respawn_delay;
+	nc_params[9] = addsiren;
+	amx_Callback(amx, n_CreateVehicle_, &vehicleid, nc_params);
+	gamevehicles[vehicleid].dbvehicle = NULL;
+	gamevehicles[vehicleid].reincarnation++;
+	gamevehicles[vehicleid].need_recreation = 0;
+	return vehicleid;
+}
+
+int
+veh_NC_DestroyVehicle(AMX *amx, int vehicleid)
+{
+	if (gamevehicles[vehicleid].dbvehicle) {
+		gamevehicles[vehicleid].dbvehicle->spawnedvehicleid = 0;
+		gamevehicles[vehicleid].dbvehicle = NULL;
+	}
+	nc_params[0] = 1;
+	nc_params[1] = vehicleid;
+	amx_Callback(amx, n_DestroyVehicle_, &nc_result, nc_params);
+	return nc_result;
+}
+
+/**
+Creates a vehicle from a dbvehicle struct.
+Makes sure references from vehicleid to db vehicle are updated.
+*/
+int
+veh_create_from_dbvehicle(AMX *amx, struct dbvehicle *veh)
+{
+	int vehicleid = veh_NC_CreateVehicle(
+		amx, veh->model, veh->x, veh->y, veh->z,
+		veh->r, veh->col1, veh->col2, VEHICLE_RESPAWN_DELAY, 0);
+	veh->spawnedvehicleid = vehicleid;
+	gamevehicles[vehicleid].dbvehicle = veh;
+	return vehicleid;
+}
+
+int
+veh_OnVehicleSpawn(AMX *amx, int vehicleid)
+{
+	struct dbvehicle *veh;
+	float min_fuel;
+
+	veh = gamevehicles[vehicleid].dbvehicle;
+
+	if (veh) {
+		if (gamevehicles[vehicleid].need_recreation) {
+			veh_NC_DestroyVehicle(amx, vehicleid);
+			vehicleid = veh_create_from_dbvehicle(amx, veh);
+			if (vehicleid == INVALID_VEHICLE_ID) {
+				/*expect things to crash*/
+				logprintf("ERR: veh_OnVehicleSpawn: failed "
+					  "to recreate vehicle");
+			}
+		}
+		min_fuel = model_fuel_capacity(veh->model) * .25f;
+		if (veh->fuel < min_fuel) {
+			veh->fuel = min_fuel;
+		}
+	}
+	/*this might've been already increased (due to recreate)
+	but it doesn't matter, it just needs to change*/
+	gamevehicles[vehicleid].reincarnation++;
+	return vehicleid;
 }

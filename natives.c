@@ -2,10 +2,16 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "vehicles.h"
+
+/* Natives ending in _ means that they have
+custom code and shouldn't be used directly.*/
 
 int n_ChangeVehicleColor;
 int n_CreatePlayerObject;
+int n_CreateVehicle_;
 int n_DestroyPlayerObject;
+int n_DestroyVehicle_;
 int n_DisablePlayerRaceCheckpoint;
 int n_GetPlayerPos;
 int n_GetPlayerVehicleID;
@@ -39,7 +45,9 @@ int natives_find(AMX *amx)
 	struct NATIVE natives[] = {
 		{ "ChangeVehicleColor", &n_ChangeVehicleColor },
 		{ "CreatePlayerObject", &n_CreatePlayerObject },
+		{ "CreateVehicle", &n_CreateVehicle_ },
 		{ "DestroyPlayerObject", &n_DestroyPlayerObject },
+		{ "DestroyVehicle", &n_DestroyVehicle_ },
 		{ "DisablePlayerRaceCheckpoint",
 			&n_DisablePlayerRaceCheckpoint },
 		{ "GetPlayerPos", &n_GetPlayerPos },

@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "playerdata.h"
+#include "vehicles.h"
 
 logprintf_t logprintf;
 extern void *pAMXFunctions;
@@ -113,7 +114,6 @@ FORWARD(Veh_CollectSpawnedVehicles);
 FORWARD(Veh_CollectPlayerVehicles);
 FORWARD(Veh_ConsumeFuel);
 FORWARD(Veh_Destroy);
-FORWARD(Veh_EnsureHasFuel);
 FORWARD(Veh_FormatPanelText);
 FORWARD(Veh_GetLabelToDelete);
 FORWARD(Veh_GetNextUpdateQuery);
@@ -193,6 +193,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnPlayerCommandText),
 	REGISTERNATIVE(B_OnPlayerConnect),
 	REGISTERNATIVE(B_OnPlayerDisconnect),
+	REGISTERNATIVE(B_OnVehicleSpawn),
 	REGISTERNATIVE(B_Validate),
 	/* commands.c */
 	REGISTERNATIVE(Command_Is),
@@ -286,7 +287,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_CollectPlayerVehicles),
 	REGISTERNATIVE(Veh_ConsumeFuel),
 	REGISTERNATIVE(Veh_Destroy),
-	REGISTERNATIVE(Veh_EnsureHasFuel),
 	REGISTERNATIVE(Veh_FormatPanelText),
 	REGISTERNATIVE(Veh_GetLabelToDelete),
 	REGISTERNATIVE(Veh_GetNextUpdateQuery),
