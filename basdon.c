@@ -41,13 +41,13 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 	return MAX_PLAYERS;
 }
 
-/* native B_Loop1000() */
-cell AMX_NATIVE_CALL B_Loop1000(AMX *amx, cell *params)
+/* native B_Timer1000() */
+cell AMX_NATIVE_CALL B_Timer1000(AMX *amx, cell *params)
 {
 	return 1;
 }
 
-void loop100(AMX *amx)
+void timer100(AMX *amx)
 {
 	void maps_process_tick(AMX *amx);
 #ifdef DEV
@@ -58,14 +58,14 @@ void loop100(AMX *amx)
 	maps_process_tick(amx);
 }
 
-/* native B_Loop25() */
-cell AMX_NATIVE_CALL B_Loop25(AMX *amx, cell *params)
+/* native B_Timer25() */
+cell AMX_NATIVE_CALL B_Timer25(AMX *amx, cell *params)
 {
 	static int loop25invoccount = 0;
 
 	if (loop25invoccount > 3) {
 		loop25invoccount = 1;
-		loop100(amx);
+		timer100(amx);
 	} else {
 		loop25invoccount++;
 	}
