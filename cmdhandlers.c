@@ -65,22 +65,70 @@ cmd_dev_owner(CMDPARAMS)
 }
 #endif /*DEV*/
 
+static const char
+	*MSG_VEH_PARK_Y = SUCC"Vehicle parked!",
+	*MSG_VEH_PARK_N = WARN"You are not allowed to park this vehicle",
+	*MSG_VEH_SPRAY_N = WARN"You are not allowed to respray this vehicle";
+
 static int
-cmd_spray(CMDPARAMS)
+cmd_park(CMDPARAMS)
 {
-	char buf[144];
+	char q[144];
 	struct dbvehicle *veh;
-	int vehicleid, userid, col1, col2;
+	int vehicleid;
+	float x, y, z, r;
 
 	NC_GetPlayerVehicleID_(playerid, &vehicleid);
 	if (vehicleid) {
-		if ((veh = gamevehicles[vehicleid].dbvehicle) &&
-			pdata[playerid]->userid != veh->owneruserid &&
-			!(pdata[playerid]->groups & GROUPS_ADMIN))
+		veh = gamevehicles[vehicleid].dbvehicle;
+		if (!veh_can_player_modify_veh(playerid, veh))
 		{
-			sprintf(buf, WARN"You are not allowed to respray "
-				         "this vehicle");
-			amx_SetUString(buf144, buf, sizeof(buf));
+			amx_SetUString(buf144, MSG_VEH_PARK_N, 144);
+			NC_SendClientMessage(playerid, COL_WARN, buf144a);
+			return 1;
+		}
+		NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
+		NC_GetVehicleZAngle(vehicleid, buf32_1a);
+		x = amx_ctof(*buf32);
+		y = amx_ctof(*buf64);
+		z = amx_ctof(*buf144);
+		r = amx_ctof(*buf32_1);
+		if (356.0f < r || r < 4.0f) {
+			r = 0.0f;
+		} else if (86.0f < r && r < 94.0f) {
+			r = 90.0f;
+		} else if (176.0f < r && r < 184.0f) {
+			r = 180.0f;
+		} else if (266.0f < r && r < 274.0f) {
+			r = 270.0f;
+		}
+		veh->x = x;
+		veh->y = y;
+		veh->z = z;
+		veh->r = r;
+		gamevehicles[vehicleid].need_recreation = 1;
+		sprintf(q, "UPDATE veh SET x=%f,y=%f,z=%f,r=%f WHERE i=%d",
+			x, y, z, r, veh->id);
+		amx_SetUString(buf144, q, sizeof(q));
+		NC_mysql_tquery_nocb(buf144a);
+		amx_SetUString(buf144, MSG_VEH_PARK_Y, 144);
+		NC_SendClientMessage(playerid, COL_SUCC, buf144a);
+	}
+	return 1;
+}
+
+static int
+cmd_spray(CMDPARAMS)
+{
+	char q[144];
+	struct dbvehicle *veh;
+	int vehicleid, col1, col2;
+
+	NC_GetPlayerVehicleID_(playerid, &vehicleid);
+	if (vehicleid) {
+		veh = gamevehicles[vehicleid].dbvehicle;
+		if (!veh_can_player_modify_veh(playerid, veh)) {
+			amx_SetUString(buf144, MSG_VEH_SPRAY_N, 144);
 			NC_SendClientMessage(playerid, COL_WARN, buf144a);
 			return 1;
 		}
@@ -94,12 +142,14 @@ rand2nd:
 			NC_random_(256, &col2);
 		}
 		NC_ChangeVehicleColor(vehicleid, col1, col2);
-		veh->col1 = col1;
-		veh->col2 = col2;
+		if (veh != NULL) {
+			veh->col1 = col1;
+			veh->col2 = col2;
+		}
 		gamevehicles[vehicleid].need_recreation = 1;
-		sprintf(buf, "UPDATE veh SET col1=%d,col2=%d WHERE i=%d",
+		sprintf(q, "UPDATE veh SET col1=%d,col2=%d WHERE i=%d",
 			col1, col2, veh->id);
-		amx_SetUString(buf144, buf, sizeof(buf));
+		amx_SetUString(buf144, q, sizeof(q));
 		NC_mysql_tquery_nocb(buf144a);
 	}
 	return 1;

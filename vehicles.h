@@ -46,3 +46,8 @@ int veh_NC_CreateVehicle(AMX *amx, int model, float x, float y, float z,
 int veh_create_from_dbvehicle(AMX *amx, struct dbvehicle *veh);
 int veh_NC_DestroyVehicle(AMX *amx, int vehicleid);
 int veh_OnVehicleSpawn(AMX *amx, int vehicleid);
+/**
+Check if given player can modify a vehicle (park, spray, ..).
+Player can modify if they own the vehicle or have admin rights.
+*/
+int veh_can_player_modify(int playerid, int vehicleid);

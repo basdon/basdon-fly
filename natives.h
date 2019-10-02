@@ -11,6 +11,8 @@ extern int n_DestroyVehicle_;
 extern int n_DisablePlayerRaceCheckpoint;
 extern int n_GetPlayerPos;
 extern int n_GetPlayerVehicleID;
+extern int n_GetVehiclePos;
+extern int n_GetVehicleZAngle;
 extern int n_SendClientMessage;
 extern int n_SendClientMessageToAll;
 extern int n_SetPlayerRaceCheckpoint;
@@ -64,6 +66,15 @@ extern cell nc_result;
 	amx_Callback(amx,n_GetPlayerVehicleID,RESULT,nc_params)
 #define NC_GetPlayerVehicleID(PLAYERID) \
 	NC_GetPlayerVehicleID_(PLAYERID,&nc_result)
+
+#define NC_GetVehiclePos(VEHICLEID,FX,FY,FZ) \
+	nc_params[0]=4;nc_params[1]=VEHICLEID;\
+	nc_params[2]=FX;nc_params[3]=FY;nc_params[4]=FZ;\
+	amx_Callback(amx,n_GetVehiclePos,&nc_result,nc_params)
+
+#define NC_GetVehicleZAngle(VEHICLEID,FR) \
+	nc_params[0]=2;nc_params[1]=VEHICLEID;nc_params[2]=FR;\
+	amx_Callback(amx,n_GetVehicleZAngle,&nc_result,nc_params)
 
 #define NC_SendClientMessage(PLAYERID,COLOR,BUF) \
 	nc_params[0]=3;\

@@ -109,7 +109,6 @@ FORWARD(Urlencode);
 FORWARD(Veh_Add);
 FORWARD(Veh_AddOdo);
 FORWARD(Veh_AddServicePoint);
-FORWARD(Veh_ClearRecreateFlag);
 FORWARD(Veh_CollectSpawnedVehicles);
 FORWARD(Veh_CollectPlayerVehicles);
 FORWARD(Veh_ConsumeFuel);
@@ -122,13 +121,11 @@ FORWARD(Veh_InitServicePoints);
 FORWARD(Veh_IsFuelEmpty);
 FORWARD(Veh_IsPlayerAllowedInVehicle);
 FORWARD(Veh_OnPlayerDisconnect);
-FORWARD(Veh_Park);
 FORWARD(Veh_Refuel);
 FORWARD(Veh_RegisterLabel);
 FORWARD(Veh_Repair);
 FORWARD(Veh_ResetPanelTextCache);
 FORWARD(Veh_ShouldCreateLabel);
-FORWARD(Veh_ShouldRecreate);
 FORWARD(Veh_UpdateServicePointTextId);
 FORWARD(Veh_UpdateServicePtsVisibility);
 FORWARD(Veh_UpdateSlot);
@@ -282,7 +279,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_Add),
 	REGISTERNATIVE(Veh_AddOdo),
 	REGISTERNATIVE(Veh_AddServicePoint),
-	REGISTERNATIVE(Veh_ClearRecreateFlag),
 	REGISTERNATIVE(Veh_CollectSpawnedVehicles),
 	REGISTERNATIVE(Veh_CollectPlayerVehicles),
 	REGISTERNATIVE(Veh_ConsumeFuel),
@@ -295,13 +291,11 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_IsFuelEmpty),
 	REGISTERNATIVE(Veh_IsPlayerAllowedInVehicle),
 	REGISTERNATIVE(Veh_OnPlayerDisconnect),
-	REGISTERNATIVE(Veh_Park),
 	REGISTERNATIVE(Veh_Refuel),
 	REGISTERNATIVE(Veh_RegisterLabel),
 	REGISTERNATIVE(Veh_Repair),
 	REGISTERNATIVE(Veh_ResetPanelTextCache),
 	REGISTERNATIVE(Veh_ShouldCreateLabel),
-	REGISTERNATIVE(Veh_ShouldRecreate),
 	REGISTERNATIVE(Veh_UpdateServicePointTextId),
 	REGISTERNATIVE(Veh_UpdateServicePtsVisibility),
 	REGISTERNATIVE(Veh_UpdateSlot),

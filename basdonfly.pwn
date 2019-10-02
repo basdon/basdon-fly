@@ -788,11 +788,6 @@ native Float:Veh_AddOdo(vehicleid, playerid, Float:x1, Float:y1, Float:z1, Float
 //@seealso Veh_InitServicePoints
 native Veh_AddServicePoint(index, id, Float:x, Float:y, Float:z)
 
-//@summary Clears the recreate flag for vehicle
-//@param vehicleid vehicle to clear the flag for
-//@returns {@code 1} if the flag was cleared, {@code 0} if the vehicle was not flagged
-native Veh_ClearRecreateFlag(vehicleid)
-
 //@summary Collects all vehicles from the table that are owned by a player
 //@param userid user id of the player of whom to collect all vehicles
 //@param buf buffer to put in the vehicle data
@@ -870,20 +865,6 @@ native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[])
 //@param playerid the player that disconnected
 native Veh_OnPlayerDisconnect(playerid)
 
-//@summary Save current position of a vehicle as its parked position
-//@param playerid player attempting to park the vehicle
-//@param vehicleid vehicle the player is attempting to park, may be {@code 0}
-//@param x x position of the vehicle
-//@param y y position of the vehicle
-//@param z z position of the vehicle
-//@param r z rotation of the vehicle
-//@param querybuf buffer to store query in, to be executed when returned {@code 1}
-//@param msgcol color of the message in {@param msgbuf} to send
-//@param msgbuf buffer to store message in, always to be sent
-//@returns {@code 1} on success (execute query)
-//@remarks plugin will mark {@param vehicleid} for deletion, check with {@link Veh_ShouldRecreate} in {@link OnVehicleSpawn}
-native Veh_Park(playerid, vehicleid, Float:x, Float:y, Float:z, Float:r, querybuf[], &msgcol,msgbuf[])
-
 //@summary Refuels a vehicle within given fuel budget
 //@param x x-position of vehicle
 //@param y y-position of vehicle
@@ -928,21 +909,6 @@ native Veh_ResetPanelTextCache(playerid)
 //@param buf buffer to store the label text in, if this returns positive
 //@returns {@code 1} if a label should be made, with given text in {@param buf}
 native Veh_ShouldCreateLabel(vehicleid, playerid, buf[])
-
-//@summary check if a vehicle should be recreated (for when a vehicle is re-parked), cehck this on {@link OnVehicleSpawn}
-//@param vehicleid vehicleid to check
-//@param dbid var to store vehicle database id in for consequental calls to {@link Veh_UpdateSlot}
-//@param model var to store vehicle model in
-//@param x var to store vehicle x pos in
-//@param y var to store vehicle y pos in
-//@param z var to store vehicle z pos in
-//@param r var to store vehicle z rotation in
-//@param col1 var to store vehicle col1 in
-//@param col2 var to store vehicle col2 in
-//@returns {@code 1} when the vehicle should be recreated
-//@remarks don't forget to free current {@param vehicleid} and register new vehicleid with {@link Veh_UpdateSlot}
-//@remarks this clears the recreate flag for that vehicle
-native Veh_ShouldRecreate(vehicleid, &dbid, &model, &Float:x, &Float:y, &Float:z, &Float:r, &col1, &col2)
 
 //@summary Store the id of the 3D text created for a service point in the plugin's data.
 //@param playerid player the text was made for
