@@ -52,12 +52,49 @@ cmd_dev_testparpl(CMDPARAMS)
 	}
 	return 1;
 }
+
+/**
+Toggle owner group on yourself.
+*/
+static int
+cmd_dev_owner(CMDPARAMS)
+{
+	pdata[playerid]->groups ^= GROUP_OWNER;
+	pdata[playerid]->groups |= GROUP_MEMBER;
+	return 1;
+}
 #endif /*DEV*/
 
 static int
-cmd_admin_spray(CMDPARAMS)
+cmd_spray(CMDPARAMS)
 {
-	logprintf("respray");
+	char buf[144];
+	struct dbvehicle *veh;
+	int userid, col1, col2;
+
+	NC_GetPlayerVehicleID(playerid);
+	if (nc_result) {
+		if ((veh = gamevehicles[nc_result].dbvehicle) &&
+			pdata[playerid]->userid != veh->owneruserid &&
+			!(pdata[playerid]->groups & GROUPS_ADMIN))
+		{
+			sprintf(buf, WARN"You are not allowed to respray "
+				         "this vehicle");
+			amx_SetUString(buf144, buf, sizeof(buf));
+			NC_SendClientMessage(playerid, COL_WARN, buf144a);
+			return 1;
+		}
+		if (cmd_get_int_param(cmdtext, &parseidx, &col1)) {
+			if (!cmd_get_int_param(cmdtext, &parseidx, &col2)) {
+				goto rand2nd;
+			}
+		} else {
+			NC_random_(256, &col1);
+rand2nd:
+			NC_random_(256, &col2);
+		}
+		NC_ChangeVehicleColor(nc_result, col1, col2);
+	}
 	return 1;
 }
 

@@ -1,8 +1,10 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
 #include "playerdata.h"
+#include "vehicles.h"
 #include <string.h>
 
 /*
@@ -164,9 +166,10 @@ static struct COMMAND cmds[] = {
 #ifdef DEV
 	{ 0, "/testparpl", GROUPS_ALL, cmd_dev_testparpl },
 	{ 0, "//closestmp", GROUPS_ALL, cmd_dev_closestmp },
+	{ 0, "//owner", GROUPS_ALL, cmd_dev_owner },
 #endif /*DEV*/
 	{ 0, "//respawn", GROUPS_ADMIN, cmd_admin_respawn },
-	{ 0, "//spray", GROUPS_ALL, cmd_admin_spray },
+	{ 0, "/spray", GROUPS_ALL, cmd_spray },
 }, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
 
 /*

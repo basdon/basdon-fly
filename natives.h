@@ -3,6 +3,7 @@
 
 int natives_find(AMX *amx);
 
+extern int n_ChangeVehicleColor;
 extern int n_CreatePlayerObject;
 extern int n_DestroyPlayerObject;
 extern int n_DisablePlayerRaceCheckpoint;
@@ -26,6 +27,11 @@ extern cell nc_result;
 /* NC = NativeCall */
 
 #define NC(NATIVE) amx_Callback(amx,NATIVE,&nc_result,nc_params)
+
+#define NC_ChangeVehicleColor(VEHICLEID,COL1,COL2) \
+	nc_params[0]=3;nc_params[1]=VEHICLEID;\
+	nc_params[2]=COL1;nc_params[3]=COL2;\
+	amx_Callback(amx,n_ChangeVehicleColor,&nc_result,nc_params)
 
 #define NC_CreatePlayerObject(PLAYERID,MODELID,FX,FY,FZ,FRX,FRY,FRZ,FDISTANCE) \
 	nc_params[0]=9;nc_params[1]=PLAYERID;nc_params[2]=MODELID;\
@@ -93,5 +99,6 @@ extern cell nc_result;
 	amx_Callback(amx,n_mysql_query,RESULT,nc_params)
 #define NC_mysql_query(BUF) NC_mysql_query_(BUF,&nc_result)
 
-#define NC_random(MAX) nc_params[0]=1;nc_params[1]=MAX;\
-	amx_Callback(amx,n_random,&nc_result,nc_params)
+#define NC_random_(MAX,RESULT) nc_params[0]=1;nc_params[1]=MAX;\
+	amx_Callback(amx,n_random,RESULT,nc_params)
+#define NC_random(MAX) NC_random_(MAX,&nc_result)

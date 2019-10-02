@@ -3,6 +3,7 @@
 
 #include "common.h"
 
+int n_ChangeVehicleColor;
 int n_CreatePlayerObject;
 int n_DestroyPlayerObject;
 int n_DisablePlayerRaceCheckpoint;
@@ -35,6 +36,7 @@ int natives_find(AMX *amx)
 		int *var;
 	};
 	struct NATIVE natives[] = {
+		{ "ChangeVehicleColor", &n_ChangeVehicleColor },
 		{ "CreatePlayerObject", &n_CreatePlayerObject },
 		{ "DestroyPlayerObject", &n_DestroyPlayerObject },
 		{ "DisablePlayerRaceCheckpoint",
