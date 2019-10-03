@@ -159,6 +159,9 @@ struct COMMAND {
 
 #define IN_CMD
 #include "cmdhandlers.c"
+#ifdef DEV
+#include "cmdhandlers_dev.c"
+#endif /*DEV*/
 
 /* see sharedsymbols.h for GROUPS_ definitions */
 /* command must prefixed by forward slash and be lower case */

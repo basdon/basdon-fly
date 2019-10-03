@@ -13,6 +13,7 @@ out/amxplugin.o: vendor/SDK/plugincommon.h vendor/SDK/amxplugin.c
 
 out/basdonfly.o: basdon.c
 out/cmdbase.o: cmdhandlers.c
+out/cmdbase.o: cmdhandlers_dev.c
 
 out/%.o: %.c $(HEADERS)
 	$(GCC) $(FLAGS) -x c -c $< -o $@
