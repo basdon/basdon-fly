@@ -852,7 +852,7 @@ veh_NC_CreateVehicle(AMX *amx, int model, float x, float y, float z,
 	nc_params[7] = col2;
 	nc_params[8] = respawn_delay;
 	nc_params[9] = addsiren;
-	amx_Callback(amx, n_CreateVehicle_, &vehicleid, nc_params);
+	amx_Callback(amx, n_CreateVehicle_, (cell*) &vehicleid, nc_params);
 	gamevehicles[vehicleid].dbvehicle = NULL;
 	gamevehicles[vehicleid].reincarnation++;
 	gamevehicles[vehicleid].need_recreation = 0;

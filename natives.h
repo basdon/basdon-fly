@@ -63,7 +63,7 @@ extern cell nc_result;
 
 #define NC_GetPlayerVehicleID_(PLAYERID,RESULT) \
 	nc_params[0]=1;nc_params[1]=PLAYERID;\
-	amx_Callback(amx,n_GetPlayerVehicleID,RESULT,nc_params)
+	amx_Callback(amx,n_GetPlayerVehicleID,(cell*)RESULT,nc_params)
 #define NC_GetPlayerVehicleID(PLAYERID) \
 	NC_GetPlayerVehicleID_(PLAYERID,&nc_result)
 
@@ -124,5 +124,5 @@ extern cell nc_result;
 	amx_Callback(amx,n_mysql_tquery,&nc_result,nc_params)
 
 #define NC_random_(MAX,RESULT) nc_params[0]=1;nc_params[1]=MAX;\
-	amx_Callback(amx,n_random,RESULT,nc_params)
+	amx_Callback(amx,n_random,(cell*)RESULT,nc_params)
 #define NC_random(MAX) NC_random_(MAX,&nc_result)

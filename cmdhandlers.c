@@ -19,19 +19,6 @@ cmd_dev_closestmp(CMDPARAMS)
 	return 1;
 }
 
-/**
-Respawns the vehicle the player is in.
-*/
-static int
-cmd_admin_respawn(CMDPARAMS)
-{
-	NC_GetPlayerVehicleID(playerid);
-	if (nc_result) {
-		NC_SetVehicleToRespawn(nc_result);
-	}
-	return 1;
-}
-
 static int
 cmd_dev_testparpl(CMDPARAMS)
 {
@@ -64,6 +51,19 @@ cmd_dev_owner(CMDPARAMS)
 	return 1;
 }
 #endif /*DEV*/
+
+/**
+Respawns the vehicle the player is in.
+*/
+static int
+cmd_admin_respawn(CMDPARAMS)
+{
+	NC_GetPlayerVehicleID(playerid);
+	if (nc_result) {
+		NC_SetVehicleToRespawn(nc_result);
+	}
+	return 1;
+}
 
 static const char
 	*MSG_VEH_PARK_Y = SUCC"Vehicle parked!",

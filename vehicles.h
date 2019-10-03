@@ -50,4 +50,4 @@ int veh_OnVehicleSpawn(AMX *amx, int vehicleid);
 Check if given player can modify a vehicle (park, spray, ..).
 Player can modify if they own the vehicle or have admin rights.
 */
-int veh_can_player_modify(int playerid, int vehicleid);
+int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh);
