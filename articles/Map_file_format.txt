@@ -15,14 +15,16 @@ The rest is dependent on the spec version:
 May contain maximum 900 objects.
 
 <pre>
-(repeated x times from byte 4)
+byte 4-7: number of removed objects
+byte 8-11: number of objects
+(repeated x times from byte 12):
 	byte 0-3: model (DWORD)
-	(when model is a negative number: remove building)
+	(when model is a negative number: remove building):
 		byte 4-7: x (FLOAT)
 		byte 8-11: y (FLOAT)
 		byte 12-15: z (FLOAT)
 		byte 16-19: radius (FLOAT)
-	(when model is a positive number: object)
+	(when model is a positive number: object):
 		byte 4-7: x (FLOAT)
 		byte 8-11: y (FLOAT)
 		byte 12-15: z (FLOAT)
