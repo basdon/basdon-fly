@@ -13,6 +13,7 @@ extern int n_GetPlayerPos;
 extern int n_GetPlayerVehicleID;
 extern int n_GetVehiclePos;
 extern int n_GetVehicleZAngle;
+extern int n_RemoveBuildingForPlayer;
 extern int n_SendClientMessage;
 extern int n_SendClientMessageToAll;
 extern int n_SetPlayerRaceCheckpoint;

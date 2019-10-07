@@ -9,11 +9,15 @@
 #define MAP_MAX_FILENAME (24) /*see db col*/
 /*define to print msg to console each time map streams in/out*/
 /*#define MAPS_LOG_STREAMING*/
+#define MAX_REMOVED_OBJECTS 1000
 
 #pragma pack(push,1)
 struct OBJECT {
 	int model;
 	cell x, y, z, rx, ry, rz, drawdistance;
+};
+struct REMOVEDOBJECT {
+	cell model, x, y, z, radius;
 };
 #pragma pack(pop)
 
@@ -33,13 +37,17 @@ static struct MAP *maps;
 /*maps object id to a map id*/
 /*using MAX_OBJECTS+1 because object ideas start at 1*/
 static int object_map_id[MAX_PLAYERS][MAX_OBJECTS+1];
+static struct REMOVEDOBJECT removedobjects[MAX_REMOVED_OBJECTS];
+static int numremovedobjects = 0;
 
 int maps_load_from_file(struct MAP *map)
 {
 	FILE *filehandle;
 	char filename[18 + MAP_MAX_FILENAME];
 	int specversion;
+	int numobjects, numrem;
 	struct OBJECT *obj;
+	struct REMOVEDOBJECT *remobj;
 
 	sprintf_s(filename, sizeof(filename), "scriptfiles/maps/%s", map->name);
 	if (!(filehandle = fopen(filename, "rb"))) {
@@ -55,7 +63,43 @@ int maps_load_from_file(struct MAP *map)
 		logprintf("unknown map spec v%d for %s", specversion, filename);
 		goto exitzero;
 	}
-	obj = map->objects = malloc(sizeof(struct OBJECT) * 900);
+	if (fread(&numrem, sizeof(int), 1, filehandle) != 1 ||
+		fread(&numobjects, sizeof(int), 1, filehandle) != 1 ||
+		numobjects < 0 || 900 < numobjects ||
+		numrem < 0 || 100 < numrem)
+	{
+		goto corrupted;
+	}
+	if (numrem + numremovedobjects < MAX_REMOVED_OBJECTS) {
+		remobj = removedobjects + numremovedobjects;
+		while (numrem--) {
+			if (fread(remobj, sizeof(struct REMOVEDOBJECT), 1,
+				filehandle) != 1)
+			{
+				if (feof(filehandle)) {
+					goto allread;
+				} else {
+					goto corrupted;
+				}
+			}
+			/* as per spec */
+			remobj->model = -remobj->model;
+			/*coordinates are kept as cells to use as params as is*/
+			remobj->x = amx_ftoc(remobj->x);
+			remobj->y = amx_ftoc(remobj->y);
+			remobj->z = amx_ftoc(remobj->z);
+			remobj->radius = amx_ftoc(remobj->radius);
+			remobj++;
+			numremovedobjects++;
+		}
+	} else {
+		logprintf("ERR: MAX_REMOVED_OBJECTS limit hit!");
+	}
+	if (numobjects == 0) {
+		obj = map->objects = NULL;
+		goto allread;
+	}
+	obj = map->objects = malloc(sizeof(struct OBJECT) * numobjects);
 	do {
 		if (fread(obj, sizeof(struct OBJECT), 1, filehandle) != 1) {
 			if (feof(filehandle)) {
@@ -75,7 +119,6 @@ int maps_load_from_file(struct MAP *map)
 		obj->drawdistance = amx_ftoc(obj->drawdistance);
 		obj++;
 	} while (obj - map->objects < 900);
-	logprintf("warn: map %s truncated to 900 objects", filename);
 allread:
 	map->numobjects = obj - map->objects;
 
@@ -253,6 +296,18 @@ void maps_process_tick(AMX *amx)
 			}
 			maps_stream_for_player(amx, players[currentplayeridx]);
 		}
+	}
+}
+
+void maps_OnPlayerConnect(AMX *amx, int playerid)
+{
+	struct REMOVEDOBJECT *r = removedobjects + numremovedobjects;
+
+	while (r-- != removedobjects) {
+		nc_params[0] = 6;
+		nc_params[1] = playerid;
+		memcpy(nc_params + 2, r, sizeof(cell) * 5);
+		NC(n_RemoveBuildingForPlayer);
 	}
 }
 

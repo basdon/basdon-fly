@@ -17,6 +17,7 @@ int n_GetPlayerPos;
 int n_GetPlayerVehicleID;
 int n_GetVehiclePos;
 int n_GetVehicleZAngle;
+int n_RemoveBuildingForPlayer;
 int n_SendClientMessage;
 int n_SendClientMessageToAll;
 int n_SetPlayerRaceCheckpoint;
@@ -56,6 +57,7 @@ int natives_find(AMX *amx)
 		{ "GetPlayerVehicleID", &n_GetPlayerVehicleID },
 		{ "GetVehiclePos", &n_GetVehiclePos },
 		{ "GetVehicleZAngle", &n_GetVehicleZAngle },
+		{ "RemoveBuildingForPlayer", &n_RemoveBuildingForPlayer },
 		{ "SendClientMessage", &n_SendClientMessage },
 		{ "SendClientMessageToAll", &n_SendClientMessageToAll },
 		{ "SetPlayerRaceCheckpoint", &n_SetPlayerRaceCheckpoint },

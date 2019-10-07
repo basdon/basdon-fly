@@ -107,6 +107,8 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 /* native B_OnPlayerConnect(playerid) */
 cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 {
+	void maps_OnPlayerConnect(AMX*, int);
+
 	const int playerid = params[1];
 	int i;
 
@@ -123,6 +125,8 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 		}
 	}
 	players[playercount++] = playerid;
+
+	maps_OnPlayerConnect(amx, playerid);
 	return 1;
 }
 
