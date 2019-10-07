@@ -121,11 +121,8 @@ struct apref {
 
 static int sortaprefs(const void *_a, const void *_b)
 {
-	struct apref *a = (struct apref*) _a;
-	struct apref *b = (struct apref*) _b;
-	if (a->distance < b->distance) return 1;
-	if (a->distance > b->distance) return -1;
-	return 0;
+	struct apref *a = (struct apref*) _a, *b = (struct apref*) _b;
+	return (int) (10.0f * (b->distance - a->distance));
 }
 
 /* native APT_FormatNearestList(playerid, Float:x, Float:y, buf[]) */
@@ -141,15 +138,15 @@ cell AMX_NATIVE_CALL APT_FormatNearestList(AMX *amx, cell *params)
 	
 	while (i < airportscount) {
 		if (airports[i].enabled) {
-			dx = airports[enabledairportscount].pos.x - amx_ctof(params[2]);
-			dy = airports[enabledairportscount].pos.y - amx_ctof(params[3]);
+			dx = airports[i].pos.x - amx_ctof(params[2]);
+			dy = airports[i].pos.y - amx_ctof(params[3]);
 			aps[enabledairportscount].distance = sqrt(dx * dx + dy * dy);
 			aps[enabledairportscount].index = i;
 			enabledairportscount++;
 		}
 		i++;
 	}
-	qsort(aps, enabledairportscount, sizeof(*aps), sortaprefs);
+	qsort(aps, enabledairportscount, sizeof(struct apref), sortaprefs);
 	if (indexmap[pid] == NULL) {
 		indexmap[pid] = malloc(sizeof(indexmap[0]) * enabledairportscount);
 	}
