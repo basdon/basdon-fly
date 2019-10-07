@@ -115,6 +115,9 @@ $color_ndb_b = imagecolorallocate($im, 194, 164, 194);
 $color_ils = imagecolorallocate($im, 0, 255, 0);
 $font = 2;
 
+// ap name
+bordered_text($imgw / 2, imagefontheight($font) / 2, $apt->n, $color_black);
+
 $runway_fillings = [];
 $runway_texts = [];
 foreach ($runway_ends as $r) {
@@ -317,9 +320,6 @@ foreach ($servicepoints as $svp) {
 	imagesetpixel($im, $x + 4, $y + 9, $color_black);
 	imagesetpixel($im, $x + 5, $y + 9, $color_black);
 }
-
-// ap name
-bordered_text($imgw / 2, imagefontheight($font) / 2, $apt->n, $color_black);
 
 if (isset($_GET['web'])) {
 	if (!isset($_GET['d'])) header('Content-Type: image/png');
