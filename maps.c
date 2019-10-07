@@ -6,6 +6,7 @@
 #include <string.h>
 #include "common.h"
 
+#define MAP_FILENAMEFORMAT "scriptfiles/maps/%s.map"
 #define MAP_MAX_FILENAME (24) /*see db col*/
 /*define to print msg to console each time map streams in/out*/
 /*#define MAPS_LOG_STREAMING*/
@@ -42,14 +43,15 @@ static int numremovedobjects = 0;
 
 int maps_load_from_file(struct MAP *map)
 {
+	const float forceddrawdistance = 1000.0f;
 	FILE *filehandle;
-	char filename[18 + MAP_MAX_FILENAME];
+	char filename[22 + MAP_MAX_FILENAME];
 	int specversion;
 	int numobjects, numrem;
 	struct OBJECT *obj;
 	struct REMOVEDOBJECT *remobj;
 
-	sprintf_s(filename, sizeof(filename), "scriptfiles/maps/%s", map->name);
+	sprintf_s(filename, sizeof(filename), MAP_FILENAMEFORMAT, map->name);
 	if (!(filehandle = fopen(filename, "rb"))) {
 		logprintf("failed to open map %s", filename);
 		return 0;
@@ -117,6 +119,7 @@ int maps_load_from_file(struct MAP *map)
 		obj->ry = amx_ftoc(obj->ry);
 		obj->rz = amx_ftoc(obj->rz);
 		obj->drawdistance = amx_ftoc(obj->drawdistance);
+		obj->drawdistance = amx_ftoc(forceddrawdistance);
 		obj++;
 	} while (obj - map->objects < 900);
 allread:
