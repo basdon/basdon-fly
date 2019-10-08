@@ -66,6 +66,8 @@
 /* airport.c / airport.pwn */
 #define MAX_AIRPORT_NAME (24)
 
+#define APT_FLAG_TOWERED (0x1)
+
 #define RUNWAY_SURFACE_ASPHALT (1)
 #define RUNWAY_SURFACE_DIRT (2)
 #define RUNWAY_SURFACE_CONCRETE (3)
