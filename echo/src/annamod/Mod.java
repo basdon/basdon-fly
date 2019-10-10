@@ -5,11 +5,8 @@ package annamod;
 import java.io.IOException;
 import java.util.Properties;
 
-import net.basdon.anna.api.Config;
-import net.basdon.anna.api.IAnna;
+import net.basdon.anna.api.*;
 import net.basdon.anna.api.IAnna.Output;
-import net.basdon.anna.api.IMod;
-import net.basdon.anna.api.User;
 import net.basdon.fly.services.echo.Echo;
 
 import static net.basdon.anna.api.Util.*;
@@ -110,7 +107,8 @@ void on_disable()
 public void on_message(User user, char[] target, char[] replytarget, char[] message)
 {
 	if (this.echo != null && user != null && strcmp(this.outtarget, target)) {
-		this.echo.send_chat_to_game(user.nick, message);
+		ChannelUser cu = anna.find_user(target, user.nick);
+		this.echo.send_chat_to_game(cu == null ? 0 : cu.prefix, user.nick, message);
 	}
 }
 }

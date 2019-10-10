@@ -158,14 +158,18 @@ void msg(String message)
 /**
  * Send irc message to game.
  *
+ * @param prefix prefix of user, or {@code 0}
  * @param nickname irc user nick name
  * @param message message
  */
 public
-void send_chat_to_game(char[] nickname, char[] message)
+void send_chat_to_game(char prefix, char[] nickname, char[] message)
 {
 	// TODO: escape embedded colors?
-	byte nicklen = (byte) Math.min(nickname.length, 50);
+	byte nicklen = (byte) Math.min(nickname.length, 49);
+	if (prefix != 0) {
+		nicklen++;
+	}
 	byte msglen = (byte) Math.min(message.length, 144);
 	byte[] msg = new byte[8 + nicklen + msglen];
 	msg[0] = 'F';
@@ -177,6 +181,10 @@ void send_chat_to_game(char[] nickname, char[] message)
 	msg[7] = (byte) message.length;
 	// escape boii
 	int j = 8;
+	if (prefix != 0) {
+		msg[j] = (byte) prefix;
+		j++;
+	}
 	for (int i = 0; i < nicklen; i++, j++) {
 		msg[j] = (byte) nickname[i];
 		if (msg[j] == '%') {
