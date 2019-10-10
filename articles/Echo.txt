@@ -1,0 +1,44 @@
+The echo service is the bridge between in-game chat and IRC chat. The IRC side
+of echo is implemented as an {@a=https://github.com/yugecin/anna Anna^} mod.
+
+Echo runs on ports {@code 7767} (IRC) and {@code 7768} (In-game).
+
+{@h3 Packet spec}
+
+<pre>
+byte 0: F
+byte 1: L
+byte 2: Y
+byte 3: packet id
+</pre>
+
+{@h4(id=p0) Packet 0: Hello}
+
+A {@code hello} packet is sent to the other side when the echo service comes
+online. Upon receiving, the other side should send an {@#=p1 I'm there}
+packet back.
+
+<pre>
+byte 4-7: random value
+</pre>
+
+{@h4(id=p1) Packet 1: I'm there}
+
+An {@code I'm there} packet is sent as a response to a {@#=p0 Hello packet}.
+
+<pre>
+byte 4-7: same as bytes 4-7 as received from the Hello packet
+</pre>
+
+{@h4(id=p1) Packet 10: Chat}
+
+A simple packet saying someone sent a message. This packet can be sent from
+either side.
+
+<pre>
+byte 4: length of the nickname (must be less than 50)
+byte 5: length of the message (must be less than 144)
+byte 6-(byte 4): nickname
+byte (7 + byte4)-(7 + byte4 + byte5): message
+</pre>
+
