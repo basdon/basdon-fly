@@ -53,9 +53,11 @@ A simple packet saying someone sent a message. This packet can be sent from
 either side.
 
 <pre>
-byte 4: length of the nickname (must be less than 50)
-byte 5: length of the message (must be less than 144)
-byte 6-(byte 4): nickname
-byte (7 + byte4)-(7 + byte4 + byte5): message
+byte 4: lo byte of player id as WORD (0 when IRC to game)
+byte 5: hi byte of player id as WORD (0 when IRC to game)
+byte 6: length of the nickname (must be less than 50)
+byte 7: length of the message (must be less than 144)
+byte 8-(byte 4): nickname
+byte (9 + byte4)-(9 + byte4 + byte5): message
 </pre>
 
