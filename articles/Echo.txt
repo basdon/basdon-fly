@@ -14,7 +14,7 @@ byte 3: packet id
 
 {@h4(id=p0) Packet 0: Hello}
 
-A {@code hello} packet is sent to the other side when the echo service comes
+A {@code Hello} packet is sent to the other side when the echo service comes
 online. Upon receiving, the other side should send an {@#=p1 I'm there}
 packet back.
 
@@ -30,7 +30,24 @@ An {@code I'm there} packet is sent as a response to a {@#=p0 Hello packet}.
 byte 4-7: same as bytes 4-7 as received from the Hello packet
 </pre>
 
-{@h4(id=p1) Packet 10: Chat}
+{@h4(id=p2) Packet 2: Ping}
+
+Simple ping packet. Upon receiving, the other side should send an
+{@#=p3 Pong} packet back with the same random value.
+
+<pre>
+byte 4-7: random value
+</pre>
+
+{@h4(id=p3) Packet 3: Pong}
+
+Response to a {@#=p2 Ping}.
+
+<pre>
+byte 4-7: same as bytes 4-7 as received from the Ping packet
+</pre>
+
+{@h4(id=p10) Packet 10: Chat}
 
 A simple packet saying someone sent a message. This packet can be sent from
 either side.
