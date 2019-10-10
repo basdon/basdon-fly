@@ -36,7 +36,7 @@ $maxy = -100000;
 $minx = 100000;
 $miny = 100000;
 
-$apt = $db->query('SELECT i,c,n,b,x,y,z FROM apt WHERE c=\''.$apcode.'\'')->fetchAll()[0];
+$apt = $db->query('SELECT i,c,n,b,x,y,z,flags FROM apt WHERE c=\''.$apcode.'\'')->fetchAll()[0];
 $apid = $apt->i;
 
 $runway_ends = [];
@@ -104,7 +104,11 @@ $sqrt2 = sqrt(2);
 $im = imagecreate($imgw, $imgh);
 $color_white = $bg = imagecolorallocate($im, 255, 255, 255);
 $color_black = imagecolorallocate($im, 0, 0, 0);
-$color_rnw_towered = imagecolorallocate($im, 12, 136, 192);
+if ($apt->flags & 1 /*APT_FLAG_TOWERED*/) {
+	$color_rnw = imagecolorallocate($im, 12, 136, 192);
+} else {
+	$color_rnw = imagecolorallocate($im, 156, 107, 159);
+}
 $color_svp_inner = imagecolorallocate($im, 225, 225, 225);
 $color_veh = imagecolorallocate($im, 91, 104, 119);
 $color_veh_outline = imagecolorallocate($im, 64, 64, 64);
@@ -158,7 +162,7 @@ foreach ($runway_ends as $r) {
 			$oy - $w * sin($angle + $PI4),
 			$ox - $w * cos($angle - $PI4),
 			$oy - $w * sin($angle - $PI4)];
-		imagefilledpolygon($im, $pts, 4, $color_rnw_towered);
+		imagefilledpolygon($im, $pts, 4, $color_rnw);
 		$w /= 3;
 		$pts = [$x + $w * cos($angle + $PI4),
 			$y + $w * sin($angle + $PI4),
@@ -191,7 +195,7 @@ foreach ($runway_ends as $r) {
 		$x = xcoord($r->x);
 		$y = ycoord($r->y);
 		$w2 = $r->w / 2;
-		imagefilledarc($im, xcoord($r->x), ycoord($r->y), $r->w, $r->w, 0, 360, $color_rnw_towered, IMG_ARC_PIE);
+		imagefilledarc($im, xcoord($r->x), ycoord($r->y), $r->w, $r->w, 0, 360, $color_rnw, IMG_ARC_PIE);
 		$w4 = $r->w / 4;
 		imagefilledrectangle($im, $x - 3, $y - $w4, $x - 8, $y + $w4, $color_white);
 		imagefilledrectangle($im, $x + 3, $y - $w4, $x + 8, $y + $w4, $color_white);
@@ -230,7 +234,7 @@ foreach ($runway_texts as $t)
 	if ($t->n & 4) {
 		$txt[0] = '*';
 	}
-	bordered_text($x, $y, $txt, $color_rnw_towered);
+	bordered_text($x, $y, $txt, $color_rnw);
 }
 
 // ndb
