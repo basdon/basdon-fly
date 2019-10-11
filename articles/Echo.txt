@@ -47,6 +47,10 @@ Response to a {@#=p2 Ping}.
 byte 4-7: same as bytes 4-7 as received from the Ping packet
 </pre>
 
+{@h4(id=p4) Packet 4: Bye}
+
+Sent when an echo service is shutting down.
+
 {@h4(id=p10) Packet 10: Chat}
 
 A simple packet saying someone sent a message. This packet can be sent from
