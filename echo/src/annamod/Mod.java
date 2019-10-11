@@ -80,6 +80,7 @@ void config_loaded(Config conf)
 		return;
 	}
 	this.outtarget = echochan.toCharArray();
+	this.anna.join(this.outtarget);
 	echo = new Echo(anna, this.outtarget);
 	echo.start();
 }
@@ -101,6 +102,31 @@ void on_disable()
 		}
 		echo = null;
 	}
+}
+
+@Override
+public
+boolean on_command(User user, char[] target, char[] replytarget,
+                   char[] message, char[] cmd, char[] params)
+{
+	if (strcmp(this.outtarget, target)) {
+		if (strcmp(cmd, 'e','c','h','o')) {
+			if (this.echo != null) {
+				this.anna.privmsg(target, "echo is listening".toCharArray());
+			} else {
+				this.anna.privmsg(target, "echo is not running".toCharArray());
+			}
+		}
+		if (strcmp(cmd, 'e','c','h','o','-','p','i','n','g')) {
+			if (this.echo != null) {
+				this.echo.send_ping();
+			} else {
+				this.anna.privmsg(target, "echo is not running".toCharArray());
+			}
+			return true;
+		}
+	}
+	return false;
 }
 
 @Override

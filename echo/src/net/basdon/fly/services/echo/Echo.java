@@ -10,6 +10,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 
 import net.basdon.anna.api.IAnna;
 
@@ -38,6 +39,11 @@ static
 private final byte[] buf = new byte[160];
 private final char[] channel;
 private final IAnna anna;
+private final byte[][] last_ping_payloads = new byte[10][];
+private final long[] last_ping_stamps = new long[10];
+
+private int last_ping_idx;
+private long my_hello_sent_time;
 
 public DatagramSocket insocket;
 public DatagramSocket outsocket;
@@ -63,6 +69,7 @@ void run()
 		for (;;) {
 			try (DatagramSocket socket = new DatagramSocket(PORT_IN)) {
 				this.insocket = socket;
+				this.send_hello();
 				for (;;) {
 					DatagramPacket packet = new DatagramPacket(buf, buf.length);
 					socket.receive(packet);
@@ -111,9 +118,25 @@ throws InterruptedIOException
 		send(buf, length);
 		msg("server says hello");
 		return;
+	case PACK_IMTHERE:
+		long roundtrip = System.currentTimeMillis() - this.my_hello_sent_time;
+		msg("server is up (" + roundtrip + ")ms");
+		return;
 	case PACK_PING:
 		buf[3] = PACK_PONG;
 		send(buf, length);
+		return;
+	case PACK_PONG:
+		for (int i = 0; i < this.last_ping_payloads.length; i++) {
+			byte[] cache = this.last_ping_payloads[i];
+			if (buf[4] == cache[4] && buf[5] == cache[5] &&
+				buf[6] == cache[6] && buf[7] == cache[7])
+			{
+				long time = System.currentTimeMillis() - this.last_ping_stamps[i];
+				msg("pong (" + time + "ms)");
+			}
+		}
+		msg("pong (unknown ms)");
 		return;
 	case PACK_CHAT:
 		byte nicklen, msglen;
@@ -199,5 +222,40 @@ void send_chat_to_game(char prefix, char[] nickname, char[] message)
 		}
 	}
 	this.send(msg, msg.length);
+}
+
+/**
+ * Send ping packet to game.
+ * Stores the ping id (4 random bytes) so the round-trip time can be calculated when receiving a
+ * pong back.
+ */
+public
+void send_ping()
+{
+	Random r = new Random();
+	byte[] msg = new byte[8];
+	r.nextBytes(msg);
+	msg[0] = 'F';
+	msg[1] = 'L';
+	msg[2] = 'Y';
+	msg[3] = PACK_PING;
+	this.last_ping_idx++;
+	if (this.last_ping_idx > this.last_ping_payloads.length) {
+		this.last_ping_idx = 0;
+	}
+	this.last_ping_payloads[this.last_ping_idx] = msg;
+	this.last_ping_stamps[this.last_ping_idx] = System.currentTimeMillis();
+	this.send(msg, msg.length);
+}
+
+private
+void send_hello()
+{
+	byte[] msg = new byte[8];
+	msg[0] = 'F';
+	msg[1] = 'L';
+	msg[2] = 'Y';
+	msg[3] = PACK_HELLO;
+	this.my_hello_sent_time = System.currentTimeMillis();
 }
 }

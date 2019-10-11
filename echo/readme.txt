@@ -9,4 +9,5 @@ echo.channel            -- channel that is used to echo (#basdon.echo)
 
 commands
 --------
+echo                    -- check if the socket is alive
 echo-ping               -- sends a ping to server and back
