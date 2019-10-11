@@ -148,16 +148,16 @@ throws InterruptedIOException
 		return;
 	case PACK_CHAT:
 		byte nicklen, msglen;
-		if (length > 8 &&
+		if (length > 10 &&
 			(nicklen = buf[6]) > 0 && nicklen < 50 &&
 			(msglen = buf[7]) > 0 && msglen < 144 &&
-			8 + nicklen + msglen == length)
+			10 + nicklen + msglen == length)
 		{
 			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
 			StringBuilder sb = new StringBuilder(225);
 			sb.append(new String(buf, 8, nicklen, StandardCharsets.US_ASCII));
 			sb.append(' ').append('(').append(pid).append(')').append(':').append(' ');
-			sb.append(new String(buf, 9 + nicklen, msglen, StandardCharsets.US_ASCII));
+			sb.append(new String(buf, 10 + nicklen, msglen, StandardCharsets.US_ASCII));
 			msg(sb.toString());
 			return;
 		}
@@ -188,6 +188,7 @@ void msg(String message)
 
 /**
  * Send irc message to game.
+ * Escaping should be done at the game side.
  *
  * @param prefix prefix of user, or {@code 0}
  * @param nickname irc user nick name
@@ -196,20 +197,21 @@ void msg(String message)
 public
 void send_chat_to_game(char prefix, char[] nickname, char[] message)
 {
-	// TODO: escape embedded colors?
 	byte nicklen = (byte) Math.min(nickname.length, 49);
 	if (prefix != 0) {
 		nicklen++;
 	}
 	byte msglen = (byte) Math.min(message.length, 144);
-	byte[] msg = new byte[8 + nicklen + msglen];
+	byte[] msg = new byte[10 + nicklen + msglen];
 	msg[0] = 'F';
 	msg[1] = 'L';
 	msg[2] = 'Y';
 	msg[3] = PACK_CHAT;
 	msg[4] = msg[5] = 0; // as per spec
-	msg[6] = (byte) nickname.length;
-	msg[7] = (byte) message.length;
+	msg[6] = (byte) nicklen;
+	msg[7] = (byte) msglen;
+	msg[9 + nicklen] = 0;
+	msg[11 + nicklen + msglen] = 0;
 	// escape boii
 	int j = 8;
 	if (prefix != 0) {
@@ -218,16 +220,10 @@ void send_chat_to_game(char prefix, char[] nickname, char[] message)
 	}
 	for (int i = 0; i < nicklen; i++, j++) {
 		msg[j] = (byte) nickname[i];
-		if (msg[j] == '%') {
-			msg[j] = '#';
-		}
 	}
-	j = 9 + nicklen;
+	j = 10 + nicklen;
 	for (int i = 0; i < msglen; i++, j++) {
 		msg[j] = (byte) message[i];
-		if (msg[j] == '%') {
-			msg[j] = '#';
-		}
 	}
 	this.send(msg, msg.length);
 }
