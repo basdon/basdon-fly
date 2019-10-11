@@ -1,4 +1,5 @@
-This is the specification of the {@code .map} file format used to store/load maps (clusters of objects).
+This is the specification of the {@code .map} file format used to store/load
+maps (clusters of objects).
 
 <pre>
 byte 0-3: spec version
@@ -12,10 +13,10 @@ The rest is dependent on the spec version:
 
 {@h3(id="v1") Version 1}
 
-May contain maximum 900 objects.
+Version 1 supports remove building and can hold up to 900 objects.
 
 <pre>
-byte 4-7: number of removed objects
+byte 4-7: number of removed buildings
 byte 8-11: number of objects
 (repeated x times from byte 12):
 	byte 0-3: model (DWORD)
