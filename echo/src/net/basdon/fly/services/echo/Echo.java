@@ -151,7 +151,7 @@ throws InterruptedIOException
 		if (length > 8 &&
 			(nicklen = buf[6]) > 0 && nicklen < 50 &&
 			(msglen = buf[7]) > 0 && msglen < 144 &&
-			6 + nicklen + msglen == length)
+			8 + nicklen + msglen == length)
 		{
 			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
 			StringBuilder sb = new StringBuilder(225);
