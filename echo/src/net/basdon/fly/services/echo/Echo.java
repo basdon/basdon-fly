@@ -22,6 +22,7 @@ private static final char
 	PACK_IMTHERE = 1,
 	PACK_PING = 2,
 	PACK_PONG = 3,
+	PACK_BYE = 4,
 	PACK_CHAT = 10;
 private static final InetAddress ADDR_OUT;
 
@@ -95,7 +96,11 @@ void run()
 			}
 			Thread.sleep(3000);
 		}
-	} catch (InterruptedException e) {}
+	} catch (InterruptedException e) {
+	} finally {
+		byte[] msg = { 'F', 'L', 'Y', PACK_BYE };
+		this.send(msg, msg.length);
+	}
 }
 
 private
@@ -137,6 +142,9 @@ throws InterruptedIOException
 			}
 		}
 		msg("pong (unknown ms)");
+		return;
+	case PACK_BYE:
+		msg("server echo is shutting down");
 		return;
 	case PACK_CHAT:
 		byte nicklen, msglen;
