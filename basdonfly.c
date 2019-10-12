@@ -32,6 +32,8 @@ FORWARD(Dialog_Queue);
 FORWARD(Dialog_DropQueue);
 FORWARD(Dialog_HasInQueue);
 FORWARD(Dialog_PopQueue);
+/* echo.c */
+FORWARD(Echo_Init);
 /* game_sa.c */
 FORWARD(Game_IsAirVehicle);
 FORWARD(Game_IsHelicopter);
@@ -186,12 +188,14 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* basdon.c */
 	REGISTERNATIVE(B_Timer1000),
 	REGISTERNATIVE(B_Timer25),
+	REGISTERNATIVE(B_OnGameModeExit),
 	REGISTERNATIVE(B_OnGameModeInit),
 	REGISTERNATIVE(B_OnPlayerCommandText),
 	REGISTERNATIVE(B_OnPlayerConnect),
 	REGISTERNATIVE(B_OnPlayerDisconnect),
 	REGISTERNATIVE(B_OnVehicleSpawn),
 	REGISTERNATIVE(B_Validate),
+	REGISTERNATIVE(B_onUDPReceiveData),
 	/* commands.c */
 	REGISTERNATIVE(Command_Is),
 	REGISTERNATIVE(Command_GetIntParam),
@@ -202,6 +206,8 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Dialog_DropQueue),
 	REGISTERNATIVE(Dialog_HasInQueue),
 	REGISTERNATIVE(Dialog_PopQueue),
+	/* echo.c */
+	REGISTERNATIVE(Echo_Init),
 	/* game_sa.c */
 	REGISTERNATIVE(Game_IsAirVehicle),
 	REGISTERNATIVE(Game_IsHelicopter),

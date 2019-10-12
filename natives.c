@@ -30,6 +30,13 @@ int n_cache_get_row_int;
 int n_printf;
 int n_mysql_tquery;
 int n_mysql_query;
+int n_socket_connect;
+int n_socket_create;
+int n_socket_destroy;
+int n_socket_listen;
+int n_socket_send;
+int n_socket_send_array;
+int n_socket_stop_listen;
 int n_random;
 
 static cell nc_params_d[20];
@@ -71,6 +78,13 @@ int natives_find(AMX *amx)
 		{ "mysql_tquery", &n_mysql_tquery },
 		{ "mysql_query", &n_mysql_query },
 		{ "random", &n_random },
+		{ "socket_connect", &n_socket_connect },
+		{ "socket_create", &n_socket_create },
+		{ "socket_destroy", &n_socket_destroy },
+		{ "socket_listen", &n_socket_listen },
+		{ "socket_send", &n_socket_send },
+		{ "socket_send_array", &n_socket_send_array },
+		{ "socket_stop_listen", &n_socket_stop_listen },
 	};
 	struct NATIVE *n = natives + sizeof(natives)/sizeof(struct NATIVE);
 

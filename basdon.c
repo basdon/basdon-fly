@@ -21,6 +21,14 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 	}
 	playercount = 0;
 
+	if (sizeof(cell) != sizeof(int)) {
+		logprintf(
+			"ERR: sizeof(cell)=%d sizeof(int)=%d",
+			sizeof(cell),
+			sizeof(int));
+		return 0;
+	}
+
 	amx_GetAddr(amx, buf4096a = params[2], &buf4096);
 	amx_GetAddr(amx, buf144a = params[3], &buf144);
 	amx_GetAddr(amx, buf64a = params[4], &buf64);
@@ -69,6 +77,15 @@ cell AMX_NATIVE_CALL B_Timer25(AMX *amx, cell *params)
 	} else {
 		loop25invoccount++;
 	}
+	return 1;
+}
+
+/* native B_OnGameModeExit() */
+cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
+{
+	void echo_dispose(AMX*);
+
+	echo_dispose(amx);
 	return 1;
 }
 
@@ -159,6 +176,21 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 
 	amx_GetAddr(amx, params[1], &addr);
 	*addr = veh_OnVehicleSpawn(amx, *addr);
+	return 1;
+}
+
+/* native B_onUDPReceiveData(Socket:id, data[], data_len,
+                             remote_client_ip[], remote_client_port) */
+cell AMX_NATIVE_CALL B_onUDPReceiveData(AMX *amx, cell *params)
+{
+	void echo_on_receive(AMX*, cell, cell, cell*, int);
+
+	const int len = params[3];
+	cell socket_handle = params[1];
+	cell *addr;
+
+	amx_GetAddr(amx, params[2], &addr);
+	echo_on_receive(amx, socket_handle, params[2], addr, len);
 	return 1;
 }
 

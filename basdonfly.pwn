@@ -88,6 +88,10 @@ native B_Timer25()
 //@remarks This should be reliable for counting seconds, as deviations do not worsen.
 native B_Timer1000()
 
+//@summary Plugin callback for {@link OnGameModeExit}
+//@remarks call before closing db
+native B_OnGameModeExit()
+
 //@summary Plugin callback for {@link OnGameModeInit}
 //@remarks call after db has been initialized
 native B_OnGameModeInit()
@@ -118,6 +122,9 @@ native B_OnVehicleSpawn(&vehicleid)
 //@returns {@code 0} if something is off
 //@remarks plugin also checks if it can find the {@link getrandom} public function
 native B_Validate(maxplayers, buf4096[], buf144[], buf64[], buf32[], buf32_1[], emptystring[])
+
+//@summary Plugin callback for {@link onUDPReceiveData}
+native B_onUDPReceiveData(Socket:id, data[], data_len, remote_client_ip[], remote_client_port)
 
 #namespace "commands.c"
 
@@ -203,6 +210,11 @@ native Dialog_HasInQueue(playerid)
 //@seealso QueueDialog
 //@seealso HasDialogsInQueue
 native Dialog_PopQueue(playerid, &dialogid, &style, caption[], info[], button1[], button2[], &transactionid)
+
+#namespace "echo.c"
+
+//@summary Initialized echo sockets
+native Echo_Init()
 
 #namespace "game_sa.c"
 
