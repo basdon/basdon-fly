@@ -16,11 +16,6 @@
 #define PACK_PONG 6
 #define PACK_CHAT 10
 
-#define HELLO_R1 1
-#define HELLO_R2 3
-#define HELLO_R3 3
-#define HELLO_R4 7
-
 #define COL_IRC COL_INFO_GENERIC
 
 static cell socket_in = SOCKET_INVALID_SOCKET;
@@ -47,15 +42,9 @@ cell AMX_NATIVE_CALL Echo_Init(AMX *amx, cell *params)
 	} else {
 		amx_SetUString(buf32, buflo, 32);
 		NC_socket_connect(socket_out, buf32a, ECHO_PORT_OUT);
-		buf144[0] = 'F';
-		buf144[1] = 'L';
-		buf144[2] = 'Y';
-		buf144[3] = PACK_HELLO;
-		buf144[4] = HELLO_R1;
-		buf144[5] = HELLO_R2;
-		buf144[6] = HELLO_R3;
-		buf144[7] = HELLO_R4;
-		NC_socket_send(socket_out, buf144a, 8);
+		buf144[0] = 0x02594C46;
+		buf144[1] = 0x07030301;
+		NC_socket_send_array(socket_out, buf144a, 8);
 	}
 	return 1;
 }
@@ -67,11 +56,8 @@ Call from OnGameModeExit
 void echo_dispose(AMX *amx)
 {
 	if (socket_out != SOCKET_INVALID_SOCKET) {
-		buf144[0] = 'F';
-		buf144[1] = 'L';
-		buf144[2] = 'Y';
-		buf144[3] = PACK_BYE;
-		NC_socket_send(socket_out, buf144a, 4);
+		buf144[0] = 0x04594C46;
+		NC_socket_send_array(socket_out, buf144a, 4);
 		NC_socket_destroy(socket_out);
 		socket_out = SOCKET_INVALID_SOCKET;
 	}
