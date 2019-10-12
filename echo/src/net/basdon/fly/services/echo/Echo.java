@@ -14,6 +14,8 @@ import java.util.Random;
 
 import net.basdon.anna.api.IAnna;
 
+import static net.basdon.anna.api.Constants.*;
+
 public class Echo extends Thread
 {
 private static final int PORT_IN = 7767, PORT_OUT = 7768;
@@ -23,7 +25,8 @@ private static final char
 	PACK_BYE = 4,
 	PACK_PING = 5,
 	PACK_PONG = 6,
-	PACK_CHAT = 10;
+	PACK_CHAT = 10,
+	PACK_GAME_PLAYER_CONNECTION = 30;
 private static final InetAddress ADDR_OUT;
 
 static
@@ -151,6 +154,7 @@ throws InterruptedIOException
 		msg("game bridge is down");
 		return;
 	case PACK_CHAT:
+	{
 		byte nicklen, msglen;
 		if (length > 11 &&
 			(nicklen = buf[6]) > 0 && nicklen < 50 &&
@@ -160,8 +164,40 @@ throws InterruptedIOException
 			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
 			StringBuilder sb = new StringBuilder(225);
 			sb.append(new String(buf, 8, nicklen, StandardCharsets.US_ASCII));
-			sb.append(' ').append('(').append(pid).append(')').append(':').append(' ');
+			sb.append('(').append(pid).append(')').append(':').append(' ');
 			sb.append(new String(buf, 9 + nicklen, msglen, StandardCharsets.US_ASCII));
+			msg(sb.toString());
+			return;
+		}
+		break;
+	}
+	case PACK_GAME_PLAYER_CONNECTION:
+		byte nicklen;
+		if (length > 8 &&
+			(nicklen = buf[7]) > 0 && nicklen < 50 &&
+			8 + nicklen == length)
+		{
+			int reason = buf[6];
+			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
+			StringBuilder sb = new StringBuilder(225);
+			sb.append(CTRL_COLOR).append(SCOL_GREY);
+			if (reason == -1) {
+				sb.append("--> ");
+			} else {
+				sb.append("<-- ");
+			}
+			sb.append(new String(buf, 8, nicklen, StandardCharsets.US_ASCII));
+			sb.append('(').append(pid).append(')').append(' ');
+			if (reason == -1) {
+				sb.append("connected to the server");
+			} else {
+				sb.append("disconnected from the server");
+				switch (reason) {
+				case 0: sb.append(" (ping timeout)"); break;
+				case 1: sb.append(" (quit)"); break;
+				case 2: sb.append(" (kicked)"); break;
+				}
+			}
 			msg(sb.toString());
 			return;
 		}
