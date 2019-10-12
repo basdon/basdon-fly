@@ -15,6 +15,7 @@ extern int n_GetPlayerPos;
 extern int n_GetPlayerVehicleID;
 extern int n_GetVehiclePos;
 extern int n_GetVehicleZAngle;
+extern int n_GivePlayerWeapon;
 extern int n_RemoveBuildingForPlayer;
 extern int n_SendClientMessage;
 extern int n_SendClientMessageToAll;
@@ -100,6 +101,10 @@ extern cell nc_result;
 #define NC_GetVehicleZAngle(VEHICLEID,FR) \
 	nc_params[0]=2;nc_params[1]=VEHICLEID;nc_params[2]=FR;\
 	amx_Callback(amx,n_GetVehicleZAngle,&nc_result,nc_params)
+
+#define NC_GivePlayerWeapon(PLAYERID,WEAPONID,AMMO) nc_params[0]=3;\
+	nc_params[1]=PLAYERID;nc_params[2]=WEAPONID;nc_params[3]=AMMO;\
+	amx_Callback(amx,n_GivePlayerWeapon,&nc_result,nc_params)
 
 #define NC_SendClientMessage(PLAYERID,COLOR,BUF) \
 	nc_params[0]=3;\

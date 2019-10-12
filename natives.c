@@ -19,6 +19,7 @@ int n_GetPlayerPos;
 int n_GetPlayerVehicleID;
 int n_GetVehiclePos;
 int n_GetVehicleZAngle;
+int n_GivePlayerWeapon;
 int n_RemoveBuildingForPlayer;
 int n_SendClientMessage;
 int n_SendClientMessageToAll;
@@ -68,6 +69,7 @@ int natives_find(AMX *amx)
 		{ "GetPlayerVehicleID", &n_GetPlayerVehicleID },
 		{ "GetVehiclePos", &n_GetVehiclePos },
 		{ "GetVehicleZAngle", &n_GetVehicleZAngle },
+		{ "GivePlayerWeapon", &n_GivePlayerWeapon },
 		{ "RemoveBuildingForPlayer", &n_RemoveBuildingForPlayer },
 		{ "SendClientMessage", &n_SendClientMessage },
 		{ "SendClientMessageToAll", &n_SendClientMessageToAll },

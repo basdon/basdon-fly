@@ -26,6 +26,13 @@ static const char
 	*MSG_VEH_SPRAY_N = WARN"You are not allowed to respray this vehicle";
 
 static int
+cmd_camera(CMDPARAMS)
+{
+	NC_GivePlayerWeapon(playerid, WEAPON_CAMERA, 3036);
+	return 1;
+}
+
+static int
 cmd_park(CMDPARAMS)
 {
 	char q[144];
