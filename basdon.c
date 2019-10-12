@@ -124,6 +124,7 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 /* native B_OnPlayerConnect(playerid) */
 cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 {
+	void echo_on_player_connection(AMX*, int, int);
 	void maps_OnPlayerConnect(AMX*, int);
 
 	const int playerid = params[1];
@@ -146,18 +147,21 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	players[playercount++] = playerid;
 
 	maps_OnPlayerConnect(amx, playerid);
+	echo_on_player_connection(amx, playerid, -1);
 	return 1;
 }
 
 /* native B_OnPlayerDisconnect(playerid, reason)*/
 cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 {
+	void echo_on_player_connection(AMX*, int, int);
 	void maps_OnPlayerDisconnect(int playerid);
 
-	const int playerid = params[1];
+	const int playerid = params[1], reason = params[2];
 	int i;
 
 	maps_OnPlayerDisconnect(playerid);
+	echo_on_player_connection(amx, playerid, reason);
 
 	playeronlineflag[playerid] = 0;
 

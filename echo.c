@@ -82,17 +82,39 @@ void echo_dispose(AMX *amx)
 }
 
 /**
+Send player connection packet to IRC echo.
+
+@param amx abstract machine
+@param playerid playerid that (dis)connected
+@param reason if connected: -1, if disconnected: reason from OnPlayerDisconnect
+*/
+void echo_on_player_connection(AMX *amx, int playerid, int reason)
+{
+	int nicklen;
+	struct playerdata *pd = pdata[playerid];
+
+	if (socket_out != SOCKET_INVALID_SOCKET) {
+		nicklen = pd->namelen;
+		buf144[0] = 0x1E594C46;
+		buf144[1] =
+			(playerid & 0xFFFF) |
+			((reason & 0xFF) << 16) |
+			((nicklen & 0xFF) << 24);
+		memcpy(((char*) buf144) + 8, pd->name, nicklen + 1);
+		NC_socket_send_array(socket_out, buf144a, 8 + nicklen);
+	}
+}
+
+/**
 Send game chat to IRC echo.
 Call from OnPlayerText
 */
 void echo_on_game_chat(AMX *amx, int playerid, char *text)
 {
 	int nicklen, msglen;
-	struct playerdata *pd;
+	struct playerdata *pd = pdata[playerid];
 
-	if ((pd = pdata[playerid]) != NULL &&
-		socket_out != SOCKET_INVALID_SOCKET)
-	{
+	if (socket_out != SOCKET_INVALID_SOCKET) {
 		nicklen = pd->namelen;
 		msglen = strlen(text);
 		if (msglen > 144) {
