@@ -169,6 +169,22 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native B_OnPlayerText(playerid, text[]) */
+cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
+{
+	void echo_on_game_chat(AMX*, int, char*);
+
+	cell *addr;
+	char buf[144];
+	const int playerid = params[1];
+
+	amx_GetAddr(amx, params[2], &addr);
+	amx_GetUString(buf, addr, sizeof(buf));
+
+	echo_on_game_chat(amx, playerid, buf);
+	return 1;
+}
+
 /* native B_OnVehicleSpawn(&vehicleid) */
 cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 {

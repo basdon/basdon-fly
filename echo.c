@@ -3,6 +3,7 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
+#include "playerdata.h"
 #include <string.h>
 
 #define ECHO_PORT_OUT 7767
@@ -77,6 +78,35 @@ void echo_dispose(AMX *amx)
 	if (socket_in != SOCKET_INVALID_SOCKET) {
 		NC_socket_stop_listen(socket_in);
 		socket_in = SOCKET_INVALID_SOCKET;
+	}
+}
+
+/**
+Send game chat to IRC echo.
+Call from OnPlayerText
+*/
+void echo_on_game_chat(AMX *amx, int playerid, char *text)
+{
+	int nicklen, msglen;
+	struct playerdata *pd;
+
+	if ((pd = pdata[playerid]) != NULL &&
+		socket_out != SOCKET_INVALID_SOCKET)
+	{
+		nicklen = pd->namelen;
+		msglen = strlen(text);
+		if (msglen > 144) {
+			msglen = 144;
+		}
+		buf144[0] = 0x0A594C46;
+		buf144[1] =
+			(playerid & 0xFFFF) |
+			((pd->namelen & 0xFF) << 16) |
+			((msglen & 0xFF) << 24);
+		memcpy(((char*) buf144) + 8, pd->name, nicklen + 1);
+		memcpy(((char*) buf144) + 9 + nicklen, text, msglen);
+		*(((char*) buf144) + 9 + nicklen + msglen) = 0;
+		NC_socket_send_array(socket_out, buf144a, 10+nicklen+msglen);
 	}
 }
 

@@ -106,6 +106,9 @@ native B_OnPlayerConnect(playerid)
 //@summary Plugin callback for {@link OnPlayerDisconnect}
 native B_OnPlayerDisconnect(playerid, reason)
 
+//@summary Plugin callback for {@link OnPlayerText}
+native B_OnPlayerText(playerid, text[])
+
 //@summary Plugin callback for {@link OnVehicleSpawn}
 //@remarks {@paramref vehicleid} is passed-by-reference because the vehicle \
            might be recreated, in which case the id will be changed
