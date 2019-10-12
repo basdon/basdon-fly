@@ -18,11 +18,11 @@ public class Echo extends Thread
 {
 private static final int PORT_IN = 7767, PORT_OUT = 7768;
 private static final char
-	PACK_HELLO = 0,
-	PACK_IMTHERE = 1,
-	PACK_PING = 2,
-	PACK_PONG = 3,
+	PACK_HELLO = 2,
+	PACK_IMTHERE = 3,
 	PACK_BYE = 4,
+	PACK_PING = 5,
+	PACK_PONG = 6,
 	PACK_CHAT = 10;
 private static final InetAddress ADDR_OUT;
 
@@ -82,6 +82,7 @@ void run()
 					} catch (InterruptedIOException e) {
 						return;
 					} catch (Throwable e) {
+						e.printStackTrace();
 					}
 				}
 			} catch (SocketException e) {
@@ -100,6 +101,7 @@ void run()
 	} finally {
 		byte[] msg = { 'F', 'L', 'Y', PACK_BYE };
 		this.send(msg, msg.length);
+		this.outsocket.close();
 	}
 }
 
@@ -121,11 +123,11 @@ throws InterruptedIOException
 	case PACK_HELLO:
 		buf[3] = PACK_IMTHERE;
 		send(buf, length);
-		msg("server says hello");
+		msg("game bridge is up");
 		return;
 	case PACK_IMTHERE:
 		long roundtrip = System.currentTimeMillis() - this.my_hello_sent_time;
-		msg("server is up (" + roundtrip + ")ms");
+		msg("game bridge is up (" + roundtrip + "ms)");
 		return;
 	case PACK_PING:
 		buf[3] = PACK_PONG;
@@ -134,17 +136,19 @@ throws InterruptedIOException
 	case PACK_PONG:
 		for (int i = 0; i < this.last_ping_payloads.length; i++) {
 			byte[] cache = this.last_ping_payloads[i];
-			if (buf[4] == cache[4] && buf[5] == cache[5] &&
+			if (cache != null &&
+				buf[4] == cache[4] && buf[5] == cache[5] &&
 				buf[6] == cache[6] && buf[7] == cache[7])
 			{
 				long time = System.currentTimeMillis() - this.last_ping_stamps[i];
 				msg("pong (" + time + "ms)");
+				return;
 			}
 		}
 		msg("pong (unknown ms)");
 		return;
 	case PACK_BYE:
-		msg("server echo is shutting down");
+		msg("game bridge is down");
 		return;
 	case PACK_CHAT:
 		byte nicklen, msglen;
@@ -238,11 +242,13 @@ void send_ping()
 {
 	Random r = new Random();
 	byte[] msg = new byte[8];
-	r.nextBytes(msg);
 	msg[0] = 'F';
 	msg[1] = 'L';
 	msg[2] = 'Y';
 	msg[3] = PACK_PING;
+	for (int i = 4; i < msg.length; i++) {
+		msg[i] = (byte) (r.nextInt(100) + 2);
+	}
 	this.last_ping_idx++;
 	if (this.last_ping_idx > this.last_ping_payloads.length) {
 		this.last_ping_idx = 0;

@@ -92,7 +92,6 @@ void on_disable()
 	if (echo != null) {
 		echo.interrupt();
 		echo.insocket.close();
-		echo.outsocket.close();
 		try {
 			echo.join(5000);
 		} catch (InterruptedException ignored) {}
@@ -100,6 +99,7 @@ void on_disable()
 			anna.log_error("echo thread is still active!");
 			anna.privmsg(outtarget, "echo thread is still active!".toCharArray());
 		}
+		echo.outsocket.close();
 		echo = null;
 	}
 }
