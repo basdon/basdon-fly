@@ -134,6 +134,8 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 #endif /*DEV*/
 
+	pdata_init_player(amx, playerid);
+
 	playeronlineflag[playerid] = 1;
 
 	for (i = 0; i < playercount; ){

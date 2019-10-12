@@ -92,7 +92,6 @@ FORWARD(Panel_FormatSpeed);
 FORWARD(Panel_ResetCaches);
 /* playerdata.c */
 FORWARD(PlayerData_Clear);
-FORWARD(PlayerData_Init);
 FORWARD(PlayerData_FormatUpdateQuery);
 FORWARD(PlayerData_SetUserId);
 FORWARD(PlayerData_UpdateGroup);
@@ -267,7 +266,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Panel_ResetCaches),
 	/* playerdata.c */
 	REGISTERNATIVE(PlayerData_Clear),
-	REGISTERNATIVE(PlayerData_Init),
 	REGISTERNATIVE(PlayerData_FormatUpdateQuery),
 	REGISTERNATIVE(PlayerData_SetUserId),
 	REGISTERNATIVE(PlayerData_UpdateGroup),

@@ -13,6 +13,8 @@ int n_CreateVehicle_;
 int n_DestroyPlayerObject;
 int n_DestroyVehicle_;
 int n_DisablePlayerRaceCheckpoint;
+int n_GetPlayerIp;
+int n_GetPlayerName;
 int n_GetPlayerPos;
 int n_GetPlayerVehicleID;
 int n_GetVehiclePos;
@@ -60,6 +62,8 @@ int natives_find(AMX *amx)
 		{ "DestroyVehicle", &n_DestroyVehicle_ },
 		{ "DisablePlayerRaceCheckpoint",
 			&n_DisablePlayerRaceCheckpoint },
+		{ "GetPlayerIp", &n_GetPlayerIp },
+		{ "GetPlayerName", &n_GetPlayerName },
 		{ "GetPlayerPos", &n_GetPlayerPos },
 		{ "GetPlayerVehicleID", &n_GetPlayerVehicleID },
 		{ "GetVehiclePos", &n_GetVehiclePos },

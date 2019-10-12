@@ -19,28 +19,48 @@ void pdata_init()
 	}
 }
 
-void setName(struct playerdata *data, AMX *amx, cell addrparam, int namelen)
+/**
+Refetches the player's name and stores it in the plugin.
+Will crash the server if pdata memory hasn't been allocated.
+
+@param amx abstract machine
+@param playerid player of which to refetch the name
+*/
+void pdata_update_name(AMX *amx, int playerid)
 {
-	char *nin = data->name;
-	char *nout = data->normname;
-	char t;
-	cell *addr;
-	amx_GetAddr(amx, addrparam, &addr);
-	amx_GetUString(data->name, addr, MAX_PLAYER_NAME + 1);
-	if (namelen < 0 || MAX_PLAYER_NAME < namelen) {
-		data->namelen = 24;
-	} else {
-		data->namelen = (char) namelen;
-	}
-	while(1) {
+	struct playerdata *pd = pdata[playerid];
+	char t, *nin = pd->name, *nout = pd->normname;
+
+	NC_GetPlayerName_(playerid, buf144a, MAX_PLAYER_NAME + 1, &pd->namelen);
+	amx_GetUString(pd->name, buf144, MAX_PLAYER_NAME + 1);
+	/*update normname*/
+	do {
 		t = *nin++;
 		if ('A' <= t && t <= 'Z') {
 			t |= 0x20;
 		}
-		if ((*nout++ = t) == 0) {
-			break;
-		}
+		*nout++ = t;
+	} while (t);
+}
+
+/**
+Initializes player data for a player.
+
+@param amx abstract machine
+@param playerid playerid for which to initialize their data
+*/
+void pdata_init_player(AMX *amx, int playerid)
+{
+	struct playerdata *pd;
+
+	if ((pd = pdata[playerid]) == NULL) {
+		pd = pdata[playerid] = malloc(sizeof(struct playerdata));
 	}
+	NC_GetPlayerIp(playerid, buf144a, sizeof(pd->ip));
+	amx_GetUString(pd->ip, buf144, sizeof(pd->ip));
+	pdata_update_name(amx, playerid);
+	pd->userid = -1;
+	pd->groups = GROUP_GUEST;
 }
 
 void useridornull(int playerid, char *storage)
@@ -60,23 +80,6 @@ cell AMX_NATIVE_CALL PlayerData_Clear(AMX *amx, cell *params)
 		free(pdata[pid]);
 		pdata[pid] = NULL;
 	}
-	return 1;
-}
-
-/* native PlayerData_Init(playerid, ip[], name[], namelen) */
-cell AMX_NATIVE_CALL PlayerData_Init(AMX *amx, cell *params)
-{
-	int pid = params[1];
-	struct playerdata *pd;
-	cell *addr;
-	if (pdata[pid] == NULL) {
-		pd = pdata[pid] = malloc(sizeof(struct playerdata));
-	}
-	amx_GetAddr(amx, params[2], &addr);
-	amx_GetUString(pd->ip, addr, 16);
-	setName(pd, amx, params[3], params[4]);
-	pd->userid = -1;
-	pd->groups = GROUP_GUEST;
 	return 1;
 }
 
@@ -125,10 +128,6 @@ cell AMX_NATIVE_CALL PlayerData_UpdateGroup(AMX *amx, cell *params)
 /* native PlayerData_UpdateName(playerid, name[], namelen) */
 cell AMX_NATIVE_CALL PlayerData_UpdateName(AMX *amx, cell *params)
 {
-	int pid = params[1];
-	if (pdata[pid] == NULL) {
-		return 0;
-	}
-	setName(pdata[pid], amx, params[2], params[3]);
+	pdata_update_name(amx, params[1]);
 	return 1;
 }

@@ -9,6 +9,8 @@ extern int n_CreateVehicle_;
 extern int n_DestroyPlayerObject;
 extern int n_DestroyVehicle_;
 extern int n_DisablePlayerRaceCheckpoint;
+extern int n_GetPlayerIp;
+extern int n_GetPlayerName;
 extern int n_GetPlayerPos;
 extern int n_GetPlayerVehicleID;
 extern int n_GetVehiclePos;
@@ -43,7 +45,8 @@ extern cell nc_result;
 
 /* NC = NativeCall */
 
-#define NC(NATIVE) amx_Callback(amx,NATIVE,&nc_result,nc_params)
+#define NC_(NATIVE,RESULT) amx_Callback(amx,NATIVE,(cell*)RESULT,nc_params)
+#define NC(NATIVE) NC_(NATIVE,&nc_result)
 
 #define NC_ChangeVehicleColor(VEHICLEID,COL1,COL2) \
 	nc_params[0]=3;nc_params[1]=VEHICLEID;\
@@ -67,6 +70,16 @@ extern cell nc_result;
 #define NC_DisablePlayerRaceCheckpoint(PLAYERID) \
 	nc_params[0]=1;nc_params[1]=PLAYERID;\
 	amx_Callback(amx,n_DisablePlayerRaceCheckpoint,&nc_result,nc_params)
+
+#define NC_GetPlayerIp(PLAYERID,BUF,LEN) nc_params[0]=3;\
+	nc_params[1]=PLAYERID;nc_params[2]=BUF;nc_params[3]=LEN;\
+	amx_Callback(amx,n_GetPlayerIp,&nc_result,nc_params)
+
+#define NC_GetPlayerName_(PLAYERID,BUF,LEN,RESULT) nc_params[0]=3;\
+	nc_params[1]=PLAYERID;nc_params[2]=BUF;nc_params[3]=LEN;\
+	amx_Callback(amx,n_GetPlayerName,(cell*)RESULT,nc_params)
+#define NC_GetPlayerName(PLAYERID,BUF,LEN) \
+	NC_GetPlayerName_(PLAYERI,BUF,LEN,&nc_result)
 
 #define NC_GetPlayerPos(PLAYERID,FREFX,FREFY,FREFZ) nc_params[0]=4;\
 	nc_params[1]=PLAYERID;nc_params[2]=FREFX;nc_params[3]=FREFY;\
