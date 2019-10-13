@@ -66,6 +66,37 @@ byte 8+[byte6]: zero terminator for nickname
 byte 9+[byte6] - 8+[byte6]+[byte7]: message
 byte 9+[byte6]+[byte7]: zero terminator for message
 
-total len= 10+[byte6]+[byte7]
+total len: 10+[byte6]+[byte7]
+</pre>
+
+{@h4(id=p30) Packet 30: Player connection}
+
+Packet notifying a player has either connected or disconnected.
+
+<pre>
+byte 4: lo byte of player id as WORD (0 when IRC to game)
+byte 5: hi byte of player id as WORD (0 when IRC to game)
+byte 6: reason (see below)
+byte 7: length of the nickname (must be less than 25)
+byte 8 - 7+[byte6]: nickname
+byte 8+[byte6]: zero terminator for nickname
+
+total len: 9+[byte6]
+</pre>
+
+Reasons:
+
+<pre>
+Game:
+0: timeout
+1: quit
+2: kick
+3: connected
+
+IRC:
+6: quit
+7: part
+8: kick
+9: join
 </pre>
 
