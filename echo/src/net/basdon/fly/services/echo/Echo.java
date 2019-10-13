@@ -12,6 +12,7 @@ import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
+import net.basdon.anna.api.ChannelUser;
 import net.basdon.anna.api.IAnna;
 
 import static net.basdon.anna.api.Constants.*;
@@ -26,8 +27,18 @@ private static final char
 	PACK_PING = 5,
 	PACK_PONG = 6,
 	PACK_CHAT = 10,
-	PACK_GAME_PLAYER_CONNECTION = 30;
+	PACK_PLAYER_CONNECTION = 30;
 private static final InetAddress ADDR_OUT;
+
+public static final byte
+	CONN_REASON_GAME_TIMEOUT = 0,
+	CONN_REASON_GAME_QUIT = 1,
+	CONN_REASON_GAME_KICK = 2,
+	CONN_REASON_GAME_CONNECTED = 3,
+	CONN_REASON_IRC_QUIT = 6,
+	CONN_REASON_IRC_PART = 7,
+	CONN_REASON_IRC_KICK = 8,
+	CONN_REASON_IRC_JOIN = 9;
 
 static
 {
@@ -171,7 +182,7 @@ throws InterruptedIOException
 		}
 		break;
 	}
-	case PACK_GAME_PLAYER_CONNECTION:
+	case PACK_PLAYER_CONNECTION:
 		byte nicklen;
 		if (length > 8 &&
 			(nicklen = buf[7]) > 0 && nicklen < 50 &&
@@ -188,14 +199,14 @@ throws InterruptedIOException
 			}
 			sb.append(new String(buf, 8, nicklen, StandardCharsets.US_ASCII));
 			sb.append('(').append(pid).append(')').append(' ');
-			if (reason == -1) {
+			if (reason == CONN_REASON_GAME_CONNECTED) {
 				sb.append("connected to the server");
 			} else {
 				sb.append("disconnected from the server");
 				switch (reason) {
-				case 0: sb.append(" (ping timeout)"); break;
-				case 1: sb.append(" (quit)"); break;
-				case 2: sb.append(" (kicked)"); break;
+				case CONN_REASON_GAME_TIMEOUT: sb.append(" (ping timeout)"); break;
+				case CONN_REASON_GAME_QUIT: sb.append(" (quit)"); break;
+				case CONN_REASON_GAME_KICK: sb.append(" (kicked)"); break;
 				}
 			}
 			msg(sb.toString());
@@ -248,8 +259,8 @@ void send_chat_to_game(char prefix, char[] nickname, char[] message)
 	msg[2] = 'Y';
 	msg[3] = PACK_CHAT;
 	msg[4] = msg[5] = 0; // as per spec
-	msg[6] = (byte) nicklen;
-	msg[7] = (byte) msglen;
+	msg[6] = nicklen;
+	msg[7] = msglen;
 	int j = 8;
 	if (prefix != 0) {
 		msg[j] = (byte) prefix;
@@ -265,6 +276,39 @@ void send_chat_to_game(char prefix, char[] nickname, char[] message)
 		msg[j] = (byte) message[i];
 	}
 	msg[j] = 0;
+	this.send(msg, msg.length);
+}
+
+/**
+ * Send irc user connection to game.
+ *
+ * @param user user of which the connection changed
+ * @param reason reason as defined in {@code CONN_REASON_IRC_*} constants
+ */
+public
+void send_player_connection(ChannelUser user, byte reason)
+{
+	byte nicklen = (byte) Math.min(user.nick.length, 49);
+	if (user.prefix != 0) {
+		nicklen++;
+	}
+	byte[] msg = new byte[8 + nicklen];
+	msg[0] = 'F';
+	msg[1] = 'L';
+	msg[2] = 'Y';
+	msg[3] = PACK_PLAYER_CONNECTION;
+	msg[4] = msg[5] = 0; // as per spec
+	msg[6] = reason;
+	msg[7] = nicklen;
+	int j = 8;
+	if (user.prefix != 0) {
+		msg[j] = (byte) user.prefix;
+		j++;
+		nicklen--; // for for-loop below
+	}
+	for (int i = 0; i < nicklen; i++, j++) {
+		msg[j] = (byte) user.nick[i];
+	}
 	this.send(msg, msg.length);
 }
 

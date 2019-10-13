@@ -10,6 +10,7 @@ import net.basdon.anna.api.IAnna.Output;
 import net.basdon.fly.services.echo.Echo;
 
 import static net.basdon.anna.api.Util.*;
+import static net.basdon.fly.services.echo.Echo.*;
 
 public class Mod implements IMod
 {
@@ -130,7 +131,68 @@ boolean on_command(User user, char[] target, char[] replytarget,
 }
 
 @Override
-public void on_message(User user, char[] target, char[] replytarget, char[] message)
+public
+void on_nickchange(User user, char[] oldnick, char[] newnick)
+{
+}
+
+@Override
+public
+void on_action(User user, char[] target, char[] replytarget, char[] action)
+{
+}
+
+@Override
+public
+void on_kick(User user, char[] channel, char[] kickeduser, char[] msg)
+{
+	if (strcmp(this.outtarget, channel)) {
+		ChannelUser cu = this.anna.find_user(this.outtarget, kickeduser);
+		if (cu != null) {
+			this.echo.send_player_connection(cu, CONN_REASON_IRC_KICK);
+		}
+	}
+}
+
+@Override
+public
+void on_part(User user, char[] channel, char[] msg)
+{
+	if (strcmp(this.outtarget, channel)) {
+		this.send_player_connection(user, CONN_REASON_IRC_PART);
+	}
+}
+
+@Override
+public
+void on_quit(User user, char[] msg)
+{
+	this.send_player_connection(user, CONN_REASON_IRC_QUIT);
+}
+
+@Override
+public
+void on_join(User user, char[] channel)
+{
+	if (strcmp(this.outtarget, channel)) {
+		this.send_player_connection(user, CONN_REASON_IRC_JOIN);
+	}
+}
+
+private
+void send_player_connection(User user, byte reason)
+{
+	if (user != null) {
+		ChannelUser cu = this.anna.find_user(this.outtarget, user.nick);
+		if (cu != null) {
+			this.echo.send_player_connection(cu, reason);
+		}
+	}
+}
+
+@Override
+public
+void on_message(User user, char[] target, char[] replytarget, char[] message)
 {
 	if (this.echo != null && user != null && strcmp(this.outtarget, target)) {
 		ChannelUser cu = anna.find_user(target, user.nick);
