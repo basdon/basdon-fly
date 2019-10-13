@@ -109,6 +109,9 @@ native B_OnPlayerDisconnect(playerid, reason)
 //@summary Plugin callback for {@link OnPlayerText}
 native B_OnPlayerText(playerid, text[])
 
+//@summary Plugin callback for {@link SSocket_OnRecv}
+native B_OnRecv(ssocket:handle, data[], len)
+
 //@summary Plugin callback for {@link OnVehicleSpawn}
 //@remarks {@paramref vehicleid} is passed-by-reference because the vehicle \
            might be recreated, in which case the id will be changed
@@ -125,9 +128,6 @@ native B_OnVehicleSpawn(&vehicleid)
 //@returns {@code 0} if something is off
 //@remarks plugin also checks if it can find the {@link getrandom} public function
 native B_Validate(maxplayers, buf4096[], buf144[], buf64[], buf32[], buf32_1[], emptystring[])
-
-//@summary Plugin callback for {@link onUDPReceiveData}
-native B_onUDPReceiveData(Socket:id, data[], data_len, remote_client_ip[], remote_client_port)
 
 #namespace "commands.c"
 

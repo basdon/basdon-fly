@@ -191,6 +191,20 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native B_OnRecv(ssocket:handle, data[], len) */
+cell AMX_NATIVE_CALL B_OnRecv(AMX *amx, cell *params)
+{
+	void echo_on_receive(AMX*, cell, cell, char*, int);
+
+	const int len = params[3];
+	cell socket_handle = params[1];
+	cell *addr;
+
+	amx_GetAddr(amx, params[2], &addr);
+	echo_on_receive(amx, socket_handle, params[2], (char*) addr, len);
+	return 1;
+}
+
 /* native B_OnVehicleSpawn(&vehicleid) */
 cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 {
@@ -198,21 +212,6 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 
 	amx_GetAddr(amx, params[1], &addr);
 	*addr = veh_OnVehicleSpawn(amx, *addr);
-	return 1;
-}
-
-/* native B_onUDPReceiveData(Socket:id, data[], data_len,
-                             remote_client_ip[], remote_client_port) */
-cell AMX_NATIVE_CALL B_onUDPReceiveData(AMX *amx, cell *params)
-{
-	void echo_on_receive(AMX*, cell, cell, cell*, int);
-
-	const int len = params[3];
-	cell socket_handle = params[1];
-	cell *addr;
-
-	amx_GetAddr(amx, params[2], &addr);
-	echo_on_receive(amx, socket_handle, params[2], addr, len);
 	return 1;
 }
 

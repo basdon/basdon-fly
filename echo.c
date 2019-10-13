@@ -40,21 +40,21 @@ cell AMX_NATIVE_CALL Echo_Init(AMX *amx, cell *params)
 {
 	const char *buflo = "127.0.0.1";
 
-	NC_socket_create(SOCKET_UDP, &socket_in);
+	NC_ssocket_create(SOCKET_UDP, &socket_in);
 	if (socket_in == SOCKET_INVALID_SOCKET) {
 		logprintf("failed to create echo game socket");
 	} else {
-		NC_socket_listen(socket_in, ECHO_PORT_IN);
+		NC_ssocket_listen(socket_in, ECHO_PORT_IN);
 	}
-	NC_socket_create(SOCKET_UDP, &socket_out);
+	NC_ssocket_create(SOCKET_UDP, &socket_out);
 	if (socket_out == SOCKET_INVALID_SOCKET) {
 		logprintf("failed to create echo irc socket");
 	} else {
 		amx_SetUString(buf32, buflo, 32);
-		NC_socket_connect(socket_out, buf32a, ECHO_PORT_OUT);
+		NC_ssocket_connect(socket_out, buf32a, ECHO_PORT_OUT);
 		buf144[0] = 0x02594C46;
 		buf144[1] = 0x07030301;
-		NC_socket_send_array(socket_out, buf144a, 8);
+		NC_ssocket_send(socket_out, buf144a, 8);
 	}
 	return 1;
 }
@@ -67,12 +67,12 @@ void echo_dispose(AMX *amx)
 {
 	if (socket_out != SOCKET_INVALID_SOCKET) {
 		buf144[0] = 0x04594C46;
-		NC_socket_send_array(socket_out, buf144a, 4);
-		NC_socket_destroy(socket_out);
+		NC_ssocket_send(socket_out, buf144a, 4);
+		NC_ssocket_destroy(socket_out);
 		socket_out = SOCKET_INVALID_SOCKET;
 	}
 	if (socket_in != SOCKET_INVALID_SOCKET) {
-		NC_socket_stop_listen(socket_in);
+		NC_ssocket_destroy(socket_in);
 		socket_in = SOCKET_INVALID_SOCKET;
 	}
 }
@@ -97,7 +97,7 @@ void echo_on_player_connection(AMX *amx, int playerid, int reason)
 			((reason & 0xFF) << 16) |
 			((nicklen & 0xFF) << 24);
 		memcpy(((char*) buf144) + 8, pd->name, nicklen + 1);
-		NC_socket_send_array(socket_out, buf144a, 8 + nicklen);
+		NC_ssocket_send(socket_out, buf144a, 8 + nicklen);
 	}
 }
 
@@ -124,7 +124,7 @@ void echo_on_game_chat(AMX *amx, int playerid, char *text)
 		memcpy(((char*) buf144) + 8, pd->name, nicklen + 1);
 		memcpy(((char*) buf144) + 9 + nicklen, text, msglen);
 		*(((char*) buf144) + 9 + nicklen + msglen) = 0;
-		NC_socket_send_array(socket_out, buf144a, 10+nicklen+msglen);
+		NC_ssocket_send(socket_out, buf144a, 10+nicklen+msglen);
 	}
 }
 
@@ -154,8 +154,8 @@ static const char *msg_bridge_down = "IRC bridge is down";
 Handle received UDP packet.
 Call from onUDPReceiveData
 */
-void echo_on_receive(AMX *amx, cell socket_handle,
-		     cell data_a, cell *data, int len)
+void echo_on_receive(AMX *amx, cell socket_handle, cell data_a,
+		     char *data, int len)
 {
 	if (socket_handle == socket_in && len >= 4 &&
 		data[0] == 'F' && data[1] == 'L' && data[2] == 'Y')
@@ -167,7 +167,7 @@ void echo_on_receive(AMX *amx, cell socket_handle,
 			NC_SendClientMessageToAll(COL_IRC, buf144a);
 			if (len == 8) {
 				data[3] = PACK_IMTHERE;
-				NC_socket_send(socket_out, data_a, 8);
+				NC_ssocket_send(socket_out, data_a, 8);
 			}
 			break;
 		case PACK_IMTHERE:
@@ -179,7 +179,7 @@ void echo_on_receive(AMX *amx, cell socket_handle,
 		case PACK_PING:
 			if (len == 8) {
 				data[3] = PACK_PONG;
-				NC_socket_send(socket_out, data_a, 8);
+				NC_ssocket_send(socket_out, data_a, 8);
 			}
 			break;
 		/*game doesn't send PING packets, so not checking PONG*/
@@ -202,10 +202,12 @@ void echo_on_receive(AMX *amx, cell socket_handle,
 				break;
 			}
 			buf4096[0] = '<';
-			memcpy(buf4096 + 1, data + 8, nicklen * sizeof(cell));
+			amx_SetUString(
+				buf4096 + 1, data + 8, nicklen * sizeof(cell));
 			buf4096[1 + nicklen] = '>';
 			buf4096[2 + nicklen] = ' ';
-			memcpy(buf4096 + 3 + nicklen, data + 9 + nicklen,
+			amx_SetUString(buf4096 + 3 + nicklen,
+				data + 9 + nicklen,
 				(msglen + 1) * sizeof(cell));
 			echo_sendclientmessage_buf4096_filtered(amx);
 			break;
@@ -226,25 +228,25 @@ void echo_on_receive(AMX *amx, cell socket_handle,
 			*(b++) = ' ';
 			switch (data[6]) {
 			case CONN_REASON_IRC_QUIT:
-				memcpy(b, "quits: ", 7);
+				memcpy(b, "Quits: ", 7);
 				b += 7;
 				break;
 			case CONN_REASON_IRC_PART:
-				memcpy(b, "parts: ", 7);
+				memcpy(b, "Parts: ", 7);
 				b += 7;
 				break;
 			case CONN_REASON_IRC_KICK:
-				memcpy(b, "kicked: ", 8);
+				memcpy(b, "Kicked: ", 8);
 				b += 8;
 				break;
 			case CONN_REASON_IRC_JOIN:
-				memcpy(b, "joins: ", 7);
+				memcpy(b, "Joins: ", 7);
 				b += 7;
 				break;
 			}
 			/*copy one more here because it'll add a 0-term*/
 			amx_SetUString(buf4096, buf, b - buf + 1);
-			memcpy(buf4096 + (b - buf), data + 8,
+			amx_SetUString(buf4096 + (b - buf), data + 8,
 				(nicklen + 1) * sizeof(cell));
 			echo_sendclientmessage_buf4096_filtered(amx);
 			break;

@@ -30,13 +30,11 @@ extern int n_mysql_tquery;
 extern int n_mysql_query;
 extern int n_printf;
 extern int n_random;
-extern int n_socket_connect;
-extern int n_socket_create;
-extern int n_socket_destroy;
-extern int n_socket_listen;
-extern int n_socket_send;
-extern int n_socket_send_array;
-extern int n_socket_stop_listen;
+extern int n_ssocket_connect;
+extern int n_ssocket_create;
+extern int n_ssocket_destroy;
+extern int n_ssocket_listen;
+extern int n_ssocket_send;
 extern cell *nc_params;
 extern cell nc_result;
 
@@ -157,27 +155,20 @@ extern cell nc_result;
 	amx_Callback(amx,n_random,(cell*)RESULT,nc_params)
 #define NC_random(MAX) NC_random_(MAX,&nc_result)
 
-#define NC_socket_connect(SOCKET,HOST,PORT) nc_params[0]=3;\
+#define NC_ssocket_connect(SOCKET,HOST,PORT) nc_params[0]=3;\
 	nc_params[1]=SOCKET;nc_params[2]=HOST;nc_params[3]=PORT;\
-	amx_Callback(amx,n_socket_connect,&nc_result,nc_params)
+	amx_Callback(amx,n_ssocket_connect,&nc_result,nc_params)
 
-#define NC_socket_create(TYPE,RESULT) nc_params[0]=1;nc_params[1]=TYPE;\
-	amx_Callback(amx,n_socket_create,(cell*)RESULT,nc_params)
+#define NC_ssocket_create(TYPE,RESULT) nc_params[0]=1;nc_params[1]=TYPE;\
+	amx_Callback(amx,n_ssocket_create,(cell*)RESULT,nc_params)
 
-#define NC_socket_destroy(SOCKET) nc_params[0]=1;nc_params[1]=SOCKET;\
-	amx_Callback(amx,n_socket_destroy,&nc_result,nc_params)
+#define NC_ssocket_destroy(SOCKET) nc_params[0]=1;nc_params[1]=SOCKET;\
+	amx_Callback(amx,n_ssocket_destroy,&nc_result,nc_params)
 
-#define NC_socket_listen(SOCKET,PORT) nc_params[0]=2;\
+#define NC_ssocket_listen(SOCKET,PORT) nc_params[0]=2;\
 	nc_params[1]=SOCKET;nc_params[2]=PORT;\
-	amx_Callback(amx,n_socket_listen,&nc_result,nc_params)
+	amx_Callback(amx,n_ssocket_listen,&nc_result,nc_params)
 
-#define NC_socket_send(SOCKET,DATA,LEN) nc_params[0]=3;\
+#define NC_ssocket_send(SOCKET,DATA,LEN) nc_params[0]=3;\
 	nc_params[1]=SOCKET;nc_params[2]=DATA;nc_params[3]=LEN;\
-	amx_Callback(amx,n_socket_send,&nc_result,nc_params)
-
-#define NC_socket_send_array(SOCKET,DATA,LEN) nc_params[0]=3;\
-	nc_params[1]=SOCKET;nc_params[2]=DATA;nc_params[3]=LEN;\
-	amx_Callback(amx,n_socket_send_array,&nc_result,nc_params)
-
-#define NC_socket_stop_listen(SOCKET) nc_params[0]=1;nc_params[1]=SOCKET;\
-	amx_Callback(amx,n_socket_stop_listen,&nc_result,nc_params)
+	amx_Callback(amx,n_ssocket_send,&nc_result,nc_params)

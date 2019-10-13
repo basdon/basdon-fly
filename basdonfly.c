@@ -193,9 +193,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnPlayerConnect),
 	REGISTERNATIVE(B_OnPlayerDisconnect),
 	REGISTERNATIVE(B_OnPlayerText),
+	REGISTERNATIVE(B_OnRecv),
 	REGISTERNATIVE(B_OnVehicleSpawn),
 	REGISTERNATIVE(B_Validate),
-	REGISTERNATIVE(B_onUDPReceiveData),
 	/* commands.c */
 	REGISTERNATIVE(Command_Is),
 	REGISTERNATIVE(Command_GetIntParam),
