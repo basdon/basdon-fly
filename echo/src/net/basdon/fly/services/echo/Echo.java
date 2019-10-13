@@ -184,9 +184,9 @@ throws InterruptedIOException
 	}
 	case PACK_PLAYER_CONNECTION:
 		byte nicklen;
-		if (length > 8 &&
+		if (length > 9 &&
 			(nicklen = buf[7]) > 0 && nicklen < 50 &&
-			8 + nicklen == length)
+			9 + nicklen == length)
 		{
 			int reason = buf[6];
 			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
@@ -292,7 +292,7 @@ void send_player_connection(ChannelUser user, byte reason)
 	if (user.prefix != 0) {
 		nicklen++;
 	}
-	byte[] msg = new byte[8 + nicklen];
+	byte[] msg = new byte[9 + nicklen];
 	msg[0] = 'F';
 	msg[1] = 'L';
 	msg[2] = 'Y';
@@ -309,6 +309,7 @@ void send_player_connection(ChannelUser user, byte reason)
 	for (int i = 0; i < nicklen; i++, j++) {
 		msg[j] = (byte) user.nick[i];
 	}
+	msg[j] = 0;
 	this.send(msg, msg.length);
 }
 
