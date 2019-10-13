@@ -100,7 +100,7 @@ try{
 			{@if $r->state != 8}
 				<p>Flight is not finished, no payment information available.</p>
 			{@else}
-				<table id="paytable" style="border:1px solid #ccc;border-bottom:none;text-align:right">
+				<table id="paytable" class="default" style="border:1px solid #ccc;border-bottom:none;text-align:right">
 					{@render fmt_money.php}
 					{@if $r->ptax}<tr><td>Airport tax</td><td>{@unsafe fmt_money($r->ptax)}</tr>{@endif}
 					{@if $r->pweatherbonus}<tr><td>Weather bonus</td><td>{@unsafe fmt_money($r->pweatherbonus)}</tr>{@endif}
