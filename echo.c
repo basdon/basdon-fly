@@ -128,20 +128,23 @@ void echo_on_game_chat(AMX *amx, int playerid, char *text)
 	}
 }
 
+/**
+Send text in buf4096 using SendClientToAll after sanitizing.
+Currently only replaces % characters to # characters.
+*/
 static
-void echo_sendclientmessage_filtered(AMX *amx, char *buf, int len)
+void echo_sendclientmessage_buf4096_filtered(AMX *amx)
 {
-	char *b = buf, *bufend = buf + sizeof(buf);
+	cell *b = buf4096;
 
 	/*escape stuff TODO: escape embedded colors?*/
-	while (b != bufend) {
+	while (*b != 0) {
 		if (*b == '%') {
 			*b = '#';
 		}
 		b++;
 	}
-	amx_SetUString(buf144, buf, sizeof(buf));
-	NC_SendClientMessageToAll(COL_IRC, buf144a);
+	NC_SendClientMessageToAll(COL_IRC, buf4096a);
 }
 
 static const char *msg_bridge_up = "IRC bridge is up";
@@ -190,7 +193,6 @@ void echo_on_receive(AMX *amx, cell socket_handle,
 		case PACK_CHAT:
 		{
 			int nicklen, msglen;
-			char buf[144], *b = buf;
 
 			if (len < 12 ||
 				(nicklen = data[6]) < 1 || nicklen > 49 ||
@@ -199,13 +201,13 @@ void echo_on_receive(AMX *amx, cell socket_handle,
 			{
 				break;
 			}
-			buf[0] = '<';
-			amx_GetUString(buf + 1, data + 8, 50);
-			buf[1 + nicklen] = '>';
-			buf[2 + nicklen] = ' ';
-			b = buf + 3 + nicklen;
-			amx_GetUString(b, data + 9 + nicklen, 144);
-			echo_sendclientmessage_filtered(amx, buf, sizeof(buf));
+			buf4096[0] = '<';
+			memcpy(buf4096 + 1, data + 8, nicklen * sizeof(cell));
+			buf4096[1 + nicklen] = '>';
+			buf4096[2 + nicklen] = ' ';
+			memcpy(buf4096 + 3 + nicklen, data + 9 + nicklen,
+				(msglen + 1) * sizeof(cell));
+			echo_sendclientmessage_buf4096_filtered(amx);
 			break;
 		}
 		case PACK_PLAYER_CONNECTION:
@@ -215,7 +217,7 @@ void echo_on_receive(AMX *amx, cell socket_handle,
 
 			if (len < 9 ||
 				(nicklen = data[7]) < 1 || nicklen > 49 ||
-				8 + nicklen != len)
+				9 + nicklen != len)
 			{
 				break;
 			}
@@ -240,8 +242,11 @@ void echo_on_receive(AMX *amx, cell socket_handle,
 				b += 7;
 				break;
 			}
-			amx_GetUString(b, data + 8, 50);
-			echo_sendclientmessage_filtered(amx, buf, sizeof(buf));
+			/*copy one more here because it'll add a 0-term*/
+			amx_SetUString(buf4096, buf, b - buf + 1);
+			memcpy(buf4096 + (b - buf), data + 8,
+				(nicklen + 1) * sizeof(cell));
+			echo_sendclientmessage_buf4096_filtered(amx);
 			break;
 		}
 		}
