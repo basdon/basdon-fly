@@ -15,6 +15,16 @@
 #define PACK_PING 5
 #define PACK_PONG 6
 #define PACK_CHAT 10
+#define PACK_PLAYER_CONNECTION 30
+
+#define CONN_REASON_GAME_TIMEOUT 0
+#define CONN_REASON_GAME_QUIT 1
+#define CONN_REASON_GAME_KICK 2
+#define CONN_REASON_GAME_CONNECTED 3
+#define CONN_REASON_IRC_QUIT 6
+#define CONN_REASON_IRC_PART 7
+#define CONN_REASON_IRC_KICK 8
+#define CONN_REASON_IRC_JOIN 9
 
 #define COL_IRC COL_INFO_GENERIC
 
@@ -72,7 +82,7 @@ Send player connection packet to IRC echo.
 
 @param amx abstract machine
 @param playerid playerid that (dis)connected
-@param reason if connected: -1, if disconnected: reason from OnPlayerDisconnect
+@param reason 3 when OnPlayerConnection, reason when OnPlayerDisconnect
 */
 void echo_on_player_connection(AMX *amx, int playerid, int reason)
 {
@@ -116,6 +126,22 @@ void echo_on_game_chat(AMX *amx, int playerid, char *text)
 		*(((char*) buf144) + 9 + nicklen + msglen) = 0;
 		NC_socket_send_array(socket_out, buf144a, 10+nicklen+msglen);
 	}
+}
+
+static
+void echo_sendclientmessage_filtered(AMX *amx, char *buf, int len)
+{
+	char *b = buf, *bufend = buf + sizeof(buf);
+
+	/*escape stuff TODO: escape embedded colors?*/
+	while (b != bufend) {
+		if (*b == '%') {
+			*b = '#';
+		}
+		b++;
+	}
+	amx_SetUString(buf144, buf, sizeof(buf));
+	NC_SendClientMessageToAll(COL_IRC, buf144a);
 }
 
 static const char *msg_bridge_up = "IRC bridge is up";
@@ -164,7 +190,7 @@ void echo_on_receive(AMX *amx, cell socket_handle,
 		case PACK_CHAT:
 		{
 			int nicklen, msglen;
-			char buf[144], *b, *bufend = buf + sizeof(buf);
+			char buf[144], *b = buf;
 
 			if (len < 12 ||
 				(nicklen = data[6]) < 1 || nicklen > 49 ||
@@ -179,16 +205,43 @@ void echo_on_receive(AMX *amx, cell socket_handle,
 			buf[2 + nicklen] = ' ';
 			b = buf + 3 + nicklen;
 			amx_GetUString(b, data + 9 + nicklen, 144);
-			/*escape stuff TODO: escape embedded colors?*/
-			b = buf;
-			while (b != bufend) {
-				if (*b == '%') {
-					*b = '#';
-				}
-				b++;
+			echo_sendclientmessage_filtered(amx, buf, sizeof(buf));
+			break;
+		}
+		case PACK_PLAYER_CONNECTION:
+		{
+			int nicklen;
+			char buf[144], *b = buf;
+
+			if (len < 9 ||
+				(nicklen = data[7]) < 1 || nicklen > 49 ||
+				8 + nicklen != len)
+			{
+				break;
 			}
-			amx_SetUString(buf144, buf, sizeof(buf));
-			NC_SendClientMessageToAll(COL_IRC, buf144a);
+			*((int*) b) = 0x3A435249;
+			b += 4;
+			*(b++) = ' ';
+			switch (data[6]) {
+			case CONN_REASON_IRC_QUIT:
+				memcpy(b, "quits: ", 7);
+				b += 7;
+				break;
+			case CONN_REASON_IRC_PART:
+				memcpy(b, "parts: ", 7);
+				b += 7;
+				break;
+			case CONN_REASON_IRC_KICK:
+				memcpy(b, "kicked: ", 8);
+				b += 8;
+				break;
+			case CONN_REASON_IRC_JOIN:
+				memcpy(b, "joins: ", 7);
+				b += 7;
+				break;
+			}
+			amx_GetUString(b, data + 8, 50);
+			echo_sendclientmessage_filtered(amx, buf, sizeof(buf));
 			break;
 		}
 		}

@@ -147,7 +147,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	players[playercount++] = playerid;
 
 	maps_OnPlayerConnect(amx, playerid);
-	echo_on_player_connection(amx, playerid, -1);
+	echo_on_player_connection(amx, playerid, 3);
 	return 1;
 }
 
