@@ -214,11 +214,6 @@ native Dialog_HasInQueue(playerid)
 //@seealso HasDialogsInQueue
 native Dialog_PopQueue(playerid, &dialogid, &style, caption[], info[], button1[], button2[], &transactionid)
 
-#namespace "echo.c"
-
-//@summary Initialized echo sockets
-native Echo_Init()
-
 #namespace "game_sa.c"
 
 //@summary Checks if a vehicle with specified model is an air vehicle

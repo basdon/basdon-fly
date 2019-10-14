@@ -206,8 +206,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Dialog_DropQueue),
 	REGISTERNATIVE(Dialog_HasInQueue),
 	REGISTERNATIVE(Dialog_PopQueue),
-	/* echo.c */
-	REGISTERNATIVE(Echo_Init),
 	/* game_sa.c */
 	REGISTERNATIVE(Game_IsAirVehicle),
 	REGISTERNATIVE(Game_IsHelicopter),

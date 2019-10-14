@@ -92,9 +92,11 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 /* native B_OnGameModeInit() */
 cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 {
+	void echo_init(AMX *amx);
 	void maps_load_from_db(AMX *amx);
 
 	maps_load_from_db(amx);
+	echo_init(amx);
 	return 1;
 }
 

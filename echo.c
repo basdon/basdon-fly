@@ -36,9 +36,9 @@ Creates the echo sockets.
 Call from the _end_ of OnGameModeInit, because for a yet unknown reason the
 server crashes if it's called somewhere in the middle.
 */
-cell AMX_NATIVE_CALL Echo_Init(AMX *amx, cell *params)
+void echo_init(AMX *amx)
 {
-	const char *buflo = "127.0.0.1";
+	static const char *buflo = "127.0.0.1";
 
 	NC_ssocket_create(SOCKET_UDP, &socket_in);
 	if (socket_in == SOCKET_INVALID_SOCKET) {
@@ -56,7 +56,6 @@ cell AMX_NATIVE_CALL Echo_Init(AMX *amx, cell *params)
 		buf144[1] = 0x07030301;
 		NC_ssocket_send(socket_out, buf144a, 8);
 	}
-	return 1;
 }
 
 /**
