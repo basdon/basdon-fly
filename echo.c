@@ -33,28 +33,33 @@ static cell socket_out = SOCKET_INVALID_SOCKET;
 
 /**
 Creates the echo sockets.
-Call from the _end_ of OnGameModeInit, because for a yet unknown reason the
-server crashes if it's called somewhere in the middle.
+
+Call periodically, to up sockets in the case they couldn't be started from
+OnGameModeInit.
 */
 void echo_init(AMX *amx)
 {
 	static const char *buflo = "127.0.0.1";
 
-	NC_ssocket_create(SOCKET_UDP, &socket_in);
 	if (socket_in == SOCKET_INVALID_SOCKET) {
-		logprintf("failed to create echo game socket");
-	} else {
-		NC_ssocket_listen(socket_in, ECHO_PORT_IN);
+		NC_ssocket_create(SOCKET_UDP, &socket_in);
+		if (socket_in == SOCKET_INVALID_SOCKET) {
+			logprintf("failed to create echo game socket");
+		} else {
+			NC_ssocket_listen(socket_in, ECHO_PORT_IN);
+		}
 	}
-	NC_ssocket_create(SOCKET_UDP, &socket_out);
 	if (socket_out == SOCKET_INVALID_SOCKET) {
-		logprintf("failed to create echo irc socket");
-	} else {
-		amx_SetUString(buf32, buflo, 32);
-		NC_ssocket_connect(socket_out, buf32a, ECHO_PORT_OUT);
-		buf144[0] = 0x02594C46;
-		buf144[1] = 0x07030301;
-		NC_ssocket_send(socket_out, buf144a, 8);
+		NC_ssocket_create(SOCKET_UDP, &socket_out);
+		if (socket_out == SOCKET_INVALID_SOCKET) {
+			logprintf("failed to create echo irc socket");
+		} else {
+			amx_SetUString(buf32, buflo, 32);
+			NC_ssocket_connect(socket_out, buf32a, ECHO_PORT_OUT);
+			buf144[0] = 0x02594C46;
+			buf144[1] = 0x07030301;
+			NC_ssocket_send(socket_out, buf144a, 8);
+		}
 	}
 }
 

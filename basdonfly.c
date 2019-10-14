@@ -172,11 +172,14 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 {
 }
 
+static int time_h = 0, time_m = 0;
+
 #define amx gamemode_amx
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
+	void echo_init(AMX*);
 	void dev_missions_update_closest_point(AMX*);
-	void maps_process_tick(AMX *amx);
+	void maps_process_tick(AMX*);
 
 	static int count = 0;
 #ifdef LOG_SLOW_TICKS
@@ -195,7 +198,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 		tickcount = nc_result;
 #endif /*LOG_SLOW_TICKS*/
 
-		/*loop100*/
+		/*timer100*/
 		maps_process_tick(amx);
 #ifdef DEV
 		dev_missions_update_closest_point(amx);
@@ -204,7 +207,19 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 		NC_gettime(buf32a, buf32_1a, buf144a);
 		if (lasttime != nc_result) {
 			lasttime = nc_result;
-			/*loop1000*/
+			if (time_m++ == 30) {
+				goto timer30s;
+			} else if (time_m >= 60) {
+				time_m = 0;
+				if (time_h++ >= 24) {
+					time_h = 0;
+				}
+				/*timer1m*/
+				echo_init(amx);
+timer30s:			/*timer30s*/
+				;
+			}
+			/*timer1000*/
 		}
 	}
 }
