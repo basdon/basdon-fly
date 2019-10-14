@@ -9,6 +9,7 @@ extern int n_CreateVehicle_;
 extern int n_DestroyPlayerObject;
 extern int n_DestroyVehicle_;
 extern int n_DisablePlayerRaceCheckpoint;
+extern int n_GetConsoleVarAsInt;
 extern int n_GetPlayerIp;
 extern int n_GetPlayerName;
 extern int n_GetPlayerPos;
@@ -26,6 +27,7 @@ extern int n_cache_get_row;
 extern int n_cache_get_row_count;
 extern int n_cache_get_row_float;
 extern int n_cache_get_row_int;
+extern int n_gettime;
 extern int n_mysql_tquery;
 extern int n_mysql_query;
 extern int n_printf;
@@ -35,6 +37,7 @@ extern int n_ssocket_create;
 extern int n_ssocket_destroy;
 extern int n_ssocket_listen;
 extern int n_ssocket_send;
+extern int n_tickcount;
 extern cell *nc_params;
 extern cell nc_result;
 
@@ -69,6 +72,9 @@ extern cell nc_result;
 #define NC_DisablePlayerRaceCheckpoint(PLAYERID) \
 	nc_params[0]=1;nc_params[1]=PLAYERID;\
 	amx_Callback(amx,n_DisablePlayerRaceCheckpoint,&nc_result,nc_params)
+
+#define NC_GetConsoleVarAsInt(BUF) nc_params[0]=1;nc_params[1]=BUF;\
+	amx_Callback(amx,n_GetConsoleVarAsInt,&nc_result,nc_params)
 
 #define NC_GetPlayerIp(PLAYERID,BUF,LEN) nc_params[0]=3;\
 	nc_params[1]=PLAYERID;nc_params[2]=BUF;nc_params[3]=LEN;\
@@ -142,6 +148,11 @@ extern cell nc_result;
 	nc_params[1]=ROW;nc_params[2]=COL;nc_params[3]=BUF;\
 	amx_Callback(amx,n_cache_get_row,&nc_result,nc_params)
 
+/*note: don't call with 0,0,0 - it tends to mess up stuff after a while?*/
+#define NC_gettime(HOUR,MIN,SEC) nc_params[0]=3;\
+	nc_params[1]=HOUR;nc_params[2]=MIN;nc_params[3]=SEC;\
+	amx_Callback(amx,n_gettime,&nc_result,nc_params)
+
 #define NC_mysql_query_(BUF,RESULT) nc_params[0]=3;nc_params[1]=1;\
 	nc_params[2]=BUF;nc_params[3]=1;\
 	amx_Callback(amx,n_mysql_query,RESULT,nc_params)
@@ -172,3 +183,6 @@ extern cell nc_result;
 #define NC_ssocket_send(SOCKET,DATA,LEN) nc_params[0]=3;\
 	nc_params[1]=SOCKET;nc_params[2]=DATA;nc_params[3]=LEN;\
 	amx_Callback(amx,n_ssocket_send,&nc_result,nc_params)
+
+#define NC_tickcount() nc_params[0]=0;\
+	amx_Callback(amx,n_tickcount,&nc_result,nc_params)

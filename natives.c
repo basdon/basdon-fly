@@ -13,6 +13,7 @@ int n_CreateVehicle_;
 int n_DestroyPlayerObject;
 int n_DestroyVehicle_;
 int n_DisablePlayerRaceCheckpoint;
+int n_GetConsoleVarAsInt;
 int n_GetPlayerIp;
 int n_GetPlayerName;
 int n_GetPlayerPos;
@@ -30,6 +31,7 @@ int n_cache_get_row;
 int n_cache_get_row_count;
 int n_cache_get_row_float;
 int n_cache_get_row_int;
+int n_gettime;
 int n_printf;
 int n_mysql_tquery;
 int n_mysql_query;
@@ -39,6 +41,7 @@ int n_ssocket_destroy;
 int n_ssocket_listen;
 int n_ssocket_send;
 int n_random;
+int n_tickcount;
 
 static cell nc_params_d[20];
 cell *nc_params = nc_params_d;
@@ -61,6 +64,7 @@ int natives_find(AMX *amx)
 		{ "DestroyVehicle", &n_DestroyVehicle_ },
 		{ "DisablePlayerRaceCheckpoint",
 			&n_DisablePlayerRaceCheckpoint },
+		{ "GetConsoleVarAsInt", &n_GetConsoleVarAsInt },
 		{ "GetPlayerIp", &n_GetPlayerIp },
 		{ "GetPlayerName", &n_GetPlayerName },
 		{ "GetPlayerPos", &n_GetPlayerPos },
@@ -78,6 +82,7 @@ int natives_find(AMX *amx)
 		{ "cache_get_row_count", &n_cache_get_row_count },
 		{ "cache_get_row_float", &n_cache_get_row_float },
 		{ "cache_get_row_int", &n_cache_get_row_int },
+		{ "gettime", &n_gettime },
 		{ "printf", &n_printf },
 		{ "mysql_tquery", &n_mysql_tquery },
 		{ "mysql_query", &n_mysql_query },
@@ -87,6 +92,7 @@ int natives_find(AMX *amx)
 		{ "ssocket_destroy", &n_ssocket_destroy },
 		{ "ssocket_listen", &n_ssocket_listen },
 		{ "ssocket_send", &n_ssocket_send },
+		{ "tickcount", &n_tickcount },
 	};
 	struct NATIVE *n = natives + sizeof(natives)/sizeof(struct NATIVE);
 

@@ -39,6 +39,13 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 		return 0;
 	}
 
+	amx_SetUString(buf144, "sleep", 6);
+	NC_GetConsoleVarAsInt(buf144a);
+	if (nc_result != 5) {
+		logprintf("ERR: sleep value %d should be 5", nc_result);
+		return 0;
+	}
+
 	if (MAX_PLAYERS != params[1]) {
 		logprintf(
 			"ERR: MAX_PLAYERS mismatch: %d (plugin) vs %d (gm)",
@@ -46,38 +53,9 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 			params[1]);
 		return 0;
 	}
+
+	gamemode_amx = amx;
 	return MAX_PLAYERS;
-}
-
-/* native B_Timer1000() */
-cell AMX_NATIVE_CALL B_Timer1000(AMX *amx, cell *params)
-{
-	return 1;
-}
-
-void timer100(AMX *amx)
-{
-	void maps_process_tick(AMX *amx);
-#ifdef DEV
-	void dev_missions_update_closest_point(AMX*);
-
-	dev_missions_update_closest_point(amx);
-#endif /*DEV*/
-	maps_process_tick(amx);
-}
-
-/* native B_Timer25() */
-cell AMX_NATIVE_CALL B_Timer25(AMX *amx, cell *params)
-{
-	static int loop25invoccount = 0;
-
-	if (loop25invoccount > 3) {
-		loop25invoccount = 1;
-		timer100(amx);
-	} else {
-		loop25invoccount++;
-	}
-	return 1;
 }
 
 /* native B_OnGameModeExit() */

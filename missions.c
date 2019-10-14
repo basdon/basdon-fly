@@ -260,7 +260,6 @@ void dev_missions_toggle_closest_point(AMX *amx)
 	sprintf(buf, "showing mission points: %d", dev_show_closest_point);
 	amx_SetUString(buf144, buf, sizeof(buf));
 	NC_SendClientMessageToAll(-1, buf144a);
-
 }
 
 /**

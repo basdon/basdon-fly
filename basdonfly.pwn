@@ -81,13 +81,6 @@ native Ac_FormatLog(playerid, loggedstatus, const message[], buf[])
 
 #namespace "basdon.c"
 
-//@summary Loop callback that should be called each 25ms
-native B_Timer25()
-
-//@summary Loop callback that should be called each 1000ms
-//@remarks This should be reliable for counting seconds, as deviations do not worsen.
-native B_Timer1000()
-
 //@summary Plugin callback for {@link OnGameModeExit}
 //@remarks call before closing db
 native B_OnGameModeExit()

@@ -136,18 +136,21 @@ FORWARD(Zones_FormatLoc);
 FORWARD(Zones_InvalidateForPlayer);
 FORWARD(Zones_UpdateForPlayer);
 
+static AMX *gamemode_amx;
+
 #define IN_BASDONFLY
 #include "basdon.c"
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {
-	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES;
+	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES | SUPPORTS_PROCESS_TICK;
 }
 
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
 	void game_sa_init(), login_init(), dialog_init(), zones_init();
 	void nav_init(), missions_init(), veh_init(), cmd_init();
+	cell *phys;
 
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
@@ -169,6 +172,44 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 {
 }
 
+#define amx gamemode_amx
+PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
+{
+	void dev_missions_update_closest_point(AMX*);
+	void maps_process_tick(AMX *amx);
+
+	static int count = 0;
+#ifdef LOG_SLOW_TICKS
+	static int tickcount = 0;
+#endif /*LOG_SLOW_TICKS*/
+	static int lasttime = 0;
+
+	if (count++ >= 19) {
+		count = 0;
+
+#ifdef LOG_SLOW_TICKS
+		NC_tickcount();
+		if (tickcount && nc_result - tickcount > 120) {
+			logprintf("slow 20 ticks %d", nc_result - tickcount);
+		}
+		tickcount = nc_result;
+#endif /*LOG_SLOW_TICKS*/
+
+		/*loop100*/
+		maps_process_tick(amx);
+#ifdef DEV
+		dev_missions_update_closest_point(amx);
+#endif /*DEV*/
+
+		NC_gettime(buf32a, buf32_1a, buf144a);
+		if (lasttime != nc_result) {
+			lasttime = nc_result;
+			/*loop1000*/
+		}
+	}
+}
+#undef amx
+
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
@@ -185,8 +226,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* anticheat.c */
 	REGISTERNATIVE(Ac_FormatLog),
 	/* basdon.c */
-	REGISTERNATIVE(B_Timer1000),
-	REGISTERNATIVE(B_Timer25),
 	REGISTERNATIVE(B_OnGameModeExit),
 	REGISTERNATIVE(B_OnGameModeInit),
 	REGISTERNATIVE(B_OnPlayerCommandText),
