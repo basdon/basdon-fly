@@ -174,6 +174,7 @@ throws InterruptedIOException
 		{
 			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
 			StringBuilder sb = new StringBuilder(225);
+			sb.append('Z'); // prevent nickalerts
 			sb.append(new String(buf, 8, nicklen, StandardCharsets.US_ASCII));
 			sb.append('(').append(pid).append(')').append(':').append(' ');
 			sb.append(new String(buf, 9 + nicklen, msglen, StandardCharsets.US_ASCII));
@@ -197,6 +198,7 @@ throws InterruptedIOException
 			} else {
 				sb.append("<-- ");
 			}
+			sb.append('Z'); // prevent nickalerts
 			sb.append(new String(buf, 8, nicklen, StandardCharsets.US_ASCII));
 			sb.append('(').append(pid).append(')').append(' ');
 			if (reason == CONN_REASON_GAME_CONNECTED) {
