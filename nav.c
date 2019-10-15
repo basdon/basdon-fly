@@ -11,9 +11,9 @@
 #include <string.h>
 #include <math.h>
 
-static struct navdata {
-	struct airport *beacon;
-	struct runway *vor;
+static struct NAVDATA {
+	struct AIRPORT *beacon;
+	struct RUNWAY *vor;
 	int ils;
 	int dist;
 	int alt;
@@ -57,7 +57,7 @@ cell AMX_NATIVE_CALL Nav_EnableADF(AMX *amx, cell *params)
 	cell *addr;
 	char cmdtext[144], *cp = cmdtext;
 	char beacon[5], *bp = beacon, len = 0;
-	struct airport *ap = airports;
+	struct AIRPORT *ap = airports;
 
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
@@ -95,11 +95,11 @@ cell AMX_NATIVE_CALL Nav_EnableADF(AMX *amx, cell *params)
 		bp++;
 	}
 
-	len = airportscount;
+	len = numairports;
 	while (len--) {
 		if (strcmp(beacon, ap->beacon) == 0) {
 			if (nav[vid] == NULL) {
-				nav[vid] = malloc(sizeof(struct navdata));
+				nav[vid] = malloc(sizeof(struct NAVDATA));
 				nav[vid]->alt = nav[vid]->crs = nav[vid]->dist = 0.0f;
 			}
 			nav[vid]->beacon = ap;
@@ -123,8 +123,8 @@ cell AMX_NATIVE_CALL Nav_EnableVOR(AMX *amx, cell *params)
 	char cmdtext[144], *cp = cmdtext;
 	char beacon[5], *bp = beacon;
 	int len = 0;
-	struct airport *ap = airports;
-	struct runway *rw;
+	struct AIRPORT *ap = airports;
+	struct RUNWAY *rw;
 
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
@@ -164,7 +164,7 @@ cell AMX_NATIVE_CALL Nav_EnableVOR(AMX *amx, cell *params)
 	}
 
 	if (len) {
-		len = airportscount;
+		len = numairports;
 		while (len--) {
 			if (strcmp(beacon, ap->beacon) == 0) {
 				goto havebeacon;
@@ -208,10 +208,10 @@ havebeacon:
 	}
 
 	rw = ap->runways;
-	while (rw != NULL) {
+	while (rw != ap->runwaysend) {
 		if (strcmp(rw->id, beacon) == 0) {
 			if (nav[vid] == NULL) {
-				nav[vid] = malloc(sizeof(struct navdata));
+				nav[vid] = malloc(sizeof(struct NAVDATA));
 				nav[vid]->alt = nav[vid]->crs = nav[vid]->dist = 0.0f;
 			}
 			nav[vid]->beacon = NULL;
@@ -219,27 +219,27 @@ havebeacon:
 			nav[vid]->vor = rw;
 			return RESULT_VOR_ON;
 		}
-		rw = rw->next;
+		rw++;
 	}
 
 tellrws:
 	rw = ap->runways;
-	while (rw != NULL) {
+	while (rw != ap->runwaysend) {
 		if (rw->nav) {
 			goto hasnav;
 		}
-		rw = rw->next;
+		rw++;
 	}
 	amx_SetUString(addr, WARN"There are no VOR capable runways at this beacon", 64);
 	return RESULT_VOR_ERR;
 hasnav:
 	len = sprintf(cmdtext, WARN"Unknown runway, try one of:");
 	rw = ap->runways;
-	while (rw != NULL) {
+	while (rw != ap->runwaysend) {
 		if (rw ->nav) {
 			len += sprintf(cmdtext + len, " %s", rw->id);
 		}
-		rw = rw->next;
+		rw++;
 	}
 	amx_SetUString(addr, cmdtext, sizeof(cmdtext));
 	return RESULT_VOR_ERR;
@@ -249,7 +249,7 @@ hasnav:
 cell AMX_NATIVE_CALL Nav_Format(AMX *amx, cell *params)
 {
 	int pid = params[1];
-	struct navdata *n = nav[params[2]];
+	struct NAVDATA *n = nav[params[2]];
 	cell *addr;
 	float vorvalue;
 	char dist[16], alt[16], crs[16], ils[144];
@@ -326,8 +326,8 @@ cell AMX_NATIVE_CALL Nav_GetActiveNavType(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL Nav_NavigateToMission(AMX *amx, cell *params)
 {
 	const int vid = params[1], vehiclemodel = params[2] - 400;
-	struct airport *ap = airports + params[3];
-	struct runway *rw, *shortestrw, *shortestilsrw;
+	struct AIRPORT *ap = airports + params[3];
+	struct RUNWAY *rw, *shortestrw, *shortestilsrw;
 	float x, y, z, dx, dy, dz, dist, mindistall, mindistils;
 
 	/* if plane, try VOR if available, prioritizing ILS runways */
@@ -338,7 +338,7 @@ cell AMX_NATIVE_CALL Nav_NavigateToMission(AMX *amx, cell *params)
 		x = amx_ctof(params[4]);
 		y = amx_ctof(params[5]);
 		z = amx_ctof(params[6]);
-		while (rw != NULL) {
+		while (rw != ap->runwaysend) {
 			dx = rw->pos.x - x;
 			dy = rw->pos.y - y;
 			dz = rw->pos.z - z;
@@ -351,14 +351,14 @@ cell AMX_NATIVE_CALL Nav_NavigateToMission(AMX *amx, cell *params)
 				mindistils = dist;
 				shortestilsrw = rw;
 			}
-			rw = rw->next;
+			rw++;
 		}
 		if (shortestrw != NULL) {
 			if (shortestilsrw != NULL) {
 				shortestrw = shortestilsrw;
 			}
 			if (nav[vid] == NULL) {
-				nav[vid] = malloc(sizeof(struct navdata));
+				nav[vid] = malloc(sizeof(struct NAVDATA));
 				nav[vid]->alt = nav[vid]->crs = nav[vid]->dist = 0.0f;
 			}
 			nav[vid]->beacon = NULL;
@@ -370,7 +370,7 @@ cell AMX_NATIVE_CALL Nav_NavigateToMission(AMX *amx, cell *params)
 
 	/* if heli of no VOR runways, do ADF */
 	if (nav[vid] == NULL) {
-		nav[vid] = malloc(sizeof(struct navdata));
+		nav[vid] = malloc(sizeof(struct NAVDATA));
 		nav[vid]->alt = nav[vid]->crs = nav[vid]->dist = 0.0f;
 	}
 	nav[vid]->beacon = ap;
@@ -438,7 +438,7 @@ void calc_ils_values(
 /* native Nav_Update(vehicleid, Float:x, Float:y, Float:z, Float:heading) */
 cell AMX_NATIVE_CALL Nav_Update(AMX *amx, cell *params)
 {
-	struct navdata *n = nav[params[1]];
+	struct NAVDATA *n = nav[params[1]];
 	float x = amx_ctof(params[2]);
 	float y = amx_ctof(params[3]);
 	float z = amx_ctof(params[4]);

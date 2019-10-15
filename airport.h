@@ -3,26 +3,31 @@
 
 #define ISINVALIDAIRPORT(X) ((X).code[0] == 0)
 
-struct runway {
+struct RUNWAY {
 	char id[4];
 	float heading, headingr;
 	struct vec3 pos;
 	int nav;
-	struct runway *next;
 };
 
-struct airport {
+struct AIRPORT {
 	int id;
 	struct vec3 pos;
+	/**
+	Spawn position and rotation to use when players can spawn at this
+	airport (see flags).
+	*/
+	float spawnx, spawny, spawnz, spawnr;
 	char code[4 + 1];
 	char enabled;
 	char beacon[4 + 1];
 	char name[MAX_AIRPORT_NAME + 1];
 	int missiontypes;
-	struct runway *runways;
+	int flags;
+	struct RUNWAY *runways, *runwaysend;
 	struct missionpoint *missionpoints;
 };
 
-extern struct airport *airports;
-extern int airportscount;
+extern struct AIRPORT *airports;
+extern int numairports;
 

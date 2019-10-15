@@ -19,8 +19,11 @@ extern logprintf_t logprintf;
 
 #define M_PI 3.14159265358979323846f
 #define M_PI2 1.57079632679489661923f
+#define DEG_TO_RAD (M_PI / 180.0f)
 
 #define CLAMP(X,L,U) ((X < L) ? L : ((X > U) ? U : X))
+#define Q(X) #X
+#define EQ(X) Q(X)
 
 struct vec3 {
 	float x, y, z;

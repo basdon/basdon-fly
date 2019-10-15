@@ -141,7 +141,6 @@ void maps_load_from_db(AMX *amx)
 		"LEFT JOIN apt ON map.ap=apt.i "
 		"WHERE apt.e=1 OR apt.e IS NULL";
 	cell cacheid, rowcount;
-	cell f1, f2, f3, f4;
 	struct MAP *map, *m;
 	const struct MAP *end;
 
@@ -164,21 +163,17 @@ void maps_load_from_db(AMX *amx)
 		maps = malloc(nummaps * sizeof(struct MAP));
 		while (rowcount--) {
 			map = maps + rowcount;
-			NC_cache_get_row_int(rowcount, 0, (cell*) &map->id);
-			NC_cache_get_row_str(rowcount, 1, buf32a);
-			NC_cache_get_row_flt(rowcount, 2, &f1);
-			NC_cache_get_row_flt(rowcount, 3, &f2);
-			NC_cache_get_row_flt(rowcount, 4, &f3);
-			NC_cache_get_row_flt(rowcount, 5, &f4);
+			NC_cache_get_field_int(rowcount, 0, (cell*) &map->id);
+			NC_cache_get_field_str(rowcount, 1, buf32a);
 			amx_GetUString(map->name, buf32, sizeof(map->name));
 			if (!maps_load_from_file(map)) {
 				map->id = -1;
 				continue;
 			}
-			map->x = amx_ctof(f1);
-			map->y = amx_ctof(f2);
-			map->radius_in_sq = amx_ctof(f3);
-			map->radius_out_sq = amx_ctof(f4);
+			NC_cache_get_field_flt(rowcount, 2, map->x);
+			NC_cache_get_field_flt(rowcount, 3, map->y);
+			NC_cache_get_field_flt(rowcount, 4, map->radius_in_sq);
+			NC_cache_get_field_flt(rowcount, 5, map->radius_out_sq);
 			map->radius_in_sq *= map->radius_in_sq;
 			map->radius_out_sq *= map->radius_out_sq;
 		}

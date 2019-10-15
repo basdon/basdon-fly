@@ -136,15 +136,19 @@ extern cell nc_result;
 	amx_Callback(amx,n_cache_get_row_count,RESULT,nc_params)
 #define NC_cache_get_row_count() NC_cache_get_row_count_(&nc_result)
 
-#define NC_cache_get_row_int(ROW,COL,INTREF) nc_params[0]=2;\
+#define NC_cache_get_field_int(ROW,COL,INTREF) nc_params[0]=2;\
 	nc_params[1]=ROW;nc_params[2]=COL;\
 	amx_Callback(amx,n_cache_get_row_int,INTREF,nc_params)
 
-#define NC_cache_get_row_flt(ROW,COL,FLOATREF) nc_params[0]=2;\
+#define NC_cache_get_field_flt_cell(ROW,COL,CELLREF) nc_params[0]=2;\
 	nc_params[1]=ROW;nc_params[2]=COL;\
-	amx_Callback(amx,n_cache_get_row_float,FLOATREF,nc_params)
+	amx_Callback(amx,n_cache_get_row_float,CELLREF,nc_params)
 
-#define NC_cache_get_row_str(ROW,COL,BUF) nc_params[0]=3;\
+#define NC_cache_get_field_flt(ROW,COL,FLOAT) \
+	NC_cache_get_field_flt_cell(ROW,COL,&nc_result);\
+	FLOAT=amx_ctof(nc_result)
+
+#define NC_cache_get_field_str(ROW,COL,BUF) nc_params[0]=3;\
 	nc_params[1]=ROW;nc_params[2]=COL;nc_params[3]=BUF;\
 	amx_Callback(amx,n_cache_get_row,&nc_result,nc_params)
 

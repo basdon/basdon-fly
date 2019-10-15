@@ -3,42 +3,6 @@
 
 #namespace "airports.c"
 
-//@summary Inits the airport table
-//@param amount amount of airports that will be created using {@link APT_Add}
-//@seealso APT_Add
-//@seealso APT_Destroy
-//@remarks undefined behavior when less than {@param amount} APT_Add calls are made afterwards
-native APT_Init(amount)
-
-//@summary Add an airport to the airports table
-//@param index the index in the table to add this airport
-//@param code airport's code, must not be longer than {@code 4} + zero term
-//@param enabled {@code 0} if the airport should not be usable
-//@param name airport's name, must not be longer than {@code MAX_AIRPORT_NAME} + zero term
-//@param beacon airport's beacon, must not be longer than {@code 4} + zero term
-//@param x beacon's x position
-//@param y beacon's y position
-//@param z beacon's z position
-//@seealso APT_Init
-//@seealso APT_AddRunway
-native APT_Add(index, code[], enabled, name[], beacon[], Float:x, Float:y, Float:z)
-
-//@summary Add a runway that belongs to an airport in the airports table
-//@param aptindex the index of the airport in the airport table this runway belongs to
-//@param specifier either {@code 'L'}, {@code 'C'}, {@code 'R'} or {@code 0}
-//@param heading heading of the runway
-//@param x beacon's x position
-//@param y beacon's y position
-//@param z beacon's z position
-//@param nav {@code 1} if the runway has navigation (VOR and ILS) abilities
-//@seealso APT_Add
-native APT_AddRunway(aptindex, specifier, Float:heading, Float:x, Float:y, Float:z, nav)
-
-//@summary Clear the airport table and free the used memory
-//@remarks Also clears mission points (which exists inside the airport table)
-//@seealso APT_Init
-native APT_Destroy()
-
 //@summary Format airport list in tablist form, sorted by airport distance to given ({@param x},{@param y}) coordinates
 //@param playerid player that wants a list (used to store order for follow-up)
 //@param x x position of player

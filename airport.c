@@ -10,108 +10,149 @@
 #include <string.h>
 #include <math.h>
 
-struct airport *airports;
-int airportscount;
+struct AIRPORT *airports = NULL;
+int numairports = 0;
 
 static int *indexmap[MAX_PLAYERS];
 static short indexmapsize[MAX_PLAYERS];
 
-void freeAirportTable()
+/**
+Clears all data and frees all allocated memory.
+*/
+void airports_destroy()
 {
-	void missions_freepoints();
-	struct airport *ap = airports;
-	struct runway *rnw;
+	struct AIRPORT *ap = airports;
+	struct RUNWAY *rnw;
 
-	missions_freepoints();
-	while (airportscount) {
-		airportscount--;
-		while (ap->runways != NULL) {
-			if (ISINVALIDAIRPORT(*ap)) {
-				logprintf("warning: airport %d was not initialized", airportscount);
-				break;
-			}
-			rnw = ap->runways->next;
-			free(ap->runways);
-			ap->runways = rnw;
-		}
+	while (numairports) {
+		numairports--;
+		free(ap->runways);
 		ap++;
 	}
         free(airports);
+	airports = NULL;
 }
 
-cell AMX_NATIVE_CALL APT_Init(AMX *amx, cell *params)
+/**
+Loads airports and runways (and init other things).
+*/
+void airports_init(AMX *amx)
 {
-	int i;
+	int cacheid, rowcount, lastap, i;
+	struct AIRPORT *ap;
+	struct RUNWAY *rnw;
+
 	if (airports != NULL) {
-		logprintf("APT_Init: warning: airports table was not empty");
-		freeAirportTable();
+		logprintf("airport_init(): table was not empty");
+		airports_destroy();
 	}
-	if (params[1] <= 0) {
-		airportscount = 0;
-		airports = NULL;
-		return 0;
-	}
-	i = airportscount = params[1];
-	airports = malloc(sizeof(struct airport) * airportscount);
+
+	/*init indexmap*/
+	i = MAX_PLAYERS;
 	while (i--) {
-		airports[i].code[0] = 0;
+		indexmap[i] = NULL;
 	}
-	while (i < MAX_PLAYERS) {
-		indexmap[i++] = NULL;
+
+	/*load airports*/
+	amx_SetUString(buf144,
+		"SELECT c,e,n,b,x,y,z,flags,spawnx,spawny,spawnz,spawnr "
+		"FROM apt ORDER BY i ASC", 144);
+	NC_mysql_query_(buf144a, &cacheid);
+	NC_cache_get_row_count_(&rowcount);
+	if (!rowcount) {
+		goto noairports;
 	}
-	return 1;
-}
-
-cell AMX_NATIVE_CALL APT_Destroy(AMX *amx, cell *params)
-{
-	if (airports != NULL) {
-		freeAirportTable();
-		airports = NULL;
+	numairports = rowcount;
+	airports = malloc(sizeof(struct AIRPORT) * numairports);
+	while (rowcount--) {
+		ap = airports + rowcount;
+		ap->runways = ap->runwaysend = NULL;
+		ap->missionpoints = NULL;
+		ap->missiontypes = 0;
+		ap->id = rowcount;
+		NC_cache_get_field_str(rowcount, 0, buf144a);
+		amx_GetUString(ap->code, buf144, sizeof(ap->code));
+		NC_cache_get_field_int(rowcount, 1, &nc_result);
+		ap->enabled = (char) nc_result;
+		NC_cache_get_field_str(rowcount, 2, buf144a);
+		amx_GetUString(ap->name, buf144, sizeof(ap->name));
+		NC_cache_get_field_str(rowcount, 3, buf144a);
+		amx_GetUString(ap->beacon, buf144, sizeof(ap->beacon));
+		NC_cache_get_field_flt(rowcount, 4, ap->pos.x);
+		NC_cache_get_field_flt(rowcount, 5, ap->pos.y);
+		NC_cache_get_field_flt(rowcount, 6, ap->pos.z);
+		NC_cache_get_field_int(rowcount, 7, &ap->flags);
+		if (ap->flags & (APT_FLAG_SPAWNHERE | APT_FLAG_SPAWNHEREMIL)) {
+			NC_cache_get_field_flt(rowcount, 8, ap->spawnz);
+			NC_cache_get_field_flt(rowcount, 9, ap->spawny);
+			NC_cache_get_field_flt(rowcount, 10, ap->spawnz);
+			NC_cache_get_field_flt(rowcount, 11, ap->spawnr);
+		}
 	}
-	return 1;
-}
+noairports:
+	NC_cache_delete(cacheid);
 
-/* native APT_Add(index, code[], enabled, name[], beacon[], Float:x, Float:y, Float:z) */
-cell AMX_NATIVE_CALL APT_Add(AMX *amx, cell *params)
-{
-	cell *addr;
-	struct airport *ap = airports + params[1];
+	/*load runways*/
+	amx_SetUString(buf144,
+		"SELECT a,h,s,x,y,z,n "
+		"FROM rnw "
+		"WHERE type="EQ(RUNWAY_TYPE_RUNWAY)" "
+		"ORDER BY a ASC", 144);
+	NC_mysql_query_(buf144a, &cacheid);
+	NC_cache_get_row_count_(&rowcount);
+	if (!rowcount) {
+		goto norunways;
+	}
+	rowcount--;
+	while (rowcount >= 0) {
+		NC_cache_get_field_int(rowcount, 0, &lastap);
+		ap = airports + lastap;
+		/*look 'ahead' to see how many runways there are*/
+		i = rowcount - 1;
+		while (i > 0) {
+			i--;
+			NC_cache_get_field_int(i, 0, &nc_result);
+			if (nc_result != lastap) {
+				break;
+			}
+		}
+		/*gottem*/
+		i = rowcount - i;
+		ap->runways = rnw = malloc(sizeof(struct RUNWAY) * i);
+		ap->runwaysend = ap->runways + i;
+		while (i--) {
+			NC_cache_get_field_flt(rowcount, 1, rnw->heading);
+			rnw->headingr = rnw->heading * DEG_TO_RAD;
+			sprintf(rnw->id, "%02.0f", rnw->heading / 10.0f);
+			NC_cache_get_field_str(rowcount, 2, buf32a);
+			rnw->id[2] = (char) buf32[0];
+			rnw->id[3] = 0;
+			NC_cache_get_field_flt(rowcount, 3, rnw->pos.x);
+			NC_cache_get_field_flt(rowcount, 4, rnw->pos.y);
+			NC_cache_get_field_flt(rowcount, 5, rnw->pos.z);
+			NC_cache_get_field_int(rowcount, 6, &rnw->nav);
+			rnw++;
+			rowcount--;
+		}
+	}
+norunways:
+	NC_cache_delete(cacheid);
 
-	ap->id = params[1];
-	amx_GetAddr(amx, params[2], &addr);
-	amx_GetUString(ap->code, addr, sizeof(ap->code));
-	ap->enabled = params[3];
-	amx_GetAddr(amx, params[4], &addr);
-	amx_GetUString(ap->name, addr, sizeof(ap->name));
-	amx_GetAddr(amx, params[5], &addr);
-	amx_GetUString(ap->beacon, addr, sizeof(ap->beacon));
-	ap->pos.x = amx_ctof(params[6]);
-	ap->pos.y = amx_ctof(params[7]);
-	ap->pos.z = amx_ctof(params[8]);
-	ap->runways = NULL;
-	ap->missionpoints = NULL;
-	ap->missiontypes = 0;
-	return 1;
-}
-
-/* native APT_AddRunway(aptindex, specifier, Float:heading, Float:x, Float:y, Float:z, nav) */
-cell AMX_NATIVE_CALL APT_AddRunway(AMX *amx, cell *params)
-{
-	struct airport *ap = airports + params[1];
-	struct runway *rnw = malloc(sizeof(struct runway));
-
-	sprintf(rnw->id, "%02.0f", amx_ctof(params[3]) / 10.0f);
-	rnw->id[2] = params[2];
-	rnw->id[3] = 0;
-	rnw->heading = amx_ctof(params[3]);
-	rnw->headingr = rnw->heading * M_PI / 180.0f;
-	rnw->pos.x = amx_ctof(params[4]);
-	rnw->pos.y = amx_ctof(params[5]);
-	rnw->pos.z = amx_ctof(params[6]);
-	rnw->nav = params[7];
-	rnw->next = ap->runways;
-	ap->runways = rnw;
-	return 1;
+#ifdef TEST_AIRPORT_LOADING
+	ap = airports;
+	i = numairports;
+	while (i--) {
+		printf("airport %d: %s code %s beacon %s\n", ap->id, ap->name,
+			ap->code, ap->beacon);
+		printf(" runwaycount: %d\n", ap->runwaysend - ap->runways);
+		rnw = ap->runways;
+		while (rnw != ap->runwaysend) {
+			printf("  runway %s nav %d\n", rnw->id, rnw->nav);
+			rnw++;
+		}
+		ap++;
+	}
+#endif
 }
 
 struct apref {
@@ -130,29 +171,29 @@ cell AMX_NATIVE_CALL APT_FormatNearestList(AMX *amx, cell *params)
 {
 	cell *addr;
 	int i = 0, idx = 0, pid = params[1];
-	int enabledairportscount = 0;
+	int numairports = 0;
 	float dx, dy;
 	char buf[4096];
-	struct airport *ap;
-	struct apref *aps = malloc(sizeof(struct apref) * airportscount);
+	struct AIRPORT *ap;
+	struct apref *aps = malloc(sizeof(struct apref) * numairports);
 	
-	while (i < airportscount) {
+	while (i < numairports) {
 		if (airports[i].enabled) {
 			dx = airports[i].pos.x - amx_ctof(params[2]);
 			dy = airports[i].pos.y - amx_ctof(params[3]);
-			aps[enabledairportscount].distance = sqrt(dx * dx + dy * dy);
-			aps[enabledairportscount].index = i;
-			enabledairportscount++;
+			aps[numairports].distance = sqrt(dx * dx + dy * dy);
+			aps[numairports].index = i;
+			numairports++;
 		}
 		i++;
 	}
-	qsort(aps, enabledairportscount, sizeof(struct apref), sortaprefs);
+	qsort(aps, numairports, sizeof(struct apref), sortaprefs);
 	if (indexmap[pid] == NULL) {
-		indexmap[pid] = malloc(sizeof(indexmap[0]) * enabledairportscount);
+		indexmap[pid] = malloc(sizeof(indexmap[0]) * numairports);
 	}
-	i = indexmapsize[pid] = enabledairportscount;
+	i = indexmapsize[pid] = numairports;
 	while (i--) {
-		*(indexmap[pid] + enabledairportscount - i - 1) = aps[i].index;
+		*(indexmap[pid] + numairports - i - 1) = aps[i].index;
 		ap = airports + aps[i].index;
 		if (aps[i].distance < 1000.0f) {
 			idx += sprintf(buf + idx, "\n%.0f\t%s\t[%s]", aps[i].distance, ap->name, ap->code);
@@ -172,8 +213,8 @@ cell AMX_NATIVE_CALL APT_FormatBeaconList(AMX *amx, cell *params)
 {
 	cell *addr;
 	char buf[4096];
-	struct airport *ap = airports;
-	int count = airportscount, idx = 0;
+	struct AIRPORT *ap = airports;
+	int count = numairports, idx = 0;
 
 	while (count-- > 0) {
 		if (ap->enabled) {
@@ -211,14 +252,14 @@ cell AMX_NATIVE_CALL APT_MapIndexFromListDialog(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
 {
 	int idx = params[1];
-	struct airport *ap;
-	struct runway *rnw;
+	struct AIRPORT *ap;
+	struct RUNWAY *rnw;
 	cell *addr;
 	char buf[4096];
 	char szRunways[] = "Runways:";
 
 	amx_GetAddr(amx, params[2], &addr);
-	if (idx < 0 || airportscount <= idx) {
+	if (idx < 0 || numairports <= idx) {
 		buf[0] = 0;
 		amx_SetUString(addr, buf, 2);
 		return 0;
@@ -227,14 +268,14 @@ cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
 	idx = sprintf(buf, "\nElevation:\t%.0f FT", ap->pos.z);
 	idx += sprintf(buf + idx, "\nBeacon:\t%s", ap->beacon);
 	rnw = ap->runways;
-	while (rnw != NULL) {
+	while (rnw != ap->runwaysend) {
 		idx += sprintf(buf + idx, "\n%s\t%s", szRunways, rnw->id);
 		if (rnw->nav == (NAV_VOR | NAV_ILS)) {
 			idx += sprintf(buf + idx, " (VOR+ILS)");
 		} else if (rnw->nav) {
 			idx += sprintf(buf + idx, " (VOR)");
 		}
-		rnw = rnw->next;
+		rnw++;
 		szRunways[0] = '\t';
 		szRunways[1] = 0;
 	}
@@ -251,7 +292,7 @@ cell AMX_NATIVE_CALL APT_FormatCodeAndName(AMX *amx, cell *params)
 	char res[64];
 
 	amx_GetAddr(amx, params[2], &addr);
-	if (idx < 0 || airportscount <= idx) {
+	if (idx < 0 || numairports <= idx) {
 		res[0] = 'u';
 		res[1] = 'n';
 		res[2] = 'k';

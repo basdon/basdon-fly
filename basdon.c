@@ -61,8 +61,12 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 /* native B_OnGameModeExit() */
 cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 {
+	void airports_destroy();
 	void echo_dispose(AMX*);
+	void missions_freepoints();
 
+	missions_freepoints(); /*call this before airports_destroy!*/
+	airports_destroy();
 	echo_dispose(amx);
 	return 1;
 }
@@ -70,9 +74,11 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 /* native B_OnGameModeInit() */
 cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 {
+	void airports_init(AMX *amx);
 	void echo_init(AMX *amx);
 	void maps_load_from_db(AMX *amx);
 
+	airports_init(amx);
 	maps_load_from_db(amx);
 	echo_init(amx);
 	return 1;

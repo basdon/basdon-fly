@@ -11,10 +11,6 @@ extern void *pAMXFunctions;
 #define FORWARD(X) cell AMX_NATIVE_CALL X(AMX *amx, cell *params)
 
 /* airport.c */
-FORWARD(APT_Init);
-FORWARD(APT_Destroy);
-FORWARD(APT_Add);
-FORWARD(APT_AddRunway);
 FORWARD(APT_FormatNearestList);
 FORWARD(APT_FormatBeaconList);
 FORWARD(APT_MapIndexFromListDialog);
@@ -229,10 +225,6 @@ timer30s:			/*timer30s*/
 AMX_NATIVE_INFO PluginNatives[] =
 {
 	/* airport.c */
-	REGISTERNATIVE(APT_Init),
-	REGISTERNATIVE(APT_Destroy),
-	REGISTERNATIVE(APT_Add),
-	REGISTERNATIVE(APT_AddRunway),
 	REGISTERNATIVE(APT_FormatNearestList),
 	REGISTERNATIVE(APT_FormatBeaconList),
 	REGISTERNATIVE(APT_MapIndexFromListDialog),

@@ -23,7 +23,7 @@ struct missionpoint {
 	unsigned int type;
 	unsigned char numberofsametype;
 	unsigned short currentlyactivemissions;
-	struct airport *ap;
+	struct AIRPORT *ap;
 	struct missionpoint *next;
 };
 
@@ -97,8 +97,8 @@ static int mission_append_pay(char *buf, char *description, int amount)
 
 void missions_freepoints()
 {
-	int i = airportscount;
-	struct airport *ap = airports;
+	int i = numairports;
+	struct AIRPORT *ap = airports;
 	struct missionpoint *msp, *tmp;
 
 	while (i--) {
@@ -168,10 +168,10 @@ static float mission_get_vehicle_paymp(int model)
 	}
 }
 
-int calculate_airport_tax(struct airport *ap, int missiontype)
+int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 {
 	struct missionpoint *msp;
-	struct runway *rnw;
+	struct RUNWAY *rnw;
 	int runwayendcount = 0;
 	int costpermsp, tax = 500, chargernws = 0;
 
@@ -220,7 +220,7 @@ int calculate_airport_tax(struct airport *ap, int missiontype)
 
 	if (chargernws) {
 		rnw = ap->runways;
-		while (rnw != NULL) {
+		while (rnw != ap->runwaysend) {
 			runwayendcount++;
 			if (rnw->nav & NAV_VOR) {
 				tax += 15;
@@ -228,7 +228,7 @@ int calculate_airport_tax(struct airport *ap, int missiontype)
 			if (rnw->nav & NAV_ILS) {
 				tax += 15;
 			}
-			rnw = rnw->next;
+			rnw++;
 		}
 		tax += 50 * runwayendcount;
 	}
@@ -273,14 +273,14 @@ void dev_missions_update_closest_point(AMX *amx)
 	const float size = 11.0f;
 	int i, playerid;
 	float px, py, dx, dy, shortestdistance, dist;
-	struct airport *ap, *apend, *closestap;
+	struct AIRPORT *ap, *apend, *closestap;
 	struct missionpoint *mp, *closestmp;
 
 	if (!dev_show_closest_point) {
 		return;
 	}
 
-	apend = airports + airportscount;
+	apend = airports + numairports;
 
 	for (i = 0; i < playercount; i++) {
 		playerid = players[i];
@@ -336,7 +336,7 @@ cell AMX_NATIVE_CALL Missions_AddPoint(AMX *amx, cell *params)
 {
 	struct missionpoint *mp;
 	struct missionpoint *newmp;
-	struct airport *ap = airports + params[1];
+	struct AIRPORT *ap = airports + params[1];
 
 	newmp = malloc(sizeof(struct missionpoint));
 	newmp->id = params[2];
@@ -356,13 +356,13 @@ cell AMX_NATIVE_CALL Missions_AddPoint(AMX *amx, cell *params)
 	return 1;
 }
 
-struct airport *getRandomAirportForType(AMX *amx, int missiontype, struct airport *blacklistedairport)
+struct AIRPORT *getRandomAirportForType(AMX *amx, int missiontype, struct AIRPORT *blacklistedairport)
 {
-	struct airport *ap = airports, **aps;
+	struct AIRPORT *ap = airports, **aps;
 	int apsc = 0;
-	int i = airportscount;
+	int i = numairports;
 
-	aps = malloc(sizeof(aps) * airportscount);
+	aps = malloc(sizeof(aps) * numairports);
 
 	while (i--) {
 		if (ap != blacklistedairport && ap->missiontypes & missiontype) {
@@ -384,12 +384,12 @@ struct airport *getRandomAirportForType(AMX *amx, int missiontype, struct airpor
 	return ap;
 }
 
-struct missionpoint *getRandomEndPointForType(AMX *amx, int missiontype, struct airport *blacklistedairport)
+struct missionpoint *getRandomEndPointForType(AMX *amx, int missiontype, struct AIRPORT *blacklistedairport)
 {
 #define TMP_PT_SIZE 7
 	struct missionpoint *points[TMP_PT_SIZE], *msp;
 	int pointc = 0, leastamtofcurrentmissions = 1000000;
-	struct airport *airport = getRandomAirportForType(amx, missiontype, blacklistedairport);
+	struct AIRPORT *airport = getRandomAirportForType(amx, missiontype, blacklistedairport);
 
 	if (airport == NULL) {
 		return NULL;
@@ -429,10 +429,10 @@ cell AMX_NATIVE_CALL Missions_Create(AMX *amx, cell *params)
 	cell *bufaddr;
 	char buf[255], tmpuseridornullbuf[12];
 	struct missionpoint *msp, *startpoint, *endpoint;
-	struct airport *ap = airports, *closestap = NULL;
+	struct AIRPORT *ap = airports, *closestap = NULL;
 	struct dbvehicle *veh;
 	struct mission *mission;
-	int missiontype, i = airportscount;
+	int missiontype, i = numairports;
 	const int playerid = params[1], vehicleid = params[5], vv = params[6];
 	float x, y, z, dx, dy, dz, dist, shortestdistance = 0x7F800000;
 
@@ -727,9 +727,9 @@ exit_set_errmsg:
 /* native Missions_FinalizeAddPoints() */
 cell AMX_NATIVE_CALL Missions_FinalizeAddPoints(AMX *amx, cell *params)
 {
-	struct airport *ap = airports;
+	struct AIRPORT *ap = airports;
 	struct missionpoint *msp;
-	int i = airportscount;
+	int i = numairports;
 	unsigned char gate, cargo, heliport;
 
 	while (i--) {
