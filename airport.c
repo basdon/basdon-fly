@@ -155,14 +155,14 @@ norunways:
 #endif
 }
 
-struct apref {
+struct APREF {
 	float distance;
 	int index;
 };
 
 static int sortaprefs(const void *_a, const void *_b)
 {
-	struct apref *a = (struct apref*) _a, *b = (struct apref*) _b;
+	struct APREF *a = (struct APREF*) _a, *b = (struct APREF*) _b;
 	return (int) (10.0f * (b->distance - a->distance));
 }
 
@@ -171,29 +171,29 @@ cell AMX_NATIVE_CALL APT_FormatNearestList(AMX *amx, cell *params)
 {
 	cell *addr;
 	int i = 0, idx = 0, pid = params[1];
-	int numairports = 0;
+	int enabledairportscount = 0;
 	float dx, dy;
 	char buf[4096];
 	struct AIRPORT *ap;
-	struct apref *aps = malloc(sizeof(struct apref) * numairports);
+	struct APREF *aps = malloc(sizeof(struct APREF) * numairports);
 	
 	while (i < numairports) {
 		if (airports[i].enabled) {
 			dx = airports[i].pos.x - amx_ctof(params[2]);
 			dy = airports[i].pos.y - amx_ctof(params[3]);
-			aps[numairports].distance = sqrt(dx * dx + dy * dy);
-			aps[numairports].index = i;
-			numairports++;
+			aps[enabledairportscount].distance = sqrt(dx * dx + dy * dy);
+			aps[enabledairportscount].index = i;
+			enabledairportscount++;
 		}
 		i++;
 	}
-	qsort(aps, numairports, sizeof(struct apref), sortaprefs);
+	qsort(aps, enabledairportscount, sizeof(struct APREF), sortaprefs);
 	if (indexmap[pid] == NULL) {
-		indexmap[pid] = malloc(sizeof(indexmap[0]) * numairports);
+		indexmap[pid] = malloc(sizeof(indexmap[0]) * enabledairportscount);
 	}
-	i = indexmapsize[pid] = numairports;
+	i = indexmapsize[pid] = enabledairportscount;
 	while (i--) {
-		*(indexmap[pid] + numairports - i - 1) = aps[i].index;
+		*(indexmap[pid] + enabledairportscount - i - 1) = aps[i].index;
 		ap = airports + aps[i].index;
 		if (aps[i].distance < 1000.0f) {
 			idx += sprintf(buf + idx, "\n%.0f\t%s\t[%s]", aps[i].distance, ap->name, ap->code);
