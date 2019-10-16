@@ -169,7 +169,10 @@ void dialog_pop_queue(AMX *amx)
 
 	for (i = 0; i < playercount; i++) {
 		playerid = players[i];
-		if ((q = dialogqueue[playerid]) != NULL) {
+		if ((q = dialogqueue[playerid]) != NULL &&
+			!showndialog[playerid] && (!transaction[playerid] ||
+				transaction[playerid] == q->transactionid))
+		{
 			dialogqueue[playerid] = q->next;
 			dialog_NC_ShowPlayerDialog(
 				amx, playerid, q->dialogid, q->style,
