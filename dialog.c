@@ -141,9 +141,10 @@ int dialog_NC_ShowPlayerDialog(
 	}
 	transaction[playerid] = transactionid;
 
-	amx_SetUString(buf64, caption, 32);
-	amx_SetUString(buf4096, info, 32);
-	amx_SetUString(buf32, button1, 32);
+	showndialog[playerid] = dialogid;
+	amx_SetUString(buf64, caption, LIMIT_DIALOG_CAPTION);
+	amx_SetUString(buf4096, info, LIMIT_DIALOG_INFO);
+	amx_SetUString(buf32, button1, LIMIT_DIALOG_BUTTON);
 	nc_params[0] = 7;
 	nc_params[1] = playerid;
 	nc_params[2] = dialogid;
@@ -152,7 +153,7 @@ int dialog_NC_ShowPlayerDialog(
 	nc_params[5] = buf4096a;
 	nc_params[6] = buf32a;
 	if (button2) {
-		amx_SetUString(buf32_1, button2, 32);
+		amx_SetUString(buf32_1, button2, LIMIT_DIALOG_BUTTON);
 		nc_params[7] = buf32_1a;
 	} else {
 		nc_params[7] = emptystringa;
