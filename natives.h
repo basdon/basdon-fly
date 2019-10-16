@@ -22,6 +22,7 @@ extern int n_SendClientMessage;
 extern int n_SendClientMessageToAll;
 extern int n_SetPlayerRaceCheckpoint;
 extern int n_SetVehicleToRespawn;
+extern int n_ShowPlayerDialog;
 extern int n_cache_delete;
 extern int n_cache_get_row;
 extern int n_cache_get_row_count;
@@ -128,6 +129,8 @@ extern cell nc_result;
 #define NC_SetVehicleToRespawn(VEHICLEID) \
 	nc_params[0]=1;nc_params[1]=VEHICLEID;\
 	amx_Callback(amx,n_SetVehicleToRespawn,&nc_result,nc_params)
+
+#define NC_ShowPlayerDialog __USE__dialog_NC_ShowPlayerDialog__
 
 #define NC_cache_delete(ID) nc_params[0]=2;nc_params[1]=ID;nc_params[2]=1;\
 	amx_Callback(amx,n_cache_delete,&nc_result,nc_params)

@@ -58,6 +58,25 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 	return MAX_PLAYERS;
 }
 
+/* native B_OnDialogResponse() */
+cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
+{
+	int dialog_on_response(AMX*, int, int);
+
+	const int playerid = params[1], dialogid = params[2];
+	const int response = params[3], listitem = params[4];
+	char inputtext[128];
+	cell *addr;
+
+	if (!dialog_on_response(amx, playerid, dialogid)) {
+		return 0;
+	}
+	amx_GetAddr(amx, params[5], &addr);
+	amx_GetUString(inputtext, addr, sizeof(inputtext));
+
+	return 1;
+}
+
 /* native B_OnGameModeExit() */
 cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 {
@@ -111,6 +130,7 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 {
 	void echo_on_player_connection(AMX*, int, int);
+	void dialog_on_player_connect(AMX*, int);
 	void maps_OnPlayerConnect(AMX*, int);
 
 	const int playerid = params[1];
@@ -125,15 +145,16 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 
 	playeronlineflag[playerid] = 1;
 
+	maps_OnPlayerConnect(amx, playerid);
+	echo_on_player_connection(amx, playerid, 3);
+	dialog_on_player_connect(amx, playerid);
+
 	for (i = 0; i < playercount; ){
 		if (players[i] == playerid) {
 			return 1;
 		}
 	}
 	players[playercount++] = playerid;
-
-	maps_OnPlayerConnect(amx, playerid);
-	echo_on_player_connection(amx, playerid, 3);
 	return 1;
 }
 
@@ -141,6 +162,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 {
 	void echo_on_player_connection(AMX*, int, int);
+	void dialog_on_player_disconnect(AMX*, int);
 	void maps_OnPlayerDisconnect(int playerid);
 
 	const int playerid = params[1], reason = params[2];
@@ -148,6 +170,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 
 	maps_OnPlayerDisconnect(playerid);
 	echo_on_player_connection(amx, playerid, reason);
+	dialog_on_player_disconnect(amx, playerid);
 
 	playeronlineflag[playerid] = 0;
 

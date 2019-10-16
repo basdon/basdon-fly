@@ -81,8 +81,8 @@
 
 /* dialog.c / dialog.pwn */
 #define LIMIT_DIALOG_CAPTION (64)
-#define LIMIT_DIALOG_TEXT (4096)
-/* button len limit is not defined */
+#define LIMIT_DIALOG_INFO (4096)
+/* button len limit is not defined, using 32 */
 #define LIMIT_DIALOG_BUTTON (32)
 
 /* login.c / login.pwn */

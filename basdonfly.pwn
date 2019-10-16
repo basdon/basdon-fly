@@ -45,6 +45,10 @@ native Ac_FormatLog(playerid, loggedstatus, const message[], buf[])
 
 #namespace "basdon.c"
 
+//@summary Plugin callback for {@link B_OnDialogResponse}
+//@returns {@code 0} if further processing should be cancelled
+native B_OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
+
 //@summary Plugin callback for {@link OnGameModeExit}
 //@remarks call before closing db
 native B_OnGameModeExit()
@@ -122,54 +126,6 @@ native Command_GetStringParam(cmdtext[], &idx, buf[])
 //@remarks {@param idx} may be changed even if this returns {@code 0}
 //@remarks commands can't have spaces in them for obvious reasons
 native Command_Is(cmdtext[], const cmd[], &idx)
-
-#namespace "dialog.c"
-
-//@summary Queue a dialog to show later
-//@param playerid see {@link ShowPlayerDialog}
-//@param dialogid see {@link ShowPlayerDialog}
-//@param style see {@link ShowPlayerDialog}
-//@param caption see {@link ShowPlayerDialog}
-//@param info see {@link ShowPlayerDialog}
-//@param button1 see {@link ShowPlayerDialog}
-//@param button2 see {@link ShowPlayerDialog}
-//@param transactionid the transactionid for the dialog
-//@returns info see {@link ShowPlayerDialog}
-//@remarks info see {@link ShowPlayerDialog}
-//@seealso HasDialogsInQueue
-//@seealso DropDialogQueue
-//@seealso PopDialogQueue
-native Dialog_Queue(playerid, dialogid, style, caption[], info[], button1[], button2[], transactionid)
-
-//@summary Drops the dialog queue for a player
-//@param playerid the playerid to drop the queue for
-//@seealso HasDialogsInQueue
-//@seealso QueueDialog
-//@seealso PopDialogQueue
-native Dialog_DropQueue(playerid)
-
-//@summary Check if there are dialogs queued for a player
-//@param playerid the playerid to check the queue for
-//@returns {@code 0} if the queue is empty
-//@seealso DropDialogQueue
-//@seealso QueueDialog
-//@seealso PopDialogQueue
-native Dialog_HasInQueue(playerid)
-
-//@summary Pop the first queued dialog for a player
-//@param playerid the playerid to pop for
-//@param dialogid variable to store dialogid in, passed by ref
-//@param style variable to store style in, passed by ref
-//@param caption variable to store caption in, MUST be of at least {@code 64} len
-//@param info variable to store info in, MUST be of at least {@code 4096} len
-//@param button1 variable to store button1 in, MUST be of at least {@code 32} len
-//@param button2 variable to store button2 in, MUST be of at least {@code 32} len
-//@param transactionid variable to store transactionid in, passed by ref
-//@returns {@code 0} if there was no dialog to pop
-//@seealso DropDialogQueue
-//@seealso QueueDialog
-//@seealso HasDialogsInQueue
-native Dialog_PopQueue(playerid, &dialogid, &style, caption[], info[], button1[], button2[], &transactionid)
 
 #namespace "game_sa.c"
 

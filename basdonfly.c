@@ -24,10 +24,9 @@ FORWARD(Command_GetIntParam);
 FORWARD(Command_GetPlayerParam);
 FORWARD(Command_GetStringParam);
 /* dialog.c */
-FORWARD(Dialog_Queue);
-FORWARD(Dialog_DropQueue);
-FORWARD(Dialog_HasInQueue);
-FORWARD(Dialog_PopQueue);
+FORWARD(Dialog_EndTransaction);
+FORWARD(Dialog_EnsureTransaction);
+FORWARD(Dialog_ShowPlayerDialog);
 /* echo.c */
 FORWARD(Echo_Init);
 /* game_sa.c */
@@ -144,7 +143,7 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
-	void game_sa_init(), login_init(), dialog_init(), zones_init();
+	void game_sa_init(), login_init(), zones_init();
 	void nav_init(), missions_init(), veh_init(), cmd_init();
 	cell *phys;
 
@@ -154,7 +153,6 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	cmd_init();
 	game_sa_init();
 	login_init();
-	dialog_init();
 	pdata_init();
 	zones_init();
 	nav_init();
@@ -175,6 +173,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
 	void echo_init(AMX*);
 	void dev_missions_update_closest_point(AMX*);
+	void dialog_pop_queue(AMX*);
 	void maps_process_tick(AMX*);
 
 	static int count = 0;
@@ -216,6 +215,9 @@ timer30s:			/*timer30s*/
 				;
 			}
 			/*timer1000*/
+
+			/*TODO: on 5s?*/
+			dialog_pop_queue(amx);
 		}
 	}
 }
@@ -233,6 +235,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* anticheat.c */
 	REGISTERNATIVE(Ac_FormatLog),
 	/* basdon.c */
+	REGISTERNATIVE(B_OnDialogResponse),
 	REGISTERNATIVE(B_OnGameModeExit),
 	REGISTERNATIVE(B_OnGameModeInit),
 	REGISTERNATIVE(B_OnPlayerCommandText),
@@ -248,10 +251,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Command_GetPlayerParam),
 	REGISTERNATIVE(Command_GetStringParam),
 	/* dialog.c */
-	REGISTERNATIVE(Dialog_Queue),
-	REGISTERNATIVE(Dialog_DropQueue),
-	REGISTERNATIVE(Dialog_HasInQueue),
-	REGISTERNATIVE(Dialog_PopQueue),
+	REGISTERNATIVE(Dialog_EndTransaction),
+	REGISTERNATIVE(Dialog_EnsureTransaction),
+	REGISTERNATIVE(Dialog_ShowPlayerDialog),
 	/* game_sa.c */
 	REGISTERNATIVE(Game_IsAirVehicle),
 	REGISTERNATIVE(Game_IsHelicopter),

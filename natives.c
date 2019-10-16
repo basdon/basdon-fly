@@ -26,6 +26,7 @@ int n_SendClientMessage;
 int n_SendClientMessageToAll;
 int n_SetPlayerRaceCheckpoint;
 int n_SetVehicleToRespawn;
+int n_ShowPlayerDialog;
 int n_cache_delete;
 int n_cache_get_row;
 int n_cache_get_row_count;
@@ -77,6 +78,7 @@ int natives_find(AMX *amx)
 		{ "SendClientMessageToAll", &n_SendClientMessageToAll },
 		{ "SetPlayerRaceCheckpoint", &n_SetPlayerRaceCheckpoint },
 		{ "SetVehicleToRespawn", &n_SetVehicleToRespawn },
+		{ "ShowPlayerDialog", &n_ShowPlayerDialog },
 		{ "cache_delete", &n_cache_delete },
 		{ "cache_get_row", &n_cache_get_row },
 		{ "cache_get_row_count", &n_cache_get_row_count },
