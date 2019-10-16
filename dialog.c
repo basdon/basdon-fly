@@ -77,7 +77,7 @@ void dialog_end_transaction(int playerid, int transactionid)
 			"is active", transactionid, transaction[playerid]);
 		return;
 	}
-	transaction[playerid] = transactionid;
+	transaction[playerid] = TRANSACTION_NONE;
 }
 
 void dialog_ensure_transaction(int playerid, int transactionid)
