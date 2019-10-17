@@ -62,6 +62,7 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 {
 	int dialog_on_response(AMX*, int, int);
+	void spawn_on_dialog_response(AMX*, int, int, int);
 
 	const int playerid = params[1], dialogid = params[2];
 	const int response = params[3], listitem = params[4];
@@ -74,6 +75,11 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[5], &addr);
 	amx_GetUString(inputtext, addr, sizeof(inputtext));
 
+	switch (dialogid) {
+	case DIALOG_SPAWN_SELECTION:
+		spawn_on_dialog_response(amx, playerid, response, listitem);
+		return 1;
+	}
 	return 1;
 }
 
@@ -83,10 +89,12 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 	void airports_destroy();
 	void echo_dispose(AMX*);
 	void missions_freepoints();
+	void spawn_dispose();
 
 	missions_freepoints(); /*call this before airports_destroy!*/
 	airports_destroy();
 	echo_dispose(amx);
+	spawn_dispose();
 	return 1;
 }
 
@@ -181,6 +189,15 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 			return 1;
 		}
 	}
+	return 1;
+}
+
+/* native B_OnPlayerSpawn(playerid) */
+cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
+{
+	void spawn_on_player_spawn(AMX*, int);
+
+	spawn_on_player_spawn(amx, params[1]);
 	return 1;
 }
 

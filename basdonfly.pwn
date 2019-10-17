@@ -67,6 +67,9 @@ native B_OnPlayerConnect(playerid)
 //@summary Plugin callback for {@link OnPlayerDisconnect}
 native B_OnPlayerDisconnect(playerid, reason)
 
+//@summary Plugin callback for {@link OnPlayerSpawn}
+native B_OnPlayerSpawn(playerid)
+
 //@summary Plugin callback for {@link OnPlayerText}
 native B_OnPlayerText(playerid, text[])
 

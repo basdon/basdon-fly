@@ -24,6 +24,9 @@ int n_GivePlayerWeapon;
 int n_RemoveBuildingForPlayer;
 int n_SendClientMessage;
 int n_SendClientMessageToAll;
+int n_SetCameraBehindPlayer;
+int n_SetPlayerFacingAngle;
+int n_SetPlayerPos;
 int n_SetPlayerRaceCheckpoint;
 int n_SetVehicleToRespawn;
 int n_ShowPlayerDialog;
@@ -76,6 +79,9 @@ int natives_find(AMX *amx)
 		{ "RemoveBuildingForPlayer", &n_RemoveBuildingForPlayer },
 		{ "SendClientMessage", &n_SendClientMessage },
 		{ "SendClientMessageToAll", &n_SendClientMessageToAll },
+		{ "SetCameraBehindPlayer", &n_SetCameraBehindPlayer },
+		{ "SetPlayerPos", &n_SetPlayerPos },
+		{ "SetPlayerFacingAngle", &n_SetPlayerFacingAngle },
 		{ "SetPlayerRaceCheckpoint", &n_SetPlayerRaceCheckpoint },
 		{ "SetVehicleToRespawn", &n_SetVehicleToRespawn },
 		{ "ShowPlayerDialog", &n_ShowPlayerDialog },

@@ -13,11 +13,6 @@ struct RUNWAY {
 struct AIRPORT {
 	int id;
 	struct vec3 pos;
-	/**
-	Spawn position and rotation to use when players can spawn at this
-	airport (see flags).
-	*/
-	float spawnx, spawny, spawnz, spawnr;
 	char code[4 + 1];
 	char enabled;
 	char beacon[4 + 1];

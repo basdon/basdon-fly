@@ -40,3 +40,8 @@ extern char playeronlineflag[MAX_PLAYERS];
 extern short players[MAX_PLAYERS];
 extern int playercount;
 #define IsPlayerConnected(PLAYERID) playeronlineflag[PLAYERID]
+
+/**
+Teleport the player to a coordinate, and set facing angle and reset camera.
+*/
+void common_tp_player(AMX *amx, int pid, float x, float y, float z, float r);

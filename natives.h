@@ -20,6 +20,9 @@ extern int n_GivePlayerWeapon;
 extern int n_RemoveBuildingForPlayer;
 extern int n_SendClientMessage;
 extern int n_SendClientMessageToAll;
+extern int n_SetCameraBehindPlayer;
+extern int n_SetPlayerFacingAngle;
+extern int n_SetPlayerPos;
 extern int n_SetPlayerRaceCheckpoint;
 extern int n_SetVehicleToRespawn;
 extern int n_ShowPlayerDialog;
@@ -119,6 +122,18 @@ extern cell nc_result;
 #define NC_SendClientMessageToAll(COLOR,BUF) \
 	nc_params[0]=2;nc_params[1]=COLOR;nc_params[2]=BUF;\
 	amx_Callback(amx,n_SendClientMessageToAll,&nc_result,nc_params)
+
+#define NC_SetCameraBehindPlayer(PLAYERID) \
+	nc_params[0]=1;nc_params[1]=PLAYERID;\
+	amx_Callback(amx,n_SetCameraBehindPlayer,&nc_result,nc_params)
+
+#define NC_SetPlayerFacingAngle(PLAYERID,FR) nc_params[0]=2;\
+	nc_params[1]=PLAYERID;nc_params[2]=FR;\
+	amx_Callback(amx,n_SetPlayerFacingAngle,&nc_result,nc_params)
+
+#define NC_SetPlayerPos(PLAYERID,FX,FY,FZ) nc_params[0]=4;\
+	nc_params[1]=PLAYERID;nc_params[2]=FX;nc_params[3]=FY;nc_params[4]=FZ;\
+	amx_Callback(amx,n_SetPlayerpos,&nc_result,nc_params)
 
 #define NC_SetPlayerRaceCheckpoint(PLAYERID,TYPE,FX,FY,FZ,FNX,FNY,FNZ,FSIZE) \
 	nc_params[0]=9;nc_params[1]=PLAYERID;nc_params[2]=TYPE;\

@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include "airport.h"
+#include "spawn.h"
 #include <string.h>
 #include <math.h>
 
@@ -41,6 +42,7 @@ void airports_init(AMX *amx)
 	int cacheid, rowcount, lastap, i;
 	struct AIRPORT *ap;
 	struct RUNWAY *rnw;
+	struct SPAWN *nextspawn;
 
 	if (airports != NULL) {
 		logprintf("airport_init(): table was not empty");
@@ -64,6 +66,7 @@ void airports_init(AMX *amx)
 	}
 	numairports = rowcount;
 	airports = malloc(sizeof(struct AIRPORT) * numairports);
+	nextspawn = spawns = malloc(sizeof(struct SPAWN) * numairports);
 	while (rowcount--) {
 		ap = airports + rowcount;
 		ap->runways = ap->runwaysend = NULL;
@@ -83,12 +86,17 @@ void airports_init(AMX *amx)
 		NC_cache_get_field_flt(rowcount, 6, ap->pos.z);
 		NC_cache_get_field_int(rowcount, 7, &ap->flags);
 		if (ap->flags & (APT_FLAG_SPAWNHERE | APT_FLAG_SPAWNHEREMIL)) {
-			NC_cache_get_field_flt(rowcount, 8, ap->spawnz);
-			NC_cache_get_field_flt(rowcount, 9, ap->spawny);
-			NC_cache_get_field_flt(rowcount, 10, ap->spawnz);
-			NC_cache_get_field_flt(rowcount, 11, ap->spawnr);
+			numspawns++;
+			nextspawn->name = ap->name;
+			NC_cache_get_field_flt(rowcount, 8, nextspawn->x);
+			NC_cache_get_field_flt(rowcount, 9, nextspawn->y);
+			NC_cache_get_field_flt(rowcount, 10, nextspawn->z);
+			NC_cache_get_field_flt(rowcount, 11, nextspawn->r);
+			nextspawn++;
 		}
 	}
+	spawns = realloc(spawns, sizeof(struct SPAWN) * numspawns);
+	spawn_init();
 noairports:
 	NC_cache_delete(cacheid);
 
