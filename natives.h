@@ -23,7 +23,7 @@ extern int n_SendClientMessage;
 extern int n_SendClientMessageToAll;
 extern int n_SetCameraBehindPlayer;
 extern int n_SetPlayerFacingAngle;
-extern int n_SetPlayerPos;
+extern int n_SetPlayerPos_;
 extern int n_SetPlayerRaceCheckpoint;
 extern int n_SetVehicleToRespawn;
 extern int n_ShowPlayerDialog_;
@@ -138,9 +138,7 @@ extern cell nc_result;
 	nc_params[1]=PLAYERID;nc_params[2]=FR;\
 	amx_Callback(amx,n_SetPlayerFacingAngle,&nc_result,nc_params)
 
-#define NC_SetPlayerPos(PLAYERID,FX,FY,FZ) nc_params[0]=4;\
-	nc_params[1]=PLAYERID;nc_params[2]=FX;nc_params[3]=FY;nc_params[4]=FZ;\
-	amx_Callback(amx,n_SetPlayerpos,&nc_result,nc_params)
+#define NC_SetPlayerPos __USE__natives_NC_SetPlayerPos__
 
 #define NC_SetPlayerRaceCheckpoint(PLAYERID,TYPE,FX,FY,FZ,FNX,FNY,FNZ,FSIZE) \
 	nc_params[0]=9;nc_params[1]=PLAYERID;nc_params[2]=TYPE;\
@@ -215,3 +213,5 @@ extern cell nc_result;
 
 #define NC_tickcount() nc_params[0]=0;\
 	amx_Callback(amx,n_tickcount,&nc_result,nc_params)
+
+int natives_NC_SetPlayerPos(AMX *amx, int playerid, struct vec3 pos);

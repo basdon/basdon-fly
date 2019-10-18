@@ -6,7 +6,8 @@ struct SPAWN {
 	Spawn name, this should be the airport name.
 	*/
 	char *name;
-	float x, y, z, r;
+	struct vec3 pos;
+	float r;
 };
 
 /**

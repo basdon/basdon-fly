@@ -27,7 +27,7 @@ int n_SendClientMessage;
 int n_SendClientMessageToAll;
 int n_SetCameraBehindPlayer;
 int n_SetPlayerFacingAngle;
-int n_SetPlayerPos;
+int n_SetPlayerPos_;
 int n_SetPlayerRaceCheckpoint;
 int n_SetVehicleToRespawn;
 int n_ShowPlayerDialog_;
@@ -82,7 +82,7 @@ int natives_find(AMX *amx)
 		{ "SendClientMessage", &n_SendClientMessage },
 		{ "SendClientMessageToAll", &n_SendClientMessageToAll },
 		{ "SetCameraBehindPlayer", &n_SetCameraBehindPlayer },
-		{ "SetPlayerPos", &n_SetPlayerPos },
+		{ "SetPlayerPos", &n_SetPlayerPos_ },
 		{ "SetPlayerFacingAngle", &n_SetPlayerFacingAngle },
 		{ "SetPlayerRaceCheckpoint", &n_SetPlayerRaceCheckpoint },
 		{ "SetVehicleToRespawn", &n_SetVehicleToRespawn },
@@ -115,4 +115,19 @@ int natives_find(AMX *amx)
 	}
 
 	return 1;
+}
+
+int natives_NC_SetPlayerPos(AMX *amx, int playerid, struct vec3 pos)
+{
+	void maps_stream_for_player(AMX*, int, struct vec3);
+
+	maps_stream_for_player(amx, playerid, pos);
+
+	nc_params[0] = 4;
+	nc_params[1] = playerid;
+	*((float*) (nc_params + 2)) = pos.x;
+	*((float*) (nc_params + 3)) = pos.y;
+	*((float*) (nc_params + 4)) = pos.z;
+	NC(n_SetPlayerPos_);
+	return nc_result;
 }

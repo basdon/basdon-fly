@@ -51,30 +51,29 @@ void spawn_dispose()
 
 void spawn_on_dialog_response(AMX *amx, int playerid, int response, int idx)
 {
-	float x, y, z, r;
 	if (response && 0 <= idx && idx < numspawns) {
-		x = (spawns + idx)->x;
-		y = (spawns + idx)->y;
-		z = (spawns + idx)->z;
-		r = (spawns + idx)->r;
-		common_tp_player(amx, playerid, x, y, z, r);
+		common_tp_player(amx, playerid,
+			(spawns + idx)->pos, (spawns + idx)->r);
 	}
 }
 
 void spawn_on_player_spawn(AMX *amx, int playerid)
 {
 	int randomspawn;
-	float x = 1477.4771f, y = 1244.7747f, z = 10.8281f, r = 0.0f;
+	struct vec3 pos;
+	float r = 0.0f;
 	if (numspawns > 0) {
 		dialog_NC_ShowPlayerDialog(
 			amx, playerid, DIALOG_SPAWN_SELECTION,
 			DIALOG_STYLE_LIST, "Spawn selection", spawn_list_text,
 			"Spawn", "Cancel", -1);
 		NC_random_(numspawns, &randomspawn);
-		x = (spawns + randomspawn)->x;
-		y = (spawns + randomspawn)->y;
-		z = (spawns + randomspawn)->z;
+		pos = (spawns + randomspawn)->pos;
 		r = (spawns + randomspawn)->r;
+	} else {
+		pos.x = 1477.4771f;
+		pos.y = 1244.7747f;
+		pos.z = 10.8281f;
 	}
-	common_tp_player(amx, playerid, x, y, z, r);
+	common_tp_player(amx, playerid, pos, r);
 }

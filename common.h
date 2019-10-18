@@ -44,4 +44,4 @@ extern int playercount;
 /**
 Teleport the player to a coordinate, and set facing angle and reset camera.
 */
-void common_tp_player(AMX *amx, int pid, float x, float y, float z, float r);
+void common_tp_player(AMX *amx, int pid, struct vec3 pos, float r);

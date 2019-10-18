@@ -236,15 +236,14 @@ void maps_stream_out_for_player(AMX *amx, int playerid, struct MAP *map)
 	}
 }
 
-void maps_stream_for_player(AMX *amx, int playerid)
+void maps_stream_for_player(AMX *amx, int playerid, struct vec3 pos)
 {
 	float dx, dy, dist;
 	struct MAP *map = maps + nummaps;
 
-	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
 	while (map-- != maps) {
-		dx = map->x - amx_ctof(*buf32);
-		dy = map->y - amx_ctof(*buf64);
+		dx = map->x - pos.x;
+		dy = map->y - pos.y;
 		dist = dx * dx + dy * dy;
 		if (map->streamstatus[playerid]) {
 			if (dist > map->radius_out_sq) {
@@ -286,13 +285,20 @@ void maps_process_tick(AMX *amx)
 {
 	static int currentplayeridx = 0;
 	int increment = 1 + playercount / 10;
+	int playerid;
+	struct vec3 pos;
 
 	if (playercount > 0) {
 		while (increment--) {
 			if (++currentplayeridx >= playercount) {
 				currentplayeridx = 0;
 			}
-			maps_stream_for_player(amx, players[currentplayeridx]);
+			playerid = players[currentplayeridx];
+			NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
+			pos.x = amx_ctof(*buf32);
+			pos.y = amx_ctof(*buf64);
+			pos.z = amx_ctof(*buf144);
+			maps_stream_for_player(amx, playerid, pos);
 		}
 	}
 }

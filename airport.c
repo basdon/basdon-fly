@@ -88,9 +88,9 @@ void airports_init(AMX *amx)
 		if (ap->flags & (APT_FLAG_SPAWNHERE | APT_FLAG_SPAWNHEREMIL)) {
 			numspawns++;
 			nextspawn->name = ap->name;
-			NC_cache_get_field_flt(rowcount, 8, nextspawn->x);
-			NC_cache_get_field_flt(rowcount, 9, nextspawn->y);
-			NC_cache_get_field_flt(rowcount, 10, nextspawn->z);
+			NC_cache_get_field_flt(rowcount, 8, nextspawn->pos.x);
+			NC_cache_get_field_flt(rowcount, 9, nextspawn->pos.y);
+			NC_cache_get_field_flt(rowcount, 10, nextspawn->pos.z);
 			NC_cache_get_field_flt(rowcount, 11, nextspawn->r);
 			nextspawn++;
 		}
