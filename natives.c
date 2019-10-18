@@ -7,6 +7,7 @@
 /* Natives ending in _ means that they have
 custom code and shouldn't be used directly.*/
 
+int n_AddPlayerClass;
 int n_ChangeVehicleColor;
 int n_CreatePlayerObject;
 int n_CreateVehicle_;
@@ -29,7 +30,7 @@ int n_SetPlayerFacingAngle;
 int n_SetPlayerPos;
 int n_SetPlayerRaceCheckpoint;
 int n_SetVehicleToRespawn;
-int n_ShowPlayerDialog;
+int n_ShowPlayerDialog_;
 int n_cache_delete;
 int n_cache_get_row;
 int n_cache_get_row_count;
@@ -61,6 +62,7 @@ int natives_find(AMX *amx)
 		int *var;
 	};
 	struct NATIVE natives[] = {
+		{ "AddPlayerClass", &n_AddPlayerClass },
 		{ "ChangeVehicleColor", &n_ChangeVehicleColor },
 		{ "CreatePlayerObject", &n_CreatePlayerObject },
 		{ "CreateVehicle", &n_CreateVehicle_ },
@@ -84,7 +86,7 @@ int natives_find(AMX *amx)
 		{ "SetPlayerFacingAngle", &n_SetPlayerFacingAngle },
 		{ "SetPlayerRaceCheckpoint", &n_SetPlayerRaceCheckpoint },
 		{ "SetVehicleToRespawn", &n_SetVehicleToRespawn },
-		{ "ShowPlayerDialog", &n_ShowPlayerDialog },
+		{ "ShowPlayerDialog", &n_ShowPlayerDialog_ },
 		{ "cache_delete", &n_cache_delete },
 		{ "cache_get_row", &n_cache_get_row },
 		{ "cache_get_row_count", &n_cache_get_row_count },

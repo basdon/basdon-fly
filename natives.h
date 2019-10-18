@@ -3,6 +3,7 @@
 
 int natives_find(AMX *amx);
 
+extern int n_AddPlayerClass;
 extern int n_ChangeVehicleColor;
 extern int n_CreatePlayerObject;
 extern int n_CreateVehicle_;
@@ -25,7 +26,7 @@ extern int n_SetPlayerFacingAngle;
 extern int n_SetPlayerPos;
 extern int n_SetPlayerRaceCheckpoint;
 extern int n_SetVehicleToRespawn;
-extern int n_ShowPlayerDialog;
+extern int n_ShowPlayerDialog_;
 extern int n_cache_delete;
 extern int n_cache_get_row;
 extern int n_cache_get_row_count;
@@ -53,6 +54,12 @@ extern cell nc_result;
 
 #define NC_(NATIVE,RESULT) amx_Callback(amx,NATIVE,(cell*)RESULT,nc_params)
 #define NC(NATIVE) NC_(NATIVE,&nc_result)
+
+#define NC_AddPlayerClass(CLASSID,FX,FY,FZ,FR,W1) nc_params[0]=11;\
+	nc_params[1]=CLASSID;nc_params[2]=FX;nc_params[3]=FY;nc_params[4]=FZ;\
+	nc_params[5]=FR;nc_params[6]=WEAPON_CAMERA;nc_params[7]=3036;\
+	nc_params[8]=nc_params[9]=nc_params[10]=nc_params[11]=0;\
+	amx_Callback(amx,n_AddPlayerClass,&nc_result,nc_params)
 
 #define NC_ChangeVehicleColor(VEHICLEID,COL1,COL2) \
 	nc_params[0]=3;nc_params[1]=VEHICLEID;\

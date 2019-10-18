@@ -38,7 +38,7 @@ void dialog_on_player_connect(AMX *amx, int playerid)
 	nc_params[5] = emptystringa;
 	nc_params[6] = emptystringa;
 	nc_params[7] = emptystringa;
-	NC(n_ShowPlayerDialog);
+	NC(n_ShowPlayerDialog_);
 }
 
 void dialog_on_player_disconnect(AMX *amx, int playerid)
@@ -158,7 +158,7 @@ int dialog_NC_ShowPlayerDialog(
 	} else {
 		nc_params[7] = emptystringa;
 	}
-	NC(n_ShowPlayerDialog);
+	NC(n_ShowPlayerDialog_);
 	return nc_result;
 }
 
