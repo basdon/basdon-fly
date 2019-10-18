@@ -1,8 +1,6 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define ISINVALIDAIRPORT(X) ((X).code[0] == 0)
-
 struct RUNWAY {
 	char id[4];
 	float heading, headingr;
