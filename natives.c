@@ -31,6 +31,7 @@ int n_SetPlayerPos_;
 int n_SetPlayerRaceCheckpoint;
 int n_SetVehicleToRespawn;
 int n_ShowPlayerDialog_;
+int n_SpawnPlayer_;
 int n_cache_delete;
 int n_cache_get_row;
 int n_cache_get_row_count;
@@ -87,6 +88,7 @@ int natives_find(AMX *amx)
 		{ "SetPlayerRaceCheckpoint", &n_SetPlayerRaceCheckpoint },
 		{ "SetVehicleToRespawn", &n_SetVehicleToRespawn },
 		{ "ShowPlayerDialog", &n_ShowPlayerDialog_ },
+		{ "SpawnPlayer", &n_SpawnPlayer_ },
 		{ "cache_delete", &n_cache_delete },
 		{ "cache_get_row", &n_cache_get_row },
 		{ "cache_get_row_count", &n_cache_get_row_count },
@@ -129,5 +131,18 @@ int natives_NC_SetPlayerPos(AMX *amx, int playerid, struct vec3 pos)
 	*((float*) (nc_params + 3)) = pos.y;
 	*((float*) (nc_params + 4)) = pos.z;
 	NC(n_SetPlayerPos_);
+	return nc_result;
+}
+
+int natives_NC_SpawnPlayer(AMX *amx, int playerid)
+{
+	NC_GetPlayerVehicleID(playerid);
+	if (nc_result) {
+		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
+		NC(n_SetPlayerPos_);
+	}
+	nc_params[0] = 1;
+	/*nc_params[1] = playerid;*/
+	NC(n_SpawnPlayer_);
 	return nc_result;
 }

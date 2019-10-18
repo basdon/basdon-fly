@@ -80,6 +80,25 @@ cmd_park(CMDPARAMS)
 }
 
 static int
+cmd_respawn(CMDPARAMS)
+{
+	int missions_is_player_on_mission(int playerid);
+	void spawn_respawn_player(AMX*, int);
+
+	static const char* NO = WARN"You cannot respawn while on a mission. "
+		"Use /s to cancel your current mission for a fee "
+		"($"EQ(MISSION_CANCEL_FINE_)").";
+
+	if (missions_is_player_on_mission(playerid)) {
+		amx_SetUString(buf144, NO, 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	} else {
+		natives_NC_SpawnPlayer(amx, playerid);
+	}
+	return 1;
+}
+
+static int
 cmd_spray(CMDPARAMS)
 {
 	char q[144];

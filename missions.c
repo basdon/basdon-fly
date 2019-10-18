@@ -46,6 +46,14 @@ static struct mission *activemission[MAX_PLAYERS];
 /*whether one flightdata data packet with afk flag has been sent already*/
 static char afk_tracker_packet_sent[MAX_PLAYERS];
 
+/**
+TODO: refactor once missions is all-plugin
+*/
+int missions_is_player_on_mission(int playerid)
+{
+	return activemission[playerid] != NULL;
+}
+
 void missions_init()
 {
 	int i = MAX_PLAYERS;

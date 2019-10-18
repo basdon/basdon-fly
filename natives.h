@@ -27,6 +27,7 @@ extern int n_SetPlayerPos_;
 extern int n_SetPlayerRaceCheckpoint;
 extern int n_SetVehicleToRespawn;
 extern int n_ShowPlayerDialog_;
+extern int n_SpawnPlayer_;
 extern int n_cache_delete;
 extern int n_cache_get_row;
 extern int n_cache_get_row_count;
@@ -152,6 +153,8 @@ extern cell nc_result;
 
 #define NC_ShowPlayerDialog __USE__dialog_NC_ShowPlayerDialog__
 
+#define NC_SpawnPlayer __USE__natives_NC_SpawnPlayer__
+
 #define NC_cache_delete(ID) nc_params[0]=2;nc_params[1]=ID;nc_params[2]=1;\
 	amx_Callback(amx,n_cache_delete,&nc_result,nc_params)
 
@@ -214,4 +217,14 @@ extern cell nc_result;
 #define NC_tickcount() nc_params[0]=0;\
 	amx_Callback(amx,n_tickcount,&nc_result,nc_params)
 
+/**
+Done here to do stuff, like streaming maps, anticheat?
+*/
 int natives_NC_SetPlayerPos(AMX *amx, int playerid, struct vec3 pos);
+/**
+SpawnPlayer kills players that are in vehicles, and spawns them with a bottle.
+
+So this wrapper does SetPlayerPos (directly) if needed, because that will
+eject a player.
+*/
+int natives_NC_SpawnPlayer(AMX *amx, int playerid);
