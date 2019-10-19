@@ -6,6 +6,7 @@ int natives_find(AMX *amx);
 extern int n_AddPlayerClass;
 extern int n_ChangeVehicleColor;
 extern int n_CreatePlayerObject;
+extern int n_CreatePlayerTextDraw;
 extern int n_CreateVehicle_;
 extern int n_DestroyPlayerObject;
 extern int n_DestroyVehicle_;
@@ -15,9 +16,21 @@ extern int n_GetPlayerIp;
 extern int n_GetPlayerName;
 extern int n_GetPlayerPos;
 extern int n_GetPlayerVehicleID;
+extern int n_GetVehicleModel;
 extern int n_GetVehiclePos;
+extern int n_GetVehicleVelocity;
 extern int n_GetVehicleZAngle;
 extern int n_GivePlayerWeapon;
+extern int n_PlayerTextDrawAlignment;
+extern int n_PlayerTextDrawColor;
+extern int n_PlayerTextDrawFont;
+extern int n_PlayerTextDrawHide;
+extern int n_PlayerTextDrawLetterSize;
+extern int n_PlayerTextDrawSetOutline;
+extern int n_PlayerTextDrawSetProportional;
+extern int n_PlayerTextDrawSetShadow;
+extern int n_PlayerTextDrawSetString;
+extern int n_PlayerTextDrawShow;
 extern int n_RemoveBuildingForPlayer;
 extern int n_SendClientMessage;
 extern int n_SendClientMessageToAll;
@@ -73,6 +86,11 @@ extern cell nc_result;
 	nc_params[7]=FRY;nc_params[8]=FRZ;nc_params[9]=FDISTANCE;\
 	amx_Callback(amx,n_CreatePlayerObject,&nc_result,nc_params)
 
+#define NC_CreatePlayerTextDraw(PLAYERID,FX,FY,BUF) nc_params[0]=4;\
+	nc_params[1]=PLAYERID;nc_params[2]=FX;nc_params[3]=FY;\
+	nc_params[4]=BUF;\
+	amx_Callback(amx,n_CreatePlayerTextDraw,&nc_result,nc_params)
+
 #define NC_CreateVehicle __USE__veh_NC_CreateVehicle__
 
 #define NC_DestroyPlayerObject(PLAYERID,OBJECTID) \
@@ -109,10 +127,20 @@ extern cell nc_result;
 #define NC_GetPlayerVehicleID(PLAYERID) \
 	NC_GetPlayerVehicleID_(PLAYERID,&nc_result)
 
+#define NC_GetVehicleModel_(VEHICLEID,RESULT) \
+	nc_params[0]=1;nc_params[1]=VEHICLEID;\
+	amx_Callback(amx,n_GetVehicleModel,(cell*)RESULT,nc_params)
+#define NC_GetVehicleModel(VEHICLEID) NC_GetVehicleModel_(VEHICLEID,&nc_result)
+
 #define NC_GetVehiclePos(VEHICLEID,FX,FY,FZ) \
 	nc_params[0]=4;nc_params[1]=VEHICLEID;\
 	nc_params[2]=FX;nc_params[3]=FY;nc_params[4]=FZ;\
 	amx_Callback(amx,n_GetVehiclePos,&nc_result,nc_params)
+
+#define NC_GetVehicleVelocity(VEHICLEID,FX,FY,FZ) \
+	nc_params[0]=4;nc_params[1]=VEHICLEID;\
+	nc_params[2]=FX;nc_params[3]=FY;nc_params[4]=FZ;\
+	amx_Callback(amx,n_GetVehicleVelocity,&nc_result,nc_params)
 
 #define NC_GetVehicleZAngle(VEHICLEID,FR) \
 	nc_params[0]=2;nc_params[1]=VEHICLEID;nc_params[2]=FR;\
@@ -121,6 +149,47 @@ extern cell nc_result;
 #define NC_GivePlayerWeapon(PLAYERID,WEAPONID,AMMO) nc_params[0]=3;\
 	nc_params[1]=PLAYERID;nc_params[2]=WEAPONID;nc_params[3]=AMMO;\
 	amx_Callback(amx,n_GivePlayerWeapon,&nc_result,nc_params)
+
+#define NC_PlayerTextDrawAlignment(PLAYERID,TD,ALIGNMENT) nc_params[0]=3;\
+	nc_params[1]=PLAYERID;nc_params[2]=TD;nc_params[3]=ALIGNMENT;\
+	amx_Callback(amx,n_PlayerTextDrawAlignment,&nc_result,nc_params)
+
+#define NC_PlayerTextDrawColor(PLAYERID,TD,COLOR) nc_params[0]=3;\
+	nc_params[1]=PLAYERID;nc_params[2]=TD;nc_params[3]=COLOR;\
+	amx_Callback(amx,n_PlayerTextDrawColor,&nc_result,nc_params)
+
+#define NC_PlayerTextDrawFont(PLAYERID,TD,FONT) nc_params[0]=3;\
+	nc_params[1]=PLAYERID;nc_params[2]=TD;nc_params[3]=FONT;\
+	amx_Callback(amx,n_PlayerTextDrawFont,&nc_result,nc_params)
+
+#define NC_PlayerTextDrawHide(PLAYERID,TD) \
+	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=TD;\
+	amx_Callback(amx,n_PlayerTextDrawHide,&nc_result,nc_params)
+
+#define NC_PlayerTextDrawLetterSize(PLAYERID,TD,FX,FY) nc_params[0]=3;\
+	nc_params[1]=PLAYERID;nc_params[2]=TD;\
+	nc_params[3]=FX;nc_params[4]=FY\
+	amx_Callback(amx,n_PlayerTextDrawLetterSize,&nc_result,nc_params)
+
+#define NC_PlayerTextDrawOutline(PLAYERID,TD,OUTLINE) nc_params[0]=3;\
+	nc_params[1]=PLAYERID;nc_params[2]=TD;nc_params[3]=OUTLINE;\
+	amx_Callback(amx,n_PlayerTextDrawOutline,&nc_result,nc_params)
+
+#define NC_PlayerTextDrawProportional(PLAYERID,TD,PROP) nc_params[0]=3;\
+	nc_params[1]=PLAYERID;nc_params[2]=TD;nc_params[3]=PROP;\
+	amx_Callback(amx,n_PlayerTextDrawProportional,&nc_result,nc_params)
+
+#define NC_PlayerTextDrawSetShadow(PLAYERID,TD,SHADOW) nc_params[0]=3;\
+	nc_params[1]=PLAYERID;nc_params[2]=TD;nc_params[3]=SHADOW;\
+	amx_Callback(amx,n_PlayerTextDrawSetShadow,&nc_result,nc_params)
+
+#define NC_PlayerTextDrawSetString(PLAYERID,TD,BUF) nc_params[0]=3;\
+	nc_params[1]=PLAYERID;nc_params[2]=TD;nc_params[3]=BUF;\
+	amx_Callback(amx,n_PlayerTextDrawSetString,&nc_result,nc_params)
+
+#define NC_PlayerTextDrawShow(PLAYERID,TD) \
+	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=TD;\
+	amx_Callback(amx,n_PlayerTextDrawShow,&nc_result,nc_params)
 
 #define NC_SendClientMessage(PLAYERID,COLOR,BUF) \
 	nc_params[0]=3;\
@@ -228,3 +297,10 @@ So this wrapper does SetPlayerPos (directly) if needed, because that will
 eject a player.
 */
 int natives_NC_SpawnPlayer(AMX *amx, int playerid);
+
+/**
+Alternative for GetPlayerPos to get it directly into a vec3 struct.
+
+Will use buf32, buf64, buf144.
+*/
+int natives_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos);

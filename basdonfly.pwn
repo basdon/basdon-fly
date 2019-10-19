@@ -64,6 +64,9 @@ native B_OnPlayerCommandText(playerid, cmdtext[])
 //@summary Plugin callback for {@link OnPlayerConnect}
 native B_OnPlayerConnect(playerid)
 
+//@summary Plugin callback for {@link OnPlayerDeath}
+native B_OnPlayerDeath(playerid, killerid, reason)
+
 //@summary Plugin callback for {@link OnPlayerDisconnect}
 native B_OnPlayerDisconnect(playerid, reason)
 
@@ -846,33 +849,3 @@ native Veh_UpdateServicePtsVisibility(playerid, Float:x, Float:y, data[])
 //@param dbid id of the vehicle in the vehicle table (returned by {@link Veh_Add}), or {@code -1} if slot is now free
 //@seealso Veh_Add
 native Veh_UpdateSlot(vehicleid, dbid)
-
-#namespace "zones.c"
-
-//@summary Insert the zone string for player in {@param buf}
-//@param playerid the playerid of which to get the zone
-//@param buf a buffer
-native Zones_FormatForPlayer(playerid, buf[])
-
-//@summary Inserts the formatted '/loc' text for a player
-//@param playerid the playerid whose '/loc' is needed
-//@param buf a buffer
-//@param z z position of player
-//@param model model of vehicle the player is in or {@code 0}
-//@param vx x-velocity of vehicle the player is in
-//@param vy y-velocity of vehicle the player is in
-//@param vz z-velocity of vehicle the player is in
-native Zones_FormatLoc(playerid, buf[], Float:z, model, Float:vx, Float:vy, Float:vz)
-
-//@summary Invalidate cached zone for player
-//@param playerid player to invalidate cache for
-native Zones_InvalidateForPlayer(playerid)
-
-//@summary Check if the player's zone has changed.
-//@param playerid player to check
-//@param x x position of player
-//@param y y position of player
-//@param z z position of player
-//@returns {@code 0} if the player's zone did not change
-native Zones_UpdateForPlayer(playerid, Float:x, Float:y, Float:z)
-

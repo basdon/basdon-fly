@@ -126,11 +126,6 @@ FORWARD(Veh_ShouldCreateLabel);
 FORWARD(Veh_UpdateServicePointTextId);
 FORWARD(Veh_UpdateServicePtsVisibility);
 FORWARD(Veh_UpdateSlot);
-/* zones.c */
-FORWARD(Zones_FormatForPlayer);
-FORWARD(Zones_FormatLoc);
-FORWARD(Zones_InvalidateForPlayer);
-FORWARD(Zones_UpdateForPlayer);
 
 static AMX *gamemode_amx;
 
@@ -176,6 +171,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	void dev_missions_update_closest_point(AMX*);
 	void dialog_pop_queue(AMX*);
 	void maps_process_tick(AMX*);
+	void zones_update_for_all(AMX*);
 
 	static int count = 0;
 #ifdef LOG_SLOW_TICKS
@@ -216,7 +212,7 @@ timer30s:			/*timer30s*/
 				;
 			}
 			/*timer1000*/
-
+			zones_update_for_all(amx);
 			/*TODO: on 5s?*/
 			dialog_pop_queue(amx);
 		}
@@ -241,6 +237,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnGameModeInit),
 	REGISTERNATIVE(B_OnPlayerCommandText),
 	REGISTERNATIVE(B_OnPlayerConnect),
+	REGISTERNATIVE(B_OnPlayerDeath),
 	REGISTERNATIVE(B_OnPlayerDisconnect),
 	REGISTERNATIVE(B_OnPlayerSpawn),
 	REGISTERNATIVE(B_OnPlayerText),
@@ -352,11 +349,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_UpdateServicePointTextId),
 	REGISTERNATIVE(Veh_UpdateServicePtsVisibility),
 	REGISTERNATIVE(Veh_UpdateSlot),
-	/* zones.c */
-	REGISTERNATIVE(Zones_FormatForPlayer),
-	REGISTERNATIVE(Zones_FormatLoc),
-	REGISTERNATIVE(Zones_InvalidateForPlayer),
-	REGISTERNATIVE(Zones_UpdateForPlayer),
 	{0, 0}
 };
 

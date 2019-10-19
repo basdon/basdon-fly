@@ -140,6 +140,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	void echo_on_player_connection(AMX*, int, int);
 	void dialog_on_player_connect(AMX*, int);
 	void maps_OnPlayerConnect(AMX*, int);
+	void zones_OnPlayerConnect(AMX*, int);
 
 	const int playerid = params[1];
 	int i;
@@ -156,6 +157,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	maps_OnPlayerConnect(amx, playerid);
 	echo_on_player_connection(amx, playerid, 3);
 	dialog_on_player_connect(amx, playerid);
+	zones_on_player_connect(amx, playerid);
 
 	for (i = 0; i < playercount; ){
 		if (players[i] == playerid) {
@@ -163,6 +165,18 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 		}
 	}
 	players[playercount++] = playerid;
+	return 1;
+}
+
+/* native B_OnPlayerDeath(playerid, killerid, reason */
+cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
+{
+	void zones_on_player_death(AMX*, int);
+
+	const int playerid = params[1], killerdid = params[2];
+	const int reason = params[3];
+
+	zones_on_player_death(amx, playerid);
 	return 1;
 }
 
@@ -196,8 +210,10 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 {
 	void spawn_on_player_spawn(AMX*, int);
+	void zones_on_player_spawn(AMX*, int);
 
 	spawn_on_player_spawn(amx, params[1]);
+	zones_on_player_spawn(amx, params[1]);
 	return 1;
 }
 

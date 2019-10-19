@@ -10,6 +10,7 @@ custom code and shouldn't be used directly.*/
 int n_AddPlayerClass;
 int n_ChangeVehicleColor;
 int n_CreatePlayerObject;
+int n_CreatePlayerTextDraw;
 int n_CreateVehicle_;
 int n_DestroyPlayerObject;
 int n_DestroyVehicle_;
@@ -19,9 +20,21 @@ int n_GetPlayerIp;
 int n_GetPlayerName;
 int n_GetPlayerPos;
 int n_GetPlayerVehicleID;
+int n_GetVehicleModel;
 int n_GetVehiclePos;
+int n_GetVehicleVelocity;
 int n_GetVehicleZAngle;
 int n_GivePlayerWeapon;
+int n_PlayerTextDrawAlignment;
+int n_PlayerTextDrawColor;
+int n_PlayerTextDrawFont;
+int n_PlayerTextDrawHide;
+int n_PlayerTextDrawLetterSize;
+int n_PlayerTextDrawSetOutline;
+int n_PlayerTextDrawSetProportional;
+int n_PlayerTextDrawSetShadow;
+int n_PlayerTextDrawSetString;
+int n_PlayerTextDrawShow;
 int n_RemoveBuildingForPlayer;
 int n_SendClientMessage;
 int n_SendClientMessageToAll;
@@ -66,6 +79,7 @@ int natives_find(AMX *amx)
 		{ "AddPlayerClass", &n_AddPlayerClass },
 		{ "ChangeVehicleColor", &n_ChangeVehicleColor },
 		{ "CreatePlayerObject", &n_CreatePlayerObject },
+		{ "CreatePlayerTextDraw", &n_CreatePlayerTextDraw },
 		{ "CreateVehicle", &n_CreateVehicle_ },
 		{ "DestroyPlayerObject", &n_DestroyPlayerObject },
 		{ "DestroyVehicle", &n_DestroyVehicle_ },
@@ -76,9 +90,22 @@ int natives_find(AMX *amx)
 		{ "GetPlayerName", &n_GetPlayerName },
 		{ "GetPlayerPos", &n_GetPlayerPos },
 		{ "GetPlayerVehicleID", &n_GetPlayerVehicleID },
+		{ "GetVehicleModel", &n_GetVehicleModel },
 		{ "GetVehiclePos", &n_GetVehiclePos },
+		{ "GetVehicleVelocity", &n_GetVehicleVelocity },
 		{ "GetVehicleZAngle", &n_GetVehicleZAngle },
 		{ "GivePlayerWeapon", &n_GivePlayerWeapon },
+		{ "PlayerTextDrawAlignment", &n_PlayerTextDrawAlignment },
+		{ "PlayerTextDrawColor", &n_PlayerTextDrawColor },
+		{ "PlayerTextDrawFont", &n_PlayerTextDrawFont },
+		{ "PlayerTextDrawHide", &n_PlayerTextDrawHide },
+		{ "PlayerTextDrawLetterSize", &n_PlayerTextDrawLetterSize },
+		{ "PlayerTextDrawSetOutline", &n_PlayerTextDrawSetOutline },
+		{ "PlayerTextDrawSetProportional",
+			&n_PlayerTextDrawSetProportional },
+		{ "PlayerTextDrawSetShadow", &n_PlayerTextDrawSetShadow },
+		{ "PlayerTextDrawSetString", &n_PlayerTextDrawSetString },
+		{ "PlayerTextDrawShow", &n_PlayerTextDrawShow },
 		{ "RemoveBuildingForPlayer", &n_RemoveBuildingForPlayer },
 		{ "SendClientMessage", &n_SendClientMessage },
 		{ "SendClientMessageToAll", &n_SendClientMessageToAll },
@@ -122,8 +149,10 @@ int natives_find(AMX *amx)
 int natives_NC_SetPlayerPos(AMX *amx, int playerid, struct vec3 pos)
 {
 	void maps_stream_for_player(AMX*, int, struct vec3);
+	void zones_update(AMX*, int, struct vec3);
 
 	maps_stream_for_player(amx, playerid, pos);
+	zones_update(amx, playerid, pos);
 
 	nc_params[0] = 4;
 	nc_params[1] = playerid;
@@ -144,5 +173,14 @@ int natives_NC_SpawnPlayer(AMX *amx, int playerid)
 	nc_params[0] = 1;
 	/*nc_params[1] = playerid;*/
 	NC(n_SpawnPlayer_);
+	return nc_result;
+}
+
+int natives_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos)
+{
+	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
+	pos->x = *((float*) buf32);
+	pos->y = *((float*) buf64);
+	pos->z = *((float*) buf144);
 	return nc_result;
 }

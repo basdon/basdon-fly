@@ -3,19 +3,13 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
+#include "cmd.h"
 #include "playerdata.h"
 #include "vehicles.h"
 #include "game_sa.h"
 #include <string.h>
 
-/*
-Gets next int parameter in cmdtext after parseidx.
-Preceding whitespace(s) are skipped.
-On match, parseidx is the index right after the value, so either space or \0.
-Returns non-zero on success, with int in value parameter.
-*/
-static int
-cmd_get_int_param(const char *cmdtext, int *parseidx, int *value)
+int cmd_get_int_param(const char *cmdtext, int *parseidx, int *value)
 {
 	char *pc = (char*) cmdtext + *parseidx;
 	int val = 0, sign = 1;
@@ -45,15 +39,7 @@ nextchar:
 	goto nextchar;
 }
 
-/*
-Gets next player parameter in cmdtext after parseidx.
-Preceding whitespace(s) are skipped.
-On match, parseidx is the index right after the value, so either space or \0.
-If a valid player id was given but id is not taken, INVALID_PLAYER_ID is used.
-Returns non-zero on success, with playerid in playerid parameter.
-*/
-static int
-cmd_get_player_param(const char *cmdtext, int *parseidx, int *playerid)
+int cmd_get_player_param(const char *cmdtext, int *parseidx, int *playerid)
 {
 	char name[MAX_PLAYER_NAME + 1], val;
 	char *pc = (char*) cmdtext + *parseidx;
@@ -122,14 +108,7 @@ gotvalue:
 	return 1;
 }
 
-/*
-Gets next string parameter in cmdtext after parseidx.
-Preceding whitespace(s) are skipped.
-On match, parseidx is the index right after the value, so either space or \0.
-Returns non-zero on success, with filled in buffer.
-*/
-static int
-cmd_get_str_param(const char* cmdtext, int *parseidx, char *buf)
+int cmd_get_str_param(const char* cmdtext, int *parseidx, char *buf)
 {
 	char *pc = (char*) cmdtext + *parseidx;
 	char *b = buf;
@@ -164,6 +143,8 @@ struct COMMAND {
 #include "cmdhandlers_dev.c"
 #endif /*DEV*/
 
+int zones_cmd_loc(CMDPARAMS);
+
 /* see sharedsymbols.h for GROUPS_ definitions */
 /* command must prefixed by forward slash and be lower case */
 static struct COMMAND cmds[] = {
@@ -174,6 +155,7 @@ static struct COMMAND cmds[] = {
 #endif /*DEV*/
 	{ 0, "//respawn", GROUPS_ADMIN, cmd_admin_respawn },
 	{ 0, "/camera", GROUPS_ALL, cmd_camera },
+	{ 0, "/loc", GROUPS_ALL, zones_cmd_loc },
 	{ 0, "/park", GROUPS_ALL, cmd_park },
 	{ 0, "/respawn", GROUPS_ALL, cmd_respawn },
 	{ 0, "/spray", GROUPS_ALL, cmd_spray },
