@@ -39,6 +39,7 @@ int n_PlayerTextDrawShow;
 int n_RemoveBuildingForPlayer;
 int n_SendClientMessage;
 int n_SendClientMessageToAll;
+int n_SendRconCommand;
 int n_SetCameraBehindPlayer;
 int n_SetPlayerCameraPos;
 int n_SetPlayerCameraLookAt;
@@ -115,6 +116,7 @@ int natives_find(AMX *amx)
 		{ "RemoveBuildingForPlayer", &n_RemoveBuildingForPlayer },
 		{ "SendClientMessage", &n_SendClientMessage },
 		{ "SendClientMessageToAll", &n_SendClientMessageToAll },
+		{ "SendRconCommand", &n_SendRconCommand },
 		{ "SetCameraBehindPlayer", &n_SetCameraBehindPlayer },
 		{ "SetPlayerCameraPos", &n_SetPlayerCameraPos },
 		{ "SetPlayerCameraLookAt", &n_SetPlayerCameraLookAt },

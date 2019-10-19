@@ -35,6 +35,7 @@ extern int n_PlayerTextDrawShow;
 extern int n_RemoveBuildingForPlayer;
 extern int n_SendClientMessage;
 extern int n_SendClientMessageToAll;
+extern int n_SendRconCommand;
 extern int n_SetCameraBehindPlayer;
 extern int n_SetPlayerCameraPos;
 extern int n_SetPlayerCameraLookAt;
@@ -209,6 +210,9 @@ extern cell nc_result;
 #define NC_SendClientMessageToAll(COLOR,BUF) \
 	nc_params[0]=2;nc_params[1]=COLOR;nc_params[2]=BUF;\
 	amx_Callback(amx,n_SendClientMessageToAll,&nc_result,nc_params)
+
+#define NC_SendRconCommand(BUF) nc_params[0]=1;nc_params[1]=BUF;\
+	amx_Callback(amx,n_SendRconCommand,&nc_result,nc_params)
 
 #define NC_SetCameraBehindPlayer(PLAYERID) \
 	nc_params[0]=1;nc_params[1]=PLAYERID;\

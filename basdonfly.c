@@ -128,7 +128,7 @@ FORWARD(Veh_UpdateServicePointTextId);
 FORWARD(Veh_UpdateServicePtsVisibility);
 FORWARD(Veh_UpdateSlot);
 
-static AMX *gamemode_amx;
+static AMX *gamemode_amx = NULL;
 
 #define IN_BASDONFLY
 #include "basdon.c"
@@ -180,6 +180,13 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	static int tickcount = 0;
 #endif /*LOG_SLOW_TICKS*/
 	static int lasttime = 0;
+
+	/*occurs when doing gmx*/
+	/*if (gamemode_amx == NULL) {
+		count = 0;
+		lasttime = 0;
+		return;
+	}*/
 
 	if (count++ >= 19) {
 		count = 0;
@@ -378,6 +385,14 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx)
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx)
 {
+	if (amx == gamemode_amx) {
+		gamemode_amx = NULL;
+		/*Most likely doing gmx for update, so the server needs
+		to restart (exit and start) to copy and load the new plugin.*/
+		buf32[0] = 'e'; buf32[1] = 'x'; buf32[2] = 'i'; buf32[3] = 't';
+		buf32[4] = 0;
+		NC_SendRconCommand(buf32a);
+	}
 	return AMX_ERR_NONE;
 }
 
