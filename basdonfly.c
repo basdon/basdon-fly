@@ -182,11 +182,11 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	static int lasttime = 0;
 
 	/*occurs when doing gmx*/
-	/*if (gamemode_amx == NULL) {
+	if (gamemode_amx == NULL) {
 		count = 0;
 		lasttime = 0;
 		return;
-	}*/
+	}
 
 	if (count++ >= 19) {
 		count = 0;
@@ -392,6 +392,8 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx)
 		buf32[0] = 'e'; buf32[1] = 'x'; buf32[2] = 'i'; buf32[3] = 't';
 		buf32[4] = 0;
 		NC_SendRconCommand(buf32a);
+		/*TODO this actually crashes the server somewhere. Although the
+		result is the same, it would be nice if it didn't crash :)*/
 	}
 	return AMX_ERR_NONE;
 }
