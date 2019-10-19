@@ -185,8 +185,7 @@ void zones_update_for_all(AMX *amx)
 	}
 }
 
-int zones_cmd_loc(
-	AMX *amx, const int playerid, const char *cmdtext, int parseidx)
+int zones_cmd_loc(CMDPARAMS)
 {
 	static const char *CMD_SYN = WARN"Syntax: /loc [id/part of name]";
 	static const char *CMD_NOT_ONLINE = WARN"That player is not online.";

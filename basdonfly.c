@@ -171,6 +171,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	void dev_missions_update_closest_point(AMX*);
 	void dialog_pop_queue(AMX*);
 	void maps_process_tick(AMX*);
+	void protips_timed_broadcast(AMX*);
 	void zones_update_for_all(AMX*);
 
 	static int count = 0;
@@ -208,6 +209,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 				}
 				/*timer1m*/
 				echo_init(amx);
+				protips_timed_broadcast(amx);
 timer30s:			/*timer30s*/
 				;
 			}

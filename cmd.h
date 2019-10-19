@@ -1,6 +1,8 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#define CMDPARAMS AMX *amx,const int playerid,const char *cmdtext,int parseidx
+
 /*
 Gets next int parameter in cmdtext after parseidx.
 
