@@ -4,6 +4,7 @@
 #define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
 #include "a_samp.h"
+#include "class.h"
 #include "game_sa.h"
 
 #define VINEWOOD_CAM_POS_X 1496.7052f
@@ -13,11 +14,13 @@
 #define VINEWOOD_CAM_LAT_Y -787.6342f
 #define VINEWOOD_CAM_LAT_Z 82.1637f
 
-#define CLASS_PILOT 0
-#define CLASS_RESCUE 1
-#define CLASS_ARMY 2
-#define CLASS_AID 3
-#define CLASS_TRUCKER 4
+const int CLASSMAPPING[] = {
+	CLASS_PILOT,
+	CLASS_RESCUE,
+	CLASS_ARMY,
+	CLASS_AID,
+	CLASS_TRUCKER,
+};
 
 static const char *CLASS_NAMES[] = {
 	"~p~Pilot",
@@ -35,7 +38,8 @@ static const int CLASS_COLORS[] = {
 	0xe2c063ff,
 };
 
-int playerclass[MAX_PLAYERS];
+int classid[MAX_PLAYERS];
+int classidx[MAX_PLAYERS];
 
 void class_init(AMX *amx)
 {
@@ -60,6 +64,7 @@ void class_init(AMX *amx)
 
 void class_on_player_connect(AMX *amx, int playerid)
 {
+	classid[playerid] = CLASSMAPPING[classidx[playerid] = 0];
 	nc_params[0] = 2;
 	nc_params[1] = playerid;
 	nc_params[2] = 0x888888FF;
@@ -73,12 +78,14 @@ May also be called by login code, after player is logged in.
 
 @param classid class id or -1 to use already set class id
 */
-void class_on_player_request_class(AMX *amx, int playerid, int classid)
+void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 {
-	if (classid == -1) {
-		classid = playerclass[playerid];
+	int class_index;
+	if (_classid < 0 || numclasses <= _classid) {
+		class_index = classidx[playerid];
 	} else {
-		playerclass[playerid] = classid;
+		classidx[playerid] = class_index = _classid;
+		classid[playerid] = CLASSMAPPING[class_index];
 	}
 
 	nc_params[0] = 4;
@@ -111,7 +118,7 @@ void class_on_player_request_class(AMX *amx, int playerid, int classid)
 	/*special action should be done _after_ setting position*/
 	/*Note: while this shouldn't be done when the player has not logged in
 	yet, calling this doesn't work on first invocation (which normally
-	would happens in class_on_player_request_class), so execute it here
+	would happen in class_on_player_request_class), so execute it here
 	already so the animation can 'preload' and works on request class.*/
 	nc_params[0] = 2;
 	nc_params[2] = SPECIAL_ACTION_DANCE1;
@@ -122,14 +129,14 @@ void class_on_player_request_class(AMX *amx, int playerid, int classid)
 		return;
 	}
 
-	nc_params[2] = CLASS_COLORS[classid];
+	nc_params[2] = CLASS_COLORS[class_index];
 	NC(n_SetPlayerColor);
 
 	/*facing angle only looks good when the dancing animation is applied*/
 	*((float*) (nc_params + 2)) = 236.0f;
 	NC(n_SetPlayerFacingAngle);
 
-	amx_SetUString(buf32, CLASS_NAMES[classid], 32);
+	amx_SetUString(buf32, CLASS_NAMES[class_index], 32);
 	nc_params[2] = buf32a;
 	nc_params[3] = 0x800000;
 	nc_params[4] = 3;
@@ -140,7 +147,7 @@ int class_on_player_request_spawn(AMX *amx, int playerid)
 {
 	static const char *NO_TRUCK = WARN"Trucker class is not available yet.";
 
-	if (playerclass[playerid] == CLASS_TRUCKER) {
+	if (classid[playerid] == CLASS_TRUCKER) {
 		amx_SetUString(buf144, NO_TRUCK, 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 0;

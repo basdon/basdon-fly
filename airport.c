@@ -7,7 +7,6 @@
 
 #include "common.h"
 #include "airport.h"
-#include "spawn.h"
 #include <string.h>
 #include <math.h>
 
@@ -42,7 +41,6 @@ void airports_init(AMX *amx)
 	int cacheid, rowcount, lastap, i;
 	struct AIRPORT *ap;
 	struct RUNWAY *rnw;
-	struct SPAWN *nextspawn;
 
 	if (airports != NULL) {
 		logprintf("airport_init(): table was not empty");
@@ -57,7 +55,7 @@ void airports_init(AMX *amx)
 
 	/*load airports*/
 	amx_SetUString(buf144,
-		"SELECT c,e,n,b,x,y,z,flags,spawnx,spawny,spawnz,spawnr "
+		"SELECT c,e,n,b,x,y,z,flags "
 		"FROM apt ORDER BY i ASC", 144);
 	NC_mysql_query_(buf144a, &cacheid);
 	NC_cache_get_row_count_(&rowcount);
@@ -66,7 +64,6 @@ void airports_init(AMX *amx)
 	}
 	numairports = rowcount;
 	airports = malloc(sizeof(struct AIRPORT) * numairports);
-	nextspawn = spawns = malloc(sizeof(struct SPAWN) * numairports);
 	while (rowcount--) {
 		ap = airports + rowcount;
 		ap->runways = ap->runwaysend = NULL;
@@ -85,18 +82,7 @@ void airports_init(AMX *amx)
 		NC_cache_get_field_flt(rowcount, 5, ap->pos.y);
 		NC_cache_get_field_flt(rowcount, 6, ap->pos.z);
 		NC_cache_get_field_int(rowcount, 7, &ap->flags);
-		if (ap->flags & (APT_FLAG_SPAWNHERE | APT_FLAG_SPAWNHEREMIL)) {
-			numspawns++;
-			nextspawn->name = ap->name;
-			NC_cache_get_field_flt(rowcount, 8, nextspawn->pos.x);
-			NC_cache_get_field_flt(rowcount, 9, nextspawn->pos.y);
-			NC_cache_get_field_flt(rowcount, 10, nextspawn->pos.z);
-			NC_cache_get_field_flt(rowcount, 11, nextspawn->r);
-			nextspawn++;
-		}
 	}
-	spawns = realloc(spawns, sizeof(struct SPAWN) * numspawns);
-	spawn_init();
 noairports:
 	NC_cache_delete(cacheid);
 

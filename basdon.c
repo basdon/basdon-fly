@@ -106,6 +106,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	void class_init(AMX *amx);
 	void echo_init(AMX *amx);
 	void maps_load_from_db(AMX *amx);
+	void spawn_init(AMX*);
 
 	memset(spawned, 0, sizeof(spawned));
 
@@ -113,6 +114,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	class_init(amx);
 	maps_load_from_db(amx);
 	echo_init(amx);
+	spawn_init(amx); /*MUST run after airports_init*/
 	return 1;
 }
 

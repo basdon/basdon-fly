@@ -29,6 +29,11 @@ struct vec3 {
 	float x, y, z;
 };
 
+struct vec4 {
+	struct vec3 coords;
+	float r;
+};
+
 /* amx addresses of buffers */
 extern cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
 /* physical addresses of buffers */
@@ -57,7 +62,7 @@ extern int playerclass[MAX_PLAYERS];
 /**
 Teleport the player to a coordinate, and set facing angle and reset camera.
 */
-void common_tp_player(AMX *amx, int playerid, struct vec3 pos, float r);
+void common_tp_player(AMX *amx, int playerid, struct vec4 pos);
 
 /**
 Hides game text for given player.
