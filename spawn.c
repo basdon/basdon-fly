@@ -61,7 +61,7 @@ void spawn_on_player_spawn(AMX *amx, int playerid)
 {
 	int randomspawn;
 	struct vec3 pos;
-	float r = 0.0f;
+	float r;
 	if (numspawns > 0) {
 		dialog_NC_ShowPlayerDialog(
 			amx, playerid, DIALOG_SPAWN_SELECTION,
@@ -71,9 +71,11 @@ void spawn_on_player_spawn(AMX *amx, int playerid)
 		pos = (spawns + randomspawn)->pos;
 		r = (spawns + randomspawn)->r;
 	} else {
-		pos.x = 1477.4771f;
-		pos.y = 1244.7747f;
-		pos.z = 10.8281f;
+		/*lv spawn*/
+		pos.x = 1320.41f;
+		pos.y = 1268.25f;
+		pos.z = 10.8203f;
+		r = 0.0f;
 	}
 	common_tp_player(amx, playerid, pos, r);
 }

@@ -5,6 +5,7 @@
 
 int p_OnPlayerCommandTextHash;
 int p_REMOVEME_isafk;
+int p_REMOVEME_isplaying;
 
 cell pc_result;
 
@@ -18,6 +19,7 @@ int publics_find(AMX *amx)
 	struct PUBLIC publics[] = {
 		{ "OnPlayerCommandTextHash", &p_OnPlayerCommandTextHash },
 		{ "REMOVEME_isafk", &p_REMOVEME_isafk },
+		{ "REMOVEME_isplaying", &p_REMOVEME_isplaying },
 	};
 	struct PUBLIC *p = publics + sizeof(publics)/sizeof(struct PUBLIC);
 

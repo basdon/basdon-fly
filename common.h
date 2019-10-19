@@ -34,14 +34,32 @@ extern cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
 /* physical addresses of buffers */
 extern cell *emptystring, *buf32, *buf32_1, *buf64, *buf144, *buf4096;
 
-/* element at index playerid is either 0 or 1 */
+/**
+element at index playerid is either 0 or 1
+*/
 extern char playeronlineflag[MAX_PLAYERS];
-/* contains 'playercount' elements, ids of connected players (not sorted) */
+/**
+contains 'playercount' elements, ids of connected players (not sorted)
+*/
 extern short players[MAX_PLAYERS];
 extern int playercount;
+/**
+Holds spawned status of players.
+*/
+extern int spawned[MAX_PLAYERS];
+/**
+Holds class the players are playing as.
+*/
+extern int playerclass[MAX_PLAYERS];
+
 #define IsPlayerConnected(PLAYERID) playeronlineflag[PLAYERID]
 
 /**
 Teleport the player to a coordinate, and set facing angle and reset camera.
 */
-void common_tp_player(AMX *amx, int pid, struct vec3 pos, float r);
+void common_tp_player(AMX *amx, int playerid, struct vec3 pos, float r);
+
+/**
+Hides game text for given player.
+*/
+void common_hide_gametext_for_player(AMX *amx, int playerid);

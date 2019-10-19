@@ -11,6 +11,7 @@ extern int n_CreateVehicle_;
 extern int n_DestroyPlayerObject;
 extern int n_DestroyVehicle_;
 extern int n_DisablePlayerRaceCheckpoint;
+extern int n_GameTextForPlayer;
 extern int n_GetConsoleVarAsInt;
 extern int n_GetPlayerIp;
 extern int n_GetPlayerName;
@@ -35,9 +36,13 @@ extern int n_RemoveBuildingForPlayer;
 extern int n_SendClientMessage;
 extern int n_SendClientMessageToAll;
 extern int n_SetCameraBehindPlayer;
+extern int n_SetPlayerCameraPos;
+extern int n_SetPlayerCameraLookAt;
+extern int n_SetPlayerColor;
 extern int n_SetPlayerFacingAngle;
 extern int n_SetPlayerPos_;
 extern int n_SetPlayerRaceCheckpoint;
+extern int n_SetPlayerSpecialAction;
 extern int n_SetVehicleToRespawn;
 extern int n_ShowPlayerDialog_;
 extern int n_SpawnPlayer_;
@@ -102,6 +107,11 @@ extern cell nc_result;
 #define NC_DisablePlayerRaceCheckpoint(PLAYERID) \
 	nc_params[0]=1;nc_params[1]=PLAYERID;\
 	amx_Callback(amx,n_DisablePlayerRaceCheckpoint,&nc_result,nc_params)
+
+#define NC_GameTextForPlayer(PLAYERID,BUF,LENGTH,STYLE) \
+	nc_params[0]=4;nc_params[1]=PLAYERID;nc_params[2]=BUF;\
+	nc_params[3]=LENGTH;nc_params[4]=STYLE;\
+	amx_Callback(amx,n_GameTextForPlayer,&nc_result,nc_params)
 
 #define NC_GetConsoleVarAsInt(BUF) nc_params[0]=1;nc_params[1]=BUF;\
 	amx_Callback(amx,n_GetConsoleVarAsInt,&nc_result,nc_params)

@@ -10,6 +10,7 @@ when we're inside basdonfly.c*/
 char playeronlineflag[MAX_PLAYERS];
 short players[MAX_PLAYERS];
 int playercount;
+int spawned[MAX_PLAYERS];
 
 /* native B_Validate(maxplayers, buf4096[], buf144[], buf64[], buf32[],
                      buf32_1[], emptystring) */
@@ -102,10 +103,14 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 {
 	void airports_init(AMX *amx);
+	void class_init(AMX *amx);
 	void echo_init(AMX *amx);
 	void maps_load_from_db(AMX *amx);
 
+	memset(spawned, 0, sizeof(spawned));
+
 	airports_init(amx);
+	class_init(amx);
 	maps_load_from_db(amx);
 	echo_init(amx);
 	return 1;
@@ -116,11 +121,19 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 {
 	int cmd_check(AMX*, const int, const int, const char*);
 	int cmd_hash(char*);
+	int spawn_on_player_command_text(AMX*, int);
 
+	static const char *NO = WARN"You can't use commands when not spawned.";
 	const int playerid = params[1];
 	char cmdtext[145];
 	cell *addr;
 	int hash;
+
+	if (!spawned[playerid]) {
+		amx_SetUString(buf144, NO, 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		return 1;
+	}
 
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
@@ -138,6 +151,7 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 {
 	void echo_on_player_connection(AMX*, int, int);
+	void class_on_player_connect(AMX*, int);
 	void dialog_on_player_connect(AMX*, int);
 	void maps_OnPlayerConnect(AMX*, int);
 	void zones_OnPlayerConnect(AMX*, int);
@@ -155,6 +169,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	playeronlineflag[playerid] = 1;
 
 	maps_OnPlayerConnect(amx, playerid);
+	class_on_player_connect(amx, playerid);
 	echo_on_player_connection(amx, playerid, 3);
 	dialog_on_player_connect(amx, playerid);
 	zones_on_player_connect(amx, playerid);
@@ -176,6 +191,8 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 	const int playerid = params[1], killerdid = params[2];
 	const int reason = params[3];
 
+	spawned[playerid] = 0;
+
 	zones_on_player_death(amx, playerid);
 	return 1;
 }
@@ -195,6 +212,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	dialog_on_player_disconnect(amx, playerid);
 
 	playeronlineflag[playerid] = 0;
+	spawned[playerid] = 0;
 
 	for (i = 0; i < playercount; i++) {
 		if (players[i] == playerid) {
@@ -206,14 +224,39 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native B_OnPlayerRequestClass(playerid, classid) */
+cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
+{
+	void class_on_player_request_class(AMX*, int, int);
+
+	const int playerid = params[1], classid = params[2];
+
+	class_on_player_request_class(amx, playerid, classid);
+	return 1;
+}
+
+/* native B_OnPlayerRequestSpawn(playerid) */
+cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
+{
+	int class_on_player_request_spawn(AMX*, int);
+
+	const int playerid = params[1];
+
+	return class_on_player_request_spawn(amx, playerid);
+}
+
 /* native B_OnPlayerSpawn(playerid) */
 cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 {
 	void spawn_on_player_spawn(AMX*, int);
 	void zones_on_player_spawn(AMX*, int);
 
-	spawn_on_player_spawn(amx, params[1]);
-	zones_on_player_spawn(amx, params[1]);
+	const int playerid = params[1];
+
+	spawned[playerid] = 1;
+
+	spawn_on_player_spawn(amx, playerid);
+	zones_on_player_spawn(amx, playerid);
 	return 1;
 }
 

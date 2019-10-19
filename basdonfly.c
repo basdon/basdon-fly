@@ -5,6 +5,7 @@
 #include "dialog.h"
 #include "playerdata.h"
 #include "vehicles.h"
+#include <string.h>
 
 logprintf_t logprintf;
 extern void *pAMXFunctions;
@@ -222,9 +223,23 @@ timer30s:			/*timer30s*/
 }
 #undef amx
 
+cell AMX_NATIVE_CALL REMOVEME_isspawned(AMX *amx, cell *params)
+{
+	return spawned[params[1]];
+}
+
+cell AMX_NATIVE_CALL REMOVEME_onplayerreqclassimpl(AMX *amx, cell *params)
+{
+	void class_on_player_request_class(AMX*,int,int);
+	class_on_player_request_class(amx,params[1],params[2]);
+	return 1;
+}
+
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
+	REGISTERNATIVE(REMOVEME_isspawned),
+	REGISTERNATIVE(REMOVEME_onplayerreqclassimpl),
 	/* airport.c */
 	REGISTERNATIVE(APT_FormatNearestList),
 	REGISTERNATIVE(APT_FormatBeaconList),
@@ -241,6 +256,8 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnPlayerConnect),
 	REGISTERNATIVE(B_OnPlayerDeath),
 	REGISTERNATIVE(B_OnPlayerDisconnect),
+	REGISTERNATIVE(B_OnPlayerRequestClass),
+	REGISTERNATIVE(B_OnPlayerRequestSpawn),
 	REGISTERNATIVE(B_OnPlayerSpawn),
 	REGISTERNATIVE(B_OnPlayerText),
 	REGISTERNATIVE(B_OnRecv),

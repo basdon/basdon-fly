@@ -15,6 +15,7 @@ int n_CreateVehicle_;
 int n_DestroyPlayerObject;
 int n_DestroyVehicle_;
 int n_DisablePlayerRaceCheckpoint;
+int n_GameTextForPlayer;
 int n_GetConsoleVarAsInt;
 int n_GetPlayerIp;
 int n_GetPlayerName;
@@ -39,9 +40,13 @@ int n_RemoveBuildingForPlayer;
 int n_SendClientMessage;
 int n_SendClientMessageToAll;
 int n_SetCameraBehindPlayer;
+int n_SetPlayerCameraPos;
+int n_SetPlayerCameraLookAt;
+int n_SetPlayerColor;
 int n_SetPlayerFacingAngle;
 int n_SetPlayerPos_;
 int n_SetPlayerRaceCheckpoint;
+int n_SetPlayerSpecialAction;
 int n_SetVehicleToRespawn;
 int n_ShowPlayerDialog_;
 int n_SpawnPlayer_;
@@ -85,6 +90,7 @@ int natives_find(AMX *amx)
 		{ "DestroyVehicle", &n_DestroyVehicle_ },
 		{ "DisablePlayerRaceCheckpoint",
 			&n_DisablePlayerRaceCheckpoint },
+		{ "GameTextForPlayer", &n_GameTextForPlayer },
 		{ "GetConsoleVarAsInt", &n_GetConsoleVarAsInt },
 		{ "GetPlayerIp", &n_GetPlayerIp },
 		{ "GetPlayerName", &n_GetPlayerName },
@@ -110,9 +116,13 @@ int natives_find(AMX *amx)
 		{ "SendClientMessage", &n_SendClientMessage },
 		{ "SendClientMessageToAll", &n_SendClientMessageToAll },
 		{ "SetCameraBehindPlayer", &n_SetCameraBehindPlayer },
+		{ "SetPlayerCameraPos", &n_SetPlayerCameraPos },
+		{ "SetPlayerCameraLookAt", &n_SetPlayerCameraLookAt },
+		{ "SetPlayerColor", &n_SetPlayerColor },
 		{ "SetPlayerPos", &n_SetPlayerPos_ },
 		{ "SetPlayerFacingAngle", &n_SetPlayerFacingAngle },
 		{ "SetPlayerRaceCheckpoint", &n_SetPlayerRaceCheckpoint },
+		{ "SetPlayerSpecialAction", &n_SetPlayerSpecialAction },
 		{ "SetVehicleToRespawn", &n_SetVehicleToRespawn },
 		{ "ShowPlayerDialog", &n_ShowPlayerDialog_ },
 		{ "SpawnPlayer", &n_SpawnPlayer_ },

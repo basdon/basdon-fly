@@ -70,6 +70,12 @@ native B_OnPlayerDeath(playerid, killerid, reason)
 //@summary Plugin callback for {@link OnPlayerDisconnect}
 native B_OnPlayerDisconnect(playerid, reason)
 
+//@summary Plugin callback for {@link OnPlayerRequestClass}
+native B_OnPlayerRequestClass(playerid, classid)
+
+//@summary Plugin callback for {@link OnPlayerRequestSpawn}
+native B_OnPlayerRequestSpawn(playerid)
+
 //@summary Plugin callback for {@link OnPlayerSpawn}
 native B_OnPlayerSpawn(playerid)
 
