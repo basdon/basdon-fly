@@ -20,7 +20,7 @@ static int lastzoneindex[MAX_PLAYERS];
 /**
 Holds player text draw id for each player.
 */
-static ptextid[MAX_PLAYERS];
+static int ptextid[MAX_PLAYERS];
 
 void zones_init()
 {

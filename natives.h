@@ -242,12 +242,12 @@ extern cell nc_result;
 	amx_Callback(amx,n_cache_delete,&nc_result,nc_params)
 
 #define NC_cache_get_row_count_(RESULT) nc_params[0]=1;nc_params[1]=1;\
-	amx_Callback(amx,n_cache_get_row_count,RESULT,nc_params)
+	amx_Callback(amx,n_cache_get_row_count,(cell*)RESULT,nc_params)
 #define NC_cache_get_row_count() NC_cache_get_row_count_(&nc_result)
 
 #define NC_cache_get_field_int(ROW,COL,INTREF) nc_params[0]=2;\
 	nc_params[1]=ROW;nc_params[2]=COL;\
-	amx_Callback(amx,n_cache_get_row_int,INTREF,nc_params)
+	amx_Callback(amx,n_cache_get_row_int,(cell*)INTREF,nc_params)
 
 #define NC_cache_get_field_flt_cell(ROW,COL,CELLREF) nc_params[0]=2;\
 	nc_params[1]=ROW;nc_params[2]=COL;\
@@ -268,7 +268,7 @@ extern cell nc_result;
 
 #define NC_mysql_query_(BUF,RESULT) nc_params[0]=3;nc_params[1]=1;\
 	nc_params[2]=BUF;nc_params[3]=1;\
-	amx_Callback(amx,n_mysql_query,RESULT,nc_params)
+	amx_Callback(amx,n_mysql_query,(cell*)RESULT,nc_params)
 #define NC_mysql_query(BUF) NC_mysql_query_(BUF,&nc_result)
 
 #define NC_mysql_tquery_nocb(BUF) nc_params[0]=4;nc_params[1]=1;\

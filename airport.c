@@ -22,7 +22,6 @@ Clears all data and frees all allocated memory.
 void airports_destroy()
 {
 	struct AIRPORT *ap = airports;
-	struct RUNWAY *rnw;
 
 	while (numairports) {
 		numairports--;

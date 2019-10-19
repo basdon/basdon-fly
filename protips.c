@@ -32,11 +32,10 @@ static const char *protips[] = {
 	"Pro Tip: Always try to land on the back wheels."
 };
 static const int numprotips = sizeof(protips)/sizeof(protips[0]);
-static delay = 0;
 
 void protips_timed_broadcast(AMX *amx)
 {
-	static delay = 0;
+	static int delay = 0;
 
 	if (delay++ == 8) {
 		delay = 0;

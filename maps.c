@@ -303,7 +303,7 @@ void maps_process_tick(AMX *amx)
 	}
 }
 
-void maps_OnPlayerConnect(AMX *amx, int playerid)
+void maps_on_player_connect(AMX *amx, int playerid)
 {
 	struct REMOVEDOBJECT *r = removedobjects + numremovedobjects;
 
@@ -315,7 +315,7 @@ void maps_OnPlayerConnect(AMX *amx, int playerid)
 	}
 }
 
-void maps_OnPlayerDisconnect(int playerid)
+void maps_on_player_disconnect(int playerid)
 {
 	struct MAP *map = maps + nummaps;
 	while (map-- != maps) {

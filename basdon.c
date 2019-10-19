@@ -155,8 +155,8 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	void echo_on_player_connection(AMX*, int, int);
 	void class_on_player_connect(AMX*, int);
 	void dialog_on_player_connect(AMX*, int);
-	void maps_OnPlayerConnect(AMX*, int);
-	void zones_OnPlayerConnect(AMX*, int);
+	void maps_on_player_connect(AMX*, int);
+	void zones_on_player_connect(AMX*, int);
 
 	const int playerid = params[1];
 	int i;
@@ -170,10 +170,10 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 
 	playeronlineflag[playerid] = 1;
 
-	maps_OnPlayerConnect(amx, playerid);
 	class_on_player_connect(amx, playerid);
 	echo_on_player_connection(amx, playerid, 3);
 	dialog_on_player_connect(amx, playerid);
+	maps_on_player_connect(amx, playerid);
 	zones_on_player_connect(amx, playerid);
 
 	for (i = 0; i < playercount; ){
@@ -204,14 +204,14 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 {
 	void echo_on_player_connection(AMX*, int, int);
 	void dialog_on_player_disconnect(AMX*, int);
-	void maps_OnPlayerDisconnect(int playerid);
+	void maps_on_player_disconnect(int playerid);
 
 	const int playerid = params[1], reason = params[2];
 	int i;
 
-	maps_OnPlayerDisconnect(playerid);
 	echo_on_player_connection(amx, playerid, reason);
 	dialog_on_player_disconnect(amx, playerid);
+	maps_on_player_disconnect(playerid);
 
 	playeronlineflag[playerid] = 0;
 	spawned[playerid] = 0;

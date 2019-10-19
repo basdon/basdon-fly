@@ -7,6 +7,16 @@
 #include "vendor/SDK/amx/amx.h"
 #include "vendor/SDK/plugincommon.h"
 #include "sharedsymbols.h"
+
+struct vec3 {
+	float x, y, z;
+};
+
+struct vec4 {
+	struct vec3 coords;
+	float r;
+};
+
 #include "natives.h"
 #include "publics.h"
 
@@ -24,15 +34,6 @@ extern logprintf_t logprintf;
 #define CLAMP(X,L,U) ((X < L) ? L : ((X > U) ? U : X))
 #define Q(X) #X
 #define EQ(X) Q(X)
-
-struct vec3 {
-	float x, y, z;
-};
-
-struct vec4 {
-	struct vec3 coords;
-	float r;
-};
 
 /* amx addresses of buffers */
 extern cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
