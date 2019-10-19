@@ -101,7 +101,7 @@ void zones_on_player_spawn(AMX *amx, int playerid)
 	natives_NC_SetPlayerPos on player spawn.*/
 }
 
-void zones_on_player_death(AMX *amx, int playerid)
+void zones_hide_text(AMX *amx, int playerid)
 {
 	NC_PlayerTextDrawHide(playerid, ptextid[playerid]);
 }

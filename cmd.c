@@ -157,6 +157,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/loc", GROUPS_ALL, zones_cmd_loc },
 	{ 0, "/park", GROUPS_ALL, cmd_park },
 	{ 0, "/protip", GROUPS_ALL, protips_cmd_protip },
+	{ 0, "/reclass", GROUPS_ALL, cmd_reclass },
 	{ 0, "/respawn", GROUPS_ALL, cmd_respawn },
 	{ 0, "/spray", GROUPS_ALL, cmd_spray },
 }, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);

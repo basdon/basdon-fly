@@ -11,6 +11,7 @@ extern int n_CreateVehicle_;
 extern int n_DestroyPlayerObject;
 extern int n_DestroyVehicle_;
 extern int n_DisablePlayerRaceCheckpoint;
+extern int n_ForceClassSelection;
 extern int n_GameTextForPlayer;
 extern int n_GetConsoleVarAsInt;
 extern int n_GetPlayerIp;
@@ -47,6 +48,7 @@ extern int n_SetPlayerSpecialAction;
 extern int n_SetVehicleToRespawn;
 extern int n_ShowPlayerDialog_;
 extern int n_SpawnPlayer_;
+extern int n_TogglePlayerSpectating;
 extern int n_cache_delete;
 extern int n_cache_get_row;
 extern int n_cache_get_row_count;
@@ -108,6 +110,9 @@ extern cell nc_result;
 #define NC_DisablePlayerRaceCheckpoint(PLAYERID) \
 	nc_params[0]=1;nc_params[1]=PLAYERID;\
 	amx_Callback(amx,n_DisablePlayerRaceCheckpoint,&nc_result,nc_params)
+
+#define NC_ForceClassSelection(PLAYERID) nc_params[0]=1;nc_params[1]=PLAYERID;\
+	amx_Callback(amx,n_ForceClassSelection,&nc_result,nc_params)
 
 #define NC_GameTextForPlayer(PLAYERID,BUF,LENGTH,STYLE) \
 	nc_params[0]=4;nc_params[1]=PLAYERID;nc_params[2]=BUF;\
@@ -237,6 +242,10 @@ extern cell nc_result;
 #define NC_ShowPlayerDialog __USE__dialog_NC_ShowPlayerDialog__
 
 #define NC_SpawnPlayer __USE__natives_NC_SpawnPlayer__
+
+#define NC_TogglePlayerSpectating(PLAYERID,FLAG) \
+	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=FLAG;\
+	amx_Callback(amx,n_TogglePlayerSpectating,&nc_result,nc_params)
 
 #define NC_cache_delete(ID) nc_params[0]=2;nc_params[1]=ID;nc_params[2]=1;\
 	amx_Callback(amx,n_cache_delete,&nc_result,nc_params)

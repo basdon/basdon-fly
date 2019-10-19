@@ -188,14 +188,14 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 /* native B_OnPlayerDeath(playerid, killerid, reason */
 cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 {
-	void zones_on_player_death(AMX*, int);
+	void zones_hide_text(AMX*, int);
 
 	const int playerid = params[1], killerdid = params[2];
 	const int reason = params[3];
 
 	spawned[playerid] = 0;
 
-	zones_on_player_death(amx, playerid);
+	zones_hide_text(amx, playerid);
 	return 1;
 }
 

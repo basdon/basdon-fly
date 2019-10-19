@@ -15,6 +15,7 @@ int n_CreateVehicle_;
 int n_DestroyPlayerObject;
 int n_DestroyVehicle_;
 int n_DisablePlayerRaceCheckpoint;
+int n_ForceClassSelection;
 int n_GameTextForPlayer;
 int n_GetConsoleVarAsInt;
 int n_GetPlayerIp;
@@ -51,6 +52,7 @@ int n_SetPlayerSpecialAction;
 int n_SetVehicleToRespawn;
 int n_ShowPlayerDialog_;
 int n_SpawnPlayer_;
+int n_TogglePlayerSpectating;
 int n_cache_delete;
 int n_cache_get_row;
 int n_cache_get_row_count;
@@ -91,6 +93,7 @@ int natives_find(AMX *amx)
 		{ "DestroyVehicle", &n_DestroyVehicle_ },
 		{ "DisablePlayerRaceCheckpoint",
 			&n_DisablePlayerRaceCheckpoint },
+		{ "ForceClassSelection", &n_ForceClassSelection },
 		{ "GameTextForPlayer", &n_GameTextForPlayer },
 		{ "GetConsoleVarAsInt", &n_GetConsoleVarAsInt },
 		{ "GetPlayerIp", &n_GetPlayerIp },
@@ -128,6 +131,7 @@ int natives_find(AMX *amx)
 		{ "SetVehicleToRespawn", &n_SetVehicleToRespawn },
 		{ "ShowPlayerDialog", &n_ShowPlayerDialog_ },
 		{ "SpawnPlayer", &n_SpawnPlayer_ },
+		{ "TogglePlayerSpectating", &n_TogglePlayerSpectating },
 		{ "cache_delete", &n_cache_delete },
 		{ "cache_get_row", &n_cache_get_row },
 		{ "cache_get_row_count", &n_cache_get_row_count },

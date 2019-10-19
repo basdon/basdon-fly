@@ -79,18 +79,36 @@ cmd_park(CMDPARAMS)
 	return 1;
 }
 
+static const char* NO_RECLASSSPAWN =
+	WARN"You cannot reclass/respawn while on a mission. "
+	"Use /s to cancel your current mission for a fee "
+	"($"EQ(MISSION_CANCEL_FINE_)").";
+
+static int
+cmd_reclass(CMDPARAMS)
+{
+	int missions_is_player_on_mission(int playerid);
+
+	if (missions_is_player_on_mission(playerid)) {
+		amx_SetUString(buf144, NO_RECLASSSPAWN, 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	} else {
+		NC_ForceClassSelection(playerid);
+		NC_TogglePlayerSpectating(playerid, 1);
+		nc_params[2] = 0;
+		NC(n_TogglePlayerSpectating);
+	}
+	return 1;
+}
+
 static int
 cmd_respawn(CMDPARAMS)
 {
 	int missions_is_player_on_mission(int playerid);
 	void spawn_respawn_player(AMX*, int);
 
-	static const char* NO = WARN"You cannot respawn while on a mission. "
-		"Use /s to cancel your current mission for a fee "
-		"($"EQ(MISSION_CANCEL_FINE_)").";
-
 	if (missions_is_player_on_mission(playerid)) {
-		amx_SetUString(buf144, NO, 144);
+		amx_SetUString(buf144, NO_RECLASSSPAWN, 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	} else {
 		natives_NC_SpawnPlayer(amx, playerid);

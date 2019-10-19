@@ -80,6 +80,8 @@ May also be called by login code, after player is logged in.
 */
 void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 {
+	void zones_hide_text(AMX*, int);
+
 	int class_index;
 	if (_classid < 0 || numclasses <= _classid) {
 		class_index = classidx[playerid];
@@ -141,6 +143,10 @@ void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 	nc_params[3] = 0x800000;
 	nc_params[4] = 3;
 	NC(n_GameTextForPlayer);
+
+	/*Can happen, eg when doing /respawn (uses TogglePlayerSpectating,
+	which won't hide it.*/
+	zones_hide_text(amx, playerid);
 }
 
 int class_on_player_request_spawn(AMX *amx, int playerid)
