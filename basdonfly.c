@@ -92,9 +92,6 @@ FORWARD(PlayerData_UpdateGroup);
 FORWARD(PlayerData_UpdateName);
 /* playtime.c */
 FORWARD(Playtime_FormatUpdateTimes);
-/* prefs.c */
-FORWARD(Prefs_DoActionForRow);
-FORWARD(Prefs_FormatDialog);
 /* timecyc.c */
 FORWARD(Timecyc_GetCurrentWeatherMsg);
 FORWARD(Timecyc_GetNextWeatherMsgQuery);
@@ -238,11 +235,24 @@ cell AMX_NATIVE_CALL REMOVEME_onplayerreqclassimpl(AMX *amx, cell *params)
 	return 1;
 }
 
+cell AMX_NATIVE_CALL REMOVEME_setprefs(AMX *amx, cell *params)
+{
+	prefs[params[1]] = params[2];
+	return 1;
+}
+
+cell AMX_NATIVE_CALL REMOVEME_getprefs(AMX *amx, cell *params)
+{
+	return prefs[params[1]];
+}
+
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
 	REGISTERNATIVE(REMOVEME_isspawned),
 	REGISTERNATIVE(REMOVEME_onplayerreqclassimpl),
+	REGISTERNATIVE(REMOVEME_setprefs),
+	REGISTERNATIVE(REMOVEME_getprefs),
 	/* airport.c */
 	REGISTERNATIVE(APT_FormatNearestList),
 	REGISTERNATIVE(APT_FormatBeaconList),
@@ -336,9 +346,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PlayerData_UpdateName),
 	/* playtime.c */
 	REGISTERNATIVE(Playtime_FormatUpdateTimes),
-	/* prefs.c */
-	REGISTERNATIVE(Prefs_DoActionForRow),
-	REGISTERNATIVE(Prefs_FormatDialog),
 	/* timecyc.c */
 	REGISTERNATIVE(Timecyc_GetCurrentWeatherMsg),
 	REGISTERNATIVE(Timecyc_GetNextWeatherMsgQuery),

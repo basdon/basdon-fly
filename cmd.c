@@ -141,6 +141,7 @@ struct COMMAND {
 #include "cmdhandlers_dev.c"
 #endif /*DEV*/
 
+int prefs_cmd_preferences(CMDPARAMS);
 int protips_cmd_protip(CMDPARAMS);
 int nav_cmd_adf(CMDPARAMS);
 int nav_cmd_ils(CMDPARAMS);
@@ -161,6 +162,8 @@ static struct COMMAND cmds[] = {
 	{ 0, "/ils", GROUPS_ALL, nav_cmd_ils },
 	{ 0, "/loc", GROUPS_ALL, zones_cmd_loc },
 	{ 0, "/park", GROUPS_ALL, cmd_park },
+	{ 0, "/p", GROUPS_ALL, prefs_cmd_preferences },
+	{ 0, "/preferences", GROUPS_ALL, prefs_cmd_preferences },
 	{ 0, "/protip", GROUPS_ALL, protips_cmd_protip },
 	{ 0, "/reclass", GROUPS_ALL, cmd_reclass },
 	{ 0, "/respawn", GROUPS_ALL, cmd_respawn },

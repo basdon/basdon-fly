@@ -3,8 +3,12 @@
 
 #define DIALOG_DUMMY 127
 /*used ids from 1000 and up; gm uses < 1000*/
+/*max dialog is 32767*/
 #define DIALOG_SPAWN_SELECTION 1001
+#define DIALOG_PREFERENCES 1002
 
+/*don't use an id that is used in a dialog id (unless they relate)*/
+/*max transaction id is int max*/
 #define TRANSACTION_NONE 0
 #define TRANSACTION_OVERRIDE 1
 

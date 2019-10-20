@@ -64,6 +64,7 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 {
 	int dialog_on_response(AMX*, int, int);
 	void spawn_on_dialog_response(AMX*, int, int, int);
+	void prefs_on_dialog_response(AMX*, int, int, int);
 
 	const int playerid = params[1], dialogid = params[2];
 	const int response = params[3], listitem = params[4];
@@ -79,6 +80,9 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 	switch (dialogid) {
 	case DIALOG_SPAWN_SELECTION:
 		spawn_on_dialog_response(amx, playerid, response, listitem);
+		return 1;
+	case DIALOG_PREFERENCES:
+		prefs_on_dialog_response(amx, playerid, response, listitem);
 		return 1;
 	}
 	return 1;
@@ -156,6 +160,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	void class_on_player_connect(AMX*, int);
 	void dialog_on_player_connect(AMX*, int);
 	void maps_on_player_connect(AMX*, int);
+	void prefs_on_player_connect(int);
 	void zones_on_player_connect(AMX*, int);
 
 	const int playerid = params[1];
@@ -174,6 +179,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	echo_on_player_connection(amx, playerid, 3);
 	dialog_on_player_connect(amx, playerid);
 	maps_on_player_connect(amx, playerid);
+	prefs_on_player_connect(playerid);
 	zones_on_player_connect(amx, playerid);
 
 	for (i = 0; i < playercount; ){

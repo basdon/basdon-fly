@@ -57,6 +57,10 @@ extern int spawned[MAX_PLAYERS];
 Holds class the players are playing as.
 */
 extern int playerclass[MAX_PLAYERS];
+/**
+Player preferences, see sharedsymbols.h.
+*/
+extern int prefs[MAX_PLAYERS];
 
 #define IsPlayerConnected(PLAYERID) playeronlineflag[PLAYERID]
 
