@@ -142,6 +142,9 @@ struct COMMAND {
 #endif /*DEV*/
 
 int protips_cmd_protip(CMDPARAMS);
+int nav_cmd_adf(CMDPARAMS);
+int nav_cmd_ils(CMDPARAMS);
+int nav_cmd_vor(CMDPARAMS);
 int zones_cmd_loc(CMDPARAMS);
 
 /* see sharedsymbols.h for GROUPS_ definitions */
@@ -153,13 +156,16 @@ static struct COMMAND cmds[] = {
 	{ 0, "//owner", GROUPS_ALL, cmd_dev_owner },
 #endif /*DEV*/
 	{ 0, "//respawn", GROUPS_ADMIN, cmd_admin_respawn },
+	{ 0, "/adf", GROUPS_ALL, nav_cmd_adf },
 	{ 0, "/camera", GROUPS_ALL, cmd_camera },
+	{ 0, "/ils", GROUPS_ALL, nav_cmd_ils },
 	{ 0, "/loc", GROUPS_ALL, zones_cmd_loc },
 	{ 0, "/park", GROUPS_ALL, cmd_park },
 	{ 0, "/protip", GROUPS_ALL, protips_cmd_protip },
 	{ 0, "/reclass", GROUPS_ALL, cmd_reclass },
 	{ 0, "/respawn", GROUPS_ALL, cmd_respawn },
 	{ 0, "/spray", GROUPS_ALL, cmd_spray },
+	{ 0, "/vor", GROUPS_ALL, nav_cmd_vor },
 }, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
 
 /*

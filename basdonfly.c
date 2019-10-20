@@ -73,14 +73,11 @@ FORWARD(Missions_ShouldShowSatisfaction);
 FORWARD(Missions_Start);
 FORWARD(Missions_UpdateSatisfaction);
 /* nav.c */
-FORWARD(Nav_EnableADF);
-FORWARD(Nav_EnableVOR);
 FORWARD(Nav_GetActiveNavType);
 FORWARD(Nav_Format);
 FORWARD(Nav_NavigateToMission);
 FORWARD(Nav_Reset);
 FORWARD(Nav_ResetCache);
-FORWARD(Nav_ToggleILS);
 FORWARD(Nav_Update);
 /* panel.c */
 FORWARD(Panel_FormatAltitude);
@@ -320,14 +317,11 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Missions_Start),
 	REGISTERNATIVE(Missions_UpdateSatisfaction),
 	/* nav.c */
-	REGISTERNATIVE(Nav_EnableADF),
-	REGISTERNATIVE(Nav_EnableVOR),
 	REGISTERNATIVE(Nav_GetActiveNavType),
 	REGISTERNATIVE(Nav_Format),
 	REGISTERNATIVE(Nav_NavigateToMission),
 	REGISTERNATIVE(Nav_Reset),
 	REGISTERNATIVE(Nav_ResetCache),
-	REGISTERNATIVE(Nav_ToggleILS),
 	REGISTERNATIVE(Nav_Update),
 	/* panel.c */
 	REGISTERNATIVE(Panel_FormatAltitude),

@@ -295,10 +295,17 @@ cell AMX_NATIVE_CALL B_OnRecv(AMX *amx, cell *params)
 /* native B_OnVehicleSpawn(&vehicleid) */
 cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 {
-	cell *addr;
+	void nav_reset_for_vehicle(int);
 
+	cell *addr;
+	int vehicleid;
+
+	/*keep this first*/
 	amx_GetAddr(amx, params[1], &addr);
-	*addr = veh_OnVehicleSpawn(amx, *addr);
+	*addr = vehicleid = veh_OnVehicleSpawn(amx, *addr);
+
+	nav_reset_for_vehicle(vehicleid);
+
 	return 1;
 }
 

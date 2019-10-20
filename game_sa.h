@@ -71,3 +71,12 @@
 extern char *vehnames[];
 extern unsigned int vehicleflags[MODEL_TOTAL];
 
+/**
+Check if the given vehicle model is an air vehicle (plane or helicopter).
+*/
+int game_is_air_vehicle(int model);
+/**
+Check if the given vehicle model is a plane.
+*/
+int game_is_plane(int model);
+

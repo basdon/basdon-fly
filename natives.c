@@ -21,12 +21,14 @@ int n_GetConsoleVarAsInt;
 int n_GetPlayerIp;
 int n_GetPlayerName;
 int n_GetPlayerPos;
+int n_GetPlayerState;
 int n_GetPlayerVehicleID;
 int n_GetVehicleModel;
 int n_GetVehiclePos;
 int n_GetVehicleVelocity;
 int n_GetVehicleZAngle;
 int n_GivePlayerWeapon;
+int n_PlayerPlaySound;
 int n_PlayerTextDrawAlignment;
 int n_PlayerTextDrawColor;
 int n_PlayerTextDrawFont;
@@ -98,6 +100,7 @@ int natives_find(AMX *amx)
 		{ "GetConsoleVarAsInt", &n_GetConsoleVarAsInt },
 		{ "GetPlayerIp", &n_GetPlayerIp },
 		{ "GetPlayerName", &n_GetPlayerName },
+		{ "GetPlayerState", &n_GetPlayerState },
 		{ "GetPlayerPos", &n_GetPlayerPos },
 		{ "GetPlayerVehicleID", &n_GetPlayerVehicleID },
 		{ "GetVehicleModel", &n_GetVehicleModel },
@@ -105,6 +108,7 @@ int natives_find(AMX *amx)
 		{ "GetVehicleVelocity", &n_GetVehicleVelocity },
 		{ "GetVehicleZAngle", &n_GetVehicleZAngle },
 		{ "GivePlayerWeapon", &n_GivePlayerWeapon },
+		{ "PlayerPlaySound", &n_PlayerPlaySound },
 		{ "PlayerTextDrawAlignment", &n_PlayerTextDrawAlignment },
 		{ "PlayerTextDrawColor", &n_PlayerTextDrawColor },
 		{ "PlayerTextDrawFont", &n_PlayerTextDrawFont },

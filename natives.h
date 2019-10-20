@@ -17,12 +17,14 @@ extern int n_GetConsoleVarAsInt;
 extern int n_GetPlayerIp;
 extern int n_GetPlayerName;
 extern int n_GetPlayerPos;
+extern int n_GetPlayerState;
 extern int n_GetPlayerVehicleID;
 extern int n_GetVehicleModel;
 extern int n_GetVehiclePos;
 extern int n_GetVehicleVelocity;
 extern int n_GetVehicleZAngle;
 extern int n_GivePlayerWeapon;
+extern int n_PlayerPlaySound;
 extern int n_PlayerTextDrawAlignment;
 extern int n_PlayerTextDrawColor;
 extern int n_PlayerTextDrawFont;
@@ -137,6 +139,9 @@ extern cell nc_result;
 	nc_params[4]=FREFZ;\
 	amx_Callback(amx,n_GetPlayerPos,&nc_result,nc_params)
 
+#define NC_GetPlayerState(PLAYERID) nc_params[0]=1;nc_params[1]=PLAYERID;\
+	amx_Callback(amx,n_GetPlayerState,&nc_result,nc_params)
+
 #define NC_GetPlayerVehicleID_(PLAYERID,RESULT) \
 	nc_params[0]=1;nc_params[1]=PLAYERID;\
 	amx_Callback(amx,n_GetPlayerVehicleID,(cell*)RESULT,nc_params)
@@ -165,6 +170,17 @@ extern cell nc_result;
 #define NC_GivePlayerWeapon(PLAYERID,WEAPONID,AMMO) nc_params[0]=3;\
 	nc_params[1]=PLAYERID;nc_params[2]=WEAPONID;nc_params[3]=AMMO;\
 	amx_Callback(amx,n_GivePlayerWeapon,&nc_result,nc_params)
+
+#define NC_PlayerPlaySound(PLAYERID,SOUNDID,FX,FY,FZ) \
+	nc_params[0]=5;nc_params[1]=PLAYERID;nc_params[2]=SOUNDID;\
+	nc_params[3]=FX;nc_params[4]=FY;nc_params[5]=FZ;\
+	amx_Callback(amx,n_PlayerPlaySound,&nc_result,nc_params)
+
+/*same but at location 0, 0, 0*/
+#define NC_PlayerPlaySound0(PLAYERID,SOUNDID) \
+	nc_params[0]=5;nc_params[1]=PLAYERID;nc_params[2]=SOUNDID;\
+	nc_params[3]=nc_params[4]=nc_params[5]=0;\
+	amx_Callback(amx,n_PlayerPlaySound,&nc_result,nc_params)
 
 #define NC_PlayerTextDrawAlignment(PLAYERID,TD,ALIGNMENT) nc_params[0]=3;\
 	nc_params[1]=PLAYERID;nc_params[2]=TD;nc_params[3]=ALIGNMENT;\

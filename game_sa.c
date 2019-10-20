@@ -36,6 +36,16 @@ void game_sa_init()
 	SETFLAGS(MODEL_DODO, PLANE);
 }
 
+int game_is_air_vehicle(int model)
+{
+	return model && (vehicleflags[model - 400] & (HELI | PLANE));
+}
+
+int game_is_plane(int model)
+{
+	return model && (vehicleflags[model - 400] & PLANE);
+}
+
 /* native Game_IsAirVehicle(model) */
 cell AMX_NATIVE_CALL Game_IsAirVehicle(AMX *amx, cell *params)
 {
