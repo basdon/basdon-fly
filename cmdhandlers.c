@@ -93,9 +93,12 @@ cmd_reclass(CMDPARAMS)
 		amx_SetUString(buf144, NO_RECLASSSPAWN, 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	} else {
+		spawned[playerid] = 0;
 		NC_ForceClassSelection(playerid);
 		NC_TogglePlayerSpectating(playerid, 1);
 		nc_params[2] = 0;
+		/*TODO: toggle clock in timecyc?*/
+		NC(n_TogglePlayerClock);
 		NC(n_TogglePlayerSpectating);
 	}
 	return 1;

@@ -54,6 +54,7 @@ int n_SetPlayerSpecialAction;
 int n_SetVehicleToRespawn;
 int n_ShowPlayerDialog_;
 int n_SpawnPlayer_;
+int n_TogglePlayerClock;
 int n_TogglePlayerSpectating;
 int n_cache_delete;
 int n_cache_get_row;
@@ -135,6 +136,7 @@ int natives_find(AMX *amx)
 		{ "SetVehicleToRespawn", &n_SetVehicleToRespawn },
 		{ "ShowPlayerDialog", &n_ShowPlayerDialog_ },
 		{ "SpawnPlayer", &n_SpawnPlayer_ },
+		{ "TogglePlayerClock", &n_TogglePlayerClock },
 		{ "TogglePlayerSpectating", &n_TogglePlayerSpectating },
 		{ "cache_delete", &n_cache_delete },
 		{ "cache_get_row", &n_cache_get_row },

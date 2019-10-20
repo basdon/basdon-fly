@@ -50,6 +50,7 @@ extern int n_SetPlayerSpecialAction;
 extern int n_SetVehicleToRespawn;
 extern int n_ShowPlayerDialog_;
 extern int n_SpawnPlayer_;
+extern int n_TogglePlayerClock;
 extern int n_TogglePlayerSpectating;
 extern int n_cache_delete;
 extern int n_cache_get_row;
