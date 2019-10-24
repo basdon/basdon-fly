@@ -289,7 +289,7 @@ haveairport:
 
 	rw = ap->runways;
 	while (rw != ap->runwaysend) {
-		if (strcmp(rw->id, b) == 0) {
+		if (rw->type == RUNWAY_TYPE_RUNWAY && strcmp(rw->id, b) == 0) {
 			nav_enable(amx, vehicleid, NULL, rw);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_SET);
 			return 1;
@@ -303,7 +303,7 @@ tellrws:
 	b += sprintf(b, WARN"Unknown runway, try one of:");
 	rw = ap->runways;
 	while (rw != ap->runwaysend) {
-		if (rw ->nav) {
+		if (rw->nav & NAV_VOR) {
 			b += sprintf(b, " %s", rw->id);
 			len++;
 		}
