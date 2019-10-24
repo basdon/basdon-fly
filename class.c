@@ -106,10 +106,10 @@ void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 	do class thingies.*/
 	PC_REMOVEME_isplaying(playerid);
 	if (!pc_result) {
-		/*position behind the vinewood sign, to hide during login*/
-		*((float*) (nc_params + 2)) = 1415.386f;
-		*((float*) (nc_params + 3)) = -807.9211f;
-		*((float*) (nc_params + 4)) = 85.0615f;
+		/*position behind the camera, to hide during login*/
+		*((float*) (nc_params + 2)) = 1500.9938f;
+		*((float*) (nc_params + 3)) = -891.3679f;
+		*((float*) (nc_params + 4)) = 58.7611f;
 	} else {
 		*((float*) (nc_params + 2)) = 1486.2727f;
 		*((float*) (nc_params + 3)) = -874.0833f;
