@@ -249,8 +249,9 @@ cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
 	int idx = params[1];
 	struct AIRPORT *ap;
 	struct RUNWAY *rnw;
+	int helipads = 0;
 	cell *addr;
-	char buf[4096];
+	char buf[4096], *b = buf;
 	char szRunways[] = "Runways:";
 
 	amx_GetAddr(amx, params[2], &addr);
@@ -260,22 +261,27 @@ cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
 		return 0;
 	}
 	ap = airports + idx;
-	idx = sprintf(buf, "\nElevation:\t%.0f FT", ap->pos.z);
-	idx += sprintf(buf + idx, "\nBeacon:\t%s", ap->beacon);
+	b += sprintf(b, "\nElevation:\t%.0f FT", ap->pos.z);
+	b += sprintf(b, "\nBeacon:\t%s", ap->beacon);
 	rnw = ap->runways;
 	while (rnw != ap->runwaysend) {
-		idx += sprintf(buf + idx, "\n%s\t%s", szRunways, rnw->id);
-		if (rnw->nav == (NAV_VOR | NAV_ILS)) {
-			idx += sprintf(buf + idx, " (VOR+ILS)");
-		} else if (rnw->nav) {
-			idx += sprintf(buf + idx, " (VOR)");
+		if (rnw->type == RUNWAY_TYPE_HELIPAD) {
+			helipads++;
+		} else {
+			b += sprintf(b, "\n%s\t%s", szRunways, rnw->id);
+			if (rnw->nav == (NAV_VOR | NAV_ILS)) {
+				b += sprintf(b, " (VOR+ILS)");
+			} else if (rnw->nav) {
+				b += sprintf(b, " (VOR)");
+			}
+			szRunways[0] = '\t';
+			szRunways[1] = 0;
 		}
 		rnw++;
-		szRunways[0] = '\t';
-		szRunways[1] = 0;
 	}
+	b += sprintf(b, "\nHelipads:\t%d", helipads);
 
-	amx_SetUString(addr, buf + 1, idx + 1);
+	amx_SetUString(addr, buf + 1, sizeof(buf));
 	return 1;
 }
 
