@@ -110,6 +110,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	void class_init(AMX *amx);
 	void echo_init(AMX *amx);
 	void maps_load_from_db(AMX *amx);
+	void panel_on_gamemode_init(AMX*);
 	void spawn_init(AMX*);
 
 	memset(spawned, 0, sizeof(spawned));
@@ -118,6 +119,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	class_init(amx);
 	maps_load_from_db(amx);
 	echo_init(amx);
+	panel_on_gamemode_init(amx);
 	spawn_init(amx); /*MUST run after airports_init*/
 	return 1;
 }
@@ -160,6 +162,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	void class_on_player_connect(AMX*, int);
 	void dialog_on_player_connect(AMX*, int);
 	void maps_on_player_connect(AMX*, int);
+	void panel_on_player_connect(AMX*, int);
 	void pm_on_player_connect(int);
 	void prefs_on_player_connect(int);
 	void zones_on_player_connect(AMX*, int);
@@ -175,11 +178,13 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	pdata_init_player(amx, playerid);
 
 	playeronlineflag[playerid] = 1;
+	loggedstatus[playerid] = LOGGED_NO;
 
 	class_on_player_connect(amx, playerid);
 	echo_on_player_connection(amx, playerid, 3);
 	dialog_on_player_connect(amx, playerid);
 	maps_on_player_connect(amx, playerid);
+	panel_on_player_connect(amx, playerid);
 	pm_on_player_connect(playerid);
 	prefs_on_player_connect(playerid);
 	zones_on_player_connect(amx, playerid);
@@ -213,6 +218,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	void echo_on_player_connection(AMX*, int, int);
 	void dialog_on_player_disconnect(AMX*, int);
 	void maps_on_player_disconnect(int playerid);
+	void panel_remove_panel_player(int);
 	void pm_on_player_disconnect(int);
 
 	const int playerid = params[1], reason = params[2];
@@ -221,6 +227,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	echo_on_player_connection(amx, playerid, reason);
 	dialog_on_player_disconnect(amx, playerid);
 	maps_on_player_disconnect(playerid);
+	panel_remove_panel_player(playerid);
 	pm_on_player_connect(playerid);
 
 	playeronlineflag[playerid] = 0;
@@ -269,6 +276,18 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 
 	spawn_on_player_spawn(amx, playerid);
 	zones_on_player_spawn(amx, playerid);
+	return 1;
+}
+
+/* native B_OnPlayerStateChange(playerid, newstate, oldstate) */
+cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
+{
+	void panel_on_player_state_change(AMX*, int, int, int);
+
+	const int playerid = params[1];
+	const int newstate = params[2], oldstate = params[3];
+
+	panel_on_player_state_change(amx, playerid, oldstate, newstate);
 	return 1;
 }
 

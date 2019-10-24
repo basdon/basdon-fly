@@ -50,6 +50,11 @@ contains 'playercount' elements, ids of connected players (not sorted)
 extern short players[MAX_PLAYERS];
 extern int playercount;
 /**
+Contains playerids to kick next tick, contains 'numtokick' elements.
+*/
+extern short tokick[MAX_PLAYERS];
+extern int numtokick;
+/**
 Holds spawned status of players.
 */
 extern int spawned[MAX_PLAYERS];
@@ -61,6 +66,10 @@ extern int playerclass[MAX_PLAYERS];
 Player preferences, see sharedsymbols.h.
 */
 extern int prefs[MAX_PLAYERS];
+/**
+Logged-in status of each player (one of the LOGGED_ definitions).
+*/
+extern int loggedstatus[MAX_PLAYERS];
 
 #define IsPlayerConnected(PLAYERID) playeronlineflag[PLAYERID]
 
@@ -73,3 +82,35 @@ void common_tp_player(AMX *amx, int playerid, struct vec4 pos);
 Hides game text for given player.
 */
 void common_hide_gametext_for_player(AMX *amx, int playerid);
+
+/**
+Try to find the driver of the given vehicle.
+
+@returns player id or INVALID_PLAYER_ID
+*/
+int common_find_vehicle_driver(AMX *amx, int vehicleid);
+
+/**
+Attempt to crash the player.
+*/
+void common_crash_player(AMX *amx, int playerid);
+
+/**
+Kick a player next server tick.
+*/
+void common_NC_Kick(int playerid);
+
+/**
+Log some anticheat related thing.
+
+@param eventtype one of AC_ definitions
+@param info not escaped into db query
+*/
+void anticheat_log(AMX *amx, int playerid, int eventtype, char *info);
+
+/**
+Check if a float is any NaN
+
+@return non-zero when given float is a NaN float
+*/
+int common_is_nan(float f);

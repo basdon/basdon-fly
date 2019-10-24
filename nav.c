@@ -147,6 +147,9 @@ int nav_cmd_adf(CMDPARAMS)
 	static const char
 		*SYN = WARN"Syntax: /adf [beacon] - see /beacons or /nearest";
 
+	void panel_hide_vor_bar_for_passengers(AMX*, int);
+	void panel_reset_nav_for_passengers(AMX*, int);
+
 	struct AIRPORT *ap;
 	struct NAVDATA *np;
 	int vehicleid, len;
@@ -159,6 +162,7 @@ int nav_cmd_adf(CMDPARAMS)
 	if (!cmd_get_str_param(cmdtext, &parseidx, beacon)) {
 		if (nav[vehicleid] != NULL) {
 			nav_disable(vehicleid);
+			panel_reset_nav_for_passengers(amx, vehicleid);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL);
 			return 1;
 		}
@@ -185,6 +189,7 @@ int nav_cmd_adf(CMDPARAMS)
 	while (len--) {
 		if (strcmp(beacon, ap->beacon) == 0) {
 			nav_enable(vehicleid, ap, NULL);
+			panel_hide_vor_bar_for_passengers(amx, vehicleid);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_SET);
 			return 1;
 		}
@@ -212,6 +217,9 @@ int nav_cmd_vor(CMDPARAMS)
 			"see /beacons or /nearest",
 		*NO_CAP = WARN"There are no VOR capable runways at this beacon";
 
+	void panel_show_vor_bar_for_passengers(AMX*, int);
+	void panel_reset_nav_for_passengers(AMX*, int);
+
 	struct NAVDATA *np;
 	struct AIRPORT *ap;
 	struct RUNWAY *rw;
@@ -227,6 +235,7 @@ int nav_cmd_vor(CMDPARAMS)
 	if (!cmd_get_str_param(cmdtext, &parseidx, beaconpar)) {
 		if (nav[vehicleid] != NULL) {
 			nav_disable(vehicleid);
+			panel_reset_nav_for_passengers(amx, vehicleid);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL);
 			return 1;
 		}
@@ -283,6 +292,7 @@ haveairport:
 	while (rw != ap->runwaysend) {
 		if (strcmp(rw->id, b) == 0) {
 			nav_enable(vehicleid, NULL, rw);
+			panel_show_vor_bar_for_passengers(amx, vehicleid);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_SET);
 			return 1;
 		}
@@ -346,65 +356,130 @@ retmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	return 1;
 }
 
-/* native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[], bufils[], &Float:vorvalue) */
-cell AMX_NATIVE_CALL Nav_Format(AMX *amx, cell *params)
+/**
+Update nav related textdraws in panel for player if needed.
+
+Does not actually update the nav data (see nav_update for that), just updates
+the textdraws.
+*/
+void nav_update_textdraws(
+	AMX *amx, int playerid, int vehicleid, int *ptxt_adf_dis_base,
+	int *ptxt_adf_alt_base, int *ptxt_adf_crs_base, int *ptxt_vor_base)
 {
-	int pid = params[1];
-	struct NAVDATA *n = nav[params[2]];
-	cell *addr;
-	float vorvalue;
-	char dist[16], alt[16], crs[16], ils[144];
+	static const char
+		*ILS_X = "~w~X~n~~w~X~n~~w~X~n~~w~X~n~~w~X ~w~X ~w~X ~w~X ~w~X"
+			" ~w~X ~w~X ~w~X ~w~X~n~~w~X~n~~w~X~n~~w~X~n~~w~X";
+	static const unsigned char
+		ILS_X_OFFSETS[] = { 1, 8, 15, 22, 49, 76, 83, 90, 97 };
+
+	struct NAVDATA *n = nav[vehicleid];
+	char buf[144];
 
 	if (n == NULL) {
-		return 0;
+		return;
 	}
 
-	dist[0] = alt[0] = crs[0] = ils[0] = 0;
+	nc_params[0] = 3;
+	nc_params[1] = playerid;
+	nc_params[3] = buf144a;
 
-	if (n->dist != pcache[pid].dist) {
+	if (n->dist != pcache[playerid].dist) {
+		pcache[playerid].dist = n->dist;
 		if (n->dist >= 1000) {
-			sprintf(dist, "%.1fK", n->dist / 1000.0f);
+			sprintf(buf, "%.1fK", n->dist / 1000.0f);
 		} else {
-			sprintf(dist, "%d", n->dist);
+			sprintf(buf, "%d", n->dist);
 		}
-		pcache[pid].dist = n->dist;
+		nc_params[2] = ptxt_adf_dis_base[playerid];
+		amx_SetUString(buf144, buf, sizeof(buf));
+		NC(n_PlayerTextDrawSetString);
 	}
-	if (n->alt != pcache[pid].alt) {
-		sprintf(alt, "%d", n->alt);
-		pcache[pid].alt = n->alt;
+
+	if (n->alt != pcache[playerid].alt) {
+		pcache[playerid].alt = n->alt;
+		sprintf(buf, "%d", n->alt);
+		nc_params[2] = ptxt_adf_alt_base[playerid];
+		amx_SetUString(buf144, buf, sizeof(buf));
+		NC(n_PlayerTextDrawSetString);
 	}
-	if (n->crs != pcache[pid].crs) {
-		sprintf(crs, "%d", n->crs);
-		pcache[pid].crs = n->crs;
+
+	if (n->crs != pcache[playerid].crs) {
+		pcache[playerid].crs = n->crs;
+		sprintf(buf, "%d", n->crs);
+		nc_params[2] = ptxt_adf_crs_base[playerid];
+		amx_SetUString(buf144, buf, sizeof(buf));
+		NC(n_PlayerTextDrawSetString);
 	}
 
 	if (n->ilsx < 0 || 8 < n->ilsx) {
-		strcpy(ils, "~r~~h~no ILS signal");
+		amx_SetUString(buf144, "~r~~h~no ILS signal", 144);
+		goto doils;
 	} else if (0 <= n->ilsz &&  n->ilsz <= 8) {
-		strcpy(ils, "~w~X~n~~w~X~n~~w~X~n~~w~X~n~~w~X ~w~X ~w~X ~w~X ~w~X"
-			" ~w~X ~w~X ~w~X ~w~X~n~~w~X~n~~w~X~n~~w~X~n~~w~X");
-		ils[29 + 5 * n->ilsx] = ils[(unsigned char) "\x01\x08\x0f\x16\x31\x4c\x53\x5a\x61"[n->ilsz]] = 'r';
+		amx_SetUString(buf144, ILS_X, 144);
+		buf144[29 + 5 * n->ilsx] = buf144[ILS_X_OFFSETS[n->ilsz]] = 'r';
+doils:
+		NC_GameTextForPlayer(playerid, buf144a, 200, 6);
 	}
 
-	amx_GetAddr(amx, params[3], &addr);
-	amx_SetUString(addr, dist, sizeof(dist));
-	amx_GetAddr(amx, params[4], &addr);
-	amx_SetUString(addr, alt, sizeof(alt));
-	amx_GetAddr(amx, params[5], &addr);
-	amx_SetUString(addr, crs, sizeof(crs));
-	amx_GetAddr(amx, params[6], &addr);
-	amx_SetUString(addr, ils, sizeof(ils));
+	if (n->vorvalue < 640) {
+		if (ptxt_vor_base[playerid] != -1) {
+			nc_params[0] = 2;
+			nc_params[1] = playerid;
+			nc_params[2] = ptxt_vor_base[playerid];
+			NC(n_PlayerTextDrawDestroy);
+		}
+		buf144[0] = 'i';
+		buf144[1] = 0;
+		nc_params[0] = 4;
+		nc_params[1] = playerid;
+		*((float*) (nc_params + 2)) = (float) n->vorvalue;
+		*((float*) (nc_params + 3)) = 407.0f;
+		nc_params[4] = buf144a;
+		NC(n_CreatePlayerTextDraw);
 
-	vorvalue = (float) n->vorvalue;
-	amx_GetAddr(amx, params[7], &addr);
-	*addr = amx_ftoc(vorvalue);
+		nc_params[2] = ptxt_vor_base[playerid] = nc_result;
+		*((float*) (nc_params + 3)) = 0.4f;
+		*((float*) (nc_params + 4)) = 1.6f;
+		NC(n_PlayerTextDrawLetterSize);
 
-	if (n->vorvalue != pcache[pid].vorvalue) {
-		pcache[pid].vorvalue = n->vorvalue;
-		return 1;
+		nc_params[0] = 3;
+		nc_params[3] = 0xFF00FFFF;
+		NC(n_PlayerTextDrawColor);
+		nc_params[3] = 2;
+		NC(n_PlayerTextDrawAlignment);
+		NC(n_PlayerTextDrawFont);
+		nc_params[3] = 1;
+		NC(n_PlayerTextDrawSetProportional);
+		nc_params[3] = 0;
+		NC(n_PlayerTextDrawSetOutline);
+		NC(n_PlayerTextDrawSetShadow);
+
+		nc_params[0] = 2;
+		NC(n_PlayerTextDrawShow);
+	} else {
+		ptxt_vor_base[playerid] = -1;
 	}
 
-	return dist[0] != 0 || alt[0] != 0 || crs[0] != 0 || ils[0] != 0;
+	if (n->vorvalue != pcache[playerid].vorvalue) {
+		pcache[playerid].vorvalue = n->vorvalue;
+	}
+}
+
+/**
+May return NAV_NONE, NAV_ADF, NAV_VOR or NAV_VOR|NAV_ILS
+*/
+int nav_get_active_type(int vehicleid)
+{
+	if (nav[vehicleid] == NULL) {
+		return NAV_NONE;
+	}
+	if (nav[vehicleid]->beacon != NULL) {
+		return NAV_ADF;
+	}
+	if (nav[vehicleid]->vor != NULL) {
+		return NAV_VOR | (NAV_ILS * nav[vehicleid]->ils);
+	}
+	return NAV_NONE;
 }
 
 /* native Nav_GetActiveNavType(vehicleid) */
@@ -426,6 +501,9 @@ cell AMX_NATIVE_CALL Nav_GetActiveNavType(AMX *amx, cell *params)
 /* native Nav_NavigateToMission(vehicleid, vehiclemodel, airportidx, Float:x, Float:y, Float:z) */
 cell AMX_NATIVE_CALL Nav_NavigateToMission(AMX *amx, cell *params)
 {
+	void panel_hide_vor_bar_for_passengers(AMX*, int);
+	void panel_show_vor_bar_for_passengers(AMX*, int);
+
 	const int vid = params[1], vehiclemodel = params[2] - 400;
 	struct AIRPORT *ap = airports + params[3];
 	struct RUNWAY *rw, *shortestrw, *shortestilsrw;
@@ -465,7 +543,8 @@ cell AMX_NATIVE_CALL Nav_NavigateToMission(AMX *amx, cell *params)
 			nav[vid]->beacon = NULL;
 			nav[vid]->ils = 0;
 			nav[vid]->vor = shortestrw;
-			return NAV_VOR;
+			panel_show_vor_bar_for_passengers(amx, vid);
+			return 1;
 		}
 	}
 
@@ -477,7 +556,8 @@ cell AMX_NATIVE_CALL Nav_NavigateToMission(AMX *amx, cell *params)
 	nav[vid]->beacon = ap;
 	nav[vid]->ils = 0;
 	nav[vid]->vor = NULL;
-	return NAV_ADF;
+	panel_hide_vor_bar_for_passengers(amx, vid);
+	return 1;
 }
 
 /**
@@ -495,10 +575,13 @@ void nav_reset_for_vehicle(int vehicleid)
 /* native Nav_Reset(vehicleid) */
 cell AMX_NATIVE_CALL Nav_Reset(AMX *amx, cell *params)
 {
+	void panel_reset_nav_for_passengers(AMX*, int);
+
 	int vid = params[1];
 	if (nav[vid] != NULL) {
 		free(nav[vid]);
 		nav[vid] = NULL;
+		panel_reset_nav_for_passengers(amx, vid);
 		return 1;
 	}
 	return 0;
@@ -534,20 +617,16 @@ void calc_ils_values(
 	*ilsx = CLAMP(tmp, 0, 8);
 }
 
-/* native Nav_Update(vehicleid, Float:x, Float:y, Float:z, Float:heading) */
-cell AMX_NATIVE_CALL Nav_Update(AMX *amx, cell *params)
+void nav_update(AMX *amx, int vehicleid,
+	float x, float y, float z, float heading)
 {
-	struct NAVDATA *n = nav[params[1]];
-	float x = amx_ctof(params[2]);
-	float y = amx_ctof(params[3]);
-	float z = amx_ctof(params[4]);
-	float heading = 360.0f - amx_ctof(params[5]);
+	struct NAVDATA *n = nav[vehicleid];
 	float dx, dy;
 	float dist, crs, vorangle, horizontaldeviation;
 	struct vec3 *pos;
 
 	if (n == NULL) {
-		return 0;
+		return;
 	}
 
 	if (n->beacon != NULL) {
@@ -555,8 +634,10 @@ cell AMX_NATIVE_CALL Nav_Update(AMX *amx, cell *params)
 	} else if (n->vor != NULL) {
 		pos = &n->vor->pos;
 	} else {
-		return 0;
+		return;
 	}
+
+	heading = 360.0f - heading;
 
 	dx = x - pos->x;
 	dy = pos->y - y;
@@ -588,6 +669,4 @@ cell AMX_NATIVE_CALL Nav_Update(AMX *amx, cell *params)
 	} else {
 		calc_ils_values(&n->ilsx, &n->ilsz, dist, z, horizontaldeviation);
 	}
-
-	return 1;
 }

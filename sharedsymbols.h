@@ -77,6 +77,13 @@
 #define RUNWAY_TYPE_RUNWAY (1)
 #define RUNWAY_TYPE_HELIPAD (2)
 
+/* anticheat.h */
+
+#define AC_GENERIC 0
+#define AC_VEH_HP_NAN 1
+#define AC_VEH_HP_HIGH 2
+#define AC_WRONG_DIALOGID 3
+
 /* dialog.c / dialog.pwn */
 #define LIMIT_DIALOG_CAPTION (64)
 #define LIMIT_DIALOG_INFO (4096)
@@ -98,6 +105,10 @@
 	GROUP_ADMIN|GROUP_OWNER)
 #define GROUPS_ADMIN (GROUP_ADMIN|GROUP_OWNER)
 #define GROUPS_NOTBANNED (GROUPS_ALL&~GROUPS_BANNED)
+
+#define LOGGED_NO 0
+#define LOGGED_IN 1
+#define LOGGED_GUEST 2
 
 #ifdef _samp_included
 #define GROUPS_ISADMIN(%1) ((%1) >= GROUP_ADMIN)

@@ -59,12 +59,11 @@ int dialog_on_response(AMX *amx, int playerid, int dialogid)
 	int ret = 1;
 	transaction[playerid] = TRANSACTION_NONE;
 	if (dialogid != showndialog[playerid]) {
-		/*
-		// TODO: aclog
-		//format buf144, sizeof(buf144), "unexpected dialog response "
-		//"%d expected %d", dialogid, showndialog[playerid]
-		//ac_log playerid, buf144
-		*/
+		sprintf((char*) buf144,
+			"expected %d got %d",
+			showndialog[playerid],
+			dialogid);
+		anticheat_log(amx, playerid, AC_WRONG_DIALOGID, (char*) buf144);
 		ret = 0;
 	}
 	showndialog[playerid] = 0;

@@ -74,16 +74,9 @@ FORWARD(Missions_Start);
 FORWARD(Missions_UpdateSatisfaction);
 /* nav.c */
 FORWARD(Nav_GetActiveNavType);
-FORWARD(Nav_Format);
 FORWARD(Nav_NavigateToMission);
 FORWARD(Nav_Reset);
 FORWARD(Nav_ResetCache);
-FORWARD(Nav_Update);
-/* panel.c */
-FORWARD(Panel_FormatAltitude);
-FORWARD(Panel_FormatHeading);
-FORWARD(Panel_FormatSpeed);
-FORWARD(Panel_ResetCaches);
 /* playerdata.c */
 FORWARD(PlayerData_Clear);
 FORWARD(PlayerData_FormatUpdateQuery);
@@ -158,6 +151,9 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 
 static int time_h = 0, time_m = 0;
 
+short tokick[MAX_PLAYERS];
+int numtokick;
+
 #define amx gamemode_amx
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
@@ -165,6 +161,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	void dev_missions_update_closest_point(AMX*);
 	void dialog_pop_queue(AMX*);
 	void maps_process_tick(AMX*);
+	void panel_timed_update(AMX*);
 	void protips_timed_broadcast(AMX*);
 	void zones_update_for_all(AMX*);
 
@@ -179,6 +176,12 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 		count = 0;
 		lasttime = 0;
 		return;
+	}
+
+	while (numtokick) {
+		nc_params[0] = 1;
+		nc_params[1] = tokick[--numtokick];
+		NC(n_Kick);
 	}
 
 	if (count++ >= 19) {
@@ -197,6 +200,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 #ifdef DEV
 		dev_missions_update_closest_point(amx);
 #endif /*DEV*/
+		panel_timed_update(amx);
 
 		NC_gettime(buf32a, buf32_1a, buf144a);
 		if (lasttime != nc_result) {
@@ -246,13 +250,38 @@ cell AMX_NATIVE_CALL REMOVEME_getprefs(AMX *amx, cell *params)
 	return prefs[params[1]];
 }
 
+cell AMX_NATIVE_CALL REMOVEME_setloggedstatus(AMX *amx, cell *params)
+{
+	loggedstatus[params[1]] = params[2];
+	return 1;
+}
+
+cell AMX_NATIVE_CALL REMOVEME_onplayerwasafk(AMX *amx, cell *params)
+{
+	void panel_on_player_was_afk(AMX*, int);
+
+	panel_on_player_was_afk(amx, params[1]);
+	return 1;
+}
+
+cell AMX_NATIVE_CALL REMOVEME_onplayernowafk(AMX *amx, cell *params)
+{
+	void panel_remove_panel_player(int);
+
+	panel_remove_panel_player(params[1]);
+	return 1;
+}
+
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
+	REGISTERNATIVE(REMOVEME_onplayernowafk),
+	REGISTERNATIVE(REMOVEME_onplayerwasafk),
 	REGISTERNATIVE(REMOVEME_isspawned),
 	REGISTERNATIVE(REMOVEME_onplayerreqclassimpl),
 	REGISTERNATIVE(REMOVEME_setprefs),
 	REGISTERNATIVE(REMOVEME_getprefs),
+	REGISTERNATIVE(REMOVEME_setloggedstatus),
 	/* airport.c */
 	REGISTERNATIVE(APT_FormatNearestList),
 	REGISTERNATIVE(APT_FormatBeaconList),
@@ -272,6 +301,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnPlayerRequestClass),
 	REGISTERNATIVE(B_OnPlayerRequestSpawn),
 	REGISTERNATIVE(B_OnPlayerSpawn),
+	REGISTERNATIVE(B_OnPlayerStateChange),
 	REGISTERNATIVE(B_OnPlayerText),
 	REGISTERNATIVE(B_OnRecv),
 	REGISTERNATIVE(B_OnVehicleSpawn),
@@ -328,16 +358,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Missions_UpdateSatisfaction),
 	/* nav.c */
 	REGISTERNATIVE(Nav_GetActiveNavType),
-	REGISTERNATIVE(Nav_Format),
 	REGISTERNATIVE(Nav_NavigateToMission),
 	REGISTERNATIVE(Nav_Reset),
 	REGISTERNATIVE(Nav_ResetCache),
-	REGISTERNATIVE(Nav_Update),
-	/* panel.c */
-	REGISTERNATIVE(Panel_FormatAltitude),
-	REGISTERNATIVE(Panel_FormatHeading),
-	REGISTERNATIVE(Panel_FormatSpeed),
-	REGISTERNATIVE(Panel_ResetCaches),
 	/* playerdata.c */
 	REGISTERNATIVE(PlayerData_Clear),
 	REGISTERNATIVE(PlayerData_FormatUpdateQuery),

@@ -19,14 +19,18 @@ extern int n_GetPlayerName;
 extern int n_GetPlayerPos;
 extern int n_GetPlayerState;
 extern int n_GetPlayerVehicleID;
+extern int n_GetPlayerVehicleSeat;
+extern int n_GetVehicleHealth;
 extern int n_GetVehicleModel;
 extern int n_GetVehiclePos;
 extern int n_GetVehicleVelocity;
 extern int n_GetVehicleZAngle;
 extern int n_GivePlayerWeapon;
+extern int n_Kick;
 extern int n_PlayerPlaySound;
 extern int n_PlayerTextDrawAlignment;
 extern int n_PlayerTextDrawColor;
+extern int n_PlayerTextDrawDestroy;
 extern int n_PlayerTextDrawFont;
 extern int n_PlayerTextDrawHide;
 extern int n_PlayerTextDrawLetterSize;
@@ -47,9 +51,23 @@ extern int n_SetPlayerFacingAngle;
 extern int n_SetPlayerPos_;
 extern int n_SetPlayerRaceCheckpoint;
 extern int n_SetPlayerSpecialAction;
+extern int n_SetVehicleHealth;
 extern int n_SetVehicleToRespawn;
 extern int n_ShowPlayerDialog_;
 extern int n_SpawnPlayer_;
+extern int n_TextDrawAlignment;
+extern int n_TextDrawBoxColor;
+extern int n_TextDrawColor;
+extern int n_TextDrawCreate;
+extern int n_TextDrawFont;
+extern int n_TextDrawHideForPlayer;
+extern int n_TextDrawLetterSize;
+extern int n_TextDrawSetOutline;
+extern int n_TextDrawSetProportional;
+extern int n_TextDrawSetShadow;
+extern int n_TextDrawShowForPlayer;
+extern int n_TextDrawTextSize;
+extern int n_TextDrawUseBox;
 extern int n_TogglePlayerClock;
 extern int n_TogglePlayerSpectating;
 extern int n_cache_delete;
@@ -149,6 +167,8 @@ extern cell nc_result;
 #define NC_GetPlayerVehicleID(PLAYERID) \
 	NC_GetPlayerVehicleID_(PLAYERID,&nc_result)
 
+#define NC_GetVehicleHealth __USE__anticheat_NC_GetVehicleHealth__
+
 #define NC_GetVehicleModel_(VEHICLEID,RESULT) \
 	nc_params[0]=1;nc_params[1]=VEHICLEID;\
 	amx_Callback(amx,n_GetVehicleModel,(cell*)RESULT,nc_params)
@@ -171,6 +191,8 @@ extern cell nc_result;
 #define NC_GivePlayerWeapon(PLAYERID,WEAPONID,AMMO) nc_params[0]=3;\
 	nc_params[1]=PLAYERID;nc_params[2]=WEAPONID;nc_params[3]=AMMO;\
 	amx_Callback(amx,n_GivePlayerWeapon,&nc_result,nc_params)
+
+#define NC_Kick(PLAYERID) __USE__common_NC_Kick__
 
 #define NC_PlayerPlaySound(PLAYERID,SOUNDID,FX,FY,FZ) \
 	nc_params[0]=5;nc_params[1]=PLAYERID;nc_params[2]=SOUNDID;\
@@ -252,6 +274,10 @@ extern cell nc_result;
 	nc_params[7]=FNY;nc_params[8]=FNZ;nc_params[9]=FSIZE;\
 	amx_Callback(amx,n_SetPlayerRaceCheckpoint,&nc_result,nc_params)
 
+#define NC_SetVehicleHealth(PLAYERID,FHP) \
+	nc_params[0]=2;nc_params[1]=PLAYERID;*((float*)(nc_params+2))=FHP;\
+	amx_Callback(amx,n_SetVehicleHealth,&nc_result,nc_params)
+
 #define NC_SetVehicleToRespawn(VEHICLEID) \
 	nc_params[0]=1;nc_params[1]=VEHICLEID;\
 	amx_Callback(amx,n_SetVehicleToRespawn,&nc_result,nc_params)
@@ -259,6 +285,14 @@ extern cell nc_result;
 #define NC_ShowPlayerDialog __USE__dialog_NC_ShowPlayerDialog__
 
 #define NC_SpawnPlayer __USE__natives_NC_SpawnPlayer__
+
+#define NC_TextDrawHideForPlayer(PLAYERID,TXT) \
+	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=TXT;\
+	amx_Callback(amx,n_TextDrawHideForPlayer,&nc_result,nc_params)
+
+#define NC_TextDrawShowForPlayer(PLAYERID,TXT) \
+	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=TXT;\
+	amx_Callback(amx,n_TextDrawShowForPlayer,&nc_result,nc_params)
 
 #define NC_TogglePlayerSpectating(PLAYERID,FLAG) \
 	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=FLAG;\
@@ -344,3 +378,8 @@ Alternative for GetPlayerPos to get it directly into a vec3 struct.
 Will use buf32, buf64, buf144.
 */
 int natives_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos);
+
+/**
+Gets vehicle hp, after checking for unnacceptable values and handling offenders.
+*/
+float anticheat_NC_GetVehicleHealth(AMX *amx, int vehicleid);

@@ -79,6 +79,9 @@ native B_OnPlayerRequestSpawn(playerid)
 //@summary Plugin callback for {@link OnPlayerSpawn}
 native B_OnPlayerSpawn(playerid)
 
+//@summary Plugin callback for {@link OnPlayerStateChange}
+native B_OnPlayerStateChange(playerid, oldstate, newstate)
+
 //@summary Plugin callback for {@link OnPlayerText}
 native B_OnPlayerText(playerid, text[])
 
@@ -446,51 +449,10 @@ native Missions_UpdateSatisfaction(playerid, vehicleid, Float:qw, Float:qx, Floa
 
 #namespace "nav.c"
 
-//@summary Enables ADF navigation for a vehicle
-//@param vehicleid vehicle to enable ADF for
-//@param cmdtext beacon to navigate to (may have whitespace in front)
-//@param buf64 buffer to store error message in, to be sent when result is {@code RESULT_ADF_ERR}
-/// <returns>
-///   <ul>
-///     <li><b><c>RESULT_ADF_OFF</c></b> - ADF is now disabled</li>
-///     <li><b><c>RESULT_ADF_ON</c></b> - ADF is now enabled</li>
-///     <li><b><c>RESULT_ADF_ERR</c></b> - error, message stored in <paramref name="buf64"/></li>
-///   </ul>
-/// </returns>
-//@seealso Nav_EnableVOR
-//@seealso Nav_ToggleILS
-native Nav_EnableADF(vehicleid, cmdtext[], buf64[])
-
-//@summary Enables VOR navigation for a vehicle
-//@param vehicleid vehicle to enable VOR for
-//@param cmdtext beacon+runway to navigate to (optionally prepended by whitespace and white space between beacon and runway)
-//@param buf64 buffer to store error message in, to be sent when result is {@code RESULT_VOR_ERR}
-/// <returns>
-///   <ul>
-///     <li><b><c>RESULT_VOR_OFF</c></b> - VOR is now disabled</li>
-///     <li><b><c>RESULT_VOR_ON</c></b> - VOR is now enabled</li>
-///     <li><b><c>RESULT_VOR_ERR</c></b> - error, message stored in <paramref name="buf64"/></li>
-///   </ul>
-/// </returns>
-//@seealso Nav_EnableADF
-//@seealso Nav_ToggleILS
-native Nav_EnableVOR(vehicleid, cmdtext[], buf64[])
-
 //@summary get the active nav in the specified vehicle
 //@param vehicleid the vehicle to query its nav system
 //@returns one of {@code NAV_NONE}, {@code NAV_ADF}, {@code NAV_VOR}, {@code NAV_ILS}
 native Nav_GetActiveNavType(vehicleid)
-
-//@summary Update nav data for player
-//@param playerid player to update nav for
-//@param vehicleid vehicle the player is in
-//@param bufdist buffer for distance
-//@param bufalt buffer for altitude
-//@param bufcrs buffer for course
-//@param bufils buffer for ILS text
-//@param vorvalue variable to store vor offset in, will be {@code [320.0f-85.0f,320.0f+85.0f]} or {@code > 640.0f} if not active.
-//@returns {@code 0} if nothing needs to be updated, otherwise the first byte of each component will be {@code 0} if no update needed
-native Nav_Format(playerid, vehicleid, bufdist[], bufalt[], bufcrs[], bufils[], &Float:vorvalue)
 
 //@summary Sets navigation data for a vehicle to the next point of a mission
 //@param vehicleid vehicle to set nav for
@@ -507,71 +469,6 @@ native Nav_NavigateToMission(vehicleid, vehiclemodel, airportidx, Float:x, Float
 //@param vehicleid vehicle to reset nav for
 //@returns {@code 0} if nav was not enabled for vehicle
 native Nav_Reset(vehicleid)
-
-//@summary Reset panel value indicators cache for a player
-//@param playerid player to reset cache for
-native Nav_ResetCache(playerid)
-
-//@summary Toggles ILS navigation for a vehicle
-//@param vehicleid vehicle to enable ILS for
-/// <returns>
-///   <ul>
-///     <li><b><c>RESULT_ILS_OFF</c></b> - ILS is now disabled</li>
-///     <li><b><c>RESULT_ILS_ON</c></b> - ILS is now enabled</li>
-///     <li><b><c>RESULT_ILS_NOVOR</c></b> - VOR is not enabled</li>
-///     <li><b><c>RESULT_ILS_NOILS</c></b> - no ILS for current VOR runway</li>
-///   </ul>
-/// </returns>
-//@remarks ILS can only be enabled if VOR is enabled on a runway that has VOR+ILS capabilities
-//@seealso Nav_EnableADF
-//@seealso Nav_EnableVOR
-native Nav_ToggleILS(vehicleid)
-
-//@summary Update nav for vehicle
-//@param vehicleid vehicle to update nav for
-//@param x x position of aircraft
-//@param y y position of aircraft
-//@param z z position of aircraft
-//@param heading heading of aircraft
-//@returns {@code 0} if no nav is set for this vehicle
-native Nav_Update(vehicleid, Float:x, Float:y, Float:z, Float:heading)
-
-#namespace "panel.c"
-
-//@summary Formats text for altitude part of panel
-//@param playerid the player to update the altitude for
-//@param altitude the altitude as int
-//@param buf4 buffer for the altitude text, must be of length {@code 4}
-//@param buf13 buffer for the altitude small meter text, must be of length {@code 13}
-//@param buf44 buffer for the altitude large meter text, must be of length {@code 44}
-//@returns {@code 1} if an update is needed
-//@remarks {@code buf13[0]} will be set to {@code 0} if the small meter doesn't need to be updated
-//@remarks {@code buf44[0]} will be set to {@code 0} if the large meter doesn't need to be updated
-native Panel_FormatAltitude(playerid, altitude, buf4[], buf13[], buf44[])
-
-//@summary Formats text for heading part of panel
-//@param playerid the player to update the heading for
-//@param heading the heading as int
-//@param buf4 buffer for the speed text, must be of length {@code 4}
-//@param buf44 buffer for the speed large meter text, must be of length {@code 44}
-//@returns {@code 1} if an update is needed
-native Panel_FormatHeading(playerid, heading, buf4[], buf44[])
-
-//@summary Formats text for speed part of panel
-//@param playerid the player to update the speed for
-//@param speed the speed as int
-//@param buf4 buffer for the speed text, must be of length {@code 4}
-//@param buf13 buffer for the speed small meter text, must be of length {@code 13}
-//@param buf44 buffer for the speed large meter text, must be of length {@code 44}
-//@returns {@code 1} if an update is needed
-//@remarks {@code buf13[0]} will be set to {@code 0} if the small meter doesn't need to be updated
-//@remarks {@code buf44[0]} will be set to {@code 0} if the large meter doesn't need to be updated
-//@remarks If the small meter doesn't need to be updated, the large meter won't need an update either
-native Panel_FormatSpeed(playerid, speed, buf4[], buf13[], buf44[])
-
-//@summary Reset panel caches for player
-//@param playerid the player to reset panel caches for
-native Panel_ResetCaches(playerid)
 
 #namespace "playerdata.c"
 
@@ -725,14 +622,6 @@ native Veh_ConsumeFuel(vehicleid, throttle, &isOutOfFuel, buf[])
 //@seealso Veh_Init
 //@seealso Veh_InitServicePoints
 native Veh_Destroy();
-
-//@summary Formats vehicle hp/fuel level text for display in the panel
-//@param playerid the playerid for which to draw the text
-//@param vehicleid the vehicle the player is in
-//@param vehiclehp hp of the vehicle
-//@param buf buffer in which to store the text
-//@returns {@code 0} if no text update is needed since last call
-native Veh_FormatPanelText(playerid, vehicleid, Float:vehiclehp, buf[])
 
 //@summary Check if there is a label on given vehicle for given player, {@b and unregister it}
 //@param vehicleid vehicle on which a label might be

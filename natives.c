@@ -23,14 +23,18 @@ int n_GetPlayerName;
 int n_GetPlayerPos;
 int n_GetPlayerState;
 int n_GetPlayerVehicleID;
+int n_GetPlayerVehicleSeat;
+int n_GetVehicleHealth;
 int n_GetVehicleModel;
 int n_GetVehiclePos;
 int n_GetVehicleVelocity;
 int n_GetVehicleZAngle;
 int n_GivePlayerWeapon;
+int n_Kick;
 int n_PlayerPlaySound;
 int n_PlayerTextDrawAlignment;
 int n_PlayerTextDrawColor;
+int n_PlayerTextDrawDestroy;
 int n_PlayerTextDrawFont;
 int n_PlayerTextDrawHide;
 int n_PlayerTextDrawLetterSize;
@@ -51,9 +55,23 @@ int n_SetPlayerFacingAngle;
 int n_SetPlayerPos_;
 int n_SetPlayerRaceCheckpoint;
 int n_SetPlayerSpecialAction;
+int n_SetVehicleHealth;
 int n_SetVehicleToRespawn;
 int n_ShowPlayerDialog_;
 int n_SpawnPlayer_;
+int n_TextDrawAlignment;
+int n_TextDrawBoxColor;
+int n_TextDrawColor;
+int n_TextDrawCreate;
+int n_TextDrawFont;
+int n_TextDrawHideForPlayer;
+int n_TextDrawLetterSize;
+int n_TextDrawSetOutline;
+int n_TextDrawSetProportional;
+int n_TextDrawSetShadow;
+int n_TextDrawShowForPlayer;
+int n_TextDrawTextSize;
+int n_TextDrawUseBox;
 int n_TogglePlayerClock;
 int n_TogglePlayerSpectating;
 int n_cache_delete;
@@ -104,14 +122,18 @@ int natives_find(AMX *amx)
 		{ "GetPlayerState", &n_GetPlayerState },
 		{ "GetPlayerPos", &n_GetPlayerPos },
 		{ "GetPlayerVehicleID", &n_GetPlayerVehicleID },
+		{ "GetPlayerVehicleSeat", &n_GetPlayerVehicleSeat },
+		{ "GetVehicleHealth", &n_GetVehicleHealth },
 		{ "GetVehicleModel", &n_GetVehicleModel },
 		{ "GetVehiclePos", &n_GetVehiclePos },
 		{ "GetVehicleVelocity", &n_GetVehicleVelocity },
 		{ "GetVehicleZAngle", &n_GetVehicleZAngle },
 		{ "GivePlayerWeapon", &n_GivePlayerWeapon },
+		{ "Kick", &n_Kick },
 		{ "PlayerPlaySound", &n_PlayerPlaySound },
 		{ "PlayerTextDrawAlignment", &n_PlayerTextDrawAlignment },
 		{ "PlayerTextDrawColor", &n_PlayerTextDrawColor },
+		{ "PlayerTextDrawDestroy", &n_PlayerTextDrawDestroy },
 		{ "PlayerTextDrawFont", &n_PlayerTextDrawFont },
 		{ "PlayerTextDrawHide", &n_PlayerTextDrawHide },
 		{ "PlayerTextDrawLetterSize", &n_PlayerTextDrawLetterSize },
@@ -133,11 +155,25 @@ int natives_find(AMX *amx)
 		{ "SetPlayerFacingAngle", &n_SetPlayerFacingAngle },
 		{ "SetPlayerRaceCheckpoint", &n_SetPlayerRaceCheckpoint },
 		{ "SetPlayerSpecialAction", &n_SetPlayerSpecialAction },
+		{ "SetVehicleHealth", &n_SetVehicleHealth },
 		{ "SetVehicleToRespawn", &n_SetVehicleToRespawn },
 		{ "ShowPlayerDialog", &n_ShowPlayerDialog_ },
 		{ "SpawnPlayer", &n_SpawnPlayer_ },
 		{ "TogglePlayerClock", &n_TogglePlayerClock },
 		{ "TogglePlayerSpectating", &n_TogglePlayerSpectating },
+		{ "TextDrawAlignment", &n_TextDrawAlignment },
+		{ "TextDrawBoxColor", &n_TextDrawBoxColor },
+		{ "TextDrawColor", &n_TextDrawColor },
+		{ "TextDrawCreate", &n_TextDrawCreate },
+		{ "TextDrawFont", &n_TextDrawFont },
+		{ "TextDrawHideForPlayer", &n_TextDrawHideForPlayer },
+		{ "TextDrawLetterSize", &n_TextDrawLetterSize },
+		{ "TextDrawSetOutline", &n_TextDrawSetOutline },
+		{ "TextDrawSetProportional", &n_TextDrawSetProportional },
+		{ "TextDrawSetShadow", &n_TextDrawSetShadow },
+		{ "TextDrawShowForPlayer", &n_TextDrawShowForPlayer },
+		{ "TextDrawTextSize", &n_TextDrawTextSize },
+		{ "TextDrawUseBox", &n_TextDrawUseBox },
 		{ "cache_delete", &n_cache_delete },
 		{ "cache_get_row", &n_cache_get_row },
 		{ "cache_get_row_count", &n_cache_get_row_count },
