@@ -1,39 +1,6 @@
 
 // vim: set filetype=c ts=8 noexpandtab:
 
-#namespace "airports.c"
-
-//@summary Format airport list in tablist form, sorted by airport distance to given ({@param x},{@param y}) coordinates
-//@param playerid player that wants a list (used to store order for follow-up)
-//@param x x position of player
-//@param y y position of player
-//@param buf the buffer to store the resulting list in (use {@code buf4096})
-//@remarks Despite being named 'nearest', it adds all airports, but sorted on distance.
-//@remarks Shown list order gets saved for follow-up, use {@link APT_MapIndexFromListDialog} to free memory.
-native APT_FormatNearestList(playerid, Float:x, Float:y, buf[])
-
-//@summary Format beacon list in msgbox form
-//@param buf the buffer to store the resulting list in (use {@code buf4096})
-native APT_FormatBeaconList(buf[])
-
-//@summary Maps the clicked listitem (from {@link APT_FormatNearestList}) to airport index.
-//@param playerid the playerid that clicked
-//@param listitem the listitem that the player clicked (optional={@code 0})
-//@remarks Call this even when it's not needed, it frees memory.
-native APT_MapIndexFromListDialog(playerid, listitem=0)
-
-//@summary Format an airport's info for a msgbox
-//@param aptidx index of the airport
-//@param buf the buffer to store the resulting list in (use {@code buf4096})
-//@returns {@code 0} if {@param aptidx} is invalid
-native APT_FormatInfo(aptidx, buf[])
-
-//@summary Format an airport's code and name for use in dialog titles etc
-//@param aptidx index of the airport
-//@param buf the buffer to store the resulting string in (use {@code buf64})
-//@returns {@code 0} if {@param aptidx} is invalid
-native APT_FormatCodeAndName(aptidx, buf[])
-
 #namespace "anticheat.c"
 
 //@summary Formats query to insert log into db

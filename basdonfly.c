@@ -12,12 +12,6 @@ extern void *pAMXFunctions;
 
 #define FORWARD(X) cell AMX_NATIVE_CALL X(AMX *amx, cell *params)
 
-/* airport.c */
-FORWARD(APT_FormatNearestList);
-FORWARD(APT_FormatBeaconList);
-FORWARD(APT_MapIndexFromListDialog);
-FORWARD(APT_FormatInfo);
-FORWARD(APT_FormatCodeAndName);
 /* anticheat.c */
 FORWARD(Ac_FormatLog);
 /* commands.c */
@@ -278,12 +272,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(REMOVEME_setprefs),
 	REGISTERNATIVE(REMOVEME_getprefs),
 	REGISTERNATIVE(REMOVEME_setloggedstatus),
-	/* airport.c */
-	REGISTERNATIVE(APT_FormatNearestList),
-	REGISTERNATIVE(APT_FormatBeaconList),
-	REGISTERNATIVE(APT_MapIndexFromListDialog),
-	REGISTERNATIVE(APT_FormatInfo),
-	REGISTERNATIVE(APT_FormatCodeAndName),
 	/* anticheat.c */
 	REGISTERNATIVE(Ac_FormatLog),
 	/* basdon.c */

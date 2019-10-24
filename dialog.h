@@ -1,11 +1,13 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+/*can be used when no response is needed*/
 #define DIALOG_DUMMY 127
 /*used ids from 1000 and up; gm uses < 1000*/
 /*max dialog is 32767*/
 #define DIALOG_SPAWN_SELECTION 1001
 #define DIALOG_PREFERENCES 1002
+#define DIALOG_AIRPORT_NEAREST 1003
 
 /*don't use an id that is used in a dialog id (unless they relate)*/
 /*max transaction id is int max*/
@@ -48,6 +50,8 @@ which is being polled and will be shown once no transaction is active anymore.
 The transaction is reset in OnDialogResponse, use dialog_ensure_transaction
 in your dialog's response code to keep the transaction set (eg when doing a
 db query and not wanting any other dialog shown while the query is executing).
+
+DIALOG_DUMMY can be used as dialog id if no response is handled.
 
 @param style see DIALOG_STYLE_ constants
 @param playerid The ID of the player to show the dialog to

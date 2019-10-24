@@ -141,6 +141,8 @@ struct COMMAND {
 #include "cmdhandlers_dev.c"
 #endif /*DEV*/
 
+int airport_cmd_beacons(CMDPARAMS);
+int airport_cmd_nearest(CMDPARAMS);
 int pm_cmd_pm(CMDPARAMS);
 int pm_cmd_r(CMDPARAMS);
 int prefs_cmd_preferences(CMDPARAMS);
@@ -160,9 +162,11 @@ static struct COMMAND cmds[] = {
 #endif /*DEV*/
 	{ 0, "//respawn", GROUPS_ADMIN, cmd_admin_respawn },
 	{ 0, "/adf", GROUPS_ALL, nav_cmd_adf },
+	{ 0, "/beacons", GROUPS_ALL, airport_cmd_beacons },
 	{ 0, "/camera", GROUPS_ALL, cmd_camera },
 	{ 0, "/ils", GROUPS_ALL, nav_cmd_ils },
 	{ 0, "/loc", GROUPS_ALL, zones_cmd_loc },
+	{ 0, "/nearest", GROUPS_ALL, airport_cmd_nearest },
 	{ 0, "/park", GROUPS_ALL, cmd_park },
 	{ 0, "/p", GROUPS_ALL, prefs_cmd_preferences },
 	{ 0, "/pm", GROUPS_ALL, pm_cmd_pm },

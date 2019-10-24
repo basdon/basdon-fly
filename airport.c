@@ -7,14 +7,22 @@
 
 #include "common.h"
 #include "airport.h"
+#include "cmd.h"
+#include "dialog.h"
 #include <string.h>
 #include <math.h>
 
 struct AIRPORT *airports = NULL;
 int numairports = 0;
 
-static int *indexmap[MAX_PLAYERS];
-static short indexmapsize[MAX_PLAYERS];
+/**
+Map of airports corresponding to nearest airports from /nearest cmd.
+*/
+static struct AIRPORT **nearest_airports_map[MAX_PLAYERS];
+/**
+Amount of airports in the nearest_airports_map array.
+*/
+static short nearest_airports_map_size[MAX_PLAYERS];
 
 /**
 Clears all data and frees all allocated memory.
@@ -49,7 +57,7 @@ void airports_init(AMX *amx)
 	/*init indexmap*/
 	i = MAX_PLAYERS;
 	while (i--) {
-		indexmap[i] = NULL;
+		nearest_airports_map[i] = NULL;
 	}
 
 	/*load airports*/
@@ -161,106 +169,144 @@ static int sortaprefs(const void *_a, const void *_b)
 	return (int) (10.0f * (b->distance - a->distance));
 }
 
-/* native APT_FormatNearestList(playerid, Float:x, Float:y, buf[]) */
-cell AMX_NATIVE_CALL APT_FormatNearestList(AMX *amx, cell *params)
+/**
+The /nearest command, shows a list dialog with airports.
+
+Airports are sorted by distance from player. Choosing an airport shows an
+additional dialog with information about the selected airport.
+*/
+int airport_cmd_nearest(CMDPARAMS)
 {
-	cell *addr;
-	int i = 0, idx = 0, pid = params[1];
-	int enabledairportscount = 0;
-	float dx, dy;
-	char buf[4096];
+	static const char *NONE = WARN"No airports!";
+
+	int i = 0;
+	int num = 0;
+	float playerx, playery, dx, dy;
+	char buf[4096], *b;
 	struct AIRPORT *ap;
+	struct AIRPORT **map;
 	struct APREF *aps = malloc(sizeof(struct APREF) * numairports);
-	
+
+	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
+	playerx = *((float*) buf32);
+	playery = *((float*) buf64);
+
 	while (i < numairports) {
 		if (airports[i].enabled) {
-			dx = airports[i].pos.x - amx_ctof(params[2]);
-			dy = airports[i].pos.y - amx_ctof(params[3]);
-			aps[enabledairportscount].distance = sqrt(dx * dx + dy * dy);
-			aps[enabledairportscount].index = i;
-			enabledairportscount++;
+			dx = airports[i].pos.x - playerx;
+			dy = airports[i].pos.y - playery;
+			aps[num].distance = sqrt(dx * dx + dy * dy);
+			aps[num].index = i;
+			num++;
 		}
 		i++;
 	}
-	qsort(aps, enabledairportscount, sizeof(struct APREF), sortaprefs);
-	if (indexmap[pid] == NULL) {
-		indexmap[pid] = malloc(sizeof(indexmap[0]) * enabledairportscount);
+	if (num == 0) {
+		amx_SetUString(buf144, NONE, 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		return 1;
 	}
-	i = indexmapsize[pid] = enabledairportscount;
+	qsort(aps, num, sizeof(struct APREF), sortaprefs);
+	map = nearest_airports_map[playerid];
+	if (map == NULL) {
+		map = malloc(sizeof(struct AIRPORT*) * num);
+		nearest_airports_map[playerid] = map;
+	}
+	i = nearest_airports_map_size[playerid] = num;
+	b = buf;
 	while (i--) {
-		*(indexmap[pid] + enabledairportscount - i - 1) = aps[i].index;
-		ap = airports + aps[i].index;
+		*map = ap = airports + aps[i].index;
+		map++;
 		if (aps[i].distance < 1000.0f) {
-			idx += sprintf(buf + idx, "\n%.0f\t%s\t[%s]", aps[i].distance, ap->name, ap->code);
+			b += sprintf(b, "\n%.0f", aps[i].distance);
 		} else {
-			idx += sprintf(buf + idx, "\n%.1fK\t%s\t[%s]", aps[i].distance / 1000.0f, ap->name, ap->code);
+			b += sprintf(b, "\n%.1fK", aps[i].distance / 1000.0f);
 		}
+		b += sprintf(b, "\t%s\t[%s]", ap->name, ap->code);
 	}
-	amx_GetAddr(amx, params[4], &addr);
-	amx_SetUString(addr, buf + 1, idx + 1);
+
+	dialog_NC_ShowPlayerDialog(
+		amx,
+		playerid,
+		DIALOG_AIRPORT_NEAREST,
+		DIALOG_STYLE_TABLIST,
+		"Nearest airports",
+		buf + 1,
+		"Info",
+		"Close",
+		-1);
 
 	free(aps);
 	return 1;
 }
 
-/* native APT_FormatBeaconList(buf[]) */
-cell AMX_NATIVE_CALL APT_FormatBeaconList(AMX *amx, cell *params)
+/**
+The /beacons command, shows a dialog with list of all airport beacons.
+*/
+int airport_cmd_beacons(CMDPARAMS)
 {
-	cell *addr;
-	char buf[4096];
+	char buf[4096], *b = buf;
 	struct AIRPORT *ap = airports;
-	int count = numairports, idx = 0;
+	int count = numairports;
 
 	while (count-- > 0) {
 		if (ap->enabled) {
-			idx += sprintf(buf + idx, " %s", ap->beacon);
+			b += sprintf(b, " %s", ap->beacon);
 		}
 		ap++;
 	}
-
-	amx_GetAddr(amx, params[1], &addr);
-	amx_SetUString(addr, buf + 1, idx + 1);
+	if (b == buf) {
+		strcpy(buf, " None!");
+	}
+	dialog_NC_ShowPlayerDialog(
+		amx,
+		playerid,
+		DIALOG_DUMMY,
+		DIALOG_STYLE_MSGBOX,
+		"Beacons",
+		buf + 1,
+		"Close",
+		NULL,
+		-1);
 	return 1;
 }
 
-/* native API_MapIndexFromListDialog(playerid, listitem=0) */
-cell AMX_NATIVE_CALL APT_MapIndexFromListDialog(AMX *amx, cell *params)
+/**
+Cleanup stored stuff for player when they disconnect.
+*/
+void airport_on_player_disconnect(int playerid)
 {
-	int value, pid = params[1];
-
-	if (indexmap[pid] == NULL) {
-		return 0;
+	if (nearest_airports_map[playerid] != NULL) {
+		free(nearest_airports_map[playerid]);
+		nearest_airports_map[playerid] = NULL;
 	}
-
-	if (params[2] < 0 || indexmapsize[pid] <= params[2]) {
-		value = 0;
-	} else {
-		value = *(indexmap[pid] + params[2]);
-	}
-
-	free(indexmap[pid]);
-	indexmap[pid] = NULL;
-	return value;
 }
 
-/* native APT_FormatInfo(aptidx, buf[]) */
-cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
+/**
+Call when getting a response from DIALOG_AIRPORT_NEAREST, to show info dialog.
+*/
+void airport_list_dialog_response(AMX *amx, int playerid, int response, int idx)
 {
-	int idx = params[1];
 	struct AIRPORT *ap;
 	struct RUNWAY *rnw;
 	int helipads = 0;
-	cell *addr;
-	char buf[4096], *b = buf;
+	char title[64], info[4096], *b;
 	char szRunways[] = "Runways:";
 
-	amx_GetAddr(amx, params[2], &addr);
-	if (idx < 0 || numairports <= idx) {
-		buf[0] = 0;
-		amx_SetUString(addr, buf, 2);
-		return 0;
+	if (nearest_airports_map[playerid] == NULL) {
+		return;
 	}
-	ap = airports + idx;
+	if (!response ||
+		idx < 0 ||
+		nearest_airports_map_size[playerid] <= idx)
+	{
+		goto freereturn;
+	}
+	ap = nearest_airports_map[playerid][idx];
+
+	sprintf(title, "%s - %s", ap->code, ap->name);
+
+	b = info;
 	b += sprintf(b, "\nElevation:\t%.0f FT", ap->pos.z);
 	b += sprintf(b, "\nBeacon:\t%s", ap->beacon);
 	rnw = ap->runways;
@@ -281,28 +327,18 @@ cell AMX_NATIVE_CALL APT_FormatInfo(AMX *amx, cell *params)
 	}
 	b += sprintf(b, "\nHelipads:\t%d", helipads);
 
-	amx_SetUString(addr, buf + 1, sizeof(buf));
-	return 1;
-}
+	dialog_NC_ShowPlayerDialog(
+		amx,
+		playerid,
+		DIALOG_DUMMY,
+		DIALOG_STYLE_MSGBOX,
+		title,
+		info + 1,
+		"Close",
+		NULL,
+		-1);
 
-/* native APT_FormatCodeAndName(aptidx, buf[]) */
-cell AMX_NATIVE_CALL APT_FormatCodeAndName(AMX *amx, cell *params)
-{
-	int idx = params[1];
-	cell *addr;
-	char res[64];
-
-	amx_GetAddr(amx, params[2], &addr);
-	if (idx < 0 || numairports <= idx) {
-		res[0] = 'u';
-		res[1] = 'n';
-		res[2] = 'k';
-		res[3] = 0;
-		amx_SetUString(addr, res, 4);
-		return 0;
-	}
-
-	sprintf(res, "%s - %s", airports[idx].code, airports[idx].name);
-	amx_SetUString(addr, res, 64);
-	return 1;
+freereturn:
+	free(nearest_airports_map[playerid]);
+	nearest_airports_map[playerid] = NULL;
 }

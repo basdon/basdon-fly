@@ -62,6 +62,7 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 /* native B_OnDialogResponse() */
 cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 {
+	int airport_list_dialog_response(AMX*, int, int, int);
 	int dialog_on_response(AMX*, int, int);
 	void spawn_on_dialog_response(AMX*, int, int, int);
 	void prefs_on_dialog_response(AMX*, int, int, int);
@@ -83,6 +84,9 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 		return 1;
 	case DIALOG_PREFERENCES:
 		prefs_on_dialog_response(amx, playerid, response, listitem);
+		return 1;
+	case DIALOG_AIRPORT_NEAREST:
+		airport_list_dialog_response(amx, playerid, response, listitem);
 		return 1;
 	}
 	return 1;
@@ -215,6 +219,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 /* native B_OnPlayerDisconnect(playerid, reason)*/
 cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 {
+	void airport_on_player_disconnect(int);
 	void echo_on_player_connection(AMX*, int, int);
 	void dialog_on_player_disconnect(AMX*, int);
 	void maps_on_player_disconnect(int playerid);
@@ -224,6 +229,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	const int playerid = params[1], reason = params[2];
 	int i;
 
+	airport_on_player_disconnect(playerid);
 	echo_on_player_connection(amx, playerid, reason);
 	dialog_on_player_disconnect(amx, playerid);
 	maps_on_player_disconnect(playerid);
