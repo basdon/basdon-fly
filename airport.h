@@ -6,6 +6,10 @@ struct RUNWAY {
 	float heading, headingr;
 	struct vec3 pos;
 	int nav;
+	/**
+	Should be one of the RUNWAY_TYPE_ constants.
+	*/
+	int type;
 };
 
 struct AIRPORT {

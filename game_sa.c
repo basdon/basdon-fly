@@ -41,6 +41,11 @@ int game_is_air_vehicle(int model)
 	return model && (vehicleflags[model - 400] & (HELI | PLANE));
 }
 
+int game_is_heli(int model)
+{
+	return model && (vehicleflags[model - 400] & HELI);
+}
+
 int game_is_plane(int model)
 {
 	return model && (vehicleflags[model - 400] & PLANE);

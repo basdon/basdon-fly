@@ -87,9 +87,9 @@ noairports:
 
 	/*load runways*/
 	amx_SetUString(buf144,
-		"SELECT a,h,s,x,y,z,n "
+		"SELECT a,h,s,x,y,z,n,type "
 		"FROM rnw "
-		"WHERE type="EQ(RUNWAY_TYPE_RUNWAY)" "
+		/*"WHERE type="EQ(RUNWAY_TYPE_RUNWAY)" "*/
 		"ORDER BY a ASC", 144);
 	NC_mysql_query_(buf144a, &cacheid);
 	NC_cache_get_row_count_(&rowcount);
@@ -124,6 +124,7 @@ noairports:
 			NC_cache_get_field_flt(rowcount, 4, rnw->pos.y);
 			NC_cache_get_field_flt(rowcount, 5, rnw->pos.z);
 			NC_cache_get_field_int(rowcount, 6, &rnw->nav);
+			NC_cache_get_field_int(rowcount, 7, &rnw->type);
 			rnw++;
 			rowcount--;
 		}
@@ -140,7 +141,8 @@ norunways:
 		printf(" runwaycount: %d\n", ap->runwaysend - ap->runways);
 		rnw = ap->runways;
 		while (rnw != ap->runwaysend) {
-			printf("  runway %s nav %d\n", rnw->id, rnw->nav);
+			printf("  runway %s type %d nav %d\n",
+				rnw->id, rnw->type, rnw->nav);
 			rnw++;
 		}
 		ap++;

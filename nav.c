@@ -483,59 +483,67 @@ int nav_get_active_type(int vehicleid)
 /**
 Set given vehicle's navigation to given airport.
 
-Navigation target is decided by the runway or heliport that is the closest
-to the vehicle.
+Navigation target is decided by the runway or heliport (decision based on
+given vehiclemodel) that is the closest to the vehicle.
+When no target is found, airport's ADF beacon will be used.
 */
 void nav_navigate_to_airport(
 	AMX *amx, int vehicleid, int vehiclemodel,
 	struct AIRPORT *ap)
-{struct NAVDATA *n;
-	struct RUNWAY *rw, *shortestrw, *shortestilsrw;
+{
+	struct NAVDATA *n;
+	struct RUNWAY *rw, *closestrw;
 	float vehiclex, vehicley, vehiclez;
-	float dx, dy, dz, dist, mindistall, mindistils;
+	float dx, dy, dz, dist, mindist;
 
-	n = nav[vehicleid];
-	if (n == NULL) {
-		n = nav[vehicleid] = malloc(sizeof(struct NAVDATA));
-		n->alt = n->crs = n->dist = 0.0f;
-	}
-	n->ils = 0;
+	rw = ap->runways;
+	mindist = 0x7F800000;
+	closestrw = NULL;
+	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
+	vehiclex = *((float*) buf32);
+	vehicley = *((float*) buf64);
+	vehiclez = *((float*) buf144);
 
 	/* if plane, try VOR if available, prioritizing ILS runways */
 	if (game_is_plane(vehiclemodel)) {
-		rw = ap->runways;
-		mindistall = mindistils = 0x7F800000;
-		shortestrw = shortestilsrw = NULL;
-		NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
-		vehiclex = *((float*) buf32);
-		vehicley = *((float*) buf64);
-		vehiclez = *((float*) buf144);
 		while (rw != ap->runwaysend) {
-			dx = rw->pos.x - vehiclex;
-			dy = rw->pos.y - vehicley;
-			dz = rw->pos.z - vehiclez;
-			dist = dx * dx + dy * dy + dz * dz;
-			if (rw->nav & NAV_VOR && dist < mindistall) {
-				mindistall = dist;
-				shortestrw = rw;
-			}
-			if (rw->nav & NAV_ILS && dist < mindistils) {
-				mindistils = dist;
-				shortestilsrw = rw;
+			if (rw->type == RUNWAY_TYPE_RUNWAY) {
+				dx = rw->pos.x - vehiclex;
+				dy = rw->pos.y - vehicley;
+				dz = rw->pos.z - vehiclez;
+				dist = dx * dx + dy * dy + dz * dz;
+				if (rw->nav & NAV_VOR && dist < mindist) {
+					mindist = dist;
+					closestrw = rw;
+				}
 			}
 			rw++;
 		}
-		if (shortestrw != NULL) {
-			n->beacon = NULL;
-			n->vor = shortestrw;
+		if (closestrw != NULL) {
+			nav_enable(amx, vehicleid, NULL, closestrw);
+			return;
+		}
+	} else if (game_is_heli(vehiclemodel)) {
+		while (rw != ap->runwaysend) {
+			if (rw->type == RUNWAY_TYPE_HELIPAD) {
+				dx = rw->pos.x - vehiclex;
+				dy = rw->pos.y - vehicley;
+				dz = rw->pos.z - vehiclez;
+				dist = dx * dx + dy * dy + dz * dz;
+				if (dist < mindist) {
+					mindist = dist;
+					closestrw = rw;
+				}
+			}
+			rw++;
+		}
+		if (closestrw != NULL) {
+			nav_enable(amx, vehicleid, &closestrw->pos, NULL);
 			return;
 		}
 	}
 
-	/* if heli of no VOR runways, do ADF */
-	n->beacon = &ap->pos;
-	n->vor = NULL;
-	return;
+	nav_enable(amx, vehicleid, &ap->pos, NULL);
 }
 
 /**
