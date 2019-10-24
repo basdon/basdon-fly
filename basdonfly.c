@@ -62,7 +62,6 @@ FORWARD(Missions_CreateTrackerMessage);
 FORWARD(Missions_EndUnfinished);
 FORWARD(Missions_EnterCheckpoint);
 FORWARD(Missions_FinalizeAddPoints);
-FORWARD(Missions_GetMissionNavData);
 FORWARD(Missions_GetState);
 FORWARD(Missions_OnVehicleRefueled);
 FORWARD(Missions_OnVehicleRepaired);
@@ -73,10 +72,7 @@ FORWARD(Missions_ShouldShowSatisfaction);
 FORWARD(Missions_Start);
 FORWARD(Missions_UpdateSatisfaction);
 /* nav.c */
-FORWARD(Nav_GetActiveNavType);
-FORWARD(Nav_NavigateToMission);
 FORWARD(Nav_Reset);
-FORWARD(Nav_ResetCache);
 /* playerdata.c */
 FORWARD(PlayerData_Clear);
 FORWARD(PlayerData_FormatUpdateQuery);
@@ -346,7 +342,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Missions_EndUnfinished),
 	REGISTERNATIVE(Missions_EnterCheckpoint),
 	REGISTERNATIVE(Missions_FinalizeAddPoints),
-	REGISTERNATIVE(Missions_GetMissionNavData),
 	REGISTERNATIVE(Missions_GetState),
 	REGISTERNATIVE(Missions_OnVehicleRefueled),
 	REGISTERNATIVE(Missions_OnVehicleRepaired),
@@ -357,10 +352,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Missions_Start),
 	REGISTERNATIVE(Missions_UpdateSatisfaction),
 	/* nav.c */
-	REGISTERNATIVE(Nav_GetActiveNavType),
-	REGISTERNATIVE(Nav_NavigateToMission),
 	REGISTERNATIVE(Nav_Reset),
-	REGISTERNATIVE(Nav_ResetCache),
 	/* playerdata.c */
 	REGISTERNATIVE(PlayerData_Clear),
 	REGISTERNATIVE(PlayerData_FormatUpdateQuery),

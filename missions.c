@@ -761,29 +761,6 @@ cell AMX_NATIVE_CALL Missions_FinalizeAddPoints(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Missions_GetMissionNavData(playerid, &vehicleid, &vehiclemodel, &airportidx) */
-cell AMX_NATIVE_CALL Missions_GetMissionNavData(AMX *amx, cell *params)
-{
-	const int playerid = params[1];
-	cell *addr;
-	struct mission *miss;
-	if ((miss = activemission[playerid]) != NULL) {
-		amx_GetAddr(amx, params[2], &addr);
-		if ((*addr = miss->veh->spawnedvehicleid)) {
-			amx_GetAddr(amx, params[3], &addr);
-			*addr = miss->veh->model;
-			amx_GetAddr(amx, params[4], &addr);
-			if (miss->stage <= MISSION_STAGE_PRELOAD) {
-				*addr = miss->startpoint->ap->id;
-			} else {
-				*addr = miss->endpoint->ap->id;
-			}
-			return 1;
-		}
-	}
-	return 0;
-}
-
 /* native Missions_GetState(playerid) */
 cell AMX_NATIVE_CALL Missions_GetState(AMX *amx, cell *params)
 {
@@ -862,6 +839,12 @@ cell AMX_NATIVE_CALL Missions_PostLoad(AMX *amx, cell *params)
 	{
 		return 0;
 	}
+
+	nav_navigate_to_airport(
+		amx,
+		mission->veh->spawnedvehicleid,
+		mission->veh->model,
+		mission->endpoint->ap);
 
 	mission->stage = MISSION_STAGE_FLIGHT;
 	sprintf(buf,
@@ -1126,6 +1109,12 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 		trackermsg[14] = 1;
 		trackermsg[15] = '?';
 	}
+
+	nav_navigate_to_airport(
+		amx,
+		mission->veh->spawnedvehicleid,
+		mission->veh->model,
+		mission->startpoint->ap);
 
 	return 1;
 }

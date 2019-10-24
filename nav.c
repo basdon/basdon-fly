@@ -482,45 +482,44 @@ int nav_get_active_type(int vehicleid)
 	return NAV_NONE;
 }
 
-/* native Nav_GetActiveNavType(vehicleid) */
-cell AMX_NATIVE_CALL Nav_GetActiveNavType(AMX *amx, cell *params)
-{
-	int vid = params[1];
-	if (nav[vid] == NULL) {
-		return NAV_NONE;
-	}
-	if (nav[vid]->beacon != NULL) {
-		return NAV_ADF;
-	}
-	if (nav[vid]->vor != NULL) {
-		return NAV_VOR | (NAV_ILS * nav[vid]->ils);
-	}
-	return NAV_NONE;
-}
+/**
+Set given vehicle's navigation to given airport.
 
-/* native Nav_NavigateToMission(vehicleid, vehiclemodel, airportidx, Float:x, Float:y, Float:z) */
-cell AMX_NATIVE_CALL Nav_NavigateToMission(AMX *amx, cell *params)
+Navigation target is decided by the runway or heliport that is the closest
+to the vehicle.
+*/
+void nav_navigate_to_airport(
+	AMX *amx, int vehicleid, int vehiclemodel,
+	struct AIRPORT *ap)
 {
 	void panel_hide_vor_bar_for_passengers(AMX*, int);
 	void panel_show_vor_bar_for_passengers(AMX*, int);
 
-	const int vid = params[1], vehiclemodel = params[2] - 400;
-	struct AIRPORT *ap = airports + params[3];
+	struct NAVDATA *n;
 	struct RUNWAY *rw, *shortestrw, *shortestilsrw;
-	float x, y, z, dx, dy, dz, dist, mindistall, mindistils;
+	float vehiclex, vehicley, vehiclez;
+	float dx, dy, dz, dist, mindistall, mindistils;
+
+	n = nav[vehicleid];
+	if (n == NULL) {
+		n = nav[vehicleid] = malloc(sizeof(struct NAVDATA));
+		n->alt = n->crs = n->dist = 0.0f;
+	}
+	n->ils = 0;
 
 	/* if plane, try VOR if available, prioritizing ILS runways */
-	if (0 <= vehiclemodel && vehiclemodel < MODEL_TOTAL && vehicleflags[vehiclemodel] & PLANE) {
+	if (game_is_plane(vehiclemodel)) {
 		rw = ap->runways;
 		mindistall = mindistils = 0x7F800000;
 		shortestrw = shortestilsrw = NULL;
-		x = amx_ctof(params[4]);
-		y = amx_ctof(params[5]);
-		z = amx_ctof(params[6]);
+		NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
+		vehiclex = *((float*) buf32);
+		vehicley = *((float*) buf64);
+		vehiclez = *((float*) buf144);
 		while (rw != ap->runwaysend) {
-			dx = rw->pos.x - x;
-			dy = rw->pos.y - y;
-			dz = rw->pos.z - z;
+			dx = rw->pos.x - vehiclex;
+			dy = rw->pos.y - vehicley;
+			dz = rw->pos.z - vehiclez;
 			dist = dx * dx + dy * dy + dz * dz;
 			if (rw->nav & NAV_VOR && dist < mindistall) {
 				mindistall = dist;
@@ -533,31 +532,18 @@ cell AMX_NATIVE_CALL Nav_NavigateToMission(AMX *amx, cell *params)
 			rw++;
 		}
 		if (shortestrw != NULL) {
-			if (shortestilsrw != NULL) {
-				shortestrw = shortestilsrw;
-			}
-			if (nav[vid] == NULL) {
-				nav[vid] = malloc(sizeof(struct NAVDATA));
-				nav[vid]->alt = nav[vid]->crs = nav[vid]->dist = 0.0f;
-			}
-			nav[vid]->beacon = NULL;
-			nav[vid]->ils = 0;
-			nav[vid]->vor = shortestrw;
-			panel_show_vor_bar_for_passengers(amx, vid);
-			return 1;
+			n->beacon = NULL;
+			n->vor = shortestrw;
+			panel_show_vor_bar_for_passengers(amx, vehicleid);
+			return;
 		}
 	}
 
 	/* if heli of no VOR runways, do ADF */
-	if (nav[vid] == NULL) {
-		nav[vid] = malloc(sizeof(struct NAVDATA));
-		nav[vid]->alt = nav[vid]->crs = nav[vid]->dist = 0.0f;
-	}
-	nav[vid]->beacon = ap;
-	nav[vid]->ils = 0;
-	nav[vid]->vor = NULL;
-	panel_hide_vor_bar_for_passengers(amx, vid);
-	return 1;
+	n->beacon = ap;
+	n->vor = NULL;
+	panel_hide_vor_bar_for_passengers(amx, vehicleid);
+	return;
 }
 
 /**
@@ -585,13 +571,6 @@ cell AMX_NATIVE_CALL Nav_Reset(AMX *amx, cell *params)
 		return 1;
 	}
 	return 0;
-}
-
-/* native Nav_ResetCache(playerid) */
-cell AMX_NATIVE_CALL Nav_ResetCache(AMX *amx, cell *params)
-{
-	nav_resetcache(params[1]);
-	return 1;
 }
 
 void calc_ils_values(

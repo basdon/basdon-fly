@@ -362,15 +362,6 @@ native Missions_EnterCheckpoint(playerid, vehicleid, vv, Float:x, Float:y, Float
 //@seealso Missions_AddPoint
 native Missions_FinalizeAddPoints()
 
-//@summary Get data to enable navigation for a mission
-//@param playerid player on a mission
-//@param vehicleid variable to store mission vehicle id in
-//@param vehiclemodel variable to store mission vehicle model in
-//@param airportidx variable to store next airport idx in
-//@returns {@code 0} if something did not work
-//@seealso Nav_NavigateToMission
-native Missions_GetMissionNavData(playerid, &vehicleid, &vehiclemodel, &airportidx)
-
 //@summary Get mission state of a player
 //@param playerid player to get the mission state of
 //@returns {@code -1} if not in a mission, or one of the flight-statuses.txt constants
@@ -448,22 +439,6 @@ native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, querybu
 native Missions_UpdateSatisfaction(playerid, vehicleid, Float:qw, Float:qx, Float:qy, Float:qz, buf[])
 
 #namespace "nav.c"
-
-//@summary get the active nav in the specified vehicle
-//@param vehicleid the vehicle to query its nav system
-//@returns one of {@code NAV_NONE}, {@code NAV_ADF}, {@code NAV_VOR}, {@code NAV_ILS}
-native Nav_GetActiveNavType(vehicleid)
-
-//@summary Sets navigation data for a vehicle to the next point of a mission
-//@param vehicleid vehicle to set nav for
-//@param vehiclemodel model of the vehicle
-//@param airportidx index of the airport in the airport table to navigate to
-//@param x current x position of the player, to determine closest runway if needed
-//@param y current y position of the player, to determine closest runway if needed
-//@param z current z position of the player, to determine closest runway if needed
-//@returns {@code 0} or {@code NAV_ADF} or {@code NAV_VOR}, specifying what kind of nav is set active
-//@seealso Missions_GetMissionNavData
-native Nav_NavigateToMission(vehicleid, vehiclemodel, airportidx, Float:x, Float:y, Float:z)
 
 //@summary Resets all nav for a vehicle
 //@param vehicleid vehicle to reset nav for
