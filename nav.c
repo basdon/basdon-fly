@@ -19,7 +19,7 @@
 #define SOUND_NAV_DEL 1084
 
 static struct NAVDATA {
-	struct AIRPORT *beacon;
+	struct vec3 *beacon;
 	struct RUNWAY *vor;
 	int ils;
 	int dist;
@@ -62,11 +62,13 @@ Disables navigation for given vehicle.
 
 Ensures the VOR textdraws are hidden.
 */
-void nav_disable(int vehicleid)
+void nav_disable(AMX* amx, int vehicleid)
 {
+	void panel_reset_nav_for_passengers(AMX*, int);
+
 	free(nav[vehicleid]);
 	nav[vehicleid] = NULL;
-	/*TODO panel_resetNavForPassengers vid*/
+	panel_reset_nav_for_passengers(amx, vehicleid);
 }
 
 /**
@@ -74,11 +76,14 @@ Enables navigation for given vehicle.
 
 Ensures the VOR textdraws are shown/hidden.
 
-@param adf airport to ADF towards, may be NULL
+@param adf vec3 to ADF towards, may be NULL
 @param vor runway to VOR towards, may be NULL
 */
-void nav_enable(int vehicleid, struct AIRPORT *adf, struct RUNWAY *vor)
+void nav_enable(AMX *amx, int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 {
+	void panel_hide_vor_bar_for_passengers(AMX*, int);
+	void panel_show_vor_bar_for_passengers(AMX*, int);
+
 	struct NAVDATA *np;
 
 	np = nav[vehicleid];
@@ -90,9 +95,9 @@ void nav_enable(int vehicleid, struct AIRPORT *adf, struct RUNWAY *vor)
 	np->vor = vor;
 	np->ils = 0;
 	if (vor) {
-		/* TODO panel_showVorBarForPassengers vid */
+		panel_show_vor_bar_for_passengers(amx, vehicleid);
 	} else {
-		/* TODO panel_hideVorBarForPassengers vid */
+		panel_hide_vor_bar_for_passengers(amx, vehicleid);
 	}
 }
 
@@ -161,8 +166,7 @@ int nav_cmd_adf(CMDPARAMS)
 
 	if (!cmd_get_str_param(cmdtext, &parseidx, beacon)) {
 		if (nav[vehicleid] != NULL) {
-			nav_disable(vehicleid);
-			panel_reset_nav_for_passengers(amx, vehicleid);
+			nav_disable(amx, vehicleid);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL);
 			return 1;
 		}
@@ -188,8 +192,7 @@ int nav_cmd_adf(CMDPARAMS)
 	len = numairports;
 	while (len--) {
 		if (strcmp(beacon, ap->beacon) == 0) {
-			nav_enable(vehicleid, ap, NULL);
-			panel_hide_vor_bar_for_passengers(amx, vehicleid);
+			nav_enable(amx, vehicleid, &ap->pos, NULL);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_SET);
 			return 1;
 		}
@@ -217,9 +220,6 @@ int nav_cmd_vor(CMDPARAMS)
 			"see /beacons or /nearest",
 		*NO_CAP = WARN"There are no VOR capable runways at this beacon";
 
-	void panel_show_vor_bar_for_passengers(AMX*, int);
-	void panel_reset_nav_for_passengers(AMX*, int);
-
 	struct NAVDATA *np;
 	struct AIRPORT *ap;
 	struct RUNWAY *rw;
@@ -234,8 +234,7 @@ int nav_cmd_vor(CMDPARAMS)
 
 	if (!cmd_get_str_param(cmdtext, &parseidx, beaconpar)) {
 		if (nav[vehicleid] != NULL) {
-			nav_disable(vehicleid);
-			panel_reset_nav_for_passengers(amx, vehicleid);
+			nav_disable(amx, vehicleid);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL);
 			return 1;
 		}
@@ -291,8 +290,7 @@ haveairport:
 	rw = ap->runways;
 	while (rw != ap->runwaysend) {
 		if (strcmp(rw->id, b) == 0) {
-			nav_enable(vehicleid, NULL, rw);
-			panel_show_vor_bar_for_passengers(amx, vehicleid);
+			nav_enable(amx, vehicleid, NULL, rw);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_SET);
 			return 1;
 		}
@@ -491,11 +489,7 @@ to the vehicle.
 void nav_navigate_to_airport(
 	AMX *amx, int vehicleid, int vehiclemodel,
 	struct AIRPORT *ap)
-{
-	void panel_hide_vor_bar_for_passengers(AMX*, int);
-	void panel_show_vor_bar_for_passengers(AMX*, int);
-
-	struct NAVDATA *n;
+{struct NAVDATA *n;
 	struct RUNWAY *rw, *shortestrw, *shortestilsrw;
 	float vehiclex, vehicley, vehiclez;
 	float dx, dy, dz, dist, mindistall, mindistils;
@@ -534,15 +528,13 @@ void nav_navigate_to_airport(
 		if (shortestrw != NULL) {
 			n->beacon = NULL;
 			n->vor = shortestrw;
-			panel_show_vor_bar_for_passengers(amx, vehicleid);
 			return;
 		}
 	}
 
 	/* if heli of no VOR runways, do ADF */
-	n->beacon = ap;
+	n->beacon = &ap->pos;
 	n->vor = NULL;
-	panel_hide_vor_bar_for_passengers(amx, vehicleid);
 	return;
 }
 
@@ -609,7 +601,7 @@ void nav_update(AMX *amx, int vehicleid,
 	}
 
 	if (n->beacon != NULL) {
-		pos = &n->beacon->pos;
+		pos = n->beacon;
 	} else if (n->vor != NULL) {
 		pos = &n->vor->pos;
 	} else {
