@@ -466,13 +466,16 @@ void panel_hide_vor_bar_for_passengers(AMX *amx, int vehicleid)
 	/*TODO: use on_player_was_afk to hide VOR bar to passengers that
 	were afk while the pilot disabled VOR,
 	then can change to panelplayers*/
-	int playerid, n = playercount;
+	int pid, n = playercount;
 
 	while (n--) {
-		playerid = players[n];
-		NC_GetPlayerVehicleID(playerid);
+		pid = players[n];
+		NC_GetPlayerVehicleID(pid);
 		if (nc_result == vehicleid) {
-			NC_TextDrawHideForPlayer(playerid, txt_vorbar);
+			NC_TextDrawHideForPlayer(pid, txt_vorbar);
+			if (ptxt_vor[pid] != -1) {
+				NC_PlayerTextDrawHide(pid, ptxt_vor[pid]);
+			}
 		}
 	}
 }
