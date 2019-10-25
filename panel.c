@@ -426,8 +426,8 @@ static void panel_reset_nav(AMX *amx, int playerid)
 		}
 		nc_params[2] = txt_vorbar;
 		NC(n_TextDrawHideForPlayer);
-		panel_reset_caches(playerid);
 	}
+	panel_reset_caches(playerid);
 }
 
 /**
@@ -555,6 +555,16 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 		NC(n_TextDrawShowForPlayer);
 		nc_params[2] = txt_adf_labels;
 		NC(n_TextDrawShowForPlayer);
+
+		buf144[0] = '-';
+		buf144[1] = 0;
+		nc_params[2] = ptxt_adf_dis[playerid];
+		nc_params[3] = buf144a;
+		NC(n_PlayerTextDrawSetString);
+		nc_params[2] = ptxt_adf_alt[playerid];
+		NC(n_PlayerTextDrawSetString);
+		nc_params[2] = ptxt_adf_crs[playerid];
+		NC(n_PlayerTextDrawSetString);
 
 		if (nav_get_active_type(vehicleid) & (NAV_VOR | NAV_ILS)) {
 			nc_params[2] = txt_vorbar;
