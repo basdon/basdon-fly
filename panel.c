@@ -260,9 +260,11 @@ static void panel_update_speed(AMX *amx, int playerid, int speed)
 	}
 
 	/* spd meter small */
-	strcpy(buf, "0~n~~n~0");
+	strcpy(buf, "0~n~~n~_");
 	buf[0] = '0' + ((speed + 1) % 10);
-	buf[7] = '0' + ((speed + 9) % 10);
+	if (speed != 0) {
+		buf[7] = '0' + ((speed + 9) % 10);
+	}
 	amx_SetUString(buf144, buf, sizeof(buf));
 	nc_params[2] = ptxt_spd_small[playerid];
 	NC(n_PlayerTextDrawSetString);
