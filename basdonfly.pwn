@@ -639,10 +639,6 @@ native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid)
 //@returns the actual amont of money it costs to repair the vehicle, {@code 0} if error
 native Veh_Repair(Float:x, Float:y, Float:z, vehicleid, playerid, budget, Float:hp, &Float:newhp, buf[], querybuf[])
 
-//@summary Reset cache for text displayed on panel
-//@param playerid player for which to reset the cache
-native Veh_ResetPanelTextCache(playerid)
-
 //@summary Check if a label should be created on a vehicle for a player
 //@param vehicleid vehicle on which the label would be attached
 //@param playerid player for which the label would show

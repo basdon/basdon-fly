@@ -88,7 +88,6 @@ FORWARD(Veh_CollectSpawnedVehicles);
 FORWARD(Veh_CollectPlayerVehicles);
 FORWARD(Veh_ConsumeFuel);
 FORWARD(Veh_Destroy);
-FORWARD(Veh_FormatPanelText);
 FORWARD(Veh_GetLabelToDelete);
 FORWARD(Veh_GetNextUpdateQuery);
 FORWARD(Veh_Init);
@@ -99,7 +98,6 @@ FORWARD(Veh_OnPlayerDisconnect);
 FORWARD(Veh_Refuel);
 FORWARD(Veh_RegisterLabel);
 FORWARD(Veh_Repair);
-FORWARD(Veh_ResetPanelTextCache);
 FORWARD(Veh_ShouldCreateLabel);
 FORWARD(Veh_UpdateServicePointTextId);
 FORWARD(Veh_UpdateServicePtsVisibility);
@@ -139,7 +137,7 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 {
 }
 
-static int time_h = 0, time_m = 0;
+int time_h = 0, time_m = 0;
 
 short tokick[MAX_PLAYERS];
 int numtokick;
@@ -153,6 +151,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	void maps_process_tick(AMX*);
 	void panel_timed_update(AMX*);
 	void protips_timed_broadcast(AMX*);
+	void veh_timed_panel_update(AMX*);
 	void zones_update_for_all(AMX*);
 
 	static int count = 0;
@@ -209,6 +208,7 @@ timer30s:			/*timer30s*/
 				;
 			}
 			/*timer1000*/
+			veh_timed_panel_update(amx);
 			zones_update_for_all(amx);
 			/*TODO: on 5s?*/
 			dialog_pop_queue(amx);
@@ -362,7 +362,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_CollectPlayerVehicles),
 	REGISTERNATIVE(Veh_ConsumeFuel),
 	REGISTERNATIVE(Veh_Destroy),
-	REGISTERNATIVE(Veh_FormatPanelText),
 	REGISTERNATIVE(Veh_GetLabelToDelete),
 	REGISTERNATIVE(Veh_GetNextUpdateQuery),
 	REGISTERNATIVE(Veh_Init),
@@ -373,7 +372,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_Refuel),
 	REGISTERNATIVE(Veh_RegisterLabel),
 	REGISTERNATIVE(Veh_Repair),
-	REGISTERNATIVE(Veh_ResetPanelTextCache),
 	REGISTERNATIVE(Veh_ShouldCreateLabel),
 	REGISTERNATIVE(Veh_UpdateServicePointTextId),
 	REGISTERNATIVE(Veh_UpdateServicePtsVisibility),

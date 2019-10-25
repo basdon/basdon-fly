@@ -33,6 +33,7 @@ int n_GivePlayerWeapon;
 int n_Kick;
 int n_PlayerPlaySound;
 int n_PlayerTextDrawAlignment;
+int n_PlayerTextDrawBackgroundColor;
 int n_PlayerTextDrawColor;
 int n_PlayerTextDrawDestroy;
 int n_PlayerTextDrawFont;
@@ -132,6 +133,8 @@ int natives_find(AMX *amx)
 		{ "Kick", &n_Kick },
 		{ "PlayerPlaySound", &n_PlayerPlaySound },
 		{ "PlayerTextDrawAlignment", &n_PlayerTextDrawAlignment },
+		{ "PlayerTextDrawBackgroundColor",
+			&n_PlayerTextDrawBackgroundColor },
 		{ "PlayerTextDrawColor", &n_PlayerTextDrawColor },
 		{ "PlayerTextDrawDestroy", &n_PlayerTextDrawDestroy },
 		{ "PlayerTextDrawFont", &n_PlayerTextDrawFont },

@@ -6,6 +6,7 @@
 #endif
 
 #include "common.h"
+#include "a_samp.h"
 #include <string.h>
 #include <math.h>
 #include "game_sa.h"
@@ -13,8 +14,6 @@
 #include "vehicles.h"
 
 #define SERVICE_MAP_DISTANCE 350.0f
-#define INVALID_HPFL_CACHE 2147483647
-#define INVALID_ODO_CACHE INVALID_HPFL_CACHE
 
 struct vehnode {
 	struct dbvehicle *veh;
@@ -39,8 +38,38 @@ static struct dbvehicle *dbvehicles;
 int dbvehiclenextid, dbvehiclealloc;
 struct vehicle gamevehicles[MAX_VEHICLES];
 short labelids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB+ of mapping, errrr */
-int panel_hpflcache[MAX_PLAYERS];
-int panel_odocache[MAX_PLAYERS];
+
+/**
+Holds global textdraw id of the vehicle panel background.
+*/
+static int txt_bg;
+/**
+Holds player textdraw id of the vehicle panel text, -1 if not created.
+*/
+static int ptxt_txt[MAX_PLAYERS];
+/**
+Holds player textdraw id of the fuel level bar text, -1 if not created.
+*/
+static int ptxt_fl[MAX_PLAYERS];
+/**
+Holds player textdraw id of the health bar text, -1 if not created.
+*/
+static int ptxt_hp[MAX_PLAYERS];
+/**
+Last fuel value that was shown to a player.
+*/
+static short ptxtcache_fl[MAX_PLAYERS];
+/**
+Last health value that was shown to a player.
+*/
+static short ptxtcache_hp[MAX_PLAYERS];
+
+void veh_on_player_connect(AMX *amx, int playerid)
+{
+	ptxt_hp[playerid] = -1;
+	ptxt_fl[playerid] = -1;
+	ptxt_txt[playerid] = -1;
+}
 
 void veh_init()
 {
@@ -364,49 +393,6 @@ cell AMX_NATIVE_CALL Veh_Destroy(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Veh_FormatPanelText(int playerid, int vehicleid, Float:vehiclehp, buf[]) */
-cell AMX_NATIVE_CALL Veh_FormatPanelText(AMX *amx, cell *params)
-{
-	struct dbvehicle *veh;
-	const int pid = params[1], vid = params[2];
-	const int vehiclehp = amx_ctof(params[3]);
-	cell *addr;
-	char buf[85];
-	int fuel, fuelcapacity, panel_hpflcachevalue, panel_odocachevalue;
-	float odo = 0.0f;
-
-	fuel = fuelcapacity = 0;
-	if ((veh = gamevehicles[vid].dbvehicle) != NULL) {
-		fuel = veh->fuel;
-		fuelcapacity = model_fuel_capacity(veh->model);
-		odo = veh->odo;
-	}
-
-	if ((panel_hpflcachevalue = fuel * 10000 + vehiclehp) == panel_hpflcache[pid] &&
-	    (panel_odocachevalue = odo * 10.0f) == panel_odocache[pid])
-	{
-		return 0;
-	}
-	panel_hpflcache[pid] = panel_hpflcachevalue;
-	panel_odocache[pid] = panel_odocachevalue;
-
-	sprintf(buf,
-	        "HP:~g~%4d/1000 ~w~FL:~g~%d/%d~n~~w~ODO: %08.1fkm",
-	        vehiclehp,
-	        fuel,
-	        fuelcapacity,
-	        odo);
-	if (vehiclehp < 350) {
-		buf[4] = 'r';
-	}
-	if (fuel <= (int) ((float) fuelcapacity * 0.2f)) {
-		buf[23] = 'r';
-	}
-	amx_GetAddr(amx, params[4], &addr);
-	amx_SetUString(addr, buf, sizeof(buf));
-	return 1;
-}
-
 /* native Veh_GetLabelToDelete(vehicleid, playerid, &PlayerText3D:labelid) */
 cell AMX_NATIVE_CALL Veh_GetLabelToDelete(AMX *amx, cell *params)
 {
@@ -684,15 +670,6 @@ cell AMX_NATIVE_CALL Veh_Repair(AMX *amx, cell *params)
 	return cost;
 }
 
-/* native Veh_ResetPanelTextCache(playerid) */
-cell AMX_NATIVE_CALL Veh_ResetPanelTextCache(AMX *amx, cell *params)
-{
-	const int pid = params[1];
-	panel_hpflcache[pid] = INVALID_HPFL_CACHE;
-	panel_odocache[pid] = INVALID_ODO_CACHE;
-	return 1;
-}
-
 /* native Veh_ShouldCreateLabel(vehicleid, playerid, buf[]) */
 cell AMX_NATIVE_CALL Veh_ShouldCreateLabel(AMX *amx, cell *params)
 {
@@ -914,4 +891,258 @@ veh_OnVehicleSpawn(AMX *amx, int vehicleid)
 	but it doesn't matter, it just needs to change*/
 	gamevehicles[vehicleid].reincarnation++;
 	return vehicleid;
+}
+
+static void veh_update_panel_for_player(AMX *amx, int playerid)
+{
+	struct dbvehicle *veh;
+	int vehicleid;
+	float odo, hp, fuel;
+	short cache;
+
+	NC_GetPlayerVehicleID_(playerid, &vehicleid);
+	if (!vehicleid) {
+		return;
+	}
+
+	veh = gamevehicles[vehicleid].dbvehicle;
+
+	if (veh != NULL) {
+		odo = veh->odo;
+		fuel = veh->fuel;
+		fuel /= model_fuel_capacity(veh->model);
+	} else {
+		fuel = odo = 0.0f;
+	}
+
+	hp = anticheat_NC_GetVehicleHealth(amx, vehicleid);
+	hp -= 250.0f;
+	if (hp < 0.0f) {
+		hp = 0.0f;
+	} else {
+		hp /= 750.0f;
+	}
+
+	sprintf((char*) buf64,
+		"ODO %08.0f~n~_FL i-------i~n~_HP i-------i",
+		veh->odo);
+	if (time_m % 2) {
+		if (fuel < 0.2f) {
+			((char*) buf64)[16] = '_';
+			((char*) buf64)[17] = '_';
+		}
+		if (hp < 0.2f) {
+			((char*) buf64)[32] = '_';
+			((char*) buf64)[33] = '_';
+		}
+	}
+	amx_SetUString(buf144, (char*) buf64, 64);
+	nc_params[0] = 3;
+	nc_params[1] = playerid;
+	nc_params[2] = ptxt_txt[playerid];
+	nc_params[3] = buf144a;
+	NC(n_PlayerTextDrawSetString);
+
+	cache = (short) (fuel * 100.0f);
+	if (ptxtcache_fl[playerid] != cache) {
+		ptxtcache_fl[playerid] = cache;
+		nc_params[0] = 2;
+		nc_params[1] = playerid;
+		nc_params[2] = ptxt_fl[playerid];
+		NC(n_PlayerTextDrawDestroy);
+
+		buf144[0] = 'i';
+		buf144[1] = 0;
+		nc_params[0] = 4;
+		nc_params[1] = playerid;
+		*((float*) (nc_params + 2)) =
+			555.0f + (608.0f - 555.0f) * fuel;
+		*((float*) (nc_params + 3)) = 413.0f;
+		nc_params[4] = buf144a;
+		NC_(n_CreatePlayerTextDraw, ptxt_fl + playerid);
+
+		nc_params[2] = ptxt_fl[playerid];
+		*((float*) (nc_params + 3)) = 0.25f;
+		*((float*) (nc_params + 4)) = 1.0f;
+		NC(n_PlayerTextDrawLetterSize);
+
+		nc_params[0] = 3;
+		nc_params[3] = 0xFF00FFFF;
+		NC(n_PlayerTextDrawColor);
+		NC(n_PlayerTextDrawBackgroundColor);
+		nc_params[3] = 1,
+		NC(n_PlayerTextDrawSetOutline);
+		NC(n_PlayerTextDrawSetProportional);
+		nc_params[3] = 2;
+		NC(n_PlayerTextDrawFont);
+
+		nc_params[0] = 2;
+		NC(n_PlayerTextDrawShow);
+	}
+
+	cache = (short) (hp * 100.0f);
+	if (ptxtcache_hp[playerid] != cache) {
+		ptxtcache_hp[playerid] = cache;
+		nc_params[0] = 2;
+		nc_params[1] = playerid;
+		nc_params[2] = ptxt_hp[playerid];
+		NC(n_PlayerTextDrawDestroy);
+
+		buf144[0] = 'i';
+		buf144[1] = 0;
+		nc_params[0] = 4;
+		nc_params[1] = playerid;
+		*((float*) (nc_params + 2)) =
+			555.0f + (608.0f - 555.0f) * hp;
+		*((float*) (nc_params + 3)) = 422.0f;
+		nc_params[4] = buf144a;
+		NC_(n_CreatePlayerTextDraw, ptxt_hp + playerid);
+
+		nc_params[2] = ptxt_hp[playerid];
+		*((float*) (nc_params + 3)) = 0.25f;
+		*((float*) (nc_params + 4)) = 1.0f;
+		NC(n_PlayerTextDrawLetterSize);
+
+		nc_params[0] = 3;
+		nc_params[3] = 0xFF00FFFF;
+		NC(n_PlayerTextDrawColor);
+		NC(n_PlayerTextDrawBackgroundColor);
+		nc_params[3] = 1,
+		NC(n_PlayerTextDrawSetOutline);
+		NC(n_PlayerTextDrawSetProportional);
+		nc_params[3] = 2;
+		NC(n_PlayerTextDrawFont);
+
+		nc_params[0] = 2;
+		NC(n_PlayerTextDrawShow);
+	}
+}
+
+void veh_on_player_state_change(AMX *amx, int playerid, int from, int to)
+{
+	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
+		buf144[0] = '_';
+		buf144[1] = 0;
+		nc_params[0] = 4;
+		nc_params[1] = playerid;
+		*((float*) (nc_params + 2)) = -10.0f;
+		*((float*) (nc_params + 3)) = -10.0f;
+		nc_params[4] = buf144a;
+		NC_(n_CreatePlayerTextDraw, ptxt_hp + playerid);
+		NC_(n_CreatePlayerTextDraw, ptxt_fl + playerid);
+
+		nc_params[0] = 2;
+		nc_params[2] = txt_bg;
+		NC(n_TextDrawShowForPlayer);
+		nc_params[2] = ptxt_txt[playerid];
+		NC(n_PlayerTextDrawShow);
+
+		ptxtcache_fl[playerid] = -1;
+		ptxtcache_hp[playerid] = -1;
+
+		veh_update_panel_for_player(amx, playerid);
+	} else if (ptxt_fl[playerid] != -1 /*if panel active*/) {
+		nc_params[0] = 2;
+		nc_params[1] = playerid;
+		nc_params[2] = txt_bg;
+		NC(n_TextDrawHideForPlayer);
+		nc_params[2] = ptxt_txt[playerid];
+		NC(n_PlayerTextDrawHide);
+		nc_params[2] = ptxt_fl[playerid];
+		NC(n_PlayerTextDrawDestroy);
+		nc_params[2] = ptxt_hp[playerid];
+		NC(n_PlayerTextDrawDestroy);
+
+		ptxt_fl[playerid] = -1;
+		ptxt_hp[playerid] = -1;
+
+		ptxtcache_fl[playerid] = -1;
+		ptxtcache_hp[playerid] = -1;
+	}
+}
+
+void veh_timed_panel_update(AMX *amx)
+{
+	int n = playercount;
+
+	while (n--) {
+		if (spawned[players[n]]) {
+			veh_update_panel_for_player(amx, players[n]);
+		}
+	}
+}
+
+/**
+Should be called in OnPlayerConnect.
+*/
+void veh_create_player_textdraws(AMX *amx, int playerid)
+{
+	float *f2, *f3, *f4;
+
+	ptxt_fl[playerid] = ptxt_hp[playerid] = -1;
+
+	f2 = (float*) (nc_params + 2);
+	f3 = (float*) (nc_params + 3);
+	f4 = (float*) (nc_params + 4);
+
+	/*create em first*/
+	nc_params[0] = 4;
+	nc_params[1] = playerid;
+	*f2 = 528.0f;
+	*f3 = 404.0f;
+	nc_params[4] = buf144a;
+	SETB144("ODO 00000000~n~_FL i-------i~n~_HP i-------i");
+	NC_(n_CreatePlayerTextDraw, ptxt_txt + playerid);
+
+	/*letter sizes*/
+	nc_params[2] = ptxt_txt[playerid];
+	*f3 = 0.25f;
+	*f4 = 1.0f;
+	NC(n_PlayerTextDrawLetterSize);
+
+	nc_params[0] = 3;
+	/*rest*/
+	nc_params[2] = ptxt_txt[playerid];
+	nc_params[3] = -1;
+	NC(n_PlayerTextDrawColor);
+	nc_params[3] = 0,
+	NC(n_PlayerTextDrawSetOutline);
+	NC(n_PlayerTextDrawSetProportional);
+	NC(n_PlayerTextDrawSetShadow);
+	nc_params[3] = 2;
+	NC(n_PlayerTextDrawFont);
+}
+
+/**
+Should be called in OnGameModeInit.
+*/
+void veh_create_global_textdraws(AMX *amx)
+{
+	float *f1, *f2, *f3;
+
+	f1 = (float*) (nc_params + 1);
+	f2 = (float*) (nc_params + 2);
+	f3 = (float*) (nc_params + 3);
+
+	nc_params[0] = 3;
+	*f1 = 570.0f;
+	*f2 = 405.0f;
+	nc_params[3] = buf144a;
+	SETB144("~n~~n~~n~");
+	NC_(n_TextDrawCreate, &txt_bg);
+	nc_params[1] = txt_bg;
+	*f2 = 0.5f;
+	*f3 = 1.0f;
+	NC(n_TextDrawLetterSize);
+	*f2 = 30.0f;
+	*f3 = 90.0f;
+	NC(n_TextDrawTextSize);
+	nc_params[0] = 2;
+	nc_params[2] = 0x00000077; /*should be same as PANEL_BG*/
+	NC(n_TextDrawBoxColor);
+	nc_params[2] = 1;
+	NC(n_TextDrawFont);
+	NC(n_TextDrawUseBox);
+	nc_params[2] = 2;
+	NC(n_TextDrawAlignment);
 }

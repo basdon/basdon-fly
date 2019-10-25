@@ -116,6 +116,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	void maps_load_from_db(AMX *amx);
 	void panel_on_gamemode_init(AMX*);
 	void spawn_init(AMX*);
+	void veh_create_global_textdraws(AMX*);
 
 	memset(spawned, 0, sizeof(spawned));
 
@@ -125,6 +126,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	echo_init(amx);
 	panel_on_gamemode_init(amx);
 	spawn_init(amx); /*MUST run after airports_init*/
+	veh_create_global_textdraws(amx);
 	return 1;
 }
 
@@ -169,6 +171,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	void panel_on_player_connect(AMX*, int);
 	void pm_on_player_connect(int);
 	void prefs_on_player_connect(int);
+	void veh_create_player_textdraws(AMX*, int);
 	void zones_on_player_connect(AMX*, int);
 
 	const int playerid = params[1];
@@ -191,6 +194,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	panel_on_player_connect(amx, playerid);
 	pm_on_player_connect(playerid);
 	prefs_on_player_connect(playerid);
+	veh_create_player_textdraws(amx, playerid);
 	zones_on_player_connect(amx, playerid);
 
 	for (i = 0; i < playercount; ){
@@ -289,11 +293,13 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 {
 	void panel_on_player_state_change(AMX*, int, int, int);
+	void veh_on_player_state_change(AMX*, int, int, int);
 
 	const int playerid = params[1];
 	const int newstate = params[2], oldstate = params[3];
 
 	panel_on_player_state_change(amx, playerid, oldstate, newstate);
+	veh_on_player_state_change(amx, playerid, oldstate, newstate);
 	return 1;
 }
 

@@ -29,6 +29,7 @@ extern int n_GivePlayerWeapon;
 extern int n_Kick;
 extern int n_PlayerPlaySound;
 extern int n_PlayerTextDrawAlignment;
+extern int n_PlayerTextDrawBackgroundColor;
 extern int n_PlayerTextDrawColor;
 extern int n_PlayerTextDrawDestroy;
 extern int n_PlayerTextDrawFont;

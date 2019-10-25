@@ -317,7 +317,7 @@ void panel_timed_update(AMX *amx)
 	void nav_update_textdraws(AMX*, int, int, int*, int*, int*, int*);
 
 	int playerid, vehicleid, n = numpanelplayers;
-	float x, y, z, heading, hp;
+	float x, y, z, heading;
 
 	while (n--) {
 		playerid = panelplayers[n];
@@ -346,15 +346,6 @@ void panel_timed_update(AMX *amx)
 			ptxt_adf_alt,
 			ptxt_adf_crs,
 			ptxt_vor);
-
-		hp = anticheat_NC_GetVehicleHealth(amx, vehicleid);
-		/*
-		veh things here (FL/ODO)
-		if (Veh_FormatPanelText(playerid, vid, hp, buf144)) {
-			PlayerTextDrawSetString playerid,
-			playerpnltxt[playerid][PNLTXT_HPFLODO], buf144
-		}
-		*/
 
 		/*vai*/
 		NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
@@ -518,7 +509,8 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 		panelplayers[numpanelplayers++] = playerid;
 		panel_reset_nav(amx, playerid);
 
-		amx_SetUString(buf144, "_", 2);
+		buf144[0] = '_';
+		buf144[1] = 0;
 		nc_params[0] = 4;
 		nc_params[1] = playerid;
 		*((float*) (nc_params + 2)) = -10.0f;
@@ -632,8 +624,6 @@ void panel_on_player_was_afk(AMX* amx, int playerid)
 		}
 	}
 }
-
-#define SETB144(X) amx_SetUString(buf144,X,144)
 
 void panel_on_player_connect(AMX *amx, int playerid)
 {

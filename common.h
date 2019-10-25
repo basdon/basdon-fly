@@ -26,6 +26,7 @@ extern logprintf_t logprintf;
 
 #define amx_GetUString(dest, source, size) amx_GetString(dest, source, 0, size)
 #define amx_SetUString(dest, source, size) amx_SetString(dest, source, 0, 0, size)
+#define SETB144(X) amx_SetUString(buf144,X,144)
 
 #define M_PI 3.14159265358979323846f
 #define M_PI2 1.57079632679489661923f
@@ -70,6 +71,14 @@ extern int prefs[MAX_PLAYERS];
 Logged-in status of each player (one of the LOGGED_ definitions).
 */
 extern int loggedstatus[MAX_PLAYERS];
+/**
+Current in-game hour.
+*/
+extern int time_h;
+/**
+Current in-game minute.
+*/
+extern int time_m;
 
 #define IsPlayerConnected(PLAYERID) playeronlineflag[PLAYERID]
 
