@@ -76,7 +76,6 @@ static int ptxt_hdg_value[MAX_PLAYERS];
 static int ptxt_adf_dis[MAX_PLAYERS];
 static int ptxt_adf_alt[MAX_PLAYERS];
 static int ptxt_adf_crs[MAX_PLAYERS];
-static int ptxt_hpflodo[MAX_PLAYERS];
 /**
 Vertical Airspeed Indicator value indicator textdraw.
 */
@@ -545,8 +544,6 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 		NC(n_PlayerTextDrawShow);
 		nc_params[2] = ptxt_adf_crs[playerid];
 		NC(n_PlayerTextDrawShow);
-		nc_params[2] = ptxt_hpflodo[playerid];
-		NC(n_PlayerTextDrawShow);
 		nc_params[2] = txt_bg;
 		NC(n_TextDrawShowForPlayer);
 		nc_params[2] = txt_vai;
@@ -598,8 +595,6 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 		nc_params[2] = ptxt_adf_alt[playerid];
 		NC(n_PlayerTextDrawHide);
 		nc_params[2] = ptxt_adf_crs[playerid];
-		NC(n_PlayerTextDrawHide);
-		nc_params[2] = ptxt_hpflodo[playerid];
 		NC(n_PlayerTextDrawHide);
 		nc_params[2] = txt_bg;
 		NC(n_TextDrawHideForPlayer);
@@ -690,9 +685,6 @@ void panel_on_player_connect(AMX *amx, int playerid)
 	*f2 = 395.0f;
 	*f3 = 360.0f;
 	NC_(n_CreatePlayerTextDraw, &ptxt_adf_crs[playerid]);
-	*f2 = 227.0f;
-	*f3 = 381.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_hpflodo[playerid]);
 
 	*i2 = ptxt_spd_small[playerid];
 	*f3 = 0.3f;
@@ -723,8 +715,6 @@ void panel_on_player_connect(AMX *amx, int playerid)
 	*i2 = ptxt_adf_alt[playerid];
 	NC(n_PlayerTextDrawLetterSize);
 	*i2 = ptxt_adf_crs[playerid];
-	NC(n_PlayerTextDrawLetterSize);
-	*i2 = ptxt_hpflodo[playerid];
 	NC(n_PlayerTextDrawLetterSize);
 
 	nc_params[0] = 3;
@@ -850,16 +840,6 @@ void panel_on_player_connect(AMX *amx, int playerid)
 	*i3 = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
-
-	*i2 = ptxt_hpflodo[playerid];
-	*i3 = -1;
-	NC(n_PlayerTextDrawColor);
-	*i3 = 2;
-	NC(n_PlayerTextDrawFont);
-	*i3 = 0;
-	NC(n_PlayerTextDrawSetOutline);
-	NC(n_PlayerTextDrawSetShadow);
-	NC(n_PlayerTextDrawSetProportional);
 
 	/*
 	tmp = playerpnltxt[playerid][PNLTXT_SPD_METER] =
