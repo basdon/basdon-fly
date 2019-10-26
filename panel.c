@@ -103,10 +103,7 @@ Resets caches for panel stuff, to make sure textdraws update next iteration.
 */
 static void panel_reset_caches(int playerid)
 {
-	void nav_resetcache(int);
-
 	memset(&caches[playerid], 0xFF, sizeof(struct PANELCACHE));
-	nav_resetcache(playerid);
 }
 
 /**
@@ -483,6 +480,44 @@ void panel_hide_vor_bar_for_passengers(AMX *amx, int vehicleid)
 }
 
 /**
+Shows the ILS text for passengers of given vehicle.
+*/
+void panel_show_ils_for_passengers(AMX *amx, int vehicleid)
+{
+	/*TODO: use on_player_was_afk to hide VOR bar to passengers that
+	were afk while the pilot disabled VOR,
+	then can change to panelplayers*/
+	int pid, n = playercount;
+
+	while (n--) {
+		pid = players[n];
+		NC_GetPlayerVehicleID(pid);
+		if (nc_result == vehicleid) {
+			NC_PlayerTextDrawShow(pid, ptxt_ils[pid]);
+		}
+	}
+}
+
+/**
+Hides the ILS text for passengers of given vehicle.
+*/
+void panel_hide_ils_for_passengers(AMX *amx, int vehicleid)
+{
+	/*TODO: use on_player_was_afk to hide VOR bar to passengers that
+	were afk while the pilot disabled VOR,
+	then can change to panelplayers*/
+	int pid, n = playercount;
+
+	while (n--) {
+		pid = players[n];
+		NC_GetPlayerVehicleID(pid);
+		if (nc_result == vehicleid) {
+			NC_PlayerTextDrawHide(pid, ptxt_ils[pid]);
+		}
+	}
+}
+
+/**
 Resets nav indicators for all players in given vehicle.
 */
 void panel_reset_nav_for_passengers(AMX *amx, int vehicleid)
@@ -504,8 +539,9 @@ void panel_reset_nav_for_passengers(AMX *amx, int vehicleid)
 void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 {
 	int nav_get_active_type(int);
+	void nav_reset_cache(int);
 
-	int vehicleid;
+	int vehicleid, activenav;
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
 		NC_GetPlayerVehicleID_(playerid, &vehicleid);
@@ -519,6 +555,7 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 
 		panelplayers[numpanelplayers++] = playerid;
 		panel_reset_nav(amx, playerid);
+		nav_reset_cache(playerid);
 
 		buf144[0] = '_';
 		buf144[1] = 0;
@@ -575,7 +612,12 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 		nc_params[2] = ptxt_adf_crs[playerid];
 		NC(n_PlayerTextDrawSetString);
 
-		if (nav_get_active_type(vehicleid) & (NAV_VOR | NAV_ILS)) {
+		activenav = nav_get_active_type(vehicleid);
+		if (activenav & NAV_ILS) {
+			nc_params[2] = ptxt_ils[playerid];
+			NC(n_PlayerTextDrawShow);
+		}
+		if (activenav & (NAV_ILS | NAV_VOR)) {
 			nc_params[2] = txt_vorbar;
 			NC(n_TextDrawShowForPlayer);
 		}
@@ -626,11 +668,8 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 			NC(n_PlayerTextDrawDestroy);
 			ptxt_vor[playerid] = -1;
 		}
-		if (ptxt_ils[playerid] != -1) {
-			nc_params[2] = ptxt_ils[playerid];
-			NC(n_PlayerTextDrawHide);
-			ptxt_ils[playerid] = -1;
-		}
+		nc_params[2] = ptxt_ils[playerid];
+		NC(n_PlayerTextDrawHide);
 
 		panel_remove_panel_player(playerid);
 	}
@@ -866,7 +905,6 @@ void panel_on_player_connect(AMX *amx, int playerid)
 	NC(n_PlayerTextDrawFont);
 	*i3 = 1;
 	NC(n_PlayerTextDrawSetOutline);
-	NC(n_PlayerTextDrawSetProportional);
 
 	/*
 	tmp = playerpnltxt[playerid][PNLTXT_SPD_METER] =

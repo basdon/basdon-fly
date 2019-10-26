@@ -26,7 +26,16 @@ static struct NAVDATA {
 	int alt;
 	int crs;
 	int vorvalue;
-	unsigned char ilsx, ilsz;
+	/**
+	ILS x value, [-ILS_SIZE,ILS_SIZE*2] where [0,ILS_SIZE] is 'on target'.
+	INVALID_ILS_VALUE when ILS out of range.
+	DISABLED_ILS_VALUE when ILS is disabled.
+	*/
+	signed char ilsx;
+	/**
+	ILS z value, [-ILS_SIZE,ILS_SIZE*2] where [0,ILS_SIZE] is 'on target'
+	*/
+	signed char ilsz;
 } *nav[MAX_VEHICLES];
 
 static struct playercache {
@@ -38,8 +47,15 @@ static struct playercache {
 } pcache[MAX_PLAYERS];
 
 #define INVALID_CACHE 500000
+
+/*value for ILS when it's out of range*/
 #define INVALID_ILS_VALUE 100
+/*maximum distance from where to start showing ILS*/
 #define ILS_MAX_DIST (1500.0f)
+/*extra offset where ILS values are out of range, but ILS is still shown*/
+#define ILS_GREYZONE (80.0f)
+/*amount of horizontal/vertical X tokens*/
+#define ILS_SIZE 8
 
 void nav_init()
 {
@@ -49,7 +65,7 @@ void nav_init()
 	}
 }
 
-void nav_resetcache(int playerid)
+void nav_reset_cache(int playerid)
 {
 	pcache[playerid].dist = INVALID_CACHE;
 	pcache[playerid].alt = INVALID_CACHE;
@@ -75,6 +91,7 @@ void nav_disable(AMX* amx, int vehicleid)
 Enables navigation for given vehicle.
 
 Ensures the VOR textdraws are shown/hidden.
+Resets nav cache for all players in vehicle.
 
 @param adf vec3 to ADF towards, may be NULL
 @param vor runway to VOR towards, may be NULL
@@ -85,6 +102,7 @@ void nav_enable(AMX *amx, int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 	void panel_show_vor_bar_for_passengers(AMX*, int);
 
 	struct NAVDATA *np;
+	int playerid, n = playercount;
 
 	np = nav[vehicleid];
 	if (np == NULL) {
@@ -98,6 +116,13 @@ void nav_enable(AMX *amx, int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 		panel_show_vor_bar_for_passengers(amx, vehicleid);
 	} else {
 		panel_hide_vor_bar_for_passengers(amx, vehicleid);
+	}
+	while (n--) {
+		playerid = players[n];
+		NC_GetPlayerVehicleID(playerid);
+		if (nc_result == vehicleid) {
+			nav_reset_cache(playerid);
+		}
 	}
 }
 
@@ -331,6 +356,9 @@ int nav_cmd_ils(CMDPARAMS)
 		*N_VOR = "ILS can only be activated when VOR is already active",
 		*N_CAP = "The selected runway does not have ILS capabilities";
 
+	void panel_show_ils_for_passengers(AMX*, int);
+	void panel_hide_ils_for_passengers(AMX*, int);
+
 	struct NAVDATA *np;
 	int vehicleid;
 
@@ -351,6 +379,11 @@ retmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 #error "edit the soundid in line below"
 #endif
 	NC_PlayerPlaySound0(playerid, SOUND_NAV_SET + (np->ils ^= 1));
+	if (np->ils) {
+		panel_show_ils_for_passengers(amx, vehicleid);
+	} else {
+		panel_hide_ils_for_passengers(amx, vehicleid);
+	}
 	return 1;
 }
 
@@ -366,10 +399,22 @@ void nav_update_textdraws(
 	int *ptxt_vor_base, int *ptxt_ils_base)
 {
 	static const char
-		*ILS_X = "~w~X~n~~w~X~n~~w~X~n~~w~X~n~~w~X ~w~X ~w~X ~w~X ~w~X"
-			" ~w~X ~w~X ~w~X ~w~X~n~~w~X~n~~w~X~n~~w~X~n~~w~X";
+		*ILS_X =
+			"~r~_~n~"
+			"~w~X~n~"
+			"~w~X~n~"
+			"~w~X~n~"
+			"~w~X~n~"
+			"~r~__ "
+			"~w~X ~w~X ~w~X ~w~X ~w~X ~w~X ~w~X ~w~X ~w~X"
+			" ~r~_~n~"
+			"~w~X~n~"
+			"~w~X~n~"
+			"~w~X~n~"
+			"~w~X~n~"
+			"~r~__";
 	static const unsigned char
-		ILS_X_OFFSETS[] = { 1, 8, 15, 22, 49, 76, 83, 90, 97 };
+		ILS_X_OFFSETS[] = { 8, 15, 22, 29, 62, 94, 101, 108, 115 };
 
 	struct NAVDATA *n = nav[vehicleid];
 	char buf[144];
@@ -410,26 +455,41 @@ void nav_update_textdraws(
 		NC(n_PlayerTextDrawSetString);
 	}
 
-	if (n->ilsx < 0 || 8 < n->ilsx) {
-		amx_SetUString(buf144, "~r~~h~no ILS signal", 144);
-		goto doils;
-	} else if (0 <= n->ilsz &&  n->ilsz <= 8) {
-		amx_SetUString(buf144, ILS_X, 144);
-		buf144[29 + 5 * n->ilsx] = buf144[ILS_X_OFFSETS[n->ilsz]] = 'r';
+	if (n->ils &&
+		((n->ilsx << 8) | (n->ilsz)) != pcache[playerid].ils)
+	{
+		pcache[playerid].ils = (n->ilsx << 8) | (n->ilsz);
+		if (n->ilsx == INVALID_ILS_VALUE) {
+			amx_SetUString(buf144, "~r~~h~no ILS signal", 144);
+			nc_params[3] = 1;
+			goto doils;
+		} else if (-ILS_SIZE <= n->ilsx &&  n->ilsx < ILS_SIZE * 2) {
+			amx_SetUString(buf144, ILS_X, 144);
+			if (n->ilsx < 0) {
+				buf144[38] = '-';
+				buf144[39] = '0' + (-n->ilsx);
+			} else if (n->ilsx >= ILS_SIZE) {
+				buf144[89] = '0' + (n->ilsx - ILS_SIZE + 1);
+			} else {
+				buf144[42 + 5 * n->ilsx] = 'r';
+			}
+			if (n->ilsz < 0) {
+				buf144[3] = '0' + (-n->ilsz);
+			} else if (n->ilsz >= ILS_SIZE) {
+				buf144[124] = '-';
+				buf144[125] = '0' + (n->ilsz - ILS_SIZE + 1);
+			} else {
+				buf144[ILS_X_OFFSETS[n->ilsz]] = 'r';
+			}
+			nc_params[3] = 0;
 doils:
-		nc_params[0] = 3;
-		nc_params[1] = playerid;
-		nc_params[2] = ptxt_ils_base[playerid];
-		nc_params[3] = buf144a;
-		NC(n_PlayerTextDrawSetString);
-		/*show is not needed every update*/
-		nc_params[0] = 2;
-		NC(n_PlayerTextDrawShow);
-	} else if (ptxt_ils_base[playerid] != -1) {
-		nc_params[0] = 2;
-		nc_params[1] = playerid;
-		nc_params[2] = ptxt_ils_base[playerid];
-		NC(n_PlayerTextDrawHide);
+			nc_params[0] = 3;
+			nc_params[1] = playerid;
+			nc_params[2] = ptxt_ils_base[playerid];
+			NC(n_PlayerTextDrawSetProportional);
+			nc_params[3] = buf144a;
+			NC(n_PlayerTextDrawSetString);
+		}
 	}
 
 	if (n->vorvalue < 640) {
@@ -589,8 +649,8 @@ cell AMX_NATIVE_CALL Nav_Reset(AMX *amx, cell *params)
 	return 0;
 }
 
-void calc_ils_values(
-	unsigned char *ilsx, unsigned char *ilsz, const float ydist,
+static void nav_calc_ils_values(
+	signed char *ilsx, signed char *ilsz, const float ydist,
 	const float z, const float dx)
 {
 	float xdev = 5.0f + ydist * (90.0f - 5.0f) / ILS_MAX_DIST;
@@ -598,18 +658,19 @@ void calc_ils_values(
 	float ztarget = 4.0f + ydist * (130.0f - 4.0f) / (500.0f);
 	int tmp;
 
-#define GREYZONE (50.0f)
-	if (z < ztarget - zdev - GREYZONE || z > ztarget + zdev + GREYZONE ||
-		dx < -xdev - GREYZONE || dx > xdev + GREYZONE)
+	if (z < ztarget - zdev - ILS_GREYZONE ||
+		z > ztarget + zdev + ILS_GREYZONE ||
+		dx < -xdev - ILS_GREYZONE ||
+		dx > xdev + ILS_GREYZONE)
 	{
 		*ilsx = INVALID_ILS_VALUE;
 		*ilsz = 0;
 		return;
 	}
-	tmp = (int) (-8.0f * (z - ztarget) / (zdev * 2.0f)) + 4;
-	*ilsz = CLAMP(tmp, 0, 8);
-	tmp = (int) (-8.0f * dx / (xdev * 2.0f)) + 4;
-	*ilsx = CLAMP(tmp, 0, 8);
+	tmp = (int) (-ILS_SIZE * (z - ztarget) / (zdev * 2.0f)) + ILS_SIZE / 2;
+	*ilsz = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2);
+	tmp = (int) (-ILS_SIZE * dx / (xdev * 2.0f)) + ILS_SIZE / 2;
+	*ilsx = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2);
 }
 
 void nav_update(AMX *amx, int vehicleid,
@@ -662,6 +723,7 @@ void nav_update(AMX *amx, int vehicleid,
 		n->ilsx = INVALID_ILS_VALUE;
 		n->ilsz = 0;
 	} else {
-		calc_ils_values(&n->ilsx, &n->ilsz, dist, z, horizontaldeviation);
+		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, z,
+			horizontaldeviation);
 	}
 }
