@@ -380,7 +380,7 @@ retmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 #if SOUND_NAV_SET != 1083 || SOUND_NAV_DEL != 1084
 #error "edit the soundid in line below"
 #endif
-	NC_PlayerPlaySound0(playerid, SOUND_NAV_SET + (np->ils ^= 1));
+	NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL - (np->ils ^= 1));
 	if (np->ils) {
 		panel_show_ils_for_passengers(amx, vehicleid);
 	} else {
