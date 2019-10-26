@@ -157,6 +157,7 @@ int zones_cmd_loc(CMDPARAMS);
 static struct COMMAND cmds[] = {
 #ifdef DEV
 	{ 0, "/testparpl", GROUPS_ALL, cmd_dev_testparpl },
+	{ 0, "/timex", GROUPS_ALL, cmd_dev_timex },
 	{ 0, "//closestmp", GROUPS_ALL, cmd_dev_closestmp },
 	{ 0, "//owner", GROUPS_ALL, cmd_dev_owner },
 #endif /*DEV*/

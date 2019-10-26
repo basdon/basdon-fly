@@ -52,6 +52,7 @@ extern int n_SetPlayerFacingAngle;
 extern int n_SetPlayerPos_;
 extern int n_SetPlayerRaceCheckpoint;
 extern int n_SetPlayerSpecialAction;
+extern int n_SetPlayerTime;
 extern int n_SetVehicleHealth;
 extern int n_SetVehicleToRespawn;
 extern int n_ShowPlayerDialog_;
@@ -274,6 +275,10 @@ extern cell nc_result;
 	nc_params[3]=FX;nc_params[4]=FY;nc_params[5]=FZ;nc_params[6]=FNX;\
 	nc_params[7]=FNY;nc_params[8]=FNZ;nc_params[9]=FSIZE;\
 	amx_Callback(amx,n_SetPlayerRaceCheckpoint,&nc_result,nc_params)
+
+#define NC_SetPlayerTime(PLAYERID,H,M) \
+	nc_params[0]=3;nc_params[1]=PLAYERID;nc_params[2]=H;nc_params[3]=M;\
+	amx_Callback(amx,n_SetPlayerTime,&nc_result,nc_params)
 
 #define NC_SetVehicleHealth(PLAYERID,FHP) \
 	nc_params[0]=2;nc_params[1]=PLAYERID;*((float*)(nc_params+2))=FHP;\

@@ -56,6 +56,7 @@ int n_SetPlayerFacingAngle;
 int n_SetPlayerPos_;
 int n_SetPlayerRaceCheckpoint;
 int n_SetPlayerSpecialAction;
+int n_SetPlayerTime;
 int n_SetVehicleHealth;
 int n_SetVehicleToRespawn;
 int n_ShowPlayerDialog_;
@@ -158,6 +159,7 @@ int natives_find(AMX *amx)
 		{ "SetPlayerFacingAngle", &n_SetPlayerFacingAngle },
 		{ "SetPlayerRaceCheckpoint", &n_SetPlayerRaceCheckpoint },
 		{ "SetPlayerSpecialAction", &n_SetPlayerSpecialAction },
+		{ "SetPlayerTime", &n_SetPlayerTime },
 		{ "SetVehicleHealth", &n_SetVehicleHealth },
 		{ "SetVehicleToRespawn", &n_SetVehicleToRespawn },
 		{ "ShowPlayerDialog", &n_ShowPlayerDialog_ },

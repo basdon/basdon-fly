@@ -39,6 +39,24 @@ cmd_dev_testparpl(CMDPARAMS)
 	return 1;
 }
 
+static int cmd_dev_timex(CMDPARAMS)
+{
+	int h, m;
+	char buf[144];
+
+	if (!cmd_get_int_param(cmdtext, &parseidx, &h) ||
+		!cmd_get_int_param(cmdtext, &parseidx, &m))
+	{
+		amx_SetUString(buf144, WARN"Syntax: /timex <h> <m>", 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	} else {
+		time_h = h;
+		time_m = m;
+		NC_SetPlayerTime(playerid, h, m);
+	}
+	return 1;
+}
+
 /**
 Toggle owner group on yourself.
 */
