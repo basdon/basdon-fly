@@ -361,8 +361,9 @@ Does not actually update the nav data (see nav_update for that), just updates
 the textdraws.
 */
 void nav_update_textdraws(
-	AMX *amx, int playerid, int vehicleid, int *ptxt_adf_dis_base,
-	int *ptxt_adf_alt_base, int *ptxt_adf_crs_base, int *ptxt_vor_base)
+	AMX *amx, int playerid, int vehicleid,
+	int *ptxt_adf_dis_base, int *ptxt_adf_alt_base, int *ptxt_adf_crs_base,
+	int *ptxt_vor_base, int *ptxt_ils_base)
 {
 	static const char
 		*ILS_X = "~w~X~n~~w~X~n~~w~X~n~~w~X~n~~w~X ~w~X ~w~X ~w~X ~w~X"
@@ -416,7 +417,19 @@ void nav_update_textdraws(
 		amx_SetUString(buf144, ILS_X, 144);
 		buf144[29 + 5 * n->ilsx] = buf144[ILS_X_OFFSETS[n->ilsz]] = 'r';
 doils:
-		NC_GameTextForPlayer(playerid, buf144a, 200, 6);
+		nc_params[0] = 3;
+		nc_params[1] = playerid;
+		nc_params[2] = ptxt_ils_base[playerid];
+		nc_params[3] = buf144a;
+		NC(n_PlayerTextDrawSetString);
+		/*show is not needed every update*/
+		nc_params[0] = 2;
+		NC(n_PlayerTextDrawShow);
+	} else if (ptxt_ils_base[playerid] != -1) {
+		nc_params[0] = 2;
+		nc_params[1] = playerid;
+		nc_params[2] = ptxt_ils_base[playerid];
+		NC(n_PlayerTextDrawHide);
 	}
 
 	if (n->vorvalue < 640) {
@@ -454,8 +467,11 @@ doils:
 
 		nc_params[0] = 2;
 		NC(n_PlayerTextDrawShow);
-	} else {
-		ptxt_vor_base[playerid] = -1;
+	} else if (ptxt_vor_base[playerid] != -1) {
+		nc_params[0] = 2;
+		nc_params[1] = playerid;
+		nc_params[2] = ptxt_vor_base[playerid];
+		NC(n_PlayerTextDrawDestroy);
 	}
 
 	if (n->vorvalue != pcache[playerid].vorvalue) {

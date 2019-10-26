@@ -77,13 +77,17 @@ static int ptxt_adf_dis[MAX_PLAYERS];
 static int ptxt_adf_alt[MAX_PLAYERS];
 static int ptxt_adf_crs[MAX_PLAYERS];
 /**
-Vertical Airspeed Indicator value indicator textdraw.
+Vertical Airspeed Indicator value indicator player textdraw.
 */
 static int ptxt_vai[MAX_PLAYERS];
 /**
-VOR value indicator textdraw.
+VOR value indicator player textdraw.
 */
 static int ptxt_vor[MAX_PLAYERS];
+/**
+ILS indicator player textdraw.
+*/
+static int ptxt_ils[MAX_PLAYERS];
 
 /**
 Players that should receive panel updates.
@@ -315,7 +319,7 @@ Panel loop. Call from timer100.
 void panel_timed_update(AMX *amx)
 {
 	void nav_update(AMX*, int, float, float, float, float);
-	void nav_update_textdraws(AMX*, int, int, int*, int*, int*, int*);
+	void nav_update_textdraws(AMX*, int, int, int*, int*, int*, int*, int*);
 
 	int playerid, vehicleid, n = numpanelplayers;
 	float x, y, z, heading;
@@ -346,7 +350,8 @@ void panel_timed_update(AMX *amx)
 			ptxt_adf_dis,
 			ptxt_adf_alt,
 			ptxt_adf_crs,
-			ptxt_vor);
+			ptxt_vor,
+			ptxt_ils);
 
 		/*vai*/
 		NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
@@ -424,6 +429,11 @@ static void panel_reset_nav(AMX *amx, int playerid)
 			nc_params[2] = ptxt_vor[playerid];
 			NC(n_PlayerTextDrawDestroy);
 			ptxt_vor[playerid] = -1;
+		}
+		if (ptxt_ils[playerid] != -1) {
+			nc_params[2] = ptxt_ils[playerid];
+			NC(n_PlayerTextDrawHide);
+			ptxt_ils[playerid] = -1;
 		}
 		nc_params[2] = txt_vorbar;
 		NC(n_TextDrawHideForPlayer);
@@ -616,6 +626,11 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 			NC(n_PlayerTextDrawDestroy);
 			ptxt_vor[playerid] = -1;
 		}
+		if (ptxt_ils[playerid] != -1) {
+			nc_params[2] = ptxt_ils[playerid];
+			NC(n_PlayerTextDrawHide);
+			ptxt_ils[playerid] = -1;
+		}
 
 		panel_remove_panel_player(playerid);
 	}
@@ -644,7 +659,7 @@ void panel_on_player_connect(AMX *amx, int playerid)
 	i3 = (int*) (nc_params + 3);
 
 	panel_reset_caches(playerid);
-	ptxt_vai[playerid] = ptxt_vor[playerid] = -1;
+	ptxt_vai[playerid] = ptxt_vor[playerid] = ptxt_ils[playerid] = -1;
 
 	nc_params[0] = 4;
 	nc_params[1] = playerid;
@@ -669,13 +684,12 @@ void panel_on_player_connect(AMX *amx, int playerid)
 	*f3 = 389.0f;
 	NC_(n_CreatePlayerTextDraw, &ptxt_alt_value[playerid]);
 	*f2 = 320.0f;
+	*f3 = 100.0f;
+	NC_(n_CreatePlayerTextDraw, &ptxt_ils[playerid]);
 	*f3 = 423.0f;
 	NC_(n_CreatePlayerTextDraw, &ptxt_hdg_meter[playerid]);
-	*f2 = 320.0f;
 	*f3 = 420.0f;
 	NC_(n_CreatePlayerTextDraw, &ptxt_hdg_value[playerid]);
-	buf144[0] = '-';
-	buf144[1] = 0;
 	*f2 = 265.0f;
 	*f3 = 360.0f;
 	NC_(n_CreatePlayerTextDraw, &ptxt_adf_dis[playerid]);
@@ -686,6 +700,7 @@ void panel_on_player_connect(AMX *amx, int playerid)
 	*f3 = 360.0f;
 	NC_(n_CreatePlayerTextDraw, &ptxt_adf_crs[playerid]);
 
+	/*letter size*/
 	*i2 = ptxt_spd_small[playerid];
 	*f3 = 0.3f;
 	*f4 = 1.2f;
@@ -716,9 +731,13 @@ void panel_on_player_connect(AMX *amx, int playerid)
 	NC(n_PlayerTextDrawLetterSize);
 	*i2 = ptxt_adf_crs[playerid];
 	NC(n_PlayerTextDrawLetterSize);
+	*i2 = ptxt_ils[playerid];
+	*f3 = 0.45f;
+	*f4 = 2.5f;
+	NC(n_PlayerTextDrawLetterSize);
 
 	nc_params[0] = 3;
-
+	/*rest*/
 	*i2 = ptxt_spd_large[playerid];
 	*i3 = LARGE_METER_COLOR;
 	NC(n_PlayerTextDrawColor);
@@ -840,6 +859,14 @@ void panel_on_player_connect(AMX *amx, int playerid)
 	*i3 = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
+
+	*i2 = ptxt_ils[playerid];
+	*i3 = 2;
+	NC(n_PlayerTextDrawAlignment);
+	NC(n_PlayerTextDrawFont);
+	*i3 = 1;
+	NC(n_PlayerTextDrawSetOutline);
+	NC(n_PlayerTextDrawSetProportional);
 
 	/*
 	tmp = playerpnltxt[playerid][PNLTXT_SPD_METER] =
