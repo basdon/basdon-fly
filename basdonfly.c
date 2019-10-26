@@ -139,9 +139,6 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 
 int time_h = 0, time_m = 0;
 
-short tokick[MAX_PLAYERS];
-int numtokick;
-
 #define amx gamemode_amx
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
@@ -160,17 +157,23 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 #endif /*LOG_SLOW_TICKS*/
 	static int lasttime = 0;
 
+	int n = playercount;
+
+	while (n--) {
+		if (kickdelay[players[n]]) {
+			if(--kickdelay[players[n]]) {
+				nc_params[0] = 1;
+				nc_params[1] = players[n];
+				NC(n_Kick);
+			}
+		}
+	}
+
 	/*occurs when doing gmx*/
 	if (gamemode_amx == NULL) {
 		count = 0;
 		lasttime = 0;
 		return;
-	}
-
-	while (numtokick) {
-		nc_params[0] = 1;
-		nc_params[1] = tokick[--numtokick];
-		NC(n_Kick);
 	}
 
 	if (count++ >= 19) {

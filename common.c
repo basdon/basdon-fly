@@ -4,6 +4,7 @@
 #include "common.h"
 
 int loggedstatus[MAX_PLAYERS];
+short kickdelay[MAX_PLAYERS];
 
 void common_tp_player(AMX *amx, int playerid, struct vec4 pos)
 {
@@ -52,7 +53,7 @@ void common_crash_player(AMX *amx, int playerid)
 
 void common_NC_Kick(int playerid)
 {
-	tokick[numtokick++] = playerid;
+	kickdelay[playerid] = 2;
 }
 
 int common_is_nan(float f)

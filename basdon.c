@@ -186,6 +186,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 
 	playeronlineflag[playerid] = 1;
 	loggedstatus[playerid] = LOGGED_NO;
+	kickdelay[playerid] = 0;
 
 	class_on_player_connect(amx, playerid);
 	echo_on_player_connection(amx, playerid, 3);

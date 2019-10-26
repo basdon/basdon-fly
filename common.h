@@ -51,10 +51,10 @@ contains 'playercount' elements, ids of connected players (not sorted)
 extern short players[MAX_PLAYERS];
 extern int playercount;
 /**
-Contains playerids to kick next tick, contains 'numtokick' elements.
+Kickdelay, when larger than 0, should be decremented in ProcessTick and
+player kicked on 0.
 */
-extern short tokick[MAX_PLAYERS];
-extern int numtokick;
+extern short kickdelay[MAX_PLAYERS];
 /**
 Holds spawned status of players.
 */
