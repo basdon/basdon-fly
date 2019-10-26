@@ -48,6 +48,8 @@ static struct playercache {
 
 #define INVALID_CACHE 500000
 
+/*value for VOR when it's out of range*/
+#define INVALID_VOR_VALUE 2000000000
 /*value for ILS when it's out of range*/
 #define INVALID_ILS_VALUE 100
 /*maximum distance from where to start showing ILS*/
@@ -417,6 +419,7 @@ void nav_update_textdraws(
 		ILS_X_OFFSETS[] = { 8, 15, 22, 29, 62, 94, 101, 108, 115 };
 
 	struct NAVDATA *n = nav[vehicleid];
+	float vorbarx, vorbarlettersizex;
 	char buf[144];
 
 	if (n == NULL) {
@@ -492,24 +495,42 @@ doils:
 		}
 	}
 
-	if (n->vorvalue < 640) {
+	if (n->vorvalue != INVALID_VOR_VALUE) {
 		if (ptxt_vor_base[playerid] != -1) {
 			nc_params[0] = 2;
 			nc_params[1] = playerid;
 			nc_params[2] = ptxt_vor_base[playerid];
 			NC(n_PlayerTextDrawDestroy);
 		}
-		buf144[0] = 'i';
-		buf144[1] = 0;
+
+		if (-50 < n->vorvalue && n->vorvalue < 50) {
+			buf144[0] = 'i';
+			buf144[1] = 0;
+			vorbarx = (float) n->vorvalue * 85.0f / 50.0f;
+			vorbarx = CLAMP(vorbarx, -85.0f, 85.0f);
+			vorbarlettersizex = 0.4f;
+		} else {
+			if (n->vorvalue < 0) {
+				vorbarx = (n->vorvalue + 49) / 15;
+				sprintf((char*) buf64, "%d", -(int) vorbarx);
+				vorbarx = -85.0f;
+			} else {
+				vorbarx = (n->vorvalue - 49) / 15;
+				sprintf((char*) buf64, "%d", (int) vorbarx);
+				vorbarx = 85.0f;
+			}
+			amx_SetUString(buf144, (char*) buf64, 64);
+			vorbarlettersizex = 0.2f;
+		}
 		nc_params[0] = 4;
 		nc_params[1] = playerid;
-		*((float*) (nc_params + 2)) = (float) n->vorvalue;
+		*((float*) (nc_params + 2)) = 320.0f - vorbarx;
 		*((float*) (nc_params + 3)) = 407.0f;
 		nc_params[4] = buf144a;
 		NC(n_CreatePlayerTextDraw);
 
 		nc_params[2] = ptxt_vor_base[playerid] = nc_result;
-		*((float*) (nc_params + 3)) = 0.4f;
+		*((float*) (nc_params + 3)) = vorbarlettersizex;
 		*((float*) (nc_params + 4)) = 1.6f;
 		NC(n_PlayerTextDrawLetterSize);
 
@@ -707,23 +728,18 @@ void nav_update(AMX *amx, int vehicleid,
 	if (n->vor != NULL ) {
 		vorangle = crs + M_PI2 - n->vor->headingr;
 		horizontaldeviation = dist * cos(vorangle);
-		n->vorvalue = (int) (horizontaldeviation / 50.0f * 85.0f);
-		n->vorvalue = CLAMP(n->vorvalue, -85, 85);
-		n->vorvalue = 320 - n->vorvalue;
+		n->vorvalue = (int) horizontaldeviation;
+		if (dist > ILS_MAX_DIST || (dist *= sin(vorangle)) <= 0.0f) {
+			n->ilsx = INVALID_ILS_VALUE;
+			n->ilsz = 0;
+		} else {
+			nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, z,
+				horizontaldeviation);
+		}
 		crs = heading - n->vor->heading;
 	} else {
-		n->vorvalue = 1000;
+		n->vorvalue = INVALID_VOR_VALUE;
 		crs = heading - (crs * 180.0f / M_PI);
 	}
 	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);
-	if (n->vor == NULL || !n->ils) {
-		n->ilsx = 0;
-		n->ilsz = INVALID_ILS_VALUE;
-	} else if (dist > ILS_MAX_DIST || (dist *= sin(vorangle)) <= 0.0f) {
-		n->ilsx = INVALID_ILS_VALUE;
-		n->ilsz = 0;
-	} else {
-		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, z,
-			horizontaldeviation);
-	}
 }
