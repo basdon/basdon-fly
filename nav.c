@@ -729,17 +729,20 @@ void nav_update(AMX *amx, int vehicleid,
 		vorangle = crs + M_PI2 - n->vor->headingr;
 		horizontaldeviation = dist * cos(vorangle);
 		n->vorvalue = (int) horizontaldeviation;
-		if (dist > ILS_MAX_DIST || (dist *= sin(vorangle)) <= 0.0f) {
-			n->ilsx = INVALID_ILS_VALUE;
-			n->ilsz = 0;
-		} else {
-			nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, z,
-				horizontaldeviation);
-		}
 		crs = heading - n->vor->heading;
 	} else {
 		n->vorvalue = INVALID_VOR_VALUE;
 		crs = heading - (crs * 180.0f / M_PI);
+	}
+	if (n->vor == NULL || !n->ils) {
+		n->ilsx = 0;
+		n->ilsz = INVALID_ILS_VALUE;
+	} else if (dist > ILS_MAX_DIST || (dist *= sin(vorangle)) <= 0.0f) {
+		n->ilsx = INVALID_ILS_VALUE;
+		n->ilsz = 0;
+	} else {
+		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, z,
+			horizontaldeviation);
 	}
 	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);
 }
