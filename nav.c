@@ -53,7 +53,7 @@ static struct playercache {
 /*value for ILS when it's out of range*/
 #define INVALID_ILS_VALUE 100
 /*maximum distance from where to start showing ILS*/
-#define ILS_MAX_DIST (1500.0f)
+#define ILS_MAX_DIST (3000.0f)
 /*extra offset where ILS values are out of range, but ILS is still shown*/
 #define ILS_GREYZONE (80.0f)
 /*amount of horizontal/vertical X tokens*/
@@ -409,14 +409,14 @@ void nav_update_textdraws(
 			"~w~X~n~"
 			"~r~__ "
 			"~w~X ~w~X ~w~X ~w~X ~w~X ~w~X ~w~X ~w~X ~w~X"
-			" ~r~_~n~"
+			" ~r~__~n~"
 			"~w~X~n~"
 			"~w~X~n~"
 			"~w~X~n~"
 			"~w~X~n~"
 			"~r~__";
 	static const unsigned char
-		ILS_X_OFFSETS[] = { 8, 15, 22, 29, 62, 94, 101, 108, 115 };
+		ILS_X_OFFSETS[] = { 8, 15, 22, 29, 62, 95, 102, 109, 116 };
 
 	struct NAVDATA *n = nav[vehicleid];
 	float vorbarx, vorbarlettersizex;
@@ -461,10 +461,8 @@ void nav_update_textdraws(
 	if (n->ils &&
 		((n->ilsx << 8) | (n->ilsz)) != pcache[playerid].ils)
 	{
-		pcache[playerid].ils = (n->ilsx << 8) | (n->ilsz);
 		if (n->ilsx == INVALID_ILS_VALUE) {
 			amx_SetUString(buf144, "~r~~h~no ILS signal", 144);
-			nc_params[3] = 1;
 			goto doils;
 		} else if (-ILS_SIZE <= n->ilsx &&  n->ilsx < ILS_SIZE * 2) {
 			amx_SetUString(buf144, ILS_X, 144);
@@ -479,20 +477,19 @@ void nav_update_textdraws(
 			if (n->ilsz < 0) {
 				buf144[3] = '0' + (-n->ilsz);
 			} else if (n->ilsz >= ILS_SIZE) {
-				buf144[124] = '-';
-				buf144[125] = '0' + (n->ilsz - ILS_SIZE + 1);
+				buf144[125] = '-';
+				buf144[126] = '0' + (n->ilsz - ILS_SIZE + 1);
 			} else {
 				buf144[ILS_X_OFFSETS[n->ilsz]] = 'r';
 			}
-			nc_params[3] = 0;
 doils:
 			nc_params[0] = 3;
 			nc_params[1] = playerid;
 			nc_params[2] = ptxt_ils_base[playerid];
-			NC(n_PlayerTextDrawSetProportional);
 			nc_params[3] = buf144a;
 			NC(n_PlayerTextDrawSetString);
 		}
+		pcache[playerid].ils = (n->ilsx << 8) | (n->ilsz);
 	}
 
 	if (n->vorvalue != INVALID_VOR_VALUE) {
@@ -511,11 +508,11 @@ doils:
 			vorbarlettersizex = 0.4f;
 		} else {
 			if (n->vorvalue < 0) {
-				vorbarx = (n->vorvalue + 49) / 15;
-				sprintf((char*) buf64, "%d", -(int) vorbarx);
+				vorbarx = (n->vorvalue + 50) / -15 + 1;
+				sprintf((char*) buf64, "%d", (int) vorbarx);
 				vorbarx = -85.0f;
 			} else {
-				vorbarx = (n->vorvalue - 49) / 15;
+				vorbarx = (n->vorvalue - 50) / 15 + 1;
 				sprintf((char*) buf64, "%d", (int) vorbarx);
 				vorbarx = 85.0f;
 			}
@@ -671,12 +668,12 @@ cell AMX_NATIVE_CALL Nav_Reset(AMX *amx, cell *params)
 }
 
 static void nav_calc_ils_values(
-	signed char *ilsx, signed char *ilsz, const float ydist,
-	const float z, const float dx)
+	signed char *ilsx, signed char *ilsz, const float dist,
+	const float z, const float targetz, const float dx)
 {
-	float xdev = 5.0f + ydist * (90.0f - 5.0f) / ILS_MAX_DIST;
-	float zdev = 2.0f + ydist * (100.0f - 2.0f) / 1500.0f;
-	float ztarget = 4.0f + ydist * (130.0f - 4.0f) / (500.0f);
+	float xdev = 5.0f + dist * (90.0f - 5.0f) / 1500.0f;
+	float zdev = 2.0f + dist * (100.0f - 2.0f) / 1250.0f;
+	float ztarget = targetz + dist * 0.2f;
 	int tmp;
 
 	if (z < ztarget - zdev - ILS_GREYZONE ||
@@ -741,7 +738,7 @@ void nav_update(AMX *amx, int vehicleid,
 		n->ilsx = INVALID_ILS_VALUE;
 		n->ilsz = 0;
 	} else {
-		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, z,
+		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, z, pos->z,
 			horizontaldeviation);
 	}
 	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);
