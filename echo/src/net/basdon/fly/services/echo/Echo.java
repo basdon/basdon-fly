@@ -16,6 +16,7 @@ import net.basdon.anna.api.ChannelUser;
 import net.basdon.anna.api.IAnna;
 
 import static net.basdon.anna.api.Constants.*;
+import static net.basdon.anna.api.Util.*;
 
 public class Echo extends Thread
 {
@@ -27,6 +28,7 @@ private static final char
 	PACK_PING = 5,
 	PACK_PONG = 6,
 	PACK_CHAT = 10,
+	PACK_ACTION = 11,
 	PACK_PLAYER_CONNECTION = 30;
 private static final InetAddress ADDR_OUT;
 
@@ -164,6 +166,7 @@ throws InterruptedIOException
 	case PACK_BYE:
 		msg("game bridge is down");
 		return;
+	case PACK_ACTION:
 	case PACK_CHAT:
 	{
 		byte nicklen, msglen;
@@ -176,9 +179,19 @@ throws InterruptedIOException
 			StringBuilder sb = new StringBuilder(225);
 			sb.append('Z'); // prevent nickalerts
 			sb.append(new String(buf, 8, nicklen, StandardCharsets.US_ASCII));
-			sb.append('(').append(pid).append(')').append(':').append(' ');
+			sb.append('(').append(pid).append(')');
+			if (buf[3] != PACK_ACTION) {
+				sb.append(':');
+			}
+			sb.append(' ');
 			sb.append(new String(buf, 9 + nicklen, msglen, StandardCharsets.US_ASCII));
-			msg(sb.toString());
+			if (buf[3] == PACK_ACTION) {
+				this.anna.sync_exec(() -> {
+					this.anna.action(this.channel, chars(sb));
+				});
+			} else {
+				msg(sb.toString());
+			}
 			return;
 		}
 		break;
