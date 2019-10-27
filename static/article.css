@@ -34,9 +34,11 @@ tr.fsh {
 	text-align: center;
 	font-size: 110%;
 }
-div.articleright {
-	float: right;
-	padding-left: 1em;
+@media (min-width: 600px) {
+	div.articleright {
+		float: right;
+		padding-left: 1em;
+	}
 }
 .article h3, .article h4 {
 	overflow: hidden;

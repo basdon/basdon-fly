@@ -1,6 +1,7 @@
 <div class="articleright">
 	<?php include('../articles/gen/apfactsheet_SALS.html') ?>
 </div>
+
 Is an airport.
 
 {@clear}
