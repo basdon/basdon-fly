@@ -169,6 +169,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/ils", GROUPS_ALL, nav_cmd_ils },
 	{ 0, "/loc", GROUPS_ALL, zones_cmd_loc },
 	{ 0, "/nearest", GROUPS_ALL, airport_cmd_nearest },
+	{ 0, "/me", GROUPS_ALL, cmd_me },
 	{ 0, "/park", GROUPS_ALL, cmd_park },
 	{ 0, "/p", GROUPS_ALL, prefs_cmd_preferences },
 	{ 0, "/pm", GROUPS_ALL, pm_cmd_pm },

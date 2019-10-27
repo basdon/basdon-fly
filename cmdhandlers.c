@@ -32,6 +32,33 @@ cmd_camera(CMDPARAMS)
 	return 1;
 }
 
+static int cmd_me(CMDPARAMS)
+{
+	char *from;
+	cell *to;
+	int hascontent = 0;
+
+	sprintf((char*) buf144, "* %s", pdata[playerid]->name);
+	amx_SetUString(buf4096, (char*) buf144, 144);
+	from = (char*) cmdtext + 3;
+	to = buf4096 + 2 + pdata[playerid]->namelen;
+	while ((*to = *from)) {
+		if (*from != ' ') {
+			hascontent = 1;
+		}
+		from++;
+		to++;
+	}
+	if (hascontent) {
+		buf4096[144] = 0;
+		NC_SendClientMessageToAll(-1, buf4096a);
+	} else {
+		amx_SetUString(buf144, WARN"Syntax: /me <action>", 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	}
+	return 1;
+}
+
 static int
 cmd_park(CMDPARAMS)
 {
