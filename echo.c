@@ -216,7 +216,11 @@ void echo_on_receive(AMX *amx, cell socket_handle, cell data_a,
 			{
 				break;
 			}
-			b = buf4096;
+			buf4096[0] = 'I';
+			buf4096[1] = 'R';
+			buf4096[2] = 'C';
+			buf4096[3] = ' ';
+			b = buf4096 + 4;
 			if (data[3] == PACK_ACTION) {
 				*(b++) = '*';
 				*(b++) = ' ';
