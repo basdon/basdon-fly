@@ -7,6 +7,7 @@ all: .templates .aerodromecharts .apfactsheets .articles
 	cd templates && make
 
 .aerodromecharts:
+	rm static/gen/aerodrome_*
 	cd cli && php genaerodromechart.php
 
 .apfactsheets:

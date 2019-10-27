@@ -49,6 +49,7 @@ $article_name = 'Main_Page';
 if (isset($_GET['title'])) {
 	$article_name = $_GET['title'];
 }
+$article_id = -1;
 $article_title = 'Article not found';
 $article_pageviews = null;
 $article_categories = [];
@@ -63,6 +64,7 @@ if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 	++$db_querycount;
 	$db->exec('UPDATE art SET pageviews=pageviews+1 WHERE id=' . $r->id);
 
+	$article_id = $r->id;
 	$article_name = $r->name;
 	$article_title = $r->title;
 	$article_pageviews = $r->pageviews + 1;
@@ -84,7 +86,7 @@ nextparentcat:
 		if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 			array_push($article_categories, $r[0]);
 			++$db_querycount;
-			$arts = $db->query('SELECT name,title FROM art WHERE cat=' . $cat);
+			$arts = $db->query('SELECT id,name,title FROM art WHERE cat=' . $cat);
 			if ($arts != null) {
 				$r[0]->articles = $arts->fetchAll();
 			}

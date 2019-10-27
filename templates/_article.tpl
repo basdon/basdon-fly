@@ -43,7 +43,11 @@
 								{@eval $bull = ''}
 								{@foreach $c->articles as $a}
 									{@unsafe $bull}
-									<a href="article.php?title={@unsafe $a->name}">{@unsafe $a->title}</a>
+									{@if $a->id == $article_id}
+										<strong>{@unsafe $a->title}</strong>
+									{@else}
+										<a href="article.php?title={@unsafe $a->name}">{@unsafe $a->title}</a>
+									{@endif}
 									{@eval $bull = ' &bull; '}
 								{@endforeach}
 							</p>
