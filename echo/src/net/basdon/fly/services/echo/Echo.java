@@ -256,12 +256,13 @@ void msg(String message)
  * Send irc message to game.
  * Escaping should be done at the game side.
  *
+ * @param isaction {@code true} if it's an action message
  * @param prefix prefix of user, or {@code 0}
  * @param nickname irc user nick name
  * @param message message
  */
 public
-void send_chat_to_game(char prefix, char[] nickname, char[] message)
+void send_chat_or_action_to_game(boolean isaction, char prefix, char[] nickname, char[] message)
 {
 	byte nicklen = (byte) Math.min(nickname.length, 49);
 	if (prefix != 0) {
@@ -272,7 +273,7 @@ void send_chat_to_game(char prefix, char[] nickname, char[] message)
 	msg[0] = 'F';
 	msg[1] = 'L';
 	msg[2] = 'Y';
-	msg[3] = PACK_CHAT;
+	msg[3] = (byte) (isaction ? PACK_ACTION : PACK_CHAT);
 	msg[4] = msg[5] = 0; // as per spec
 	msg[6] = nicklen;
 	msg[7] = msglen;

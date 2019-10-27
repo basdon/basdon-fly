@@ -140,6 +140,11 @@ void on_nickchange(User user, char[] oldnick, char[] newnick)
 public
 void on_action(User user, char[] target, char[] replytarget, char[] action)
 {
+	if (this.echo != null && user != null && strcmp(this.outtarget, target)) {
+		ChannelUser cu = anna.find_user(target, user.nick);
+		char prefix = cu == null ? 0 : cu.prefix;
+		this.echo.send_chat_or_action_to_game(true, prefix, user.nick, action);
+	}
 }
 
 @Override
@@ -196,7 +201,8 @@ void on_message(User user, char[] target, char[] replytarget, char[] message)
 {
 	if (this.echo != null && user != null && strcmp(this.outtarget, target)) {
 		ChannelUser cu = anna.find_user(target, user.nick);
-		this.echo.send_chat_to_game(cu == null ? 0 : cu.prefix, user.nick, message);
+		char prefix = cu == null ? 0 : cu.prefix;
+		this.echo.send_chat_or_action_to_game(false, prefix, user.nick, message);
 	}
 }
 }
