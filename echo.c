@@ -204,8 +204,10 @@ void echo_on_receive(AMX *amx, cell socket_handle, cell data_a,
 			}
 			break;
 		case PACK_CHAT:
+		case PACK_ACTION:
 		{
 			int nicklen, msglen;
+			cell *b;
 
 			if (len < 12 ||
 				(nicklen = data[6]) < 1 || nicklen > 49 ||
@@ -214,12 +216,21 @@ void echo_on_receive(AMX *amx, cell socket_handle, cell data_a,
 			{
 				break;
 			}
-			buf4096[0] = '<';
-			amx_SetUString(
-				buf4096 + 1, data + 8, nicklen * sizeof(cell));
-			buf4096[1 + nicklen] = '>';
-			buf4096[2 + nicklen] = ' ';
-			amx_SetUString(buf4096 + 3 + nicklen,
+			b = buf4096;
+			if (data[3] == PACK_ACTION) {
+				*(b++) = '*';
+				*(b++) = ' ';
+			} else {
+				*(b++) = '<';
+
+			}
+			amx_SetUString(b, data + 8, nicklen * sizeof(cell));
+			b += nicklen;
+			if (data[3] != PACK_ACTION) {
+				*(b++) = '>';
+			}
+			*(b++) = ' ';
+			amx_SetUString(b,
 				data + 9 + nicklen,
 				(msglen + 1) * sizeof(cell));
 			echo_sendclientmessage_buf4096_filtered(amx);
