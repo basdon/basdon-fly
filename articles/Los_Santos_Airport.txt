@@ -3,6 +3,23 @@
 </div>
 Is an airport.
 
+{@clear}
+
+{@h3 Service points}
+
+Los Santos airport has two service points available, one in the east and one in
+the west.
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=sals_sp_east.jpg;East service point;East service point}
+  <small>East service point</small>
+}
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=sals_sp_west.jpg;West service point;West service point}
+  <small>West service point</small>
+}
+
 {@h3 Aerodrome Chart}
 {@simg=gen/aerodrome_SALS.png;SALS aerodrome chart;SALS aerodrome chart}
 

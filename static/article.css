@@ -3,6 +3,7 @@
 	border: 1px solid #b5cdff;
 	margin: .4em;
 	padding: .4em;
+	display: inline-block;
 }
 .infobox .img {
 	padding: 0;
