@@ -69,6 +69,10 @@ byte 9+[byte6]+[byte7]: zero terminator for message
 total len: 10+[byte6]+[byte7]
 </pre>
 
+{@h4(id=p11) Packet 11: Action}
+
+Basically a copy of the {@#=p10 Chat} packet, but for an action ({@code /me} command).
+
 {@h4(id=p30) Packet 30: Player connection}
 
 Packet notifying a player has either connected or disconnected.
