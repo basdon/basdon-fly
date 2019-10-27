@@ -18,8 +18,10 @@ cmd_dev_closestmp(CMDPARAMS)
 	return 1;
 }
 
-static int
-cmd_dev_testparpl(CMDPARAMS)
+/**
+Command to test parameter parsing in plugin code.
+*/
+static int cmd_dev_testparpl(CMDPARAMS)
 {
 	int i;
 	char buf[144];
@@ -36,6 +38,29 @@ cmd_dev_testparpl(CMDPARAMS)
 	if (cmd_get_int_param(cmdtext, &parseidx, &i)) {
 		printf("int %d\n", i);
 	}
+	return 1;
+}
+
+static int devplatformobj = -1;
+
+/**
+Creates a haystack object at the player's position.
+
+Useful to make a platform to stand on for taking pictures.
+*/
+static int cmd_dev_platform(CMDPARAMS)
+{
+	if (devplatformobj != -1) {
+		NC_DestroyObject(devplatformobj);
+	}
+	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
+	NC_CreateObject_(3374, *buf32, *buf64, *buf144,
+		0, 0, 0, 0x43960000, &devplatformobj);
+	*((float*) buf144) += 4.0f;
+	nc_params[0] = 4;
+	nc_params[1] = playerid;
+	nc_params[4] = *buf144;
+	NC(n_SetPlayerPos_);
 	return 1;
 }
 

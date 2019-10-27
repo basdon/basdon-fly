@@ -9,9 +9,11 @@ custom code and shouldn't be used directly.*/
 
 int n_AddPlayerClass;
 int n_ChangeVehicleColor;
+int n_CreateObject;
 int n_CreatePlayerObject;
 int n_CreatePlayerTextDraw;
 int n_CreateVehicle_;
+int n_DestroyObject;
 int n_DestroyPlayerObject;
 int n_DestroyVehicle_;
 int n_DisablePlayerRaceCheckpoint;
@@ -109,9 +111,11 @@ int natives_find(AMX *amx)
 	struct NATIVE natives[] = {
 		{ "AddPlayerClass", &n_AddPlayerClass },
 		{ "ChangeVehicleColor", &n_ChangeVehicleColor },
+		{ "CreateObject", &n_CreateObject },
 		{ "CreatePlayerObject", &n_CreatePlayerObject },
 		{ "CreatePlayerTextDraw", &n_CreatePlayerTextDraw },
 		{ "CreateVehicle", &n_CreateVehicle_ },
+		{ "DestroyObject", &n_DestroyObject },
 		{ "DestroyPlayerObject", &n_DestroyPlayerObject },
 		{ "DestroyVehicle", &n_DestroyVehicle_ },
 		{ "DisablePlayerRaceCheckpoint",

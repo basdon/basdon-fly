@@ -5,9 +5,11 @@ int natives_find(AMX *amx);
 
 extern int n_AddPlayerClass;
 extern int n_ChangeVehicleColor;
+extern int n_CreateObject;
 extern int n_CreatePlayerObject;
 extern int n_CreatePlayerTextDraw;
 extern int n_CreateVehicle_;
+extern int n_DestroyObject;
 extern int n_DestroyPlayerObject;
 extern int n_DestroyVehicle_;
 extern int n_DisablePlayerRaceCheckpoint;
@@ -111,6 +113,13 @@ extern cell nc_result;
 	nc_params[2]=COL1;nc_params[3]=COL2;\
 	amx_Callback(amx,n_ChangeVehicleColor,&nc_result,nc_params)
 
+#define NC_CreateObject_(OBJECTID,FX,FY,FZ,FRX,FRY,FRZ,DD,RES) nc_params[0]=8;\
+	nc_params[1]=OBJECTID;nc_params[2]=FX;nc_params[3]=FY;nc_params[4]=FZ;\
+	nc_params[5]=FRX;nc_params[6]=FRY;nc_params[7]=FRZ;nc_params[8]=DD;\
+	amx_Callback(amx,n_CreateObject,(cell*)RES,nc_params)
+#define NC_CreateObject(OBJECTID,FX,FY,FZ,FRX,FRY,FRZ,DD) \
+	NC_CreateObject_(OBJECTID,FX,FY,FZ,FRX,FRY,FRZ,DD,&nc_result)
+
 #define NC_CreatePlayerObject(PLAYERID,MODELID,FX,FY,FZ,FRX,FRY,FRZ,FDISTANCE) \
 	nc_params[0]=9;nc_params[1]=PLAYERID;nc_params[2]=MODELID;\
 	nc_params[3]=FX;nc_params[4]=FY;nc_params[5]=FZ;nc_params[6]=FRX;\
@@ -123,6 +132,9 @@ extern cell nc_result;
 	amx_Callback(amx,n_CreatePlayerTextDraw,&nc_result,nc_params)
 
 #define NC_CreateVehicle __USE__veh_NC_CreateVehicle__
+
+#define NC_DestroyObject(OBJECTID) nc_params[0]=1;nc_params[1]=OBJECTID;\
+	amx_Callback(amx,n_DestroyObject,&nc_result,nc_params)
 
 #define NC_DestroyPlayerObject(PLAYERID,OBJECTID) \
 	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=OBJECTID;\
