@@ -307,7 +307,7 @@ cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 /* native B_OnPlayerText(playerid, text[]) */
 cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 {
-	void echo_on_game_chat(AMX*, int, char*);
+	void echo_on_game_chat_or_action(AMX*, int, int, char*);
 
 	cell *addr;
 	char buf[144];
@@ -316,7 +316,7 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(buf, addr, sizeof(buf));
 
-	echo_on_game_chat(amx, playerid, buf);
+	echo_on_game_chat_or_action(amx, 0, playerid, buf);
 	return 1;
 }
 

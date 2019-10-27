@@ -15,6 +15,7 @@
 #define PACK_PING 5
 #define PACK_PONG 6
 #define PACK_CHAT 10
+#define PACK_ACTION 11
 #define PACK_PLAYER_CONNECTION 30
 
 #define CONN_REASON_GAME_TIMEOUT 0
@@ -105,11 +106,16 @@ void echo_on_player_connection(AMX *amx, int playerid, int reason)
 	}
 }
 
+
 /**
-Send game chat to IRC echo.
-Call from OnPlayerText
+Send game chat or action to IRC echo.
+
+Call from OnPlayerText with t 0 or from /me cmd handler with t 1.
+
+@param t type, either 0 for normal chat or 1 for action
 */
-void echo_on_game_chat(AMX *amx, int playerid, char *text)
+void echo_on_game_chat_or_action(
+	AMX *amx, int t, int playerid, char *text)
 {
 	int nicklen, msglen;
 	struct playerdata *pd = pdata[playerid];
@@ -120,7 +126,10 @@ void echo_on_game_chat(AMX *amx, int playerid, char *text)
 		if (msglen > 144) {
 			msglen = 144;
 		}
-		buf144[0] = 0x0A594C46;
+#if PACK_ACTION != PACK_CHAT + 1
+#error "the next line will fail"
+#endif
+		buf144[0] = 0x0A594C46 + 0x01000000 * t;
 		buf144[1] =
 			(playerid & 0xFFFF) |
 			((pd->namelen & 0xFF) << 16) |
