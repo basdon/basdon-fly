@@ -79,6 +79,15 @@ foreach ($db->query('SELECT m,x,y,z FROM veh WHERE e=1 AND ap='.$apid.' ORDER BY
 	$miny = min($miny, $r->y);
 }
 
+$spawns = [];
+foreach ($db->query('SELECT sx,sy FROM spw WHERE ap='.$apid) as $s) {
+	$spawns[] = $s;
+	$maxx = max($maxx, $s->sx);
+	$maxy = max($maxy, $s->sy);
+	$minx = min($minx, $s->sx);
+	$miny = min($miny, $s->sy);
+}
+
 $maxx += 50;
 $maxy += 50;
 $minx -= 50;
@@ -117,6 +126,8 @@ $color_msp_outline = $color_black;
 $color_ndb_a = imagecolorallocate($im, 157, 108, 159);
 $color_ndb_b = imagecolorallocate($im, 194, 164, 194);
 $color_ils = imagecolorallocate($im, 0, 255, 0);
+$color_spawn = imagecolorallocate($im, 0, 168, 30);
+$color_spawn_outline = imagecolorallocate($im, 0, 128, 30);
 $font = 2;
 
 // ap name
@@ -259,6 +270,7 @@ bordered_text($x - $off, $y - $off, $apt->b, $color_ndb_a);
 
 $mspsize = 6;
 $vehsize = 3;
+$spawnsize = 5;
 
 function rect($x, $y, $size, $col_outline, $col)
 {
@@ -292,6 +304,12 @@ foreach ($vehicles as $v) {
 	$x = xcoord($v->x);
 	$y = ycoord($v->y);
 	rect($x, $y, $vehsize, $color_veh_outline, $color_veh);
+}
+
+foreach ($spawns as $s) {
+	$x = xcoord($s->sx);
+	$y = ycoord($s->sy);
+	rect($x, $y, $spawnsize, $color_spawn_outline, $color_spawn);
 }
 
 // service points, sweet icon
