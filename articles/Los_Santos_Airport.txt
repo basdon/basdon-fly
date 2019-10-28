@@ -2,7 +2,16 @@
 	<?php $AP_FACTSHEET_IMG='sals.jpg'; include('../articles/gen/apfactsheet_SALS.html') ?>
 </div>
 
-Is an airport.
+Los Santos Airport was originally built as the airport for the National Guard of
+Los Santos. It was transformed into a civil airport in 1942. Since then, the
+terminals have seen millions of passengers passing through.
+
+The airport is located at the southern beach of Los Santos, bordered by the
+freeway, Verdant Bluffs, El Corona and Willowfied.
+
+There are two long runways at LSA, which are connected to each other in a
+U-shape. All runways have full navigation capabilities. There is only a single
+helipad at LSA.
 
 {@clear}
 
