@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php include('../articles/gen/apfactsheet_SALS.html') ?>
+	<?php $AP_FACTSHEET_IMG='sals.jpg'; include('../articles/gen/apfactsheet_SALS.html') ?>
 </div>
 
 Is an airport.
