@@ -1,0 +1,25 @@
+<div class="articleright">
+	<?php $AP_FACTSHEET_IMG='savm.jpg';
+	include('../articles/gen/apfactsheet_SAVM.html') ?>
+</div>
+
+Verdant Meadows, also known as Verdant Meadows Aircraft Graveyard, is an
+abandoned airfield located in the desert of Bone County. It is very close to
+{@article=Area_69 Area 69}. There are many old, crashed planes and parts laying
+around close to the runway. There is a small ATC building near the eastern end
+of the runway.
+
+Despite having a long and wide runway (the widest of all mainland airports!),
+landing a big plane can be difficult as there are hangars at both sides,
+potentially forming obstructions for an aircraft's wings.
+
+Being abandoned, there are no service points to be found. The runway also
+doesn't have any navigational aids, however, there is a working beacon present.
+
+{@clear}
+
+{@h3 Aerodrome Chart}
+{@simg=gen/aerodrome_SAVM.png;SAVM aerodrome chart;SAVM aerodrome chart}
+
+{@clear}
+

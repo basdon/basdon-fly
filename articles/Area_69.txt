@@ -1,0 +1,17 @@
+<div class="articleright">
+	<?php $AP_FACTSHEET_IMG='xxxx.jpg'; include('../articles/gen/apfactsheet_XXXX.html') ?>
+</div>
+
+SASF
+
+{@clear}
+
+{@h3 Service points}
+
+NONE
+
+{@h3 Aerodrome Chart}
+{@simg=gen/aerodrome_XXXX.png;XXXX aerodrome chart;XXXX aerodrome chart}
+
+{@clear}
+
