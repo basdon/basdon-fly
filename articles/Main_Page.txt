@@ -3,6 +3,8 @@
 
 {@b Here you can find resources to learn and enchance your experience on this server.}
 
+{@ia=articleindex.php Article index}
+
 </div>
 <style>
 .article thead tr{
@@ -29,11 +31,15 @@
 	<tbody>
 		<tr valign="top">
 			<td><ul>
-				{@li {@ia=article.php?title=Fuel Fuel}}
-				{@li {@ia=article.php?title=List_of_aircraft List of aircraft}}
+				{@li {@article=Fuel Fuel}}
+				{@li {@article=List_of_aircraft List of aircraft}}
 			</ul></td>
 			<td><ul>
-				{@li {@ia=article.php?title=Los_Santos_Airport Los Santos Airport}}
+				{@li {@article=Area_69 Area 69}}
+				{@li {@article=Las_Venturas_Airport Las Venturas Airport}}
+				{@li {@article=Los_Santos_Airport Los Santos Airport}}
+				{@li {@article=San_Fierro_Airport San Fierro Airport}}
+				{@li {@article=Verdant_Meadows Verdant Meadows}}
 			</ul></td>
 		</tr>
 	</tbody>
