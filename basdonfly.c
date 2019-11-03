@@ -145,6 +145,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	void echo_init(AMX*);
 	void dev_missions_update_closest_point(AMX*);
 	void dialog_pop_queue(AMX*);
+	void heartbeat_timed_update(AMX*);
 	void maps_process_tick(AMX*);
 	void panel_timed_update(AMX*);
 	void protips_timed_broadcast(AMX*);
@@ -208,7 +209,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 				echo_init(amx);
 				protips_timed_broadcast(amx);
 timer30s:			/*timer30s*/
-				;
+				heartbeat_timed_update(amx);
 			}
 			/*timer1000*/
 			veh_timed_panel_update(amx);

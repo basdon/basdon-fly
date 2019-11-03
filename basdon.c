@@ -97,12 +97,14 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 {
 	void airports_destroy();
 	void echo_dispose(AMX*);
+	void heartbeat_end_session(AMX*);
 	void missions_freepoints();
 	void spawn_dispose();
 
 	missions_freepoints(); /*call this before airports_destroy!*/
 	airports_destroy();
 	echo_dispose(amx);
+	heartbeat_end_session(amx);
 	spawn_dispose();
 	return 1;
 }
@@ -113,6 +115,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	void airports_init(AMX *amx);
 	void class_init(AMX *amx);
 	void echo_init(AMX *amx);
+	void heartbeat_create_session(AMX*);
 	void maps_load_from_db(AMX *amx);
 	void panel_on_gamemode_init(AMX*);
 	void spawn_init(AMX*);
@@ -124,6 +127,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	class_init(amx);
 	maps_load_from_db(amx);
 	echo_init(amx);
+	heartbeat_create_session(amx);
 	panel_on_gamemode_init(amx);
 	spawn_init(amx); /*MUST run after airports_init*/
 	veh_create_global_textdraws(amx);
