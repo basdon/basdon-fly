@@ -14,6 +14,8 @@
 #include "vehicles.h"
 
 #define SERVICE_MAP_DISTANCE 350.0f
+#define SERVICE_MAP_DISTANCE_SQ (SERVICE_MAP_DISTANCE * SERVICE_MAP_DISTANCE)
+#define SERVICE_MAP_ICON_TYPE 38 /*S sweet icon*/
 
 struct vehnode {
 	struct dbvehicle *veh;
@@ -25,12 +27,16 @@ struct servicepoint {
 	float x, y, z;
 };
 
-struct mapservicepoint {
+struct PLAYERSERVICEPOINT {
 	struct servicepoint *svp;
 	int textid;
 };
 
-static struct mapservicepoint mapservicepoints[MAX_PLAYERS][MAX_SERVICE_MAP_ICONS];
+/**
+Array holding which service points are shown per player.
+*/
+static struct PLAYERSERVICEPOINT
+	player_servicepoints[MAX_PLAYERS][MAX_SERVICE_MAP_ICONS];
 static int servicepointc;
 static struct servicepoint *servicepoints;
 static struct vehnode *vehiclestoupdate;
@@ -63,23 +69,28 @@ static short ptxtcache_fl[MAX_PLAYERS];
 Last health value that was shown to a player.
 */
 static short ptxtcache_hp[MAX_PLAYERS];
+/**
+Last vehicle id the player was in.
+*/
+static int lastvehicle[MAX_PLAYERS];
 
 void veh_on_player_connect(AMX *amx, int playerid)
 {
+	struct PLAYERSERVICEPOINT *psvp = player_servicepoints[playerid];
+	int i;
+
+	for (i = 0; i < MAX_SERVICE_MAP_ICONS; i++) {
+		psvp[i].svp = NULL;
+	}
 	ptxt_hp[playerid] = -1;
 	ptxt_fl[playerid] = -1;
 	ptxt_txt[playerid] = -1;
+	lastvehicle[playerid] = 0;
 }
 
 void veh_init()
 {
-	int i = MAX_PLAYERS, j;
-	while (i--) {
-		j = MAX_SERVICE_MAP_ICONS;
-		while (j--) {
-			mapservicepoints[i][j].svp = NULL;
-		}
-	}
+	int i;
 	for (i = 0; i < MAX_VEHICLES; i++) {
 		gamevehicles[i].dbvehicle = NULL;
 		gamevehicles[i].reincarnation = 0;
@@ -691,89 +702,6 @@ cell AMX_NATIVE_CALL Veh_ShouldCreateLabel(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Veh_UpdateServicePointTextId(playerid, index, PlayerText3D:textid) */
-cell AMX_NATIVE_CALL Veh_UpdateServicePointTextId(AMX *amx, cell *params)
-{
-	const int playerid = params[1], index = params[2], textid = params[3];
-
-	if (0 <= index && index < MAX_SERVICE_MAP_ICONS) {
-		mapservicepoints[playerid][index].textid = textid;
-	}
-
-	return 1;
-}
-
-/* native Veh_UpdateServicePtsVisibility(playerid, Float:x, Float:y, data[]) */
-cell AMX_NATIVE_CALL Veh_UpdateServicePtsVisibility(AMX *amx, cell *params)
-{
-	struct servicepoint *pt;
-	const int playerid = params[1];
-	struct mapservicepoint *msvp = mapservicepoints[playerid];
-	const float x = amx_ctof(params[2]), y = amx_ctof(params[3]);
-	int amount = 0, i, j, existing[MAX_SERVICE_MAP_ICONS], existingc = 0;
-	float dx, dy;
-	cell *addr;
-
-	amx_GetAddr(amx, params[4], &addr);
-	i = MAX_SERVICE_MAP_ICONS;
-	while (i--) {
-		*(addr + i * 5) = -2;
-	}
-
-	/* remove old, now out of range ones */
-	i = MAX_SERVICE_MAP_ICONS;
-	while (i--) {
-		if ((pt = msvp[i].svp) != NULL) {
-			dx = pt->x - x;
-			dy = pt->y - y;
-			if (dx * dx + dy * dy > SERVICE_MAP_DISTANCE * SERVICE_MAP_DISTANCE) {
-				*(addr++) = msvp[i].textid;
-				*addr = i;
-				addr += 4;
-				msvp[i].svp = NULL;
-				amount++;
-			} else {
-				existing[existingc++] = pt->id;
-			}
-		}
-	}
-
-	/* add new ones */
-	i = servicepointc;
-	while (1) {
-nextsvp:
-		if (!i--) {
-			return amount;
-		}
-		dx = x - servicepoints[i].x;
-		dy = y - servicepoints[i].y;
-		if (dx * dx + dy * dy < SERVICE_MAP_DISTANCE * SERVICE_MAP_DISTANCE) {
-			j = existingc;
-			while (j--) {
-				if (existing[j] == servicepoints[i].id) {
-					goto nextsvp;
-				}
-			}
-			j = MAX_SERVICE_MAP_ICONS;
-			while (j--) {
-				if (msvp[j].svp == NULL) {
-					msvp[j].svp = servicepoints + i;
-					*(addr++) = -1;
-					*(addr++) = j;
-					*(addr++) = amx_ftoc(servicepoints[i].x);
-					*(addr++) = amx_ftoc(servicepoints[i].y);
-					*(addr++) = amx_ftoc(servicepoints[i].z);
-					amount++;
-					goto nextsvp;
-				}
-			}
-			return amount;
-		}
-	}
-
-	return amount;
-}
-
 /* native Veh_UpdateSlot(vehicleid, dbid) */
 cell AMX_NATIVE_CALL Veh_UpdateSlot(AMX *amx, cell *params)
 {
@@ -805,6 +733,115 @@ cell AMX_NATIVE_CALL Veh_UpdateSlot(AMX *amx, cell *params)
 	gamevehicles[vehicleid].dbvehicle = NULL;
 	logprintf("Veh_UpdateSlot: unknown dbid: %d", dbid);
 	return 0;
+}
+
+/**
+Updates the service point mapicons (and 3D text) for given playerid.
+
+@param x x-position of the player
+@param y y-position of the player
+*/
+void veh_update_service_point_mapicons(AMX *amx, int playerid, float x, float y)
+{
+	static const char* SVP_TXT = "Service Point\n/repair - /refuel";
+
+	struct servicepoint *svp;
+	struct PLAYERSERVICEPOINT *psvps = player_servicepoints[playerid];
+	float dx, dy;
+	int i, selectedpsvp;
+
+	/* remove old, now out of range ones */
+	for (i = 0; i < MAX_SERVICE_MAP_ICONS; i++) {
+		if ((svp = psvps[i].svp) != NULL) {
+			dx = svp->x - x;
+			dy = svp->y - y;
+			if (dx * dx + dy * dy > SERVICE_MAP_DISTANCE_SQ) {
+				nc_params[0] = 2;
+				nc_params[1] = playerid;
+				nc_params[2] = psvps[i].textid;
+				NC(n_DeletePlayer3DTextLabel);
+				nc_params[2] = i;
+				NC(n_RemovePlayerMapIcon);
+				psvps[i].svp = NULL;
+			}
+		}
+	}
+
+	/* add new ones */
+	svp = servicepoints + servicepointc;
+	while (svp-- != servicepoints) {
+		dx = x - svp->x;
+		dy = y - svp->y;
+		if (dx * dx + dy * dy < SERVICE_MAP_DISTANCE_SQ) {
+			selectedpsvp = -1;
+			for (i = 0; i < MAX_SERVICE_MAP_ICONS; i++) {
+				if (psvps[i].svp == svp) {
+					goto alreadyshown;
+				}
+				if (psvps[i].svp == NULL) {
+					selectedpsvp = i;
+				}
+			}
+			if (selectedpsvp == -1) {
+				/*no more map icon slots*/
+				break;
+			}
+			nc_params[0] = 7;
+			nc_params[1] = playerid;
+			nc_params[2] = selectedpsvp;
+			*((float*) (nc_params + 3)) = svp->x;
+			*((float*) (nc_params + 4)) = svp->y;
+			*((float*) (nc_params + 5)) = svp->z;
+			nc_params[6] = SERVICE_MAP_ICON_TYPE,
+			nc_params[7] = MAPICON_GLOBAL;
+			NC(n_SetPlayerMapIcon);
+			amx_SetUString(buf144, SVP_TXT, 144);
+			nc_params[0] = 10;
+			nc_params[2] = buf144a;
+			nc_params[6] = nc_params[5];
+			nc_params[5] = nc_params[4];
+			nc_params[4] = nc_params[3];
+			nc_params[3] = -1;
+			*((float*) (nc_params + 7)) = 50.0f;
+			nc_params[8] = nc_params[9] = INVALID_PLAYER_ID;
+			nc_params[10] = 1;
+			NC(n_CreatePlayer3DTextLabel);
+			(psvps + selectedpsvp)->svp = svp;
+			(psvps + selectedpsvp)->textid = nc_result;
+		}
+alreadyshown:
+		;
+	}
+}
+
+/**
+Update vehicle related things like ODO, fuel, ...
+
+To be called every second.
+*/
+void veh_timed_1s_update(AMX *amx)
+{
+	int playerid, vehicleid, n = playercount;
+
+	while (n--) {
+		playerid = players[n];
+		NC_GetPlayerVehicleSeat(playerid);
+		if (nc_result == 0) {
+			NC_GetPlayerVehicleID_(playerid, &vehicleid);
+			if (vehicleid && vehicleid == lastvehicle[playerid]) {
+				NC_GetVehicleModel(vehicleid);
+				if (game_is_air_vehicle(nc_result)) {
+
+				}
+			}
+		}
+		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
+		veh_update_service_point_mapicons(
+			amx,
+			playerid,
+			*((float*) buf32),
+			*((float*) buf64));
+	}
 }
 
 /**

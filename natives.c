@@ -10,9 +10,11 @@ custom code and shouldn't be used directly.*/
 int n_AddPlayerClass;
 int n_ChangeVehicleColor;
 int n_CreateObject;
+int n_CreatePlayer3DTextLabel;
 int n_CreatePlayerObject;
 int n_CreatePlayerTextDraw;
 int n_CreateVehicle_;
+int n_DeletePlayer3DTextLabel;
 int n_DestroyObject;
 int n_DestroyPlayerObject;
 int n_DestroyVehicle_;
@@ -46,7 +48,9 @@ int n_PlayerTextDrawSetProportional;
 int n_PlayerTextDrawSetShadow;
 int n_PlayerTextDrawSetString;
 int n_PlayerTextDrawShow;
+int n_PutPlayerInVehicle_;
 int n_RemoveBuildingForPlayer;
+int n_RemovePlayerMapIcon;
 int n_SendClientMessage;
 int n_SendClientMessageToAll;
 int n_SendRconCommand;
@@ -55,6 +59,7 @@ int n_SetPlayerCameraPos;
 int n_SetPlayerCameraLookAt;
 int n_SetPlayerColor;
 int n_SetPlayerFacingAngle;
+int n_SetPlayerMapIcon;
 int n_SetPlayerPos_;
 int n_SetPlayerRaceCheckpoint;
 int n_SetPlayerSpecialAction;
@@ -113,9 +118,11 @@ int natives_find(AMX *amx)
 		{ "AddPlayerClass", &n_AddPlayerClass },
 		{ "ChangeVehicleColor", &n_ChangeVehicleColor },
 		{ "CreateObject", &n_CreateObject },
+		{ "CreatePlayer3DTextLabel", &n_CreatePlayer3DTextLabel },
 		{ "CreatePlayerObject", &n_CreatePlayerObject },
 		{ "CreatePlayerTextDraw", &n_CreatePlayerTextDraw },
 		{ "CreateVehicle", &n_CreateVehicle_ },
+		{ "DeletePlayer3DTextLabel", &n_DeletePlayer3DTextLabel },
 		{ "DestroyObject", &n_DestroyObject },
 		{ "DestroyPlayerObject", &n_DestroyPlayerObject },
 		{ "DestroyVehicle", &n_DestroyVehicle_ },
@@ -152,7 +159,9 @@ int natives_find(AMX *amx)
 		{ "PlayerTextDrawSetShadow", &n_PlayerTextDrawSetShadow },
 		{ "PlayerTextDrawSetString", &n_PlayerTextDrawSetString },
 		{ "PlayerTextDrawShow", &n_PlayerTextDrawShow },
+		{ "PutPlayerInVehicle", &n_PutPlayerInVehicle_ },
 		{ "RemoveBuildingForPlayer", &n_RemoveBuildingForPlayer },
+		{ "RemovePlayerMapIcon", &n_RemovePlayerMapIcon },
 		{ "SendClientMessage", &n_SendClientMessage },
 		{ "SendClientMessageToAll", &n_SendClientMessageToAll },
 		{ "SendRconCommand", &n_SendRconCommand },
@@ -160,6 +169,7 @@ int natives_find(AMX *amx)
 		{ "SetPlayerCameraPos", &n_SetPlayerCameraPos },
 		{ "SetPlayerCameraLookAt", &n_SetPlayerCameraLookAt },
 		{ "SetPlayerColor", &n_SetPlayerColor },
+		{ "SetPlayerMapIcon", &n_SetPlayerMapIcon },
 		{ "SetPlayerPos", &n_SetPlayerPos_ },
 		{ "SetPlayerFacingAngle", &n_SetPlayerFacingAngle },
 		{ "SetPlayerRaceCheckpoint", &n_SetPlayerRaceCheckpoint },
@@ -215,12 +225,29 @@ int natives_find(AMX *amx)
 	return 1;
 }
 
+int natives_NC_PutPlayerInVehicle(AMX *amx, int playerid, int vehicleid)
+{
+	void veh_update_service_point_mapicons(AMX*, int, float, float);
+
+	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
+	veh_update_service_point_mapicons(
+		amx, playerid, *((float*) buf32), *((float*) buf64));
+
+	nc_params[0] = 2;
+	nc_params[1] = playerid;
+	nc_params[2] = vehicleid;
+	NC(n_PutPlayerInVehicle_);
+	return nc_result;
+}
+
 int natives_NC_SetPlayerPos(AMX *amx, int playerid, struct vec3 pos)
 {
 	void maps_stream_for_player(AMX*, int, struct vec3);
+	void veh_update_service_point_mapicons(AMX*, int, float, float);
 	void zones_update(AMX*, int, struct vec3);
 
 	maps_stream_for_player(amx, playerid, pos);
+	veh_update_service_point_mapicons(amx, playerid, pos.x, pos.y);
 	zones_update(amx, playerid, pos);
 
 	nc_params[0] = 4;

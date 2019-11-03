@@ -105,6 +105,8 @@ FORWARD(Veh_UpdateSlot);
 
 static AMX *gamemode_amx = NULL;
 
+int temp_afk[MAX_PLAYERS];
+
 #define IN_BASDONFLY
 #include "basdon.c"
 
@@ -149,6 +151,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	void maps_process_tick(AMX*);
 	void panel_timed_update(AMX*);
 	void protips_timed_broadcast(AMX*);
+	void veh_timed_1s_update(AMX*);
 	void veh_timed_panel_update(AMX*);
 	void zones_update_for_all(AMX*);
 
@@ -212,6 +215,7 @@ timer30s:			/*timer30s*/
 				heartbeat_timed_update(amx);
 			}
 			/*timer1000*/
+			veh_timed_1s_update(amx);
 			veh_timed_panel_update(amx);
 			zones_update_for_all(amx);
 			/*TODO: on 5s?*/
@@ -254,6 +258,7 @@ cell AMX_NATIVE_CALL REMOVEME_onplayerwasafk(AMX *amx, cell *params)
 {
 	void panel_on_player_was_afk(AMX*, int);
 
+	temp_afk[params[1]] = 0;
 	panel_on_player_was_afk(amx, params[1]);
 	return 1;
 }
@@ -262,6 +267,7 @@ cell AMX_NATIVE_CALL REMOVEME_onplayernowafk(AMX *amx, cell *params)
 {
 	void panel_remove_panel_player(int);
 
+	temp_afk[params[1]] = 1;
 	panel_remove_panel_player(params[1]);
 	return 1;
 }
@@ -377,8 +383,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_RegisterLabel),
 	REGISTERNATIVE(Veh_Repair),
 	REGISTERNATIVE(Veh_ShouldCreateLabel),
-	REGISTERNATIVE(Veh_UpdateServicePointTextId),
-	REGISTERNATIVE(Veh_UpdateServicePtsVisibility),
 	REGISTERNATIVE(Veh_UpdateSlot),
 	{0, 0}
 };

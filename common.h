@@ -72,6 +72,10 @@ Logged-in status of each player (one of the LOGGED_ definitions).
 */
 extern int loggedstatus[MAX_PLAYERS];
 /**
+Variable holding afk state of players (temp until all is moved to plugin).
+*/
+extern int temp_afk[MAX_PLAYERS];
+/**
 Current in-game hour.
 */
 extern int time_h;

@@ -6,9 +6,11 @@ int natives_find(AMX *amx);
 extern int n_AddPlayerClass;
 extern int n_ChangeVehicleColor;
 extern int n_CreateObject;
+extern int n_CreatePlayer3DTextLabel;
 extern int n_CreatePlayerObject;
 extern int n_CreatePlayerTextDraw;
 extern int n_CreateVehicle_;
+extern int n_DeletePlayer3DTextLabel;
 extern int n_DestroyObject;
 extern int n_DestroyPlayerObject;
 extern int n_DestroyVehicle_;
@@ -42,7 +44,9 @@ extern int n_PlayerTextDrawSetProportional;
 extern int n_PlayerTextDrawSetShadow;
 extern int n_PlayerTextDrawSetString;
 extern int n_PlayerTextDrawShow;
+extern int n_PutPlayerInVehicle_;
 extern int n_RemoveBuildingForPlayer;
+extern int n_RemovePlayerMapIcon;
 extern int n_SendClientMessage;
 extern int n_SendClientMessageToAll;
 extern int n_SendRconCommand;
@@ -51,6 +55,7 @@ extern int n_SetPlayerCameraPos;
 extern int n_SetPlayerCameraLookAt;
 extern int n_SetPlayerColor;
 extern int n_SetPlayerFacingAngle;
+extern int n_SetPlayerMapIcon;
 extern int n_SetPlayerPos_;
 extern int n_SetPlayerRaceCheckpoint;
 extern int n_SetPlayerSpecialAction;
@@ -134,6 +139,10 @@ extern cell nc_result;
 
 #define NC_CreateVehicle __USE__veh_NC_CreateVehicle__
 
+#define NC_DeletePlayer3DTextLabel(PLAYERID,TXTID) \
+	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=TXTID;\
+	amx_Callback(amx,n_DeletePlayer3DTextLabel,&nc_result,nc_params)
+
 #define NC_DestroyObject(OBJECTID) nc_params[0]=1;nc_params[1]=OBJECTID;\
 	amx_Callback(amx,n_DestroyObject,&nc_result,nc_params)
 
@@ -181,6 +190,9 @@ extern cell nc_result;
 	amx_Callback(amx,n_GetPlayerVehicleID,(cell*)RESULT,nc_params)
 #define NC_GetPlayerVehicleID(PLAYERID) \
 	NC_GetPlayerVehicleID_(PLAYERID,&nc_result)
+
+#define NC_GetPlayerVehicleSeat(PLAYERID) nc_params[0]=1;nc_params[1]=PLAYERID;\
+	amx_Callback(amx,n_GetPlayerVehicleSeat,&nc_result,nc_params)
 
 #define NC_GetVehicleHealth __USE__anticheat_NC_GetVehicleHealth__
 
@@ -260,6 +272,12 @@ extern cell nc_result;
 #define NC_PlayerTextDrawShow(PLAYERID,TD) \
 	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=TD;\
 	amx_Callback(amx,n_PlayerTextDrawShow,&nc_result,nc_params)
+
+#define NC_PutPlayerInVehicle __USE__natives_NC_PutPlayerInVehicle__
+
+#define NC_RemovePlayerMapIcon(PLAYERID,MAPICONID) nc_params[0]=2;\
+	nc_params[1]=PLAYERID;nc_params[2]=MAPICONID;\
+	amx_Callback(amx,n_RemovePlayerMapIcon,&nc_result,nc_params)
 
 #define NC_SendClientMessage(PLAYERID,COLOR,BUF) \
 	nc_params[0]=3;\
