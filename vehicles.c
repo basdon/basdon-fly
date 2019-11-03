@@ -943,7 +943,6 @@ static void veh_update_panel_for_player(AMX *amx, int playerid)
 	}
 
 	veh = gamevehicles[vehicleid].dbvehicle;
-
 	if (veh != NULL) {
 		odo = veh->odo;
 		fuel = veh->fuel;
@@ -962,7 +961,7 @@ static void veh_update_panel_for_player(AMX *amx, int playerid)
 
 	sprintf((char*) buf64,
 		"ODO %08.0f~n~_FL i-------i~n~_HP i-------i",
-		veh->odo);
+		odo);
 	if (time_m % 2) {
 		if (fuel < 0.2f) {
 			((char*) buf64)[16] = '_';
