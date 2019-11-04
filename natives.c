@@ -30,6 +30,7 @@ int n_GetPlayerVehicleID;
 int n_GetPlayerVehicleSeat;
 int n_GetVehicleHealth;
 int n_GetVehicleModel;
+int n_GetVehicleParamsEx;
 int n_GetVehiclePos;
 int n_GetVehicleVelocity;
 int n_GetVehicleZAngle;
@@ -65,6 +66,7 @@ int n_SetPlayerRaceCheckpoint;
 int n_SetPlayerSpecialAction;
 int n_SetPlayerTime;
 int n_SetVehicleHealth;
+int n_SetVehicleParamsEx;
 int n_SetVehicleToRespawn;
 int n_ShowPlayerDialog_;
 int n_SpawnPlayer_;
@@ -134,6 +136,7 @@ int natives_find(AMX *amx)
 		{ "GetPlayerIp", &n_GetPlayerIp },
 		{ "GetPlayerName", &n_GetPlayerName },
 		{ "GetPlayerState", &n_GetPlayerState },
+		{ "GetVehicleParamsEx", &n_GetVehicleParamsEx },
 		{ "GetPlayerPos", &n_GetPlayerPos },
 		{ "GetPlayerVehicleID", &n_GetPlayerVehicleID },
 		{ "GetPlayerVehicleSeat", &n_GetPlayerVehicleSeat },
@@ -176,6 +179,7 @@ int natives_find(AMX *amx)
 		{ "SetPlayerSpecialAction", &n_SetPlayerSpecialAction },
 		{ "SetPlayerTime", &n_SetPlayerTime },
 		{ "SetVehicleHealth", &n_SetVehicleHealth },
+		{ "SetVehicleParamsEx", &n_SetVehicleParamsEx },
 		{ "SetVehicleToRespawn", &n_SetVehicleToRespawn },
 		{ "ShowPlayerDialog", &n_ShowPlayerDialog_ },
 		{ "SpawnPlayer", &n_SpawnPlayer_ },
@@ -229,6 +233,7 @@ int natives_NC_PutPlayerInVehicle(AMX *amx, int playerid, int vehicleid)
 {
 	void veh_update_service_point_mapicons(AMX*, int, float, float);
 
+	veh_on_player_now_driving(amx, playerid, vehicleid);
 	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
 	veh_update_service_point_mapicons(
 		amx, playerid, *((float*) buf32), *((float*) buf64));

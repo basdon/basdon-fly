@@ -153,6 +153,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	void protips_timed_broadcast(AMX*);
 	void veh_timed_1s_update(AMX*);
 	void veh_timed_panel_update(AMX*);
+	int veh_commit_next_vehicle_odo_to_db(AMX*);
 	void zones_update_for_all(AMX*);
 
 	static int count = 0;
@@ -218,8 +219,11 @@ timer30s:			/*timer30s*/
 			veh_timed_1s_update(amx);
 			veh_timed_panel_update(amx);
 			zones_update_for_all(amx);
-			/*TODO: on 5s?*/
-			dialog_pop_queue(amx);
+			/*timer5000*/
+			if ((time_m % 5) == 0) {
+				dialog_pop_queue(amx);
+				veh_commit_next_vehicle_odo_to_db(amx);
+			}
 		}
 	}
 }
@@ -272,6 +276,12 @@ cell AMX_NATIVE_CALL REMOVEME_onplayernowafk(AMX *amx, cell *params)
 	return 1;
 }
 
+extern float playerodo[MAX_PLAYERS];
+cell AMX_NATIVE_CALL REMOVEME_getplayerodo(AMX *amx, cell *params)
+{
+	return amx_ftoc(playerodo[params[1]]);
+}
+
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
@@ -282,6 +292,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(REMOVEME_setprefs),
 	REGISTERNATIVE(REMOVEME_getprefs),
 	REGISTERNATIVE(REMOVEME_setloggedstatus),
+	REGISTERNATIVE(REMOVEME_getplayerodo),
 	/* anticheat.c */
 	REGISTERNATIVE(Ac_FormatLog),
 	/* basdon.c */
@@ -366,14 +377,12 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Urlencode),
 	/* vehicles.c */
 	REGISTERNATIVE(Veh_Add),
-	REGISTERNATIVE(Veh_AddOdo),
 	REGISTERNATIVE(Veh_AddServicePoint),
 	REGISTERNATIVE(Veh_CollectSpawnedVehicles),
 	REGISTERNATIVE(Veh_CollectPlayerVehicles),
 	REGISTERNATIVE(Veh_ConsumeFuel),
 	REGISTERNATIVE(Veh_Destroy),
 	REGISTERNATIVE(Veh_GetLabelToDelete),
-	REGISTERNATIVE(Veh_GetNextUpdateQuery),
 	REGISTERNATIVE(Veh_Init),
 	REGISTERNATIVE(Veh_InitServicePoints),
 	REGISTERNATIVE(Veh_IsFuelEmpty),

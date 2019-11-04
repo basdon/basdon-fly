@@ -100,12 +100,14 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 	void heartbeat_end_session(AMX*);
 	void missions_freepoints();
 	void spawn_dispose();
+	int veh_commit_next_vehicle_odo_to_db(AMX*);
 
 	missions_freepoints(); /*call this before airports_destroy!*/
 	airports_destroy();
 	echo_dispose(amx);
 	heartbeat_end_session(amx);
 	spawn_dispose();
+	while (veh_commit_next_vehicle_odo_to_db(amx));
 	return 1;
 }
 

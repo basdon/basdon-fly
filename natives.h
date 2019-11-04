@@ -26,6 +26,7 @@ extern int n_GetPlayerVehicleID;
 extern int n_GetPlayerVehicleSeat;
 extern int n_GetVehicleHealth;
 extern int n_GetVehicleModel;
+extern int n_GetVehicleParamsEx;
 extern int n_GetVehiclePos;
 extern int n_GetVehicleVelocity;
 extern int n_GetVehicleZAngle;
@@ -61,6 +62,7 @@ extern int n_SetPlayerRaceCheckpoint;
 extern int n_SetPlayerSpecialAction;
 extern int n_SetPlayerTime;
 extern int n_SetVehicleHealth;
+extern int n_SetVehicleParamsEx;
 extern int n_SetVehicleToRespawn;
 extern int n_ShowPlayerDialog_;
 extern int n_SpawnPlayer_;
@@ -201,6 +203,12 @@ extern cell nc_result;
 	amx_Callback(amx,n_GetVehicleModel,(cell*)RESULT,nc_params)
 #define NC_GetVehicleModel(VEHICLEID) NC_GetVehicleModel_(VEHICLEID,&nc_result)
 
+#define NC_GetVehicleParamsEx(VID,ENGINE,LIGHTS,ALARM,DOORS,BONNET,BOOT,OBJ) \
+	nc_params[0]=8;nc_params[1]=VID;nc_params[2]=ENGINE;\
+	nc_params[3]=LIGHTS;nc_params[4]=ALARM;nc_params[5]=DOORS;\
+	nc_params[6]=BONNET;nc_params[7]=BOOT;nc_params[8]=OBJ;\
+	amx_Callback(amx,n_GetVehicleParamsEx,&nc_result,nc_params)
+
 #define NC_GetVehiclePos(VEHICLEID,FX,FY,FZ) \
 	nc_params[0]=4;nc_params[1]=VEHICLEID;\
 	nc_params[2]=FX;nc_params[3]=FY;nc_params[4]=FZ;\
@@ -314,6 +322,12 @@ extern cell nc_result;
 #define NC_SetVehicleHealth(PLAYERID,FHP) \
 	nc_params[0]=2;nc_params[1]=PLAYERID;*((float*)(nc_params+2))=FHP;\
 	amx_Callback(amx,n_SetVehicleHealth,&nc_result,nc_params)
+
+#define NC_SetVehicleParamsEx(VID,ENGINE,LIGHTS,ALARM,DOORS,BONNET,BOOT,OBJ) \
+	nc_params[0]=8;nc_params[1]=VID;nc_params[2]=ENGINE;\
+	nc_params[3]=LIGHTS;nc_params[4]=ALARM;nc_params[5]=DOORS;\
+	nc_params[6]=BONNET;nc_params[7]=BOOT;nc_params[8]=OBJ;\
+	amx_Callback(amx,n_SetVehicleParamsEx,&nc_result,nc_params)
 
 #define NC_SetVehicleToRespawn(VEHICLEID) \
 	nc_params[0]=1;nc_params[1]=VEHICLEID;\

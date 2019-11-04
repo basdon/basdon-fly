@@ -512,21 +512,6 @@ native Urlencode(const data[], len, output[])
 //@seealso Veh_UpdateSlot
 native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, odo, ownername[])
 
-//@summary Add odo value to vehicle based on distance between given coords
-//@param vehicleid vehicle id to give odo to
-//@param playerid valid playerid that issued odo update (to update mission distance when applicable)
-//@param x1 first x-position
-//@param y1 first y-position
-//@param z1 first z-position
-//@param x2 second x-position
-//@param y2 second y-position
-//@param z2 second z-position
-//@param podo player odo value, only passed to add the added odo to remove the need for a {@link floatadd} call :)
-//@returns {@param podo} + the added odo value, even if there's no vehicle mapping for {@param vehicleid}
-//@remarks All values are in km.
-//@remarks This will also add travelled distance to player's current mission, if applicable.
-native Float:Veh_AddOdo(vehicleid, playerid, Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2, Float:podo)
-
 //@summary Add a service point to the service point table
 //@param index index in the servicepoints table to store this point
 //@param id id of the service point
@@ -571,11 +556,6 @@ native Veh_Destroy();
 //@param labelid the label id will be put in this variable if this returns positive
 //@returns {@code 1} if there is a label to delete, its id will be put in {@param labelid}
 native Veh_GetLabelToDelete(vehicleid, playerid, &PlayerText3D:labelid)
-
-//@summary Gets next queued query to update a vehicle in the db
-//@param buf buffer to store query in
-//@returns {@code 0} if the queue is empty
-native Veh_GetNextUpdateQuery(buf[])
 
 //@summary Inits the db vehicle table
 //@param dbvehiclecount initial size of the table

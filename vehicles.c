@@ -39,7 +39,10 @@ static struct PLAYERSERVICEPOINT
 	player_servicepoints[MAX_PLAYERS][MAX_SERVICE_MAP_ICONS];
 static int servicepointc;
 static struct servicepoint *servicepoints;
-static struct vehnode *vehiclestoupdate;
+/**
+Linked list of vehicles that need an ODO update in db.
+*/
+static struct vehnode *vehstoupdate;
 static struct dbvehicle *dbvehicles;
 int dbvehiclenextid, dbvehiclealloc;
 struct vehicle gamevehicles[MAX_VEHICLES];
@@ -70,9 +73,22 @@ Last health value that was shown to a player.
 */
 static short ptxtcache_hp[MAX_PLAYERS];
 /**
-Last vehicle id the player was in.
+Last vehicle id the player was in as driver.
 */
 static int lastvehicle[MAX_PLAYERS];
+/**
+Last vehicle position for player (when driver), for ODO purposes.
+
+To be inited in veh_on_player_now_driving and updated on ODO update.
+*/
+static struct vec3 lastvpos[MAX_PLAYERS];
+
+/**
+Each player's total ODO value.
+
+TODO: move this somewhere else.
+*/
+float playerodo[MAX_PLAYERS];
 
 void veh_on_player_connect(AMX *amx, int playerid)
 {
@@ -86,6 +102,7 @@ void veh_on_player_connect(AMX *amx, int playerid)
 	ptxt_fl[playerid] = -1;
 	ptxt_txt[playerid] = -1;
 	lastvehicle[playerid] = 0;
+	playerodo[playerid] = 0.0f;
 }
 
 void veh_init()
@@ -96,7 +113,7 @@ void veh_init()
 		gamevehicles[i].reincarnation = 0;
 		gamevehicles[i].need_recreation = 0;
 	}
-	vehiclestoupdate = NULL;
+	vehstoupdate = NULL;
 	servicepoints = NULL;
 	servicepointc = 0;
 	dbvehicles = NULL;
@@ -248,48 +265,6 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 	return dbvehiclenextid - 1;
 }
 
-/* native Float:Veh_AddOdo(vehicleid, playerid, Float:x1, Float:y1, Float:z1,
-                           Float:x2, Float:y2, Float:z2, Float:podo) */
-cell AMX_NATIVE_CALL Veh_AddOdo(AMX *amx, cell *params)
-{
-	void missions_add_distance(int, float);
-	struct dbvehicle *veh;
-	struct vehnode *updatequeue;
-	const int vehicleid = params[1], playerid = params[2];
-	const float dx = amx_ctof(params[3]) - amx_ctof(params[6]);
-	const float dy = amx_ctof(params[4]) - amx_ctof(params[7]);
-	const float dz = amx_ctof(params[5]) - amx_ctof(params[8]);
-	float vs = sqrt(dx * dx + dy * dy + dz * dz) / 1000.0f;
-
-	if ((amx_ftoc(vs) & 0x7F80000) == 0x7F80000 && (amx_ftoc(vs) & 0x007FFFFF) == 0) {
-		vs = 0.0f;
-	}
-
-	if ((veh = gamevehicles[vehicleid].dbvehicle) != NULL) {
-		veh->odo += vs;
-		if (!veh->needsodoupdate) {
-			veh->needsodoupdate = 1;
-			if (vehiclestoupdate == NULL) {
-				vehiclestoupdate = malloc(sizeof(struct vehnode));
-				vehiclestoupdate->veh = veh;
-				vehiclestoupdate->next = NULL;
-			} else {
-				updatequeue = vehiclestoupdate;
-				while (updatequeue->next != NULL) {
-					updatequeue = updatequeue->next;
-				}
-				updatequeue->next = malloc(sizeof(struct vehnode));
-				updatequeue->next->veh = veh;
-				updatequeue->next->next = NULL;
-			}
-		}
-	}
-
-	missions_add_distance(playerid, vs * 1000.0);
-	vs += amx_ctof(params[9]);
-	return amx_ftoc(vs);
-}
-
 /* native Veh_AddServicePoint(index, id, Float:x, Float:y, Float:z) */
 cell AMX_NATIVE_CALL Veh_AddServicePoint(AMX *amx, cell *params)
 {
@@ -416,28 +391,6 @@ cell AMX_NATIVE_CALL Veh_GetLabelToDelete(AMX *amx, cell *params)
 	labelids[playerid][vehicleid] = -1;
 	amx_GetAddr(amx, params[3], &addr);
 	*addr = labelid;
-	return 1;
-}
-
-/* native Veh_GetNextUpdateQuery(buf[]) */
-cell AMX_NATIVE_CALL Veh_GetNextUpdateQuery(AMX *amx, cell *params)
-{
-	cell *addr;
-	struct dbvehicle *veh;
-	struct vehnode *tofree;
-	char buf[80];
-
-	if (vehiclestoupdate == NULL) {
-		return 0;
-	}
-	veh = vehiclestoupdate->veh;
-	tofree = vehiclestoupdate;
-	vehiclestoupdate = vehiclestoupdate->next;
-	free(tofree);
-	veh->needsodoupdate = 0;
-	sprintf(buf, "UPDATE veh SET odo=%d WHERE i=%d", (int) veh->odo, veh->id);
-	amx_GetAddr(amx, params[1], &addr);
-	amx_SetUString(addr, buf, sizeof(buf));
 	return 1;
 }
 
@@ -736,6 +689,34 @@ cell AMX_NATIVE_CALL Veh_UpdateSlot(AMX *amx, cell *params)
 }
 
 /**
+Stuff to do when a player is now driver of a vehicle.
+
+To be called from OnPlayerStateChange with new state being driver, or when
+calling PutPlayerInVehicle when the player was already a driver (because
+this won't trigger a OnPlayerStateChange.
+*/
+void veh_on_player_now_driving(AMX *amx, int playerid, int vehicleid)
+{
+	struct dbvehicle *veh;
+	int reqenginestate;
+
+	lastvehicle[playerid] = vehicleid;
+	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
+	lastvpos[playerid].x = *((float*) buf32);
+	lastvpos[playerid].y = *((float*) buf64);
+	lastvpos[playerid].z = *((float*) buf144);
+
+	reqenginestate =
+		(veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
+		veh->fuel > 0.0f;
+	common_set_vehicle_engine(amx, vehicleid, reqenginestate);
+	if (!reqenginestate) {
+		amx_SetUString(buf144, WARN"This vehicle is out of fuel!", 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	}
+}
+
+/**
 Updates the service point mapicons (and 3D text) for given playerid.
 
 @param x x-position of the player
@@ -815,13 +796,92 @@ alreadyshown:
 }
 
 /**
+Commits odo of next vehicle in update queue to db.
+
+To be called in 5 second timer, or to be called in a loop until it returns 0 in
+OnGameModeExit.
+
+@return 0 if there was nothing to commit
+*/
+int veh_commit_next_vehicle_odo_to_db(AMX *amx)
+{
+	struct dbvehicle *veh;
+	struct vehnode *tofree;
+
+	if (vehstoupdate) {
+		veh = vehstoupdate->veh;
+		tofree = vehstoupdate;
+		vehstoupdate = vehstoupdate->next;
+		free(tofree);
+		veh->needsodoupdate = 0;
+		sprintf((char*) buf4096,
+			"UPDATE veh SET odo=%.4f WHERE i=%d",
+			veh->odo,
+			veh->id);
+		amx_SetUString(buf144, (char*) buf4096, 144);
+		NC_mysql_tquery_nocb(buf144a);
+		return 1;
+	}
+	return 0;
+}
+
+/**
+Updates vehicle and player odo.
+
+Given player must be driver of given vehicle.
+
+@param pos the position of the given vehicle
+*/
+static
+void veh_update_odo(AMX *amx, int playerid, int vehicleid, struct vec3 pos)
+{
+	struct vehnode *vuq;
+	struct dbvehicle *veh;
+	float dx, dy, dz, distance;
+
+	dx = lastvpos[playerid].x - pos.x;
+	dy = lastvpos[playerid].y - pos.y;
+	dz = lastvpos[playerid].z - pos.z;
+	distance = sqrt(dx * dx + dy * dy + dz * dz);
+	if (common_is_nan(distance) || distance == 0.0f) {
+		return;
+	}
+
+	playerodo[playerid] += distance;
+	/*TODO: should this only check mission vehicle?*/
+	missions_add_distance(playerid, distance);
+
+	if ((veh = gamevehicles[vehicleid].dbvehicle) != NULL) {
+		veh->odo += distance / 1000.0f;
+		if (!veh->needsodoupdate) {
+			veh->needsodoupdate = 1;
+			if (vehstoupdate == NULL) {
+				vehstoupdate = malloc(sizeof(struct vehnode));
+				vehstoupdate->veh = veh;
+				vehstoupdate->next = NULL;
+			} else {
+				vuq = vehstoupdate;
+				while (vuq->next != NULL) {
+					vuq = vuq->next;
+				}
+				vuq->next = malloc(sizeof(struct vehnode));
+				vuq = vuq->next;
+				vuq->veh = veh;
+				vuq->next = NULL;
+			}
+		}
+	}
+}
+
+/**
 Update vehicle related things like ODO, fuel, ...
 
 To be called every second.
 */
 void veh_timed_1s_update(AMX *amx)
 {
-	int playerid, vehicleid, n = playercount;
+	int engine, playerid, vehicleid, n = playercount;
+	struct vec3 vpos;
 
 	while (n--) {
 		playerid = players[n];
@@ -829,10 +889,16 @@ void veh_timed_1s_update(AMX *amx)
 		if (nc_result == 0) {
 			NC_GetPlayerVehicleID_(playerid, &vehicleid);
 			if (vehicleid && vehicleid == lastvehicle[playerid]) {
+				NC_GetVehiclePos(vehicleid,
+					buf32a, buf64a, buf144a);
+				vpos.x = *((float*) buf32);
+				vpos.y = *((float*) buf64);
+				vpos.z = *((float*) buf144);
 				NC_GetVehicleModel(vehicleid);
 				if (game_is_air_vehicle(nc_result)) {
 
 				}
+				veh_update_odo(amx, playerid, vehicleid, vpos);
 			}
 		}
 		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
@@ -1094,6 +1160,11 @@ void veh_on_player_state_change(AMX *amx, int playerid, int from, int to)
 
 		ptxtcache_fl[playerid] = -1;
 		ptxtcache_hp[playerid] = -1;
+	}
+
+	if (to == PLAYER_STATE_DRIVER) {
+		NC_GetPlayerVehicleID(playerid);
+		veh_on_player_now_driving(amx, playerid, nc_result);
 	}
 }
 

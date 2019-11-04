@@ -61,3 +61,27 @@ int common_is_nan(float f)
 	unsigned int v = *((unsigned int*) &f);
 	return (v | 0x807FFFFF) == 0xFFFFFFFF && (v & 0x007FFFFF);
 }
+
+void common_set_vehicle_engine(AMX *amx, int vehicleid, int enginestatus)
+{
+	cell p1a = buf144a;
+	cell p2a = buf144a + 1;
+	cell p3a = buf144a + 2;
+	cell p4a = buf144a + 3;
+	cell p5a = buf144a + 4;
+	cell p6a = buf144a + 5;
+	cell p7a = buf144a + 6;
+	cell *p1 = buf144;
+	cell *p2 = buf144 + 1;
+	cell *p3 = buf144 + 2;
+	cell *p4 = buf144 + 3;
+	cell *p5 = buf144 + 4;
+	cell *p6 = buf144 + 5;
+	cell *p7 = buf144 + 6;
+
+	NC_GetVehicleParamsEx(vehicleid, p1a, p2a, p3a, p4a, p5a, p6a, p7a);
+	if (enginestatus != *p1) {
+		NC_SetVehicleParamsEx(
+			vehicleid, enginestatus, *p2, *p3, *p4, *p5, *p6, *p7);
+	}
+}
