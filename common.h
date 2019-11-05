@@ -140,3 +140,24 @@ int common_is_nan(float f);
 Sets the state of the engine for given vehicle id.
 */
 void common_set_vehicle_engine(AMX *amx, int vehicleid, int enginestatus);
+
+/**
+Alternative for GetPlayerPos to get it directly into a vec3 struct.
+
+Will use buf32, buf64, buf144.
+*/
+int common_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos);
+
+/**
+Alternative for GetVehiclePos to get it directly into a vec3 struct.
+
+Will use buf32, buf64, buf144.
+*/
+int common_NC_GetVehiclePos(AMX*, int vehicleid, struct vec3 *pos);
+
+/**
+Alternative for GetVehicleVelocity to get it directly into a vec3 struct.
+
+Will use buf32, buf64, buf144.
+*/
+int common_NC_GetVehicleVelocity(AMX*, int vehicleid, struct vec3 *vel);

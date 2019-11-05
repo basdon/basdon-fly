@@ -86,3 +86,30 @@ void common_set_vehicle_engine(AMX *amx, int vehicleid, int enginestatus)
 			vehicleid, enginestatus, *p2, *p3, *p4, *p5, *p6, *p7);
 	}
 }
+
+int common_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos)
+{
+	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
+	pos->x = *((float*) buf32);
+	pos->y = *((float*) buf64);
+	pos->z = *((float*) buf144);
+	return nc_result;
+}
+
+int common_NC_GetVehiclePos(AMX *amx, int vehicleid, struct vec3 *pos)
+{
+	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
+	pos->x = *((float*) buf32);
+	pos->y = *((float*) buf64);
+	pos->z = *((float*) buf144);
+	return nc_result;
+}
+
+int common_NC_GetVehicleVelocity(AMX *amx, int vehicleid, struct vec3 *vel)
+{
+	NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
+	vel->x = *((float*) buf32);
+	vel->y = *((float*) buf64);
+	vel->z = *((float*) buf144);
+	return nc_result;
+}

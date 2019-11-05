@@ -439,27 +439,6 @@ eject a player.
 int natives_NC_SpawnPlayer(AMX *amx, int playerid);
 
 /**
-Alternative for GetPlayerPos to get it directly into a vec3 struct.
-
-Will use buf32, buf64, buf144.
-*/
-int natives_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos);
-
-/**
-Alternative for GetVehiclePos to get it directly into a vec3 struct.
-
-Will use buf32, buf64, buf144.
-*/
-int natives_NC_GetVehiclePos(AMX*, int vehicleid, struct vec3 *pos);
-
-/**
-Alternative for GetVehicleVelocity to get it directly into a vec3 struct.
-
-Will use buf32, buf64, buf144.
-*/
-int natives_NC_GetVehicleVelocity(AMX*, int vehicleid, struct vec3 *vel);
-
-/**
 Gets vehicle hp, after checking for unnacceptable values and handling offenders.
 */
 float anticheat_NC_GetVehicleHealth(AMX *amx, int vehicleid);

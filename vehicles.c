@@ -912,7 +912,7 @@ void veh_timed_update_a(
 
 	if (missions_get_stage(playerid) == MISSION_STAGE_FLIGHT) {
 		hp = anticheat_NC_GetVehicleHealth(amx, vehicleid);
-		natives_NC_GetVehicleVelocity(amx, vehicleid, &vvel);
+		common_NC_GetVehicleVelocity(amx, vehicleid, &vvel);
 		missions_send_tracker_data(
 			amx, playerid, vehicleid, hp,
 			vpos, &vvel, temp_afk[playerid], engine);
@@ -960,7 +960,7 @@ void veh_timed_1s_update(AMX *amx)
 
 
 		if (vehicleid == lastvehicle[playerid]) {
-			natives_NC_GetVehiclePos(amx, vehicleid, &vpos);
+			common_NC_GetVehiclePos(amx, vehicleid, &vpos);
 			veh_update_odo(amx, playerid, vehicleid, vpos);
 
 			NC_GetVehicleModel(vehicleid);

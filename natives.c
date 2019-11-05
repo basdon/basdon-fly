@@ -257,7 +257,7 @@ int natives_NC_PutPlayerInVehicle(
 		}
 	}
 
-	natives_NC_GetVehiclePos(amx, vehicleid, &pos);
+	common_NC_GetVehiclePos(amx, vehicleid, &pos);
 	maps_stream_for_player(amx, playerid, pos);
 	veh_on_player_now_driving(amx, playerid, vehicleid);
 	veh_update_service_point_mapicons(amx, playerid, pos.x, pos.y);
@@ -300,32 +300,5 @@ int natives_NC_SpawnPlayer(AMX *amx, int playerid)
 	nc_params[0] = 1;
 	/*nc_params[1] = playerid;*/
 	NC(n_SpawnPlayer_);
-	return nc_result;
-}
-
-int natives_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos)
-{
-	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
-	pos->x = *((float*) buf32);
-	pos->y = *((float*) buf64);
-	pos->z = *((float*) buf144);
-	return nc_result;
-}
-
-int natives_NC_GetVehiclePos(AMX *amx, int vehicleid, struct vec3 *pos)
-{
-	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
-	pos->x = *((float*) buf32);
-	pos->y = *((float*) buf64);
-	pos->z = *((float*) buf144);
-	return nc_result;
-}
-
-int natives_NC_GetVehicleVelocity(AMX *amx, int vehicleid, struct vec3 *vel)
-{
-	NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
-	vel->x = *((float*) buf32);
-	vel->y = *((float*) buf64);
-	vel->z = *((float*) buf144);
 	return nc_result;
 }
