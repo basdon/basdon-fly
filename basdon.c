@@ -42,6 +42,11 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 	cbuf144 = (char*) buf144;
 	cbuf4096 = (char*) buf4096;
 	cemptystring = (char*) emptystring;
+	fbuf32_1 = (float*) buf32_1;
+	fbuf32 = (float*) buf32;
+	fbuf64 = (float*) buf64;
+	fbuf144 = (float*) buf144;
+	fbuf4096 = (float*) buf4096;
 
 	if (!natives_find(amx) || !publics_find(amx)) {
 		return 0;

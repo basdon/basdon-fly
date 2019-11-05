@@ -112,6 +112,7 @@ cell nc_result;
 cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
 cell *emptystring, *buf32, *buf32_1, *buf64, *buf144, *buf4096;
 char *cemptystring, *cbuf32, *cbuf32_1, *cbuf64, *cbuf144, *cbuf4096;
+float *fbuf32_1, *fbuf32, *fbuf64, *fbuf144, *fbuf4096;
 
 int natives_find(AMX *amx)
 {
