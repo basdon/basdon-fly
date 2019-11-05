@@ -197,3 +197,20 @@ void anticheat_disallowed_vehicle_1s(AMX *amx, int playerid)
 		"unauthorized vehicle access");
 	anticheat_infraction(amx, playerid, AC_IF_DISALLOWED_VEHICLE);
 }
+
+void anticheat_on_player_enter_vehicle(
+	AMX* amx, int playerid, int vehicleid, int ispassenger)
+{
+	float hp;
+
+	if (!ispassenger) {
+		nc_params[0] = 2;
+		nc_params[1] = vehicleid;
+		nc_params[2] = buf32a;
+		NC(n_GetVehicleHealth);
+		if (*fbuf32 != *fbuf32 || *fbuf32 < 0.0f || 1000.0f < *fbuf32) {
+			*fbuf32 = 1000.0f;
+			NC(n_SetVehicleHealth);
+		}
+	}
+}

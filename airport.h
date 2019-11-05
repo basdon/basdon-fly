@@ -28,3 +28,8 @@ struct AIRPORT {
 extern struct AIRPORT *airports;
 extern int numairports;
 
+/**
+To normalize vehicle hp.
+*/
+void anticheat_on_player_enter_vehicle(AMX*, int pid, int vid, int ispassenger);
+

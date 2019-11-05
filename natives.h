@@ -329,8 +329,8 @@ extern cell nc_result;
 	nc_params[0]=3;nc_params[1]=PLAYERID;nc_params[2]=H;nc_params[3]=M;\
 	amx_Callback(amx,n_SetPlayerTime,&nc_result,nc_params)
 
-#define NC_SetVehicleHealth(PLAYERID,FHP) \
-	nc_params[0]=2;nc_params[1]=PLAYERID;*((float*)(nc_params+2))=FHP;\
+#define NC_SetVehicleHealth(VEHICLEID,HP) \
+	nc_params[0]=2;nc_params[1]=VEHICLEID;nc_params[2]=HP;\
 	amx_Callback(amx,n_SetVehicleHealth,&nc_result,nc_params)
 
 #define NC_SetVehicleParamsEx(VID,ENGINE,LIGHTS,ALARM,DOORS,BONNET,BOOT,OBJ) \
