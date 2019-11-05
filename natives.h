@@ -18,6 +18,7 @@ extern int n_DisablePlayerRaceCheckpoint;
 extern int n_ForceClassSelection;
 extern int n_GameTextForPlayer;
 extern int n_GetConsoleVarAsInt;
+extern int n_GetPlayerFacingAngle;
 extern int n_GetPlayerIp;
 extern int n_GetPlayerName;
 extern int n_GetPlayerPos;
@@ -168,6 +169,10 @@ extern cell nc_result;
 
 #define NC_GetConsoleVarAsInt(BUF) nc_params[0]=1;nc_params[1]=BUF;\
 	amx_Callback(amx,n_GetConsoleVarAsInt,&nc_result,nc_params)
+
+#define NC_GetPlayerFacingAngle(PLAYERID,FANGLE) nc_params[0]=2;\
+	nc_params[1]=PLAYERID;nc_params[2]=FANGLE;\
+	amx_Callback(amx,n_GetPlayerFacingAngle,&nc_result,nc_params)
 
 #define NC_GetPlayerIp(PLAYERID,BUF,LEN) nc_params[0]=3;\
 	nc_params[1]=PLAYERID;nc_params[2]=BUF;nc_params[3]=LEN;\
@@ -419,6 +424,7 @@ extern cell nc_result;
 Done here to do stuff, like streaming maps, anticheat?
 */
 int natives_NC_SetPlayerPos(AMX *amx, int playerid, struct vec3 pos);
+
 /**
 SpawnPlayer kills players that are in vehicles, and spawns them with a bottle.
 
@@ -435,6 +441,18 @@ Will use buf32, buf64, buf144.
 int natives_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos);
 
 /**
+Alternative for GetVehiclePos to get it directly into a vec3 struct.
+
+Will use buf32, buf64, buf144.
+*/
+int natives_NC_GetVehiclePos(AMX*, int vehicleid, struct vec3 *pos);
+
+/**
 Gets vehicle hp, after checking for unnacceptable values and handling offenders.
 */
 float anticheat_NC_GetVehicleHealth(AMX *amx, int vehicleid);
+
+/**
+Puts a player in vehicle, updating map, zone, vehiclestuff ...
+*/
+int natives_NC_PutPlayerInVehicle(AMX*, int playerid, int vehicleid, int seat);

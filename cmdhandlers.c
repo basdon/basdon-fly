@@ -54,7 +54,8 @@ static int cmd_me(CMDPARAMS)
 	if (hascontent) {
 		buf4096[144] = 0;
 		NC_SendClientMessageToAll(-1, buf4096a);
-		echo_on_game_chat_or_action(amx, 1, playerid, cmdtext + 4);
+		echo_on_game_chat_or_action(amx, 1, playerid,
+			(char*) cmdtext + 4);
 	} else {
 		amx_SetUString(buf144, WARN"Syntax: /me <action>", 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);

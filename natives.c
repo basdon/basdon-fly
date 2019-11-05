@@ -22,6 +22,7 @@ int n_DisablePlayerRaceCheckpoint;
 int n_ForceClassSelection;
 int n_GameTextForPlayer;
 int n_GetConsoleVarAsInt;
+int n_GetPlayerFacingAngle;
 int n_GetPlayerIp;
 int n_GetPlayerName;
 int n_GetPlayerPos;
@@ -139,6 +140,7 @@ int natives_find(AMX *amx)
 		N(GetPlayerName),
 		N(GetPlayerState),
 		N(GetVehicleParamsEx),
+		N(GetPlayerFacingAngle),
 		N(GetPlayerPos),
 		N(GetPlayerVehicleID),
 		N(GetPlayerVehicleSeat),
@@ -229,18 +231,25 @@ int natives_find(AMX *amx)
 	return 1;
 }
 
-int natives_NC_PutPlayerInVehicle(AMX *amx, int playerid, int vehicleid)
+int natives_NC_PutPlayerInVehicle(
+	AMX *amx, int playerid, int vehicleid, int seat)
 {
+	void maps_stream_for_player(AMX*, int, struct vec3);
 	void veh_update_service_point_mapicons(AMX*, int, float, float);
+	void zones_update(AMX*, int, struct vec3);
 
+	struct vec3 pos;
+
+	natives_NC_GetVehiclePos(amx, vehicleid, &pos);
+	maps_stream_for_player(amx, playerid, pos);
 	veh_on_player_now_driving(amx, playerid, vehicleid);
-	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
-	veh_update_service_point_mapicons(
-		amx, playerid, *((float*) buf32), *((float*) buf64));
+	veh_update_service_point_mapicons(amx, playerid, pos.x, pos.y);
+	zones_update(amx, playerid, pos);
 
-	nc_params[0] = 2;
+	nc_params[0] = 3;
 	nc_params[1] = playerid;
 	nc_params[2] = vehicleid;
+	nc_params[3] = seat;
 	NC(n_PutPlayerInVehicle_);
 	return nc_result;
 }
@@ -274,6 +283,15 @@ int natives_NC_SpawnPlayer(AMX *amx, int playerid)
 	nc_params[0] = 1;
 	/*nc_params[1] = playerid;*/
 	NC(n_SpawnPlayer_);
+	return nc_result;
+}
+
+int natives_NC_GetVehiclePos(AMX *amx, int vehicleid, struct vec3 *pos)
+{
+	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
+	pos->x = *((float*) buf32);
+	pos->y = *((float*) buf64);
+	pos->z = *((float*) buf144);
 	return nc_result;
 }
 
