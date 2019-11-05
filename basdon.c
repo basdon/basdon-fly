@@ -326,7 +326,6 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 {
 	void panel_on_player_state_change(AMX*, int, int, int);
-	void veh_on_player_state_change(AMX*, int, int, int);
 
 	const int playerid = params[1];
 	const int newstate = params[2], oldstate = params[3];

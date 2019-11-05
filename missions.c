@@ -35,7 +35,7 @@ struct mission {
 	int stage;
 	int missiontype;
 	struct missionpoint *startpoint, *endpoint;
-	float distance, actualdistance;
+	float distance, actualdistanceM;
 	int passenger_satisfaction;
 	struct dbvehicle *veh;
 	int vehicle_reincarnation_value;
@@ -93,7 +93,7 @@ void missions_init()
 void missions_add_distance(int playerid, float distance_in_m)
 {
 	if (activemission[playerid] != NULL) {
-		activemission[playerid]->actualdistance += distance_in_m;
+		activemission[playerid]->actualdistanceM += distance_in_m;
 	}
 }
 
@@ -581,7 +581,7 @@ thisisworsethanbubblesort:
 	mission->startpoint = startpoint;
 	mission->endpoint = endpoint;
 	mission->distance = sqrt(dx * dx + dy * dy);
-	mission->actualdistance = 0.0f;
+	mission->actualdistanceM = 0.0f;
 	mission->passenger_satisfaction = 100;
 	mission->veh = veh;
 	mission->vehicle_reincarnation_value = vv;
@@ -669,7 +669,7 @@ cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 		"SET state=%d,tlastupdate=UNIX_TIMESTAMP(),adistance=%f "
 		"WHERE id=%d",
 	        reason,
-		mission->actualdistance,
+		mission->actualdistanceM,
 	        mission->id);
 	amx_SetUString(buf4096, q, sizeof(q));
 	NC_mysql_tquery_nocb(buf4096a);
@@ -961,7 +961,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	        pbonus,
 	        ptotal,
 	        mission->passenger_satisfaction,
-	        mission->actualdistance,
+	        mission->actualdistanceM,
 	        paymp,
 	        mission->damagetaken,
 	        mission->id);
@@ -980,7 +980,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	             mission->startpoint->ap->name,
 	             mission->endpoint->ap->name,
 	             mission->distance,
-	             mission->actualdistance,
+	             mission->actualdistanceM,
 	             duration_h,
 	             duration_m,
 		     mission->fuelburned,

@@ -1,6 +1,10 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+/**
+Add mission distance. No effect when player is not on a mission.
+*/
+void missions_add_distance(int playerid, float distance_in_m);
 void missions_create_tracker_socket(AMX*);
 void missions_destroy_tracker_socket(AMX*);
 /**

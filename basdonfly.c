@@ -118,7 +118,7 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
 	void game_sa_init(), login_init(), zones_init();
-	void nav_init(), missions_init(), veh_init(), cmd_init();
+	void nav_init(), missions_init(), cmd_init();
 
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
@@ -151,9 +151,6 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	void maps_process_tick(AMX*);
 	void panel_timed_update(AMX*);
 	void protips_timed_broadcast(AMX*);
-	void veh_timed_1s_update(AMX*);
-	void veh_timed_panel_update(AMX*);
-	int veh_commit_next_vehicle_odo_to_db(AMX*);
 	void zones_update_for_all(AMX*);
 
 	static int count = 0;
@@ -277,10 +274,10 @@ cell AMX_NATIVE_CALL REMOVEME_onplayernowafk(AMX *amx, cell *params)
 	return 1;
 }
 
-extern float playerodo[MAX_PLAYERS];
+extern float playerodoKM[MAX_PLAYERS];
 cell AMX_NATIVE_CALL REMOVEME_getplayerodo(AMX *amx, cell *params)
 {
-	return amx_ftoc(playerodo[params[1]]);
+	return amx_ftoc(playerodoKM[params[1]]);
 }
 
 #define REGISTERNATIVE(X) {#X, X}

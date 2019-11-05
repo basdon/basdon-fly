@@ -7,7 +7,7 @@ struct dbvehicle {
 	int owneruserid;
 	float x, y, z, r;
 	int col1, col2;
-	float odo;
+	float odoKM;
 	float fuel;
 	char *ownerstring;
 	unsigned char ownerstringowneroffset;
@@ -55,6 +55,8 @@ int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh);
 To be called from OnPlayerEnterVehicle
 */
 void veh_on_player_enter_vehicle(AMX*, int pid, int vid, int ispassenger);
+void veh_on_player_state_change(AMX*, int, int, int);
+void veh_init();
 /**
 Check if a player is allowed to be in given vehicle.
 
@@ -64,3 +66,5 @@ be NULL when this functions returns 0.
 @param veh may be NULL.
 */
 int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh);
+void veh_timed_1s_update(AMX*);
+void veh_timed_panel_update(AMX*);

@@ -85,11 +85,11 @@ To be inited in veh_on_player_now_driving and updated on ODO update.
 static struct vec3 lastvpos[MAX_PLAYERS];
 
 /**
-Each player's total ODO value.
+Each player's total ODO value (m).
 
 TODO: move this somewhere else.
 */
-float playerodo[MAX_PLAYERS];
+float playerodoKM[MAX_PLAYERS];
 
 void veh_on_player_connect(AMX *amx, int playerid)
 {
@@ -103,7 +103,7 @@ void veh_on_player_connect(AMX *amx, int playerid)
 	ptxt_fl[playerid] = -1;
 	ptxt_txt[playerid] = -1;
 	lastvehicle[playerid] = 0;
-	playerodo[playerid] = 0.0f;
+	playerodoKM[playerid] = 0.0f;
 }
 
 void veh_init()
@@ -250,7 +250,7 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 	veh->r = amx_ctof(params[7]);
 	veh->col1 = params[8];
 	veh->col2 = params[9];
-	veh->odo = (float) params[10];
+	veh->odoKM = (float) params[10];
 	veh->fuel = model_fuel_capacity(model);
 	if (veh->owneruserid != 0 && 400 <= model && model <= 611) {
 		amx_GetAddr(amx, params[11], &ownernameaddr);
@@ -718,10 +718,7 @@ void veh_on_player_now_driving(AMX *amx, int playerid, int vehicleid)
 	int reqenginestate;
 
 	lastvehicle[playerid] = vehicleid;
-	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
-	lastvpos[playerid].x = *((float*) buf32);
-	lastvpos[playerid].y = *((float*) buf64);
-	lastvpos[playerid].z = *((float*) buf144);
+	common_NC_GetVehiclePos(amx, vehicleid, &lastvpos[playerid]);
 
 	reqenginestate =
 		(veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
@@ -833,7 +830,7 @@ int veh_commit_next_vehicle_odo_to_db(AMX *amx)
 		veh->needsodoupdate = 0;
 		sprintf((char*) buf4096,
 			"UPDATE veh SET odo=%.4f WHERE i=%d",
-			veh->odo,
+			veh->odoKM,
 			veh->id);
 		amx_SetUString(buf144, (char*) buf4096, 144);
 		NC_mysql_tquery_nocb(buf144a);
@@ -854,22 +851,25 @@ void veh_update_odo(AMX *amx, int playerid, int vehicleid, struct vec3 pos)
 {
 	struct vehnode *vuq;
 	struct dbvehicle *veh;
-	float dx, dy, dz, distance;
+	float dx, dy, dz, distanceM, distanceKM;
 
 	dx = lastvpos[playerid].x - pos.x;
 	dy = lastvpos[playerid].y - pos.y;
 	dz = lastvpos[playerid].z - pos.z;
-	distance = sqrt(dx * dx + dy * dy + dz * dz);
-	if (distance != distance || distance == 0.0f) {
+	distanceM = sqrt(dx * dx + dy * dy + dz * dz);
+	lastvpos[playerid] = pos;
+	if (distanceM != distanceM || distanceM == 0.0f) {
 		return;
 	}
+	distanceKM = distanceM / 1000.0f;
 
-	playerodo[playerid] += distance;
 	/*TODO: should this only check mission vehicle?*/
-	missions_add_distance(playerid, distance);
+	/*this also adds while not loaded yet, this is correct*/
+	missions_add_distance(playerid, distanceM);
+	playerodoKM[playerid] += distanceKM;
 
 	if ((veh = gamevehicles[vehicleid].dbvehicle) != NULL) {
-		veh->odo += distance / 1000.0f;
+		veh->odoKM += distanceKM;
 		if (!veh->needsodoupdate) {
 			veh->needsodoupdate = 1;
 			if (vehstoupdate == NULL) {
@@ -1074,7 +1074,7 @@ static void veh_update_panel_for_player(AMX *amx, int playerid)
 
 	veh = gamevehicles[vehicleid].dbvehicle;
 	if (veh != NULL) {
-		odo = veh->odo;
+		odo = veh->odoKM;
 		fuel = veh->fuel;
 		fuel /= model_fuel_capacity(veh->model);
 	} else {
