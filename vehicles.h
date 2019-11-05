@@ -51,3 +51,7 @@ Check if given player can modify a vehicle (park, spray, ..).
 Player can modify if they own the vehicle or have admin rights.
 */
 int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh);
+/**
+Check if a player is allowed to be in given vehicle.
+*/
+int veh_is_player_allowed_in_vehicle(int playerid, int vehicleid);

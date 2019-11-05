@@ -24,9 +24,9 @@ void common_hide_gametext_for_player(AMX *amx, int playerid)
 	NC_GameTextForPlayer(playerid, buf32a, 2, 3);
 }
 
-int common_find_vehicle_driver(AMX *amx, int vehicleid)
+int common_find_player_in_vehicle_seat(AMX *amx, int vehicleid, int seat)
 {
-	int n = playercount;
+	int playerid, n = playercount;
 
 	nc_params[0] = 1;
 	while (n--) {
@@ -34,7 +34,7 @@ int common_find_vehicle_driver(AMX *amx, int vehicleid)
 		NC(n_GetPlayerVehicleID);
 		if (nc_result == vehicleid) {
 			NC(n_GetPlayerVehicleSeat);
-			if (nc_result == 0) {
+			if (nc_result == seat) {
 				return players[n];
 			}
 		}

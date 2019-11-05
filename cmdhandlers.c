@@ -20,6 +20,49 @@ cmd_admin_respawn(CMDPARAMS)
 	return 1;
 }
 
+static int cmd_at400(CMDPARAMS)
+{
+	struct vec3 playerpos, vehiclepos;
+	struct dbvehicle *veh;
+	int vehicleid, found_vehicle;
+	float dx, dy, dz, vx, vy, vz, shortest_distance, tmpdistance;
+
+
+	NC_GetPlayerVehicleID_(playerid, &vehicleid);
+	if (vehicleid) {
+		return 1;
+	}
+
+	found_vehicle = 0;
+	shortest_distance = FLOAT_PINF;
+	natives_NC_GetPlayerPos(amx, playerid, &playerpos);
+	for (vehicleid = 0; vehicleid < MAX_VEHICLES; vehicleid++) {
+		veh = gamevehicles[vehicleid].dbvehicle;
+		if (veh != NULL &&
+			veh->model == MODEL_AT400 &&
+			veh_is_player_allowed_in_vehicle(playerid, vehicleid))
+		{
+			natives_NC_GetVehiclePos(amx, vehicleid, &vehiclepos);
+			dx = vehiclepos.x - playerpos.x;
+			dy = vehiclepos.y - playerpos.y;
+			dz = vehiclepos.z - playerpos.z;
+			tmpdistance = dx * dx + dy * dy + dz * dz;
+			if (tmpdistance < shortest_distance &&
+				common_find_vehicle_driver(amx, vehicleid)
+					== INVALID_PLAYER_ID)
+			{
+				shortest_distance = tmpdistance;
+				found_vehicle = vehicleid;
+			}
+		}
+	}
+	if (found_vehicle && shortest_distance < 25.0f * 25.0f) {
+		natives_NC_PutPlayerInVehicle(amx, playerid, found_vehicle, 0);
+	}
+
+	return 1;
+}
+
 static const char
 	*MSG_VEH_PARK_Y = SUCC"Vehicle parked!",
 	*MSG_VEH_PARK_N = WARN"You are not allowed to park this vehicle",

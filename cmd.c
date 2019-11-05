@@ -165,6 +165,7 @@ static struct COMMAND cmds[] = {
 #endif /*DEV*/
 	{ 0, "//respawn", GROUPS_ADMIN, cmd_admin_respawn },
 	{ 0, "/adf", GROUPS_ALL, nav_cmd_adf },
+	{ 0, "/at400", GROUPS_ALL, cmd_at400 },
 	{ 0, "/beacons", GROUPS_ALL, airport_cmd_beacons },
 	{ 0, "/camera", GROUPS_ALL, cmd_camera },
 	{ 0, "/ils", GROUPS_ALL, nav_cmd_ils },

@@ -3,6 +3,7 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
+#include "vehicles.h"
 #include <math.h>
 #include <string.h>
 #include "playerdata.h"

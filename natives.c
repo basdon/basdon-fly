@@ -238,7 +238,20 @@ int natives_NC_PutPlayerInVehicle(
 	void veh_update_service_point_mapicons(AMX*, int, float, float);
 	void zones_update(AMX*, int, struct vec3);
 
+	float hp;
 	struct vec3 pos;
+
+	if (seat == 0) {
+		nc_params[0] = 2;
+		nc_params[1] = vehicleid;
+		nc_params[2] = buf32a;
+		NC(n_GetVehicleHealth);
+		hp = *((float*) buf32);
+		if (common_is_nan(hp) || hp < 0.0f || 1000.0f < hp) {
+			*((float*) buf32) = 1000.0f;
+			NC_SetVehicleHealth(vehicleid, *buf32);
+		}
+	}
 
 	natives_NC_GetVehiclePos(amx, vehicleid, &pos);
 	maps_stream_for_player(amx, playerid, pos);

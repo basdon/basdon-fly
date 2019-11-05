@@ -454,5 +454,7 @@ float anticheat_NC_GetVehicleHealth(AMX *amx, int vehicleid);
 
 /**
 Puts a player in vehicle, updating map, zone, vehiclestuff ...
+
+Also resets the vehicle HP to 1000.0 when it's invalid.
 */
 int natives_NC_PutPlayerInVehicle(AMX*, int playerid, int vehicleid, int seat);

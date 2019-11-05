@@ -688,6 +688,15 @@ cell AMX_NATIVE_CALL Veh_UpdateSlot(AMX *amx, cell *params)
 	return 0;
 }
 
+int veh_is_player_allowed_in_vehicle(int playerid, int vehicleid)
+{
+	struct dbvehicle *veh;
+	return (veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
+		veh->owneruserid == 0 ||
+		(pdata[playerid] != NULL &&
+			veh->owneruserid == pdata[playerid]->userid);
+}
+
 /**
 Stuff to do when a player is now driver of a vehicle.
 

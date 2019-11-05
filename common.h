@@ -28,6 +28,8 @@ extern logprintf_t logprintf;
 #define amx_SetUString(dest, source, size) amx_SetString(dest, source, 0, 0, size)
 #define SETB144(X) amx_SetUString(buf144,X,144)
 
+#define FLOAT_PINF (0x7F800000)
+#define FLOAT_NINF (0xFF800000)
 #define M_PI 3.14159265358979323846f
 #define M_PI2 1.57079632679489661923f
 #define DEG_TO_RAD (M_PI / 180.0f)
@@ -97,11 +99,13 @@ Hides game text for given player.
 void common_hide_gametext_for_player(AMX *amx, int playerid);
 
 /**
-Try to find the driver of the given vehicle.
+Try to find the player that is in given seat of given vehicle.
 
-@returns player id or INVALID_PLAYER_ID
+@return player id or INVALID_PLAYER_ID
 */
-int common_find_vehicle_driver(AMX *amx, int vehicleid);
+int common_find_player_in_vehicle_seat(AMX *amx, int vehicleid, int seat);
+#define common_find_vehicle_driver(X,Y) \
+	common_find_player_in_vehicle_seat(X,Y,0)
 
 /**
 Attempt to crash the player.
