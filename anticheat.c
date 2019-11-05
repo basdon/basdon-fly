@@ -160,7 +160,7 @@ float anticheat_NC_GetVehicleHealth(AMX *amx, int vehicleid)
 	nc_params[2] = buf144a;
 	NC(n_GetVehicleHealth);
 	hp = *((float*) buf144);
-	if (common_is_nan(hp)) {
+	if (hp != hp) {
 		playerid = common_find_vehicle_driver(amx, vehicleid);
 		if (playerid == INVALID_PLAYER_ID) {
 			goto resethp;

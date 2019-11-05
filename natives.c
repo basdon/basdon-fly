@@ -251,7 +251,7 @@ int natives_NC_PutPlayerInVehicle(
 		nc_params[2] = buf32a;
 		NC(n_GetVehicleHealth);
 		hp = *((float*) buf32);
-		if (common_is_nan(hp) || hp < 0.0f || 1000.0f < hp) {
+		if (hp != hp || hp < 0.0f || 1000.0f < hp) {
 			*((float*) buf32) = 1000.0f;
 			NC_SetVehicleHealth(vehicleid, *buf32);
 		}

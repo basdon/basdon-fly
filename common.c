@@ -57,12 +57,6 @@ void common_NC_Kick(int playerid)
 	kickdelay[playerid] = 2;
 }
 
-int common_is_nan(float f)
-{
-	unsigned int v = *((unsigned int*) &f);
-	return (v | 0x807FFFFF) == 0xFFFFFFFF && (v & 0x007FFFFF);
-}
-
 void common_set_vehicle_engine(AMX *amx, int vehicleid, int enginestatus)
 {
 	cell p1a = buf144a;

@@ -860,7 +860,7 @@ void veh_update_odo(AMX *amx, int playerid, int vehicleid, struct vec3 pos)
 	dy = lastvpos[playerid].y - pos.y;
 	dz = lastvpos[playerid].z - pos.z;
 	distance = sqrt(dx * dx + dy * dy + dz * dz);
-	if (common_is_nan(distance) || distance == 0.0f) {
+	if (distance != distance || distance == 0.0f) {
 		return;
 	}
 

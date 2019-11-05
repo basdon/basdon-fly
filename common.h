@@ -130,13 +130,6 @@ Log some anticheat related thing.
 void anticheat_log(AMX *amx, int playerid, int eventtype, char *info);
 
 /**
-Check if a float is any NaN
-
-@return non-zero when given float is a NaN float
-*/
-int common_is_nan(float f);
-
-/**
 Sets the state of the engine for given vehicle id.
 */
 void common_set_vehicle_engine(AMX *amx, int vehicleid, int enginestatus);
