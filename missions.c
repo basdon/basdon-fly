@@ -621,7 +621,7 @@ void missions_send_tracker_data(
 {
 	struct mission *mission;
 	unsigned char flags;
-	short spd, alt;
+	short spd, alt, hpv;
 
 	if ((mission = activemission[playerid]) == NULL ||
 		mission->veh->spawnedvehicleid != vehicleid ||
@@ -635,6 +635,7 @@ void missions_send_tracker_data(
 		flags |= 2;
 	}
 
+	hpv = (short) hp;
 	alt = (short) vpos->z;
 	spd = (short) (VEL_TO_KTS_VAL * sqrt(
 		vvel->x * vvel->x + vvel->y * vvel->y + vvel->z * vvel->z));
@@ -646,7 +647,7 @@ void missions_send_tracker_data(
 	cbuf32[9] = (char) mission->passenger_satisfaction;
 	memcpy(cbuf32 + 10, &spd, 2);
 	memcpy(cbuf32 + 12, &alt, 2);
-	memcpy(cbuf32 + 14, &hp, 2);
+	memcpy(cbuf32 + 14, &hpv, 2);
 	memcpy(cbuf32 + 16, &mission->veh->fuel, 4);
 	memcpy(cbuf32 + 20, &vpos->x, 4);
 	memcpy(cbuf32 + 24, &vpos->y, 4);
