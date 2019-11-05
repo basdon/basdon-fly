@@ -914,11 +914,13 @@ cell AMX_NATIVE_CALL Missions_PostLoad(AMX *amx, cell *params)
 		return 0;
 	}
 
-	nav_navigate_to_airport(
-		amx,
-		mission->veh->spawnedvehicleid,
-		mission->veh->model,
-		mission->endpoint->ap);
+	if (prefs[playerid] & PREF_WORK_AUTONAV) {
+		nav_navigate_to_airport(
+			amx,
+			mission->veh->spawnedvehicleid,
+			mission->veh->model,
+			mission->endpoint->ap);
+	}
 
 	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
 		sprintf(cbuf32, SATISFACTION_TEXT_FORMAT, 100);
@@ -1173,11 +1175,13 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	/*buf32 is len 32 * 4 so 40 is fine*/
 	NC_ssocket_send(tracker, buf32a, 40);
 
-	nav_navigate_to_airport(
-		amx,
-		mission->veh->spawnedvehicleid,
-		mission->veh->model,
-		mission->startpoint->ap);
+	if (prefs[playerid] & PREF_WORK_AUTONAV) {
+		nav_navigate_to_airport(
+			amx,
+			mission->veh->spawnedvehicleid,
+			mission->veh->model,
+			mission->startpoint->ap);
+	}
 
 	return 1;
 }
