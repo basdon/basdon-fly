@@ -22,21 +22,21 @@ const static char *destinationtype_heliport = "heliport";
 
 const static char *SATISFACTION_TEXT_FORMAT = "Passenger~n~Satisfaction: %d%%";
 
-struct missionpoint {
+struct MISSIONPOINT {
 	unsigned short id;
 	float x, y, z;
 	unsigned int type;
 	unsigned char numberofsametype;
 	unsigned short currentlyactivemissions;
 	struct AIRPORT *ap;
-	struct missionpoint *next;
+	struct MISSIONPOINT *next;
 };
 
-struct mission {
+struct MISSION {
 	int id;
 	int stage;
 	int missiontype;
-	struct missionpoint *startpoint, *endpoint;
+	struct MISSIONPOINT *startpoint, *endpoint;
 	float distance, actualdistanceM;
 	int passenger_satisfaction;
 	struct dbvehicle *veh;
@@ -47,7 +47,7 @@ struct mission {
 	short weatherbonus;
 };
 
-static struct mission *activemission[MAX_PLAYERS];
+static struct MISSION *activemission[MAX_PLAYERS];
 /*whether one flightdata data packet with afk flag has been sent already*/
 static char tracker_afk_packet_sent[MAX_PLAYERS];
 /**
@@ -141,7 +141,7 @@ void missions_freepoints()
 {
 	int i = numairports;
 	struct AIRPORT *ap = airports;
-	struct missionpoint *msp, *tmp;
+	struct MISSIONPOINT *msp, *tmp;
 
 	while (i--) {
 		msp = ap->missionpoints;
@@ -212,7 +212,7 @@ static float mission_get_vehicle_paymp(int model)
 
 int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 {
-	struct missionpoint *msp;
+	struct MISSIONPOINT *msp;
 	struct RUNWAY *rnw;
 	int runwayendcount = 0;
 	int costpermsp, tax = 500, chargernws = 0;
@@ -310,13 +310,13 @@ missionpoint is closest to them.
 */
 void dev_missions_update_closest_point(AMX *amx)
 {
-	static struct missionpoint *dev_closest_point[MAX_PLAYERS];
+	static struct MISSIONPOINT *dev_closest_point[MAX_PLAYERS];
 
 	const float size = 11.0f;
 	int i, playerid;
 	float px, py, dx, dy, shortestdistance, dist;
 	struct AIRPORT *ap, *apend, *closestap;
-	struct missionpoint *mp, *closestmp;
+	struct MISSIONPOINT *mp, *closestmp;
 
 	if (!dev_show_closest_point) {
 		return;
@@ -376,11 +376,11 @@ void dev_missions_update_closest_point(AMX *amx)
 /* native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type) */
 cell AMX_NATIVE_CALL Missions_AddPoint(AMX *amx, cell *params)
 {
-	struct missionpoint *mp;
-	struct missionpoint *newmp;
+	struct MISSIONPOINT *mp;
+	struct MISSIONPOINT *newmp;
 	struct AIRPORT *ap = airports + params[1];
 
-	newmp = malloc(sizeof(struct missionpoint));
+	newmp = malloc(sizeof(struct MISSIONPOINT));
 	newmp->id = params[2];
 	newmp->x = amx_ctof(params[3]);
 	newmp->y = amx_ctof(params[4]);
@@ -426,10 +426,10 @@ struct AIRPORT *getRandomAirportForType(AMX *amx, int missiontype, struct AIRPOR
 	return ap;
 }
 
-struct missionpoint *getRandomEndPointForType(AMX *amx, int missiontype, struct AIRPORT *blacklistedairport)
+struct MISSIONPOINT *getRandomEndPointForType(AMX *amx, int missiontype, struct AIRPORT *blacklistedairport)
 {
 #define TMP_PT_SIZE 7
-	struct missionpoint *points[TMP_PT_SIZE], *msp;
+	struct MISSIONPOINT *points[TMP_PT_SIZE], *msp;
 	int pointc = 0, leastamtofcurrentmissions = 1000000;
 	struct AIRPORT *airport = getRandomAirportForType(amx, missiontype, blacklistedairport);
 
@@ -470,10 +470,10 @@ cell AMX_NATIVE_CALL Missions_Create(AMX *amx, cell *params)
 {
 	cell *bufaddr;
 	char buf[255], tmpuseridornullbuf[12];
-	struct missionpoint *msp, *startpoint, *endpoint;
+	struct MISSIONPOINT *msp, *startpoint, *endpoint;
 	struct AIRPORT *ap = airports, *closestap = NULL;
 	struct dbvehicle *veh;
-	struct mission *mission;
+	struct MISSION *mission;
 	int missiontype, i = numairports;
 	const int playerid = params[1], vehicleid = params[5], vv = params[6];
 	float x, y, z, dx, dy, dz, dist, shortestdistance = 0x7F800000;
@@ -580,7 +580,7 @@ thisisworsethanbubblesort:
 	dx = startpoint->x - endpoint->x;
 	dy = startpoint->y - endpoint->y;
 
-	activemission[playerid] = mission = malloc(sizeof(struct mission));
+	activemission[playerid] = mission = malloc(sizeof(struct MISSION));
 	mission->id = -1;
 	mission->stage = MISSION_STAGE_CREATE;
 	mission->missiontype = missiontype;
@@ -649,7 +649,7 @@ void missions_on_player_connect(AMX *amx, int playerid)
 
 void missions_on_player_death(AMX *amx, int playerid)
 {
-	struct mission *mission;
+	struct MISSION *mission;
 
 	if ((mission = activemission[playerid]) != NULL) {
 		/*end unfinished*/
@@ -660,7 +660,7 @@ void missions_send_tracker_data(
 	AMX *amx, int playerid, int vehicleid, float hp,
 	struct vec3 *vpos, struct vec3 *vvel, int afk, int engine)
 {
-	struct mission *mission;
+	struct MISSION *mission;
 	unsigned char flags;
 	short spd, alt, hpv;
 
@@ -703,7 +703,7 @@ Call when ending a mission.
 @param mission mission of the player. Must match with given playerid.
 */
 static
-void missions_cleanup(AMX *amx, struct mission *mission, int playerid)
+void missions_cleanup(AMX *amx, struct MISSION *mission, int playerid)
 {
 	/* flight tracker packet 3 */
 	buf32[0] = 0x03594C46;
@@ -724,7 +724,7 @@ void missions_cleanup(AMX *amx, struct mission *mission, int playerid)
 cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 {
 	const int playerid = params[1], reason = params[2];
-	struct mission *mission;
+	struct MISSION *mission;
 	char q[200];
 
 	if ((mission = activemission[playerid]) == NULL) {
@@ -750,7 +750,7 @@ cell AMX_NATIVE_CALL Missions_EnterCheckpoint(AMX *amx, cell *params)
 {
 	const int playerid = params[1], vehicleid = params[2], vv = params[3];
 	float x, y, z;
-	struct mission *mission;
+	struct MISSION *mission;
 	struct dbvehicle *veh;
 	cell *addr;
 	char msg[144];
@@ -805,7 +805,7 @@ exit_set_errmsg:
 cell AMX_NATIVE_CALL Missions_FinalizeAddPoints(AMX *amx, cell *params)
 {
 	struct AIRPORT *ap = airports;
-	struct missionpoint *msp;
+	struct MISSIONPOINT *msp;
 	int i = numairports;
 	unsigned char gate, cargo, heliport;
 
@@ -832,7 +832,7 @@ cell AMX_NATIVE_CALL Missions_FinalizeAddPoints(AMX *amx, cell *params)
 
 int missions_get_stage(int playerid)
 {
-	struct mission *mission = activemission[playerid];
+	struct MISSION *mission = activemission[playerid];
 	if (mission != NULL) {
 		return mission->stage;
 	}
@@ -848,7 +848,7 @@ cell AMX_NATIVE_CALL Missions_GetState(AMX *amx, cell *params)
 /* native Missions_OnVehicleRefueled(playerid, vehicleid, Float:refuelamount) */
 cell AMX_NATIVE_CALL Missions_OnVehicleRefueled(AMX *amx, cell *params)
 {
-	struct mission *miss;
+	struct MISSION *miss;
 	const int playerid = params[1], vehicleid = params[2];
 	const float refuelamount = amx_ctof(params[3]);
 
@@ -864,7 +864,7 @@ cell AMX_NATIVE_CALL Missions_OnVehicleRefueled(AMX *amx, cell *params)
 /* native Missions_OnVehicleRepaired(playerid, vehicleid, Float:oldhp, Float:newhp) */
 cell AMX_NATIVE_CALL Missions_OnVehicleRepaired(AMX *amx, cell *params)
 {
-	struct mission *miss;
+	struct MISSION *miss;
 	const int playerid = params[1], vehicleid = params[2];
 	const float newhp = amx_ctof(params[4]), hpdiff = newhp - amx_ctof(params[3]);
 
@@ -904,7 +904,7 @@ cell AMX_NATIVE_CALL Missions_OnWeatherChanged(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL Missions_PostLoad(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
-	struct mission *mission;
+	struct MISSION *mission;
 	cell *addr;
 	char buf[144];
 
@@ -952,7 +952,7 @@ cell AMX_NATIVE_CALL Missions_PostLoad(AMX *amx, cell *params)
 /* native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[]) */
 cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 {
-	struct mission *mission;
+	struct MISSION *mission;
 	const int playerid = params[1];
 	const float vehiclehp = amx_ctof(params[2]);
 	float paymp;
@@ -1107,7 +1107,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
-	struct mission *mission = activemission[playerid];
+	struct MISSION *mission = activemission[playerid];
 	int vehmodel;
 	float fuelcapacity;
 	cell *addr;
@@ -1184,7 +1184,7 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 
 void missions_update_satisfaction(AMX *amx, int pid, int vid, struct quat *vrot)
 {
-	struct mission *miss;
+	struct MISSION *miss;
 	int last_satisfaction;
 	float qw, qx, qy, qz;
 	float tmpvalue = 0.0f;;
