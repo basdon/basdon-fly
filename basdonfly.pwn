@@ -37,6 +37,9 @@ native B_OnPlayerDeath(playerid, killerid, reason)
 //@summary Plugin callback for {@link OnPlayerDisconnect}
 native B_OnPlayerDisconnect(playerid, reason)
 
+//@summary Plugin callback for {@link OnPlayerEnterVehicle}
+native B_OnPlayerEnterVehicle(playerid, vehicleid, ispassenger)
+
 //@summary Plugin callback for {@link OnPlayerRequestClass}
 native B_OnPlayerRequestClass(playerid, classid)
 
@@ -573,13 +576,6 @@ native Veh_InitServicePoints(servicepointscount)
 //@param vehicleid vehicle to check
 //@returns {@code 0} if the vehicle still has fuel
 native Veh_IsFuelEmpty(vehicleid)
-
-//@summary Checks if a player is allowed to be in a vehicle
-//@param userid user id of the player to check
-//@param vehicleid vehicle
-//@param buf if not allowed, errormessage will be placed in this buffer (to send to player when trying to enter)
-//@returns {@code 0} if that user is not allowed in the given vehicle
-native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[])
 
 //@summary Clears data when a player disconnects
 //@param playerid the player that disconnected

@@ -42,6 +42,8 @@ extern logprintf_t logprintf;
 extern cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
 /* physical addresses of buffers */
 extern cell *emptystring, *buf32, *buf32_1, *buf64, *buf144, *buf4096;
+/* buffers as char pointers */
+extern char *cemptystring, *cbuf32, *cbuf32_1, *cbuf64, *cbuf144, *cbuf4096;
 
 /**
 element at index playerid is either 0 or 1

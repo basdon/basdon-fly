@@ -52,6 +52,15 @@ Player can modify if they own the vehicle or have admin rights.
 */
 int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh);
 /**
-Check if a player is allowed to be in given vehicle.
+To be called from OnPlayerEnterVehicle
 */
-int veh_is_player_allowed_in_vehicle(int playerid, int vehicleid);
+void veh_on_player_enter_vehicle(AMX*, int pid, int vid, int ispassenger);
+/**
+Check if a player is allowed to be in given vehicle.
+
+Player are always allowed to be in unknown vehicles, which means veh will never
+be NULL when this functions returns 0.
+
+@param veh may be NULL.
+*/
+int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh);

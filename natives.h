@@ -5,6 +5,7 @@ int natives_find(AMX *amx);
 
 extern int n_AddPlayerClass;
 extern int n_ChangeVehicleColor;
+extern int n_ClearAnimations;
 extern int n_CreateObject;
 extern int n_CreatePlayer3DTextLabel;
 extern int n_CreatePlayerObject;
@@ -121,6 +122,10 @@ extern cell nc_result;
 	nc_params[0]=3;nc_params[1]=VEHICLEID;\
 	nc_params[2]=COL1;nc_params[3]=COL2;\
 	amx_Callback(amx,n_ChangeVehicleColor,&nc_result,nc_params)
+
+#define NC_ClearAnimations(PLAYERID,FORCESYNC) \
+	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=FORCESYNC;\
+	amx_Callback(amx,n_ClearAnimations,&nc_result,nc_params)
 
 #define NC_CreateObject_(OBJECTID,FX,FY,FZ,FRX,FRY,FRZ,DD,RES) nc_params[0]=8;\
 	nc_params[1]=OBJECTID;nc_params[2]=FX;nc_params[3]=FY;nc_params[4]=FZ;\

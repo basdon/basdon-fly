@@ -3,10 +3,40 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
+#include "anticheat.h"
 #include "vehicles.h"
 #include <math.h>
 #include <string.h>
 #include "playerdata.h"
+
+struct INFRACTIONDATA {
+	/**
+	One of AC_ constants.
+	*/
+	int eventtype;
+	/**
+	Amount by which to increment infraction value per infraction.
+	*/
+	int increment;
+	/**
+	Maximum allowed infraction value, player will be kicked when exceeding.
+	*/
+	int maxvalue;
+	/**
+	Amount by which to decrement infraction value every 5 seconds.
+	*/
+	int decrement_per_5000;
+	/**
+	Reason string used when kicking the player.
+	*/
+	char *kickreason;
+};
+
+static struct INFRACTIONDATA infractiondata[] = {
+	/*AC_IF_DISALLOWED_VEHICLE*/
+	{ AC_UNAUTH_VEHICLE_ACCESS, 3, 15, 1, "unauthorized vehicle access" },
+};
+static int infractionvalue[INFRACTIONTYPES][MAX_PLAYERS];
 
 /* native Ac_FormatLog(playerid, loggedstatus, const message[], buf[]) */
 cell AMX_NATIVE_CALL Ac_FormatLog(AMX *amx, cell *params)
@@ -39,6 +69,55 @@ cell AMX_NATIVE_CALL Ac_FormatLog(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[4], &addr);
 	amx_SetUString(addr, buf, sizeof(buf));
 	return 1;
+}
+
+/**
+Kicks and broadcasts kickmessage when needed. Does not log.
+
+@param type infraction type, one of AC_IF_ constants.
+*/
+static void anticheat_infraction(AMX *amx, int playerid, int type)
+{
+	struct INFRACTIONDATA d = infractiondata[type];
+
+	if ((infractionvalue[type][playerid] += d.increment) >= d.maxvalue) {
+		sprintf((char*) buf4096,
+			"%s[%d] was kicked by system (%s)",
+			pdata[playerid]->name,
+			playerid,
+			d.kickreason);
+		amx_SetUString(buf144, (char*) buf4096, 144);
+		NC_SendClientMessageToAll(COL_WARN, buf144a);
+		common_NC_Kick(playerid);
+	}
+}
+
+void anticheat_decrease_infractions()
+{
+	int playerid, j, i = playercount;
+	int *iv;
+
+	while (i--) {
+		playerid = players[i];
+		for (j = 0; j < INFRACTIONTYPES; j++) {
+			iv = infractionvalue[j] + playerid;
+			if (*iv > 0) {
+				*iv -= infractiondata[j].decrement_per_5000;
+				if (*iv < 0) {
+					*iv = 0;
+				}
+			}
+		}
+	}
+}
+
+void anticheat_on_player_connect(int playerid)
+{
+	int n = INFRACTIONTYPES;
+
+	while (n--) {
+		infractionvalue[n][playerid] = 0;
+	}
 }
 
 void anticheat_log(AMX *amx, int playerid, int eventtype, char *info)
@@ -110,4 +189,11 @@ float anticheat_NC_GetVehicleHealth(AMX *amx, int vehicleid)
 resethp:
 	NC_SetVehicleHealth(vehicleid, 1000.0f);
 	return 1000.0f;
+}
+
+void anticheat_disallowed_vehicle_1s(AMX *amx, int playerid)
+{
+	anticheat_log(amx, playerid, AC_UNAUTH_VEHICLE_ACCESS,
+		"unauthorized vehicle access");
+	anticheat_infraction(amx, playerid, AC_IF_DISALLOWED_VEHICLE);
 }

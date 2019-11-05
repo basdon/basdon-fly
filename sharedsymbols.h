@@ -83,6 +83,7 @@
 #define AC_VEH_HP_NAN 1
 #define AC_VEH_HP_HIGH 2
 #define AC_WRONG_DIALOGID 3
+#define AC_UNAUTH_VEHICLE_ACCESS 4
 
 /* dialog.c / dialog.pwn */
 #define LIMIT_DIALOG_CAPTION (64)

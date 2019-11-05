@@ -444,27 +444,6 @@ cell AMX_NATIVE_CALL Veh_IsFuelEmpty(AMX *amx, cell *params)
 	return veh->fuel == 0.0f;
 }
 
-/* native Veh_IsPlayerAllowedInVehicle(userid, vehicleid, buf[]) */
-cell AMX_NATIVE_CALL Veh_IsPlayerAllowedInVehicle(AMX *amx, cell *params)
-{
-	const int userid = params[1], vehicleid = params[2];
-	cell *addr;
-	char buf[144];
-	struct dbvehicle *veh;
-	if (gamevehicles[vehicleid].dbvehicle == NULL) {
-		logprintf("Veh_IsPlayerAllowedInVehicle: unknown vehicleid");
-		return 1;
-	}
-	veh = gamevehicles[vehicleid].dbvehicle;
-	if (veh->owneruserid == 0 || veh->owneruserid == userid) {
-		return 1;
-	}
-	sprintf(buf, WARN"This vehicle belongs to %s!", &veh->ownerstring[veh->ownerstringowneroffset]);
-	amx_GetAddr(amx, params[3], &addr);
-	amx_SetUString(addr, buf, sizeof(buf));
-	return 0;
-}
-
 /* native Veh_OnPlayerDisconnect(playerid) */
 cell AMX_NATIVE_CALL Veh_OnPlayerDisconnect(AMX *amx, cell *params)
 {
@@ -688,13 +667,41 @@ cell AMX_NATIVE_CALL Veh_UpdateSlot(AMX *amx, cell *params)
 	return 0;
 }
 
-int veh_is_player_allowed_in_vehicle(int playerid, int vehicleid)
+/**
+Prevent player from entering or being in vehicle and send them a message.
+
+If player is already inside, this will instantly eject them.
+*/
+static
+void veh_disallow_player_in_vehicle(AMX *amx, int playerid, struct dbvehicle *v)
 {
-	struct dbvehicle *veh;
-	return (veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
-		veh->owneruserid == 0 ||
+	/*when player is entering, this stops them*/
+	/*when player is already in, this should instantly eject the player*/
+	NC_ClearAnimations(playerid, 1);
+
+	sprintf(cbuf4096,
+		WARN"This vehicle belongs to %s!",
+		v->ownerstring + v->ownerstringowneroffset);
+	amx_SetUString(buf144, cbuf4096, 144);
+	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+}
+
+int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh)
+{
+	return veh == NULL || veh->owneruserid == 0 ||
 		(pdata[playerid] != NULL &&
 			veh->owneruserid == pdata[playerid]->userid);
+}
+
+void veh_on_player_enter_vehicle(
+	AMX *amx, int playerid, int vehicleid, int ispassenger)
+{
+	struct dbvehicle *veh;
+
+	veh = gamevehicles[vehicleid].dbvehicle;
+	if (!ispassenger && !veh_is_player_allowed_in_vehicle(playerid, veh)) {
+		veh_disallow_player_in_vehicle(amx, playerid, veh);
+	}
 }
 
 /**
@@ -889,33 +896,49 @@ To be called every second.
 */
 void veh_timed_1s_update(AMX *amx)
 {
-	int engine, playerid, vehicleid, n = playercount;
+	struct dbvehicle *veh;
 	struct vec3 vpos;
+	int engine, playerid, vehicleid, n = playercount;
 
 	while (n--) {
 		playerid = players[n];
-		NC_GetPlayerVehicleSeat(playerid);
-		if (nc_result == 0) {
-			NC_GetPlayerVehicleID_(playerid, &vehicleid);
-			if (vehicleid && vehicleid == lastvehicle[playerid]) {
-				NC_GetVehiclePos(vehicleid,
-					buf32a, buf64a, buf144a);
-				vpos.x = *((float*) buf32);
-				vpos.y = *((float*) buf64);
-				vpos.z = *((float*) buf144);
-				NC_GetVehicleModel(vehicleid);
-				if (game_is_air_vehicle(nc_result)) {
 
-				}
-				veh_update_odo(amx, playerid, vehicleid, vpos);
-			}
-		}
 		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
 		veh_update_service_point_mapicons(
 			amx,
 			playerid,
 			*((float*) buf32),
 			*((float*) buf64));
+
+		nc_params[0] = 1;
+		nc_params[1] = playerid;
+		NC_(n_GetPlayerVehicleID, &vehicleid);
+		if (!vehicleid) {
+			continue;
+		}
+		NC(n_GetPlayerVehicleSeat);
+		if (nc_result != 0) {
+			continue;
+		}
+
+		veh = gamevehicles[vehicleid].dbvehicle;
+		if (!veh_is_player_allowed_in_vehicle(playerid, veh)) {
+			veh_disallow_player_in_vehicle(amx, playerid, veh);
+			anticheat_disallowed_vehicle_1s(amx, playerid);
+			continue;
+		}
+
+
+		if (vehicleid == lastvehicle[playerid]) {
+			natives_NC_GetVehiclePos(amx, vehicleid, &vpos);
+			veh_update_odo(amx, playerid, vehicleid, vpos);
+
+			NC_GetVehicleModel(vehicleid);
+			if (game_is_air_vehicle(nc_result)) {
+
+			}
+		}
+
 	}
 }
 

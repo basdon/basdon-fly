@@ -53,6 +53,7 @@ void common_crash_player(AMX *amx, int playerid)
 
 void common_NC_Kick(int playerid)
 {
+	/*TODO: log?*/
 	kickdelay[playerid] = 2;
 }
 

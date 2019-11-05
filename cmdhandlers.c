@@ -27,7 +27,6 @@ static int cmd_at400(CMDPARAMS)
 	int vehicleid, found_vehicle;
 	float dx, dy, dz, vx, vy, vz, shortest_distance, tmpdistance;
 
-
 	NC_GetPlayerVehicleID_(playerid, &vehicleid);
 	if (vehicleid) {
 		return 1;
@@ -40,7 +39,7 @@ static int cmd_at400(CMDPARAMS)
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (veh != NULL &&
 			veh->model == MODEL_AT400 &&
-			veh_is_player_allowed_in_vehicle(playerid, vehicleid))
+			veh_is_player_allowed_in_vehicle(playerid, veh))
 		{
 			natives_NC_GetVehiclePos(amx, vehicleid, &vehiclepos);
 			dx = vehiclepos.x - playerpos.x;

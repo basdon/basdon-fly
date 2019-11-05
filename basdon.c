@@ -35,6 +35,13 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 	amx_GetAddr(amx, buf64a = params[4], &buf64);
 	amx_GetAddr(amx, buf32a = params[5], &buf32);
 	amx_GetAddr(amx, buf32_1a = params[6], &buf32_1);
+	amx_GetAddr(amx, emptystringa = params[7], &emptystring);
+	cbuf32_1 = (char*) buf32_1;
+	cbuf32 = (char*) buf32;
+	cbuf64 = (char*) buf64;
+	cbuf144 = (char*) buf144;
+	cbuf4096 = (char*) buf4096;
+	cemptystring = (char*) emptystring;
 
 	if (!natives_find(amx) || !publics_find(amx)) {
 		return 0;
@@ -258,6 +265,17 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 			return 1;
 		}
 	}
+	return 1;
+}
+
+/* native B_OnPlayerEnterVehicle(playerid, vehicleid, ispassenger) */
+cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
+{
+	const int playerid = params[1], vehicleid = params[2];
+	const int ispassenger = params[3];
+
+	veh_on_player_enter_vehicle(amx, playerid, vehicleid, ispassenger);
+
 	return 1;
 }
 

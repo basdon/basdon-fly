@@ -2,6 +2,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "anticheat.h"
 #include "dialog.h"
 #include "playerdata.h"
 #include "vehicles.h"
@@ -93,7 +94,6 @@ FORWARD(Veh_GetNextUpdateQuery);
 FORWARD(Veh_Init);
 FORWARD(Veh_InitServicePoints);
 FORWARD(Veh_IsFuelEmpty);
-FORWARD(Veh_IsPlayerAllowedInVehicle);
 FORWARD(Veh_OnPlayerDisconnect);
 FORWARD(Veh_Refuel);
 FORWARD(Veh_RegisterLabel);
@@ -219,8 +219,9 @@ timer30s:			/*timer30s*/
 			veh_timed_1s_update(amx);
 			veh_timed_panel_update(amx);
 			zones_update_for_all(amx);
-			/*timer5000*/
 			if ((time_m % 5) == 0) {
+				/*timer5000*/
+				anticheat_decrease_infractions();
 				dialog_pop_queue(amx);
 				veh_commit_next_vehicle_odo_to_db(amx);
 			}
@@ -303,6 +304,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnPlayerConnect),
 	REGISTERNATIVE(B_OnPlayerDeath),
 	REGISTERNATIVE(B_OnPlayerDisconnect),
+	REGISTERNATIVE(B_OnPlayerEnterVehicle),
 	REGISTERNATIVE(B_OnPlayerRequestClass),
 	REGISTERNATIVE(B_OnPlayerRequestSpawn),
 	REGISTERNATIVE(B_OnPlayerSpawn),
@@ -386,7 +388,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_Init),
 	REGISTERNATIVE(Veh_InitServicePoints),
 	REGISTERNATIVE(Veh_IsFuelEmpty),
-	REGISTERNATIVE(Veh_IsPlayerAllowedInVehicle),
 	REGISTERNATIVE(Veh_OnPlayerDisconnect),
 	REGISTERNATIVE(Veh_Refuel),
 	REGISTERNATIVE(Veh_RegisterLabel),

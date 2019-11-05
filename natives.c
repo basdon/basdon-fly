@@ -9,6 +9,7 @@ custom code and shouldn't be used directly.*/
 
 int n_AddPlayerClass;
 int n_ChangeVehicleColor;
+int n_ClearAnimations;
 int n_CreateObject;
 int n_CreatePlayer3DTextLabel;
 int n_CreatePlayerObject;
@@ -110,6 +111,7 @@ cell nc_result;
 
 cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
 cell *emptystring, *buf32, *buf32_1, *buf64, *buf144, *buf4096;
+char *cemptystring, *cbuf32, *cbuf32_1, *cbuf64, *cbuf144, *cbuf4096;
 
 int natives_find(AMX *amx)
 {
@@ -123,6 +125,7 @@ int natives_find(AMX *amx)
 		N(AddPlayerClass),
 		N(AddPlayerClass),
 		N(ChangeVehicleColor),
+		N(ClearAnimations),
 		N(CreateObject),
 		N(CreatePlayer3DTextLabel),
 		N(CreatePlayerObject),
