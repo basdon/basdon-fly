@@ -303,6 +303,15 @@ int natives_NC_SpawnPlayer(AMX *amx, int playerid)
 	return nc_result;
 }
 
+int natives_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos)
+{
+	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
+	pos->x = *((float*) buf32);
+	pos->y = *((float*) buf64);
+	pos->z = *((float*) buf144);
+	return nc_result;
+}
+
 int natives_NC_GetVehiclePos(AMX *amx, int vehicleid, struct vec3 *pos)
 {
 	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
@@ -312,11 +321,11 @@ int natives_NC_GetVehiclePos(AMX *amx, int vehicleid, struct vec3 *pos)
 	return nc_result;
 }
 
-int natives_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos)
+int natives_NC_GetVehicleVelocity(AMX *amx, int vehicleid, struct vec3 *vel)
 {
-	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
-	pos->x = *((float*) buf32);
-	pos->y = *((float*) buf64);
-	pos->z = *((float*) buf144);
+	NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
+	vel->x = *((float*) buf32);
+	vel->y = *((float*) buf64);
+	vel->z = *((float*) buf144);
 	return nc_result;
 }

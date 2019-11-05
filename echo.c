@@ -43,7 +43,7 @@ void echo_init(AMX *amx)
 	static const char *buflo = "127.0.0.1";
 
 	if (socket_in == SOCKET_INVALID_SOCKET) {
-		NC_ssocket_create(SOCKET_UDP, &socket_in);
+		NC_ssocket_create_(SOCKET_UDP, &socket_in);
 		if (socket_in == SOCKET_INVALID_SOCKET) {
 			logprintf("failed to create echo game socket");
 		} else {
@@ -51,7 +51,7 @@ void echo_init(AMX *amx)
 		}
 	}
 	if (socket_out == SOCKET_INVALID_SOCKET) {
-		NC_ssocket_create(SOCKET_UDP, &socket_out);
+		NC_ssocket_create_(SOCKET_UDP, &socket_out);
 		if (socket_out == SOCKET_INVALID_SOCKET) {
 			logprintf("failed to create echo irc socket");
 		} else {

@@ -118,6 +118,7 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 	airports_destroy();
 	echo_dispose(amx);
 	heartbeat_end_session(amx);
+	missions_destroy_tracker_socket(amx);
 	spawn_dispose();
 	while (veh_commit_next_vehicle_odo_to_db(amx));
 	return 1;
@@ -140,6 +141,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	airports_init(amx);
 	class_init(amx);
 	maps_load_from_db(amx);
+	missions_create_tracker_socket(amx);
 	echo_init(amx);
 	heartbeat_create_session(amx);
 	panel_on_gamemode_init(amx);

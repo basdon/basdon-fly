@@ -408,7 +408,7 @@ extern cell nc_result;
 	nc_params[1]=SOCKET;nc_params[2]=HOST;nc_params[3]=PORT;\
 	amx_Callback(amx,n_ssocket_connect,&nc_result,nc_params)
 
-#define NC_ssocket_create(TYPE,RESULT) nc_params[0]=1;nc_params[1]=TYPE;\
+#define NC_ssocket_create_(TYPE,RESULT) nc_params[0]=1;nc_params[1]=TYPE;\
 	amx_Callback(amx,n_ssocket_create,(cell*)RESULT,nc_params)
 
 #define NC_ssocket_destroy(SOCKET) nc_params[0]=1;nc_params[1]=SOCKET;\
@@ -451,6 +451,13 @@ Alternative for GetVehiclePos to get it directly into a vec3 struct.
 Will use buf32, buf64, buf144.
 */
 int natives_NC_GetVehiclePos(AMX*, int vehicleid, struct vec3 *pos);
+
+/**
+Alternative for GetVehicleVelocity to get it directly into a vec3 struct.
+
+Will use buf32, buf64, buf144.
+*/
+int natives_NC_GetVehicleVelocity(AMX*, int vehicleid, struct vec3 *vel);
 
 /**
 Gets vehicle hp, after checking for unnacceptable values and handling offenders.

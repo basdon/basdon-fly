@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include "game_sa.h"
+#include "missions.h"
 #include "playerdata.h"
 #include "vehicles.h"
 
@@ -890,13 +891,42 @@ void veh_update_odo(AMX *amx, int playerid, int vehicleid, struct vec3 pos)
 }
 
 /**
+Continuation of veh_timed_1s_update when player is in air vehicle.
+*/
+static
+void veh_timed_update_a(
+	AMX *amx, int playerid, int vehicleid, struct vec3 *vpos,
+	struct dbvehicle *v)
+{
+	struct vec3 vvel;
+	int engine;
+	float hp;
+
+	nc_params[0] = 8;
+	nc_params[1] = vehicleid;
+	nc_params[2] = buf32a;
+	nc_params[3] = nc_params[4] = nc_params[5] = nc_params[6]
+		= nc_params[7] = nc_params[8] = buf64a;
+	NC(n_GetVehicleParamsEx);
+	engine = *buf32;
+
+	if (missions_get_stage(playerid) == MISSION_STAGE_FLIGHT) {
+		hp = anticheat_NC_GetVehicleHealth(amx, vehicleid);
+		natives_NC_GetVehicleVelocity(amx, vehicleid, &vvel);
+		missions_send_tracker_data(
+			amx, playerid, vehicleid, hp,
+			vpos, &vvel, temp_afk[playerid], engine);
+	}
+}
+
+/**
 Update vehicle related things like ODO, fuel, ...
 
 To be called every second.
 */
 void veh_timed_1s_update(AMX *amx)
 {
-	struct dbvehicle *veh;
+	struct dbvehicle *v;
 	struct vec3 vpos;
 	int engine, playerid, vehicleid, n = playercount;
 
@@ -921,9 +951,9 @@ void veh_timed_1s_update(AMX *amx)
 			continue;
 		}
 
-		veh = gamevehicles[vehicleid].dbvehicle;
-		if (!veh_is_player_allowed_in_vehicle(playerid, veh)) {
-			veh_disallow_player_in_vehicle(amx, playerid, veh);
+		v = gamevehicles[vehicleid].dbvehicle;
+		if (!veh_is_player_allowed_in_vehicle(playerid, v)) {
+			veh_disallow_player_in_vehicle(amx, playerid, v);
 			anticheat_disallowed_vehicle_1s(amx, playerid);
 			continue;
 		}
@@ -935,7 +965,9 @@ void veh_timed_1s_update(AMX *amx)
 
 			NC_GetVehicleModel(vehicleid);
 			if (game_is_air_vehicle(nc_result)) {
-
+				veh_timed_update_a(
+					amx, playerid, vehicleid,
+					&vpos, v);
 			}
 		}
 

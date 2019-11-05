@@ -12,6 +12,9 @@
 #include "airport.h"
 #include "playerdata.h"
 #include "vehicles.h"
+#include "missions.h"
+
+#define TRACKER_PORT 7766
 
 const char *destinationtype_gate = "gate";
 const char *destinationtype_cargo = "cargo";
@@ -44,7 +47,11 @@ struct mission {
 
 static struct mission *activemission[MAX_PLAYERS];
 /*whether one flightdata data packet with afk flag has been sent already*/
-static char afk_tracker_packet_sent[MAX_PLAYERS];
+static char tracker_afk_packet_sent[MAX_PLAYERS];
+/**
+Tracker socket handle.
+*/
+static int tracker;
 
 /**
 TODO: refactor once missions is all-plugin
@@ -52,6 +59,27 @@ TODO: refactor once missions is all-plugin
 int missions_is_player_on_mission(int playerid)
 {
 	return activemission[playerid] != NULL;
+}
+
+void missions_create_tracker_socket(AMX *amx)
+{
+	NC_ssocket_create_(SOCKET_UDP, &tracker);
+	if (tracker == SOCKET_INVALID_SOCKET) {
+		logprintf("failed to create flighttracker socket");
+	} else {
+		amx_SetUString(buf144, "127.0.0.1", 144);
+		NC_ssocket_connect(tracker, buf144a, TRACKER_PORT);
+		*buf32 = 0x04594C46;
+		NC_ssocket_send(tracker, buf32a, 4);
+	}
+}
+
+void missions_destroy_tracker_socket(AMX *amx)
+{
+	if (tracker != SOCKET_INVALID_SOCKET) {
+		*buf32 = 0x05594C46;
+		NC_ssocket_send(tracker, buf32a, 4);
+	}
 }
 
 void missions_init()
@@ -587,90 +615,69 @@ thisisworsethanbubblesort:
 	return 1;
 }
 
-/* native Missions_CreateTrackerMessage(playerid, vid, Float:hp,
-                                        Float:x, Float:y,
-                                        Float:vx, Float:vy, Float:vz, Float:alt,
-					isafk, engine, buf[]) */
-cell AMX_NATIVE_CALL Missions_CreateTrackerMessage(AMX *amx, cell *params)
+void missions_send_tracker_data(
+	AMX *amx, int playerid, int vehicleid, float hp,
+	struct vec3 *vpos, struct vec3 *vvel, int afk, int engine)
 {
-	const int playerid = params[1], vehicleid = params[2], isafk = params[10];
-	const int engine = params[11];
-	cell *addr;
-	char *trackermsg;
 	struct mission *mission;
-	float x, y, vx, vy, vz;
-	short spd, alt, hp;
-	int flags;
+	unsigned char flags;
+	short spd, alt;
 
-	if ((mission = activemission[playerid]) == NULL || mission->veh->spawnedvehicleid != vehicleid) {
-		return 0;
+	if ((mission = activemission[playerid]) == NULL ||
+		mission->veh->spawnedvehicleid != vehicleid ||
+		(afk && tracker_afk_packet_sent[playerid]))
+	{
+		return;
 	}
 
-	if (isafk && afk_tracker_packet_sent[playerid]) {
-		return 0;
-	}
-	afk_tracker_packet_sent[playerid] = flags = isafk == 1;
+	tracker_afk_packet_sent[playerid] = flags = afk == 1;
 	if (engine) {
 		flags |= 2;
 	}
 
-	x = amx_ctof(params[4]);
-	y = amx_ctof(params[5]);
-	vx = amx_ctof(params[6]);
-	vy = amx_ctof(params[7]);
-	vz = amx_ctof(params[8]);
-	hp = (short) amx_ctof(params[3]);
-	spd = (short) (VEL_TO_KTS_VAL * sqrt(vx * vx + vy * vy + vz * vz));
-	alt = (short) amx_ctof(params[9]);
+	alt = (short) vpos->z;
+	spd = (short) (VEL_TO_KTS_VAL * sqrt(
+		vvel->x * vvel->x + vvel->y * vvel->y + vvel->z * vvel->z));
 
 	/* flight tracker packet 2 */
-	amx_GetAddr(amx, params[12], &addr);
-	trackermsg = (char*) addr;
-	trackermsg[0] = 'F';
-	trackermsg[1] = 'L';
-	trackermsg[2] = 'Y';
-	trackermsg[3] = 2;
-	memcpy(trackermsg + 4, &mission->id, 4);
-	trackermsg[8] = flags;
-	trackermsg[9] = (char) mission->passenger_satisfaction;
-	memcpy(trackermsg + 10, &spd, 2);
-	memcpy(trackermsg + 12, &alt, 2);
-	memcpy(trackermsg + 14, &hp, 2);
-	memcpy(trackermsg + 16, &mission->veh->fuel, 4);
-	memcpy(trackermsg + 20, &x, 4);
-	memcpy(trackermsg + 24, &y, 4);
-	return 1;
+	buf32[0] = 0x02594C46;
+	buf32[1] = mission->id;
+	cbuf32[8] = flags;
+	cbuf32[9] = (char) mission->passenger_satisfaction;
+	memcpy(cbuf32 + 10, &spd, 2);
+	memcpy(cbuf32 + 12, &alt, 2);
+	memcpy(cbuf32 + 14, &hp, 2);
+	memcpy(cbuf32 + 16, &mission->veh->fuel, 4);
+	memcpy(cbuf32 + 20, &vpos->x, 4);
+	memcpy(cbuf32 + 24, &vpos->y, 4);
+	NC_ssocket_send(tracker, buf32a, 28);
 }
 
-/* native Missions_EndUnfinished(playerid, reason, querybuf[], trackerbuf[]) */
+/* native Missions_EndUnfinished(playerid, reason, querybuf[]) */
 cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 {
 	const int playerid = params[1], reason = params[2];
 	struct mission *mission;
-	cell *addr;
-	char *trackermsg;
-	char buf[144];
+	char q[200];
 
 	if ((mission = activemission[playerid]) == NULL) {
 		return 0;
 	}
 
-	sprintf(buf,
-	        "UPDATE flg SET state=%d,tlastupdate=UNIX_TIMESTAMP(),adistance=%f WHERE id=%d",
+	sprintf(q,
+	        "UPDATE flg "
+		"SET state=%d,tlastupdate=UNIX_TIMESTAMP(),adistance=%f "
+		"WHERE id=%d",
 	        reason,
 		mission->actualdistance,
 	        mission->id);
-	amx_GetAddr(amx, params[3], &addr);
-	amx_SetUString(addr, buf, sizeof(buf));
+	amx_SetUString(buf4096, q, sizeof(q));
+	NC_mysql_tquery_nocb(buf4096a);
 
 	/* flight tracker packet 3 */
-	amx_GetAddr(amx, params[4], &addr);
-	trackermsg = (char*) addr;
-	trackermsg[0] = 'F';
-	trackermsg[1] = 'L';
-	trackermsg[2] = 'Y';
-	trackermsg[3] = 3;
-	memcpy(trackermsg + 4, &mission->id, 4);
+	buf32[0] = 0x03594C46;
+	buf32[1] = mission->id;
+	NC_ssocket_send(tracker, buf32a, 8);
 
 	free(mission);
 	activemission[playerid] = NULL;
@@ -761,14 +768,19 @@ cell AMX_NATIVE_CALL Missions_FinalizeAddPoints(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Missions_GetState(playerid) */
-cell AMX_NATIVE_CALL Missions_GetState(AMX *amx, cell *params)
+int missions_get_stage(int playerid)
 {
-	struct mission *mission = activemission[params[1]];
+	struct mission *mission = activemission[playerid];
 	if (mission != NULL) {
 		return mission->stage;
 	}
-	return -1;
+	return MISSION_STAGE_NOMISSION;
+}
+
+/* native Missions_GetState(playerid) */
+cell AMX_NATIVE_CALL Missions_GetState(AMX *amx, cell *params)
+{
+	return missions_get_stage(params[1]);
 }
 
 /* native Missions_OnVehicleRefueled(playerid, vehicleid, Float:refuelamount) */
@@ -1008,12 +1020,9 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	amx_SetUString(addr + 1000, buf, sizeof(buf));
 
 	/* flight tracker packet 3 */
-	trackermsg = (char*) (addr + 2200);
-	trackermsg[0] = 'F';
-	trackermsg[1] = 'L';
-	trackermsg[2] = 'Y';
-	trackermsg[3] = 3;
-	memcpy(trackermsg + 4, &mission->id, 4);
+	buf32[0] = 0x03594C46;
+	buf32[1] = mission->id;
+	NC_ssocket_send(tracker, buf32a, 8);
 
 	amx_GetAddr(amx, params[3], &addr);
 	*addr = ptotal;
@@ -1048,7 +1057,7 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 		return 0;
 	}
 
-	afk_tracker_packet_sent[playerid] = 0;
+	tracker_afk_packet_sent[playerid] = 0;
 
 	mission->id = params[2];
 	mission->stage = MISSION_STAGE_PRELOAD;
@@ -1091,24 +1100,16 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	amx_SetUString(addr, msg, sizeof(msg));
 
 	/* flight tracker packet 1 */
-	amx_GetAddr(amx, params[7], &addr);
-	trackermsg = (char*) addr;
-	trackermsg[0] = 'F';
-	trackermsg[1] = 'L';
-	trackermsg[2] = 'Y';
-	trackermsg[3] = 1;
-	memcpy(trackermsg + 4, &mission->id, 4);
+	buf32[0] = 0x01594C46;
+	buf32[1] = mission->id;
 	fuelcapacity = model_fuel_capacity(vehmodel = mission->veh->model);
-	memcpy(trackermsg + 8, &fuelcapacity, 4);
-	memcpy(trackermsg + 12, &vehmodel, 2);
-	memset(trackermsg + 15, 0, 24); /* don't leak random data */
-	if (pdata[playerid] != NULL) {
-		trackermsg[14] = pdata[playerid]->namelen;
-		strcpy(trackermsg + 15, pdata[playerid]->name);
-	} else {
-		trackermsg[14] = 1;
-		trackermsg[15] = '?';
-	}
+	memcpy(cbuf32 + 8, &fuelcapacity, 4);
+	memcpy(cbuf32 + 12, &vehmodel, 2);
+	cbuf32[14] = pdata[playerid]->namelen;
+	memset(cbuf32 + 15, 0, 24); /* don't leak random data */
+	strcpy(cbuf32 + 15, pdata[playerid]->name);
+	/*buf32 is len 32 * 4 so 40 is fine*/
+	NC_ssocket_send(tracker, buf32a, 40);
 
 	nav_navigate_to_airport(
 		amx,

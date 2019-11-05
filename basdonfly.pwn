@@ -308,10 +308,8 @@ native Missions_CreateTrackerMessage(playerid, vid, Float:hp, Float:x, Float:y, 
 //@summary Ends the active mission for given player (when applicable)
 //@param playerid the playerid to cancel their mission for
 //@param reason the reason, see {@code MISSION_CANCELREASON_} constants
-//@param querybuf buffer for query
-//@param trackerbuf buffer for tracker packet data (always 8 bytes)
 //@returns {@code 0} if no mission was active for player
-native Missions_EndUnfinished(playerid, reason, querybuf[], trackerbuf[])
+native Missions_EndUnfinished(playerid, reason)
 
 //@summary Try to advance any active mission for player when they entered a race checkpoint
 //@param playerid player that entered a checkpoint
@@ -375,7 +373,6 @@ native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z, buf[])
 ///     <li>{@code buf+1000}: result dialog text</li>
 ///     <li>{@code buf+2000}: optional ac speed cheat msg (use {@link Ac_FormatLog}) (only if first char is non-zero)</li>
 ///     <li>{@code buf+2100}: optional ac vhh cheat msg (use {@link Ac_FormatLog}) (only if first char is non-zero)</li>
-///     <li>{@code buf+2200}: tracker data to be sent to flight tracker</li>
 ///   </ul>
 /// </remarks>
 native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[])
@@ -392,9 +389,8 @@ native Missions_ShouldShowSatisfaction(playerid)
 //@param y will contain loading point y coordinate on return
 //@param z will contain loading point z coordinate on return
 //@param querybuf buffer to store query in
-//@param trackerbuf buffer to store tracker packet data in (always 40 bytes)
 //@returns {@code 0} if there's no mission associated with the given player
-native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, querybuf[], trackerbuf[])
+native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, querybuf[])
 
 //@summary Updates passenger satisfaction. Should be called every second.\
 	Has no effect when player is not in a mission (or in a mission that has no passengers).
