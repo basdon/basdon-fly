@@ -13,7 +13,7 @@ int playercount;
 int spawned[MAX_PLAYERS];
 
 /* native B_Validate(maxplayers, buf4096[], buf144[], buf64[], buf32[],
-                     buf32_1[], emptystring) */
+                     buf32_1[], emptystring, underscorestring) */
 cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 {
 	int i;
@@ -36,12 +36,14 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 	amx_GetAddr(amx, buf32a = params[5], &buf32);
 	amx_GetAddr(amx, buf32_1a = params[6], &buf32_1);
 	amx_GetAddr(amx, emptystringa = params[7], &emptystring);
+	amx_GetAddr(amx, underscorestringa = params[8], &underscorestring);
 	cbuf32_1 = (char*) buf32_1;
 	cbuf32 = (char*) buf32;
 	cbuf64 = (char*) buf64;
 	cbuf144 = (char*) buf144;
 	cbuf4096 = (char*) buf4096;
 	cemptystring = (char*) emptystring;
+	cunderscorestring = (char*) underscorestring;
 	fbuf32_1 = (float*) buf32_1;
 	fbuf32 = (float*) buf32;
 	fbuf64 = (float*) buf64;
@@ -213,6 +215,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	echo_on_player_connection(amx, playerid, 3);
 	dialog_on_player_connect(amx, playerid);
 	maps_on_player_connect(amx, playerid);
+	missions_on_player_connect(amx, playerid);
 	panel_on_player_connect(amx, playerid);
 	pm_on_player_connect(playerid);
 	prefs_on_player_connect(playerid);
@@ -238,6 +241,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 
 	spawned[playerid] = 0;
 
+	missions_on_player_death(amx, playerid);
 	zones_hide_text(amx, playerid);
 	return 1;
 }

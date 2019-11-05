@@ -899,8 +899,10 @@ void veh_timed_update_a(
 	struct dbvehicle *v)
 {
 	struct vec3 vvel;
+	struct quat vrot;
 	int engine;
 	float hp;
+	int afk = temp_afk[playerid];
 
 	nc_params[0] = 8;
 	nc_params[1] = vehicleid;
@@ -910,12 +912,17 @@ void veh_timed_update_a(
 	NC(n_GetVehicleParamsEx);
 	engine = *buf32;
 
+	if (!afk) {
+		common_NC_GetVehicleRotationQuat(amx, vehicleid, &vrot);
+		missions_update_satisfaction(amx, playerid, vehicleid, &vrot);
+	}
+
 	if (missions_get_stage(playerid) == MISSION_STAGE_FLIGHT) {
 		hp = anticheat_NC_GetVehicleHealth(amx, vehicleid);
 		common_NC_GetVehicleVelocity(amx, vehicleid, &vvel);
 		missions_send_tracker_data(
 			amx, playerid, vehicleid, hp,
-			vpos, &vvel, temp_afk[playerid], engine);
+			vpos, &vvel, afk, engine);
 	}
 }
 

@@ -30,6 +30,7 @@ extern int n_GetVehicleHealth;
 extern int n_GetVehicleModel;
 extern int n_GetVehicleParamsEx;
 extern int n_GetVehiclePos;
+extern int n_GetVehicleRotationQuat;
 extern int n_GetVehicleVelocity;
 extern int n_GetVehicleZAngle;
 extern int n_GivePlayerWeapon;
@@ -223,6 +224,11 @@ extern cell nc_result;
 	nc_params[0]=4;nc_params[1]=VEHICLEID;\
 	nc_params[2]=FX;nc_params[3]=FY;nc_params[4]=FZ;\
 	amx_Callback(amx,n_GetVehiclePos,&nc_result,nc_params)
+
+#define NC_GetVehicleRotationQuat(VEHICLEID,FQW,FQX,FQY,FQZ) \
+	nc_params[0]=5;nc_params[1]=VEHICLEID;nc_params[2]=FQW;\
+	nc_params[3]=FQX;nc_params[4]=FQY;nc_params[5]=FQZ;\
+	amx_Callback(amx,n_GetVehicleRotationQuat,&nc_result,nc_params)
 
 #define NC_GetVehicleVelocity(VEHICLEID,FX,FY,FZ) \
 	nc_params[0]=4;nc_params[1]=VEHICLEID;\

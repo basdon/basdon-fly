@@ -99,6 +99,17 @@ int common_NC_GetVehiclePos(AMX *amx, int vehicleid, struct vec3 *pos)
 	return nc_result;
 }
 
+int common_NC_GetVehicleRotationQuat(AMX *amx, int vehicleid, struct quat *rot)
+{
+	/*in SA:MP qw comes first*/
+	NC_GetVehicleRotationQuat(vehicleid, buf32_1a, buf32a, buf64a, buf144a);
+	rot->qx = *((float*) buf32);
+	rot->qy = *((float*) buf64);
+	rot->qz = *((float*) buf144);
+	rot->qw = *((float*) buf32_1);
+	return nc_result;
+}
+
 int common_NC_GetVehicleVelocity(AMX *amx, int vehicleid, struct vec3 *vel)
 {
 	NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);

@@ -63,9 +63,7 @@ FORWARD(Missions_OnVehicleRepaired);
 FORWARD(Missions_OnWeatherChanged);
 FORWARD(Missions_PostLoad);
 FORWARD(Missions_PostUnload);
-FORWARD(Missions_ShouldShowSatisfaction);
 FORWARD(Missions_Start);
-FORWARD(Missions_UpdateSatisfaction);
 /* nav.c */
 FORWARD(Nav_Reset);
 /* playerdata.c */
@@ -355,9 +353,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Missions_OnWeatherChanged),
 	REGISTERNATIVE(Missions_PostLoad),
 	REGISTERNATIVE(Missions_PostUnload),
-	REGISTERNATIVE(Missions_ShouldShowSatisfaction),
 	REGISTERNATIVE(Missions_Start),
-	REGISTERNATIVE(Missions_UpdateSatisfaction),
 	/* nav.c */
 	REGISTERNATIVE(Nav_Reset),
 	/* playerdata.c */

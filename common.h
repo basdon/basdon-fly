@@ -17,6 +17,10 @@ struct vec4 {
 	float r;
 };
 
+struct quat {
+	float qx, qy, qz, qw;
+};
+
 #include "natives.h"
 #include "publics.h"
 
@@ -40,12 +44,17 @@ extern logprintf_t logprintf;
 
 /* amx addresses of buffers */
 extern cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
+extern cell underscorestringa;
 /* physical addresses of buffers */
 extern cell *emptystring, *buf32, *buf32_1, *buf64, *buf144, *buf4096;
+extern cell *underscorestring;
 /* buffers as char pointers */
 extern char *cemptystring, *cbuf32, *cbuf32_1, *cbuf64, *cbuf144, *cbuf4096;
+extern char *cunderscorestring;
 /* float pointers to buffers */
 extern float *fbuf32_1, *fbuf32, *fbuf64, *fbuf144, *fbuf4096;
+/* nc parameters as floats */
+extern float *nc_paramf;
 
 /**
 element at index playerid is either 0 or 1
@@ -147,6 +156,13 @@ Alternative for GetVehiclePos to get it directly into a vec3 struct.
 Will use buf32, buf64, buf144.
 */
 int common_NC_GetVehiclePos(AMX*, int vehicleid, struct vec3 *pos);
+
+/**
+Alternative for GetVehicleRotationQuat to get it directly into a quat struct.
+
+Will use buf32, buf64, buf144, buf32_1.
+*/
+int common_NC_GetVehicleRotationQuat(AMX*, int vehicleid, struct quat *rot);
 
 /**
 Alternative for GetVehicleVelocity to get it directly into a vec3 struct.

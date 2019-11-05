@@ -16,9 +16,11 @@
 
 #define TRACKER_PORT 7766
 
-const char *destinationtype_gate = "gate";
-const char *destinationtype_cargo = "cargo";
-const char *destinationtype_heliport = "heliport";
+const static char *destinationtype_gate = "gate";
+const static char *destinationtype_cargo = "cargo";
+const static char *destinationtype_heliport = "heliport";
+
+const static char *SATISFACTION_TEXT_FORMAT = "Passenger~n~Satisfaction: %d%%";
 
 struct missionpoint {
 	unsigned short id;
@@ -52,6 +54,10 @@ static char tracker_afk_packet_sent[MAX_PLAYERS];
 Tracker socket handle.
 */
 static int tracker;
+/**
+Player textdraw handles for passenger satisfaction indicator.
+*/
+static int ptxt_satisfaction[MAX_PLAYERS];
 
 /**
 TODO: refactor once missions is all-plugin
@@ -615,6 +621,41 @@ thisisworsethanbubblesort:
 	return 1;
 }
 
+void missions_on_player_connect(AMX *amx, int playerid)
+{
+	nc_params[0] = 4;
+	nc_params[1] = playerid;
+	nc_paramf[2] = 88.0f;
+	nc_paramf[3] = 425.0f;
+	nc_params[4] = underscorestringa;
+	NC_(n_CreatePlayerTextDraw, nc_params + 2);
+	ptxt_satisfaction[playerid] = nc_params[2];
+	nc_paramf[3] = 0.3f;
+	nc_paramf[4] = 1.0f;
+	NC(n_PlayerTextDrawLetterSize);
+
+	nc_params[0] = 3;
+	nc_params[2] = 255;
+	NC(n_PlayerTextDrawBackgroundColor);
+	nc_params[3] = 2;
+	NC(n_PlayerTextDrawAlignment);
+	nc_params[3] = 1;
+	NC(n_PlayerTextDrawFont);
+	NC(n_PlayerTextDrawSetProportional);
+	NC(n_PlayerTextDrawSetOutline);
+	nc_params[3] = -1;
+	NC(n_PlayerTextDrawColor);
+}
+
+void missions_on_player_death(AMX *amx, int playerid)
+{
+	struct mission *mission;
+
+	if ((mission = activemission[playerid]) != NULL) {
+		/*end unfinished*/
+	}
+}
+
 void missions_send_tracker_data(
 	AMX *amx, int playerid, int vehicleid, float hp,
 	struct vec3 *vpos, struct vec3 *vvel, int afk, int engine)
@@ -664,6 +705,8 @@ cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 	if ((mission = activemission[playerid]) == NULL) {
 		return 0;
 	}
+
+	NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
 
 	sprintf(q,
 	        "UPDATE flg "
@@ -726,6 +769,7 @@ cell AMX_NATIVE_CALL Missions_EnterCheckpoint(AMX *amx, cell *params)
 		return MISSION_ENTERCHECKPOINTRES_LOAD;
 	case MISSION_STAGE_FLIGHT:
 		mission->stage = MISSION_STAGE_UNLOAD;
+		NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
 		return MISSION_ENTERCHECKPOINTRES_UNLOAD;
 	default:
 		logprintf("ERR: player uid %d entered mission checkpoint in invalid stage: %d",
@@ -859,9 +903,23 @@ cell AMX_NATIVE_CALL Missions_PostLoad(AMX *amx, cell *params)
 		mission->veh->model,
 		mission->endpoint->ap);
 
+	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
+		sprintf(cbuf32, SATISFACTION_TEXT_FORMAT, 100);
+		amx_SetUString(buf32_1, cbuf32, 32);
+		nc_params[0] = 3;
+		nc_params[1] = playerid;
+		nc_params[2] = ptxt_satisfaction[playerid];
+		nc_params[3] = buf32_1a;
+		NC(n_PlayerTextDrawSetString);
+		nc_params[0] = 2;
+		NC(n_PlayerTextDrawShow);
+	}
+
 	mission->stage = MISSION_STAGE_FLIGHT;
 	sprintf(buf,
-	        "UPDATE flg SET tload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP() WHERE id=%d",
+	        "UPDATE flg "
+		"SET tload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP() "
+		"WHERE id=%d",
 	        mission->id);
 	amx_GetAddr(amx, params[2], &addr);
 	*addr = amx_ftoc(mission->endpoint->x);
@@ -1033,14 +1091,6 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Missions_ShouldShowSatisfaction(playerid) */
-cell AMX_NATIVE_CALL Missions_ShouldShowSatisfaction(AMX *amx, cell *params)
-{
-	const int playerid = params[1];
-	return activemission[playerid] != NULL &&
-		activemission[playerid]->missiontype & PASSENGER_MISSIONTYPES;
-}
-
 /* native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z,
                          querybuf[], trackerbuf[]) */
 cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
@@ -1121,48 +1171,45 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Missions_UpdateSatisfaction(playerid, vehicleid, Float:qw, Float:qx, Float:qy, Float:qz, buf[]) */
-cell AMX_NATIVE_CALL Missions_UpdateSatisfaction(AMX *amx, cell *params)
+void missions_update_satisfaction(AMX *amx, int pid, int vid, struct quat *vrot)
 {
 	struct mission *miss;
-	const int playerid = params[1], vehicleid = params[2];
-	cell *addr;
-	int lastval;
+	int last_satisfaction;
 	float qw, qx, qy, qz;
-	float value = 0.0f;
-	char buf[144];
+	float tmpvalue = 0.0f;;
 
-	if ((miss = activemission[playerid]) != NULL &&
+	if ((miss = activemission[pid]) != NULL &&
 		miss->stage == MISSION_STAGE_FLIGHT &&
-		miss->veh->spawnedvehicleid == vehicleid)
+		miss->veh->spawnedvehicleid == vid)
 	{
-		lastval = miss->passenger_satisfaction;
-		qw = amx_ctof(params[3]);
-		qx = amx_ctof(params[4]);
-		qy = amx_ctof(params[5]);
-		qz = amx_ctof(params[6]);
+		last_satisfaction = miss->passenger_satisfaction;
+		qx = vrot->qx;
+		qy = vrot->qy;
+		qz = vrot->qz;
+		qw = vrot->qw;
 		/* pitch */
-		value = fabs(100.0f * 2.0f * (qy * qz - qw * qx)) - 46.0;
-		if (value > 0.0) {
-			miss->passenger_satisfaction -= (int) (value / 2.0f);
+		tmpvalue = fabs(100.0f * 2.0f * (qy * qz - qw * qx)) - 46.0;
+		if (tmpvalue > 0.0) {
+			miss->passenger_satisfaction -= (int) (tmpvalue / 2.0f);
 			if (miss->passenger_satisfaction < 0) {
 				miss->passenger_satisfaction = 0;
 			}
 		}
 		/* roll */
-		value = fabs(100.0f * 2.0f * (qx * qz + qw * qy)) - 61.0f;
-		if (value > 0.0) {
-			miss->passenger_satisfaction -= (int) (value / 2.0f);
+		tmpvalue = fabs(100.0f * 2.0f * (qx * qz + qw * qy)) - 61.0f;
+		if (tmpvalue > 0.0) {
+			miss->passenger_satisfaction -= (int) (tmpvalue / 2.0f);
 			if (miss->passenger_satisfaction < 0) {
 				miss->passenger_satisfaction = 0;
 			}
 		}
-		if (lastval != miss->passenger_satisfaction) {
-			sprintf(buf, "Passenger~n~Satisfaction: %d%%", miss->passenger_satisfaction);
-			amx_GetAddr(amx, params[7], &addr);
-			amx_SetUString(addr, buf, sizeof(buf));
-			return 1;
+		if (last_satisfaction != miss->passenger_satisfaction) {
+			sprintf(cbuf32_1,
+				SATISFACTION_TEXT_FORMAT,
+				miss->passenger_satisfaction);
+			amx_SetUString(buf32, cbuf32_1, 32);
+			NC_PlayerTextDrawSetString(
+				pid, ptxt_satisfaction[pid], buf32a);
 		}
 	}
-	return 0;
 }

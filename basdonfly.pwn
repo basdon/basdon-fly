@@ -71,9 +71,10 @@ native B_OnVehicleSpawn(&vehicleid)
 //@param buf32 the 32 sized buffer that's on the heap
 //@param buf32_1 the 2nd 32 sized buffer that's on the heap
 //@param emptystring empty buffer on the heap
+//@param underscorestring buffer containing simply {@code "_"} on the heap
 //@returns {@code 0} if something is off
 //@remarks plugin also checks if it can find the {@link getrandom} public function
-native B_Validate(maxplayers, buf4096[], buf144[], buf64[], buf32[], buf32_1[], emptystring[])
+native B_Validate(maxplayers, buf4096[], buf144[], buf64[], buf32[], buf32_1[], emptystring[], underscorestring[])
 
 #namespace "commands.c"
 
@@ -289,22 +290,6 @@ native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type)
 //@remarks next step is to execute the queries and call {@link Missions_Start} after query@{@code buf[400]} returned last inserted id
 native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, Float:vehiclehp, msg[], querybuf[])
 
-//@summary Creates a message to be sent to the flighttracker
-//@param playerid playerid that is on a mission
-//@param vid vehicle id
-//@param hp health of the vehicle
-//@param x x-position of the vehicle
-//@param y y-position of the vehicle
-//@param vx x-velocity of the vehicle
-//@param vy y-velocity of the vehicle
-//@param vz z-velocity of the vehicle
-//@param alt altitude (z-pos) of the vehicle
-//@param isafk whether the player is afk
-//@param engine whether the engine is on
-//@param buf buffer to store message in (always 28 bytes)
-//@returns {@code 0} if something doesn't add up and there's no message to be sent
-native Missions_CreateTrackerMessage(playerid, vid, Float:hp, Float:x, Float:y, Float:vx, Float:vy, Float:vz, Float:alt, isafk, engine, buf[])
-
 //@summary Ends the active mission for given player (when applicable)
 //@param playerid the playerid to cancel their mission for
 //@param reason the reason, see {@code MISSION_CANCELREASON_} constants
@@ -376,11 +361,6 @@ native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z, buf[])
 ///   </ul>
 /// </remarks>
 native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[])
-
-//@summary Check if the satisfaction textdraw should be shown for a player
-//@param playerid player to check
-//@returns {@code 1} if the satisfaction textdraw should be shown
-native Missions_ShouldShowSatisfaction(playerid)
 
 //@summary Starts a mission for a player after the mission id has been retrieved
 //@param playerid the player to start the mission for

@@ -34,6 +34,7 @@ int n_GetVehicleHealth;
 int n_GetVehicleModel;
 int n_GetVehicleParamsEx;
 int n_GetVehiclePos;
+int n_GetVehicleRotationQuat;
 int n_GetVehicleVelocity;
 int n_GetVehicleZAngle;
 int n_GivePlayerWeapon;
@@ -110,9 +111,13 @@ cell *nc_params = nc_params_d;
 cell nc_result;
 
 cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
+cell underscorestringa;
 cell *emptystring, *buf32, *buf32_1, *buf64, *buf144, *buf4096;
+cell *underscorestring;
 char *cemptystring, *cbuf32, *cbuf32_1, *cbuf64, *cbuf144, *cbuf4096;
+char *cunderscorestring;
 float *fbuf32_1, *fbuf32, *fbuf64, *fbuf144, *fbuf4096;
+float *nc_paramf = (float*) nc_params_d;
 
 int natives_find(AMX *amx)
 {
@@ -150,6 +155,7 @@ int natives_find(AMX *amx)
 		N(GetPlayerVehicleSeat),
 		N(GetVehicleHealth),
 		N(GetVehicleModel),
+		N(GetVehicleRotationQuat),
 		N(GetVehiclePos),
 		N(GetVehicleVelocity),
 		N(GetVehicleZAngle),
