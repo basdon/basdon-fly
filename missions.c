@@ -695,6 +695,31 @@ void missions_send_tracker_data(
 	NC_ssocket_send(tracker, buf32a, 28);
 }
 
+/**
+Cleanup stuff and free memory. Does not query. Does send a tracker msg.
+
+Call when ending a mission.
+
+@param mission mission of the player. Must match with given playerid.
+*/
+static
+void missions_cleanup(AMX *amx, struct mission *mission, int playerid)
+{
+	/* flight tracker packet 3 */
+	buf32[0] = 0x03594C46;
+	buf32[1] = mission->id;
+	NC_ssocket_send(tracker, buf32a, 8);
+
+	mission->startpoint->currentlyactivemissions--;
+	mission->endpoint->currentlyactivemissions--;
+	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
+		NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
+	}
+
+	free(mission);
+	activemission[playerid] = NULL;
+}
+
 /* native Missions_EndUnfinished(playerid, reason, querybuf[]) */
 cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 {
@@ -706,8 +731,6 @@ cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 		return 0;
 	}
 
-	NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
-
 	sprintf(q,
 	        "UPDATE flg "
 		"SET state=%d,tlastupdate=UNIX_TIMESTAMP(),adistance=%f "
@@ -718,13 +741,7 @@ cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 	amx_SetUString(buf4096, q, sizeof(q));
 	NC_mysql_tquery_nocb(buf4096a);
 
-	/* flight tracker packet 3 */
-	buf32[0] = 0x03594C46;
-	buf32[1] = mission->id;
-	NC_ssocket_send(tracker, buf32a, 8);
-
-	free(mission);
-	activemission[playerid] = NULL;
+	missions_cleanup(amx, mission, playerid);
 	return 1;
 }
 
@@ -1078,16 +1095,10 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	buf[--p] = 0;
 	amx_SetUString(addr + 1000, buf, sizeof(buf));
 
-	/* flight tracker packet 3 */
-	buf32[0] = 0x03594C46;
-	buf32[1] = mission->id;
-	NC_ssocket_send(tracker, buf32a, 8);
-
 	amx_GetAddr(amx, params[3], &addr);
 	*addr = ptotal;
 
-	free(mission);
-	activemission[playerid] = NULL;
+	missions_cleanup(amx, mission, playerid);
 	return 1;
 }
 
