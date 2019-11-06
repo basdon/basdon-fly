@@ -75,14 +75,14 @@ nextparentcat4catpage:
 
 		// fetch all articles (either in category or in subcategories)
 		++$db_querycount;
-		foreach ($db->query('SELECT name,title,cat FROM art WHERE cat IN ('.implode(',',$category_ids).') ORDER BY name ASC') as $r) {
+		foreach ($db->query('SELECT id,name,title,cat FROM art WHERE cat IN ('.implode(',',$category_ids).') ORDER BY name ASC') as $r) {
 			$catmapping[$r->cat]->articles[] = $r;
 		}
 		unset($catmapping);
 		unset($category_ids);
 	} else {
 		++$db_querycount;
-		foreach ($db->query('SELECT name,title FROM art WHERE ISNULL(cat) ORDER BY name ASC') as $a) {
+		foreach ($db->query('SELECT id,name,title FROM art WHERE ISNULL(cat) ORDER BY name ASC') as $a) {
 			$cat->articles[] = $a;
 		}
 	}

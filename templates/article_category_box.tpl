@@ -4,6 +4,7 @@
 	------
 	string name
 	string title
+	int id
 	
 	category
 	---------
