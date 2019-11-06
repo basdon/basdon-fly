@@ -11,11 +11,9 @@
 	string name
 	string color
 	article[] articles
-	category parent
-	category subs
+	category[] subs
 
 	expect category $cat
-	expect category array from parent to child $categories
 
 	uncategorized articles should be in a category with null name/color
 	categories that have subcategories may not have articles

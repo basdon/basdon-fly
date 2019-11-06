@@ -35,7 +35,7 @@ function fetch_category_box($categoryname, $categoryid, &$cat, &$categories)
 		$catmapping = [];
 		$catmapping[$r->id] = $cat;
 
-		$parentcat = $cat;
+		$childcat = $cat;
 
 		// traverse parent categories
 		$parentid = $r->parent;
@@ -49,11 +49,9 @@ nextparentcat4catpage:
 				$p = new stdClass();
 				$p->color = $r->color;
 				$p->name = $r->name;
-				$p->parent = null;
 				array_unshift($categories, $p);
-				$p->subs = [$parentcat];
-				$parentcat->parent = $p;
-				$parentcat = $p;
+				$p->subs = [$childcat];
+				$childcat = $p;
 				if (($parentid = $r->parent) != null) {
 					goto nextparentcat4catpage;
 				}
