@@ -12,7 +12,7 @@
 		<div class="mainright article">
 			<p>
 				<a href="article.php">Articles</a>
-				{@foreach $article_categories as $c}
+				{@foreach $categories as $c}
 					&#32;&gt;&#32;
 					<a href="article.php?category={@urlencode $c->name}">{@unsafe $c->name}</a>
 				{@endforeach}
@@ -22,7 +22,7 @@
 					<small> (Redirected from {@unsafe $article_redirected_from})</small>
 				{@endif}
 			</p>
-			{@if $article_pageviews == null}
+			{@if !isset($article_pageviews)}
 				<h2 id="main">Article not found!</h2>
 				<p>The article with name '{$article_name}' was not found.</p>
 			{@else}
@@ -33,26 +33,9 @@
 				{@else}
 					{@eval include($file)}
 				{@endif}
-				{@if count($article_categories)}
-					<div class="artcat">
-						{@foreach $article_categories as $c}
-							<p style="background:#{@unsafe $c->color}">
-								Category: <a href="article.php?category={@urlencode $c->name}">{@unsafe $c->name}</a>
-							</p>
-							<p>
-								{@eval $bull = ''}
-								{@foreach $c->articles as $a}
-									{@unsafe $bull}
-									{@if $a->id == $article_id}
-										<strong>{@unsafe $a->title}</strong>
-									{@else}
-										<a href="article.php?title={@unsafe $a->name}">{@unsafe $a->title}</a>
-									{@endif}
-									{@eval $bull = ' &bull; '}
-								{@endforeach}
-							</p>
-						{@endforeach}
-					</div>
+				{@if isset($cat)}
+					{@rem don't show category box on uncategorized pages @}
+					{@render article_category_box.tpl}
 				{@endif}
 			{@endif}
 			{@render article_bottom_right_links.tpl}

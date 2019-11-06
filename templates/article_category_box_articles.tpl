@@ -1,5 +1,5 @@
 
-{@rem expect array $articles@}
+{@rem expect array $articles @}
 
 {@eval $bull = ''}
 {@foreach $articles as $a}

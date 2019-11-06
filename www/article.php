@@ -1,17 +1,28 @@
 <?php
 include('../inc/bootstrap.php');
 
-if (isset($_GET['category'])) {
-	$stmt = $db->prepare('SELECT id,parent,name,color FROM artcat WHERE name=? LIMIT 1');
-	$stmt->bindValue(1, $_GET['category']);
+function fetch_category_box($categoryname, $categoryid, &$cat, &$categories)
+{
+	global $db, $db_querycount;
 
 	$cat = new stdClass();
+	$cat->id = -1;
 	$cat->color = 'dddddd';
 	$cat->name = 'Uncategorized';
 	$cat->articles = [];
 	$cat->parent = null;
 	$cat->subs = [];
 	$categories = [$cat];
+
+	if ($categoryname != null) {
+		$stmt = $db->prepare('SELECT id,parent,name,color FROM artcat WHERE name=? LIMIT 1');
+		$stmt->bindValue(1, $categoryname);
+	} else if ($categoryid != null) {
+		$stmt = $db->prepare('SELECT id,parent,name,color FROM artcat WHERE id=? LIMIT 1');
+		$stmt->bindValue(1, $categoryid);
+	} else {
+		return;
+	}
 
 	++$db_querycount;
 	if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
@@ -75,7 +86,10 @@ nextparentcat4catpage:
 			$cat->articles[] = $a;
 		}
 	}
+}
 
+if (isset($_GET['category'])) {
+	fetch_category_box($_GET['category'], null, $cat, $categories);
 	$__script = '_article_category';
 	include('../inc/output.php');
 	die();
@@ -87,8 +101,6 @@ if (isset($_GET['title'])) {
 }
 $article_id = -1;
 $article_title = 'Article not found';
-$article_pageviews = null;
-$article_categories = [];
 $article_redirected_from = null;
 
 ++$db_querycount;
@@ -113,23 +125,10 @@ if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 		}
 	}
 
-	$cat = $r->cat;
-	if ($cat != null) {
-		$stmt = $db->prepare('SELECT name,color,parent FROM artcat WHERE id=?');
-nextparentcat:
-		$stmt->bindValue(1, $cat);
-		++$db_querycount;
-		if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
-			array_push($article_categories, $r[0]);
-			++$db_querycount;
-			$arts = $db->query('SELECT id,name,title FROM art WHERE cat=' . $cat);
-			if ($arts != null) {
-				$r[0]->articles = $arts->fetchAll();
-			}
-			if (($cat = $r[0]->parent) != null) {
-				goto nextparentcat;
-			}
-		}
+	fetch_category_box(null, $r->cat, $cat, $categories);
+	// to not show category box on uncategorized pages
+	if ($cat->id == -1) {
+		unset($cat);
 	}
 } else {
 	$stmt = $db->prepare('SELECT art.name FROM art JOIN artalt ON art.id = artalt.art WHERE artalt.alt=?');
