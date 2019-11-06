@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php $AP_FACTSHEET_IMG='salv.jpg'; include('../articles/gen/apfactsheet_SALV.html') ?>
+	<?php $AP_FACTSHEET_IMG='salv.jpg'; include('../articles/apfactsheets/SALV.html') ?>
 </div>
 
 LAV

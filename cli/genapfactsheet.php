@@ -134,7 +134,7 @@ if (count($nav)) {
 echo '</tbody>';
 echo '</table>';
 
-file_put_contents('../articles/gen/apfactsheet_'.$apt->c.'.html', ob_get_contents());
+file_put_contents('../articles/apfactsheets/'.$apt->c.'.html', ob_get_contents());
 if (isset($_GET['web'])) {
 	echo '<link rel="stylesheet" href="http://localhost:8080/sapstatic/article.css" type="text/css" />';
 	ob_end_flush();

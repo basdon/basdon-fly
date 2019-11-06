@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php $AP_FACTSHEET_IMG='sasf.jpg'; include('../articles/gen/apfactsheet_SASF.html') ?>
+	<?php $AP_FACTSHEET_IMG='sasf.jpg'; include('../articles/apfactsheets/SASF.html') ?>
 </div>
 
 SASF
