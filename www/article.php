@@ -2,42 +2,78 @@
 include('../inc/bootstrap.php');
 
 if (isset($_GET['category'])) {
-	++$db_querycount;
 	$stmt = $db->prepare('SELECT id,parent,name,color FROM artcat WHERE name=? LIMIT 1');
 	$stmt->bindValue(1, $_GET['category']);
 
-	$category = 'Uncategorized';
-	$categories = [$category];
-	$category_color = 'dddddd';
-	$articles = [];
+	$cat = new stdClass();
+	$cat->color = 'dddddd';
+	$cat->name = 'Uncategorized';
+	$cat->articles = [];
+	$cat->parent = null;
+	$cat->subs = [];
+	$categories = [$cat];
+
+	++$db_querycount;
 	if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 		$r = $r[0];
-		$category = $r->name;
-		$categoryid = $r->id;
-		$categories = [$category];
-		$category_color = $r->color;
+		$cat->id = $r->id;
+		$cat->name = $r->name;
+		$cat->color = $r->color;
+		$category_ids = [$r->id];
 
-		$parent = $r->parent;
-		if ($parent != null) {
-			$stmt = $db->prepare('SELECT parent,name FROM artcat WHERE id=? LIMIT 1');
+		$catmapping = [];
+		$catmapping[$r->id] = $cat;
+
+		$parentcat = $cat;
+
+		// traverse parent categories
+		$parentid = $r->parent;
+		if ($parentid != null) {
+			$stmt = $db->prepare('SELECT parent,name,color FROM artcat WHERE id=? LIMIT 1');
 nextparentcat4catpage:
-			$stmt->bindValue(1, $parent);
+			$stmt->bindValue(1, $parentid);
 			++$db_querycount;
 			if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 				$r = $r[0];
-				array_push($categories, $r->name);
-				if (($parent = $r->parent) != null) {
+				$p = new stdClass();
+				$p->color = $r->color;
+				$p->name = $r->name;
+				$p->parent = null;
+				array_unshift($categories, $p);
+				$p->subs = [$parentcat];
+				$parentcat->parent = $p;
+				$parentcat = $p;
+				if (($parentid = $r->parent) != null) {
 					goto nextparentcat4catpage;
 				}
 			}
 		}
+
+		// fetch all child categories (one level)
 		++$db_querycount;
-		$articles = $db->prepare('SELECT name,title FROM art WHERE cat=? ORDER BY name ASC');
-		$articles->bindValue(1, $categoryid);
-		$articles->execute();
+		foreach ($db->query('SELECT id,name,color FROM artcat WHERE parent='.$cat->id.' ORDER BY name ASC') as $r) {
+			$sub = new stdClass();
+			$sub->id = $r->id;
+			$sub->name = $r->name;
+			$sub->color = $r->color;
+			$sub->articles = [];
+			$cat->subs[] = $sub;
+			$category_ids[] = $r->id;
+			$catmapping[$r->id] = $sub;
+		}
+
+		// fetch all articles (either in category or in subcategories)
+		++$db_querycount;
+		foreach ($db->query('SELECT name,title,cat FROM art WHERE cat IN ('.implode(',',$category_ids).') ORDER BY name ASC') as $r) {
+			$catmapping[$r->cat]->articles[] = $r;
+		}
+		unset($catmapping);
+		unset($category_ids);
 	} else {
 		++$db_querycount;
-		$articles = $db->query('SELECT name,title FROM art WHERE ISNULL(cat) ORDER BY name ASC');
+		foreach ($db->query('SELECT name,title FROM art WHERE ISNULL(cat) ORDER BY name ASC') as $a) {
+			$cat->articles[] = $a;
+		}
 	}
 
 	$__script = '_article_category';

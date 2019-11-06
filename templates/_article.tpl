@@ -14,7 +14,7 @@
 				<a href="article.php">Articles</a>
 				{@foreach $article_categories as $c}
 					&#32;&gt;&#32;
-					<a href="article.php?category={@unsafe $c->name}">{@unsafe $c->name}</a>
+					<a href="article.php?category={@urlencode $c->name}">{@unsafe $c->name}</a>
 				{@endforeach}
 				&#32;&gt;&#32;
 				<a href="article.php?title={$article_name}">{$article_name}</a>
@@ -37,7 +37,7 @@
 					<div class="artcat">
 						{@foreach $article_categories as $c}
 							<p style="background:#{@unsafe $c->color}">
-								Category: <a href="article.php?category={@unsafe $c->name}">{@unsafe $c->name}</a>
+								Category: <a href="article.php?category={@urlencode $c->name}">{@unsafe $c->name}</a>
 							</p>
 							<p>
 								{@eval $bull = ''}
@@ -55,12 +55,7 @@
 					</div>
 				{@endif}
 			{@endif}
-			<p style="text-align:right">
-				<small>
-					{@if $article_pageviews != null}This article has been accessed {@unsafe $article_pageviews} time(s).<br/>{@endif}
-					<a href="article.php">Main page</a> <a href="articleindex.php">Article index</a>
-				</small>
-			</p>
+			{@render article_bottom_right_links.tpl}
 		</div>
 		{@render aside.tpl}
 		<div class="clear"></div>

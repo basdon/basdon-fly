@@ -9,19 +9,24 @@
 	padding: 0;
 	margin: 0;
 }
-.artcat {
+.article table.artcat {
+	width: 100%;
 	border: 1px solid #ccc;
-	padding: 2px;
-	margin: 1em 0;
+	cell-spacing: 2px;
 }
-.artcat p:first-child {
-	text-align: center;
-	margin: 0;
+.article table.artcat th,
+.article table.artcat td {
 	padding: .2em;
 }
-.artcat p + p {
-	margin: 0;
-	padding: .5em 1em;
+.article table.artcat td:first-child {
+	text-align: right;
+	padding-left: .8em;
+	padding-right: .2em;
+	white-space: nowrap;
+	width: auto;
+}
+.article table.artcat td + td {
+	width: 100%;
 }
 .article table {
 	border: 1px solid #a2a9b1;

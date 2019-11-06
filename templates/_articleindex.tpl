@@ -29,7 +29,7 @@
 						{@endif}
 						<div class="artcat">
 							<p style="background:#{@unsafe $cat->color}">
-								Category: <a href="article.php?category={@unsafe $cat->name}">{@unsafe $cat->name}</a>
+								Category: <a href="article.php?category={@urlencode $cat->name}">{@unsafe $cat->name}</a>
 							</p>
 							<p>
 						{@eval $bull = ''}
@@ -39,6 +39,7 @@
 				{@endforeach}
 				{@if $div_open}</p></div>{@endif}
 			{@endif}
+			{@render article_bottom_right_links.tpl}
 		</div>
 		{@render aside.tpl}
 		<div class="clear"></div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Category:{$category} :: basdon.net aviation server</title>
+	<title>Category:{$cat->name} :: basdon.net aviation server</title>
 	<link rel="stylesheet" href="{@unsafe $STATICPATH}/article.{@unsafe $CSS_SUFFIX}" type="text/css" />
 	{@render defaulthead.tpl}
 </head>
@@ -14,25 +14,12 @@
 				<a href="article.php">Articles</a>
 				{@foreach $categories as $c}
 					&#32;&gt;&#32;
-					<a href="article.php?category={@unsafe $c}">{@unsafe $c}</a>
+					<a href="article.php?category={@urlencode $c->name}">{@unsafe $c->name}</a>
 				{@endforeach}
 			</p>
-			<h2 id="main">Category:{@unsafe $category}</h2>
-			<div class="artcat">
-				<p style="background:#{@unsafe $category_color}">Category: {@unsafe $category}</p>
-				<p>
-					{@eval $bull = ''}
-					{@foreach $articles as $a}
-						{@unsafe $bull}<a href="article.php?title={@unsafe $a->name}">{$a->title}</a>
-						{@eval $bull = ' &bull; '}
-					{@endforeach}
-				</p>
-			</div>
-			<p style="text-align:right">
-				<small>
-					<a href="article.php">Main page</a> <a href="articleindex.php">Article index</a>
-				</small>
-			</p>
+			<h2 id="main">Category: {@unsafe $cat->name}</h2>
+			{@render article_category_box.tpl}
+			{@render article_bottom_right_links.tpl}
 		</div>
 		{@render aside.tpl}
 		<div class="clear"></div>
