@@ -7,18 +7,27 @@
 #define CLASS_AID 8
 #define CLASS_TRUCKER 16
 
-#define numclasses 5
+#define NUMCLASSES 5
+
+#define SPAWN_WEAPON_1 WEAPON_CAMERA
+#define SPAWN_AMMO_1 3036
+#define SPAWN_WEAPON_2_3 0
+#define SPAWN_AMMO_2_3 0
 
 /**
-From class index to class id
+From class index (SAMP) to class id (CLASS_ constants)
 */
-extern const int CLASSMAPPING[numclasses];
+extern const int CLASSMAPPING[NUMCLASSES];
 /**
-Class id of players.
+Skin ID per class.
+*/
+extern const int CLASS_SKINS[NUMCLASSES];
+/**
+Class id of players (CLASS_ constants).
 */
 extern int classid[MAX_PLAYERS];
 /**
-Class index of players.
+Class index of players (SA-MP's classid).
 */
 extern int classidx[MAX_PLAYERS];
 

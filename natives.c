@@ -2,6 +2,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "spawn.h"
 #include "vehicles.h"
 
 /* Natives ending in _ means that they have
@@ -68,6 +69,7 @@ int n_SetPlayerPos_;
 int n_SetPlayerRaceCheckpoint;
 int n_SetPlayerSpecialAction;
 int n_SetPlayerTime;
+int n_SetSpawnInfo;
 int n_SetVehicleHealth;
 int n_SetVehicleParamsEx;
 int n_SetVehicleToRespawn;
@@ -190,6 +192,7 @@ int natives_find(AMX *amx)
 		N(SetPlayerRaceCheckpoint),
 		N(SetPlayerSpecialAction),
 		N(SetPlayerTime),
+		N(SetSpawnInfo),
 		N(SetVehicleHealth),
 		N(SetVehicleParamsEx),
 		N(SetVehicleToRespawn),
@@ -298,6 +301,7 @@ int natives_NC_SetPlayerPos(AMX *amx, int playerid, struct vec3 pos)
 
 int natives_NC_SpawnPlayer(AMX *amx, int playerid)
 {
+	/*eject player first if they're in a vehicle*/
 	NC_GetPlayerVehicleID(playerid);
 	if (nc_result) {
 		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
@@ -306,5 +310,7 @@ int natives_NC_SpawnPlayer(AMX *amx, int playerid)
 	nc_params[0] = 1;
 	/*nc_params[1] = playerid;*/
 	NC(n_SpawnPlayer_);
+
+	spawn_prespawn(amx, playerid);
 	return nc_result;
 }

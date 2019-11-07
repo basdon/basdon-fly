@@ -6,7 +6,9 @@
 #include "dialog.h"
 #include "missions.h"
 #include "playerdata.h"
+#include "spawn.h"
 #include "vehicles.h"
+#include "zones.h"
 #include <string.h>
 
 logprintf_t logprintf;

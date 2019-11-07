@@ -242,6 +242,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 	spawned[playerid] = 0;
 
 	missions_on_player_death(amx, playerid);
+	spawn_prespawn(amx, playerid);
 	zones_hide_text(amx, playerid);
 	return 1;
 }
@@ -308,21 +309,30 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 
 	const int playerid = params[1];
 
-	return class_on_player_request_spawn(amx, playerid);
+	if (class_on_player_request_spawn(amx, playerid)) {
+		spawn_prespawn(amx, playerid);
+		return 1;
+	}
+
+	return 0;
 }
 
 /* native B_OnPlayerSpawn(playerid) */
 cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 {
-	void spawn_on_player_spawn(AMX*, int);
-	void zones_on_player_spawn(AMX*, int);
+	void maps_stream_for_player(AMX*, int, struct vec3);
+	void veh_update_service_point_mapicons(AMX*, int, float, float);
 
+	struct vec3 pos;
 	const int playerid = params[1];
 
 	spawned[playerid] = 1;
 
+	common_NC_GetPlayerPos(amx, playerid, &pos);
+	maps_stream_for_player(amx, playerid, pos);
 	spawn_on_player_spawn(amx, playerid);
-	zones_on_player_spawn(amx, playerid);
+	veh_update_service_point_mapicons(amx, playerid, pos.x, pos.y);
+	zones_on_player_spawn(amx, playerid, pos);
 	return 1;
 }
 

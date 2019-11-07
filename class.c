@@ -22,6 +22,14 @@ const int CLASSMAPPING[] = {
 	CLASS_TRUCKER,
 };
 
+const int CLASS_SKINS[] = {
+	61,
+	275,
+	287,
+	287,
+	133,
+};
+
 static const char *CLASS_NAMES[] = {
 	"~p~Pilot",
 	"~b~~h~~h~Rescue worker",
@@ -43,23 +51,22 @@ int classidx[MAX_PLAYERS];
 
 void class_init(AMX *amx)
 {
+	int i;
+
 	nc_params[0] = 11;
 	*((float*) (nc_params + 2)) = 1488.5236f;
 	*((float*) (nc_params + 3)) = -873.1125f;
 	*((float*) (nc_params + 4)) = 59.3885f;
 	*((float*) (nc_params + 5)) = 232.0f;
-	nc_params[6] = WEAPON_CAMERA;
-	nc_params[7] = 3036;
-	nc_params[8] = nc_params[9] = nc_params[10] = nc_params[11] = 0;
-	nc_params[1] = 61;
-	NC(n_AddPlayerClass);
-	nc_params[1] = 275;
-	NC(n_AddPlayerClass);
-	nc_params[1] = 287;
-	NC(n_AddPlayerClass);
-	NC(n_AddPlayerClass);
-	nc_params[1] = 133;
-	NC(n_AddPlayerClass);
+	nc_params[6] = SPAWN_WEAPON_1;
+	nc_params[7] = SPAWN_AMMO_1;
+	nc_params[8] = nc_params[10] = SPAWN_WEAPON_2_3;
+	nc_params[11] = nc_params[11] = SPAWN_AMMO_2_3;
+
+	for (i = 0; i < NUMCLASSES; i++) {
+		nc_params[1] = CLASS_SKINS[i];
+		NC(n_AddPlayerClass);
+	}
 }
 
 void class_on_player_connect(AMX *amx, int playerid)
@@ -83,7 +90,7 @@ void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 	void zones_hide_text(AMX*, int);
 
 	int class_index;
-	if (_classid < 0 || numclasses <= _classid) {
+	if (_classid < 0 || NUMCLASSES <= _classid) {
 		class_index = classidx[playerid];
 	} else {
 		classidx[playerid] = class_index = _classid;

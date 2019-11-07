@@ -7,6 +7,7 @@
 #include "cmd.h"
 #include "game_sa.h"
 #include "playerdata.h"
+#include "zones.h"
 #include <string.h>
 #include <math.h>
 
@@ -94,11 +95,10 @@ void zones_on_player_connect(AMX *amx, int playerid)
 	NC(n_PlayerTextDrawColor);
 }
 
-void zones_on_player_spawn(AMX *amx, int playerid)
+void zones_on_player_spawn(AMX *amx, int playerid, struct vec3 pos)
 {
 	NC_PlayerTextDrawShow(playerid, ptextid[playerid]);
-	/*Note: not doing zones_update here because spawn.c will call
-	natives_NC_SetPlayerPos on player spawn.*/
+	zones_update(amx, playerid, pos);
 }
 
 void zones_hide_text(AMX *amx, int playerid)
@@ -106,11 +106,6 @@ void zones_hide_text(AMX *amx, int playerid)
 	NC_PlayerTextDrawHide(playerid, ptextid[playerid]);
 }
 
-/**
-Check if a single player their zone has changed, and update it if needed.
-
-Should also be called when OnPlayerSetPos is called.
-*/
 void zones_update(AMX *amx, int playerid, struct vec3 pos)
 {
 	struct REGION *r = regions, *rmax = regions + regioncount;

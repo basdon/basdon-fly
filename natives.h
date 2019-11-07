@@ -64,6 +64,7 @@ extern int n_SetPlayerPos_;
 extern int n_SetPlayerRaceCheckpoint;
 extern int n_SetPlayerSpecialAction;
 extern int n_SetPlayerTime;
+extern int n_SetSpawnInfo;
 extern int n_SetVehicleHealth;
 extern int n_SetVehicleParamsEx;
 extern int n_SetVehicleToRespawn;
