@@ -1,15 +1,12 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_DEPRECATE
-#endif
-
 #include "common.h"
 #include "a_samp.h"
 #include "airport.h"
-#include "cmd.h"
 #include "game_sa.h"
+#include "nav.h"
+#include "panel.h"
 #include <string.h>
 #include <math.h>
 
@@ -75,34 +72,15 @@ void nav_reset_cache(int playerid)
 	pcache[playerid].ils = INVALID_CACHE;
 }
 
-/**
-Disables navigation for given vehicle.
-
-Ensures the VOR textdraws are hidden.
-*/
 void nav_disable(AMX* amx, int vehicleid)
 {
-	void panel_reset_nav_for_passengers(AMX*, int);
-
 	free(nav[vehicleid]);
 	nav[vehicleid] = NULL;
 	panel_reset_nav_for_passengers(amx, vehicleid);
 }
 
-/**
-Enables navigation for given vehicle.
-
-Ensures the VOR textdraws are shown/hidden.
-Resets nav cache for all players in vehicle.
-
-@param adf vec3 to ADF towards, may be NULL
-@param vor runway to VOR towards, may be NULL
-*/
 void nav_enable(AMX *amx, int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 {
-	void panel_hide_vor_bar_for_passengers(AMX*, int);
-	void panel_show_vor_bar_for_passengers(AMX*, int);
-
 	struct NAVDATA *np;
 	int playerid, n = playercount;
 
@@ -135,6 +113,7 @@ Checks if a player can do a nav cmd by checking if the vehicle can do the nav.
 @param vehicleid out param to contain the vehicleid of the player
 @return 0 on failure, a message will have been sent to the player
 */
+static
 int nav_check_can_do_cmd(AMX *amx, int playerid, int navtype, int *vehicleid)
 {
 	static const char
@@ -167,13 +146,6 @@ sendmsgfail:	amx_SetUString(buf144, b, 144);
 
 static const char *UNK_BEACON = WARN"Unknown beacon - see /beacons or /nearest";
 
-/**
-The /adf cmd.
-
-Syntax: /adf [beacon]
-Example: /adf ls
-When no beacon, disable nav
-*/
 int nav_cmd_adf(CMDPARAMS)
 {
 	static const char
@@ -230,15 +202,6 @@ unkbeacon:
 	return 1;
 }
 
-/**
-The /vor cmd.
-
-Syntax: /vor [beacon][runway]
-Example: /vor ls09l
-Optional whitespace between beacon and runway
-When no beacon, disable nav
-When no or invalid runway, print a list of valid runways
-*/
 int nav_cmd_vor(CMDPARAMS)
 {
 	static const char
@@ -344,20 +307,11 @@ sendwarnmsg:
 	return 1;
 }
 
-/**
-The /ils command
-
-Syntax: /ils
-Only toggles ils when VOR is already active and the runway has ILS capabilities.
-*/
 int nav_cmd_ils(CMDPARAMS)
 {
 	static const char
 		*N_VOR = "ILS can only be activated when VOR is already active",
 		*N_CAP = "The selected runway does not have ILS capabilities";
-
-	void panel_show_ils_for_passengers(AMX*, int);
-	void panel_hide_ils_for_passengers(AMX*, int);
 
 	struct NAVDATA *np;
 	int vehicleid;
@@ -387,12 +341,6 @@ retmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	return 1;
 }
 
-/**
-Update nav related textdraws in panel for player if needed.
-
-Does not actually update the nav data (see nav_update for that), just updates
-the textdraws.
-*/
 void nav_update_textdraws(
 	AMX *amx, int playerid, int vehicleid,
 	int *ptxt_adf_dis_base, int *ptxt_adf_alt_base, int *ptxt_adf_crs_base,
@@ -557,9 +505,6 @@ doils:
 	}
 }
 
-/**
-May return NAV_NONE, NAV_ADF, NAV_VOR or NAV_VOR|NAV_ILS
-*/
 int nav_get_active_type(int vehicleid)
 {
 	if (nav[vehicleid] == NULL) {
@@ -574,13 +519,6 @@ int nav_get_active_type(int vehicleid)
 	return NAV_NONE;
 }
 
-/**
-Set given vehicle's navigation to given airport.
-
-Navigation target is decided by the runway or heliport (decision based on
-given vehiclemodel) that is the closest to the vehicle.
-When no target is found, airport's ADF beacon will be used.
-*/
 void nav_navigate_to_airport(
 	AMX *amx, int vehicleid, int vehiclemodel,
 	struct AIRPORT *ap)
@@ -639,9 +577,6 @@ void nav_navigate_to_airport(
 	nav_enable(amx, vehicleid, &ap->pos, NULL);
 }
 
-/**
-Resets (disables) navigation for given vehicle.
-*/
 void nav_reset_for_vehicle(int vehicleid)
 {
 	if (nav[vehicleid] != NULL) {
@@ -666,7 +601,18 @@ cell AMX_NATIVE_CALL Nav_Reset(AMX *amx, cell *params)
 	return 0;
 }
 
-static void nav_calc_ils_values(
+/**
+Calculates ILS values.
+
+@param ilsx output
+@param ilsz output
+@param dist horizontal distance of player to beacon
+@param z player z
+@param targetz beacon z position
+@param dx how far player is off of beacon target.
+*/
+static
+void nav_calc_ils_values(
 	signed char *ilsx, signed char *ilsz, const float dist,
 	const float z, const float targetz, const float dx)
 {
@@ -690,36 +636,35 @@ static void nav_calc_ils_values(
 	*ilsx = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2);
 }
 
-void nav_update(AMX *amx, int vehicleid,
-	float x, float y, float z, float heading)
+void nav_update(AMX *amx, int vehicleid, struct vec3 *pos, float heading)
 {
 	struct NAVDATA *n = nav[vehicleid];
 	float dx, dy;
 	float dist, crs, vorangle, horizontaldeviation;
-	struct vec3 *pos;
+	struct vec3 *beacon;
 
 	if (n == NULL) {
 		return;
 	}
 
 	if (n->beacon != NULL) {
-		pos = n->beacon;
+		beacon = n->beacon;
 	} else if (n->vor != NULL) {
-		pos = &n->vor->pos;
+		beacon = &n->vor->pos;
 	} else {
 		return;
 	}
 
 	heading = 360.0f - heading;
 
-	dx = x - pos->x;
-	dy = pos->y - y;
+	dx = pos->x - beacon->x;
+	dy = beacon->y - pos->y;
 	dist = sqrtf(dx * dx + dy * dy);
 	n->dist = (int) dist;
 	if (n->dist > 1000) {
 		n->dist = (n->dist / 100) * 100;
 	}
-	n->alt = (int) (z - pos->z);
+	n->alt = (int) (pos->z - beacon->z);
 	crs = -atan2f(dx, dy);
 	if (n->vor != NULL ) {
 		vorangle = crs + M_PI2 - n->vor->headingr;
@@ -737,7 +682,7 @@ void nav_update(AMX *amx, int vehicleid,
 		n->ilsx = INVALID_ILS_VALUE;
 		n->ilsz = 0;
 	} else {
-		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, z, pos->z,
+		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, beacon->z, pos->z,
 			horizontaldeviation);
 	}
 	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);

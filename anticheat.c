@@ -1,7 +1,6 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
 #include "anticheat.h"
 #include "vehicles.h"
@@ -76,7 +75,8 @@ Kicks and broadcasts kickmessage when needed. Does not log.
 
 @param type infraction type, one of AC_IF_ constants.
 */
-static void anticheat_infraction(AMX *amx, int playerid, int type)
+static
+void anticheat_infraction(AMX *amx, int playerid, int type)
 {
 	struct INFRACTIONDATA d = infractiondata[type];
 
@@ -202,7 +202,7 @@ void anticheat_disallowed_vehicle_1s(AMX *amx, int playerid)
 }
 
 void anticheat_on_player_enter_vehicle(
-	AMX* amx, int playerid, int vehicleid, int ispassenger)
+	AMX *amx, int playerid, int vehicleid, int ispassenger)
 {
 	if (!ispassenger) {
 		nc_params[0] = 2;

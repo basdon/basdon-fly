@@ -1,8 +1,8 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
+#include "heartbeat.h"
 #include <string.h>
 
 /**
@@ -10,9 +10,6 @@ The session id of the currently running server.
 */
 static int sessionid = -1;
 
-/**
-Performs query to update endtime of current session. Call every 30 seconds.
-*/
 void heartbeat_timed_update(AMX *amx)
 {
 	if (sessionid != -1) {
@@ -26,9 +23,6 @@ void heartbeat_timed_update(AMX *amx)
 	}
 }
 
-/**
-Call from OnGameModeInit.
-*/
 void heartbeat_create_session(AMX *amx)
 {
 	amx_SetUString(buf144,
@@ -40,9 +34,6 @@ void heartbeat_create_session(AMX *amx)
 	NC_cache_delete(*buf4096);
 }
 
-/**
-Call from OnGameModeExit.
-*/
 void heartbeat_end_session(AMX *amx)
 {
 	if (sessionid != -1) {

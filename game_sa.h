@@ -83,4 +83,5 @@ int game_is_heli(int model);
 Check if the given vehicle model is a plane.
 */
 int game_is_plane(int model);
+void game_sa_init();
 

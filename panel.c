@@ -1,9 +1,11 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
 #include "a_samp.h"
+#include "game_sa.h"
+#include "panel.h"
+#include "nav.h"
 #include <math.h>
 #include <string.h>
 
@@ -101,7 +103,8 @@ static int numpanelplayers;
 /**
 Resets caches for panel stuff, to make sure textdraws update next iteration.
 */
-static void panel_reset_caches(int playerid)
+static
+void panel_reset_caches(int playerid)
 {
 	memset(&caches[playerid], 0xFF, sizeof(struct PANELCACHE));
 }
@@ -129,7 +132,8 @@ Value should have leading zeros.
 |  -50 - | large
 +--------+
 */
-static void panel_update_altitude(AMX *amx, int playerid, int altitude)
+static
+void panel_update_altitude(AMX *amx, int playerid, int altitude)
 {
 	int altitude50 = altitude / 50;
 	int i, tmp, tmp2;
@@ -216,7 +220,8 @@ Value should have leading zeros.
 |      - | large
 +--------+
 */
-static void panel_update_speed(AMX *amx, int playerid, int speed)
+static
+void panel_update_speed(AMX *amx, int playerid, int speed)
 {
 	static const char SPDMETERDATA[] =
 		"160-~n~150-~n~140-~n~130-~n~120-~n~110-~n~100-~n~_90-~n~_"
@@ -270,7 +275,11 @@ static void panel_update_speed(AMX *amx, int playerid, int speed)
 	NC(n_PlayerTextDrawSetString);
 }
 
-static void panel_update_heading(AMX *amx, int playerid, int heading)
+/**
+Update heading textdraws.
+*/
+static
+void panel_update_heading(AMX *amx, int playerid, int heading)
 {
 	char buf[50];
 
@@ -310,14 +319,9 @@ static void panel_update_heading(AMX *amx, int playerid, int heading)
 	NC(n_PlayerTextDrawSetString);
 }
 
-/**
-Panel loop. Call from timer100.
-*/
 void panel_timed_update(AMX *amx)
 {
-	void nav_update(AMX*, int, float, float, float, float);
-	void nav_update_textdraws(AMX*, int, int, int*, int*, int*, int*, int*);
-
+	struct vec3 vpos;
 	int playerid, vehicleid, n = numpanelplayers;
 	float x, y, z, heading;
 
@@ -326,11 +330,8 @@ void panel_timed_update(AMX *amx)
 
 		NC_GetPlayerVehicleID_(playerid, &vehicleid);
 
-		NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
-		x = amx_ctof(*buf32);
-		y = amx_ctof(*buf64);
-		z = amx_ctof(*buf144);
-		panel_update_altitude(amx, playerid, (int) z);
+		common_NC_GetVehiclePos(amx, vehicleid, &vpos);
+		panel_update_altitude(amx, playerid, (int) vpos.z);
 
 		NC_GetVehicleZAngle(vehicleid, buf144a);
 		heading = *((float*) buf144);
@@ -338,7 +339,7 @@ void panel_timed_update(AMX *amx)
 
 		NC_GetPlayerState(playerid);
 		if (nc_result == PLAYER_STATE_DRIVER) {
-			nav_update(amx, vehicleid, x, y, z, heading);
+			nav_update(amx, vehicleid, &vpos, heading);
 		}
 
 		nav_update_textdraws(amx,
@@ -408,7 +409,11 @@ void panel_remove_panel_player(int playerid)
 	}
 }
 
-static void panel_reset_nav(AMX *amx, int playerid)
+/**
+Reset nav textdraws, meaning dashes for values and hide vor/ils textdraws.
+*/
+static
+void panel_reset_nav(AMX *amx, int playerid)
 {
 	if (ptxt_vai[playerid] != -1) {
 		buf144[0] = '-';
@@ -438,9 +443,6 @@ static void panel_reset_nav(AMX *amx, int playerid)
 	panel_reset_caches(playerid);
 }
 
-/**
-Show the VOR bar for passengers of given vehicle.
-*/
 void panel_show_vor_bar_for_passengers(AMX *amx, int vehicleid)
 {
 	/*TODO: use on_player_was_afk to show VOR bar to passengers that
@@ -457,9 +459,6 @@ void panel_show_vor_bar_for_passengers(AMX *amx, int vehicleid)
 	}
 }
 
-/**
-Hides the VOR bar for passengers of given vehicle.
-*/
 void panel_hide_vor_bar_for_passengers(AMX *amx, int vehicleid)
 {
 	/*TODO: use on_player_was_afk to hide VOR bar to passengers that
@@ -479,9 +478,6 @@ void panel_hide_vor_bar_for_passengers(AMX *amx, int vehicleid)
 	}
 }
 
-/**
-Shows the ILS text for passengers of given vehicle.
-*/
 void panel_show_ils_for_passengers(AMX *amx, int vehicleid)
 {
 	/*TODO: use on_player_was_afk to hide VOR bar to passengers that
@@ -498,9 +494,6 @@ void panel_show_ils_for_passengers(AMX *amx, int vehicleid)
 	}
 }
 
-/**
-Hides the ILS text for passengers of given vehicle.
-*/
 void panel_hide_ils_for_passengers(AMX *amx, int vehicleid)
 {
 	/*TODO: use on_player_was_afk to hide VOR bar to passengers that
@@ -517,9 +510,6 @@ void panel_hide_ils_for_passengers(AMX *amx, int vehicleid)
 	}
 }
 
-/**
-Resets nav indicators for all players in given vehicle.
-*/
 void panel_reset_nav_for_passengers(AMX *amx, int vehicleid)
 {
 	/*TODO: use on_player_was_afk to hide VOR bar to passengers that
@@ -675,7 +665,7 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 	}
 }
 
-void panel_on_player_was_afk(AMX* amx, int playerid)
+void panel_on_player_was_afk(AMX *amx, int playerid)
 {
 	NC_GetPlayerVehicleID(playerid);
 	if (nc_result) {

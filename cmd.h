@@ -4,6 +4,10 @@
 #define CMDPARAMS AMX *amx,const int playerid,const char *cmdtext,int parseidx
 
 /*
+Checks incoming command and calls handler if one found and group matched.
+*/
+int cmd_check(AMX*, const int playerid, const int hash, const char *cmdtext);
+/*
 Gets next int parameter in cmdtext after parseidx.
 
 Preceding whitespace(s) are skipped.
@@ -31,3 +35,13 @@ On match, parseidx is the index right after the value, so either space or \0.
 @return non-zero on success, with filled in buffer.
 */
 int cmd_get_str_param(const char* cmdtext, int *parseidx, char *buf);
+/*
+Hashes command part of command text (case-insensitive).
+End delimiter for the command part is either a zero terminator, or anything
+with a value below the space character.
+*/
+int cmd_hash(const char *cmdtext);
+/*
+Precalcs all command hashes.
+*/
+void cmd_init();

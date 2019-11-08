@@ -1,6 +1,8 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#define _CRT_SECURE_NO_DEPRECATE
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -21,6 +23,7 @@ struct quat {
 	float qx, qy, qz, qw;
 };
 
+#include "cmd.h"
 #include "natives.h"
 #include "publics.h"
 
@@ -104,66 +107,56 @@ extern int time_m;
 /**
 Teleport the player to a coordinate, and set facing angle and reset camera.
 */
-void common_tp_player(AMX *amx, int playerid, struct vec4 pos);
-
+void common_tp_player(AMX*, int playerid, struct vec4 pos);
 /**
 Hides game text for given player.
 */
-void common_hide_gametext_for_player(AMX *amx, int playerid);
-
+void common_hide_gametext_for_player(AMX*, int playerid);
 /**
 Try to find the player that is in given seat of given vehicle.
 
 @return player id or INVALID_PLAYER_ID
 */
-int common_find_player_in_vehicle_seat(AMX *amx, int vehicleid, int seat);
+int common_find_player_in_vehicle_seat(AMX*, int vehicleid, int seat);
 #define common_find_vehicle_driver(X,Y) \
 	common_find_player_in_vehicle_seat(X,Y,0)
-
 /**
 Attempt to crash the player.
 */
-void common_crash_player(AMX *amx, int playerid);
-
+void common_crash_player(AMX*, int playerid);
 /**
 Kick a player next server tick.
 */
 void common_NC_Kick(int playerid);
-
 /**
 Log some anticheat related thing.
 
 @param eventtype one of AC_ definitions
 @param info not escaped into db query
 */
-void anticheat_log(AMX *amx, int playerid, int eventtype, char *info);
-
+void anticheat_log(AMX*, int playerid, int eventtype, char *info);
 /**
 Sets the state of the engine for given vehicle id.
 */
-void common_set_vehicle_engine(AMX *amx, int vehicleid, int enginestatus);
-
+void common_set_vehicle_engine(AMX*, int vehicleid, int enginestatus);
 /**
 Alternative for GetPlayerPos to get it directly into a vec3 struct.
 
 Will use buf32, buf64, buf144.
 */
-int common_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos);
-
+int common_NC_GetPlayerPos(AMX*, int playerid, struct vec3 *pos);
 /**
 Alternative for GetVehiclePos to get it directly into a vec3 struct.
 
 Will use buf32, buf64, buf144.
 */
 int common_NC_GetVehiclePos(AMX*, int vehicleid, struct vec3 *pos);
-
 /**
 Alternative for GetVehicleRotationQuat to get it directly into a quat struct.
 
 Will use buf32, buf64, buf144, buf32_1.
 */
 int common_NC_GetVehicleRotationQuat(AMX*, int vehicleid, struct quat *rot);
-
 /**
 Alternative for GetVehicleVelocity to get it directly into a vec3 struct.
 

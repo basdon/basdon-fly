@@ -10,8 +10,8 @@ when we're inside cmd.c*/
 /**
 Respawns the vehicle the player is in.
 */
-static int
-cmd_admin_respawn(CMDPARAMS)
+static
+int cmd_admin_respawn(CMDPARAMS)
 {
 	NC_GetPlayerVehicleID(playerid);
 	if (nc_result) {
@@ -20,7 +20,8 @@ cmd_admin_respawn(CMDPARAMS)
 	return 1;
 }
 
-static int cmd_at400(CMDPARAMS)
+static
+int cmd_at400(CMDPARAMS)
 {
 	struct vec3 playerpos, vehiclepos;
 	struct dbvehicle *veh;
@@ -67,17 +68,16 @@ static const char
 	*MSG_VEH_PARK_N = WARN"You are not allowed to park this vehicle",
 	*MSG_VEH_SPRAY_N = WARN"You are not allowed to respray this vehicle";
 
-static int
-cmd_camera(CMDPARAMS)
+static
+int cmd_camera(CMDPARAMS)
 {
 	NC_GivePlayerWeapon(playerid, WEAPON_CAMERA, 3036);
 	return 1;
 }
 
-static int cmd_me(CMDPARAMS)
+static
+int cmd_me(CMDPARAMS)
 {
-	void echo_on_game_chat_or_action(AMX*, int, int, char*);
-
 	char *from;
 	cell *to;
 	int hascontent = 0;
@@ -105,8 +105,8 @@ static int cmd_me(CMDPARAMS)
 	return 1;
 }
 
-static int
-cmd_park(CMDPARAMS)
+static
+int cmd_park(CMDPARAMS)
 {
 	char q[144];
 	struct dbvehicle *veh;
@@ -157,11 +157,9 @@ static const char* NO_RECLASSSPAWN =
 	"Use /s to cancel your current mission for a fee "
 	"($"EQ(MISSION_CANCEL_FINE_)").";
 
-static int
-cmd_reclass(CMDPARAMS)
+static
+int cmd_reclass(CMDPARAMS)
 {
-	int missions_is_player_on_mission(int playerid);
-
 	if (missions_is_player_on_mission(playerid)) {
 		amx_SetUString(buf144, NO_RECLASSSPAWN, 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
@@ -177,12 +175,9 @@ cmd_reclass(CMDPARAMS)
 	return 1;
 }
 
-static int
-cmd_respawn(CMDPARAMS)
+static
+int cmd_respawn(CMDPARAMS)
 {
-	int missions_is_player_on_mission(int playerid);
-	void spawn_respawn_player(AMX*, int);
-
 	if (missions_is_player_on_mission(playerid)) {
 		amx_SetUString(buf144, NO_RECLASSSPAWN, 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
@@ -192,8 +187,8 @@ cmd_respawn(CMDPARAMS)
 	return 1;
 }
 
-static int
-cmd_spray(CMDPARAMS)
+static
+int cmd_spray(CMDPARAMS)
 {
 	char q[144];
 	struct dbvehicle *veh;

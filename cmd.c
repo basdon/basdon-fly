@@ -1,12 +1,18 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
-#include "cmd.h"
-#include "playerdata.h"
-#include "vehicles.h"
+#include "airport.h"
+#include "echo.h"
 #include "game_sa.h"
+#include "playerdata.h"
+#include "pm.h"
+#include "prefs.h"
+#include "protips.h"
+#include "nav.h"
+#include "missions.h"
+#include "vehicles.h"
+#include "zones.h"
 #include <string.h>
 
 int cmd_get_int_param(const char *cmdtext, int *parseidx, int *value)
@@ -141,17 +147,6 @@ struct COMMAND {
 #include "cmdhandlers_dev.c"
 #endif /*DEV*/
 
-int airport_cmd_beacons(CMDPARAMS);
-int airport_cmd_nearest(CMDPARAMS);
-int pm_cmd_pm(CMDPARAMS);
-int pm_cmd_r(CMDPARAMS);
-int prefs_cmd_preferences(CMDPARAMS);
-int protips_cmd_protip(CMDPARAMS);
-int nav_cmd_adf(CMDPARAMS);
-int nav_cmd_ils(CMDPARAMS);
-int nav_cmd_vor(CMDPARAMS);
-int zones_cmd_loc(CMDPARAMS);
-
 /* see sharedsymbols.h for GROUPS_ definitions */
 /* command must prefixed by forward slash and be lower case */
 static struct COMMAND cmds[] = {
@@ -184,11 +179,6 @@ static struct COMMAND cmds[] = {
 	{ 0, "/vor", GROUPS_ALL, nav_cmd_vor },
 }, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
 
-/*
-Hashes command part of command text (case-insensitive).
-End delimiter for the command part is either a zero terminator, or anything
-with a value below the space character.
-*/
 int cmd_hash(const char *cmdtext)
 {
 	int val, pos = 0, result = 0;
@@ -209,7 +199,8 @@ Check if the command in cmdtext is same as cmd (case insensensitive).
 Parseidx is not written to if it didn't match.
 On match, parseidx is the index right after the command, so either space or \0.
 */
-static int cmd_is(const char *cmdtext, const char *cmd, int *parseidx)
+static
+int cmd_is(const char *cmdtext, const char *cmd, int *parseidx)
 {
 	int pos = 0;
 
@@ -295,9 +286,6 @@ cell AMX_NATIVE_CALL Command_Is(AMX *amx, cell *params)
 	return cmd_is(cmdtext, cmd, (int*) addr);
 }
 
-/*
-Precalcs all command hashes.
-*/
 void cmd_init()
 {
 	struct COMMAND *c = cmds;
@@ -311,8 +299,7 @@ void cmd_init()
 /*
 Checks incoming command and calls handler if one found and group matched.
 */
-int
-cmd_check(AMX *amx, const int playerid, const int hash, const char *cmdtext)
+int cmd_check(AMX *amx, const int playerid, const int hash, const char *cmdtext)
 {
 	struct COMMAND *c = cmds;
 	int parseidx;

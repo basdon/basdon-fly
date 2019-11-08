@@ -1,7 +1,6 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
 #include "dialog.h"
 #include <string.h>
@@ -51,9 +50,6 @@ void dialog_on_player_disconnect(AMX *amx, int playerid)
 	}
 }
 
-/**
-@return 0 when the response should be dropped
-*/
 int dialog_on_response(AMX *amx, int playerid, int dialogid)
 {
 	int ret = 1;

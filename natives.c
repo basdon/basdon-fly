@@ -2,8 +2,11 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "maps.h"
+#include "natives.h"
 #include "spawn.h"
 #include "vehicles.h"
+#include "zones.h"
 
 /* Natives ending in _ means that they have
 custom code and shouldn't be used directly.*/
@@ -240,17 +243,12 @@ int natives_find(AMX *amx)
 			return 0;
 		}
 	}
-
 	return 1;
 }
 
 int natives_NC_PutPlayerInVehicle(
 	AMX *amx, int playerid, int vehicleid, int seat)
 {
-	void maps_stream_for_player(AMX*, int, struct vec3);
-	void veh_update_service_point_mapicons(AMX*, int, float, float);
-	void zones_update(AMX*, int, struct vec3);
-
 	float hp;
 	struct vec3 pos;
 

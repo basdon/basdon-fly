@@ -28,7 +28,6 @@ If the player has a different transaction going, it will not be
 ended and a warning will be logged.
 */
 void dialog_end_transaction(int playerid, int transactionid);
-
 /**
 Ensures the current transactionid for given player.
 
@@ -36,7 +35,6 @@ If the player already has a different transaction going, it will not be
 overridden and a warning will be logged.
 */
 void dialog_ensure_transaction(int playerid, int transactionid);
-
 /**
 Shows the player a synchronous (only one at a time) dialog box.
 
@@ -75,7 +73,14 @@ DIALOG_DUMMY can be used as dialog id if no response is handled.
          dialog was queued.
 */
 int dialog_NC_ShowPlayerDialog(
-	AMX *amx, int playerid, int dialogid, int style,
+	AMX*, int playerid, int dialogid, int style,
 	char *caption, char *info,
 	char *button1, char *button2, int transactionid);
-
+int dialog_on_response(AMX*, int, int);
+void dialog_on_player_connect(AMX*, int playerid);
+void dialog_on_player_disconnect(AMX*, int playerid);
+/**
+@return 0 when the response should be dropped
+*/
+int dialog_on_response(AMX*, int playerid, int dialogid);
+void dialog_pop_queue(AMX*);

@@ -1,13 +1,8 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_DEPRECATE
-#endif
-
 #include "common.h"
 #include "airport.h"
-#include "cmd.h"
 #include "dialog.h"
 #include <string.h>
 #include <math.h>
@@ -24,9 +19,6 @@ Amount of airports in the nearest_airports_map array.
 */
 static short nearest_airports_map_size[MAX_PLAYERS];
 
-/**
-Clears all data and frees all allocated memory.
-*/
 void airports_destroy()
 {
 	struct AIRPORT *ap = airports;
@@ -40,9 +32,6 @@ void airports_destroy()
 	airports = NULL;
 }
 
-/**
-Loads airports and runways (and init other things).
-*/
 void airports_init(AMX *amx)
 {
 	int cacheid, rowcount, lastap, i;
@@ -158,23 +147,24 @@ norunways:
 #endif
 }
 
+/**
+Structure used for sorting airports by distance for the /nearest list dialog.
+*/
 struct APREF {
 	float distance;
 	int index;
 };
 
-static int sortaprefs(const void *_a, const void *_b)
+/**
+Sort function used to sort airports by distance for the /nearest list dialog.
+*/
+static
+int sortaprefs(const void *_a, const void *_b)
 {
 	struct APREF *a = (struct APREF*) _a, *b = (struct APREF*) _b;
 	return (int) (10.0f * (b->distance - a->distance));
 }
 
-/**
-The /nearest command, shows a list dialog with airports.
-
-Airports are sorted by distance from player. Choosing an airport shows an
-additional dialog with information about the selected airport.
-*/
 int airport_cmd_nearest(CMDPARAMS)
 {
 	static const char *NONE = WARN"No airports!";
@@ -240,9 +230,6 @@ int airport_cmd_nearest(CMDPARAMS)
 	return 1;
 }
 
-/**
-The /beacons command, shows a dialog with list of all airport beacons.
-*/
 int airport_cmd_beacons(CMDPARAMS)
 {
 	char buf[4096], *b = buf;
@@ -271,9 +258,6 @@ int airport_cmd_beacons(CMDPARAMS)
 	return 1;
 }
 
-/**
-Cleanup stored stuff for player when they disconnect.
-*/
 void airport_on_player_disconnect(int playerid)
 {
 	if (nearest_airports_map[playerid] != NULL) {
@@ -282,9 +266,6 @@ void airport_on_player_disconnect(int playerid)
 	}
 }
 
-/**
-Call when getting a response from DIALOG_AIRPORT_NEAREST, to show info dialog.
-*/
 void airport_list_dialog_response(AMX *amx, int playerid, int response, int idx)
 {
 	struct AIRPORT *ap;

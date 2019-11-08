@@ -1,7 +1,6 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define _CRT_SECURE_NO_DEPRECATE
 #include "a_samp.h"
 #include "game_sa.h"
 #include "common.h"
@@ -28,11 +27,6 @@ Elements may be NULL is associated value in numspawns is zero.
 */
 static char *spawn_list_text[NUMCLASSES];
 
-/**
-Loads spawn locations from database, creates spawn list texts.
-
-Must run after airports_init
-*/
 void spawn_init(AMX *amx)
 {
 	int querycacheid, row, rows, ap, klass = NUMCLASSES;

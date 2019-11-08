@@ -1,16 +1,12 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_DEPRECATE
-#endif
-
 #include "common.h"
 #include <string.h>
 
 /*
 
-viedistance can be /2 by night
+viewdistance can be /2 by night
 
 VDIS viewdistance
 CC   cloud coverage
@@ -139,7 +135,7 @@ DE | 18, 18, 18, 17, 17, 17, 17, 17, 17, 17, 19, 19, 19, 17
 
 */
 
-const unsigned char nextweatherarray[NEXT_WEATHER_POSSIBILITIES] = {
+static const unsigned char nextweatherarray[NEXT_WEATHER_POSSIBILITIES] = {
 	/* 9x clear */
 	WEATHER_LA_EXTRASUNNY, /* VD  800 */
 	WEATHER_LA_EXTRASUNNYSMOG, /* VD  800 */
@@ -192,21 +188,21 @@ const unsigned char nextweatherarray[NEXT_WEATHER_POSSIBILITIES] = {
 	/* 1x sandstorms */
 	WEATHER_DE_SANDSTORMS,
 };
-const char weathernames[] =
+static const char weathernames[] =
 	"clear\0light clouds\0overcast\0thunderstorms\0thick fog\0sandstorms";
 /*       0      6            19        28             42         52 */
-const unsigned char weathernamemapping[WEATHERS] = {
+static const unsigned char weathernamemapping[WEATHERS] = {
 	0, 6, 0, 6, 19, 6, 0, 19, 28, 42, 6, 0, 19, 0, 6, 19, 28, 0, 6, 52, 42
 };
-const float winds[WEATHERS] = {
+static const float winds[WEATHERS] = {
 	0.0f, 0.25f, 0.0f, 0.2f, 0.7f, 0.25f, 0.0f, 0.7f, 1.0f, 0.0f, 0.2f,
 	0.0f, 0.4f, 0.0f, 0.3f, 0.7f, 1.0f, 0.0f, 0.3f, 1.5f, 0.0f
 };
 #define WIND_MULTIPLIER (34.0f)
-const char scales[] =
+static const char scales[] =
 	"very high\0moderate\0very low";
 /*       0    5    10        19   24 */
-const unsigned char visibilitymapping[WEATHERS] = {
+static const unsigned char visibilitymapping[WEATHERS] = {
 	/*    0 -  454 very low */
 	/*  455 -  650 low */
 	/*  651 -  700 moderate */
@@ -214,16 +210,20 @@ const unsigned char visibilitymapping[WEATHERS] = {
 	/* 1001 - 1500 very high */
 	5, 5, 5, 5, 10, 24, 24, 0, 24, 19, 5, 5, 5, 0, 0, 0, 24, 0, 0, 19, 19
 };
-const unsigned char wavesmapping[WEATHERS] = {
+static const unsigned char wavesmapping[WEATHERS] = {
 	/*   0 - 0.3 low */
 	/* 0.4 - 0.6 moderate */
 	/* 0.7 - 1.0 high */
 	24, 10, 24, 10, 5, 10, 24, 5, 5, 24, 10, 24, 5, 24, 10, 5, 5, 24, 10, 5, 24
 };
 
-unsigned char currentweather = WEATHER_INVALID;
+static unsigned char currentweather = WEATHER_INVALID;
 
-static void makeWeatherMsg(char* buf, const char* type, int weather, cell* outaddr)
+/**
+Formats the METAR weather message.
+*/
+static
+void timecyc_make_weather_msg(char* buf, const char* type, int weather, cell* outaddr)
 {
 	sprintf(buf, "METAR %s: %s, visibility: %s, winds: %.0fkts, waves: %s", type,
 		weathernames + weathernamemapping[weather], scales + visibilitymapping[weather],
@@ -238,7 +238,7 @@ cell AMX_NATIVE_CALL Timecyc_GetNextWeatherMsgQuery(AMX *amx, cell *params)
 	cell* addr;
 	const unsigned char lastweather = currentweather;
 	amx_GetAddr(amx, params[2], &addr);
-	makeWeatherMsg(buf, "forecast", currentweather = nextweatherarray[params[1]], addr);
+	timecyc_make_weather_msg(buf, "forecast", currentweather = nextweatherarray[params[1]], addr);
 	amx_GetAddr(amx, params[3], &addr);
 	if (lastweather == WEATHER_INVALID) {
 		buf[0] = 0;
@@ -255,6 +255,6 @@ cell AMX_NATIVE_CALL Timecyc_GetCurrentWeatherMsg(AMX *amx, cell *params)
 	char buf[144];
 	cell* addr;
 	amx_GetAddr(amx, params[1], &addr);
-	makeWeatherMsg(buf, "weather report", currentweather, addr);
+	timecyc_make_weather_msg(buf, "weather report", currentweather, addr);
 	return 1;
 }

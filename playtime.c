@@ -1,10 +1,6 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_DEPRECATE
-#endif
-
 #include "common.h"
 #include <string.h>
 

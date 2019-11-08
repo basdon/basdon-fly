@@ -1,13 +1,9 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_DEPRECATE
-#endif
-
 #include "common.h"
-#include <string.h>
 #include "playerdata.h"
+#include <string.h>
 
 struct playerdata *pdata[MAX_PLAYERS];
 
@@ -19,13 +15,6 @@ void pdata_init()
 	}
 }
 
-/**
-Refetches the player's name and stores it in the plugin.
-Will crash the server if pdata memory hasn't been allocated.
-
-@param amx abstract machine
-@param playerid player of which to refetch the name
-*/
 void pdata_update_name(AMX *amx, int playerid)
 {
 	struct playerdata *pd = pdata[playerid];
@@ -43,12 +32,6 @@ void pdata_update_name(AMX *amx, int playerid)
 	} while (t);
 }
 
-/**
-Initializes player data for a player.
-
-@param amx abstract machine
-@param playerid playerid for which to initialize their data
-*/
 void pdata_init_player(AMX *amx, int playerid)
 {
 	struct playerdata *pd;

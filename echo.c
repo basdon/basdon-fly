@@ -1,8 +1,8 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
+#include "echo.h"
 #include "playerdata.h"
 #include <string.h>
 
@@ -32,12 +32,6 @@
 static cell socket_in = SOCKET_INVALID_SOCKET;
 static cell socket_out = SOCKET_INVALID_SOCKET;
 
-/**
-Creates the echo sockets.
-
-Call periodically, to up sockets in the case they couldn't be started from
-OnGameModeInit.
-*/
 void echo_init(AMX *amx)
 {
 	static const char *buflo = "127.0.0.1";
@@ -64,10 +58,6 @@ void echo_init(AMX *amx)
 	}
 }
 
-/**
-Destroys the sockets used by the echo service.
-Call from OnGameModeExit
-*/
 void echo_dispose(AMX *amx)
 {
 	if (socket_out != SOCKET_INVALID_SOCKET) {
@@ -82,13 +72,6 @@ void echo_dispose(AMX *amx)
 	}
 }
 
-/**
-Send player connection packet to IRC echo.
-
-@param amx abstract machine
-@param playerid playerid that (dis)connected
-@param reason 3 when OnPlayerConnection, reason when OnPlayerDisconnect
-*/
 void echo_on_player_connection(AMX *amx, int playerid, int reason)
 {
 	int nicklen;
@@ -106,14 +89,6 @@ void echo_on_player_connection(AMX *amx, int playerid, int reason)
 	}
 }
 
-
-/**
-Send game chat or action to IRC echo.
-
-Call from OnPlayerText with t 0 or from /me cmd handler with t 1.
-
-@param t type, either 0 for normal chat or 1 for action
-*/
 void echo_on_game_chat_or_action(
 	AMX *amx, int t, int playerid, char *text)
 {
@@ -163,10 +138,6 @@ void echo_sendclientmessage_buf4096_filtered(AMX *amx)
 static const char *msg_bridge_up = "IRC bridge is up";
 static const char *msg_bridge_down = "IRC bridge is down";
 
-/**
-Handle received UDP packet.
-Call from onUDPReceiveData
-*/
 void echo_on_receive(AMX *amx, cell socket_handle, cell data_a,
 		     char *data, int len)
 {

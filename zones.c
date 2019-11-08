@@ -1,10 +1,8 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define _CRT_SECURE_NO_DEPRECATE
 #include "a_samp.h"
 #include "common.h"
-#include "cmd.h"
 #include "game_sa.h"
 #include "playerdata.h"
 #include "zones.h"
@@ -55,7 +53,11 @@ nr:
 	}
 }
 
-static int zones_is_in_zone(struct vec3 pos, struct ZONE *zone)
+/**
+Check if given position is inside given zone
+*/
+static
+int zones_is_in_zone(struct vec3 pos, struct ZONE *zone)
 {
 	return zone->x1 <= pos.x && pos.x <= zone->x2 &&
 		zone->y1 <= pos.y && pos.y <= zone->y2 &&
@@ -161,9 +163,6 @@ gotcha:
 	}
 }
 
-/**
-Update player zone for all players, should be called periodically.
-*/
 void zones_update_for_all(AMX *amx)
 {
 	int idx, playerid;

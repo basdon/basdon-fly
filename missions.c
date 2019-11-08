@@ -1,18 +1,15 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_DEPRECATE
-#endif
-
 #include "common.h"
+#include "airport.h"
+#include "playerdata.h"
+#include "missions.h"
+#include "nav.h"
+#include "vehicles.h"
 #include <math.h>
 #include <string.h>
 #include <time.h>
-#include "airport.h"
-#include "playerdata.h"
-#include "vehicles.h"
-#include "missions.h"
 
 #define TRACKER_PORT 7766
 
@@ -59,9 +56,6 @@ Player textdraw handles for passenger satisfaction indicator.
 */
 static int ptxt_satisfaction[MAX_PLAYERS];
 
-/**
-TODO: refactor once missions is all-plugin
-*/
 int missions_is_player_on_mission(int playerid)
 {
 	return activemission[playerid] != NULL;
@@ -103,8 +97,13 @@ void missions_add_distance(int playerid, float distance_in_m)
 	}
 }
 
-/* returns amount of characters appended */
-static int mission_append_pay(char *buf, char *description, int amount)
+/**
+Append a pay description and colorized, formatted number to given buffer.
+
+@return amount of characters appended
+*/
+static
+int missions_append_pay(char *buf, char *description, int amount)
 {
 	char tmp[12], *ptmp;
 	int len, p = sprintf(buf, "%s", description);
@@ -154,8 +153,11 @@ void missions_freepoints()
 	}
 }
 
-/* in units/s */
-static float mission_get_vehicle_maximum_speed(int model)
+/**
+@return speed in units/s
+*/
+static
+float missions_get_vehicle_maximum_speed(int model)
 {
 	/* max horizontal speed is about 81.6 */
 	switch (model) {
@@ -173,7 +175,8 @@ static float mission_get_vehicle_maximum_speed(int model)
 	case MODEL_RUSTLER: return 235.0f / 270.0f * 81.6f;
 	case MODEL_SKIMMER: return 135.0f / 270.0f * 81.6f;
 	default:
-		logprintf("mission_get_vehicle_minimum_missiontime: unknown model: %d", model);
+		logprintf("mission_get_vehicle_maximum_speed: "
+			"unknown model: %d", model);
 	case MODEL_SHAMAL:
 	case MODEL_HYDRA:
 	case MODEL_ANDROM:
@@ -182,7 +185,11 @@ static float mission_get_vehicle_maximum_speed(int model)
 	}
 }
 
-static float mission_get_vehicle_paymp(int model)
+/**
+Gets the pay multiplier for missions done with given vehicle model.
+*/
+static
+float missions_get_vehicle_paymp(int model)
 {
 	const float heli_mp = 1.18f;
 
@@ -210,6 +217,10 @@ static float mission_get_vehicle_paymp(int model)
 	}
 }
 
+/**
+Calculates airport tax for given missiontype at given airport.
+*/
+static
 int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 {
 	struct MISSIONPOINT *msp;
@@ -284,12 +295,6 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 */
 static int dev_show_closest_point = 0;
 
-/**
-Toggles showing closest missionpoint. Will send a message to all players when
-called.
-
-@see dev_missions_update_closest_point
-*/
 void dev_missions_toggle_closest_point(AMX *amx)
 {
 	int i;
@@ -304,10 +309,6 @@ void dev_missions_toggle_closest_point(AMX *amx)
 	NC_SendClientMessageToAll(-1, buf144a);
 }
 
-/**
-Dev function that will set every player's race checkpoint to whatever
-missionpoint is closest to them.
-*/
 void dev_missions_update_closest_point(AMX *amx)
 {
 	static struct MISSIONPOINT *dev_closest_point[MAX_PLAYERS];
@@ -398,6 +399,7 @@ cell AMX_NATIVE_CALL Missions_AddPoint(AMX *amx, cell *params)
 	return 1;
 }
 
+static
 struct AIRPORT *getRandomAirportForType(AMX *amx, int missiontype, struct AIRPORT *blacklistedairport)
 {
 	struct AIRPORT *ap = airports, **aps;
@@ -426,6 +428,7 @@ struct AIRPORT *getRandomAirportForType(AMX *amx, int missiontype, struct AIRPOR
 	return ap;
 }
 
+static
 struct MISSIONPOINT *getRandomEndPointForType(AMX *amx, int missiontype, struct AIRPORT *blacklistedairport)
 {
 #define TMP_PT_SIZE 7
@@ -988,7 +991,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	duration_h = (totaltime - duration_m) / 60;
 
 	/* don't use adistance because it also includes z changes */
-	mintime = (int) (mission->distance / mission_get_vehicle_maximum_speed(mission->veh->model));
+	mintime = (int) (mission->distance / missions_get_vehicle_maximum_speed(mission->veh->model));
 	if (totaltime < mintime) {
 		pcheat -= 250000;
 		sprintf(buf, "flg(#%d) too fast: min: %d actual: %d", mission->id, mintime, totaltime);
@@ -997,7 +1000,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 		*(addr + 2000) = 0; /* ac log speed cheat */
 	}
 
-	paymp = mission_get_vehicle_paymp(mission->veh->model);
+	paymp = missions_get_vehicle_paymp(mission->veh->model);
 	ptax = -calculate_airport_tax(mission->endpoint->ap, mission->missiontype);
 	pdistance = 500 + (int) (mission->distance * 1.135f);
 	pdistance = (int) (pdistance * paymp);
@@ -1070,29 +1073,29 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	buf[p++] = '\n';
 	buf[p++] = '\n';
 	if (ptax) {
-		p += mission_append_pay(buf + p, "{ffffff}Airport Tax:\t\t", ptax);
+		p += missions_append_pay(buf + p, "{ffffff}Airport Tax:\t\t", ptax);
 	}
 	if (mission->weatherbonus) {
-		p += mission_append_pay(buf + p, "{ffffff}Weather bonus:\t\t", mission->weatherbonus);
+		p += missions_append_pay(buf + p, "{ffffff}Weather bonus:\t\t", mission->weatherbonus);
 	}
-	p += mission_append_pay(buf + p, "{ffffff}Distance Pay:\t\t", pdistance);
+	p += missions_append_pay(buf + p, "{ffffff}Distance Pay:\t\t", pdistance);
 	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
 		if (psatisfaction > 0) {
-			p += mission_append_pay(buf + p, "{ffffff}Satisfaction Bonus:\t", psatisfaction);
+			p += missions_append_pay(buf + p, "{ffffff}Satisfaction Bonus:\t", psatisfaction);
 		} else {
-			p += mission_append_pay(buf + p, "{ffffff}Satisfaction Penalty:\t", psatisfaction);
+			p += missions_append_pay(buf + p, "{ffffff}Satisfaction Penalty:\t", psatisfaction);
 		}
 	}
 	if (pdamage) {
-		p += mission_append_pay(buf + p, "{ffffff}Damage Penalty:\t", pdamage);
+		p += missions_append_pay(buf + p, "{ffffff}Damage Penalty:\t", pdamage);
 	}
 	if (pcheat) {
-		p += mission_append_pay(buf + p, "{ffffff}Cheat Penalty:\t\t", pcheat);
+		p += missions_append_pay(buf + p, "{ffffff}Cheat Penalty:\t\t", pcheat);
 	}
 	if (pbonus) {
-		p += mission_append_pay(buf + p, "{ffffff}Bonus:\t\t\t", pbonus);
+		p += missions_append_pay(buf + p, "{ffffff}Bonus:\t\t\t", pbonus);
 	}
-	p += mission_append_pay(buf + p, "\n\n\t{ffffff}Total Pay: ", ptotal);
+	p += missions_append_pay(buf + p, "\n\n\t{ffffff}Total Pay: ", ptotal);
 	buf[--p] = 0;
 	amx_SetUString(addr + 1000, buf, sizeof(buf));
 

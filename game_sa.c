@@ -2,8 +2,8 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
-#include <string.h>
 #include "game_sa.h"
+#include <string.h>
 
 unsigned int vehicleflags[MODEL_TOTAL];
 

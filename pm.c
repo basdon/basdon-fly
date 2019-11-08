@@ -1,10 +1,9 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
-#include "cmd.h"
 #include "playerdata.h"
+#include "pm.h"
 #include <string.h>
 
 #define LAST_PMTARGET_NOBODY -1
@@ -15,17 +14,11 @@ The last pm target for each player, the player id that is used when doing /r.
 */
 static int lastpmtarget[MAX_PLAYERS];
 
-/**
-Resets the last pm target for given player.
-*/
 void pm_on_player_connect(int playerid)
 {
 	lastpmtarget[playerid] = -1;
 }
 
-/**
-Change every player that has given player as pm target to invalid target id.
-*/
 void pm_on_player_disconnect(int playerid)
 {
 	int pid, n = playercount;
@@ -41,7 +34,8 @@ void pm_on_player_disconnect(int playerid)
 /**
 Sends a pm. Target player is assumed to be online.
 */
-static void pm_send(AMX *amx, int from, int to, char *msg)
+static
+void pm_send(AMX *amx, int from, int to, char *msg)
 {
 	static const char
 		*FROM_DIS = WARN"Your PMs are disabled, use /p to enable them.",

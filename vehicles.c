@@ -1,18 +1,15 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_DEPRECATE
-#endif
-
 #include "common.h"
 #include "a_samp.h"
-#include <string.h>
-#include <math.h>
+#include "anticheat.h"
 #include "game_sa.h"
 #include "missions.h"
 #include "playerdata.h"
 #include "vehicles.h"
+#include <string.h>
+#include <math.h>
 
 #define SERVICE_MAP_DISTANCE 350.0f
 #define SERVICE_MAP_DISTANCE_SQ (SERVICE_MAP_DISTANCE * SERVICE_MAP_DISTANCE)
@@ -120,15 +117,15 @@ void veh_init()
 	dbvehicles = NULL;
 }
 
-int
-veh_can_player_modify_veh(int playerid, struct dbvehicle *veh)
+int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh)
 {
 	return veh &&
 		(pdata[playerid]->userid == veh->owneruserid ||
 		GROUPS_ISADMIN(pdata[playerid]->groups));
 }
 
-static int findServicePoint(float x, float y, float z)
+static
+int findServicePoint(float x, float y, float z)
 {
 	float dx, dy, dz;
 	int i = servicepointc;
@@ -144,7 +141,8 @@ static int findServicePoint(float x, float y, float z)
 	return -1;
 }
 
-static void freeDbVehicleTable()
+static
+void freeDbVehicleTable()
 {
 	struct dbvehicle *veh = dbvehicles;
 	while (dbvehiclealloc--) {
@@ -158,7 +156,8 @@ static void freeDbVehicleTable()
         dbvehicles = NULL;
 }
 
-static void resizeDbVehicleTable()
+static
+void resizeDbVehicleTable()
 {
 	struct dbvehicle *nw;
 	int i;
@@ -201,7 +200,8 @@ float model_fuel_capacity(int modelid)
 	}
 }
 
-static float model_fuel_usage(int modelid)
+static
+float model_fuel_usage(int modelid)
 {
 	switch (modelid)
 	{
@@ -705,13 +705,6 @@ void veh_on_player_enter_vehicle(
 	}
 }
 
-/**
-Stuff to do when a player is now driver of a vehicle.
-
-To be called from OnPlayerStateChange with new state being driver, or when
-calling PutPlayerInVehicle when the player was already a driver (because
-this won't trigger a OnPlayerStateChange.
-*/
 void veh_on_player_now_driving(AMX *amx, int playerid, int vehicleid)
 {
 	struct dbvehicle *veh;
@@ -730,12 +723,6 @@ void veh_on_player_now_driving(AMX *amx, int playerid, int vehicleid)
 	}
 }
 
-/**
-Updates the service point mapicons (and 3D text) for given playerid.
-
-@param x x-position of the player
-@param y y-position of the player
-*/
 void veh_update_service_point_mapicons(AMX *amx, int playerid, float x, float y)
 {
 	static const char* SVP_TXT = "Service Point\n/repair - /refuel";
@@ -809,14 +796,6 @@ alreadyshown:
 	}
 }
 
-/**
-Commits odo of next vehicle in update queue to db.
-
-To be called in 5 second timer, or to be called in a loop until it returns 0 in
-OnGameModeExit.
-
-@return 0 if there was nothing to commit
-*/
 int veh_commit_next_vehicle_odo_to_db(AMX *amx)
 {
 	struct dbvehicle *veh;
@@ -839,14 +818,6 @@ int veh_commit_next_vehicle_odo_to_db(AMX *amx)
 	return 0;
 }
 
-/**
-Updates vehicle and player odo.
-
-Given player must be driver of given vehicle.
-
-@param pos the position of the given vehicle
-*/
-static
 void veh_update_odo(AMX *amx, int playerid, int vehicleid, struct vec3 pos)
 {
 	struct vehnode *vuq;
@@ -926,11 +897,6 @@ void veh_timed_update_a(
 	}
 }
 
-/**
-Update vehicle related things like ODO, fuel, ...
-
-To be called every second.
-*/
 void veh_timed_1s_update(AMX *amx)
 {
 	struct dbvehicle *v;
@@ -981,13 +947,7 @@ void veh_timed_1s_update(AMX *amx)
 	}
 }
 
-/**
-Creates a vehicle (see CreateVehicle doc).
-
-@remarks Resets values of gamevehicles struct reflecting the created vehicle.
-*/
-int
-veh_NC_CreateVehicle(AMX *amx, int model, float x, float y, float z,
+int veh_NC_CreateVehicle(AMX *amx, int model, float x, float y, float z,
 		     float r, int col1, int col2, int respawn_delay,
 		     int addsiren)
 {
@@ -1010,8 +970,7 @@ veh_NC_CreateVehicle(AMX *amx, int model, float x, float y, float z,
 	return vehicleid;
 }
 
-int
-veh_NC_DestroyVehicle(AMX *amx, int vehicleid)
+int veh_NC_DestroyVehicle(AMX *amx, int vehicleid)
 {
 	if (gamevehicles[vehicleid].dbvehicle) {
 		gamevehicles[vehicleid].dbvehicle->spawnedvehicleid = 0;
@@ -1027,8 +986,8 @@ veh_NC_DestroyVehicle(AMX *amx, int vehicleid)
 Creates a vehicle from a dbvehicle struct.
 Makes sure references from vehicleid to db vehicle are updated.
 */
-int
-veh_create_from_dbvehicle(AMX *amx, struct dbvehicle *veh)
+static
+int veh_create_from_dbvehicle(AMX *amx, struct dbvehicle *veh)
 {
 	int vehicleid = veh_NC_CreateVehicle(
 		amx, veh->model, veh->x, veh->y, veh->z,
@@ -1038,8 +997,7 @@ veh_create_from_dbvehicle(AMX *amx, struct dbvehicle *veh)
 	return vehicleid;
 }
 
-int
-veh_OnVehicleSpawn(AMX *amx, int vehicleid)
+int veh_OnVehicleSpawn(AMX *amx, int vehicleid)
 {
 	struct dbvehicle *veh;
 	float min_fuel;
@@ -1067,7 +1025,11 @@ veh_OnVehicleSpawn(AMX *amx, int vehicleid)
 	return vehicleid;
 }
 
-static void veh_update_panel_for_player(AMX *amx, int playerid)
+/**
+Updates vehicle panel for a single player.
+*/
+static
+void veh_update_panel_for_player(AMX *amx, int playerid)
 {
 	struct dbvehicle *veh;
 	int vehicleid;
@@ -1250,9 +1212,6 @@ void veh_timed_panel_update(AMX *amx)
 	}
 }
 
-/**
-Should be called in OnPlayerConnect.
-*/
 void veh_create_player_textdraws(AMX *amx, int playerid)
 {
 	float *f2, *f3, *f4;
@@ -1291,9 +1250,6 @@ void veh_create_player_textdraws(AMX *amx, int playerid)
 	NC(n_PlayerTextDrawFont);
 }
 
-/**
-Should be called in OnGameModeInit.
-*/
 void veh_create_global_textdraws(AMX *amx)
 {
 	float *f1, *f2, *f3;

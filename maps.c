@@ -1,10 +1,10 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define _CRT_SECURE_NO_DEPRECATE
+#include "common.h"
+#include "maps.h"
 #include <stdio.h>
 #include <string.h>
-#include "common.h"
 
 #define MAP_FILENAMEFORMAT "scriptfiles/maps/%s.map"
 #define MAP_MAX_FILENAME (24) /*see db col*/
@@ -41,6 +41,12 @@ static int object_map_id[MAX_PLAYERS][MAX_OBJECTS+1];
 static struct REMOVEDOBJECT removedobjects[MAX_REMOVED_OBJECTS];
 static int numremovedobjects = 0;
 
+/**
+Load a map from file as specified in given map.
+
+@return 1 on success
+*/
+static
 int maps_load_from_file(struct MAP *map)
 {
 	const float forceddrawdistance = 1000.0f;
@@ -196,6 +202,10 @@ void maps_load_from_db(AMX *amx)
 	}
 }
 
+/**
+Creates all objects in given map for the given player.
+*/
+static
 void maps_stream_in_for_player(AMX *amx, int playerid, struct MAP *map)
 {
 	const int mapid = map->id;
@@ -218,6 +228,10 @@ void maps_stream_in_for_player(AMX *amx, int playerid, struct MAP *map)
 	}
 }
 
+/**
+Deletes all the objects from given map for the given player.
+*/
+static
 void maps_stream_out_for_player(AMX *amx, int playerid, struct MAP *map)
 {
 	const int mapid = map->id;
@@ -269,18 +283,6 @@ void maps_stream_for_player(AMX *amx, int playerid, struct vec3 pos)
 	}
 }
 
-/*
-Go over players to see if maps need to be streamed for them
-This function should be called from loop100
-It checks 1+playercount/10 amount of players per call, so:
-
- playercount | checked players | ms between ticks
-     1-9              1              100-900
-    10-19             2              500-950
-    20-29             3              700-966
-   100-109           11	            1000-1000
- (not sure if this is correct; I'm too tired)
-*/
 void maps_process_tick(AMX *amx)
 {
 	static int currentplayeridx = 0;

@@ -2,10 +2,22 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "airport.h"
+#include "class.h"
 #include "anticheat.h"
 #include "dialog.h"
+#include "echo.h"
+#include "game_sa.h"
+#include "heartbeat.h"
+#include "login.h"
+#include "maps.h"
 #include "missions.h"
+#include "nav.h"
+#include "panel.h"
 #include "playerdata.h"
+#include "pm.h"
+#include "prefs.h"
+#include "protips.h"
 #include "spawn.h"
 #include "vehicles.h"
 #include "zones.h"
@@ -79,8 +91,6 @@ FORWARD(Playtime_FormatUpdateTimes);
 /* timecyc.c */
 FORWARD(Timecyc_GetCurrentWeatherMsg);
 FORWARD(Timecyc_GetNextWeatherMsgQuery);
-/* various.c */
-FORWARD(Urlencode);
 /* vehicles.c */
 FORWARD(Veh_Add);
 FORWARD(Veh_AddOdo);
@@ -117,9 +127,6 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
-	void game_sa_init(), login_init(), zones_init();
-	void nav_init(), missions_init(), cmd_init();
-
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 
@@ -144,15 +151,6 @@ int time_h = 0, time_m = 0;
 #define amx gamemode_amx
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
-	void echo_init(AMX*);
-	void dev_missions_update_closest_point(AMX*);
-	void dialog_pop_queue(AMX*);
-	void heartbeat_timed_update(AMX*);
-	void maps_process_tick(AMX*);
-	void panel_timed_update(AMX*);
-	void protips_timed_broadcast(AMX*);
-	void zones_update_for_all(AMX*);
-
 	static int count = 0;
 #ifdef LOG_SLOW_TICKS
 	static int tickcount = 0;
@@ -234,7 +232,6 @@ cell AMX_NATIVE_CALL REMOVEME_isspawned(AMX *amx, cell *params)
 
 cell AMX_NATIVE_CALL REMOVEME_onplayerreqclassimpl(AMX *amx, cell *params)
 {
-	void class_on_player_request_class(AMX*,int,int);
 	class_on_player_request_class(amx,params[1],params[2]);
 	return 1;
 }
@@ -258,8 +255,6 @@ cell AMX_NATIVE_CALL REMOVEME_setloggedstatus(AMX *amx, cell *params)
 
 cell AMX_NATIVE_CALL REMOVEME_onplayerwasafk(AMX *amx, cell *params)
 {
-	void panel_on_player_was_afk(AMX*, int);
-
 	temp_afk[params[1]] = 0;
 	panel_on_player_was_afk(amx, params[1]);
 	return 1;
@@ -267,8 +262,6 @@ cell AMX_NATIVE_CALL REMOVEME_onplayerwasafk(AMX *amx, cell *params)
 
 cell AMX_NATIVE_CALL REMOVEME_onplayernowafk(AMX *amx, cell *params)
 {
-	void panel_remove_panel_player(int);
-
 	temp_afk[params[1]] = 1;
 	panel_remove_panel_player(params[1]);
 	return 1;
@@ -369,8 +362,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* timecyc.c */
 	REGISTERNATIVE(Timecyc_GetCurrentWeatherMsg),
 	REGISTERNATIVE(Timecyc_GetNextWeatherMsgQuery),
-	/* various.c */
-	REGISTERNATIVE(Urlencode),
 	/* vehicles.c */
 	REGISTERNATIVE(Veh_Add),
 	REGISTERNATIVE(Veh_AddServicePoint),

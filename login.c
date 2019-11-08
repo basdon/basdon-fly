@@ -1,14 +1,11 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_DEPRECATE
-#endif
-
 #include "common.h"
+#include "login.h"
+#include "playerdata.h"
 #include <string.h>
 #include <time.h>
-#include "playerdata.h"
 
 /* actual password, stored for later checking */
 static char *pwdata[MAX_PLAYERS];

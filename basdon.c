@@ -76,11 +76,6 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 /* native B_OnDialogResponse() */
 cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 {
-	int airport_list_dialog_response(AMX*, int, int, int);
-	int dialog_on_response(AMX*, int, int);
-	void spawn_on_dialog_response(AMX*, int, int, int);
-	void prefs_on_dialog_response(AMX*, int, int, int);
-
 	const int playerid = params[1], dialogid = params[2];
 	const int response = params[3], listitem = params[4];
 	char inputtext[128];
@@ -109,13 +104,6 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 /* native B_OnGameModeExit() */
 cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 {
-	void airports_destroy();
-	void echo_dispose(AMX*);
-	void heartbeat_end_session(AMX*);
-	void missions_freepoints();
-	void spawn_dispose();
-	int veh_commit_next_vehicle_odo_to_db(AMX*);
-
 	missions_freepoints(); /*call this before airports_destroy!*/
 	airports_destroy();
 	echo_dispose(amx);
@@ -129,15 +117,6 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 /* native B_OnGameModeInit() */
 cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 {
-	void airports_init(AMX *amx);
-	void class_init(AMX *amx);
-	void echo_init(AMX *amx);
-	void heartbeat_create_session(AMX*);
-	void maps_load_from_db(AMX *amx);
-	void panel_on_gamemode_init(AMX*);
-	void spawn_init(AMX*);
-	void veh_create_global_textdraws(AMX*);
-
 	memset(spawned, 0, sizeof(spawned));
 
 	airports_init(amx);
@@ -155,10 +134,6 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 /* native B_OnPlayerCommandText(playerid, cmdtext[]) */
 cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 {
-	int cmd_check(AMX*, const int, const int, const char*);
-	int cmd_hash(char*);
-	int spawn_on_player_command_text(AMX*, int);
-
 	static const char *NO = WARN"You can't use commands when not spawned.";
 	const int playerid = params[1];
 	char cmdtext[145];
@@ -173,6 +148,7 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
+	/*TODO: remove cmd_hash (make it a static func)*/
 	hash = cmd_hash(cmdtext);
 
 	if (cmd_check(amx, playerid, hash, cmdtext)) {
@@ -186,16 +162,6 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 /* native B_OnPlayerConnect(playerid) */
 cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 {
-	void echo_on_player_connection(AMX*, int, int);
-	void class_on_player_connect(AMX*, int);
-	void dialog_on_player_connect(AMX*, int);
-	void maps_on_player_connect(AMX*, int);
-	void panel_on_player_connect(AMX*, int);
-	void pm_on_player_connect(int);
-	void prefs_on_player_connect(int);
-	void veh_create_player_textdraws(AMX*, int);
-	void zones_on_player_connect(AMX*, int);
-
 	const int playerid = params[1];
 	int i;
 
@@ -234,8 +200,6 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 /* native B_OnPlayerDeath(playerid, killerid, reason */
 cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 {
-	void zones_hide_text(AMX*, int);
-
 	const int playerid = params[1], killerdid = params[2];
 	const int reason = params[3];
 
@@ -250,13 +214,6 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 /* native B_OnPlayerDisconnect(playerid, reason)*/
 cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 {
-	void airport_on_player_disconnect(int);
-	void echo_on_player_connection(AMX*, int, int);
-	void dialog_on_player_disconnect(AMX*, int);
-	void maps_on_player_disconnect(int playerid);
-	void panel_remove_panel_player(int);
-	void pm_on_player_disconnect(int);
-
 	const int playerid = params[1], reason = params[2];
 	int i;
 
@@ -294,8 +251,6 @@ cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 /* native B_OnPlayerRequestClass(playerid, classid) */
 cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
 {
-	void class_on_player_request_class(AMX*, int, int);
-
 	const int playerid = params[1], classid = params[2];
 
 	class_on_player_request_class(amx, playerid, classid);
@@ -305,8 +260,6 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
 /* native B_OnPlayerRequestSpawn(playerid) */
 cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 {
-	int class_on_player_request_spawn(AMX*, int);
-
 	const int playerid = params[1];
 
 	if (class_on_player_request_spawn(amx, playerid)) {
@@ -320,9 +273,6 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 /* native B_OnPlayerSpawn(playerid) */
 cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 {
-	void maps_stream_for_player(AMX*, int, struct vec3);
-	void veh_update_service_point_mapicons(AMX*, int, float, float);
-
 	struct vec3 pos;
 	const int playerid = params[1];
 
@@ -339,8 +289,6 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 /* native B_OnPlayerStateChange(playerid, newstate, oldstate) */
 cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 {
-	void panel_on_player_state_change(AMX*, int, int, int);
-
 	const int playerid = params[1];
 	const int newstate = params[2], oldstate = params[3];
 
@@ -352,8 +300,6 @@ cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 /* native B_OnPlayerText(playerid, text[]) */
 cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 {
-	void echo_on_game_chat_or_action(AMX*, int, int, char*);
-
 	cell *addr;
 	char buf[144];
 	const int playerid = params[1];
@@ -368,8 +314,6 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 /* native B_OnRecv(ssocket:handle, data[], len) */
 cell AMX_NATIVE_CALL B_OnRecv(AMX *amx, cell *params)
 {
-	void echo_on_receive(AMX*, cell, cell, char*, int);
-
 	const int len = params[3];
 	cell socket_handle = params[1];
 	cell *addr;
@@ -382,8 +326,6 @@ cell AMX_NATIVE_CALL B_OnRecv(AMX *amx, cell *params)
 /* native B_OnVehicleSpawn(&vehicleid) */
 cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 {
-	void nav_reset_for_vehicle(int);
-
 	cell *addr;
 	int vehicleid;
 

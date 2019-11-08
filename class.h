@@ -31,3 +31,17 @@ Class index of players (SA-MP's classid).
 */
 extern int classidx[MAX_PLAYERS];
 
+void class_init(AMX*);
+void class_on_player_connect(AMX*, int playerid);
+/**
+Class selection, sets camera, dance moves, shows class name.
+
+May also be called by login code, after player is logged in.
+
+@param classid class id or -1 to use already set class id
+*/
+void class_on_player_request_class(AMX*, int playerid, int _classid);
+/**
+Hides class selection gametext.
+*/
+int class_on_player_request_spawn(AMX*, int playerid);

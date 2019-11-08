@@ -1,7 +1,6 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define _CRT_SECURE_NO_DEPRECATE
 #include "common.h"
 #include "a_samp.h"
 #include "class.h"
@@ -78,13 +77,6 @@ void class_on_player_connect(AMX *amx, int playerid)
 	NC(n_SetPlayerColor);
 }
 
-/**
-Class selection, sets camera, dance moves, shows class name.
-
-May also be called by login code, after player is logged in.
-
-@param classid class id or -1 to use already set class id
-*/
 void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 {
 	void zones_hide_text(AMX*, int);

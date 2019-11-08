@@ -2,6 +2,20 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 /**
+Loads spawn locations from database, creates spawn list texts.
+
+Must run after airports_init
+*/
+void spawn_init(AMX*);
+/**
+Frees memory.
+*/
+void spawn_dispose();
+/**
+Call when getting response from DIALOG_SPAWN_SELECTION.
+*/
+void spawn_on_dialog_response(AMX*, int playerid, int response, int idx);
+/**
 Call on spawn to show a dialog of spawn locations to teleport to.
 
 spawn_prespawn should've been called before, which should've set the player's

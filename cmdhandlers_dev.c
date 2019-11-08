@@ -10,8 +10,8 @@ when we're inside cmd.c*/
 /**
 Toggles constantly showing the closest mission checkpoint for every player.
 */
-static int
-cmd_dev_closestmp(CMDPARAMS)
+static
+int cmd_dev_closestmp(CMDPARAMS)
 {
 	void dev_missions_toggle_closest_point(AMX*);
 	dev_missions_toggle_closest_point(amx);
@@ -21,7 +21,8 @@ cmd_dev_closestmp(CMDPARAMS)
 /**
 Command to test parameter parsing in plugin code.
 */
-static int cmd_dev_testparpl(CMDPARAMS)
+static
+int cmd_dev_testparpl(CMDPARAMS)
 {
 	int i;
 	char buf[144];
@@ -48,7 +49,8 @@ Creates a haystack object at the player's position.
 
 Useful to make a platform to stand on for taking pictures.
 */
-static int cmd_dev_platform(CMDPARAMS)
+static
+int cmd_dev_platform(CMDPARAMS)
 {
 	if (devplatformobj != -1) {
 		NC_DestroyObject(devplatformobj);
@@ -64,7 +66,11 @@ static int cmd_dev_platform(CMDPARAMS)
 	return 1;
 }
 
-static int cmd_dev_timex(CMDPARAMS)
+/**
+Sets the time of the world.
+*/
+static
+int cmd_dev_timex(CMDPARAMS)
 {
 	int h, m;
 
@@ -84,8 +90,8 @@ static int cmd_dev_timex(CMDPARAMS)
 /**
 Toggle owner group on yourself.
 */
-static int
-cmd_dev_owner(CMDPARAMS)
+static
+int cmd_dev_owner(CMDPARAMS)
 {
 	pdata[playerid]->groups ^= GROUP_OWNER;
 	pdata[playerid]->groups |= GROUP_MEMBER;
@@ -100,7 +106,8 @@ static int devvehicle = INVALID_VEHICLE_ID;
 /**
 The /v cmd to spawn a dev vehicle.
 */
-static int cmd_dev_v(CMDPARAMS)
+static
+int cmd_dev_v(CMDPARAMS)
 {
 	int modelid;
 	if (!cmd_get_int_param(cmdtext, &parseidx, &modelid)) {

@@ -1,13 +1,9 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_DEPRECATE
-#endif
-
 #include "common.h"
-#include "cmd.h"
 #include "dialog.h"
+#include "prefs.h"
 #include <string.h>
 
 int prefs[MAX_PLAYERS];
@@ -17,7 +13,8 @@ Appends a row for a preference to show in the preferences dialog.
 
 Format is {description}:\t<color><ENABLED|DISABLED>\n
 */
-static char *prefs_append_pref(char *buf, char *description, const int state)
+static
+char *prefs_append_pref(char *buf, char *description, const int state)
 {
 	while ((*(buf++) = *(description++)));
 	*(--buf) = ':';
@@ -37,6 +34,7 @@ static char *prefs_append_pref(char *buf, char *description, const int state)
 /**
 Shows a dialog with preferences which the player can modify.
 */
+static
 void prefs_show_dialog(AMX *amx, int playerid)
 {
 	int p = prefs[playerid];
@@ -68,9 +66,6 @@ void prefs_on_player_connect(int playerid)
 	prefs[playerid] = DEFAULTPREFS;
 }
 
-/**
-Checks the response from the preferences dialog and toggle a pref if wanted.
-*/
 void prefs_on_dialog_response(AMX *amx, int playerid, int response, int idx)
 {
 	/*must be same order the calls to prefs_append_pref in
@@ -81,11 +76,6 @@ void prefs_on_dialog_response(AMX *amx, int playerid, int response, int idx)
 	}
 }
 
-/**
-The /preferences command.
-
-Shows a dialog with preferences which the player can modify.
-*/
 int prefs_cmd_preferences(CMDPARAMS)
 {
 	prefs_show_dialog(amx, playerid);
