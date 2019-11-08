@@ -265,7 +265,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	dialog_on_player_disconnect(amx, playerid);
 	maps_on_player_disconnect(playerid);
 	panel_remove_panel_player(playerid);
-	pm_on_player_connect(playerid);
+	pm_on_player_disconnect(playerid);
 
 	playeronlineflag[playerid] = 0;
 	spawned[playerid] = 0;
