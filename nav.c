@@ -109,7 +109,7 @@ void nav_enable(AMX *amx, int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 	np = nav[vehicleid];
 	if (np == NULL) {
 		nav[vehicleid] = np = malloc(sizeof(struct NAVDATA));
-		np->alt = np->crs = np->dist = 0.0f;
+		np->alt = np->crs = np->dist = 0;
 	}
 	np->beacon = adf;
 	np->vor = vor;
@@ -508,12 +508,14 @@ doils:
 			vorbarlettersizex = 0.4f;
 		} else {
 			if (n->vorvalue < 0) {
-				vorbarx = (n->vorvalue + 50) / -15 + 1;
-				sprintf((char*) buf64, "%d", (int) vorbarx);
+				sprintf(cbuf64,
+					"%d",
+					(n->vorvalue + 50) / -15 + 1);
 				vorbarx = -85.0f;
 			} else {
-				vorbarx = (n->vorvalue - 50) / 15 + 1;
-				sprintf((char*) buf64, "%d", (int) vorbarx);
+				sprintf(cbuf64,
+					"%d",
+					(n->vorvalue - 50) / 15 + 1);
 				vorbarx = 85.0f;
 			}
 			amx_SetUString(buf144, (char*) buf64, 64);
@@ -715,16 +717,16 @@ void nav_update(AMX *amx, int vehicleid,
 
 	dx = x - pos->x;
 	dy = pos->y - y;
-	dist = sqrt(dx * dx + dy * dy);
+	dist = sqrtf(dx * dx + dy * dy);
 	n->dist = (int) dist;
 	if (n->dist > 1000) {
 		n->dist = (n->dist / 100) * 100;
 	}
 	n->alt = (int) (z - pos->z);
-	crs = -atan2(dx, dy);
+	crs = -atan2f(dx, dy);
 	if (n->vor != NULL ) {
 		vorangle = crs + M_PI2 - n->vor->headingr;
-		horizontaldeviation = dist * cos(vorangle);
+		horizontaldeviation = dist * cosf(vorangle);
 		n->vorvalue = (int) horizontaldeviation;
 		crs = heading - n->vor->heading;
 	} else {
@@ -734,7 +736,7 @@ void nav_update(AMX *amx, int vehicleid,
 	if (n->vor == NULL || !n->ils) {
 		n->ilsx = 0;
 		n->ilsz = INVALID_ILS_VALUE;
-	} else if (dist > ILS_MAX_DIST || (dist *= sin(vorangle)) <= 0.0f) {
+	} else if (dist > ILS_MAX_DIST || (dist *= sinf(vorangle)) <= 0.0f) {
 		n->ilsx = INVALID_ILS_VALUE;
 		n->ilsz = 0;
 	} else {

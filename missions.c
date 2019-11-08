@@ -381,7 +381,7 @@ cell AMX_NATIVE_CALL Missions_AddPoint(AMX *amx, cell *params)
 	struct AIRPORT *ap = airports + params[1];
 
 	newmp = malloc(sizeof(struct MISSIONPOINT));
-	newmp->id = params[2];
+	newmp->id = (unsigned short) params[2];
 	newmp->x = amx_ctof(params[3]);
 	newmp->y = amx_ctof(params[4]);
 	newmp->z = amx_ctof(params[5]);
@@ -586,13 +586,13 @@ thisisworsethanbubblesort:
 	mission->missiontype = missiontype;
 	mission->startpoint = startpoint;
 	mission->endpoint = endpoint;
-	mission->distance = sqrt(dx * dx + dy * dy);
+	mission->distance = sqrtf(dx * dx + dy * dy);
 	mission->actualdistanceM = 0.0f;
 	mission->passenger_satisfaction = 100;
 	mission->veh = veh;
 	mission->vehicle_reincarnation_value = vv;
 	mission->starttime = time(NULL);
-	mission->lastvehiclehp = amx_ctof(params[7]);
+	mission->lastvehiclehp = (short) amx_ctof(params[7]);
 	mission->damagetaken = 0;
 	mission->lastfuel = veh->fuel;
 	mission->fuelburned = 0.0f;
@@ -871,8 +871,8 @@ cell AMX_NATIVE_CALL Missions_OnVehicleRepaired(AMX *amx, cell *params)
 	if ((miss = activemission[playerid]) != NULL &&
 		miss->veh->spawnedvehicleid == vehicleid)
 	{
-		miss->damagetaken += hpdiff;
-		miss->lastvehiclehp = newhp;
+		miss->damagetaken += (short) hpdiff;
+		miss->lastvehiclehp = (short) newhp;
 	}
 	return 1;
 }
@@ -971,7 +971,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 
 	amx_GetAddr(amx, params[4], &addr);
 
-	tmp = mission->lastvehiclehp - vehiclehp;
+	tmp = (int) (mission->lastvehiclehp - vehiclehp);
 	if (tmp < 0) {
 		tmp = 0;
 		pcheat -= 250000;
@@ -981,7 +981,7 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 		*(addr + 2100) = 0; /* ac log hp cheat */
 	}
 	mission->damagetaken += tmp;
-	mission->lastvehiclehp = vehiclehp;
+	mission->lastvehiclehp = (short) vehiclehp;
 	mission->fuelburned += mission->lastfuel - mission->veh->fuel;
 
 	totaltime = (int) difftime(time(NULL), mission->starttime);
@@ -1203,7 +1203,7 @@ void missions_update_satisfaction(AMX *amx, int pid, int vid, struct quat *vrot)
 		qz = vrot->qz;
 		qw = vrot->qw;
 		/* pitch */
-		tmpvalue = fabs(100.0f * 2.0f * (qy * qz - qw * qx)) - 46.0;
+		tmpvalue = fabsf(100.0f * 2.0f * (qy * qz - qw * qx)) - 46.0f;
 		if (tmpvalue > 0.0) {
 			miss->passenger_satisfaction -= (int) (tmpvalue / 2.0f);
 			if (miss->passenger_satisfaction < 0) {
@@ -1211,7 +1211,7 @@ void missions_update_satisfaction(AMX *amx, int pid, int vid, struct quat *vrot)
 			}
 		}
 		/* roll */
-		tmpvalue = fabs(100.0f * 2.0f * (qx * qz + qw * qy)) - 61.0f;
+		tmpvalue = fabsf(100.0f * 2.0f * (qx * qz + qw * qy)) - 61.0f;
 		if (tmpvalue > 0.0) {
 			miss->passenger_satisfaction -= (int) (tmpvalue / 2.0f);
 			if (miss->passenger_satisfaction < 0) {

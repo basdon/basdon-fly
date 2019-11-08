@@ -187,7 +187,10 @@ float anticheat_NC_GetVehicleHealth(AMX *amx, int vehicleid)
 	NC_SendClientMessageToAll(COL_WARN, buf144a);
 	common_NC_Kick(playerid);
 resethp:
-	NC_SetVehicleHealth(vehicleid, 1000.0f);
+	nc_params[0] = 2;
+	nc_params[1] = vehicleid;
+	nc_paramf[2] = 1000.0f;
+	NC(n_SetVehicleHealth);
 	return 1000.0f;
 }
 

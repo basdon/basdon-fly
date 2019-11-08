@@ -336,11 +336,11 @@
 /* panel.pwn zones.c ... */
 #define VEL_VER 2 /* change this when anything changes */
 /* VEL_MAX = 0.66742320819112627986348122866894 */
-#define VEL_TO_KPH_VAL (180.20426) /* VEL_MAX * 270 */
-#define VEL_TO_KTS_VAL (96.77661) /* VEL_MAX * 145 */
-#define VEL_TO_MPS_VAL (50.05674) /* (KPH / 3.6) */
-#define VEL_TO_KFPM_VAL (9.8536894) /* K feet per minute (MPS * 3.28084 * 60 / 1000) */
-#define VEL_TO_KFPMA_VAL (5.630679) /* some adjustment (KFPM / 1.75) */
+#define VEL_TO_KPH_VAL (180.20426f) /* VEL_MAX * 270 */
+#define VEL_TO_KTS_VAL (96.77661f) /* VEL_MAX * 145 */
+#define VEL_TO_MPS_VAL (50.05674f) /* (KPH / 3.6) */
+#define VEL_TO_KFPM_VAL (9.8536894f) /* K feet per minute (MPS * 3.28084 * 60 / 1000) */
+#define VEL_TO_KFPMA_VAL (5.630679f) /* some adjustment (KFPM / 1.75) */
 
 /* missions.c / missions.pwn */
 

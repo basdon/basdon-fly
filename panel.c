@@ -355,10 +355,10 @@ void panel_timed_update(AMX *amx)
 		x = *((float*) buf32);
 		y = *((float*) buf64);
 		z = *((float*) buf144);
-		x = VEL_TO_KTS_VAL * sqrt(x * x + y * y + z * z);
+		x = VEL_TO_KTS_VAL * sqrtf(x * x + y * y + z * z);
 		panel_update_speed(amx, playerid, (int) x);
 
-		z *= VEL_TO_KFPM_VAL * 14.5;
+		z *= VEL_TO_KFPM_VAL * 14.5f;
 		if (z < -34.0f) {
 			z = -34.0f;
 		} else if (z > 34.0f) {
