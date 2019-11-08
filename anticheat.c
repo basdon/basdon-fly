@@ -204,8 +204,6 @@ void anticheat_disallowed_vehicle_1s(AMX *amx, int playerid)
 void anticheat_on_player_enter_vehicle(
 	AMX* amx, int playerid, int vehicleid, int ispassenger)
 {
-	float hp;
-
 	if (!ispassenger) {
 		nc_params[0] = 2;
 		nc_params[1] = vehicleid;

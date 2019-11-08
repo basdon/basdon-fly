@@ -183,7 +183,6 @@ int nav_cmd_adf(CMDPARAMS)
 	void panel_reset_nav_for_passengers(AMX*, int);
 
 	struct AIRPORT *ap;
-	struct NAVDATA *np;
 	int vehicleid, len;
 	char beacon[144], *bp;
 
@@ -247,7 +246,6 @@ int nav_cmd_vor(CMDPARAMS)
 			"see /beacons or /nearest",
 		*NO_CAP = WARN"There are no VOR capable runways at this beacon";
 
-	struct NAVDATA *np;
 	struct AIRPORT *ap;
 	struct RUNWAY *rw;
 	int vehicleid;
@@ -587,7 +585,6 @@ void nav_navigate_to_airport(
 	AMX *amx, int vehicleid, int vehiclemodel,
 	struct AIRPORT *ap)
 {
-	struct NAVDATA *n;
 	struct RUNWAY *rw, *closestrw;
 	float vehiclex, vehicley, vehiclez;
 	float dx, dy, dz, dist, mindist;

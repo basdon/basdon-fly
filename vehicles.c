@@ -935,7 +935,7 @@ void veh_timed_1s_update(AMX *amx)
 {
 	struct dbvehicle *v;
 	struct vec3 vpos;
-	int engine, playerid, vehicleid, n = playercount;
+	int playerid, vehicleid, n = playercount;
 
 	while (n--) {
 		playerid = players[n];

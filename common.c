@@ -26,7 +26,7 @@ void common_hide_gametext_for_player(AMX *amx, int playerid)
 
 int common_find_player_in_vehicle_seat(AMX *amx, int vehicleid, int seat)
 {
-	int playerid, n = playercount;
+	int n = playercount;
 
 	nc_params[0] = 1;
 	while (n--) {

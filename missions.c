@@ -959,7 +959,6 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	const float vehiclehp = amx_ctof(params[2]);
 	float paymp;
 	cell *addr;
-	char *trackermsg;
 	char buf[4096];
 	int ptax, psatisfaction = 0, pdistance, pbonus = 0, ptotal, pdamage, pcheat = 0, tmp;
 	int totaltime, mintime, duration_h, duration_m;
@@ -1113,7 +1112,6 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	int vehmodel;
 	float fuelcapacity;
 	cell *addr;
-	char *trackermsg;
 	char msg[144];
 	const char *msptypename = NULL;
 

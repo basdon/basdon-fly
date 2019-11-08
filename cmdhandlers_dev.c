@@ -67,7 +67,6 @@ static int cmd_dev_platform(CMDPARAMS)
 static int cmd_dev_timex(CMDPARAMS)
 {
 	int h, m;
-	char buf[144];
 
 	if (!cmd_get_int_param(cmdtext, &parseidx, &h) ||
 		!cmd_get_int_param(cmdtext, &parseidx, &m))

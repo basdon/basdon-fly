@@ -25,7 +25,7 @@ static int cmd_at400(CMDPARAMS)
 	struct vec3 playerpos, vehiclepos;
 	struct dbvehicle *veh;
 	int vehicleid, found_vehicle;
-	float dx, dy, dz, vx, vy, vz, shortest_distance, tmpdistance;
+	float dx, dy, dz, shortest_distance, tmpdistance;
 
 	NC_GetPlayerVehicleID_(playerid, &vehicleid);
 	if (vehicleid) {
