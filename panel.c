@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "a_samp.h"
+#include "airport.h"
 #include "game_sa.h"
 #include "panel.h"
 #include "math.h"
