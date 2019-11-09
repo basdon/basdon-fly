@@ -60,7 +60,7 @@ void class_init(AMX *amx)
 	nc_params[6] = SPAWN_WEAPON_1;
 	nc_params[7] = SPAWN_AMMO_1;
 	nc_params[8] = nc_params[10] = SPAWN_WEAPON_2_3;
-	nc_params[11] = nc_params[11] = SPAWN_AMMO_2_3;
+	nc_params[9] = nc_params[11] = SPAWN_AMMO_2_3;
 
 	for (i = 0; i < NUMCLASSES; i++) {
 		nc_params[1] = CLASS_SKINS[i];
