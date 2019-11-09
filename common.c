@@ -48,6 +48,7 @@ void common_crash_player(AMX *amx, int playerid)
 		*CRASHSTR = "Wasted~~k~SWITCH_DEBUG_CAM_ON~~k~~TOGGLE_DPAD~"
 			"~k~~NETWORK_TALK~~k~~SHOW_MOUSE_POINTER_TOGGLE~";
 
+	amx_SetUString(buf144, CRASHSTR, 144);
 	NC_GameTextForPlayer(playerid, buf144a, 5, 5);
 }
 
