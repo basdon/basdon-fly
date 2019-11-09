@@ -665,6 +665,7 @@ void nav_update(AMX *amx, int vehicleid, struct vec3 *pos, float heading)
 		n->dist = (n->dist / 100) * 100;
 	}
 	n->alt = (int) (pos->z - beacon->z);
+	/*TODO: why are dx and dy swapped?*/
 	crs = -atan2(dx, dy);
 	if (n->vor != NULL ) {
 		vorangle = crs + M_PI2 - n->vor->headingr;
