@@ -771,9 +771,9 @@ void veh_update_service_point_mapicons(AMX *amx, int playerid, float x, float y)
 			nc_params[0] = 7;
 			nc_params[1] = playerid;
 			nc_params[2] = selectedpsvp;
-			*((float*) (nc_params + 3)) = svp->x;
-			*((float*) (nc_params + 4)) = svp->y;
-			*((float*) (nc_params + 5)) = svp->z;
+			nc_paramf[3] = svp->x;
+			nc_paramf[4] = svp->y;
+			nc_paramf[5] = svp->z;
 			nc_params[6] = SERVICE_MAP_ICON_TYPE,
 			nc_params[7] = MAPICON_GLOBAL;
 			NC(n_SetPlayerMapIcon);
@@ -784,7 +784,7 @@ void veh_update_service_point_mapicons(AMX *amx, int playerid, float x, float y)
 			nc_params[5] = nc_params[4];
 			nc_params[4] = nc_params[3];
 			nc_params[3] = -1;
-			*((float*) (nc_params + 7)) = 50.0f;
+			nc_paramf[7] = 50.0f;
 			nc_params[8] = nc_params[9] = INVALID_PLAYER_ID;
 			nc_params[10] = 1;
 			NC(n_CreatePlayer3DTextLabel);
@@ -900,18 +900,18 @@ void veh_timed_update_a(
 void veh_timed_1s_update(AMX *amx)
 {
 	struct dbvehicle *v;
-	struct vec3 vpos;
+	struct vec3 vpos, *ppos = &vpos;
 	int playerid, vehicleid, n = playercount;
 
 	while (n--) {
 		playerid = players[n];
 
-		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
+		common_NC_GetPlayerPos(amx, playerid, ppos);
 		veh_update_service_point_mapicons(
 			amx,
 			playerid,
-			*((float*) buf32),
-			*((float*) buf64));
+			ppos->x,
+			ppos->y);
 
 		nc_params[0] = 1;
 		nc_params[1] = playerid;
@@ -1090,15 +1090,14 @@ void veh_update_panel_for_player(AMX *amx, int playerid)
 		buf144[1] = 0;
 		nc_params[0] = 4;
 		nc_params[1] = playerid;
-		*((float*) (nc_params + 2)) =
-			555.0f + (608.0f - 555.0f) * fuel;
-		*((float*) (nc_params + 3)) = 413.0f;
+		nc_paramf[2] = 555.0f + (608.0f - 555.0f) * fuel;
+		nc_paramf[3] = 413.0f;
 		nc_params[4] = buf144a;
 		NC_(n_CreatePlayerTextDraw, ptxt_fl + playerid);
 
 		nc_params[2] = ptxt_fl[playerid];
-		*((float*) (nc_params + 3)) = 0.25f;
-		*((float*) (nc_params + 4)) = 1.0f;
+		nc_paramf[3] = 0.25f;
+		nc_paramf[4] = 1.0f;
 		NC(n_PlayerTextDrawLetterSize);
 
 		nc_params[0] = 3;
@@ -1127,15 +1126,14 @@ void veh_update_panel_for_player(AMX *amx, int playerid)
 		buf144[1] = 0;
 		nc_params[0] = 4;
 		nc_params[1] = playerid;
-		*((float*) (nc_params + 2)) =
-			555.0f + (608.0f - 555.0f) * hp;
-		*((float*) (nc_params + 3)) = 422.0f;
+		nc_paramf[2] = 555.0f + (608.0f - 555.0f) * hp;
+		nc_paramf[3] = 422.0f;
 		nc_params[4] = buf144a;
 		NC_(n_CreatePlayerTextDraw, ptxt_hp + playerid);
 
 		nc_params[2] = ptxt_hp[playerid];
-		*((float*) (nc_params + 3)) = 0.25f;
-		*((float*) (nc_params + 4)) = 1.0f;
+		nc_paramf[3] = 0.25f;
+		nc_paramf[4] = 1.0f;
 		NC(n_PlayerTextDrawLetterSize);
 
 		nc_params[0] = 3;
@@ -1160,8 +1158,8 @@ void veh_on_player_state_change(AMX *amx, int playerid, int from, int to)
 		buf144[1] = 0;
 		nc_params[0] = 4;
 		nc_params[1] = playerid;
-		*((float*) (nc_params + 2)) = -10.0f;
-		*((float*) (nc_params + 3)) = -10.0f;
+		nc_paramf[2] = -10.0f;
+		nc_paramf[3] = -10.0f;
 		nc_params[4] = buf144a;
 		NC_(n_CreatePlayerTextDraw, ptxt_hp + playerid);
 		NC_(n_CreatePlayerTextDraw, ptxt_fl + playerid);
@@ -1218,9 +1216,9 @@ void veh_create_player_textdraws(AMX *amx, int playerid)
 
 	ptxt_fl[playerid] = ptxt_hp[playerid] = -1;
 
-	f2 = (float*) (nc_params + 2);
-	f3 = (float*) (nc_params + 3);
-	f4 = (float*) (nc_params + 4);
+	f2 = nc_paramf + 2;
+	f3 = nc_paramf + 3;
+	f4 = nc_paramf + 4;
 
 	/*create em first*/
 	nc_params[0] = 4;
@@ -1254,9 +1252,9 @@ void veh_create_global_textdraws(AMX *amx)
 {
 	float *f1, *f2, *f3;
 
-	f1 = (float*) (nc_params + 1);
-	f2 = (float*) (nc_params + 2);
-	f3 = (float*) (nc_params + 3);
+	f1 = nc_paramf + 1;
+	f2 = nc_paramf + 2;
+	f3 = nc_paramf + 3;
 
 	nc_params[0] = 3;
 	*f1 = 570.0f;

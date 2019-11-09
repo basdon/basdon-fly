@@ -53,10 +53,10 @@ void class_init(AMX *amx)
 	int i;
 
 	nc_params[0] = 11;
-	*((float*) (nc_params + 2)) = 1488.5236f;
-	*((float*) (nc_params + 3)) = -873.1125f;
-	*((float*) (nc_params + 4)) = 59.3885f;
-	*((float*) (nc_params + 5)) = 232.0f;
+	nc_paramf[2] = 1488.5236f;
+	nc_paramf[3] = -873.1125f;
+	nc_paramf[4] = 59.3885f;
+	nc_paramf[5] = 232.0f;
 	nc_params[6] = SPAWN_WEAPON_1;
 	nc_params[7] = SPAWN_AMMO_1;
 	nc_params[8] = nc_params[10] = SPAWN_WEAPON_2_3;
@@ -91,13 +91,13 @@ void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 
 	nc_params[0] = 4;
 	nc_params[1] = playerid;
-	*((float*) (nc_params + 2)) = VINEWOOD_CAM_POS_X;
-	*((float*) (nc_params + 3)) = VINEWOOD_CAM_POS_Y;
-	*((float*) (nc_params + 4)) = VINEWOOD_CAM_POS_Z;
+	nc_paramf[2] = VINEWOOD_CAM_POS_X;
+	nc_paramf[3] = VINEWOOD_CAM_POS_Y;
+	nc_paramf[4] = VINEWOOD_CAM_POS_Z;
 	NC(n_SetPlayerCameraPos);
-	*((float*) (nc_params + 2)) = VINEWOOD_CAM_LAT_X;
-	*((float*) (nc_params + 3)) = VINEWOOD_CAM_LAT_Y;
-	*((float*) (nc_params + 4)) = VINEWOOD_CAM_LAT_Z;
+	nc_paramf[2] = VINEWOOD_CAM_LAT_X;
+	nc_paramf[3] = VINEWOOD_CAM_LAT_Y;
+	nc_paramf[4] = VINEWOOD_CAM_LAT_Z;
 	NC(n_SetPlayerCameraLookAt);
 
 	/*This is also called when the player is connecting, but then they
@@ -106,13 +106,13 @@ void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 	PC_REMOVEME_isplaying(playerid);
 	if (!pc_result) {
 		/*position behind the camera, to hide during login*/
-		*((float*) (nc_params + 2)) = 1500.9938f;
-		*((float*) (nc_params + 3)) = -891.3679f;
-		*((float*) (nc_params + 4)) = 58.7611f;
+		nc_paramf[2] = 1500.9938f;
+		nc_paramf[3] = -891.3679f;
+		nc_paramf[4] = 58.7611f;
 	} else {
-		*((float*) (nc_params + 2)) = 1486.2727f;
-		*((float*) (nc_params + 3)) = -874.0833f;
-		*((float*) (nc_params + 4)) = 58.8885f;
+		nc_paramf[2] = 1486.2727f;
+		nc_paramf[3] = -874.0833f;
+		nc_paramf[4] = 58.8885f;
 	}
 	NC(n_SetPlayerPos_);
 
@@ -134,7 +134,7 @@ void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 	NC(n_SetPlayerColor);
 
 	/*facing angle only looks good when the dancing animation is applied*/
-	*((float*) (nc_params + 2)) = 236.0f;
+	nc_paramf[2] = 236.0f;
 	NC(n_SetPlayerFacingAngle);
 
 	amx_SetUString(buf32, CLASS_NAMES[class_index], 32);

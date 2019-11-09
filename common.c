@@ -11,7 +11,7 @@ void common_tp_player(AMX *amx, int playerid, struct vec4 pos)
 	natives_NC_SetPlayerPos(amx, playerid, pos.coords);
 	nc_params[0] = 2;
 	nc_params[1] = playerid;
-	*((float*) (nc_params + 2)) = pos.r;
+	nc_paramf[2] = pos.r;
 	NC(n_SetPlayerFacingAngle);
 	nc_params[0] = 1;
 	NC(n_SetCameraBehindPlayer);
@@ -85,18 +85,18 @@ void common_set_vehicle_engine(AMX *amx, int vehicleid, int enginestatus)
 int common_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos)
 {
 	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
-	pos->x = *((float*) buf32);
-	pos->y = *((float*) buf64);
-	pos->z = *((float*) buf144);
+	pos->x = *fbuf32;
+	pos->y = *fbuf64;
+	pos->z = *fbuf144;
 	return nc_result;
 }
 
 int common_NC_GetVehiclePos(AMX *amx, int vehicleid, struct vec3 *pos)
 {
 	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
-	pos->x = *((float*) buf32);
-	pos->y = *((float*) buf64);
-	pos->z = *((float*) buf144);
+	pos->x = *fbuf32;
+	pos->y = *fbuf64;
+	pos->z = *fbuf144;
 	return nc_result;
 }
 
@@ -104,18 +104,18 @@ int common_NC_GetVehicleRotationQuat(AMX *amx, int vehicleid, struct quat *rot)
 {
 	/*in SA:MP qw comes first*/
 	NC_GetVehicleRotationQuat(vehicleid, buf32_1a, buf32a, buf64a, buf144a);
-	rot->qx = *((float*) buf32);
-	rot->qy = *((float*) buf64);
-	rot->qz = *((float*) buf144);
-	rot->qw = *((float*) buf32_1);
+	rot->qx = *fbuf32;
+	rot->qy = *fbuf64;
+	rot->qz = *fbuf144;
+	rot->qw = *fbuf32_1;
 	return nc_result;
 }
 
 int common_NC_GetVehicleVelocity(AMX *amx, int vehicleid, struct vec3 *vel)
 {
 	NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
-	vel->x = *((float*) buf32);
-	vel->y = *((float*) buf64);
-	vel->z = *((float*) buf144);
+	vel->x = *fbuf32;
+	vel->y = *fbuf64;
+	vel->z = *fbuf144;
 	return nc_result;
 }

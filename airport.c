@@ -171,20 +171,19 @@ int airport_cmd_nearest(CMDPARAMS)
 
 	int i = 0;
 	int num = 0;
-	float playerx, playery, dx, dy;
+	struct vec3 playerpos;
+	float dx, dy;
 	char buf[4096], *b;
 	struct AIRPORT *ap;
 	struct AIRPORT **map;
 	struct APREF *aps = malloc(sizeof(struct APREF) * numairports);
 
-	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
-	playerx = *((float*) buf32);
-	playery = *((float*) buf64);
+	common_NC_GetPlayerPos(amx, playerid, &playerpos);
 
 	while (i < numairports) {
 		if (airports[i].enabled) {
-			dx = airports[i].pos.x - playerx;
-			dy = airports[i].pos.y - playery;
+			dx = airports[i].pos.x - playerpos.x;
+			dy = airports[i].pos.y - playerpos.y;
 			aps[num].distance = sqrt(dx * dx + dy * dy);
 			aps[num].index = i;
 			num++;

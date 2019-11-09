@@ -257,9 +257,9 @@ int natives_NC_PutPlayerInVehicle(
 		nc_params[1] = vehicleid;
 		nc_params[2] = buf32a;
 		NC(n_GetVehicleHealth);
-		hp = *((float*) buf32);
+		hp = *fbuf32;
 		if (hp != hp || hp < 0.0f || 1000.0f < hp) {
-			*((float*) buf32) = 1000.0f;
+			*fbuf32 = 1000.0f;
 			NC_SetVehicleHealth(vehicleid, *buf32);
 		}
 	}
@@ -290,9 +290,9 @@ int natives_NC_SetPlayerPos(AMX *amx, int playerid, struct vec3 pos)
 
 	nc_params[0] = 4;
 	nc_params[1] = playerid;
-	*((float*) (nc_params + 2)) = pos.x;
-	*((float*) (nc_params + 3)) = pos.y;
-	*((float*) (nc_params + 4)) = pos.z;
+	nc_paramf[2] = pos.x;
+	nc_paramf[3] = pos.y;
+	nc_paramf[4] = pos.z;
 	NC(n_SetPlayerPos_);
 	return nc_result;
 }

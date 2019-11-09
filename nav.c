@@ -469,14 +469,14 @@ doils:
 		}
 		nc_params[0] = 4;
 		nc_params[1] = playerid;
-		*((float*) (nc_params + 2)) = 320.0f - vorbarx;
-		*((float*) (nc_params + 3)) = 407.0f;
+		nc_paramf[2] = 320.0f - vorbarx;
+		nc_paramf[3] = 407.0f;
 		nc_params[4] = buf144a;
 		NC(n_CreatePlayerTextDraw);
 
 		nc_params[2] = ptxt_vor_base[playerid] = nc_result;
-		*((float*) (nc_params + 3)) = vorbarlettersizex;
-		*((float*) (nc_params + 4)) = 1.6f;
+		nc_paramf[3] = vorbarlettersizex;
+		nc_paramf[4] = 1.6f;
 		NC(n_PlayerTextDrawLetterSize);
 
 		nc_params[0] = 3;
@@ -523,25 +523,22 @@ void nav_navigate_to_airport(
 	AMX *amx, int vehicleid, int vehiclemodel,
 	struct AIRPORT *ap)
 {
+	struct vec3 vpos;
 	struct RUNWAY *rw, *closestrw;
-	float vehiclex, vehicley, vehiclez;
 	float dx, dy, dz, dist, mindist;
 
 	rw = ap->runways;
 	mindist = 0x7F800000;
 	closestrw = NULL;
-	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
-	vehiclex = *((float*) buf32);
-	vehicley = *((float*) buf64);
-	vehiclez = *((float*) buf144);
+	common_NC_GetVehiclePos(amx, vehicleid, &vpos);
 
 	/* if plane, try VOR if available, prioritizing ILS runways */
 	if (game_is_plane(vehiclemodel)) {
 		while (rw != ap->runwaysend) {
 			if (rw->type == RUNWAY_TYPE_RUNWAY) {
-				dx = rw->pos.x - vehiclex;
-				dy = rw->pos.y - vehicley;
-				dz = rw->pos.z - vehiclez;
+				dx = rw->pos.x - vpos.x;
+				dy = rw->pos.y - vpos.y;
+				dz = rw->pos.z - vpos.z;
 				dist = dx * dx + dy * dy + dz * dz;
 				if (rw->nav & NAV_VOR && dist < mindist) {
 					mindist = dist;
@@ -557,9 +554,9 @@ void nav_navigate_to_airport(
 	} else if (game_is_heli(vehiclemodel)) {
 		while (rw != ap->runwaysend) {
 			if (rw->type == RUNWAY_TYPE_HELIPAD) {
-				dx = rw->pos.x - vehiclex;
-				dy = rw->pos.y - vehicley;
-				dz = rw->pos.z - vehiclez;
+				dx = rw->pos.x - vpos.x;
+				dy = rw->pos.y - vpos.y;
+				dz = rw->pos.z - vpos.z;
 				dist = dx * dx + dy * dy + dz * dz;
 				if (dist < mindist) {
 					mindist = dist;

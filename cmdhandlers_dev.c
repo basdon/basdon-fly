@@ -58,7 +58,7 @@ int cmd_dev_platform(CMDPARAMS)
 	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
 	NC_CreateObject_(3374, *buf32, *buf64, *buf144,
 		0, 0, 0, 0x43960000, &devplatformobj);
-	*((float*) buf144) += 4.0f;
+	*fbuf144 += 4.0f;
 	nc_params[0] = 4;
 	nc_params[1] = playerid;
 	nc_params[4] = *buf144;

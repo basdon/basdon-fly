@@ -335,7 +335,7 @@ void panel_timed_update(AMX *amx)
 		panel_update_altitude(amx, playerid, (int) vpos.z);
 
 		NC_GetVehicleZAngle(vehicleid, buf144a);
-		heading = *((float*) buf144);
+		heading = *fbuf144;
 		panel_update_heading(amx, playerid, (int) heading);
 
 		NC_GetPlayerState(playerid);
@@ -354,9 +354,9 @@ void panel_timed_update(AMX *amx)
 
 		/*vai*/
 		NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
-		x = *((float*) buf32);
-		y = *((float*) buf64);
-		z = *((float*) buf144);
+		x = *fbuf32;
+		y = *fbuf64;
+		z = *fbuf144;
 		x = VEL_TO_KTS_VAL * sqrt(x * x + y * y + z * z);
 		panel_update_speed(amx, playerid, (int) x);
 
@@ -376,13 +376,13 @@ void panel_timed_update(AMX *amx)
 		buf144[2] = '~';
 		buf144[3] = 0;
 		nc_params[1] = playerid;
-		*((float*) (nc_params + 2)) = 458.0f;
-		*((float*) (nc_params + 3)) = 391.0f - z;
+		nc_paramf[2] = 458.0f;
+		nc_paramf[3] = 391.0f - z;
 		nc_params[4] = buf144a;
 		NC_(n_CreatePlayerTextDraw, ptxt_vai + playerid);
 		nc_params[2] = ptxt_vai[playerid];
-		*((float*) (nc_params + 3)) = 0.25f;
-		*((float*) (nc_params + 4)) = 1.1f;
+		nc_paramf[3] = 0.25f;
+		nc_paramf[4] = 1.1f;
 		NC(n_PlayerTextDrawLetterSize);
 		nc_params[0] = 3;
 		nc_params[3] = 0xFF0000FF;
@@ -552,8 +552,8 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 		buf144[1] = 0;
 		nc_params[0] = 4;
 		nc_params[1] = playerid;
-		*((float*) (nc_params + 2)) = -10.0f;
-		*((float*) (nc_params + 3)) = -10.0f;
+		nc_paramf[2] = -10.0f;
+		nc_paramf[3] = -10.0f;
 		nc_params[4] = buf144a;
 		NC_(n_CreatePlayerTextDraw, ptxt_vai + playerid);
 
