@@ -225,34 +225,40 @@ timer30s:			/*timer30s*/
 }
 #undef amx
 
+static
 cell AMX_NATIVE_CALL REMOVEME_isspawned(AMX *amx, cell *params)
 {
 	return spawned[params[1]];
 }
 
+static
 cell AMX_NATIVE_CALL REMOVEME_onplayerreqclassimpl(AMX *amx, cell *params)
 {
 	class_on_player_request_class(amx,params[1],params[2]);
 	return 1;
 }
 
+static
 cell AMX_NATIVE_CALL REMOVEME_setprefs(AMX *amx, cell *params)
 {
 	prefs[params[1]] = params[2];
 	return 1;
 }
 
+static
 cell AMX_NATIVE_CALL REMOVEME_getprefs(AMX *amx, cell *params)
 {
 	return prefs[params[1]];
 }
 
+static
 cell AMX_NATIVE_CALL REMOVEME_setloggedstatus(AMX *amx, cell *params)
 {
 	loggedstatus[params[1]] = params[2];
 	return 1;
 }
 
+static
 cell AMX_NATIVE_CALL REMOVEME_onplayerwasafk(AMX *amx, cell *params)
 {
 	temp_afk[params[1]] = 0;

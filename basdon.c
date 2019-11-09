@@ -14,6 +14,7 @@ int spawned[MAX_PLAYERS];
 
 /* native B_Validate(maxplayers, buf4096[], buf144[], buf64[], buf32[],
                      buf32_1[], emptystring, underscorestring) */
+static
 cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 {
 	int i;
@@ -74,6 +75,7 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 }
 
 /* native B_OnDialogResponse() */
+static
 cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 {
 	const int playerid = params[1], dialogid = params[2];
@@ -102,6 +104,7 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 }
 
 /* native B_OnGameModeExit() */
+static
 cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 {
 	missions_freepoints(); /*call this before airports_destroy!*/
@@ -115,6 +118,7 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 }
 
 /* native B_OnGameModeInit() */
+static
 cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 {
 	memset(spawned, 0, sizeof(spawned));
@@ -132,6 +136,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 }
 
 /* native B_OnPlayerCommandText(playerid, cmdtext[]) */
+static
 cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 {
 	static const char *NO = WARN"You can't use commands when not spawned.";
@@ -160,6 +165,7 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 }
 
 /* native B_OnPlayerConnect(playerid) */
+static
 cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
@@ -198,6 +204,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 }
 
 /* native B_OnPlayerDeath(playerid, killerid, reason */
+static
 cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 {
 	const int playerid = params[1]/*, killerdid = params[2]*/;
@@ -212,6 +219,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 }
 
 /* native B_OnPlayerDisconnect(playerid, reason)*/
+static
 cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 {
 	const int playerid = params[1], reason = params[2];
@@ -238,6 +246,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 }
 
 /* native B_OnPlayerEnterVehicle(playerid, vehicleid, ispassenger) */
+static
 cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 {
 	const int playerid = params[1], vehicleid = params[2];
@@ -249,6 +258,7 @@ cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 }
 
 /* native B_OnPlayerRequestClass(playerid, classid) */
+static
 cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
 {
 	const int playerid = params[1], classid = params[2];
@@ -258,6 +268,7 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
 }
 
 /* native B_OnPlayerRequestSpawn(playerid) */
+static
 cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
@@ -271,6 +282,7 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 }
 
 /* native B_OnPlayerSpawn(playerid) */
+static
 cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 {
 	struct vec3 pos;
@@ -287,6 +299,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 }
 
 /* native B_OnPlayerStateChange(playerid, newstate, oldstate) */
+static
 cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
@@ -298,6 +311,7 @@ cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 }
 
 /* native B_OnPlayerText(playerid, text[]) */
+static
 cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 {
 	cell *addr;
@@ -312,6 +326,7 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 }
 
 /* native B_OnRecv(ssocket:handle, data[], len) */
+static
 cell AMX_NATIVE_CALL B_OnRecv(AMX *amx, cell *params)
 {
 	const int len = params[3];
@@ -324,6 +339,7 @@ cell AMX_NATIVE_CALL B_OnRecv(AMX *amx, cell *params)
 }
 
 /* native B_OnVehicleSpawn(&vehicleid) */
+static
 cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 {
 	cell *addr;
