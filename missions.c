@@ -5,9 +5,9 @@
 #include "airport.h"
 #include "playerdata.h"
 #include "missions.h"
+#include "math.h"
 #include "nav.h"
 #include "vehicles.h"
-#include <math.h>
 #include <string.h>
 #include <time.h>
 
@@ -600,7 +600,7 @@ thisisworsethanbubblesort:
 	mission->missiontype = missiontype;
 	mission->startpoint = startpoint;
 	mission->endpoint = endpoint;
-	mission->distance = sqrtf(dx * dx + dy * dy);
+	mission->distance = sqrt(dx * dx + dy * dy);
 	mission->actualdistanceM = 0.0f;
 	mission->passenger_satisfaction = 100;
 	mission->veh = veh;

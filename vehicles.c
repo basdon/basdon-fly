@@ -5,11 +5,11 @@
 #include "a_samp.h"
 #include "anticheat.h"
 #include "game_sa.h"
+#include "math.h"
 #include "missions.h"
 #include "playerdata.h"
 #include "vehicles.h"
 #include <string.h>
-#include <math.h>
 
 #define SERVICE_MAP_DISTANCE 350.0f
 #define SERVICE_MAP_DISTANCE_SQ (SERVICE_MAP_DISTANCE * SERVICE_MAP_DISTANCE)
@@ -827,7 +827,7 @@ void veh_update_odo(AMX *amx, int playerid, int vehicleid, struct vec3 pos)
 	dx = lastvpos[playerid].x - pos.x;
 	dy = lastvpos[playerid].y - pos.y;
 	dz = lastvpos[playerid].z - pos.z;
-	distanceM = sqrtf(dx * dx + dy * dy + dz * dz);
+	distanceM = sqrt(dx * dx + dy * dy + dz * dz);
 	lastvpos[playerid] = pos;
 	if (distanceM != distanceM || distanceM == 0.0f) {
 		return;

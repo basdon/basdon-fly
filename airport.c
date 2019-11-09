@@ -4,8 +4,8 @@
 #include "common.h"
 #include "airport.h"
 #include "dialog.h"
+#include "math.h"
 #include <string.h>
-#include <math.h>
 
 struct AIRPORT *airports = NULL;
 int numairports = 0;
@@ -185,7 +185,7 @@ int airport_cmd_nearest(CMDPARAMS)
 		if (airports[i].enabled) {
 			dx = airports[i].pos.x - playerx;
 			dy = airports[i].pos.y - playery;
-			aps[num].distance = sqrtf(dx * dx + dy * dy);
+			aps[num].distance = sqrt(dx * dx + dy * dy);
 			aps[num].index = i;
 			num++;
 		}

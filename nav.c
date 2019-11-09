@@ -5,10 +5,10 @@
 #include "a_samp.h"
 #include "airport.h"
 #include "game_sa.h"
+#include "math.h"
 #include "nav.h"
 #include "panel.h"
 #include <string.h>
-#include <math.h>
 
 /*SOUND_ROULETTE_ADD_CASH*/
 #define SOUND_NAV_SET 1083
@@ -659,16 +659,16 @@ void nav_update(AMX *amx, int vehicleid, struct vec3 *pos, float heading)
 
 	dx = pos->x - beacon->x;
 	dy = beacon->y - pos->y;
-	dist = sqrtf(dx * dx + dy * dy);
+	dist = sqrt(dx * dx + dy * dy);
 	n->dist = (int) dist;
 	if (n->dist > 1000) {
 		n->dist = (n->dist / 100) * 100;
 	}
 	n->alt = (int) (pos->z - beacon->z);
-	crs = -atan2f(dx, dy);
+	crs = -atan2(dx, dy);
 	if (n->vor != NULL ) {
 		vorangle = crs + M_PI2 - n->vor->headingr;
-		horizontaldeviation = dist * cosf(vorangle);
+		horizontaldeviation = dist * cos(vorangle);
 		n->vorvalue = (int) horizontaldeviation;
 		crs = heading - n->vor->heading;
 	} else {
@@ -678,7 +678,7 @@ void nav_update(AMX *amx, int vehicleid, struct vec3 *pos, float heading)
 	if (n->vor == NULL || !n->ils) {
 		n->ilsx = 0;
 		n->ilsz = INVALID_ILS_VALUE;
-	} else if (dist > ILS_MAX_DIST || (dist *= sinf(vorangle)) <= 0.0f) {
+	} else if (dist > ILS_MAX_DIST || (dist *= sin(vorangle)) <= 0.0f) {
 		n->ilsx = INVALID_ILS_VALUE;
 		n->ilsz = 0;
 	} else {
