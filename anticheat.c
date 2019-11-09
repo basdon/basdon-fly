@@ -81,12 +81,12 @@ void anticheat_infraction(AMX *amx, int playerid, int type)
 	struct INFRACTIONDATA d = infractiondata[type];
 
 	if ((infractionvalue[type][playerid] += d.increment) >= d.maxvalue) {
-		sprintf((char*) buf4096,
+		sprintf(cbuf4096,
 			"%s[%d] was kicked by system (%s)",
 			pdata[playerid]->name,
 			playerid,
 			d.kickreason);
-		amx_SetUString(buf144, (char*) buf4096, 144);
+		amx_SetUString(buf144, cbuf4096, 144);
 		NC_SendClientMessageToAll(COL_WARN, buf144a);
 		common_NC_Kick(playerid);
 	}
@@ -171,19 +171,19 @@ float anticheat_NC_GetVehicleHealth(AMX *amx, int vehicleid)
 		if (playerid == INVALID_PLAYER_ID) {
 			goto resethp;
 		}
-		sprintf((char*) buf144, "vehicle hp %.4f", hp);
-		anticheat_log(amx, playerid, AC_VEH_HP_HIGH, (char*) buf144);
+		sprintf(cbuf144, "vehicle hp %.4f", hp);
+		anticheat_log(amx, playerid, AC_VEH_HP_HIGH, cbuf144);
 	} else if (hp < 0.0f) {
 		return 0.0f;
 	} else {
 		return hp;
 	}
 	common_crash_player(amx, playerid);
-	sprintf((char*) buf4096,
+	sprintf(cbuf4096,
 		"%s[%d] was kicked by system (invalid vehicle hp)",
 		pdata[playerid]->name,
 		playerid);
-	amx_SetUString(buf144, (char*) buf4096, 144);
+	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessageToAll(COL_WARN, buf144a);
 	common_NC_Kick(playerid);
 resethp:

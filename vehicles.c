@@ -807,11 +807,11 @@ int veh_commit_next_vehicle_odo_to_db(AMX *amx)
 		vehstoupdate = vehstoupdate->next;
 		free(tofree);
 		veh->needsodoupdate = 0;
-		sprintf((char*) buf4096,
+		sprintf(cbuf4096,
 			"UPDATE veh SET odo=%.4f WHERE i=%d",
 			veh->odoKM,
 			veh->id);
-		amx_SetUString(buf144, (char*) buf4096, 144);
+		amx_SetUString(buf144, cbuf4096, 144);
 		NC_mysql_tquery_nocb(buf144a);
 		return 1;
 	}
@@ -1058,20 +1058,20 @@ void veh_update_panel_for_player(AMX *amx, int playerid)
 		hp /= 750.0f;
 	}
 
-	sprintf((char*) buf64,
+	sprintf(cbuf64,
 		"ODO %08.0f~n~_FL i-------i~n~_HP i-------i",
 		odo);
 	if (time_m % 2) {
 		if (fuel < 0.2f) {
-			((char*) buf64)[16] = '_';
-			((char*) buf64)[17] = '_';
+			cbuf64[16] = '_';
+			cbuf64[17] = '_';
 		}
 		if (hp < 0.2f) {
-			((char*) buf64)[32] = '_';
-			((char*) buf64)[33] = '_';
+			cbuf64[32] = '_';
+			cbuf64[33] = '_';
 		}
 	}
-	amx_SetUString(buf144, (char*) buf64, 64);
+	amx_SetUString(buf144, cbuf64, 64);
 	nc_params[0] = 3;
 	nc_params[1] = playerid;
 	nc_params[2] = ptxt_txt[playerid];

@@ -464,7 +464,7 @@ doils:
 					(n->vorvalue - 50) / 15 + 1);
 				vorbarx = 85.0f;
 			}
-			amx_SetUString(buf144, (char*) buf64, 64);
+			amx_SetUString(buf144, cbuf64, 64);
 			vorbarlettersizex = 0.2f;
 		}
 		nc_params[0] = 4;

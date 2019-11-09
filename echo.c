@@ -84,7 +84,7 @@ void echo_on_player_connection(AMX *amx, int playerid, int reason)
 			(playerid & 0xFFFF) |
 			((reason & 0xFF) << 16) |
 			((nicklen & 0xFF) << 24);
-		memcpy(((char*) buf144) + 8, pd->name, nicklen + 1);
+		memcpy(cbuf144 + 8, pd->name, nicklen + 1);
 		NC_ssocket_send(socket_out, buf144a, 8 + nicklen);
 	}
 }
@@ -109,9 +109,9 @@ void echo_on_game_chat_or_action(
 			(playerid & 0xFFFF) |
 			((pd->namelen & 0xFF) << 16) |
 			((msglen & 0xFF) << 24);
-		memcpy(((char*) buf144) + 8, pd->name, nicklen + 1);
-		memcpy(((char*) buf144) + 9 + nicklen, text, msglen);
-		*(((char*) buf144) + 9 + nicklen + msglen) = 0;
+		memcpy((cbuf144) + 8, pd->name, nicklen + 1);
+		memcpy((cbuf144) + 9 + nicklen, text, msglen);
+		*((cbuf144) + 9 + nicklen + msglen) = 0;
 		NC_ssocket_send(socket_out, buf144a, 10+nicklen+msglen);
 	}
 }

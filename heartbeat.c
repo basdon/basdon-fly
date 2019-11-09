@@ -13,12 +13,12 @@ static int sessionid = -1;
 void heartbeat_timed_update(AMX *amx)
 {
 	if (sessionid != -1) {
-		sprintf((char*) buf4096,
+		sprintf(cbuf4096,
 			"UPDATE heartbeat "
 			"SET tlast=UNIX_TIMESTAMP() "
 			"WHERE id=%d",
 			sessionid);
-		amx_SetUString(buf144, (char*) buf4096, 144);
+		amx_SetUString(buf144, cbuf4096, 144);
 		NC_mysql_tquery_nocb(buf144a);
 	}
 }
@@ -37,12 +37,12 @@ void heartbeat_create_session(AMX *amx)
 void heartbeat_end_session(AMX *amx)
 {
 	if (sessionid != -1) {
-		sprintf((char*) buf4096,
+		sprintf(cbuf4096,
 			"UPDATE heartbeat "
 			"SET tlast=UNIX_TIMESTAMP(),cleanexit=1 "
 			"WHERE id=%d",
 			sessionid);
-		amx_SetUString(buf144, (char*) buf4096, 144);
+		amx_SetUString(buf144, cbuf4096, 144);
 		NC_mysql_tquery_nocb(buf144a);
 	}
 }

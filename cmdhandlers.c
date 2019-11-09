@@ -82,8 +82,8 @@ int cmd_me(CMDPARAMS)
 	cell *to;
 	int hascontent = 0;
 
-	sprintf((char*) buf144, "* %s", pdata[playerid]->name);
-	amx_SetUString(buf4096, (char*) buf144, 144);
+	sprintf(cbuf144, "* %s", pdata[playerid]->name);
+	amx_SetUString(buf4096, cbuf144, 144);
 	from = (char*) cmdtext + 3;
 	to = buf4096 + 2 + pdata[playerid]->namelen;
 	while ((*to = *from)) {

@@ -55,11 +55,11 @@ int dialog_on_response(AMX *amx, int playerid, int dialogid)
 	int ret = 1;
 	transaction[playerid] = TRANSACTION_NONE;
 	if (dialogid != showndialog[playerid]) {
-		sprintf((char*) buf144,
+		sprintf(cbuf144,
 			"expected %d got %d",
 			showndialog[playerid],
 			dialogid);
-		anticheat_log(amx, playerid, AC_WRONG_DIALOGID, (char*) buf144);
+		anticheat_log(amx, playerid, AC_WRONG_DIALOGID, cbuf144);
 		ret = 0;
 	}
 	showndialog[playerid] = 0;
