@@ -229,61 +229,72 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 	int costpermsp, tax = 500, chargernws = 0;
 
 	switch (missiontype) {
-	case 1: /* dodo, no rnw charge */
-		costpermsp = 20;
-		break;
-	case 2: /* small passenger */
-		costpermsp = 30;
-		chargernws = 1;
-		break;
-	case 4: /* big passenger */
-		costpermsp = 50;
-		chargernws = 1;
-		break;
-	case 8:
-	case 16:
-	case 32: /* cargo */
-		costpermsp = 40;
-		chargernws = 1;
-		break;
-	case 64:
-	case 128:
-	case 256: /* heli, only charge amount of heliports */
-		costpermsp = 30;
-		break;
-	case 512: /* military is govt, and no tax for special missions */
-	case 1024:
-	case 2048:
-	case 4096:
-	default:
-		return 0;
-	case 8192: /* skimmer, also for runways (lights maintenance etc) */
+	case MISSION_TYPE_PASSENGER_WATER:
+		/* skimmer, also for runways (lights maintenance etc) */
 		costpermsp = 15;
 		chargernws = 1;
 		break;
+	case MISSION_TYPE_PASSENGER_S:
+		/*dodo is excluded from runway cost*/
+		costpermsp = 20;
+		break;
+	case MISSION_TYPE_PASSENGER_M:
+		costpermsp = 30;
+		chargernws = 1;
+		break;
+	case MISSION_TYPE_PASSENGER_L:
+		costpermsp = 50;
+		chargernws = 1;
+		break;
+	case MISSION_TYPE_CARGO_S:
+	case MISSION_TYPE_CARGO_M:
+	case MISSION_TYPE_CARGO_L:
+		costpermsp = 40;
+		chargernws = 1;
+		break;
+	case MISSION_TYPE_HELI:
+	case MISSION_TYPE_HELI_CARGO:
+		costpermsp = 30;
+		break;
+	case MISSION_TYPE_MIL_HELI:
+	case MISSION_TYPE_MIL:
+	case MISSION_TYPE_AWACS:
+	case MISSION_TYPE_STUNT:
+	case MISSION_TYPE_CROPD:
+	default:
+		/* military is govt, and no tax for special missions */
+		return 0;
 	}
 
+	/*missionpoint cost for every missionpoint this missiontype has*/
 	msp = ap->missionpoints;
 	while (msp != NULL) {
-		if (msp->type & (64 | 128 | 256)) {
+		if (msp->type & missiontype) {
 			tax += costpermsp;
 		}
 		msp = msp->next;
 	}
 
-	if (chargernws) {
-		rnw = ap->runways;
-		while (rnw != ap->runwaysend) {
-			runwayendcount++;
-			if (rnw->nav & NAV_VOR) {
-				tax += 15;
+	/*for helis: 40 per helipad*/
+	/*for others: 50 per runway + 15 if VOR + 15 if ILS*/
+	rnw = ap->runways;
+	while (rnw != ap->runwaysend) {
+		if (missiontype & HELI_MISSIONTYPES) {
+			if (rnw->type == RUNWAY_TYPE_HELIPAD) {
+				tax += 40;
 			}
-			if (rnw->nav & NAV_ILS) {
-				tax += 15;
+		} else {
+			if (chargernws && rnw->type == RUNWAY_TYPE_RUNWAY) {
+				tax += 50;
+				if (rnw->nav & NAV_VOR) {
+					tax += 15;
+				}
+				if (rnw->nav & NAV_ILS) {
+					tax += 15;
+				}
+				rnw++;
 			}
-			rnw++;
 		}
-		tax += 50 * runwayendcount;
 	}
 	return tax;
 }
