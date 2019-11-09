@@ -225,7 +225,6 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 {
 	struct MISSIONPOINT *msp;
 	struct RUNWAY *rnw;
-	int runwayendcount = 0;
 	int costpermsp, tax = 500, chargernws = 0;
 
 	switch (missiontype) {
