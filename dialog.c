@@ -2,6 +2,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "anticheat.h"
 #include "dialog.h"
 #include <string.h>
 

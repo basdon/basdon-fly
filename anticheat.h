@@ -17,6 +17,12 @@ Should be called at most once per second, player will be kicked when it happens
 too often.
 */
 void anticheat_disallowed_vehicle_1s(AMX*, int playerid);
+/**
+Log some anticheat related thing.
+
+@param eventtype one of AC_ definitions
+@param info not escaped into db query
+*/
 void anticheat_log(AMX*, int playerid, int eventtype, char *info);
 void anticheat_on_player_connect(int playerid);
 /**

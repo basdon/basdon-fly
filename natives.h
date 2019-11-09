@@ -436,7 +436,6 @@ extern cell nc_result;
 Done here to do stuff, like streaming maps, anticheat?
 */
 int natives_NC_SetPlayerPos(AMX *amx, int playerid, struct vec3 pos);
-
 /**
 SpawnPlayer kills players that are in vehicles, and spawns them with a bottle.
 
@@ -444,10 +443,13 @@ So this wrapper does SetPlayerPos (directly) if needed, because that will
 eject a player.
 */
 int natives_NC_SpawnPlayer(AMX *amx, int playerid);
-
 /**
 Puts a player in vehicle, updating map, zone, vehiclestuff ...
 
 Also resets the vehicle HP to 1000.0 when it's invalid.
 */
 int natives_NC_PutPlayerInVehicle(AMX*, int playerid, int vehicleid, int seat);
+/**
+Kick a player next server tick.
+*/
+void natives_NC_Kick(int playerid);

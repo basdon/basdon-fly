@@ -278,7 +278,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 
 	spawned[playerid] = 1;
 
-	common_NC_GetPlayerPos(amx, playerid, &pos);
+	common_GetPlayerPos(amx, playerid, &pos);
 	maps_stream_for_player(amx, playerid, pos);
 	spawn_on_player_spawn(amx, playerid);
 	veh_update_service_point_mapicons(amx, playerid, pos.x, pos.y);

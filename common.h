@@ -125,17 +125,6 @@ Attempt to crash the player.
 */
 void common_crash_player(AMX*, int playerid);
 /**
-Kick a player next server tick.
-*/
-void common_NC_Kick(int playerid);
-/**
-Log some anticheat related thing.
-
-@param eventtype one of AC_ definitions
-@param info not escaped into db query
-*/
-void anticheat_log(AMX*, int playerid, int eventtype, char *info);
-/**
 Sets the state of the engine for given vehicle id.
 */
 void common_set_vehicle_engine(AMX*, int vehicleid, int enginestatus);
@@ -144,22 +133,22 @@ Alternative for GetPlayerPos to get it directly into a vec3 struct.
 
 Will use buf32, buf64, buf144.
 */
-int common_NC_GetPlayerPos(AMX*, int playerid, struct vec3 *pos);
+int common_GetPlayerPos(AMX*, int playerid, struct vec3 *pos);
 /**
 Alternative for GetVehiclePos to get it directly into a vec3 struct.
 
 Will use buf32, buf64, buf144.
 */
-int common_NC_GetVehiclePos(AMX*, int vehicleid, struct vec3 *pos);
+int common_GetVehiclePos(AMX*, int vehicleid, struct vec3 *pos);
 /**
 Alternative for GetVehicleRotationQuat to get it directly into a quat struct.
 
 Will use buf32, buf64, buf144, buf32_1.
 */
-int common_NC_GetVehicleRotationQuat(AMX*, int vehicleid, struct quat *rot);
+int common_GetVehicleRotationQuat(AMX*, int vehicleid, struct quat *rot);
 /**
 Alternative for GetVehicleVelocity to get it directly into a vec3 struct.
 
 Will use buf32, buf64, buf144.
 */
-int common_NC_GetVehicleVelocity(AMX*, int vehicleid, struct vec3 *vel);
+int common_GetVehicleVelocity(AMX*, int vehicleid, struct vec3 *vel);

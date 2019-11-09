@@ -52,12 +52,6 @@ void common_crash_player(AMX *amx, int playerid)
 	NC_GameTextForPlayer(playerid, buf144a, 5, 5);
 }
 
-void common_NC_Kick(int playerid)
-{
-	/*TODO: log?*/
-	kickdelay[playerid] = 2;
-}
-
 void common_set_vehicle_engine(AMX *amx, int vehicleid, int enginestatus)
 {
 	cell p1a = buf144a;
@@ -82,7 +76,7 @@ void common_set_vehicle_engine(AMX *amx, int vehicleid, int enginestatus)
 	}
 }
 
-int common_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos)
+int common_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos)
 {
 	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
 	pos->x = *fbuf32;
@@ -91,7 +85,7 @@ int common_NC_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos)
 	return nc_result;
 }
 
-int common_NC_GetVehiclePos(AMX *amx, int vehicleid, struct vec3 *pos)
+int common_GetVehiclePos(AMX *amx, int vehicleid, struct vec3 *pos)
 {
 	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
 	pos->x = *fbuf32;
@@ -100,7 +94,7 @@ int common_NC_GetVehiclePos(AMX *amx, int vehicleid, struct vec3 *pos)
 	return nc_result;
 }
 
-int common_NC_GetVehicleRotationQuat(AMX *amx, int vehicleid, struct quat *rot)
+int common_GetVehicleRotationQuat(AMX *amx, int vehicleid, struct quat *rot)
 {
 	/*in SA:MP qw comes first*/
 	NC_GetVehicleRotationQuat(vehicleid, buf32_1a, buf32a, buf64a, buf144a);
@@ -111,7 +105,7 @@ int common_NC_GetVehicleRotationQuat(AMX *amx, int vehicleid, struct quat *rot)
 	return nc_result;
 }
 
-int common_NC_GetVehicleVelocity(AMX *amx, int vehicleid, struct vec3 *vel)
+int common_GetVehicleVelocity(AMX *amx, int vehicleid, struct vec3 *vel)
 {
 	NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
 	vel->x = *fbuf32;

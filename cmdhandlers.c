@@ -35,14 +35,14 @@ int cmd_at400(CMDPARAMS)
 
 	found_vehicle = 0;
 	shortest_distance = FLOAT_PINF;
-	common_NC_GetPlayerPos(amx, playerid, &playerpos);
+	common_GetPlayerPos(amx, playerid, &playerpos);
 	for (vehicleid = 0; vehicleid < MAX_VEHICLES; vehicleid++) {
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (veh != NULL &&
 			veh->model == MODEL_AT400 &&
 			veh_is_player_allowed_in_vehicle(playerid, veh))
 		{
-			common_NC_GetVehiclePos(amx, vehicleid, &vehiclepos);
+			common_GetVehiclePos(amx, vehicleid, &vehiclepos);
 			dx = vehiclepos.x - playerpos.x;
 			dy = vehiclepos.y - playerpos.y;
 			dz = vehiclepos.z - playerpos.z;

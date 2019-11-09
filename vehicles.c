@@ -711,7 +711,7 @@ void veh_on_player_now_driving(AMX *amx, int playerid, int vehicleid)
 	int reqenginestate;
 
 	lastvehicle[playerid] = vehicleid;
-	common_NC_GetVehiclePos(amx, vehicleid, &lastvpos[playerid]);
+	common_GetVehiclePos(amx, vehicleid, &lastvpos[playerid]);
 
 	reqenginestate =
 		(veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
@@ -884,13 +884,13 @@ void veh_timed_update_a(
 	engine = *buf32;
 
 	if (!afk) {
-		common_NC_GetVehicleRotationQuat(amx, vehicleid, &vrot);
+		common_GetVehicleRotationQuat(amx, vehicleid, &vrot);
 		missions_update_satisfaction(amx, playerid, vehicleid, &vrot);
 	}
 
 	if (missions_get_stage(playerid) == MISSION_STAGE_FLIGHT) {
 		hp = anticheat_NC_GetVehicleHealth(amx, vehicleid);
-		common_NC_GetVehicleVelocity(amx, vehicleid, &vvel);
+		common_GetVehicleVelocity(amx, vehicleid, &vvel);
 		missions_send_tracker_data(
 			amx, playerid, vehicleid, hp,
 			vpos, &vvel, afk, engine);
@@ -906,7 +906,7 @@ void veh_timed_1s_update(AMX *amx)
 	while (n--) {
 		playerid = players[n];
 
-		common_NC_GetPlayerPos(amx, playerid, ppos);
+		common_GetPlayerPos(amx, playerid, ppos);
 		veh_update_service_point_mapicons(
 			amx,
 			playerid,
@@ -933,7 +933,7 @@ void veh_timed_1s_update(AMX *amx)
 
 
 		if (vehicleid == lastvehicle[playerid]) {
-			common_NC_GetVehiclePos(amx, vehicleid, &vpos);
+			common_GetVehiclePos(amx, vehicleid, &vpos);
 			veh_update_odo(amx, playerid, vehicleid, vpos);
 
 			NC_GetVehicleModel(vehicleid);

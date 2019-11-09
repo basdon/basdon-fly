@@ -246,6 +246,12 @@ int natives_find(AMX *amx)
 	return 1;
 }
 
+void natives_NC_Kick(int playerid)
+{
+	/*TODO: log?*/
+	kickdelay[playerid] = 2;
+}
+
 int natives_NC_PutPlayerInVehicle(
 	AMX *amx, int playerid, int vehicleid, int seat)
 {
@@ -264,7 +270,7 @@ int natives_NC_PutPlayerInVehicle(
 		}
 	}
 
-	common_NC_GetVehiclePos(amx, vehicleid, &pos);
+	common_GetVehiclePos(amx, vehicleid, &pos);
 	maps_stream_for_player(amx, playerid, pos);
 	veh_on_player_now_driving(amx, playerid, vehicleid);
 	veh_update_service_point_mapicons(amx, playerid, pos.x, pos.y);

@@ -331,7 +331,7 @@ void panel_timed_update(AMX *amx)
 
 		NC_GetPlayerVehicleID_(playerid, &vehicleid);
 
-		common_NC_GetVehiclePos(amx, vehicleid, &vpos);
+		common_GetVehiclePos(amx, vehicleid, &vpos);
 		panel_update_altitude(amx, playerid, (int) vpos.z);
 
 		NC_GetVehicleZAngle(vehicleid, buf144a);

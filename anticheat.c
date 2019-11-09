@@ -88,7 +88,7 @@ void anticheat_infraction(AMX *amx, int playerid, int type)
 			d.kickreason);
 		amx_SetUString(buf144, cbuf4096, 144);
 		NC_SendClientMessageToAll(COL_WARN, buf144a);
-		common_NC_Kick(playerid);
+		natives_NC_Kick(playerid);
 	}
 }
 
@@ -185,7 +185,7 @@ float anticheat_NC_GetVehicleHealth(AMX *amx, int vehicleid)
 		playerid);
 	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessageToAll(COL_WARN, buf144a);
-	common_NC_Kick(playerid);
+	natives_NC_Kick(playerid);
 resethp:
 	nc_params[0] = 2;
 	nc_params[1] = vehicleid;

@@ -530,7 +530,7 @@ void nav_navigate_to_airport(
 	rw = ap->runways;
 	mindist = 0x7F800000;
 	closestrw = NULL;
-	common_NC_GetVehiclePos(amx, vehicleid, &vpos);
+	common_GetVehiclePos(amx, vehicleid, &vpos);
 
 	/* if plane, try VOR if available, prioritizing ILS runways */
 	if (game_is_plane(vehiclemodel)) {

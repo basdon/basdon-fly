@@ -173,7 +173,7 @@ void zones_update_for_all(AMX *amx)
 		playerid = players[idx];
 		PC_REMOVEME_isafk(playerid);
 		if (!pc_result) {
-			common_NC_GetPlayerPos(amx, playerid, &pos);
+			common_GetPlayerPos(amx, playerid, &pos);
 			zones_update(amx, playerid, pos);
 		}
 	}
@@ -198,7 +198,7 @@ int zones_cmd_loc(CMDPARAMS)
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
-	common_NC_GetPlayerPos(amx, playerid, &pos);
+	common_GetPlayerPos(amx, playerid, &pos);
 	zones_update(amx, playerid, pos);
 
 	b = buf;
