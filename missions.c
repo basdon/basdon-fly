@@ -13,17 +13,13 @@
 
 #define TRACKER_PORT 7766
 
-const static char *destinationtype_gate = "gate";
-const static char *destinationtype_cargo = "cargo";
-const static char *destinationtype_heliport = "heliport";
-
 const static char *SATISFACTION_TEXT_FORMAT = "Passenger~n~Satisfaction: %d%%";
 
 struct MISSIONPOINT {
 	unsigned short id;
 	float x, y, z;
 	unsigned int type;
-	unsigned char numberofsametype;
+	char name[MAX_MSP_NAME + 1];
 	unsigned short currentlyactivemissions;
 	struct AIRPORT *ap;
 	struct MISSIONPOINT *next;
@@ -87,7 +83,6 @@ void missions_init(AMX *amx)
 	struct AIRPORT *ap;
 	struct MISSIONPOINT *msp;
 	int apid, lastapid, i, dbcache;
-	unsigned char gate, cargo, heliport;
 
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		activemission[i] = NULL;
@@ -95,7 +90,7 @@ void missions_init(AMX *amx)
 
 	/*load missionpoints*/
 	amx_SetUString(buf144,
-		"SELECT a,i,x,y,z,t "
+		"SELECT a,i,x,y,z,name,t "
 		"FROM msp "
 		"ORDER BY a ASC,i ASC",
 		144);
@@ -105,47 +100,26 @@ void missions_init(AMX *amx)
 	while (i--) {
 		NC_cache_get_field_int(i, 0, &apid);
 		if (apid != lastapid) {
-			if (lastapid != -1) {
-				msp = ap->missionpoints;
-				while (msp != NULL) {
-					if (msp->type & (1 | 2 | 4)) {
-						msp->numberofsametype = gate;
-					} else if (msp->type & (8 | 16 | 32)) {
-						msp->numberofsametype = cargo;
-					} else if (msp->type & (64 | 128 | 256)) {
-						msp->numberofsametype = heliport;
-					} else {
-						msp->numberofsametype = 1;
-					}
-					msp = msp->next;
-				}
-			}
 			lastapid = apid;
 			ap = airports + apid;
 			msp = malloc(sizeof(struct MISSIONPOINT));
 			ap->missionpoints = msp;
-			gate = heliport = cargo = 0;
 		} else {
 			msp->next = malloc(sizeof(struct MISSIONPOINT));
 			msp = msp->next;
 		}
 		msp->next = NULL;
 		msp->ap = ap;
-		msp->numberofsametype = 0;
-		if (msp->type & (1 | 2 | 4)) {
-			gate++;
-		} else if (msp->type & (8 | 16 | 32)) {
-			cargo++;
-		} else if (msp->type & (64 | 128 | 256)) {
-			heliport++;
-		}
 		msp->currentlyactivemissions = 0;
 		NC_cache_get_field_int(i, 1, &msp->id);
 		NC_cache_get_field_flt(i, 2, msp->x);
 		NC_cache_get_field_flt(i, 3, msp->y);
 		NC_cache_get_field_flt(i, 4, msp->z);
-		NC_cache_get_field_int(i, 5, &msp->type);
+		NC_cache_get_field_str(i, 6, buf32a);
+		NC_cache_get_field_int(i, 6, &msp->type);
+		amx_GetUString(msp->name, buf32, MAX_MSP_NAME + 1);
 		ap->missiontypes |= msp->type;
+
 	}
 	NC_cache_delete(dbcache);
 
@@ -1157,34 +1131,14 @@ cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[5], &addr);
 	*addr = amx_ftoc(mission->startpoint->z);
 
-	switch (mission->missiontype) {
-	case 1: msptypename = destinationtype_gate; break;
-	case 2: msptypename = destinationtype_gate; break;
-	case 4: msptypename = destinationtype_gate; break;
-	case 16: msptypename = destinationtype_cargo; break;
-	case 64: msptypename = destinationtype_heliport; break;
-	case 256: msptypename = destinationtype_heliport; break;
-	}
-
-	if (msptypename == NULL) {
-		sprintf(msg,
-		        "Flight from %s (%s) to %s (%s)",
-		        mission->startpoint->ap->name,
-		        mission->startpoint->ap->beacon,
-		        mission->endpoint->ap->name,
-		        mission->endpoint->ap->beacon);
-	} else {
-		sprintf(msg,
-			"Flight from %s (%s) %s %d to %s (%s) %s %d",
-			mission->startpoint->ap->name,
-			mission->startpoint->ap->beacon,
-			msptypename,
-			mission->startpoint->numberofsametype,
-			mission->endpoint->ap->name,
-			mission->endpoint->ap->beacon,
-			msptypename,
-			mission->endpoint->numberofsametype);
-	}
+	sprintf(msg,
+		"Flight from %s (%s) %s to %s (%s) %s",
+		mission->startpoint->ap->name,
+		mission->startpoint->ap->beacon,
+		mission->startpoint->name,
+		mission->endpoint->ap->name,
+		mission->endpoint->ap->beacon,
+		mission->endpoint->name);
 	amx_GetAddr(amx, params[6], &addr);
 	amx_SetUString(addr, msg, sizeof(msg));
 

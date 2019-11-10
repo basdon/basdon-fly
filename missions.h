@@ -4,6 +4,9 @@
 #define MISSION_LOAD_UNLOAD_TIME 2200
 #define MISSION_CHECKPOINT_SIZE 11.0f
 
+/*excluding zero term*/
+#define MAX_MSP_NAME (9)
+
 #ifdef DEV
 /**
 Toggles showing closest missionpoint. Will send a message to all players when
