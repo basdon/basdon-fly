@@ -75,7 +75,9 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 	char inputtext[128];
 	cell *addr;
 
-	if (!dialog_on_response(amx, playerid, dialogid)) {
+	if (anticheat_flood(amx, playerid, AC_FLOOD_AMOUNT_DIALOG) ||
+		!dialog_on_response(amx, playerid, dialogid))
+	{
 		return 0;
 	}
 	amx_GetAddr(amx, params[5], &addr);
@@ -309,6 +311,10 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 	cell *addr;
 	char buf[144];
 	const int playerid = params[1];
+
+	if (!anticheat_on_player_text(amx, playerid)) {
+		return 0;
+	}
 
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(buf, addr, sizeof(buf));

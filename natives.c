@@ -251,6 +251,8 @@ int natives_find(AMX *amx)
 void natives_NC_Kick(int playerid)
 {
 	/*TODO: log?*/
+	/*TODO: more delay when player is afk?
+	gamemode kicked after x player updates, or x ms if player is afk*/
 	kickdelay[playerid] = 2;
 }
 

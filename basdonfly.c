@@ -192,6 +192,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 #endif /*LOG_SLOW_TICKS*/
 
 		/*timer100*/
+		anticheat_decrease_flood();
 		maps_process_tick(amx);
 #ifdef DEV
 		dev_missions_update_closest_point(amx);

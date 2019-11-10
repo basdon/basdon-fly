@@ -36,6 +36,10 @@ static struct INFRACTIONDATA infractiondata[] = {
 	{ AC_UNAUTH_VEHICLE_ACCESS, 3, 15, 1, "unauthorized vehicle access" },
 };
 static int infractionvalue[INFRACTIONTYPES][MAX_PLAYERS];
+/**
+Flood value of player.
+*/
+static int floodcount[MAX_PLAYERS];
 
 /* native Ac_FormatLog(playerid, loggedstatus, const message[], buf[]) */
 cell AMX_NATIVE_CALL Ac_FormatLog(AMX *amx, cell *params)
@@ -72,6 +76,22 @@ cell AMX_NATIVE_CALL Ac_FormatLog(AMX *amx, cell *params)
 
 /**
 Kicks and broadcasts kickmessage when needed. Does not log.
+*/
+static
+void anticheat_kick(AMX *amx, int playerid, char *reason)
+{
+	natives_NC_Kick(playerid);
+	sprintf(cbuf4096,
+		"%s[%d] was kicked by system (%s)",
+		pdata[playerid]->name,
+		playerid,
+		reason);
+	amx_SetUString(buf144, cbuf4096, 144);
+	NC_SendClientMessageToAll(COL_WARN, buf144a);
+}
+
+/**
+Adds infraction value, kicking the player if they exceeded the max value.
 
 @param type infraction type, one of AC_IF_ constants.
 */
@@ -81,14 +101,21 @@ void anticheat_infraction(AMX *amx, int playerid, int type)
 	struct INFRACTIONDATA d = infractiondata[type];
 
 	if ((infractionvalue[type][playerid] += d.increment) >= d.maxvalue) {
-		sprintf(cbuf4096,
-			"%s[%d] was kicked by system (%s)",
-			pdata[playerid]->name,
-			playerid,
-			d.kickreason);
-		amx_SetUString(buf144, cbuf4096, 144);
-		NC_SendClientMessageToAll(COL_WARN, buf144a);
-		natives_NC_Kick(playerid);
+		anticheat_kick(amx, playerid, d.kickreason);
+	}
+}
+
+void anticheat_decrease_flood()
+{
+	int playerid, n = playercount;
+
+	while (n--) {
+		playerid = players[n];
+		if (floodcount[playerid] > 0 &&
+			(floodcount[playerid] -= AC_FLOOD_DECLINE_PER_100) < 0)
+		{
+			floodcount[playerid] = 0;
+		}
 	}
 }
 
@@ -111,6 +138,18 @@ void anticheat_decrease_infractions()
 	}
 }
 
+int anticheat_flood(AMX *amx, int playerid, int amount)
+{
+	static char *EXCESS_FLOOD = "excess flood";
+
+	if ((floodcount[playerid] += amount) >= AC_FLOOD_LIMIT) {
+		anticheat_log(amx, playerid, AC_FLOOD, EXCESS_FLOOD);
+		anticheat_kick(amx, playerid, EXCESS_FLOOD);
+		return 1;
+	}
+	return 0;
+}
+
 void anticheat_on_player_connect(int playerid)
 {
 	int n = INFRACTIONTYPES;
@@ -118,6 +157,7 @@ void anticheat_on_player_connect(int playerid)
 	while (n--) {
 		infractionvalue[n][playerid] = 0;
 	}
+	floodcount[playerid] = 0;
 }
 
 void anticheat_log(AMX *amx, int playerid, int eventtype, char *info)
@@ -214,4 +254,18 @@ void anticheat_on_player_enter_vehicle(
 			NC(n_SetVehicleHealth);
 		}
 	}
+}
+
+int anticheat_on_player_text(AMX *amx, int playerid)
+{
+	static const char *DONTSPAM = "Don't spam!";
+
+	if (anticheat_flood(amx, playerid, AC_FLOOD_AMOUNT_CHAT)) {
+		return 0;
+	}
+	if (floodcount[playerid] > AC_FLOOD_WARN_THRESHOLD) {
+		amx_SetUString(buf144, DONTSPAM, 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	}
+	return 1;
 }
