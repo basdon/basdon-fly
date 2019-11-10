@@ -26,6 +26,11 @@
 logprintf_t logprintf;
 extern void *pAMXFunctions;
 
+EXPECT_SIZE(char, 1);
+EXPECT_SIZE(int, 4);
+EXPECT_SIZE(cell, 4);
+EXPECT_SIZE(float, 4);
+
 #define FORWARD(X) cell AMX_NATIVE_CALL X(AMX *amx, cell *params)
 
 /* anticheat.c */
@@ -97,7 +102,6 @@ FORWARD(Veh_AddOdo);
 FORWARD(Veh_AddServicePoint);
 FORWARD(Veh_CollectSpawnedVehicles);
 FORWARD(Veh_CollectPlayerVehicles);
-FORWARD(Veh_ConsumeFuel);
 FORWARD(Veh_Destroy);
 FORWARD(Veh_GetLabelToDelete);
 FORWARD(Veh_GetNextUpdateQuery);
@@ -373,7 +377,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_AddServicePoint),
 	REGISTERNATIVE(Veh_CollectSpawnedVehicles),
 	REGISTERNATIVE(Veh_CollectPlayerVehicles),
-	REGISTERNATIVE(Veh_ConsumeFuel),
 	REGISTERNATIVE(Veh_Destroy),
 	REGISTERNATIVE(Veh_GetLabelToDelete),
 	REGISTERNATIVE(Veh_Init),

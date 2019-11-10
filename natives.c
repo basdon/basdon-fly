@@ -29,6 +29,7 @@ int n_GameTextForPlayer;
 int n_GetConsoleVarAsInt;
 int n_GetPlayerFacingAngle;
 int n_GetPlayerIp;
+int n_GetPlayerKeys;
 int n_GetPlayerName;
 int n_GetPlayerPos;
 int n_GetPlayerState;
@@ -151,16 +152,17 @@ int natives_find(AMX *amx)
 		N(GameTextForPlayer),
 		N(GetConsoleVarAsInt),
 		N(GetPlayerIp),
-		N(GetPlayerName),
-		N(GetPlayerState),
-		N(GetVehicleParamsEx),
 		N(GetPlayerFacingAngle),
+		N(GetPlayerKeys),
+		N(GetPlayerName),
 		N(GetPlayerPos),
+		N(GetPlayerState),
 		N(GetPlayerVehicleID),
 		N(GetPlayerVehicleSeat),
 		N(GetVehicleHealth),
 		N(GetVehicleModel),
 		N(GetVehicleRotationQuat),
+		N(GetVehicleParamsEx),
 		N(GetVehiclePos),
 		N(GetVehicleVelocity),
 		N(GetVehicleZAngle),

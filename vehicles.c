@@ -15,6 +15,8 @@
 #define SERVICE_MAP_DISTANCE_SQ (SERVICE_MAP_DISTANCE * SERVICE_MAP_DISTANCE)
 #define SERVICE_MAP_ICON_TYPE 38 /*S sweet icon*/
 
+#define FUEL_WARNING_SOUND 3200 /*air horn*/
+
 struct vehnode {
 	struct dbvehicle *veh;
 	struct vehnode *next;
@@ -327,18 +329,18 @@ static const char *MSG_FUEL_5 = WARN"Your vehicle has 5%% fuel left!";
 static const char *MSG_FUEL_10 = WARN"Your vehicle has 10%% fuel left!";
 static const char *MSG_FUEL_20 = WARN"Your vehicle has 20%% fuel left!";
 
-/* native Veh_ConsumeFuel(vehicleid, throttle, &ranOutOfFuel, buf[]) */
-cell AMX_NATIVE_CALL Veh_ConsumeFuel(AMX *amx, cell *params)
-{
-	const float consumptionmp = params[2] ? 1.0f : 0.2f;
-	struct dbvehicle *veh;
-	float fuelcapacity, lastpercentage, newpercentage;
-	cell *addr;
-	const char *buf;
+/**
+Make given vehicle consumer fuel. Should be called every second.
 
-	if ((veh = gamevehicles[params[1]].dbvehicle) == NULL) {
-		return 0;
-	}
+@param throttle whether the player is holding the throttle down
+*/
+static
+void veh_consume_fuel(AMX *amx, int playerid, int vehicleid, int throttle,
+	struct VEHICLEPARAMS *vparams, struct dbvehicle *veh)
+{
+	const float consumptionmp = throttle ? 1.0f : 0.2f;
+	float fuelcapacity, lastpercentage, newpercentage;
+	char *buf;
 
 	fuelcapacity = model_fuel_capacity(veh->model);
 	lastpercentage = veh->fuel / fuelcapacity;
@@ -347,23 +349,23 @@ cell AMX_NATIVE_CALL Veh_ConsumeFuel(AMX *amx, cell *params)
 		veh->fuel = 0.0f;
 	}
 	newpercentage = veh->fuel / fuelcapacity;
-	amx_GetAddr(amx, params[3], &addr);
-	*addr = 0;
+
 	if (lastpercentage > 0.0f && newpercentage == 0.0f) {
-		buf = MSG_FUEL_0;
-		*addr = 1;
+		vparams->engine = 0;
+		common_SetVehicleParamsEx(amx, vehicleid, vparams);
+		buf = (char*) MSG_FUEL_0;
 	} else if (lastpercentage > 0.05f && newpercentage <= 0.05f) {
-		buf = MSG_FUEL_5;
+		buf = (char*) MSG_FUEL_5;
 	} else if (lastpercentage > 0.1f && newpercentage <= 0.1f) {
-		buf = MSG_FUEL_10;
+		buf = (char*) MSG_FUEL_10;
 	} else if (lastpercentage > 0.2f && newpercentage <= 0.2f) {
-		buf = MSG_FUEL_20;
+		buf = (char*) MSG_FUEL_20;
 	} else {
-		return 0;
+		return;
 	}
-	amx_GetAddr(amx, params[4], &addr);
-	amx_SetUString(addr, buf, 80);
-	return 1;
+	amx_SetUString(buf144, buf, 144);
+	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	NC_PlayerPlaySound0(playerid, FUEL_WARNING_SOUND);
 }
 
 /* native Veh_Destroy() */
@@ -862,30 +864,33 @@ void veh_update_odo(AMX *amx, int playerid, int vehicleid, struct vec3 pos)
 }
 
 /**
-Continuation of veh_timed_1s_update when player is in air vehicle.
+Continuation of veh_timed_1s_update.
+
+Called when player is still in same in air vehicle as last in update.
 */
 static
-void veh_timed_update_a(
+void veh_timed_1s_update_a(
 	AMX *amx, int playerid, int vehicleid, struct vec3 *vpos,
 	struct dbvehicle *v)
 {
+	struct VEHICLEPARAMS vparams;
+	struct PLAYERKEYS pkeys;
 	struct vec3 vvel;
 	struct quat vrot;
-	int engine;
 	float hp;
 	int afk = temp_afk[playerid];
 
-	nc_params[0] = 8;
-	nc_params[1] = vehicleid;
-	nc_params[2] = buf32a;
-	nc_params[3] = nc_params[4] = nc_params[5] = nc_params[6]
-		= nc_params[7] = nc_params[8] = buf64a;
-	NC(n_GetVehicleParamsEx);
-	engine = *buf32;
+	common_GetVehicleParamsEx(amx, vehicleid, &vparams);
 
 	if (!afk) {
 		common_GetVehicleRotationQuat(amx, vehicleid, &vrot);
 		missions_update_satisfaction(amx, playerid, vehicleid, &vrot);
+
+		if (vparams.engine) {
+			common_GetPlayerKeys(amx, playerid, &pkeys);
+			veh_consume_fuel(amx, playerid, vehicleid,
+				pkeys.keys & KEY_SPRINT, &vparams, v);
+		}
 	}
 
 	if (missions_get_stage(playerid) == MISSION_STAGE_FLIGHT) {
@@ -893,7 +898,7 @@ void veh_timed_update_a(
 		common_GetVehicleVelocity(amx, vehicleid, &vvel);
 		missions_send_tracker_data(
 			amx, playerid, vehicleid, hp,
-			vpos, &vvel, afk, engine);
+			vpos, &vvel, afk, vparams.engine);
 	}
 }
 
@@ -938,7 +943,7 @@ void veh_timed_1s_update(AMX *amx)
 
 			NC_GetVehicleModel(vehicleid);
 			if (game_is_air_vehicle(nc_result)) {
-				veh_timed_update_a(
+				veh_timed_1s_update_a(
 					amx, playerid, vehicleid,
 					&vpos, v);
 			}

@@ -10,18 +10,42 @@
 #include "vendor/SDK/plugincommon.h"
 #include "sharedsymbols.h"
 
+#define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
+#define EXPECT_SIZE(S,SIZE) STATIC_ASSERT(sizeof(S)==(SIZE))
+
 struct vec3 {
 	float x, y, z;
 };
+EXPECT_SIZE(struct vec3, 3 * sizeof(cell));
 
 struct vec4 {
 	struct vec3 coords;
 	float r;
 };
+EXPECT_SIZE(struct vec4, 4 * sizeof(cell));
 
 struct quat {
 	float qx, qy, qz, qw;
 };
+EXPECT_SIZE(struct quat, 4 * sizeof(cell));
+
+struct PLAYERKEYS {
+	int keys;
+	int updown;
+	int leftright;
+};
+EXPECT_SIZE(struct PLAYERKEYS, 3 * sizeof(cell));
+
+struct VEHICLEPARAMS {
+	int engine;
+	int lights;
+	int alarm;
+	int doors;
+	int bonnet;
+	int boot;
+	int objectite;
+};
+EXPECT_SIZE(struct VEHICLEPARAMS, 7 * sizeof(cell));
 
 #include "cmd.h"
 #include "natives.h"
@@ -129,11 +153,23 @@ Sets the state of the engine for given vehicle id.
 */
 void common_set_vehicle_engine(AMX*, int vehicleid, int enginestatus);
 /**
+Alternative for GetPlayerKeys to get it directly into a PLAYERKEYS struct.
+
+Will use buf32.
+*/
+void common_GetPlayerKeys(AMX*, int playerid, struct PLAYERKEYS *keys);
+/**
 Alternative for GetPlayerPos to get it directly into a vec3 struct.
 
 Will use buf32, buf64, buf144.
 */
 int common_GetPlayerPos(AMX*, int playerid, struct vec3 *pos);
+/**
+Gets vehicle params of given vehicle into given VEHICLEPARAMS struct.
+
+Uses buf32.
+*/
+int common_GetVehicleParamsEx(AMX*, int vehicleid, struct VEHICLEPARAMS *p);
 /**
 Alternative for GetVehiclePos to get it directly into a vec3 struct.
 
@@ -152,3 +188,9 @@ Alternative for GetVehicleVelocity to get it directly into a vec3 struct.
 Will use buf32, buf64, buf144.
 */
 int common_GetVehicleVelocity(AMX*, int vehicleid, struct vec3 *vel);
+/**
+Sets vehicle params of given vehicle into given VEHICLEPARAMS struct.
+
+Uses buf32.
+*/
+int common_SetVehicleParamsEx(AMX*, int vehicleid, struct VEHICLEPARAMS *p);

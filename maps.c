@@ -155,11 +155,6 @@ void maps_load_from_db(AMX *amx)
 		nummaps = 0;
 		return;
 	}
-	if (sizeof(cell) != 4) {
-		logprintf("ERR: sizeof cell is not 4");
-		nummaps = 0;
-		return;
-	}
 
 	amx_SetUString(buf4096, q, sizeof(q));
 	NC_mysql_query_(buf4096a, &cacheid);

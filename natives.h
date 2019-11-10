@@ -21,6 +21,7 @@ extern int n_GameTextForPlayer;
 extern int n_GetConsoleVarAsInt;
 extern int n_GetPlayerFacingAngle;
 extern int n_GetPlayerIp;
+extern int n_GetPlayerKeys;
 extern int n_GetPlayerName;
 extern int n_GetPlayerPos;
 extern int n_GetPlayerState;

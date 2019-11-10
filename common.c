@@ -2,6 +2,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include <string.h>
 
 int loggedstatus[MAX_PLAYERS];
 short kickdelay[MAX_PLAYERS];
@@ -54,26 +55,23 @@ void common_crash_player(AMX *amx, int playerid)
 
 void common_set_vehicle_engine(AMX *amx, int vehicleid, int enginestatus)
 {
-	cell p1a = buf144a;
-	cell p2a = buf144a + 1;
-	cell p3a = buf144a + 2;
-	cell p4a = buf144a + 3;
-	cell p5a = buf144a + 4;
-	cell p6a = buf144a + 5;
-	cell p7a = buf144a + 6;
-	cell *p1 = buf144;
-	cell *p2 = buf144 + 1;
-	cell *p3 = buf144 + 2;
-	cell *p4 = buf144 + 3;
-	cell *p5 = buf144 + 4;
-	cell *p6 = buf144 + 5;
-	cell *p7 = buf144 + 6;
-
-	NC_GetVehicleParamsEx(vehicleid, p1a, p2a, p3a, p4a, p5a, p6a, p7a);
-	if (enginestatus != *p1) {
-		NC_SetVehicleParamsEx(
-			vehicleid, enginestatus, *p2, *p3, *p4, *p5, *p6, *p7);
+	struct VEHICLEPARAMS params;
+	common_GetVehicleParamsEx(amx,  vehicleid, &params);
+	if (params.engine != enginestatus) {
+		params.engine = enginestatus;
+		common_SetVehicleParamsEx(amx, vehicleid, &params);
 	}
+}
+
+#define _(N,V) (1 + (nc_params[N] = V))
+
+void common_GetPlayerKeys(AMX *amx, int playerid, struct PLAYERKEYS *keys)
+{
+	nc_params[0] = 4;
+	nc_params[1] = playerid;
+	nc_params[4] = _(3,_(2,buf32a));
+	NC(n_GetPlayerKeys);
+	memcpy(keys, buf32, sizeof(struct PLAYERKEYS));
 }
 
 int common_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos)
@@ -82,6 +80,16 @@ int common_GetPlayerPos(AMX *amx, int playerid, struct vec3 *pos)
 	pos->x = *fbuf32;
 	pos->y = *fbuf64;
 	pos->z = *fbuf144;
+	return nc_result;
+}
+
+int common_GetVehicleParamsEx(AMX *amx, int vehicleid, struct VEHICLEPARAMS *p)
+{
+	nc_params[0] = 8;
+	nc_params[1] = vehicleid;
+	nc_params[8] = _(7,_(6,_(5,_(4,_(3,_(2,buf32a))))));
+	NC(n_GetVehicleParamsEx);
+	memcpy(p, buf32, sizeof(struct VEHICLEPARAMS));
 	return nc_result;
 }
 
@@ -113,3 +121,13 @@ int common_GetVehicleVelocity(AMX *amx, int vehicleid, struct vec3 *vel)
 	vel->z = *fbuf144;
 	return nc_result;
 }
+
+int common_SetVehicleParamsEx(AMX *amx, int vehicleid, struct VEHICLEPARAMS *p)
+{
+	nc_params[0] = 8;
+	nc_params[1] = vehicleid;
+	memcpy(nc_params + 2, p, sizeof(struct VEHICLEPARAMS));
+	NC(n_SetVehicleParamsEx);
+	return nc_result;
+}
+#undef _

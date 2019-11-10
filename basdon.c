@@ -23,14 +23,6 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 	}
 	playercount = 0;
 
-	if (sizeof(cell) != sizeof(int)) {
-		logprintf(
-			"ERR: sizeof(cell)=%d sizeof(int)=%d",
-			sizeof(cell),
-			sizeof(int));
-		return 0;
-	}
-
 	amx_GetAddr(amx, buf4096a = params[2], &buf4096);
 	amx_GetAddr(amx, buf144a = params[3], &buf144);
 	amx_GetAddr(amx, buf64a = params[4], &buf64);

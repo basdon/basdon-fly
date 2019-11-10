@@ -504,15 +504,6 @@ native Veh_CollectPlayerVehicles(userid, buf[])
 //@returns the amount of vehicles that were placed in {@param buf}
 native Veh_CollectSpawnedVehicles(userid, buf[])
 
-//@summary Make a vehicle consume fuel, to be called each second when a player is in control
-//@param vehicleid the vehicle
-//@param throttle whether throttle is down or not
-//@param isOutOfFuel will be set to non-zero when the vehicle ran out of fuel by calling this, to shutdown the engine.\
-	will only be non-zero when this function also returns non-zero.
-//@param buf buffer that will hold message to send to player, when returning non-zero
-//@returns non-zero if {@param buf} contains a message to be sent to the player, {@param isOutOfFuel} might also be non-zero in this case.
-native Veh_ConsumeFuel(vehicleid, throttle, &isOutOfFuel, buf[])
-
 //@summary Destroys the db vehicle table and service points table and frees used memory
 //@seealso Veh_Add
 //@seealso Veh_AddServicePoint
