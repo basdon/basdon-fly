@@ -71,11 +71,9 @@ FORWARD(Login_PasswordConfirmStore);
 FORWARD(Login_PasswordConfirmValidate);
 FORWARD(Login_UsePassword);
 /* missions.c */
-FORWARD(Missions_AddPoint);
 FORWARD(Missions_Create);
 FORWARD(Missions_EndUnfinished);
 FORWARD(Missions_EnterCheckpoint);
-FORWARD(Missions_FinalizeAddPoints);
 FORWARD(Missions_GetState);
 FORWARD(Missions_OnVehicleRefueled);
 FORWARD(Missions_OnVehicleRepaired);
@@ -140,7 +138,6 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	pdata_init();
 	zones_init();
 	nav_init();
-	missions_init();
 	veh_init();
 
 	return 1;
@@ -348,11 +345,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Login_PasswordConfirmValidate),
 	REGISTERNATIVE(Login_UsePassword),
 	/* missions.c */
-	REGISTERNATIVE(Missions_AddPoint),
 	REGISTERNATIVE(Missions_Create),
 	REGISTERNATIVE(Missions_EndUnfinished),
 	REGISTERNATIVE(Missions_EnterCheckpoint),
-	REGISTERNATIVE(Missions_FinalizeAddPoints),
 	REGISTERNATIVE(Missions_GetState),
 	REGISTERNATIVE(Missions_OnVehicleRefueled),
 	REGISTERNATIVE(Missions_OnVehicleRepaired),

@@ -82,12 +82,80 @@ void missions_destroy_tracker_socket(AMX *amx)
 	}
 }
 
-void missions_init()
+void missions_init(AMX *amx)
 {
-	int i = MAX_PLAYERS;
-	while (i--) {
+	struct AIRPORT *ap;
+	struct MISSIONPOINT *msp;
+	int apid, lastapid, i, dbcache;
+	unsigned char gate, cargo, heliport;
+
+	for (i = 0; i < MAX_PLAYERS; i++) {
 		activemission[i] = NULL;
 	}
+
+	/*load missionpoints*/
+	amx_SetUString(buf144,
+		"SELECT a,i,x,y,z,t "
+		"FROM msp "
+		"ORDER BY a ASC,i ASC",
+		144);
+	NC_mysql_query_(buf144a, &dbcache);
+	NC_cache_get_row_count_(&i);
+	lastapid = -1;
+	while (i--) {
+		NC_cache_get_field_int(i, 0, &apid);
+		if (apid != lastapid) {
+			if (lastapid != -1) {
+				msp = ap->missionpoints;
+				while (msp != NULL) {
+					if (msp->type & (1 | 2 | 4)) {
+						msp->numberofsametype = gate;
+					} else if (msp->type & (8 | 16 | 32)) {
+						msp->numberofsametype = cargo;
+					} else if (msp->type & (64 | 128 | 256)) {
+						msp->numberofsametype = heliport;
+					} else {
+						msp->numberofsametype = 1;
+					}
+					msp = msp->next;
+				}
+			}
+			lastapid = apid;
+			ap = airports + apid;
+			msp = malloc(sizeof(struct MISSIONPOINT));
+			ap->missionpoints = msp;
+			gate = heliport = cargo = 0;
+		} else {
+			msp->next = malloc(sizeof(struct MISSIONPOINT));
+			msp = msp->next;
+		}
+		msp->next = NULL;
+		msp->ap = ap;
+		msp->numberofsametype = 0;
+		if (msp->type & (1 | 2 | 4)) {
+			gate++;
+		} else if (msp->type & (8 | 16 | 32)) {
+			cargo++;
+		} else if (msp->type & (64 | 128 | 256)) {
+			heliport++;
+		}
+		msp->currentlyactivemissions = 0;
+		NC_cache_get_field_int(i, 1, &msp->id);
+		NC_cache_get_field_flt(i, 2, msp->x);
+		NC_cache_get_field_flt(i, 3, msp->y);
+		NC_cache_get_field_flt(i, 4, msp->z);
+		NC_cache_get_field_int(i, 5, &msp->type);
+		ap->missiontypes |= msp->type;
+	}
+	NC_cache_delete(dbcache);
+
+	/*end unfinished dangling flights*/
+	amx_SetUString(buf144,
+		"UPDATE flg "
+		"SET state="EQ(MISSION_STATE_SERVER_ERR)" "
+		"WHERE state="EQ(MISSION_STAGE_FLIGHT)"",
+		144);
+	NC_mysql_tquery_nocb(buf144a);
 }
 
 void missions_add_distance(int playerid, float distance_in_m)
@@ -383,31 +451,6 @@ void dev_missions_update_closest_point(AMX *amx)
 	}
 }
 #endif /*DEV*/
-
-/* native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type) */
-cell AMX_NATIVE_CALL Missions_AddPoint(AMX *amx, cell *params)
-{
-	struct MISSIONPOINT *mp;
-	struct MISSIONPOINT *newmp;
-	struct AIRPORT *ap = airports + params[1];
-
-	newmp = malloc(sizeof(struct MISSIONPOINT));
-	newmp->id = (unsigned short) params[2];
-	newmp->x = amx_ctof(params[3]);
-	newmp->y = amx_ctof(params[4]);
-	newmp->z = amx_ctof(params[5]);
-	ap->missiontypes |= newmp->type = params[6];
-	newmp->currentlyactivemissions = 0;
-	newmp->ap = ap;
-	newmp->next = NULL;
-
-	mp = ap->missionpoints;
-	if (mp != NULL) {
-		newmp->next = mp;
-	}
-	ap->missionpoints = newmp;
-	return 1;
-}
 
 static
 struct AIRPORT *getRandomAirportForType(AMX *amx, int missiontype, struct AIRPORT *blacklistedairport)
@@ -812,35 +855,6 @@ exit_set_errmsg:
 	amx_GetAddr(amx, params[7], &addr);
 	amx_SetUString(addr, msg, sizeof(msg));
 	return MISSION_ENTERCHECKPOINTRES_ERR;
-}
-
-/* native Missions_FinalizeAddPoints() */
-cell AMX_NATIVE_CALL Missions_FinalizeAddPoints(AMX *amx, cell *params)
-{
-	struct AIRPORT *ap = airports;
-	struct MISSIONPOINT *msp;
-	int i = numairports;
-	unsigned char gate, cargo, heliport;
-
-	while (i--) {
-		gate = cargo = heliport = 1;
-		msp = ap->missionpoints;
-		while (msp != NULL) {
-			if (msp->type & (1 | 2 | 4)) {
-				msp->numberofsametype = gate++;
-			} else if (msp->type & (8 | 16 | 32)) {
-				msp->numberofsametype = cargo++;
-			} else if (msp->type & (64 | 128 | 256)) {
-				msp->numberofsametype = heliport++;
-			} else {
-				msp->numberofsametype = 1;
-			}
-			msp = msp->next;
-		}
-		ap++;
-	}
-
-	return 1;
 }
 
 int missions_get_stage(int playerid)

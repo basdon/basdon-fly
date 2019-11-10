@@ -265,16 +265,6 @@ native Login_UsePassword(playerid, buf[]);
 
 #namespace "missions.c"
 
-//@summary Adds a mission point
-//@param aptindex index of the airport in the airports table this mission point belongs to
-//@param id the id of the mission point
-//@param x x coordinate
-//@param y y coordinate
-//@param z z coordinate
-//@param type type of missions this mission point is for
-//@seealso Missions_FinalizeAddPoints
-native Missions_AddPoint(aptindex, id, Float:x, Float:y, Float:z, type)
-
 //@summary Creates a random mission for a player
 //@param playerid player to create a random mission for
 //@param x current x coordinate of player
@@ -310,10 +300,6 @@ native Missions_EndUnfinished(playerid, reason)
 	<li>{@code MISSION_ENTERCHECKPOINTRES_ERR} if vehicle does not match for player's mission, send {@param errmsg} to player</li></ul>
 //@remarks also checks if {@param vehicleid} is valid
 native Missions_EnterCheckpoint(playerid, vehicleid, vv, Float:x, Float:y, Float:z, errmsg[])
-
-//@summary Compute some mission point stuff, to be done after all points have been added
-//@seealso Missions_AddPoint
-native Missions_FinalizeAddPoints()
 
 //@summary Get mission state of a player
 //@param playerid player to get the mission state of

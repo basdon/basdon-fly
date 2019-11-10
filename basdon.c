@@ -121,6 +121,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	class_init(amx);
 	maps_load_from_db(amx);
 	missions_create_tracker_socket(amx);
+	missions_init(amx);
 	echo_init(amx);
 	heartbeat_create_session(amx);
 	panel_on_gamemode_init(amx);

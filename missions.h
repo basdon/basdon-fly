@@ -1,6 +1,9 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#define MISSION_LOAD_UNLOAD_TIME 2200
+#define MISSION_CHECKPOINT_SIZE 11.0f
+
 #ifdef DEV
 /**
 Toggles showing closest missionpoint. Will send a message to all players when
@@ -26,7 +29,10 @@ void missions_destroy_tracker_socket(AMX*);
 Free missionpoints from airport data.
 */
 void missions_freepoints();
-void missions_init();
+/**
+Loads mission points and inits variables.
+*/
+void missions_init(AMX*);
 /**
 Check if player is currently doing a mission.
 */

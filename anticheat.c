@@ -1,6 +1,8 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+/*vehicle panel does calls to GetVehicleHealth, so that checks vhh already*/
+
 #include "common.h"
 #include "anticheat.h"
 #include "vehicles.h"
