@@ -51,6 +51,8 @@ EXPECT_SIZE(struct VEHICLEPARAMS, 7 * sizeof(cell));
 #include "natives.h"
 #include "publics.h"
 
+typedef void (*mysql_cb)(AMX*, void* data);
+
 typedef void (*logprintf_t)(char* format, ...);
 
 extern logprintf_t logprintf;
@@ -69,6 +71,11 @@ extern logprintf_t logprintf;
 #define Q(X) #X
 #define EQ(X) Q(X)
 
+#define MK_PLAYER_CC(PLAYERID) \
+	((_cc[PLAYERID] & 0x003FFFFF) | (PLAYERID << 22))
+#define PLAYER_CC_GETID(VALUE) (((unsigned int) VALUE >> 22) & 0x3FF)
+#define PLAYER_CC_CHECK(VALUE,PLAYERID) (_cc[PLAYERID] == (VALUE & 0x003FFFFF))
+
 /* amx addresses of buffers */
 extern cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
 extern cell underscorestringa;
@@ -82,6 +89,12 @@ extern char *cunderscorestring;
 extern float *fbuf32_1, *fbuf32, *fbuf64, *fbuf144, *fbuf4096;
 /* nc parameters as floats */
 extern float *nc_paramf;
+/**
+Connection count per player id. Incremented every time playerid connects.
+
+Used to check if a player is still valid between long-running tasks.
+*/
+extern int _cc[MAX_PLAYERS];
 
 /**
 element at index playerid is either 0 or 1
@@ -194,3 +207,12 @@ Sets vehicle params of given vehicle into given VEHICLEPARAMS struct.
 Uses buf32.
 */
 int common_SetVehicleParamsEx(AMX*, int vehicleid, struct VEHICLEPARAMS *p);
+/**
+Calls mysql_tquery with a callback and data to pass.
+
+Uses buf4096 for query. Uses the last 5 components of buf4096.
+
+@param callback cb to call when the query has been executed
+@param data usually a pointer to allocated memory that should be freed in the cb
+*/
+void common_mysql_tquery(AMX*, char *query, mysql_cb callback, void *data);

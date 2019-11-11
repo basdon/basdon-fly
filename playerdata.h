@@ -6,7 +6,14 @@ struct playerdata {
 	char name[MAX_PLAYER_NAME + 1];
 	char normname[MAX_PLAYER_NAME + 1];
 	char namelen;
-	int userid, groups;
+	/**
+	User id of player.
+
+	May be NULL in rare cases when login failed to create a guest account,
+	so always use useridornull to get the userid to use in db queries.
+	*/
+	int userid;
+	int groups;
 };
 
 extern struct playerdata *pdata[MAX_PLAYERS];

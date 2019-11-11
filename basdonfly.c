@@ -72,7 +72,6 @@ FORWARD(Login_PasswordConfirmStore);
 FORWARD(Login_PasswordConfirmValidate);
 FORWARD(Login_UsePassword);
 /* missions.c */
-FORWARD(Missions_Create);
 FORWARD(Missions_EndUnfinished);
 FORWARD(Missions_EnterCheckpoint);
 FORWARD(Missions_GetState);
@@ -81,7 +80,6 @@ FORWARD(Missions_OnVehicleRepaired);
 FORWARD(Missions_OnWeatherChanged);
 FORWARD(Missions_PostLoad);
 FORWARD(Missions_PostUnload);
-FORWARD(Missions_Start);
 /* nav.c */
 FORWARD(Nav_Reset);
 /* playerdata.c */
@@ -119,6 +117,7 @@ FORWARD(Veh_UpdateSlot);
 static AMX *gamemode_amx = NULL;
 
 int temp_afk[MAX_PLAYERS];
+int _cc[MAX_PLAYERS];
 
 #define IN_BASDONFLY
 #include "basdon.c"
@@ -307,6 +306,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnDialogResponse),
 	REGISTERNATIVE(B_OnGameModeExit),
 	REGISTERNATIVE(B_OnGameModeInit),
+	REGISTERNATIVE(B_OnMysqlResponse),
 	REGISTERNATIVE(B_OnPlayerCommandText),
 	REGISTERNATIVE(B_OnPlayerConnect),
 	REGISTERNATIVE(B_OnPlayerDeath),
@@ -354,7 +354,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Login_PasswordConfirmValidate),
 	REGISTERNATIVE(Login_UsePassword),
 	/* missions.c */
-	REGISTERNATIVE(Missions_Create),
 	REGISTERNATIVE(Missions_EndUnfinished),
 	REGISTERNATIVE(Missions_EnterCheckpoint),
 	REGISTERNATIVE(Missions_GetState),
@@ -363,7 +362,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Missions_OnWeatherChanged),
 	REGISTERNATIVE(Missions_PostLoad),
 	REGISTERNATIVE(Missions_PostUnload),
-	REGISTERNATIVE(Missions_Start),
 	/* nav.c */
 	REGISTERNATIVE(Nav_Reset),
 	/* playerdata.c */

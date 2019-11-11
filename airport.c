@@ -64,6 +64,7 @@ void airports_init(AMX *amx)
 		ap = airports + rowcount;
 		ap->runways = ap->runwaysend = NULL;
 		ap->missionpoints = NULL;
+		ap->num_missionpts = 0;
 		ap->missiontypes = 0;
 		ap->id = rowcount;
 		NC_cache_get_field_str(rowcount, 0, buf144a);

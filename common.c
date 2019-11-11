@@ -131,3 +131,9 @@ int common_SetVehicleParamsEx(AMX *amx, int vehicleid, struct VEHICLEPARAMS *p)
 	return nc_result;
 }
 #undef _
+
+void common_mysql_tquery(AMX *amx, char *query, mysql_cb callback, void *data)
+{
+	amx_SetUString(buf4096, query, 2000);
+	PC_mysql_tquery_proxy((cell) callback, (cell) data);
+}

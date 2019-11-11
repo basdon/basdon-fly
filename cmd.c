@@ -169,7 +169,9 @@ static struct COMMAND cmds[] = {
 	{ 0, "/ils", GROUPS_ALL, nav_cmd_ils },
 	{ 0, "/loc", GROUPS_ALL, zones_cmd_loc },
 	{ 0, "/nearest", GROUPS_ALL, airport_cmd_nearest },
+	{ 0, "/m", GROUPS_ALL, missions_cmd_mission },
 	{ 0, "/me", GROUPS_ALL, cmd_me },
+	{ 0, "/mission", GROUPS_ALL, missions_cmd_mission },
 	{ 0, "/park", GROUPS_ALL, cmd_park },
 	{ 0, "/p", GROUPS_ALL, prefs_cmd_preferences },
 	{ 0, "/pm", GROUPS_ALL, pm_cmd_pm },
@@ -181,6 +183,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/respawn", GROUPS_ALL, cmd_respawn },
 	{ 0, "/spray", GROUPS_ALL, cmd_spray },
 	{ 0, "/vor", GROUPS_ALL, nav_cmd_vor },
+	{ 0, "/w", GROUPS_ALL, missions_cmd_mission },
 }, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
 
 int cmd_hash(const char *cmdtext)

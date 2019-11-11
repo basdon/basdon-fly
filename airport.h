@@ -23,6 +23,7 @@ struct AIRPORT {
 	int flags;
 	struct RUNWAY *runways, *runwaysend;
 	struct MISSIONPOINT *missionpoints;
+	int num_missionpts;
 };
 
 extern struct AIRPORT *airports;

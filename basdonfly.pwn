@@ -24,6 +24,9 @@ native B_OnGameModeExit()
 //@remarks call after db has been initialized
 native B_OnGameModeInit()
 
+//@summary Plugin callback for mysql callback
+native B_OnMysqlResponse(function, data)
+
 //@summary Plugin callback for {@link OnPlayerCommandText}
 //@remarks will call {@link OnPlayerCommandTextHash}
 native B_OnPlayerCommandText(playerid, cmdtext[])
@@ -265,21 +268,6 @@ native Login_UsePassword(playerid, buf[]);
 
 #namespace "missions.c"
 
-//@summary Creates a random mission for a player
-//@param playerid player to create a random mission for
-//@param x current x coordinate of player
-//@param y current y coordinate of player
-//@param z current z coordinate of player
-//@param vehicleid id of the vehicle player is in
-//@param vv vehicle reincarnation value (see {@link vv})
-//@param vehiclehp the safe health of {@param vehicleid}
-//@param msg buffer used to put error msg in (only to be sent when returned {@code 0})
-//@param querybuf buffer to store queries in (only to be executed when returned {@code 1}), see remarks
-//@returns {@code 0} if a mission could not be started, in that case warn msg {@param msg} should be sent to player and no queries executed
-//@remarks queries in {@param querybuf} are at positions {@code 0}, {@code 200}, {@code 400}
-//@remarks next step is to execute the queries and call {@link Missions_Start} after query@{@code buf[400]} returned last inserted id
-native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, Float:vehiclehp, msg[], querybuf[])
-
 //@summary Ends the active mission for given player (when applicable)
 //@param playerid the playerid to cancel their mission for
 //@param reason the reason, see {@code MISSION_CANCELREASON_} constants
@@ -347,16 +335,6 @@ native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z, buf[])
 ///   </ul>
 /// </remarks>
 native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[])
-
-//@summary Starts a mission for a player after the mission id has been retrieved
-//@param playerid the player to start the mission for
-//@param missionid the mission id
-//@param x will contain loading point x coordinate on return
-//@param y will contain loading point y coordinate on return
-//@param z will contain loading point z coordinate on return
-//@param querybuf buffer to store query in
-//@returns {@code 0} if there's no mission associated with the given player
-native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z, querybuf[])
 
 //@summary Updates passenger satisfaction. Should be called every second.\
 	Has no effect when player is not in a mission (or in a mission that has no passengers).

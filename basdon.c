@@ -130,6 +130,14 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	return 1;
 }
 
+static
+cell AMX_NATIVE_CALL B_OnMysqlResponse(AMX *amx, cell *params)
+{
+	/*TODO: maybe I shouldn't be doing it like this*/
+	((mysql_cb) params[1])(amx, (void*) params[2]);
+	return 1;
+}
+
 /* native B_OnPlayerCommandText(playerid, cmdtext[]) */
 static
 cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
@@ -170,6 +178,8 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	amx_SetUString(buf144, "PL: DEVELOPMENT BUILD", 144);
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 #endif /*DEV*/
+
+	_cc[playerid]++;
 
 	pdata_init_player(amx, playerid);
 

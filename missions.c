@@ -36,7 +36,17 @@ struct MISSION {
 	float distance, actualdistanceM;
 	int passenger_satisfaction;
 	struct dbvehicle *veh;
-	int vehicle_reincarnation_value;
+	/**
+	The vehicleid of the vehicle the mission was started with.
+	*/
+	int vehicleid;
+	/**
+	Reincarnation value of vehicleid when the mission was started.
+
+	Use in combination with vehicleid to check if vehicle at the end is
+	the same vehicle the mission was started with.
+	*/
+	int vehicle_reincarnation;
 	time_t starttime;
 	short lastvehiclehp, damagetaken;
 	float lastfuel, fuelburned;
@@ -122,7 +132,7 @@ void missions_init(AMX *amx)
 		NC_cache_get_field_int(i, 6, &msp->type);
 		amx_GetUString(msp->name, buf32, MAX_MSP_NAME + 1);
 		ap->missiontypes |= msp->type;
-
+		ap->num_missionpts++;
 	}
 	NC_cache_delete(dbcache);
 
@@ -336,9 +346,9 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 				if (rnw->nav & NAV_ILS) {
 					tax += 15;
 				}
-				rnw++;
 			}
 		}
+		rnw++;
 	}
 	return tax;
 }
@@ -429,229 +439,223 @@ void dev_missions_update_closest_point(AMX *amx)
 }
 #endif /*DEV*/
 
+/**
+Find a random endpoint for given missiontype, skipping airport of startpoint.
+
+@param startpoint may be NULL
+@return NULL on no applicable points found
+*/
 static
-struct AIRPORT *getRandomAirportForType(AMX *amx, int missiontype, struct AIRPORT *blacklistedairport)
+struct MISSIONPOINT *missions_get_random_endpoint(
+	AMX *amx, int missiontype, struct MISSIONPOINT *startpoint)
 {
-	struct AIRPORT *ap = airports, **aps;
-	int apsc = 0;
-	int i = numairports;
+	struct MISSIONPOINT *msp, **possible_missionpts;
+	struct AIRPORT *airport, **possible_airports;
+	int num_possible_airports, num_possible_missionpts;
+	int i, minconcurrent = 1000000;
 
-	aps = malloc(sizeof(aps) * numairports);
-
-	while (i--) {
-		if (ap != blacklistedairport && ap->missiontypes & missiontype) {
-			aps[apsc++] = ap;
-		}
-		ap++;
+	if (startpoint == NULL) {
+		return NULL;
 	}
 
-	switch (apsc) {
-	case 0: ap = NULL; break;
-	case 1: ap = aps[0]; break;
+	i = numairports;
+	airport = airports;
+	possible_airports = malloc(sizeof(struct AIRPORT*) * numairports);
+	num_possible_airports = 0;
+	while (i--) {
+		if ((airport->missiontypes & missiontype) &&
+			airport != startpoint->ap)
+		{
+			possible_airports[num_possible_airports++] = airport;
+		}
+		airport++;
+	}
+
+	switch (num_possible_airports) {
+	case 0: airport = NULL; break;
+	case 1: airport = possible_airports[0]; break;
 	default:
-		NC_random(apsc);
-		ap = aps[nc_result];
+		NC_random(num_possible_airports);
+		airport = possible_airports[nc_result];
 		break;
 	}
 
-	free(aps);
-	return ap;
+	free(possible_airports);
+	if (airport == NULL) {
+		return NULL;
+	}
+
+	/*got a random airport, now mission points*/
+	msp = airport->missionpoints;
+	possible_missionpts = malloc(sizeof(int*) * airport->num_missionpts);
+	num_possible_missionpts = 0;
+	while (msp != NULL) {
+		if (msp->type & missiontype) {
+			if (msp->currentlyactivemissions < minconcurrent) {
+				minconcurrent = msp->currentlyactivemissions;
+				num_possible_missionpts = 0;
+			}
+			possible_missionpts[num_possible_missionpts++] = msp;
+		}
+		msp = msp->next;
+	}
+
+	switch (num_possible_missionpts) {
+	case 0:
+		/*should not happen, since only airports that has the wanted
+		missiontype have been selected*/
+		msp = NULL;
+		break;
+	case 1:
+		msp = possible_missionpts[0];
+		break;
+	default:
+		NC_random(num_possible_missionpts);
+		msp = possible_missionpts[nc_result];
+		break;
+	}
+	free(possible_missionpts);
+	return msp;
 }
 
+/**
+Find a random startpoint for given missiontype.
+
+Startpoint is chosen based on least amount of currently active missions, then
+distance.
+
+@return NULL on no applicable points found
+*/
 static
-struct MISSIONPOINT *getRandomEndPointForType(AMX *amx, int missiontype, struct AIRPORT *blacklistedairport)
+struct MISSIONPOINT *missions_get_startpoint(
+	int missiontype, struct vec3 *ppos)
 {
-#define TMP_PT_SIZE 7
-	struct MISSIONPOINT *points[TMP_PT_SIZE], *msp;
-	int pointc = 0, leastamtofcurrentmissions = 1000000;
-	struct AIRPORT *airport = getRandomAirportForType(amx, missiontype, blacklistedairport);
+	struct AIRPORT *airport;
+	struct MISSIONPOINT *msp, **free_missionpts;
+	float dx, dy, dz, dist, shortest_distance;
+	int i, num_free_missionpts, least_active;
+
+	shortest_distance = FLOAT_PINF;
+	airport = NULL;
+	i = numairports;
+	while (i--) {
+		if (airports[i].missiontypes & missiontype) {
+			dx = airports[i].pos.x - ppos->x;
+			dy = airports[i].pos.y - ppos->y;
+			dz = airports[i].pos.z - ppos->z;
+			dist = dx * dx + dy * dy + dz * dz;
+			if (dist < shortest_distance) {
+				shortest_distance = dist;
+				airport = airports + i;
+			}
+		}
+	}
 
 	if (airport == NULL) {
 		return NULL;
 	}
 
+	/*first select mission points with least amount of active missions*/
+	free_missionpts = malloc(sizeof(int*) * airport->num_missionpts);
+	num_free_missionpts = 0;
+	least_active = 1000000;
 	msp = airport->missionpoints;
 	while (msp != NULL) {
 		if (msp->type & missiontype) {
-			if (msp->currentlyactivemissions < leastamtofcurrentmissions) {
-				leastamtofcurrentmissions = msp->currentlyactivemissions;
-				pointc = 0;
+			if (msp->currentlyactivemissions < least_active) {
+				least_active = msp->currentlyactivemissions;
+				num_free_missionpts = 0;
 			}
-			if (pointc < TMP_PT_SIZE) {
-				points[pointc++] = msp;
-			}
+			free_missionpts[num_free_missionpts++] = msp;
 		}
 		msp = msp->next;
 	}
 
-	if (pointc == 0) {
-		/* should not happen */
-		return NULL;
+	/*then choose the missionpoint that is the closest to the player*/
+	shortest_distance = FLOAT_PINF;
+	while (num_free_missionpts--) {
+		dx = free_missionpts[num_free_missionpts]->x - ppos->x;
+		dy = free_missionpts[num_free_missionpts]->y - ppos->y;
+		dz = free_missionpts[num_free_missionpts]->z - ppos->z;
+		dist = dx * dx + dy * dy + dz * dz;
+		if (dist < shortest_distance) {
+			shortest_distance = dist;
+			msp = free_missionpts[num_free_missionpts];
+		}
 	}
 
-	if (pointc == 1) {
-		return points[0];
-	}
-
-	NC_random(pointc);
-	return points[nc_result];
-#undef TMP_PT_SIZE
+	free(free_missionpts);
+	return msp;
 }
 
-/* native Missions_Create(playerid, Float:x, Float:y, Float:z, vehicleid, vv, vehiclehp, msg[], querybuf[]) */
-cell AMX_NATIVE_CALL Missions_Create(AMX *amx, cell *params)
+void missions_cb_create(AMX *amx, void* data)
 {
-	cell *bufaddr;
-	char buf[255], tmpuseridornullbuf[12];
-	struct MISSIONPOINT *msp, *startpoint, *endpoint;
-	struct AIRPORT *ap = airports, *closestap = NULL;
-	struct dbvehicle *veh;
+	static const char *AUTOWORKNOTICE = "Constant work is ON, "
+		"a new mission will be started when you complete this one "
+		"(/autow to disable).";
+
 	struct MISSION *mission;
-	int missiontype, i = numairports;
-	const int playerid = params[1], vehicleid = params[5], vv = params[6];
-	float x, y, z, dx, dy, dz, dist, shortestdistance = 0x7F800000;
+	unsigned int cc = (int) data;
+	int playerid;
 
-	amx_GetAddr(amx, params[8], &bufaddr);
-	if (activemission[playerid] != NULL) {
-		sprintf(buf,
-		        WARN"You're already working! Use /s to stop your current work first ($%d fine).",
-                        MISSION_CANCEL_FINE);
-		amx_SetUString(bufaddr, buf, sizeof(buf));
-		return 0;
+	playerid = PLAYER_CC_GETID(cc);
+	if (!PLAYER_CC_CHECK(cc, playerid) ||
+		(mission = activemission[playerid]) == NULL)
+	{
+		return;
 	}
 
-	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL) {
-		goto unknownvehicle;
+	common_hide_gametext_for_player(amx, playerid);
+	tracker_afk_packet_sent[playerid] = 0;
+
+	NC_cache_insert_id_(&mission->id);
+	mission->stage = MISSION_STAGE_PRELOAD;
+
+	nc_params[0] = 9;
+	nc_params[1] = playerid;
+	nc_params[2] = 2;
+	nc_paramf[3] = mission->startpoint->x;
+	nc_paramf[4] = mission->startpoint->y;
+	nc_paramf[5] = mission->startpoint->z;
+	nc_paramf[6] = nc_paramf[7] = nc_paramf[8] = 0.0f;
+	nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
+	NC(n_SetPlayerRaceCheckpoint);
+	/*TODO: missions_OnWeatherChanged for weather bonus*/
+
+	sprintf(cbuf4096,
+		"Flight from %s (%s) %s to %s (%s) %s",
+		mission->startpoint->ap->name,
+		mission->startpoint->ap->beacon,
+		mission->startpoint->name,
+		mission->endpoint->ap->name,
+		mission->endpoint->ap->beacon,
+		mission->endpoint->name);
+	amx_SetUString(buf144, cbuf4096, 144);
+	NC_SendClientMessage(playerid, COL_MISSION, buf144a);
+
+	if (prefs[playerid] & PREF_CONSTANT_WORK) {
+		amx_SetUString(buf144, AUTOWORKNOTICE, 144);
+		NC_SendClientMessage(playerid, COL_SAMP_GREY, buf144a);
 	}
 
-	switch (veh->model) {
-	case MODEL_DODO: missiontype = 1; break;
-	case MODEL_SHAMAL:
-	case MODEL_BEAGLE: missiontype = 2; break;
-	case MODEL_AT400:
-	case MODEL_ANDROM: missiontype = 4; break;
-	case MODEL_NEVADA: missiontype = 16; break;
-	case MODEL_MAVERICK:
-	case MODEL_VCNMAV:
-	case MODEL_RAINDANC:
-	case MODEL_LEVIATHN:
-	case MODEL_POLMAV:
-	case MODEL_SPARROW: missiontype = 64; break;
-	case MODEL_HUNTER:
-	case MODEL_CARGOBOB: missiontype = 256; break;
-	case MODEL_HYDRA:
-	case MODEL_RUSTLER: missiontype = 512; break;
-	case MODEL_SKIMMER: missiontype = 8192; break;
-	default:
-unknownvehicle:
-		strcpy(buf, WARN"This vehicle can't complete any type of missions!");
-		amx_SetUString(bufaddr, buf, sizeof(buf));
-		return 0;
+	if (prefs[playerid] & PREF_WORK_AUTONAV) {
+		nav_navigate_to_airport(
+			amx,
+			mission->veh->spawnedvehicleid,
+			mission->veh->model,
+			mission->startpoint->ap);
 	}
 
-	x = amx_ctof(params[2]);
-	y = amx_ctof(params[3]);
-	z = amx_ctof(params[4]);
-
-	while (i--) {
-		if (ap->missiontypes & missiontype) {
-			dx = ap->pos.x - x;
-			dy = ap->pos.y - y;
-			dz = ap->pos.z - z;
-			if ((dist = dx * dx + dy * dy + dz * dz) < shortestdistance) {
-				shortestdistance = dist;
-				closestap = ap;
-			}
-		}
-		ap++;
-	}
-
-	if (closestap == NULL) {
-		strcpy(buf, WARN"There are no missions available for this type of vehicle!");
-		amx_SetUString(bufaddr, buf, sizeof(buf));
-		return 0;
-	}
-
-	/* startpoint should be the point with 1) least amount of active missions 2) shortest distance */
-	startpoint = NULL;
-	i = 1000000;
-thisisworsethanbubblesort:
-	shortestdistance = 0x7F800000;
-	msp = closestap->missionpoints;
-	while (msp != NULL) {
-		if (msp->type & missiontype && msp->currentlyactivemissions <= i) {
-			dx = msp->x - x;
-			dy = msp->y - y;
-			dz = msp->z - z;
-			if ((dist = dx * dx + dy * dy + dz * dz) < shortestdistance) {
-				if (msp->currentlyactivemissions < i) {
-					i = msp->currentlyactivemissions;
-					goto thisisworsethanbubblesort;
-				}
-				shortestdistance = dist;
-				startpoint = msp;
-			}
-		}
-		msp = msp->next;
-	}
-
-	if (startpoint == NULL) {
-		/* this should not be happening	*/
-		logprintf("ERR: could not find suitable mission startpoint");
-		strcpy(buf, WARN"Failed to find a starting point, please try again later.");
-		amx_SetUString(bufaddr, buf, sizeof(buf));
-		return 0;
-	}
-
-	endpoint = getRandomEndPointForType(amx, missiontype, closestap);
-	if (endpoint == NULL) {
-		strcpy(buf, WARN"There is no available destination for this type of plane at this time.");
-		amx_SetUString(bufaddr, buf, sizeof(buf));
-		return 0;
-	}
-
-	dx = startpoint->x - endpoint->x;
-	dy = startpoint->y - endpoint->y;
-
-	activemission[playerid] = mission = malloc(sizeof(struct MISSION));
-	mission->id = -1;
-	mission->stage = MISSION_STAGE_CREATE;
-	mission->missiontype = missiontype;
-	mission->startpoint = startpoint;
-	mission->endpoint = endpoint;
-	mission->distance = sqrt(dx * dx + dy * dy);
-	mission->actualdistanceM = 0.0f;
-	mission->passenger_satisfaction = 100;
-	mission->veh = veh;
-	mission->vehicle_reincarnation_value = vv;
-	mission->starttime = time(NULL);
-	mission->lastvehiclehp = (short) amx_ctof(params[7]);
-	mission->damagetaken = 0;
-	mission->lastfuel = veh->fuel;
-	mission->fuelburned = 0.0f;
-	mission->weatherbonus = 0;
-
-	amx_GetAddr(amx, params[9], &bufaddr);
-	startpoint->currentlyactivemissions++;
-	endpoint->currentlyactivemissions++;
-	sprintf(buf, "UPDATE msp SET o=o+1 WHERE i=%d", startpoint->id);
-	amx_SetUString(bufaddr, buf, sizeof(buf));
-	sprintf(buf, "UPDATE msp SET p=p+1 WHERE i=%d", endpoint->id);
-	amx_SetUString(bufaddr + 200, buf, sizeof(buf));
-	useridornull(playerid, tmpuseridornullbuf);
-	sprintf(buf,
-	        "INSERT INTO flg(player,vehicle,missiontype,fapt,tapt,fmsp,tmsp,distance,tstart,tlastupdate) "
-			"VALUES(%s,%d,%d,%d,%d,%d,%d,%.4f,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())",
-	        tmpuseridornullbuf,
-		veh->id,
-		missiontype,
-		startpoint->ap->id,
-		endpoint->ap->id,
-		startpoint->id,
-		endpoint->id,
-		mission->distance);
-	amx_SetUString(bufaddr + 400, buf, sizeof(buf));
-	return 1;
+	/* flight tracker packet 1 */
+	buf32[0] = 0x01594C46;
+	buf32[1] = mission->id;
+	*((float*) (cbuf32 + 8)) = model_fuel_capacity(mission->veh->model);
+	*((short*) (cbuf32 + 12)) = (short) mission->veh->model;
+	cbuf32[14] = pdata[playerid]->namelen;
+	memset(cbuf32 + 15, 0, 24); /* don't leak random data */
+	strcpy(cbuf32 + 15, pdata[playerid]->name);
+	/*buf32 is len 32 * 4 so 40 is fine*/
+	NC_ssocket_send(tracker, buf32a, 40);
 }
 
 /**
@@ -794,11 +798,6 @@ void missions_send_tracker_data(
 	NC_ssocket_send(tracker, buf32a, 28);
 }
 
-/**
-The /automission cmd, toggles automatically starting new mission on finish.
-
-Aliases: /autow
-*/
 int missions_cmd_automission(CMDPARAMS)
 {
 	static const char
@@ -814,11 +813,6 @@ int missions_cmd_automission(CMDPARAMS)
 	return 1;
 }
 
-/**
-The /cancelmission cmd. Aliases: /s
-
-Stops current mission for the player, for a fee.
-*/
 int missions_cmd_cancelmission(CMDPARAMS)
 {
 	static const char *NOMISSION = WARN"You're not on an active mission.";
@@ -834,6 +828,139 @@ int missions_cmd_cancelmission(CMDPARAMS)
 		amx_SetUString(buf144, NOMISSION, 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	}
+	return 1;
+}
+
+static const char
+	*RETRIEV = "~b~Retrieving flight data...",
+	*NOTYPES = WARN"This vehicle can't complete any type of missions!",
+	*NOMISS = WARN"There are no missions available for this type "
+		"of vehicle!",
+	*ALREADYWORKING = WARN"You're already working! Use /s to stop "
+		"your current work first ($"Q(MISSION_CANCEL_FINE_)" fine).",
+	*MUSTBEDRIVER = WARN"You must be the driver of a vehicle "
+		"before starting work!";
+
+int missions_cmd_mission(CMDPARAMS)
+{
+	struct MISSION *mission;
+	struct MISSIONPOINT *startpoint, *endpoint;
+	struct dbvehicle *veh;
+	struct vec3 ppos;
+	char *errmsg, tmpuseridornullbuf[10];
+	int vehicleid, missiontype;
+	float vhp, dx, dy;
+
+	if (activemission[playerid] != NULL) {
+		amx_SetUString(buf144, ALREADYWORKING, 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		return 1;
+	}
+
+	nc_params[0] = 1;
+	nc_params[1] = playerid;
+	NC(n_GetPlayerVehicleSeat);
+	if (nc_result != 0) {
+		errmsg = (char*) MUSTBEDRIVER;
+		goto err;
+	}
+	NC_(n_GetPlayerVehicleID, &vehicleid);
+
+	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL) {
+		goto unknownvehicle;
+	}
+
+	switch (veh->model) {
+	case MODEL_DODO: missiontype = MISSION_TYPE_PASSENGER_S; break;
+	case MODEL_SHAMAL:
+	case MODEL_BEAGLE: missiontype = MISSION_TYPE_PASSENGER_M; break;
+	case MODEL_AT400:
+	case MODEL_ANDROM: missiontype = MISSION_TYPE_PASSENGER_L; break;
+	case MODEL_NEVADA: missiontype = MISSION_TYPE_CARGO_M; break;
+	case MODEL_MAVERICK:
+	case MODEL_VCNMAV:
+	case MODEL_RAINDANC:
+	case MODEL_LEVIATHN:
+	case MODEL_POLMAV:
+	case MODEL_SPARROW: missiontype = MISSION_TYPE_HELI; break;
+	case MODEL_HUNTER:
+	case MODEL_CARGOBOB: missiontype = MISSION_TYPE_MIL_HELI; break;
+	case MODEL_HYDRA:
+	case MODEL_RUSTLER: missiontype = MISSION_TYPE_MIL; break;
+	case MODEL_SKIMMER: missiontype = MISSION_TYPE_PASSENGER_WATER; break;
+	default:
+unknownvehicle:
+		errmsg = (char*) NOTYPES;
+		goto err;
+	}
+
+	common_GetPlayerPos(amx, playerid, &ppos);
+
+	startpoint = missions_get_startpoint(missiontype, &ppos);
+	endpoint = missions_get_random_endpoint(amx, missiontype, startpoint);
+	/*endpoint will also be NULL when startpoint is NULL*/
+	if (endpoint == NULL) {
+		errmsg = (char*) NOMISS;
+		goto err;
+	}
+
+	vhp = anticheat_NC_GetVehicleHealth(amx, vehicleid);
+
+	dx = startpoint->x - endpoint->x;
+	dy = startpoint->y - endpoint->y;
+
+	activemission[playerid] = mission = malloc(sizeof(struct MISSION));
+	mission->id = -1;
+	mission->stage = MISSION_STAGE_CREATE;
+	mission->missiontype = missiontype;
+	mission->startpoint = startpoint;
+	mission->endpoint = endpoint;
+	mission->distance = sqrt(dx * dx + dy * dy);
+	mission->actualdistanceM = 0.0f;
+	mission->passenger_satisfaction = 100;
+	mission->veh = veh;
+	mission->vehicleid = vehicleid;
+	mission->vehicle_reincarnation = gamevehicles[vehicleid].reincarnation;
+	mission->starttime = time(NULL);
+	mission->lastvehiclehp = (short) vhp;
+	mission->damagetaken = 0;
+	mission->lastfuel = veh->fuel;
+	mission->fuelburned = 0.0f;
+	mission->weatherbonus = 0;
+
+	startpoint->currentlyactivemissions++;
+	endpoint->currentlyactivemissions++;
+
+	sprintf(cbuf144, "UPDATE msp SET o=o+1 WHERE i=%d", startpoint->id);
+	amx_SetUString(buf4096, cbuf144, 144);
+	NC_mysql_tquery_nocb(buf4096a);
+	sprintf(cbuf144 + 100, "UPDATE msp SET p=p+1 WHERE i=%d", endpoint->id);
+	amx_SetUString(buf4096, cbuf144, 144);
+	NC_mysql_tquery_nocb(buf4096a);
+
+	useridornull(playerid, tmpuseridornullbuf);
+	sprintf(cbuf4096 + 2000,
+	        "INSERT INTO flg(player,vehicle,missiontype,fapt,tapt,fmsp,"
+		"tmsp,distance,tstart,tlastupdate) "
+		"VALUES(%s,%d,%d,%d,%d,%d,%d,%.4f,"
+		"UNIX_TIMESTAMP(),UNIX_TIMESTAMP())",
+	        tmpuseridornullbuf,
+		veh->id,
+		missiontype,
+		startpoint->ap->id,
+		endpoint->ap->id,
+		startpoint->id,
+		endpoint->id,
+		mission->distance);
+	common_mysql_tquery(amx, cbuf4096 + 2000,
+		missions_cb_create, (void*) MK_PLAYER_CC(playerid));
+
+	amx_SetUString(buf144, RETRIEV, 144);
+	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+	return 1;
+err:
+	amx_SetUString(buf144, errmsg, 144);
+	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	return 1;
 }
 
@@ -876,8 +1003,8 @@ cell AMX_NATIVE_CALL Missions_EnterCheckpoint(AMX *amx, cell *params)
 		return 0;
 	}
 
-	if (vehicleid == 0 ||
-		vv != mission->vehicle_reincarnation_value ||
+	if (vehicleid != mission->vehicleid ||
+		vv != mission->vehicle_reincarnation ||
 		(veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
 		veh->id != mission->veh->id)
 	{
@@ -1188,67 +1315,6 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	*addr = ptotal;
 
 	missions_cleanup(amx, mission, playerid);
-	return 1;
-}
-
-/* native Missions_Start(playerid, missionid, &Float:x, &Float:y, &Float:z,
-                         querybuf[], trackerbuf[]) */
-cell AMX_NATIVE_CALL Missions_Start(AMX *amx, cell *params)
-{
-	const int playerid = params[1];
-	struct MISSION *mission = activemission[playerid];
-	int vehmodel;
-	float fuelcapacity;
-	cell *addr;
-	char msg[144];
-	const char *msptypename = NULL;
-
-	if (mission == NULL) {
-		return 0;
-	}
-
-	tracker_afk_packet_sent[playerid] = 0;
-
-	mission->id = params[2];
-	mission->stage = MISSION_STAGE_PRELOAD;
-	amx_GetAddr(amx, params[3], &addr);
-	*addr = amx_ftoc(mission->startpoint->x);
-	amx_GetAddr(amx, params[4], &addr);
-	*addr = amx_ftoc(mission->startpoint->y);
-	amx_GetAddr(amx, params[5], &addr);
-	*addr = amx_ftoc(mission->startpoint->z);
-
-	sprintf(msg,
-		"Flight from %s (%s) %s to %s (%s) %s",
-		mission->startpoint->ap->name,
-		mission->startpoint->ap->beacon,
-		mission->startpoint->name,
-		mission->endpoint->ap->name,
-		mission->endpoint->ap->beacon,
-		mission->endpoint->name);
-	amx_GetAddr(amx, params[6], &addr);
-	amx_SetUString(addr, msg, sizeof(msg));
-
-	/* flight tracker packet 1 */
-	buf32[0] = 0x01594C46;
-	buf32[1] = mission->id;
-	fuelcapacity = model_fuel_capacity(vehmodel = mission->veh->model);
-	memcpy(cbuf32 + 8, &fuelcapacity, 4);
-	memcpy(cbuf32 + 12, &vehmodel, 2);
-	cbuf32[14] = pdata[playerid]->namelen;
-	memset(cbuf32 + 15, 0, 24); /* don't leak random data */
-	strcpy(cbuf32 + 15, pdata[playerid]->name);
-	/*buf32 is len 32 * 4 so 40 is fine*/
-	NC_ssocket_send(tracker, buf32a, 40);
-
-	if (prefs[playerid] & PREF_WORK_AUTONAV) {
-		nav_navigate_to_airport(
-			amx,
-			mission->veh->spawnedvehicleid,
-			mission->veh->model,
-			mission->startpoint->ap);
-	}
-
 	return 1;
 }
 

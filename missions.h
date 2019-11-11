@@ -26,8 +26,28 @@ void dev_missions_update_closest_point(AMX*);
 Add mission distance. Has no effect when player is not on a mission.
 */
 void missions_add_distance(int playerid, float distance_in_m);
+/**
+Callback for the query that inserts a new mission on mission creation.
+*/
+void missions_cb_create(AMX *amx, void* data);
+/**
+The /automission cmd, toggles automatically starting new mission on finish.
+
+Aliases: /autow
+*/
 int missions_cmd_automission(CMDPARAMS);
+/**
+The /cancelmission cmd, stops current mission for the player, for a fee.
+
+Aliases: /s
+*/
 int missions_cmd_cancelmission(CMDPARAMS);
+/**
+The /mission cmd, starts a new mission
+
+Aliases: /w /m
+*/
+int missions_cmd_mission(CMDPARAMS);
 void missions_create_tracker_socket(AMX*);
 void missions_destroy_tracker_socket(AMX*);
 /**
