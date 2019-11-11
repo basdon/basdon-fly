@@ -183,6 +183,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	dialog_on_player_connect(amx, playerid);
 	maps_on_player_connect(amx, playerid);
 	missions_on_player_connect(amx, playerid);
+	money_set(amx, playerid, 0);
 	panel_on_player_connect(amx, playerid);
 	pm_on_player_connect(playerid);
 	prefs_on_player_connect(playerid);

@@ -12,6 +12,7 @@
 #include "login.h"
 #include "maps.h"
 #include "missions.h"
+#include "money.h"
 #include "nav.h"
 #include "panel.h"
 #include "playerdata.h"
@@ -281,6 +282,13 @@ cell AMX_NATIVE_CALL REMOVEME_getplayerodo(AMX *amx, cell *params)
 	return amx_ftoc(playerodoKM[params[1]]);
 }
 
+static
+cell AMX_NATIVE_CALL REMOVEME_setplayermoney(AMX *amx, cell *params)
+{
+	money_set(amx,params[1], params[2]);
+	return 1;
+}
+
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
@@ -292,6 +300,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(REMOVEME_getprefs),
 	REGISTERNATIVE(REMOVEME_setloggedstatus),
 	REGISTERNATIVE(REMOVEME_getplayerodo),
+	REGISTERNATIVE(REMOVEME_setplayermoney),
 	/* anticheat.c */
 	REGISTERNATIVE(Ac_FormatLog),
 	/* basdon.c */

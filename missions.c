@@ -3,9 +3,11 @@
 
 #include "common.h"
 #include "airport.h"
+#include "cmd.h"
 #include "playerdata.h"
-#include "missions.h"
 #include "math.h"
+#include "missions.h"
+#include "money.h"
 #include "nav.h"
 #include "vehicles.h"
 #include <string.h>
@@ -750,7 +752,69 @@ void missions_cleanup(AMX *amx, struct MISSION *mission, int playerid)
 	activemission[playerid] = NULL;
 }
 
-/* native Missions_EndUnfinished(playerid, reason, querybuf[]) */
+/**
+@param reason one of MISSION_STATE_ constants
+*/
+static void missions_end_unfinished(
+	AMX *amx, struct MISSION *mission, int playerid, int reason)
+{
+	sprintf(cbuf144,
+	        "UPDATE flg "
+		"SET state=%d,tlastupdate=UNIX_TIMESTAMP(),adistance=%f "
+		"WHERE id=%d",
+	        reason,
+		mission->actualdistanceM,
+	        mission->id);
+	amx_SetUString(buf4096, cbuf144, 144);
+	NC_mysql_tquery_nocb(buf4096a);
+
+	missions_cleanup(amx, mission, playerid);
+}
+
+/**
+The /automission cmd, toggles automatically starting new mission on finish.
+
+Aliases: /autow
+*/
+int missions_cmd_automission(CMDPARAMS)
+{
+	static const char
+		*ENABLED = "Constant work enabled.",
+		*DISABLED = "Constant work disabled.";
+
+	if ((prefs[playerid] ^= PREF_CONSTANT_WORK) & PREF_CONSTANT_WORK) {
+		amx_SetUString(buf144, ENABLED, 144);
+	} else {
+		amx_SetUString(buf144, DISABLED, 144);
+	}
+	NC_SendClientMessage(playerid, COL_SAMP_GREY, buf144a);
+	return 1;
+}
+
+/**
+The /cancelmission cmd. Aliases: /s
+
+Stops current mission for the player, for a fee.
+*/
+int missions_cmd_cancelmission(CMDPARAMS)
+{
+	static const char *NOMISSION = WARN"You're not on an active mission.";
+
+	struct MISSION *mission;
+
+	if ((mission = activemission[playerid]) != NULL) {
+		NC_DisablePlayerRaceCheckpoint(playerid);
+		money_take(amx, playerid, 5000);
+		missions_end_unfinished(amx, mission,
+			playerid, MISSION_STATE_DECLINED);
+	} else {
+		amx_SetUString(buf144, NOMISSION, 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	}
+	return 1;
+}
+
+/* native Missions_EndUnfinished(playerid, reason) */
 cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 {
 	const int playerid = params[1], reason = params[2];

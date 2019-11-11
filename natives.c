@@ -42,6 +42,7 @@ int n_GetVehiclePos;
 int n_GetVehicleRotationQuat;
 int n_GetVehicleVelocity;
 int n_GetVehicleZAngle;
+int n_GivePlayerMoney_;
 int n_GivePlayerWeapon;
 int n_Kick;
 int n_PlayerPlaySound;
@@ -59,6 +60,7 @@ int n_PlayerTextDrawSetString;
 int n_PlayerTextDrawShow;
 int n_PutPlayerInVehicle_;
 int n_RemoveBuildingForPlayer;
+int n_ResetPlayerMoney_;
 int n_RemovePlayerMapIcon;
 int n_SendClientMessage;
 int n_SendClientMessageToAll;
@@ -166,6 +168,7 @@ int natives_find(AMX *amx)
 		N(GetVehiclePos),
 		N(GetVehicleVelocity),
 		N(GetVehicleZAngle),
+		N_(GivePlayerMoney),
 		N(GivePlayerWeapon),
 		N(Kick),
 		N(PlayerPlaySound),
@@ -184,6 +187,7 @@ int natives_find(AMX *amx)
 		N_(PutPlayerInVehicle),
 		N(RemoveBuildingForPlayer),
 		N(RemovePlayerMapIcon),
+		N_(ResetPlayerMoney),
 		N(SendClientMessage),
 		N(SendClientMessageToAll),
 		N(SendRconCommand),
