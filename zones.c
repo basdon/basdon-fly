@@ -26,12 +26,20 @@ void zones_init()
 	struct REGION *r = regions, *rmax = regions + regioncount;
 	struct ZONE *pz = zones;
 	int z = 0, zmax = zonecount;
+#ifdef ZONES_DEBUG
+	int zonesinregion = 0;
+#endif /*ZONES_DEBUG*/
 
 	while (z < zmax) {
 nr:
 		if (pz->x1 < r->zone.x1 || r->zone.x2 < pz->x2 ||
 			pz->y1 < r->zone.y1 || r->zone.y2 < pz->y2)
 		{
+#ifdef ZONES_DEBUG
+			printf("%d zones in region %d\n", zonesinregion,
+				r - regions);
+			zonesinregion = 0;
+#endif /*ZONES_DEBUG*/
 			r->maxzone = z;
 			r++;
 			if (r >= rmax) {
@@ -44,6 +52,9 @@ nr:
 		}
 		z++;
 		pz++;
+#ifdef ZONES_DEBUG
+		zonesinregion++;
+#endif /*ZONES_DEBUG*/
 	}
 	r->maxzone = z;
 
