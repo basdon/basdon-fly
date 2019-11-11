@@ -717,7 +717,7 @@ void missions_on_player_connect(AMX *amx, int playerid)
 	NC(n_PlayerTextDrawLetterSize);
 
 	nc_params[0] = 3;
-	nc_params[2] = 255;
+	nc_params[3] = 255;
 	NC(n_PlayerTextDrawBackgroundColor);
 	nc_params[3] = 2;
 	NC(n_PlayerTextDrawAlignment);
