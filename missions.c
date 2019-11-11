@@ -140,7 +140,7 @@ void missions_init(AMX *amx)
 	amx_SetUString(buf144,
 		"UPDATE flg "
 		"SET state="EQ(MISSION_STATE_SERVER_ERR)" "
-		"WHERE state="EQ(MISSION_STAGE_FLIGHT)"",
+		"WHERE state="EQ(MISSION_STATE_INPROGRESS)"",
 		144);
 	NC_mysql_tquery_nocb(buf144a);
 }
