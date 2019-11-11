@@ -44,6 +44,7 @@ Check if player is currently doing a mission.
 int missions_is_player_on_mission(int playerid);
 void missions_on_player_connect(AMX*, int playerid);
 void missions_on_player_death(AMX*, int playerid);
+void missions_on_player_disconnect(AMX*, int playerid);
 /**
 Sends flight tracker message.
 */

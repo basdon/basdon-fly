@@ -52,5 +52,7 @@ void anticheat_on_player_connect(int playerid);
 int anticheat_on_player_text(AMX*, int playerid);
 /**
 Gets vehicle hp, after checking for unnacceptable values and handling offenders.
+
+Only works on valid vehicles!
 */
 float anticheat_NC_GetVehicleHealth(AMX*, int vehicleid);
