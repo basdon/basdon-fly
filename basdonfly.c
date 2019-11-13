@@ -20,6 +20,7 @@
 #include "prefs.h"
 #include "protips.h"
 #include "spawn.h"
+#include "timecyc.h"
 #include "vehicles.h"
 #include "zones.h"
 #include <string.h>
@@ -77,7 +78,6 @@ FORWARD(Missions_EnterCheckpoint);
 FORWARD(Missions_GetState);
 FORWARD(Missions_OnVehicleRefueled);
 FORWARD(Missions_OnVehicleRepaired);
-FORWARD(Missions_OnWeatherChanged);
 FORWARD(Missions_PostLoad);
 FORWARD(Missions_PostUnload);
 /* nav.c */
@@ -90,9 +90,6 @@ FORWARD(PlayerData_UpdateGroup);
 FORWARD(PlayerData_UpdateName);
 /* playtime.c */
 FORWARD(Playtime_FormatUpdateTimes);
-/* timecyc.c */
-FORWARD(Timecyc_GetCurrentWeatherMsg);
-FORWARD(Timecyc_GetNextWeatherMsgQuery);
 /* vehicles.c */
 FORWARD(Veh_Add);
 FORWARD(Veh_AddOdo);
@@ -147,8 +144,6 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 {
 }
 
-int time_h = 0, time_m = 0;
-
 #define amx gamemode_amx
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
@@ -156,7 +151,6 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 #ifdef LOG_SLOW_TICKS
 	static int tickcount = 0;
 #endif /*LOG_SLOW_TICKS*/
-	static int lasttime = 0;
 
 	int n = playercount;
 
@@ -173,7 +167,6 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	/*occurs when doing gmx*/
 	if (gamemode_amx == NULL) {
 		count = 0;
-		lasttime = 0;
 		return;
 	}
 
@@ -196,42 +189,10 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 #endif /*DEV*/
 		panel_timed_update(amx);
 
-		NC_gettime(buf32a, buf32_1a, buf144a);
-		if (lasttime != nc_result) {
-			lasttime = nc_result;
-			if (time_m++ == 30) {
-				goto timer30s;
-			} else if (time_m >= 60) {
-				time_m = 0;
-				if (time_h++ >= 24) {
-					time_h = 0;
-				}
-				/*timer1m*/
-				echo_init(amx);
-				protips_timed_broadcast(amx);
-timer30s:			/*timer30s*/
-				heartbeat_timed_update(amx);
-			}
-			/*timer1000*/
-			veh_timed_1s_update(amx);
-			veh_timed_panel_update(amx);
-			zones_update_for_all(amx);
-			if ((time_m % 5) == 0) {
-				/*timer5000*/
-				anticheat_decrease_infractions();
-				dialog_pop_queue(amx);
-				veh_commit_next_vehicle_odo_to_db(amx);
-			}
-		}
+		timecyc_tick(amx);
 	}
 }
 #undef amx
-
-static
-cell AMX_NATIVE_CALL REMOVEME_isspawned(AMX *amx, cell *params)
-{
-	return spawned[params[1]];
-}
 
 static
 cell AMX_NATIVE_CALL REMOVEME_onplayerreqclassimpl(AMX *amx, cell *params)
@@ -265,6 +226,7 @@ cell AMX_NATIVE_CALL REMOVEME_onplayerwasafk(AMX *amx, cell *params)
 {
 	temp_afk[params[1]] = 0;
 	panel_on_player_was_afk(amx, params[1]);
+	timecyc_on_player_was_afk(amx, params[1]);
 	return 1;
 }
 
@@ -293,7 +255,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 {
 	REGISTERNATIVE(REMOVEME_onplayernowafk),
 	REGISTERNATIVE(REMOVEME_onplayerwasafk),
-	REGISTERNATIVE(REMOVEME_isspawned),
 	REGISTERNATIVE(REMOVEME_onplayerreqclassimpl),
 	REGISTERNATIVE(REMOVEME_setprefs),
 	REGISTERNATIVE(REMOVEME_getprefs),
@@ -317,6 +278,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnPlayerSpawn),
 	REGISTERNATIVE(B_OnPlayerStateChange),
 	REGISTERNATIVE(B_OnPlayerText),
+	REGISTERNATIVE(B_OnPlayerUpdate),
 	REGISTERNATIVE(B_OnRecv),
 	REGISTERNATIVE(B_OnVehicleSpawn),
 	REGISTERNATIVE(B_Validate),
@@ -359,7 +321,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Missions_GetState),
 	REGISTERNATIVE(Missions_OnVehicleRefueled),
 	REGISTERNATIVE(Missions_OnVehicleRepaired),
-	REGISTERNATIVE(Missions_OnWeatherChanged),
 	REGISTERNATIVE(Missions_PostLoad),
 	REGISTERNATIVE(Missions_PostUnload),
 	/* nav.c */
@@ -372,9 +333,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PlayerData_UpdateName),
 	/* playtime.c */
 	REGISTERNATIVE(Playtime_FormatUpdateTimes),
-	/* timecyc.c */
-	REGISTERNATIVE(Timecyc_GetCurrentWeatherMsg),
-	REGISTERNATIVE(Timecyc_GetNextWeatherMsgQuery),
 	/* vehicles.c */
 	REGISTERNATIVE(Veh_Add),
 	REGISTERNATIVE(Veh_AddServicePoint),

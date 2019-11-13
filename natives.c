@@ -75,6 +75,7 @@ int n_SetPlayerPos_;
 int n_SetPlayerRaceCheckpoint;
 int n_SetPlayerSpecialAction;
 int n_SetPlayerTime;
+int n_SetPlayerWeather;
 int n_SetSpawnInfo;
 int n_SetVehicleHealth;
 int n_SetVehicleParamsEx;
@@ -201,6 +202,7 @@ int natives_find(AMX *amx)
 		N(SetPlayerRaceCheckpoint),
 		N(SetPlayerSpecialAction),
 		N(SetPlayerTime),
+		N(SetPlayerWeather),
 		N(SetSpawnInfo),
 		N(SetVehicleHealth),
 		N(SetVehicleParamsEx),

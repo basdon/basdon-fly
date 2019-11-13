@@ -11,6 +11,7 @@
 #include "protips.h"
 #include "nav.h"
 #include "missions.h"
+#include "timecyc.h"
 #include "vehicles.h"
 #include "zones.h"
 #include <string.h>
@@ -156,6 +157,9 @@ static struct COMMAND cmds[] = {
 	{ 0, "/testparpl", GROUPS_ALL, cmd_dev_testparpl },
 	{ 0, "/timex", GROUPS_ALL, cmd_dev_timex },
 	{ 0, "//owner", GROUPS_ALL, cmd_dev_owner },
+	{ 0, "/fweather", GROUPS_ALL, timecyc_cmd_dev_fweather },
+	{ 0, "/nweather", GROUPS_ALL, timecyc_cmd_dev_nweather },
+	{ 0, "/tweather", GROUPS_ALL, timecyc_cmd_dev_tweather },
 	{ 0, "/v", GROUPS_ALL, cmd_dev_v },
 #endif /*DEV*/
 	{ 0, "//respawn", GROUPS_ADMIN, cmd_admin_respawn },
@@ -171,6 +175,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/nearest", GROUPS_ALL, airport_cmd_nearest },
 	{ 0, "/m", GROUPS_ALL, missions_cmd_mission },
 	{ 0, "/me", GROUPS_ALL, cmd_me },
+	{ 0, "/metar", GROUPS_ALL, timecyc_cmd_metar },
 	{ 0, "/mission", GROUPS_ALL, missions_cmd_mission },
 	{ 0, "/park", GROUPS_ALL, cmd_park },
 	{ 0, "/p", GROUPS_ALL, prefs_cmd_preferences },
@@ -184,6 +189,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/spray", GROUPS_ALL, cmd_spray },
 	{ 0, "/vor", GROUPS_ALL, nav_cmd_vor },
 	{ 0, "/w", GROUPS_ALL, missions_cmd_mission },
+	{ 0, "/weather", GROUPS_ALL, timecyc_cmd_metar },
 }, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
 
 int cmd_hash(const char *cmdtext)

@@ -55,6 +55,9 @@ native B_OnPlayerSpawn(playerid)
 //@summary Plugin callback for {@link OnPlayerStateChange}
 native B_OnPlayerStateChange(playerid, oldstate, newstate)
 
+//@summary Plugin callback for {@link OnPlayerUpdate}
+native B_OnPlayerUpdate(playerid)
+
 //@summary Plugin callback for {@link OnPlayerText}
 native B_OnPlayerText(playerid, text[])
 

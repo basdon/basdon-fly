@@ -67,6 +67,7 @@ extern int n_SetPlayerPos_;
 extern int n_SetPlayerRaceCheckpoint;
 extern int n_SetPlayerSpecialAction;
 extern int n_SetPlayerTime;
+extern int n_SetPlayerWeather;
 extern int n_SetSpawnInfo;
 extern int n_SetVehicleHealth;
 extern int n_SetVehicleParamsEx;
@@ -339,6 +340,10 @@ extern cell nc_result;
 	nc_params[0]=3;nc_params[1]=PLAYERID;nc_params[2]=H;nc_params[3]=M;\
 	amx_Callback(amx,n_SetPlayerTime,&nc_result,nc_params)
 
+#define NC_SetPlayerWeather(PLAYERID,WEATHER) \
+	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=WEATHER;\
+	amx_Callback(amx,n_SetPlayerWeather,&nc_result,nc_params)
+
 #define NC_SetVehicleHealth(VEHICLEID,HP) \
 	nc_params[0]=2;nc_params[1]=VEHICLEID;nc_params[2]=HP;\
 	amx_Callback(amx,n_SetVehicleHealth,&nc_result,nc_params)
@@ -364,6 +369,10 @@ extern cell nc_result;
 #define NC_TextDrawShowForPlayer(PLAYERID,TXT) \
 	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=TXT;\
 	amx_Callback(amx,n_TextDrawShowForPlayer,&nc_result,nc_params)
+
+#define NC_TogglePlayerClock(PLAYERID,FLAG) \
+	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=FLAG;\
+	amx_Callback(amx,n_TogglePlayerClock,&nc_result,nc_params)
 
 #define NC_TogglePlayerSpectating(PLAYERID,FLAG) \
 	nc_params[0]=2;nc_params[1]=PLAYERID;nc_params[2]=FLAG;\

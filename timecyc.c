@@ -2,6 +2,17 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "anticheat.h"
+#include "cmd.h"
+#include "echo.h"
+#include "dialog.h"
+#include "game_sa.h"
+#include "heartbeat.h"
+#include "missions.h"
+#include "protips.h"
+#include "timecyc.h"
+#include "vehicles.h"
+#include "zones.h"
 #include <string.h>
 
 /*
@@ -166,7 +177,11 @@ DE | 18, 18, 18, 17, 17, 17, 17, 17, 17, 17, 19, 19, 19, 17
 
 */
 
-static const unsigned char nextweatherarray[NEXT_WEATHER_POSSIBILITIES] = {
+#define WEATHER_INITIAL 255
+
+#define NEXT_WEATHER_POSSIBILITIES (35)
+
+static const unsigned char weather_mapping[NEXT_WEATHER_POSSIBILITIES] = {
 	/* 9x clear */
 	WEATHER_LA_EXTRASUNNY, /* VD  800 */
 	WEATHER_LA_EXTRASUNNYSMOG, /* VD  800 */
@@ -219,74 +234,434 @@ static const unsigned char nextweatherarray[NEXT_WEATHER_POSSIBILITIES] = {
 	/* 1x sandstorms */
 	WEATHER_DE_SANDSTORMS,
 };
-static const char weathernames[] =
-	"clear\0light clouds\0overcast\0thunderstorms\0thick fog\0sandstorms";
-/*       0      6            19        28             42         52 */
-static const unsigned char weathernamemapping[WEATHERS] = {
-	0, 6, 0, 6, 19, 6, 0, 19, 28, 42, 6, 0, 19, 0, 6, 19, 28, 0, 6, 52, 42
+
+static const char
+	WTH_DESC_CLEAR[] = "clear",
+	WTH_DESC_LIGHT_CLOUDS[] = "light clouds",
+	WTH_DESC_OVERCAST[] = "overcast",
+	WTH_DESC_THUNDERSTORMS[] = "thunderstorms",
+	WTH_DESC_THICK_FOG[] = "thick fog",
+	WTH_DESC_SANDSTORMS[] = "sandstorms";
+
+static const unsigned char *weather_descriptions[WEATHERS] = {
+	WTH_DESC_CLEAR,
+	WTH_DESC_LIGHT_CLOUDS,
+	WTH_DESC_CLEAR,
+	WTH_DESC_LIGHT_CLOUDS,
+	WTH_DESC_OVERCAST,
+	WTH_DESC_LIGHT_CLOUDS,
+	WTH_DESC_CLEAR,
+	WTH_DESC_OVERCAST,
+	WTH_DESC_THUNDERSTORMS,
+	WTH_DESC_THICK_FOG,
+	WTH_DESC_LIGHT_CLOUDS,
+	WTH_DESC_CLEAR,
+	WTH_DESC_OVERCAST,
+	WTH_DESC_CLEAR,
+	WTH_DESC_LIGHT_CLOUDS,
+	WTH_DESC_OVERCAST,
+	WTH_DESC_THUNDERSTORMS,
+	WTH_DESC_CLEAR,
+	WTH_DESC_LIGHT_CLOUDS,
+	WTH_DESC_SANDSTORMS,
+	WTH_DESC_THICK_FOG,
 };
-static const float winds[WEATHERS] = {
+
+static const float weather_winds[WEATHERS] = {
 	0.0f, 0.25f, 0.0f, 0.2f, 0.7f, 0.25f, 0.0f, 0.7f, 1.0f, 0.0f, 0.2f,
 	0.0f, 0.4f, 0.0f, 0.3f, 0.7f, 1.0f, 0.0f, 0.3f, 1.5f, 0.0f
 };
-#define WIND_MULTIPLIER (34.0f)
-static const char scales[] =
-	"very high\0moderate\0very low";
-/*       0    5    10        19   24 */
-static const unsigned char visibilitymapping[WEATHERS] = {
+
+#define WIND_MULTIPLIER 34.0f
+
+static const char scales[] = "very high\0moderate\0very low";
+
+#define SCALE_VERYHIGH scales
+#define SCALE_HIGH scales + 5
+#define SCALE_MODERATE scales + 10
+#define SCALE_VERYLOW scales + 19
+#define SCALE_LOW scales + 24
+
+static const unsigned char *weather_visibilities[WEATHERS] = {
 	/*    0 -  454 very low */
 	/*  455 -  650 low */
 	/*  651 -  700 moderate */
 	/*  701 - 1000 high */
 	/* 1001 - 1500 very high */
-	5, 5, 5, 5, 10, 24, 24, 0, 24, 19, 5, 5, 5, 0, 0, 0, 24, 0, 0, 19, 19
+	SCALE_HIGH,
+	SCALE_HIGH,
+	SCALE_HIGH,
+	SCALE_HIGH,
+	SCALE_MODERATE,
+	SCALE_LOW,
+	SCALE_LOW,
+	SCALE_VERYHIGH,
+	SCALE_LOW,
+	SCALE_VERYLOW,
+	SCALE_HIGH,
+	SCALE_HIGH,
+	SCALE_HIGH,
+	SCALE_VERYHIGH,
+	SCALE_VERYHIGH,
+	SCALE_VERYHIGH,
+	SCALE_LOW,
+	SCALE_VERYHIGH,
+	SCALE_VERYHIGH,
+	SCALE_VERYLOW,
+	SCALE_VERYLOW,
 };
-static const unsigned char wavesmapping[WEATHERS] = {
+
+static const unsigned char *weather_waves[WEATHERS] = {
 	/*   0 - 0.3 low */
 	/* 0.4 - 0.6 moderate */
 	/* 0.7 - 1.0 high */
-	24, 10, 24, 10, 5, 10, 24, 5, 5, 24, 10,
-	24, 5, 24, 10, 5, 5, 24, 10, 5, 24
+	SCALE_VERYLOW,
+	SCALE_MODERATE,
+	SCALE_VERYLOW,
+	SCALE_MODERATE,
+	SCALE_HIGH,
+	SCALE_MODERATE,
+	SCALE_VERYLOW,
+	SCALE_HIGH,
+	SCALE_HIGH,
+	SCALE_VERYLOW,
+	SCALE_MODERATE,
+	SCALE_VERYLOW,
+	SCALE_HIGH,
+	SCALE_VERYLOW,
+	SCALE_MODERATE,
+	SCALE_HIGH,
+	SCALE_HIGH,
+	SCALE_VERYLOW,
+	SCALE_MODERATE,
+	SCALE_HIGH,
+	SCALE_VERYLOW,
 };
 
-static unsigned char currentweather = WEATHER_INVALID;
+static struct {
+	unsigned char current;
+	unsigned char upcoming;
+	unsigned char locked;
+	unsigned char _pad;
+} weather;
+EXPECT_SIZE(weather, 4);
+
+/** In-game hours */
+int time_h;
+/** In-game minutes */
+int time_m;
 
 /**
-Formats the METAR weather message.
+State of synchronizing weather/time with a player (SYNC_STATE_ constants).
+*/
+static unsigned char timecycstate[MAX_PLAYERS];
+/**
+Weather signature of time when player started synchronizing.
+
+If the signature doesn't match signature of current weather when the player
+just synced, it means that the weather changed and they should sync again.
+This should be rare, but it can happen.
+*/
+static unsigned int timecycsignature[MAX_PLAYERS];
+
+#define SYNC_STATE_TIME1 0
+#define SYNC_STATE_TIME2 1
+#define SYNC_STATE_NONE 10
+
+#define WEATHERSIGNATURE() (*((int*) &weather))
+
+/**
+Formats the METAR weather message into cbuf4096.
 */
 static
-void timecyc_make_weather_msg(char* buf, const char* type, int weather, cell* outaddr)
+void timecyc_make_weather_msg(const char* type, int weather)
 {
-	sprintf(buf, "METAR %s: %s, visibility: %s, winds: %.0fkts, waves: %s", type,
-		weathernames + weathernamemapping[weather], scales + visibilitymapping[weather],
-		winds[weather] * WIND_MULTIPLIER, scales + wavesmapping[weather]);
-	amx_SetUString(outaddr, buf, 144);
+	sprintf(cbuf4096,
+		"METAR %s: %s, visibility: %s, winds: %.0fkts, waves: %s",
+		type,
+		weather_descriptions[weather],
+		weather_visibilities[weather],
+		weather_winds[weather] * WIND_MULTIPLIER,
+		weather_waves[weather]);
 }
 
-/* native Timecyc_GetNextWeatherMsgQuery(nextweatherindex, bufmsg[], bufquery[]) */
-cell AMX_NATIVE_CALL Timecyc_GetNextWeatherMsgQuery(AMX *amx, cell *params)
+/**
+Sets the weather, it will be interpolated for players.
+*/
+static
+void timecyc_set_weather(AMX *amx, int newweather)
 {
-	char buf[144];
-	cell* addr;
-	const unsigned char lastweather = currentweather;
-	amx_GetAddr(amx, params[2], &addr);
-	timecyc_make_weather_msg(buf, "forecast", currentweather = nextweatherarray[params[1]], addr);
-	amx_GetAddr(amx, params[3], &addr);
-	if (lastweather == WEATHER_INVALID) {
-		buf[0] = 0;
-	} else {
-		sprintf(buf, "INSERT INTO wth(w,l,t) VALUES(%d,%d,UNIX_TIMESTAMP())", currentweather, lastweather);
+	int playerid, i;
+
+	if (weather.locked != newweather) {
+		weather.locked = newweather;
+		nc_params[0] = 2;
+		nc_params[2] = newweather;
+		i = playercount;
+		while (i--) {
+			playerid = players[i];
+			if (spawned[playerid] && !temp_afk[playerid]) {
+				nc_params[1] = playerid;
+				NC(n_SetPlayerWeather);
+			}
+		}
 	}
-	amx_SetUString(addr, buf, sizeof(buf));
-	return currentweather;
 }
 
-/* native Timecyc_GetCurrentWeatherMsg(nextweatherindex, buf[]) */
-cell AMX_NATIVE_CALL Timecyc_GetCurrentWeatherMsg(AMX *amx, cell *params)
+/**
+Advances the weather.
+
+Makes a query to db to update weather stats, except right after initializing.
+*/
+static
+void timecyc_next_weather(AMX *amx)
 {
-	char buf[144];
-	cell* addr;
-	amx_GetAddr(amx, params[1], &addr);
-	timecyc_make_weather_msg(buf, "weather report", currentweather, addr);
+	int newweather;
+
+	NC_random_(NEXT_WEATHER_POSSIBILITIES, &newweather);
+	newweather = weather_mapping[newweather];
+	if (weather.current != WEATHER_INITIAL) {
+		sprintf(cbuf4096,
+			"INSERT INTO wth(w,l,t) "
+			"VALUES(%d,%d,UNIX_TIMESTAMP())",
+			newweather,
+			weather.current);
+		amx_SetUString(buf144, cbuf4096, 144);
+		NC_mysql_tquery_nocb(buf144a);
+	}
+	timecyc_set_weather(amx, newweather);
+	timecyc_make_weather_msg("forecast", newweather);
+	missions_on_weather_changed(amx, newweather);
+	amx_SetUString(buf144, cbuf4096, 144);
+	NC_SendClientMessageToAll(COL_METAR, buf144a);
+}
+
+int timecyc_cmd_metar(CMDPARAMS)
+{
+	timecyc_make_weather_msg("weather report", weather.current);
+	amx_SetUString(buf144, cbuf4096, 144);
+	NC_SendClientMessage(playerid, COL_METAR, buf144a);
 	return 1;
 }
+
+void timecyc_init(AMX *amx)
+{
+	time_h = 7;
+	time_m = 59;
+	weather.current = WEATHER_INITIAL;
+	timecyc_next_weather(amx);
+	/*TODO:settimer*/
+
+#ifdef TIMECYC_OVERLAY_CLOCK
+	clocktext = TextDrawCreate(608.0, 22.0, "12:73")
+	TextDrawColor clocktext, 0xE1E1E1FF
+	TextDrawLetterSize clocktext, 0.55, 2.2
+	TextDrawSetProportional clocktext, 0
+	TextDrawFont clocktext, 3
+	TextDrawAlignment clocktext, 3
+	TextDrawSetShadow clocktext, 0
+	TextDrawSetOutline clocktext, 2
+	TextDrawBackgroundColor clocktext, 0x000000FF
+#endif
+}
+
+/**
+Sync weather (and thus time) for a player.
+
+Weather interpolation:
+- there are three weather variables: current, upcoming, locked
+- there is equilibrium when all three are the same
+- when changing, lockedweather gets set
+- nothing happens until the clock strikes the hour
+- when the clock strikes the hour, upcoming is set to locked
+- the weather will transition this whole hour
+- when the clock strikes again, current is set to upcoming, forming equilibrium
+
+- changing the clock forward during a transition only jumps the transition
+- next phase triggers when the current minute is lower than last minute
+  - so when the hour changes, minutes goes from 60 to 0, hence cycle
+  - this means changing minutes backwards will force cycle, but not with hours
+
+- when player dies, a cycle goes (TODO check)
+
+- this works to change the weather instantly:
+  - TogglePlayerClock 0
+  - SetPlayerWeather 16
+  - TogglePlayerClock 1
+  - SetPlayerWeather 0
+  - now current and upcoming are 16, locked is 0
+*/
+static
+void timecyc_sync(AMX *amx, int playerid)
+{
+	/*Set current weather to all.
+	Setting the weather without having a clock changes all three of
+	current, upcoming, locked.*/
+	NC_TogglePlayerClock(playerid, 0);
+	NC_SetPlayerWeather(playerid, weather.current);
+	/*No delay needed here^.*/
+
+	if (weather.current == weather.upcoming) {
+		/*Not in a transition, can just set the time right.*/
+		NC_SetPlayerTime(playerid, time_h, time_m);
+		NC_TogglePlayerClock(playerid, 1);
+		if (weather.upcoming != weather.locked) {
+			/*Transition is in queue, let player know.*/
+			NC_SetPlayerWeather(playerid, weather.locked);
+			/*No delay needed here^.*/
+		}
+		timecycstate[playerid] = SYNC_STATE_NONE;
+	} else {
+		/*Need to change upcoming, so force a transition cycle.
+		Setting minutes to 30, to later set back to 0
+		(in timecyc_on_player_update), which will force a cycle.*/
+		NC_SetPlayerTime(playerid, time_h, 30);
+		NC_TogglePlayerClock(playerid, 1);
+		NC_SetPlayerWeather(playerid, weather.upcoming);
+		/*This sets lockedweather^.*/
+		timecycstate[playerid] = SYNC_STATE_TIME1;
+		timecycsignature[playerid] = WEATHERSIGNATURE();
+		/*Rest is done in timecyc_on_player_update, since the current
+		changes need to be processed before continuing.*/
+	}
+}
+
+void timecyc_on_player_connect(int playerid)
+{
+	timecycstate[playerid] = SYNC_STATE_NONE;
+}
+
+void timecyc_on_player_death(AMX *amx, int playerid)
+{
+	NC_TogglePlayerClock(playerid, 0);
+}
+
+void timecyc_on_player_request_class(AMX *amx, int playerid)
+{
+	NC_TogglePlayerClock(playerid, 0);
+	NC_SetPlayerTime(playerid, 12, 0);
+	NC_SetPlayerWeather(playerid, 1);
+}
+
+void timecyc_on_player_update(AMX *amx, int playerid)
+{
+	switch (timecycstate[playerid]) {
+	case SYNC_STATE_TIME1:
+		NC_SetPlayerTime(playerid, time_h, 0);
+		timecycstate[playerid] = SYNC_STATE_TIME2;
+		break;
+	case SYNC_STATE_TIME2:
+		if (timecycsignature[playerid] == WEATHERSIGNATURE()) {
+			NC_SetPlayerTime(playerid, time_h, time_m);
+			if (weather.locked != weather.upcoming) {
+				NC_SetPlayerWeather(playerid, weather.locked);
+			}
+			timecycstate[playerid] = SYNC_STATE_NONE;
+		} else {
+			/*TODO: remove this after a while maybe*/
+			logprintf("[timecyc] it happened");
+			timecyc_sync(amx, playerid);
+		}
+		break;
+	}
+}
+
+void timecyc_on_player_was_afk(AMX *amx, int playerid)
+{
+	timecyc_sync(amx, playerid);
+}
+
+void timecyc_tick(AMX *amx)
+{
+	static int lasttime = 0;
+
+	int i, playerid;
+
+	NC_gettime(buf32a, buf32_1a, buf144a);
+	if (lasttime != nc_result) {
+		lasttime = nc_result;
+		if (time_m++ == 30) {
+			/*sync everyone on :30 when there's no transition*/
+			if (weather.current == weather.upcoming &&
+				weather.current == weather.locked)
+			{
+				i = playercount;
+				while (i--) {
+					playerid = players[i];
+					if (spawned[playerid] &&
+						!temp_afk[playerid] &&
+						timecycstate[playerid] ==
+							SYNC_STATE_NONE)
+					{
+						timecyc_sync(amx, playerid);
+					}
+				}
+			}
+			goto timer30s;
+		} else if (time_m >= 60) {
+			time_m = 0;
+			weather.current = weather.upcoming;
+			weather.upcoming = weather.locked;
+			if (time_h++ >= 24) {
+				time_h = 0;
+			}
+			/*timer1m*/
+			echo_init(amx);
+			protips_timed_broadcast(amx);
+timer30s:
+			/*timer30s*/
+			heartbeat_timed_update(amx);
+		}
+		/*timer1000*/
+		veh_timed_1s_update(amx);
+		veh_timed_panel_update(amx);
+		zones_update_for_all(amx);
+		if ((time_m % 5) == 0) {
+			/*timer5000*/
+			anticheat_decrease_infractions();
+			dialog_pop_queue(amx);
+			veh_commit_next_vehicle_odo_to_db(amx);
+		}
+	}
+}
+
+#ifdef DEV
+int timecyc_cmd_dev_fweather(CMDPARAMS)
+{
+	int w;
+
+	if (cmd_get_int_param(cmdtext, &parseidx, &w)) {
+		weather.current = weather.locked = weather.upcoming = w;
+		timecyc_sync(amx, playerid);
+		amx_SetUString(buf144, "forced weather", 144);
+		NC_SendClientMessageToAll(-1, buf144a);
+	} else {
+		amx_SetUString(buf144, WARN"Syntax: /fweather <weather>", 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	}
+	return 1;
+}
+
+int timecyc_cmd_dev_tweather(CMDPARAMS)
+{
+	int w;
+
+	if (cmd_get_int_param(cmdtext, &parseidx, &w)) {
+		timecyc_set_weather(amx, w);
+		amx_SetUString(buf144, "changing weather", 144);
+		NC_SendClientMessageToAll(-1, buf144a);
+	} else {
+		amx_SetUString(buf144, WARN"Syntax: /tweather <weather>", 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	}
+	return 1;
+}
+
+int timecyc_cmd_dev_nweather(CMDPARAMS)
+{
+	amx_SetUString(buf144, "changing weather", 144);
+	NC_SendClientMessageToAll(-1, buf144a);
+	timecyc_next_weather(amx);
+	return 1;
+}
+#endif /*DEV*/

@@ -126,6 +126,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	heartbeat_create_session(amx);
 	panel_on_gamemode_init(amx);
 	spawn_init(amx); /*MUST run after airports_init*/
+	timecyc_init(amx);
 	veh_create_global_textdraws(amx);
 	return 1;
 }
@@ -197,6 +198,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	panel_on_player_connect(amx, playerid);
 	pm_on_player_connect(playerid);
 	prefs_on_player_connect(playerid);
+	timecyc_on_player_connect(playerid);
 	veh_create_player_textdraws(amx, playerid);
 	zones_on_player_connect(amx, playerid);
 
@@ -220,6 +222,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 
 	missions_on_player_death(amx, playerid);
 	spawn_prespawn(amx, playerid);
+	timecyc_on_player_death(amx, playerid);
 	zones_hide_text(amx, playerid);
 	return 1;
 }
@@ -271,6 +274,7 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
 	const int playerid = params[1], classid = params[2];
 
 	class_on_player_request_class(amx, playerid, classid);
+	timecyc_on_player_request_class(amx, playerid);
 	return 1;
 }
 
@@ -333,6 +337,16 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 	amx_GetUString(buf, addr, sizeof(buf));
 
 	echo_on_game_chat_or_action(amx, 0, playerid, buf);
+	return 1;
+}
+
+/* native B_OnPlayerUpdate(playerid) */
+static
+cell AMX_NATIVE_CALL B_OnPlayerUpdate(AMX *amx, cell *params)
+{
+	const int playerid = params[1];
+
+	timecyc_on_player_update(amx, playerid);
 	return 1;
 }
 

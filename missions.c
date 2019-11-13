@@ -5,6 +5,7 @@
 #include "airport.h"
 #include "anticheat.h"
 #include "cmd.h"
+#include "game_sa.h"
 #include "playerdata.h"
 #include "math.h"
 #include "missions.h"
@@ -620,7 +621,6 @@ void missions_cb_create(AMX *amx, void* data)
 	nc_paramf[6] = nc_paramf[7] = nc_paramf[8] = 0.0f;
 	nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
 	NC(n_SetPlayerRaceCheckpoint);
-	/*TODO: missions_OnWeatherChanged for weather bonus*/
 
 	sprintf(cbuf4096,
 		"Flight from %s (%s) %s to %s (%s) %s",
@@ -756,6 +756,35 @@ void missions_on_player_disconnect(AMX *amx, int playerid)
 	if ((miss = activemission[playerid]) != NULL) {
 		missions_end_unfinished(
 			amx, miss, playerid, MISSION_STATE_ABANDONED);
+	}
+}
+
+void missions_on_weather_changed(AMX *amx, int weather)
+{
+	int bonusvalue, i;
+
+	switch (weather) {
+	case WEATHER_SF_RAINY:
+	case WEATHER_CS_RAINY:
+		bonusvalue = MISSION_WEATHERBONUS_RAINY;
+		break;
+	case WEATHER_SF_FOGGY:
+	case WEATHER_UNDERWATER:
+		bonusvalue = MISSION_WEATHERBONUS_FOGGY;
+		break;
+	case WEATHER_DE_SANDSTORMS:
+		bonusvalue = MISSION_WEATHERBONUS_SANDSTORM;
+		break;
+	default:
+		return;
+	}
+	NC_random(MISSION_WEATHERBONUS_DEVIATION);
+	bonusvalue += nc_result;
+	i = playercount;
+	while (i--) {
+		if (activemission[players[i]] != NULL) {
+			activemission[players[i]]->weatherbonus += bonusvalue;
+		}
 	}
 }
 
@@ -1088,29 +1117,6 @@ cell AMX_NATIVE_CALL Missions_OnVehicleRepaired(AMX *amx, cell *params)
 	{
 		miss->damagetaken += (short) hpdiff;
 		miss->lastvehiclehp = (short) newhp;
-	}
-	return 1;
-}
-
-/* native Missions_OnWeatherChanged(newweatherid) */
-cell AMX_NATIVE_CALL Missions_OnWeatherChanged(AMX *amx, cell *params)
-{
-	int bonusvalue, i = MAX_PLAYERS;
-
-	switch (params[1]) {
-	case WEATHER_SF_RAINY:
-	case WEATHER_CS_RAINY: bonusvalue = MISSION_WEATHERBONUS_RAINY; break;
-	case WEATHER_SF_FOGGY:
-	case WEATHER_UNDERWATER: bonusvalue = MISSION_WEATHERBONUS_FOGGY; break;
-	case WEATHER_DE_SANDSTORMS: bonusvalue = MISSION_WEATHERBONUS_SANDSTORM; break;
-	default: return 0;
-	}
-	NC_random(MISSION_WEATHERBONUS_DEVIATION);
-	bonusvalue += nc_result;
-	while (i--) {
-		if (activemission[i] != NULL) {
-			activemission[i]->weatherbonus += bonusvalue;
-		}
 	}
 	return 1;
 }

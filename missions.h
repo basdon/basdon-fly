@@ -66,6 +66,10 @@ void missions_on_player_connect(AMX*, int playerid);
 void missions_on_player_death(AMX*, int playerid);
 void missions_on_player_disconnect(AMX*, int playerid);
 /**
+Call when weather changed to add dangerous weather bonus to missions if needed.
+*/
+void missions_on_weather_changed(AMX*, int weather);
+/**
 Sends flight tracker message.
 */
 void missions_send_tracker_data(
