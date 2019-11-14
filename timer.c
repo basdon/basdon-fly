@@ -10,9 +10,7 @@
 #define MAX_TIMERS (500)
 
 struct TIMER {
-	int initial_time;
 	int time_left;
-	int repeating;
 	timer_cb callback;
 	void *data;
 };
@@ -25,7 +23,7 @@ void timer_reset()
 	time_elapsed_millis();
 }
 
-void timer_set(int interval, int repeating, timer_cb cb, void *data)
+void timer_set(int interval, timer_cb cb, void *data)
 {
 	struct TIMER *timer;
 
@@ -34,7 +32,7 @@ void timer_set(int interval, int repeating, timer_cb cb, void *data)
 		logprintf("ERR: don't call timer_set before time is inited!");
 		return;
 	}
-#endif
+#endif /*DEV*/
 
 	if (numtimers >= MAX_TIMERS - 1) {
 		logprintf("ERR: timer limit "Q(MAX_TIMERS)" reached");
@@ -42,9 +40,7 @@ void timer_set(int interval, int repeating, timer_cb cb, void *data)
 	}
 
 	timer = timers + numtimers;
-	timer->initial_time = interval;
 	timer->time_left = interval;
-	timer->repeating = repeating;
 	timer->callback = cb;
 	timer->data = data;
 	numtimers++;
@@ -52,21 +48,23 @@ void timer_set(int interval, int repeating, timer_cb cb, void *data)
 
 void timer_tick(AMX *amx)
 {
-	int i, elapsed_time;
+	struct TIMER *t;
+	int i, elapsed_time, new_time;
 
 	elapsed_time = time_elapsed_millis();
-	for (i = 0; i < numtimers; i++) {
-		timers[i].time_left -= elapsed_time;
-		if (timers[i].time_left <= 0) {
-			timers[i].callback(amx, timers[i].data);
-			if (timers[i].repeating) {
-				timers[i].time_left += timers[i].initial_time;
+	for (i = 0, t = timers; i < numtimers; i++, t++) {
+		t->time_left -= elapsed_time;
+		if (t->time_left <= 0) {
+			new_time = t->callback(amx, t->data);
+			if (new_time > 0) {
+				t->time_left += new_time;
 			} else {
 				if (i != numtimers - 1) {
-					memcpy(timers + i,
+					memcpy(t,
 						timers + numtimers - 1,
 						sizeof(struct TIMER));
 					i--;
+					t--;
 				}
 				numtimers--;
 			}

@@ -371,6 +371,9 @@ static unsigned int timecycsignature[MAX_PLAYERS];
 
 #define WEATHERSIGNATURE() (*((int*) &weather))
 
+#define WEATHER_TIMER_INTERVAL (13 * 60000)
+#define WEATHER_TIMER_DEVIATION (3 * 60000)
+
 /**
 Formats the METAR weather message into cbuf4096.
 */
@@ -417,9 +420,9 @@ Makes a query to db to update weather stats, except right after initializing.
 @param unused unused param just to make the signature correct for timer callback
 */
 static
-void timecyc_next_weather(AMX *amx, void *unused)
+int timecyc_next_weather(AMX *amx, void *unused)
 {
-	int newweather;
+	int newweather, timerdeviation;
 
 	NC_random_(NEXT_WEATHER_POSSIBILITIES, &newweather);
 	newweather = weather_mapping[newweather];
@@ -437,6 +440,9 @@ void timecyc_next_weather(AMX *amx, void *unused)
 	missions_on_weather_changed(amx, newweather);
 	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessageToAll(COL_METAR, buf144a);
+
+	NC_random_(2, &timerdeviation);
+	return timerdeviation + WEATHER_TIMER_INTERVAL;
 }
 
 int timecyc_cmd_metar(CMDPARAMS)
@@ -454,7 +460,7 @@ void timecyc_init(AMX *amx)
 	weather.current = WEATHER_INITIAL;
 
 	timecyc_next_weather(amx, NULL);
-	timer_set(15 * 60000, 1, timecyc_next_weather, NULL);
+	timer_set(WEATHER_TIMER_INTERVAL, timecyc_next_weather, NULL);
 
 #ifdef TIMECYC_OVERLAY_CLOCK
 	clocktext = TextDrawCreate(608.0, 22.0, "12:73")

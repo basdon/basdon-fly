@@ -1,7 +1,7 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-typedef void (*timer_cb)(AMX*, void* data);
+typedef int (*timer_cb)(AMX*, void* data);
 
 /**
 Resets timer checking, to be called at the end of OnGameModeInit.
@@ -15,9 +15,10 @@ Set a timer.
 
 Don't forget to free data if needed when applicable.
 
+@param timer_cb zero to stop the timer or a value that will be the new interval
 @param data data to pass to timer_cb on hit
 */
-void timer_set(int interval, int repeating, timer_cb cb, void *data);
+void timer_set(int interval, timer_cb cb, void *data);
 /**
 Process the timers.
 */
