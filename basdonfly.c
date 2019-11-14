@@ -23,6 +23,7 @@
 #include "timecyc.h"
 #include "vehicles.h"
 #include "zones.h"
+#include "time/time.h"
 #include <string.h>
 
 logprintf_t logprintf;
@@ -119,6 +120,10 @@ int _cc[MAX_PLAYERS];
 #define IN_BASDONFLY
 #include "basdon.c"
 
+#ifndef PRECOMPILED_TIME
+#include "time/time.c"
+#endif /*PRECOMPILED_TIME*/
+
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {
 	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES | SUPPORTS_PROCESS_TICK;
@@ -128,6 +133,8 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
+
+	time_init();
 
 	cmd_init();
 	game_sa_init();

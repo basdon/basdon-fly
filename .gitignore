@@ -1,3 +1,7 @@
 /out/
 /vc2005/
 /vs2013/
+/time/*
+!/time/*.c
+!/time/*.h
+!/time/*.vcproj
