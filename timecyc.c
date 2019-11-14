@@ -11,6 +11,7 @@
 #include "missions.h"
 #include "protips.h"
 #include "timecyc.h"
+#include "timer.h"
 #include "vehicles.h"
 #include "zones.h"
 #include <string.h>
@@ -412,9 +413,11 @@ void timecyc_set_weather(AMX *amx, int newweather)
 Advances the weather.
 
 Makes a query to db to update weather stats, except right after initializing.
+
+@param unused unused param just to make the signature correct for timer callback
 */
 static
-void timecyc_next_weather(AMX *amx)
+void timecyc_next_weather(AMX *amx, void *unused)
 {
 	int newweather;
 
@@ -449,8 +452,9 @@ void timecyc_init(AMX *amx)
 	time_h = 7;
 	time_m = 59;
 	weather.current = WEATHER_INITIAL;
-	timecyc_next_weather(amx);
-	/*TODO:settimer*/
+
+	timecyc_next_weather(amx, NULL);
+	timer_set(15 * 60000, 1, timecyc_next_weather, NULL);
 
 #ifdef TIMECYC_OVERLAY_CLOCK
 	clocktext = TextDrawCreate(608.0, 22.0, "12:73")
@@ -661,7 +665,7 @@ int timecyc_cmd_dev_nweather(CMDPARAMS)
 {
 	amx_SetUString(buf144, "changing weather", 144);
 	NC_SendClientMessageToAll(-1, buf144a);
-	timecyc_next_weather(amx);
+	timecyc_next_weather(amx, NULL);
 	return 1;
 }
 #endif /*DEV*/
