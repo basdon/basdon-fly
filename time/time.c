@@ -21,16 +21,24 @@ static unsigned long last_value;
 
 void time_init()
 {
+	if (!initial_value) {
 #if ISWIN
-	timeBeginPeriod(1);
+		timeBeginPeriod(1);
 #endif
-	initial_value = last_value = time_timestamp();
+		initial_value = time_timestamp();
+		last_value = 0;
+	}
+}
+
+int time_is_inited()
+{
+	return initial_value;
 }
 
 unsigned long time_timestamp()
 {
 #if ISWIN
-	return initial_value - (unsigned long) timeGetTime();
+	return (unsigned long) timeGetTime() - initial_value;
 #else
 	unsigned long value;
 	struct timeval tv;
@@ -38,7 +46,7 @@ unsigned long time_timestamp()
 	gettimeofday(&tv, NULL);
 	value = (unsigned long) (tv.tv_sec * 1000L);
 	value + (unsigned long) (tv.tv_usec / 1000L);
-	return initial_value - value;
+	return value - initial_value;
 #endif
 }
 

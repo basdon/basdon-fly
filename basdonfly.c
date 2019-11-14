@@ -21,6 +21,7 @@
 #include "protips.h"
 #include "spawn.h"
 #include "timecyc.h"
+#include "timer.h"
 #include "vehicles.h"
 #include "zones.h"
 #include "time/time.h"
@@ -134,15 +135,14 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 
-	time_init();
-
 	cmd_init();
 	game_sa_init();
 	login_init();
-	pdata_init();
-	zones_init();
 	nav_init();
+	pdata_init();
+	time_init();
 	veh_init();
+	zones_init();
 
 	return 1;
 }
@@ -176,6 +176,8 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 		count = 0;
 		return;
 	}
+
+	timer_tick(amx);
 
 	if (count++ >= 19) {
 		count = 0;

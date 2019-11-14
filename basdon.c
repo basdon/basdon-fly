@@ -128,6 +128,9 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	spawn_init(amx); /*MUST run after airports_init*/
 	timecyc_init(amx);
 	veh_create_global_textdraws(amx);
+
+	/*must be last*/
+	timer_reset();
 	return 1;
 }
 
