@@ -135,5 +135,20 @@ int common_SetVehicleParamsEx(AMX *amx, int vehicleid, struct VEHICLEPARAMS *p)
 void common_mysql_tquery(AMX *amx, char *query, mysql_cb callback, void *data)
 {
 	amx_SetUString(buf4096, query, 2000);
-	PC_mysql_tquery_proxy((cell) callback, (cell) data);
+	buf4096[4088] = 'M';
+	buf4096[4089] = 'M';
+	buf4096[4090] = 0;
+	buf4096[4091] = 'i';
+	buf4096[4092] = 'i';
+	buf4096[4093] = 0;
+	buf4096[4094] = (cell) callback;
+	buf4096[4095] = (cell) data;
+	nc_params[0] = 6 << 2;
+	nc_params[1] = 1;
+	nc_params[2] = buf4096a;
+	nc_params[3] = buf4096a + 4088 * 4;
+	nc_params[4] = buf4096a + 4091 * 4;
+	nc_params[5] = buf4096a + 4094 * 4;
+	nc_params[6] = buf4096a + 4095 * 4;
+	NC(n_mysql_tquery);
 }

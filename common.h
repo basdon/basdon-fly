@@ -210,7 +210,7 @@ int common_SetVehicleParamsEx(AMX*, int vehicleid, struct VEHICLEPARAMS *p);
 /**
 Calls mysql_tquery with a callback and data to pass.
 
-Uses buf4096 for query. Uses the last 5 components of buf4096.
+Uses buf4096 for query. Also uses the last 8 components of buf4096.
 
 @param callback cb to call when the query has been executed
 @param data usually a pointer to allocated memory that should be freed in the cb

@@ -7,7 +7,6 @@
 int p_OnPlayerCommandTextHash;
 int p_REMOVEME_isafk;
 int p_REMOVEME_isplaying;
-int p_mysql_tquery_proxy;
 
 cell pc_result;
 
@@ -22,7 +21,6 @@ int publics_find(AMX *amx)
 		P(OnPlayerCommandTextHash),
 		P(REMOVEME_isafk),
 		P(REMOVEME_isplaying),
-		P(mysql_tquery_proxy),
 	};
 	struct PUBLIC *p = publics + sizeof(publics)/sizeof(struct PUBLIC);
 
