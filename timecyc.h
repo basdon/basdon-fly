@@ -35,6 +35,10 @@ void timecyc_on_player_request_class(AMX*, int playerid);
 void timecyc_on_player_update(AMX*, int playerid);
 void timecyc_on_player_was_afk(AMX*, int playerid);
 /**
+Syncs timecyc's tick function.
+*/
+void timecyc_reset();
+/**
 Let the clock tick. This will also call most timed functions.
 */
 void timecyc_tick(AMX*);

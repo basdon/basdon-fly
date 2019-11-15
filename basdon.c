@@ -115,6 +115,10 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 {
+	unsigned long t;
+
+	t = time_timestamp();
+
 	memset(spawned, 0, sizeof(spawned));
 
 	airports_init(amx);
@@ -129,7 +133,10 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	timecyc_init(amx);
 	veh_create_global_textdraws(amx);
 
+	printf("OnGameModeInit: %ldms\n", time_timestamp() - t);
+
 	/*must be last*/
+	timecyc_reset();
 	timer_reset();
 	return 1;
 }

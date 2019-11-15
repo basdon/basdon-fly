@@ -103,7 +103,6 @@ int n_cache_get_row_count;
 int n_cache_get_row_float;
 int n_cache_get_row_int;
 int n_cache_insert_id;
-int n_gettime;
 int n_printf;
 int n_mysql_tquery;
 int n_mysql_query;
@@ -230,7 +229,6 @@ int natives_find(AMX *amx)
 		N(cache_get_row_float),
 		N(cache_get_row_int),
 		N(cache_insert_id),
-		N(gettime),
 		N(printf),
 		N(mysql_tquery),
 		N(mysql_query),

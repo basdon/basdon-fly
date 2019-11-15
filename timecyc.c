@@ -14,6 +14,7 @@
 #include "timer.h"
 #include "vehicles.h"
 #include "zones.h"
+#include "time/time.h"
 #include <string.h>
 
 /*
@@ -364,6 +365,12 @@ just synced, it means that the weather changed and they should sync again.
 This should be rare, but it can happen.
 */
 static unsigned int timecycsignature[MAX_PLAYERS];
+/**
+Last time timecyc_tick has run.
+
+If this is more than 1000 from time_timestamp it means a tick should happen.
+*/
+static unsigned long lasttime;
 
 #define SYNC_STATE_TIME1 0
 #define SYNC_STATE_TIME2 1
@@ -581,15 +588,19 @@ void timecyc_on_player_was_afk(AMX *amx, int playerid)
 	timecyc_sync(amx, playerid);
 }
 
+void timecyc_reset()
+{
+	lasttime = time_timestamp();
+}
+
 void timecyc_tick(AMX *amx)
 {
-	static int lasttime = 0;
-
+	unsigned long nowtime;
 	int i, playerid;
 
-	NC_gettime(buf32a, buf32_1a, buf144a);
-	if (lasttime != nc_result) {
-		lasttime = nc_result;
+	nowtime = time_timestamp();
+	if (nowtime - lasttime > 1000) {
+		lasttime += 1000;
 		if (time_m++ == 30) {
 			/*sync everyone on :30 when there's no transition*/
 			if (weather.current == weather.upcoming &&

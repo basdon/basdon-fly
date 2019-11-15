@@ -95,7 +95,6 @@ extern int n_cache_get_row_count;
 extern int n_cache_get_row_float;
 extern int n_cache_get_row_int;
 extern int n_cache_insert_id;
-extern int n_gettime;
 extern int n_mysql_tquery;
 extern int n_mysql_query;
 extern int n_printf;
@@ -404,11 +403,6 @@ extern cell nc_result;
 #define NC_cache_insert_id_(RESULT) nc_params[0]=0;\
 	amx_Callback(amx,n_cache_insert_id,(cell*)RESULT,nc_params)
 #define NC_cache_insert_id() NC_cache_insert_id(&nc_result)
-
-/*note: don't call with 0,0,0 - it tends to mess up stuff after a while?*/
-#define NC_gettime(HOUR,MIN,SEC) nc_params[0]=3;\
-	nc_params[1]=HOUR;nc_params[2]=MIN;nc_params[3]=SEC;\
-	amx_Callback(amx,n_gettime,&nc_result,nc_params)
 
 #define NC_mysql_query_(BUF,RESULT) nc_params[0]=3;nc_params[1]=1;\
 	nc_params[2]=BUF;nc_params[3]=1;\
