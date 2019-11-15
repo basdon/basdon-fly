@@ -667,6 +667,23 @@ int timecyc_cmd_dev_tweather(CMDPARAMS)
 	return 1;
 }
 
+int cmd_dev_timex(CMDPARAMS)
+{
+	int h, m;
+
+	if (!cmd_get_int_param(cmdtext, &parseidx, &h) ||
+		!cmd_get_int_param(cmdtext, &parseidx, &m))
+	{
+		amx_SetUString(buf144, WARN"Syntax: /timex <h> <m>", 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	} else {
+		time_h = h;
+		time_m = m;
+		NC_SetPlayerTime(playerid, h, m);
+	}
+	return 1;
+}
+
 int timecyc_cmd_dev_nweather(CMDPARAMS)
 {
 	amx_SetUString(buf144, "changing weather", 144);

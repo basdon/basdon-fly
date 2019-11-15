@@ -20,6 +20,10 @@ int timecyc_cmd_dev_tweather(CMDPARAMS);
 Dev /nweather to change the weather, as if it's called by the timer.
 */
 int timecyc_cmd_dev_nweather(CMDPARAMS);
+/**
+Sets the time of the world.
+*/
+int cmd_dev_timex(CMDPARAMS);
 #endif /*DEV*/
 /**
 Starts the time and weather system.
