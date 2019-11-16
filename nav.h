@@ -31,7 +31,7 @@ Disables navigation for given vehicle.
 
 Ensures the VOR textdraws are hidden.
 */
-void nav_disable(AMX*, int vehicleid);
+void nav_disable(int vehicleid);
 /**
 Enables navigation for given vehicle.
 
@@ -41,7 +41,7 @@ Resets nav cache for all players in vehicle.
 @param adf vec3 to ADF towards, may be NULL
 @param vor runway to VOR towards, may be NULL
 */
-void nav_enable(AMX*, int vehicleid, struct vec3 *adf, struct RUNWAY *vor);
+void nav_enable(int vehicleid, struct vec3 *adf, struct RUNWAY *vor);
 /**
 May return NAV_NONE, NAV_ADF, NAV_VOR or NAV_VOR|NAV_ILS
 */
@@ -54,7 +54,7 @@ Navigation target is decided by the runway or heliport (decision based on
 given vehiclemodel) that is the closest to the vehicle.
 When no target is found, airport's ADF beacon will be used.
 */
-void nav_navigate_to_airport(AMX*, int vid, int vmodel, struct AIRPORT *ap);
+void nav_navigate_to_airport(int vid, int vmodel, struct AIRPORT *ap);
 /**
 Reset cache so textdraws will be updated next timer tick.
 */
@@ -68,7 +68,7 @@ Update nav values to be displayed.
 
 Does not display data, see nav_update_textdraws for that.
 */
-void nav_update(AMX *amx, int vehicleid, struct vec3 *pos, float heading);
+void nav_update(int vehicleid, struct vec3 *pos, float heading);
 /**
 Update nav related textdraws in panel for player if needed.
 
@@ -76,6 +76,6 @@ Does not actually update the nav data (see nav_update for that), just updates
 the textdraws.
 */
 void nav_update_textdraws(
-	AMX*, int playerid, int vehicleid,
+	int playerid, int vehicleid,
 	int *ptxt_adf_dis_base, int *ptxt_adf_alt_base, int *ptxt_adf_crs_base,
 	int *ptxt_vor_base, int *ptxt_ils_base);

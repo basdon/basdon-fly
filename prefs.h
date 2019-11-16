@@ -10,7 +10,7 @@ int prefs_cmd_preferences(CMDPARAMS);
 /**
 Call from DIALOG_PREFERENCES dialog response.
 */
-void prefs_on_dialog_response(AMX*, int playerid, int response, int idx);
+void prefs_on_dialog_response(int playerid, int response, int idx);
 /**
 Reset stuff for player.
 */

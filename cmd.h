@@ -1,12 +1,12 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define CMDPARAMS AMX *amx,const int playerid,const char *cmdtext,int parseidx
+#define CMDPARAMS const int playerid,const char *cmdtext,int parseidx
 
 /*
 Checks incoming command and calls handler if one found and group matched.
 */
-int cmd_check(AMX*, const int playerid, const int hash, const char *cmdtext);
+int cmd_check(const int playerid, const int hash, const char *cmdtext);
 /*
 Gets next int parameter in cmdtext after parseidx.
 

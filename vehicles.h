@@ -41,11 +41,11 @@ extern struct vehicle gamevehicles[MAX_VEHICLES];
 /**
 Should be called in OnGameModeInit.
 */
-void veh_create_global_textdraws(AMX*);
+void veh_create_global_textdraws();
 /**
 Should be called in OnPlayerConnect.
 */
-void veh_create_player_textdraws(AMX*, int playerid);
+void veh_create_player_textdraws(int playerid);
 /**
 Check if given player can modify a vehicle (park, spray, ..).
 Player can modify if they own the vehicle or have admin rights.
@@ -59,7 +59,7 @@ OnGameModeExit.
 
 @return 0 if there was nothing to commit
 */
-int veh_commit_next_vehicle_odo_to_db(AMX*);
+int veh_commit_next_vehicle_odo_to_db();
 void veh_init();
 /**
 Check if a player is allowed to be in given vehicle.
@@ -76,15 +76,15 @@ Creates a vehicle (see CreateVehicle doc).
 
 @remarks Resets values of gamevehicles struct reflecting the created vehicle.
 */
-int veh_NC_CreateVehicle(AMX*, int model, float x, float y, float z,
+int veh_NC_CreateVehicle(int model, float x, float y, float z,
 		         float r, int col1, int col2, int respawn_delay,
 		         int addsiren);
-int veh_NC_DestroyVehicle(AMX*, int vehicleid);
-void veh_on_player_connect(AMX*, int playerid);
+int veh_NC_DestroyVehicle(int vehicleid);
+void veh_on_player_connect(int playerid);
 /**
 To be called from OnPlayerEnterVehicle
 */
-void veh_on_player_enter_vehicle(AMX*, int pid, int vid, int ispassenger);
+void veh_on_player_enter_vehicle(int pid, int vid, int ispassenger);
 /**
 Stuff to do when a player is now driver of a vehicle.
 
@@ -92,16 +92,16 @@ To be called from OnPlayerStateChange with new state being driver, or when
 calling PutPlayerInVehicle when the player was already a driver (because
 this won't trigger a OnPlayerStateChange.
 */
-void veh_on_player_now_driving(AMX*, int playerid, int vehicleid);
-void veh_on_player_state_change(AMX*, int, int, int);
-int veh_OnVehicleSpawn(AMX*, int vehicleid);
+void veh_on_player_now_driving(int playerid, int vehicleid);
+void veh_on_player_state_change(int, int, int);
+int veh_OnVehicleSpawn(int vehicleid);
 /**
 Update vehicle related things like ODO, fuel, ...
 
 To be called every second.
 */
-void veh_timed_1s_update(AMX*);
-void veh_timed_panel_update(AMX*);
+void veh_timed_1s_update();
+void veh_timed_panel_update();
 /**
 Updates vehicle and player odo.
 
@@ -109,11 +109,11 @@ Given player must be driver of given vehicle.
 
 @param pos the position of the given vehicle
 */
-void veh_update_odo(AMX*, int playerid, int vehicleid, struct vec3 pos);
+void veh_update_odo(int playerid, int vehicleid, struct vec3 pos);
 /**
 Updates the service point mapicons (and 3D text) for given playerid.
 
 @param x x-position of the player
 @param y y-position of the player
 */
-void veh_update_service_point_mapicons(AMX*, int playerid, float x, float y);
+void veh_update_service_point_mapicons(int playerid, float x, float y);

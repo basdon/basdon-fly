@@ -5,6 +5,7 @@
 #include "a_samp.h"
 #include "class.h"
 #include "game_sa.h"
+#include "zones.h"
 
 #define VINEWOOD_CAM_POS_X 1496.7052f
 #define VINEWOOD_CAM_POS_Y -883.7934f
@@ -48,7 +49,7 @@ static const int CLASS_COLORS[] = {
 int classid[MAX_PLAYERS];
 int classidx[MAX_PLAYERS];
 
-void class_init(AMX *amx)
+void class_init()
 {
 	int i;
 
@@ -68,7 +69,7 @@ void class_init(AMX *amx)
 	}
 }
 
-void class_on_player_connect(AMX *amx, int playerid)
+void class_on_player_connect(int playerid)
 {
 	classid[playerid] = CLASSMAPPING[classidx[playerid] = 0];
 	nc_params[0] = 2;
@@ -77,10 +78,8 @@ void class_on_player_connect(AMX *amx, int playerid)
 	NC(n_SetPlayerColor);
 }
 
-void class_on_player_request_class(AMX *amx, int playerid, int _classid)
+void class_on_player_request_class(int playerid, int _classid)
 {
-	void zones_hide_text(AMX*, int);
-
 	int class_index;
 	if (_classid < 0 || NUMCLASSES <= _classid) {
 		class_index = classidx[playerid];
@@ -89,7 +88,7 @@ void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 		classid[playerid] = CLASSMAPPING[class_index];
 	}
 
-	nc_params[0] = 4;
+	NC_PARS(4);
 	nc_params[1] = playerid;
 	nc_paramf[2] = VINEWOOD_CAM_POS_X;
 	nc_paramf[3] = VINEWOOD_CAM_POS_Y;
@@ -121,7 +120,7 @@ void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 	yet, calling this doesn't work on first invocation (which normally
 	would happen in class_on_player_request_class), so execute it here
 	already so the animation can 'preload' and works on request class.*/
-	nc_params[0] = 2;
+	NC_PARS(2);
 	nc_params[2] = SPECIAL_ACTION_DANCE1;
 	NC(n_SetPlayerSpecialAction);
 
@@ -137,6 +136,7 @@ void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 	nc_paramf[2] = 236.0f;
 	NC(n_SetPlayerFacingAngle);
 
+	NC_PARS(4);
 	amx_SetUString(buf32, CLASS_NAMES[class_index], 32);
 	nc_params[2] = buf32a;
 	nc_params[3] = 0x800000;
@@ -145,10 +145,10 @@ void class_on_player_request_class(AMX *amx, int playerid, int _classid)
 
 	/*Can happen, eg when doing /respawn (uses TogglePlayerSpectating,
 	which won't hide it.*/
-	zones_hide_text(amx, playerid);
+	zones_hide_text(playerid);
 }
 
-int class_on_player_request_spawn(AMX *amx, int playerid)
+int class_on_player_request_spawn(int playerid)
 {
 	static const char *NO_TRUCK = WARN"Trucker class is not available yet.";
 
@@ -157,6 +157,6 @@ int class_on_player_request_spawn(AMX *amx, int playerid)
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 0;
 	}
-	common_hide_gametext_for_player(amx, playerid);
+	common_hide_gametext_for_player(playerid);
 	return 1;
 }

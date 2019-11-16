@@ -10,7 +10,7 @@ int p_REMOVEME_isplaying;
 
 cell pc_result;
 
-int publics_find(AMX *amx)
+int publics_find()
 {
 	struct PUBLIC {
 		char *name;

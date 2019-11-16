@@ -32,12 +32,12 @@
 static cell socket_in = SOCKET_INVALID_SOCKET;
 static cell socket_out = SOCKET_INVALID_SOCKET;
 
-void echo_init(AMX *amx)
+void echo_init()
 {
 	static const char *buflo = "127.0.0.1";
 
 	if (socket_in == SOCKET_INVALID_SOCKET) {
-		NC_ssocket_create_(SOCKET_UDP, &socket_in);
+		socket_in = NC_ssocket_create(SOCKET_UDP);
 		if (socket_in == SOCKET_INVALID_SOCKET) {
 			logprintf("failed to create echo game socket");
 		} else {
@@ -45,7 +45,7 @@ void echo_init(AMX *amx)
 		}
 	}
 	if (socket_out == SOCKET_INVALID_SOCKET) {
-		NC_ssocket_create_(SOCKET_UDP, &socket_out);
+		socket_out = NC_ssocket_create(SOCKET_UDP);
 		if (socket_out == SOCKET_INVALID_SOCKET) {
 			logprintf("failed to create echo irc socket");
 		} else {
@@ -58,7 +58,7 @@ void echo_init(AMX *amx)
 	}
 }
 
-void echo_dispose(AMX *amx)
+void echo_dispose()
 {
 	if (socket_out != SOCKET_INVALID_SOCKET) {
 		buf144[0] = 0x04594C46;
@@ -72,7 +72,7 @@ void echo_dispose(AMX *amx)
 	}
 }
 
-void echo_on_player_connection(AMX *amx, int playerid, int reason)
+void echo_on_player_connection(int playerid, int reason)
 {
 	int nicklen;
 	struct playerdata *pd = pdata[playerid];
@@ -89,8 +89,7 @@ void echo_on_player_connection(AMX *amx, int playerid, int reason)
 	}
 }
 
-void echo_on_game_chat_or_action(
-	AMX *amx, int t, int playerid, char *text)
+void echo_on_game_chat_or_action(int t, int playerid, char *text)
 {
 	int nicklen, msglen;
 	struct playerdata *pd = pdata[playerid];
@@ -121,7 +120,7 @@ Send text in buf4096 using SendClientToAll after sanitizing.
 Currently only replaces % characters to # characters.
 */
 static
-void echo_sendclientmessage_buf4096_filtered(AMX *amx)
+void echo_sendclientmessage_buf4096_filtered()
 {
 	cell *b = buf4096;
 
@@ -138,7 +137,7 @@ void echo_sendclientmessage_buf4096_filtered(AMX *amx)
 static const char *msg_bridge_up = "IRC bridge is up";
 static const char *msg_bridge_down = "IRC bridge is down";
 
-void echo_on_receive(AMX *amx, cell socket_handle, cell data_a,
+void echo_on_receive(cell socket_handle, cell data_a,
 		     char *data, int len)
 {
 	if (socket_handle == socket_in && len >= 4 &&
@@ -208,7 +207,7 @@ void echo_on_receive(AMX *amx, cell socket_handle, cell data_a,
 			amx_SetUString(b,
 				data + 9 + nicklen,
 				(msglen + 1) * sizeof(cell));
-			echo_sendclientmessage_buf4096_filtered(amx);
+			echo_sendclientmessage_buf4096_filtered();
 			break;
 		}
 		case PACK_PLAYER_CONNECTION:
@@ -247,7 +246,7 @@ void echo_on_receive(AMX *amx, cell socket_handle, cell data_a,
 			amx_SetUString(buf4096, buf, b - buf + 1);
 			amx_SetUString(buf4096 + (b - buf), data + 8,
 				(nicklen + 1) * sizeof(cell));
-			echo_sendclientmessage_buf4096_filtered(amx);
+			echo_sendclientmessage_buf4096_filtered();
 			break;
 		}
 		}

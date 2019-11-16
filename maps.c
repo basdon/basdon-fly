@@ -15,10 +15,10 @@
 #pragma pack(push,1)
 struct OBJECT {
 	int model;
-	cell x, y, z, rx, ry, rz, drawdistance;
+	float x, y, z, rx, ry, rz, drawdistance;
 };
 struct REMOVEDOBJECT {
-	cell model, x, y, z, radius;
+	float model, x, y, z, radius;
 };
 #pragma pack(pop)
 
@@ -92,11 +92,6 @@ int maps_load_from_file(struct MAP *map)
 			}
 			/* as per spec */
 			remobj->model = -remobj->model;
-			/*coordinates are kept as cells to use as params as is*/
-			remobj->x = amx_ftoc(remobj->x);
-			remobj->y = amx_ftoc(remobj->y);
-			remobj->z = amx_ftoc(remobj->z);
-			remobj->radius = amx_ftoc(remobj->radius);
 			remobj++;
 			numremovedobjects++;
 		}
@@ -117,15 +112,8 @@ int maps_load_from_file(struct MAP *map)
 				goto corrupted;
 			}
 		}
-		/*coordinates are kept as cells to use as params as is*/
-		obj->x = amx_ftoc(obj->x);
-		obj->y = amx_ftoc(obj->y);
-		obj->z = amx_ftoc(obj->z);
-		obj->rx = amx_ftoc(obj->rx);
-		obj->ry = amx_ftoc(obj->ry);
-		obj->rz = amx_ftoc(obj->rz);
-		obj->drawdistance = amx_ftoc(obj->drawdistance);
-		obj->drawdistance = amx_ftoc(forceddrawdistance);
+		/*TODO: this forceddrawdistance thing*/
+		obj->drawdistance = forceddrawdistance;
 		obj++;
 	} while (obj - map->objects < 900);
 allread:
@@ -140,13 +128,13 @@ exitzero:
 	return 0;
 }
 
-void maps_load_from_db(AMX *amx)
+void maps_load_from_db()
 {
 	char q[] =
-		"SELECT id,filename,midx,midy,radi,rado FROM map "
+		"SELECT filename,id,midx,midy,radi,rado FROM map "
 		"LEFT JOIN apt ON map.ap=apt.i "
 		"WHERE apt.e=1 OR apt.e IS NULL";
-	cell cacheid, rowcount;
+	int cacheid, rowcount, *f = nc_params + 2;
 	struct MAP *map, *m;
 	const struct MAP *end;
 
@@ -157,24 +145,28 @@ void maps_load_from_db(AMX *amx)
 	}
 
 	amx_SetUString(buf4096, q, sizeof(q));
-	NC_mysql_query_(buf4096a, &cacheid);
-	NC_cache_get_row_count_(&rowcount);
+	cacheid = NC_mysql_query(buf4096a);
+	rowcount = NC_cache_get_row_count();
 	nummaps = rowcount;
 	if (rowcount) {
 		maps = malloc(nummaps * sizeof(struct MAP));
+		nc_params[3] = buf32a;
 		while (rowcount--) {
 			map = maps + rowcount;
-			NC_cache_get_field_int(rowcount, 0, (cell*) &map->id);
-			NC_cache_get_field_str(rowcount, 1, buf32a);
+			NC_PARS(3);
+			nc_params[1] = rowcount;
+			*f = 0; NC(n_cache_get_field_s);
 			amx_GetUString(map->name, buf32, sizeof(map->name));
 			if (!maps_load_from_file(map)) {
 				map->id = -1;
 				continue;
 			}
-			NC_cache_get_field_flt(rowcount, 2, map->x);
-			NC_cache_get_field_flt(rowcount, 3, map->y);
-			NC_cache_get_field_flt(rowcount, 4, map->radius_in_sq);
-			NC_cache_get_field_flt(rowcount, 5, map->radius_out_sq);
+			NC_PARS(2);
+			map->id = (*f = 1, NC(n_cache_get_field_i));
+			map->x = (*f = 2, NC(n_cache_get_field_f));
+			map->y = (*f = 3, NC(n_cache_get_field_f));
+			map->radius_in_sq = (*f = 4, NC(n_cache_get_field_f));
+			map->radius_out_sq = (*f = 5, NC(n_cache_get_field_f));
 			map->radius_in_sq *= map->radius_in_sq;
 			map->radius_out_sq *= map->radius_out_sq;
 		}
@@ -201,24 +193,24 @@ void maps_load_from_db(AMX *amx)
 Creates all objects in given map for the given player.
 */
 static
-void maps_stream_in_for_player(AMX *amx, int playerid, struct MAP *map)
+void maps_stream_in_for_player(int playerid, struct MAP *map)
 {
 	const int mapid = map->id;
-	int *player_object_map_id = object_map_id[playerid];
+	int *player_object_map_id = object_map_id[playerid], objectid;
 	struct OBJECT *obj = map->objects, *end = obj + map->numobjects;
 
-	nc_params[0] = 9;
+	NC_PARS(9);
 	nc_params[1] = playerid;
 	while (obj != end) {
 		memcpy(nc_params + 2, obj, sizeof(cell) * 8);
-		NC(n_CreatePlayerObject);
-		if (nc_result == INVALID_OBJECT_ID) {
+		objectid = NC(n_CreatePlayerObject);
+		if (objectid == INVALID_OBJECT_ID) {
 			logprintf(
 				"obj limit hit while streaming map %s",
 				map->name);
 			break;
 		}
-		player_object_map_id[nc_result] = mapid;
+		player_object_map_id[objectid] = mapid;
 		obj++;
 	}
 }
@@ -227,13 +219,13 @@ void maps_stream_in_for_player(AMX *amx, int playerid, struct MAP *map)
 Deletes all the objects from given map for the given player.
 */
 static
-void maps_stream_out_for_player(AMX *amx, int playerid, struct MAP *map)
+void maps_stream_out_for_player(int playerid, struct MAP *map)
 {
 	const int mapid = map->id;
 	int *start = object_map_id[playerid], *player_object_map_id = start;
 	const int *end = object_map_id[playerid] + MAX_OBJECTS + 1;
 
-	nc_params[0] = 2;
+	NC_PARS(2);
 	nc_params[1] = playerid;
 	while (player_object_map_id != end) {
 		if (*player_object_map_id == mapid) {
@@ -245,7 +237,7 @@ void maps_stream_out_for_player(AMX *amx, int playerid, struct MAP *map)
 	}
 }
 
-void maps_stream_for_player(AMX *amx, int playerid, struct vec3 pos)
+void maps_stream_for_player(int playerid, struct vec3 pos)
 {
 	float dx, dy, dist;
 	struct MAP *map = maps + nummaps;
@@ -257,7 +249,7 @@ void maps_stream_for_player(AMX *amx, int playerid, struct vec3 pos)
 		if (map->streamstatus[playerid]) {
 			if (dist > map->radius_out_sq) {
 				map->streamstatus[playerid] = 0;
-				maps_stream_out_for_player(amx, playerid, map);
+				maps_stream_out_for_player(playerid, map);
 #ifdef MAPS_LOG_STREAMING
 				logprintf("map %s streamed out for %d",
 					map->name,
@@ -267,7 +259,7 @@ void maps_stream_for_player(AMX *amx, int playerid, struct vec3 pos)
 		} else  {
 			if (dist < map->radius_in_sq) {
 				map->streamstatus[playerid] = 1;
-				maps_stream_in_for_player(amx, playerid, map);
+				maps_stream_in_for_player(playerid, map);
 #ifdef MAPS_LOG_STREAMING
 				logprintf("map %s streamed in for %d",
 					map->name,
@@ -278,12 +270,12 @@ void maps_stream_for_player(AMX *amx, int playerid, struct vec3 pos)
 	}
 }
 
-void maps_process_tick(AMX *amx)
+void maps_process_tick()
 {
 	static int currentplayeridx = 0;
 	int increment = 1 + playercount / 10;
 	int playerid;
-	struct vec3 pos;
+	struct vec3 ppos;
 
 	if (playercount > 0) {
 		while (increment--) {
@@ -291,16 +283,13 @@ void maps_process_tick(AMX *amx)
 				currentplayeridx = 0;
 			}
 			playerid = players[currentplayeridx];
-			NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
-			pos.x = amx_ctof(*buf32);
-			pos.y = amx_ctof(*buf64);
-			pos.z = amx_ctof(*buf144);
-			maps_stream_for_player(amx, playerid, pos);
+			common_GetPlayerPos(playerid, &ppos);
+			maps_stream_for_player(playerid, ppos);
 		}
 	}
 }
 
-void maps_on_player_connect(AMX *amx, int playerid)
+void maps_on_player_connect(int playerid)
 {
 	struct REMOVEDOBJECT *r = removedobjects + numremovedobjects;
 

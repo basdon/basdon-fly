@@ -15,9 +15,12 @@ int spawned[MAX_PLAYERS];
 /* native B_Validate(maxplayers, buf4096[], buf144[], buf64[], buf32[],
                      buf32_1[], emptystring, underscorestring) */
 static
-cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
+cell AMX_NATIVE_CALL B_Validate(AMX *local_amx, cell *params)
 {
-	int i;
+	int i, sleep;
+
+	amx = local_amx;
+
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		playeronlineflag[i] = 0;
 	}
@@ -43,14 +46,14 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 	fbuf144 = (float*) buf144;
 	fbuf4096 = (float*) buf4096;
 
-	if (!natives_find(amx) || !publics_find(amx)) {
+	if (!natives_find() || !publics_find()) {
 		return 0;
 	}
 
 	amx_SetUString(buf144, "sleep", 6);
-	NC_GetConsoleVarAsInt(buf144a);
-	if (nc_result != 5) {
-		logprintf("ERR: sleep value %d should be 5", nc_result);
+	sleep = NC_GetConsoleVarAsInt(buf144a);
+	if (sleep != 5) {
+		logprintf("ERR: sleep value %d should be 5", sleep);
 		return 0;
 	}
 
@@ -62,7 +65,6 @@ cell AMX_NATIVE_CALL B_Validate(AMX *amx, cell *params)
 		return 0;
 	}
 
-	gamemode_amx = amx;
 	return MAX_PLAYERS;
 }
 
@@ -75,8 +77,8 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 	char inputtext[128];
 	cell *addr;
 
-	if (anticheat_flood(amx, playerid, AC_FLOOD_AMOUNT_DIALOG) ||
-		!dialog_on_response(amx, playerid, dialogid))
+	if (anticheat_flood(playerid, AC_FLOOD_AMOUNT_DIALOG) ||
+		!dialog_on_response(playerid, dialogid))
 	{
 		return 0;
 	}
@@ -85,13 +87,13 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 
 	switch (dialogid) {
 	case DIALOG_SPAWN_SELECTION:
-		spawn_on_dialog_response(amx, playerid, response, listitem);
+		spawn_on_dialog_response(playerid, response, listitem);
 		return 1;
 	case DIALOG_PREFERENCES:
-		prefs_on_dialog_response(amx, playerid, response, listitem);
+		prefs_on_dialog_response(playerid, response, listitem);
 		return 1;
 	case DIALOG_AIRPORT_NEAREST:
-		airport_list_dialog_response(amx, playerid, response, listitem);
+		airport_list_dialog_response(playerid, response, listitem);
 		return 1;
 	}
 	return 1;
@@ -103,11 +105,11 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 {
 	missions_freepoints(); /*call this before airports_destroy!*/
 	airports_destroy();
-	echo_dispose(amx);
-	heartbeat_end_session(amx);
-	missions_destroy_tracker_socket(amx);
+	echo_dispose();
+	heartbeat_end_session();
+	missions_destroy_tracker_socket();
 	spawn_dispose();
-	while (veh_commit_next_vehicle_odo_to_db(amx));
+	while (veh_commit_next_vehicle_odo_to_db());
 	return 1;
 }
 
@@ -121,17 +123,17 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 
 	memset(spawned, 0, sizeof(spawned));
 
-	airports_init(amx);
-	class_init(amx);
-	maps_load_from_db(amx);
-	missions_create_tracker_socket(amx);
-	missions_init(amx);
-	echo_init(amx);
-	heartbeat_create_session(amx);
-	panel_on_gamemode_init(amx);
-	spawn_init(amx); /*MUST run after airports_init*/
-	timecyc_init(amx);
-	veh_create_global_textdraws(amx);
+	airports_init();
+	class_init();
+	maps_load_from_db();
+	missions_create_tracker_socket();
+	missions_init();
+	echo_init();
+	heartbeat_create_session();
+	panel_on_gamemode_init();
+	spawn_init(); /*MUST run after airports_init*/
+	timecyc_init();
+	veh_create_global_textdraws();
 
 	printf("OnGameModeInit: %ldms\n", time_timestamp() - t);
 
@@ -145,7 +147,7 @@ static
 cell AMX_NATIVE_CALL B_OnMysqlResponse(AMX *amx, cell *params)
 {
 	/*TODO: maybe I shouldn't be doing it like this*/
-	((mysql_cb) params[1])(amx, (void*) params[2]);
+	((mysql_cb) params[1])((void*) params[2]);
 	return 1;
 }
 
@@ -170,7 +172,7 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 	/*TODO: remove cmd_hash (make it a static func)*/
 	hash = cmd_hash(cmdtext);
 
-	if (cmd_check(amx, playerid, hash, cmdtext)) {
+	if (cmd_check(playerid, hash, cmdtext)) {
 		return 1;
 	}
 
@@ -192,25 +194,25 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 
 	_cc[playerid]++;
 
-	pdata_init_player(amx, playerid);
+	pdata_init_player(playerid);
 
 	playeronlineflag[playerid] = 1;
 	loggedstatus[playerid] = LOGGED_NO;
 	kickdelay[playerid] = 0;
 	temp_afk[playerid] = 0;
 
-	class_on_player_connect(amx, playerid);
-	echo_on_player_connection(amx, playerid, 3);
-	dialog_on_player_connect(amx, playerid);
-	maps_on_player_connect(amx, playerid);
-	missions_on_player_connect(amx, playerid);
-	money_set(amx, playerid, 0);
-	panel_on_player_connect(amx, playerid);
+	class_on_player_connect(playerid);
+	echo_on_player_connection(playerid, 3);
+	dialog_on_player_connect(playerid);
+	maps_on_player_connect(playerid);
+	missions_on_player_connect(playerid);
+	money_set(playerid, 0);
+	panel_on_player_connect(playerid);
 	pm_on_player_connect(playerid);
 	prefs_on_player_connect(playerid);
 	timecyc_on_player_connect(playerid);
-	veh_create_player_textdraws(amx, playerid);
-	zones_on_player_connect(amx, playerid);
+	veh_create_player_textdraws(playerid);
+	zones_on_player_connect(playerid);
 
 	for (i = 0; i < playercount; ){
 		if (players[i] == playerid) {
@@ -230,10 +232,10 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 
 	spawned[playerid] = 0;
 
-	missions_on_player_death(amx, playerid);
-	spawn_prespawn(amx, playerid);
-	timecyc_on_player_death(amx, playerid);
-	zones_hide_text(amx, playerid);
+	missions_on_player_death(playerid);
+	spawn_prespawn(playerid);
+	timecyc_on_player_death(playerid);
+	zones_hide_text(playerid);
 	return 1;
 }
 
@@ -245,10 +247,10 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	int i;
 
 	airport_on_player_disconnect(playerid);
-	echo_on_player_connection(amx, playerid, reason);
-	dialog_on_player_disconnect(amx, playerid);
+	echo_on_player_connection(playerid, reason);
+	dialog_on_player_disconnect(playerid);
 	maps_on_player_disconnect(playerid);
-	missions_on_player_disconnect(amx, playerid);
+	missions_on_player_disconnect(playerid);
 	panel_remove_panel_player(playerid);
 	pm_on_player_disconnect(playerid);
 
@@ -272,7 +274,7 @@ cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 	const int playerid = params[1], vehicleid = params[2];
 	const int ispassenger = params[3];
 
-	veh_on_player_enter_vehicle(amx, playerid, vehicleid, ispassenger);
+	veh_on_player_enter_vehicle(playerid, vehicleid, ispassenger);
 
 	return 1;
 }
@@ -283,8 +285,8 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
 {
 	const int playerid = params[1], classid = params[2];
 
-	class_on_player_request_class(amx, playerid, classid);
-	timecyc_on_player_request_class(amx, playerid);
+	class_on_player_request_class(playerid, classid);
+	timecyc_on_player_request_class(playerid);
 	return 1;
 }
 
@@ -294,8 +296,8 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
 
-	if (class_on_player_request_spawn(amx, playerid)) {
-		spawn_prespawn(amx, playerid);
+	if (class_on_player_request_spawn(playerid)) {
+		spawn_prespawn(playerid);
 		return 1;
 	}
 
@@ -311,11 +313,11 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 
 	spawned[playerid] = 1;
 
-	common_GetPlayerPos(amx, playerid, &pos);
-	maps_stream_for_player(amx, playerid, pos);
-	spawn_on_player_spawn(amx, playerid);
-	veh_update_service_point_mapicons(amx, playerid, pos.x, pos.y);
-	zones_on_player_spawn(amx, playerid, pos);
+	common_GetPlayerPos(playerid, &pos);
+	maps_stream_for_player(playerid, pos);
+	spawn_on_player_spawn(playerid);
+	veh_update_service_point_mapicons(playerid, pos.x, pos.y);
+	zones_on_player_spawn(playerid, pos);
 	return 1;
 }
 
@@ -326,8 +328,8 @@ cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 	const int playerid = params[1];
 	const int newstate = params[2], oldstate = params[3];
 
-	panel_on_player_state_change(amx, playerid, oldstate, newstate);
-	veh_on_player_state_change(amx, playerid, oldstate, newstate);
+	panel_on_player_state_change(playerid, oldstate, newstate);
+	veh_on_player_state_change(playerid, oldstate, newstate);
 	return 1;
 }
 
@@ -339,14 +341,14 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 	char buf[144];
 	const int playerid = params[1];
 
-	if (!anticheat_on_player_text(amx, playerid)) {
+	if (!anticheat_on_player_text(playerid)) {
 		return 0;
 	}
 
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(buf, addr, sizeof(buf));
 
-	echo_on_game_chat_or_action(amx, 0, playerid, buf);
+	echo_on_game_chat_or_action(0, playerid, buf);
 	return 1;
 }
 
@@ -356,7 +358,7 @@ cell AMX_NATIVE_CALL B_OnPlayerUpdate(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
 
-	timecyc_on_player_update(amx, playerid);
+	timecyc_on_player_update(playerid);
 	return 1;
 }
 
@@ -369,7 +371,7 @@ cell AMX_NATIVE_CALL B_OnRecv(AMX *amx, cell *params)
 	cell *addr;
 
 	amx_GetAddr(amx, params[2], &addr);
-	echo_on_receive(amx, socket_handle, params[2], (char*) addr, len);
+	echo_on_receive(socket_handle, params[2], (char*) addr, len);
 	return 1;
 }
 
@@ -382,7 +384,7 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 
 	/*keep this first*/
 	amx_GetAddr(amx, params[1], &addr);
-	*addr = vehicleid = veh_OnVehicleSpawn(amx, *addr);
+	*addr = vehicleid = veh_OnVehicleSpawn(*addr);
 
 	nav_reset_for_vehicle(vehicleid);
 

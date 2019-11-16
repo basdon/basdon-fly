@@ -32,9 +32,9 @@ void airports_destroy()
 	airports = NULL;
 }
 
-void airports_init(AMX *amx)
+void airports_init()
 {
-	int cacheid, rowcount, lastap, i;
+	int cacheid, rowcount, lastap, i, *field = nc_params + 2;
 	struct AIRPORT *ap;
 	struct RUNWAY *rnw;
 
@@ -53,13 +53,14 @@ void airports_init(AMX *amx)
 	amx_SetUString(buf144,
 		"SELECT c,e,n,b,x,y,z,flags "
 		"FROM apt ORDER BY i ASC", 144);
-	NC_mysql_query_(buf144a, &cacheid);
-	NC_cache_get_row_count_(&rowcount);
+	cacheid = NC_mysql_query(buf144a);
+	rowcount = NC_cache_get_row_count();
 	if (!rowcount) {
 		goto noairports;
 	}
 	numairports = rowcount;
 	airports = malloc(sizeof(struct AIRPORT) * numairports);
+	nc_params[3] = buf144a;
 	while (rowcount--) {
 		ap = airports + rowcount;
 		ap->runways = ap->runwaysend = NULL;
@@ -67,62 +68,72 @@ void airports_init(AMX *amx)
 		ap->num_missionpts = 0;
 		ap->missiontypes = 0;
 		ap->id = rowcount;
-		NC_cache_get_field_str(rowcount, 0, buf144a);
+		NC_PARS(3);
+		nc_params[1] = rowcount;
+		*field = 0; NC(n_cache_get_field_s);
 		amx_GetUString(ap->code, buf144, sizeof(ap->code));
-		NC_cache_get_field_int(rowcount, 1, &nc_result);
-		ap->enabled = (char) nc_result;
-		NC_cache_get_field_str(rowcount, 2, buf144a);
+		*field = 1; NC(n_cache_get_field_s);
 		amx_GetUString(ap->name, buf144, sizeof(ap->name));
-		NC_cache_get_field_str(rowcount, 3, buf144a);
+		*field = 2; NC(n_cache_get_field_s);
 		amx_GetUString(ap->beacon, buf144, sizeof(ap->beacon));
-		NC_cache_get_field_flt(rowcount, 4, ap->pos.x);
-		NC_cache_get_field_flt(rowcount, 5, ap->pos.y);
-		NC_cache_get_field_flt(rowcount, 6, ap->pos.z);
-		NC_cache_get_field_int(rowcount, 7, &ap->flags);
+		NC_PARS(2);
+		ap->pos.x = (*field = 4, NC(n_cache_get_field_f));
+		ap->pos.y = (*field = 5, NC(n_cache_get_field_f));
+		ap->pos.z = (*field = 6, NC(n_cache_get_field_f));
+		ap->flags = (*field = 7, NC(n_cache_get_field_i));
 	}
 noairports:
 	NC_cache_delete(cacheid);
 
 	/*load runways*/
 	amx_SetUString(buf144,
-		"SELECT a,h,s,x,y,z,n,type "
+		"SELECT a,x,y,z,n,type,h,s "
 		"FROM rnw "
 		/*"WHERE type="EQ(RUNWAY_TYPE_RUNWAY)" "*/
 		"ORDER BY a ASC", 144);
-	NC_mysql_query_(buf144a, &cacheid);
-	NC_cache_get_row_count_(&rowcount);
+	cacheid = NC_mysql_query(buf144a);
+	rowcount = NC_cache_get_row_count();
 	if (!rowcount) {
 		goto norunways;
 	}
 	rowcount--;
 	while (rowcount >= 0) {
-		NC_cache_get_field_int(rowcount, 0, &lastap);
+		lastap = NC_cache_get_field_int(rowcount, 0);
 		ap = airports + lastap;
 		/*look 'ahead' to see how many runways there are*/
 		i = rowcount - 1;
+		nc_params[2] = 1;
 		while (i > 0) {
 			i--;
-			NC_cache_get_field_int(i, 0, &nc_result);
-			if (nc_result != lastap) {
+			nc_params[1] = i;
+			if (NC(n_cache_get_field_i) != lastap) {
 				break;
 			}
 		}
+
 		/*gottem*/
 		i = rowcount - i;
 		ap->runways = rnw = malloc(sizeof(struct RUNWAY) * i);
 		ap->runwaysend = ap->runways + i;
+		nc_params[1] = rowcount;
+		nc_params[3] = buf144a;
 		while (i--) {
-			NC_cache_get_field_flt(rowcount, 1, rnw->heading);
+			NC_PARS(2);
+			nc_params[1] = rowcount;
+			rnw->pos.x = (*field = 1, NC(n_cache_get_field_f));
+			rnw->pos.y = (*field = 2, NC(n_cache_get_field_f));
+			rnw->pos.z = (*field = 3, NC(n_cache_get_field_f));
+			rnw->nav = (*field = 4, NC(n_cache_get_field_i));
+			rnw->type = (*field = 5, NC(n_cache_get_field_i));
+
+			rnw->heading = (*field = 6, NC(n_cache_get_field_f));
 			rnw->headingr = rnw->heading * DEG_TO_RAD;
+
+			NC_PARS(3);
+			*field = 7; NC(n_cache_get_field_s);
 			sprintf(rnw->id, "%02.0f", rnw->heading / 10.0f);
-			NC_cache_get_field_str(rowcount, 2, buf32a);
 			rnw->id[2] = (char) buf32[0];
 			rnw->id[3] = 0;
-			NC_cache_get_field_flt(rowcount, 3, rnw->pos.x);
-			NC_cache_get_field_flt(rowcount, 4, rnw->pos.y);
-			NC_cache_get_field_flt(rowcount, 5, rnw->pos.z);
-			NC_cache_get_field_int(rowcount, 6, &rnw->nav);
-			NC_cache_get_field_int(rowcount, 7, &rnw->type);
 			rnw++;
 			rowcount--;
 		}
@@ -179,7 +190,7 @@ int airport_cmd_nearest(CMDPARAMS)
 	struct AIRPORT **map;
 	struct APREF *aps = malloc(sizeof(struct APREF) * numairports);
 
-	common_GetPlayerPos(amx, playerid, &playerpos);
+	common_GetPlayerPos(playerid, &playerpos);
 
 	while (i < numairports) {
 		if (airports[i].enabled) {
@@ -216,7 +227,6 @@ int airport_cmd_nearest(CMDPARAMS)
 	}
 
 	dialog_NC_ShowPlayerDialog(
-		amx,
 		playerid,
 		DIALOG_AIRPORT_NEAREST,
 		DIALOG_STYLE_TABLIST,
@@ -246,7 +256,6 @@ int airport_cmd_beacons(CMDPARAMS)
 		strcpy(buf, " None!");
 	}
 	dialog_NC_ShowPlayerDialog(
-		amx,
 		playerid,
 		DIALOG_DUMMY,
 		DIALOG_STYLE_MSGBOX,
@@ -266,7 +275,7 @@ void airport_on_player_disconnect(int playerid)
 	}
 }
 
-void airport_list_dialog_response(AMX *amx, int playerid, int response, int idx)
+void airport_list_dialog_response(int playerid, int response, int idx)
 {
 	struct AIRPORT *ap;
 	struct RUNWAY *rnw;
@@ -309,7 +318,6 @@ void airport_list_dialog_response(AMX *amx, int playerid, int response, int idx)
 	b += sprintf(b, "\nHelipads:\t%d", helipads);
 
 	dialog_NC_ShowPlayerDialog(
-		amx,
 		playerid,
 		DIALOG_DUMMY,
 		DIALOG_STYLE_MSGBOX,

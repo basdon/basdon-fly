@@ -31,22 +31,20 @@ static const char *protips[] = {
 };
 static const int numprotips = sizeof(protips)/sizeof(protips[0]);
 
-void protips_timed_broadcast(AMX *amx)
+void protips_timed_broadcast()
 {
 	static int delay = 0;
 
 	if (delay++ == 8) {
 		delay = 0;
-		NC_random(numprotips);
-		amx_SetUString(buf144, protips[nc_result], 144);
+		amx_SetUString(buf144, protips[NC_random(numprotips)], 144);
 		NC_SendClientMessageToAll(COL_INFO_LIGHT, buf144a);
 	}
 }
 
 int protips_cmd_protip(CMDPARAMS)
 {
-	NC_random(numprotips);
-	amx_SetUString(buf144, protips[nc_result], 144);
+	amx_SetUString(buf144, protips[NC_random(numprotips)], 144);
 	NC_SendClientMessage(playerid, COL_INFO_LIGHT, buf144a);
 	return 1;
 }

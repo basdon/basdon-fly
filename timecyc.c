@@ -400,13 +400,13 @@ void timecyc_make_weather_msg(const char* type, int weather)
 Sets the weather, it will be interpolated for players.
 */
 static
-void timecyc_set_weather(AMX *amx, int newweather)
+void timecyc_set_weather(int newweather)
 {
 	int playerid, i;
 
 	if (weather.locked != newweather) {
 		weather.locked = newweather;
-		nc_params[0] = 2;
+		NC_PARS(2);
 		nc_params[2] = newweather;
 		i = playercount;
 		while (i--) {
@@ -427,12 +427,11 @@ Makes a query to db to update weather stats, except right after initializing.
 @param unused unused param just to make the signature correct for timer callback
 */
 static
-int timecyc_next_weather(AMX *amx, void *unused)
+int timecyc_next_weather(void *unused)
 {
-	int newweather, timerdeviation;
+	int newweather;
 
-	NC_random_(NEXT_WEATHER_POSSIBILITIES, &newweather);
-	newweather = weather_mapping[newweather];
+	newweather = weather_mapping[NC_random(NEXT_WEATHER_POSSIBILITIES)];
 	if (weather.current != WEATHER_INITIAL) {
 		sprintf(cbuf4096,
 			"INSERT INTO wth(w,l,t) "
@@ -442,14 +441,13 @@ int timecyc_next_weather(AMX *amx, void *unused)
 		amx_SetUString(buf144, cbuf4096, 144);
 		NC_mysql_tquery_nocb(buf144a);
 	}
-	timecyc_set_weather(amx, newweather);
+	timecyc_set_weather(newweather);
 	timecyc_make_weather_msg("forecast", newweather);
-	missions_on_weather_changed(amx, newweather);
+	missions_on_weather_changed(newweather);
 	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessageToAll(COL_METAR, buf144a);
 
-	NC_random_(2, &timerdeviation);
-	return timerdeviation + WEATHER_TIMER_INTERVAL;
+	return WEATHER_TIMER_INTERVAL + NC_random(WEATHER_TIMER_DEVIATION);
 }
 
 int timecyc_cmd_metar(CMDPARAMS)
@@ -466,8 +464,7 @@ void timecyc_init(AMX *amx)
 	time_m = 59;
 	weather.current = WEATHER_INITIAL;
 
-	timecyc_next_weather(amx, NULL);
-	timer_set(WEATHER_TIMER_INTERVAL, timecyc_next_weather, NULL);
+	timer_set(timecyc_next_weather(NULL), timecyc_next_weather, NULL);
 
 #ifdef TIMECYC_OVERLAY_CLOCK
 	clocktext = TextDrawCreate(608.0, 22.0, "12:73")
@@ -509,7 +506,7 @@ Weather interpolation:
   - now current and upcoming are 16, locked is 0
 */
 static
-void timecyc_sync(AMX *amx, int playerid)
+void timecyc_sync(int playerid)
 {
 	/*Set current weather to all.
 	Setting the weather without having a clock changes all three of
@@ -548,19 +545,19 @@ void timecyc_on_player_connect(int playerid)
 	timecycstate[playerid] = SYNC_STATE_NONE;
 }
 
-void timecyc_on_player_death(AMX *amx, int playerid)
+void timecyc_on_player_death(int playerid)
 {
 	NC_TogglePlayerClock(playerid, 0);
 }
 
-void timecyc_on_player_request_class(AMX *amx, int playerid)
+void timecyc_on_player_request_class(int playerid)
 {
 	NC_TogglePlayerClock(playerid, 0);
 	NC_SetPlayerTime(playerid, 12, 0);
 	NC_SetPlayerWeather(playerid, 1);
 }
 
-void timecyc_on_player_update(AMX *amx, int playerid)
+void timecyc_on_player_update(int playerid)
 {
 	switch (timecycstate[playerid]) {
 	case SYNC_STATE_TIME1:
@@ -577,15 +574,15 @@ void timecyc_on_player_update(AMX *amx, int playerid)
 		} else {
 			/*TODO: remove this after a while maybe*/
 			logprintf("[timecyc] it happened");
-			timecyc_sync(amx, playerid);
+			timecyc_sync(playerid);
 		}
 		break;
 	}
 }
 
-void timecyc_on_player_was_afk(AMX *amx, int playerid)
+void timecyc_on_player_was_afk(int playerid)
 {
-	timecyc_sync(amx, playerid);
+	timecyc_sync(playerid);
 }
 
 void timecyc_reset()
@@ -593,7 +590,7 @@ void timecyc_reset()
 	lasttime = time_timestamp();
 }
 
-void timecyc_tick(AMX *amx)
+void timecyc_tick()
 {
 	unsigned long nowtime;
 	int i, playerid;
@@ -614,7 +611,7 @@ void timecyc_tick(AMX *amx)
 						timecycstate[playerid] ==
 							SYNC_STATE_NONE)
 					{
-						timecyc_sync(amx, playerid);
+						timecyc_sync(playerid);
 					}
 				}
 			}
@@ -627,21 +624,21 @@ void timecyc_tick(AMX *amx)
 				time_h = 0;
 			}
 			/*timer1m*/
-			echo_init(amx);
-			protips_timed_broadcast(amx);
+			echo_init();
+			protips_timed_broadcast();
 timer30s:
 			/*timer30s*/
-			heartbeat_timed_update(amx);
+			heartbeat_timed_update();
 		}
 		/*timer1000*/
-		veh_timed_1s_update(amx);
-		veh_timed_panel_update(amx);
-		zones_update_for_all(amx);
+		veh_timed_1s_update();
+		veh_timed_panel_update();
+		zones_update_for_all();
 		if ((time_m % 5) == 0) {
 			/*timer5000*/
 			anticheat_decrease_infractions();
-			dialog_pop_queue(amx);
-			veh_commit_next_vehicle_odo_to_db(amx);
+			dialog_pop_queue();
+			veh_commit_next_vehicle_odo_to_db();
 		}
 	}
 }
@@ -653,7 +650,7 @@ int timecyc_cmd_dev_fweather(CMDPARAMS)
 
 	if (cmd_get_int_param(cmdtext, &parseidx, &w)) {
 		weather.current = weather.locked = weather.upcoming = w;
-		timecyc_sync(amx, playerid);
+		timecyc_sync(playerid);
 		amx_SetUString(buf144, "forced weather", 144);
 		NC_SendClientMessageToAll(-1, buf144a);
 	} else {
@@ -668,7 +665,7 @@ int timecyc_cmd_dev_tweather(CMDPARAMS)
 	int w;
 
 	if (cmd_get_int_param(cmdtext, &parseidx, &w)) {
-		timecyc_set_weather(amx, w);
+		timecyc_set_weather(w);
 		amx_SetUString(buf144, "changing weather", 144);
 		NC_SendClientMessageToAll(-1, buf144a);
 	} else {
@@ -699,7 +696,7 @@ int timecyc_cmd_dev_nweather(CMDPARAMS)
 {
 	amx_SetUString(buf144, "changing weather", 144);
 	NC_SendClientMessageToAll(-1, buf144a);
-	timecyc_next_weather(amx, NULL);
+	timecyc_next_weather(NULL);
 	return 1;
 }
 #endif /*DEV*/

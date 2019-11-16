@@ -24,13 +24,13 @@ we've showed.
 */
 static int showndialog[MAX_PLAYERS];
 
-void dialog_on_player_connect(AMX *amx, int playerid)
+void dialog_on_player_connect(int playerid)
 {
 	dialogqueue[playerid] = NULL;
 	transaction[playerid] = 0;
 	showndialog[playerid] = 0;
 	/*to hide any open dialogs, send with any negative id*/
-	nc_params[0] = 7;
+	NC_PARS(7);
 	nc_params[1] = playerid;
 	nc_params[2] = -1;
 	nc_params[3] = DIALOG_STYLE_MSGBOX;
@@ -41,7 +41,7 @@ void dialog_on_player_connect(AMX *amx, int playerid)
 	NC(n_ShowPlayerDialog_);
 }
 
-void dialog_on_player_disconnect(AMX *amx, int playerid)
+void dialog_on_player_disconnect(int playerid)
 {
 	struct DIALOGDATA *next;
 	while (dialogqueue[playerid] != NULL) {
@@ -51,7 +51,7 @@ void dialog_on_player_disconnect(AMX *amx, int playerid)
 	}
 }
 
-int dialog_on_response(AMX *amx, int playerid, int dialogid)
+int dialog_on_response(int playerid, int dialogid)
 {
 	int ret = 1;
 	transaction[playerid] = TRANSACTION_NONE;
@@ -60,7 +60,7 @@ int dialog_on_response(AMX *amx, int playerid, int dialogid)
 			"expected %d got %d",
 			showndialog[playerid],
 			dialogid);
-		anticheat_log(amx, playerid, AC_WRONG_DIALOGID, cbuf144);
+		anticheat_log(playerid, AC_WRONG_DIALOGID, cbuf144);
 		ret = 0;
 	}
 	showndialog[playerid] = 0;
@@ -119,7 +119,7 @@ void dialog_queue(
 }
 
 int dialog_NC_ShowPlayerDialog(
-	AMX *amx, int playerid, int dialogid, int style,
+	int playerid, int dialogid, int style,
 	char *caption, char *info,
 	char *button1, char *button2, int transactionid)
 {
@@ -143,7 +143,7 @@ int dialog_NC_ShowPlayerDialog(
 	amx_SetUString(buf64, caption, LIMIT_DIALOG_CAPTION);
 	amx_SetUString(buf4096, info, LIMIT_DIALOG_INFO);
 	amx_SetUString(buf32, button1, LIMIT_DIALOG_BUTTON);
-	nc_params[0] = 7;
+	NC_PARS(7);
 	nc_params[1] = playerid;
 	nc_params[2] = dialogid;
 	nc_params[3] = style;
@@ -156,11 +156,10 @@ int dialog_NC_ShowPlayerDialog(
 	} else {
 		nc_params[7] = emptystringa;
 	}
-	NC(n_ShowPlayerDialog_);
-	return nc_result;
+	return NC(n_ShowPlayerDialog_);
 }
 
-void dialog_pop_queue(AMX *amx)
+void dialog_pop_queue()
 {
 	struct DIALOGDATA *q;
 	int playerid, i;
@@ -173,7 +172,7 @@ void dialog_pop_queue(AMX *amx)
 		{
 			dialogqueue[playerid] = q->next;
 			dialog_NC_ShowPlayerDialog(
-				amx, playerid, q->dialogid, q->style,
+						playerid, q->dialogid, q->style,
 				q->caption, q->info, q->button1, q->button2,
 				q->transactionid);
 			free(q);
@@ -196,7 +195,7 @@ cell AMX_NATIVE_CALL Dialog_ShowPlayerDialog(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[7], &addr);
 	amx_GetUString(b32_1, addr, 32);
 	*addr = dialog_NC_ShowPlayerDialog(
-		amx, params[1], params[2], params[3],
+		params[1], params[2], params[3],
 		b64, b4096, b32, b32_1,
 		params[0] < 8 ? -1 : params[8]);
 	free(b4096);

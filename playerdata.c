@@ -15,12 +15,16 @@ void pdata_init()
 	}
 }
 
-void pdata_update_name(AMX *amx, int playerid)
+void pdata_update_name(int playerid)
 {
 	struct playerdata *pd = pdata[playerid];
 	char t, *nin = pd->name, *nout = pd->normname;
 
-	NC_GetPlayerName_(playerid, buf144a, MAX_PLAYER_NAME + 1, &pd->namelen);
+	NC_PARS(3);
+	nc_params[1] = playerid;
+	nc_params[2] = buf144a;
+	nc_params[3] = MAX_PLAYER_NAME + 1;
+	pd->namelen = (char) NC(n_GetPlayerName);
 	amx_GetUString(pd->name, buf144, MAX_PLAYER_NAME + 1);
 	/*update normname*/
 	do {
@@ -32,7 +36,7 @@ void pdata_update_name(AMX *amx, int playerid)
 	} while (t);
 }
 
-void pdata_init_player(AMX *amx, int playerid)
+void pdata_init_player(int playerid)
 {
 	struct playerdata *pd;
 
@@ -41,7 +45,7 @@ void pdata_init_player(AMX *amx, int playerid)
 	}
 	NC_GetPlayerIp(playerid, buf144a, sizeof(pd->ip));
 	amx_GetUString(pd->ip, buf144, sizeof(pd->ip));
-	pdata_update_name(amx, playerid);
+	pdata_update_name(playerid);
 	pd->userid = -1;
 	pd->groups = GROUP_GUEST;
 }
@@ -111,6 +115,6 @@ cell AMX_NATIVE_CALL PlayerData_UpdateGroup(AMX *amx, cell *params)
 /* native PlayerData_UpdateName(playerid, name[], namelen) */
 cell AMX_NATIVE_CALL PlayerData_UpdateName(AMX *amx, cell *params)
 {
-	pdata_update_name(amx, params[1]);
+	pdata_update_name(params[1]);
 	return 1;
 }

@@ -4,5 +4,5 @@
 /**
 Call from timer 1m.
 */
-void protips_timed_broadcast(AMX*);
+void protips_timed_broadcast();
 int protips_cmd_protip(CMDPARAMS);

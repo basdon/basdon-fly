@@ -75,24 +75,24 @@ int zones_is_in_zone(struct vec3 pos, struct ZONE *zone)
 		zone->z1 <= pos.z && pos.z <= zone->z2;
 }
 
-void zones_on_player_connect(AMX *amx, int playerid)
+void zones_on_player_connect(int playerid)
 {
 	lastzoneindex[playerid] = lastzoneid[playerid] = -1;
 	lastregionid[playerid] = ZONE_INVALID;
 
-	nc_params[0] = 4;
+	NC_PARS(4);
 	nc_params[1] = playerid;
-	*((float*) (nc_params + 2)) = 88.0f; /*x*/
-	*((float*) (nc_params + 3)) = 320.0f; /*y*/
+	nc_paramf[2] = 88.0f; /*x*/
+	nc_paramf[3] = 320.0f; /*y*/
 	nc_params[4] = emptystringa; /*txt*/
-	NC_(n_CreatePlayerTextDraw, ptextid + playerid);
+	ptextid[playerid] = NC(n_CreatePlayerTextDraw);
 
 	nc_params[2] = ptextid[playerid];
-	*((float*) (nc_params + 3)) = 0.3f; /*x*/
-	*((float*) (nc_params + 4)) = 1.0f; /*y*/
+	nc_paramf[3] = 0.3f; /*x*/
+	nc_paramf[4] = 1.0f; /*y*/
 	NC(n_PlayerTextDrawLetterSize);
 
-	nc_params[0] = 3;
+	NC_PARS(3);
 	nc_params[3] = TD_ALIGNMENT_CENTER;
 	NC(n_PlayerTextDrawAlignment);
 
@@ -108,18 +108,18 @@ void zones_on_player_connect(AMX *amx, int playerid)
 	NC(n_PlayerTextDrawColor);
 }
 
-void zones_on_player_spawn(AMX *amx, int playerid, struct vec3 pos)
+void zones_on_player_spawn(int playerid, struct vec3 pos)
 {
 	NC_PlayerTextDrawShow(playerid, ptextid[playerid]);
-	zones_update(amx, playerid, pos);
+	zones_update(playerid, pos);
 }
 
-void zones_hide_text(AMX *amx, int playerid)
+void zones_hide_text(int playerid)
 {
 	NC_PlayerTextDrawHide(playerid, ptextid[playerid]);
 }
 
-void zones_update(AMX *amx, int playerid, struct vec3 pos)
+void zones_update(int playerid, struct vec3 pos)
 {
 	struct REGION *r = regions, *rmax = regions + regioncount;
 	struct ZONE *pz;
@@ -174,7 +174,7 @@ gotcha:
 	}
 }
 
-void zones_update_for_all(AMX *amx)
+void zones_update_for_all()
 {
 	int idx, playerid;
 	struct vec3 pos;
@@ -184,8 +184,8 @@ void zones_update_for_all(AMX *amx)
 		playerid = players[idx];
 		PC_REMOVEME_isafk(playerid);
 		if (!pc_result) {
-			common_GetPlayerPos(amx, playerid, &pos);
-			zones_update(amx, playerid, pos);
+			common_GetPlayerPos(playerid, &pos);
+			zones_update(playerid, pos);
 		}
 	}
 }
@@ -209,8 +209,8 @@ int zones_cmd_loc(CMDPARAMS)
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
-	common_GetPlayerPos(amx, playerid, &pos);
-	zones_update(amx, playerid, pos);
+	common_GetPlayerPos(playerid, &pos);
+	zones_update(playerid, pos);
 
 	b = buf;
 	b += sprintf(buf, "%s(%d) is located in ",
@@ -219,13 +219,13 @@ int zones_cmd_loc(CMDPARAMS)
 		b += sprintf(b, "%s, ", zonenames[lastzoneid[playerid]]);
 	}
 	b += sprintf(b, "%s ", zonenames[lastregionid[playerid]]);
-	NC_GetPlayerVehicleID_(playerid, &vehicleid);
+	vehicleid = NC_GetPlayerVehicleID(playerid);
 	if (vehicleid) {
-		NC_GetVehicleModel_(vehicleid, &model);
+		model = NC_GetVehicleModel(vehicleid);
 		NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
-		vx = *((float*) buf32);
-		vy = *((float*) buf64);
-		vz = *((float*) buf144);
+		vx = *fbuf32;
+		vy = *fbuf64;
+		vz = *fbuf144;
 		sprintf(b, "travelling at %.0f KPH in a %s (%.0f FT)",
 			VEL_TO_KPH_VAL * sqrt(vx * vx + vy * vy + vz * vz),
 			vehnames[model - 400],

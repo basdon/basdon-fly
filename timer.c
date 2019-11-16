@@ -46,7 +46,7 @@ void timer_set(int interval, timer_cb cb, void *data)
 	numtimers++;
 }
 
-void timer_tick(AMX *amx)
+void timer_tick()
 {
 	struct TIMER *t;
 	int i, elapsed_time, new_time;
@@ -55,7 +55,7 @@ void timer_tick(AMX *amx)
 	for (i = 0, t = timers; i < numtimers; i++, t++) {
 		t->time_left -= elapsed_time;
 		if (t->time_left <= 0) {
-			new_time = t->callback(amx, t->data);
+			new_time = t->callback(t->data);
 			if (new_time > 0) {
 				t->time_left += new_time;
 			} else {

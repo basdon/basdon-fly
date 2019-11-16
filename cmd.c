@@ -139,7 +139,7 @@ struct COMMAND {
 	int hash;
 	const char *cmd;
 	const int groups;
-	int (*handler)(AMX*, const int, const char*, int);
+	int (*handler)(const int, const char*, int);
 };
 
 #define IN_CMD
@@ -312,7 +312,7 @@ void cmd_init()
 /*
 Checks incoming command and calls handler if one found and group matched.
 */
-int cmd_check(AMX *amx, const int playerid, const int hash, const char *cmdtext)
+int cmd_check(const int playerid, const int hash, const char *cmdtext)
 {
 	struct COMMAND *c = cmds;
 	int parseidx;
@@ -322,7 +322,7 @@ int cmd_check(AMX *amx, const int playerid, const int hash, const char *cmdtext)
 			(pdata[playerid]->groups & c->groups) &&
 			cmd_is(cmdtext, c->cmd, &parseidx))
 		{
-			return c->handler(amx, playerid, cmdtext, parseidx);
+			return c->handler(playerid, cmdtext, parseidx);
 		}
 		c++;
 	}

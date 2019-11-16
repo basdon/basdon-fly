@@ -80,7 +80,7 @@ cell AMX_NATIVE_CALL Ac_FormatLog(AMX *amx, cell *params)
 Kicks and broadcasts kickmessage when needed. Does not log.
 */
 static
-void anticheat_kick(AMX *amx, int playerid, char *reason)
+void anticheat_kick(int playerid, char *reason)
 {
 	natives_NC_Kick(playerid);
 	sprintf(cbuf4096,
@@ -98,12 +98,12 @@ Adds infraction value, kicking the player if they exceeded the max value.
 @param type infraction type, one of AC_IF_ constants.
 */
 static
-void anticheat_infraction(AMX *amx, int playerid, int type)
+void anticheat_infraction(int playerid, int type)
 {
 	struct INFRACTIONDATA d = infractiondata[type];
 
 	if ((infractionvalue[type][playerid] += d.increment) >= d.maxvalue) {
-		anticheat_kick(amx, playerid, d.kickreason);
+		anticheat_kick(playerid, d.kickreason);
 	}
 }
 
@@ -140,13 +140,13 @@ void anticheat_decrease_infractions()
 	}
 }
 
-int anticheat_flood(AMX *amx, int playerid, int amount)
+int anticheat_flood(int playerid, int amount)
 {
 	static char *EXCESS_FLOOD = "excess flood";
 
 	if ((floodcount[playerid] += amount) >= AC_FLOOD_LIMIT) {
-		anticheat_log(amx, playerid, AC_FLOOD, EXCESS_FLOOD);
-		anticheat_kick(amx, playerid, EXCESS_FLOOD);
+		anticheat_log(playerid, AC_FLOOD, EXCESS_FLOOD);
+		anticheat_kick(playerid, EXCESS_FLOOD);
 		return 1;
 	}
 	return 0;
@@ -162,7 +162,7 @@ void anticheat_on_player_connect(int playerid)
 	floodcount[playerid] = 0;
 }
 
-void anticheat_log(AMX *amx, int playerid, int eventtype, char *info)
+void anticheat_log(int playerid, int eventtype, char *info)
 {
 	char buf[512], *b = buf;
 
@@ -192,35 +192,35 @@ void anticheat_log(AMX *amx, int playerid, int eventtype, char *info)
 	NC_mysql_tquery_nocb(buf4096a);
 }
 
-float anticheat_NC_GetVehicleHealth(AMX *amx, int vehicleid)
+float anticheat_NC_GetVehicleHealth(int vehicleid)
 {
 	float hp;
 	int playerid;
 
-	nc_params[0] = 2;
+	NC_PARS(2);
 	nc_params[1] = vehicleid;
 	nc_params[2] = buf144a;
-	NC(n_GetVehicleHealth);
+	NC(n_GetVehicleHealth_);
 	hp = *fbuf144;
 	if (hp != hp) {
-		playerid = common_find_vehicle_driver(amx, vehicleid);
+		playerid = common_find_vehicle_driver(vehicleid);
 		if (playerid == INVALID_PLAYER_ID) {
 			goto resethp;
 		}
-		anticheat_log(amx, playerid, AC_VEH_HP_NAN, "NaN vehicle hp");
+		anticheat_log(playerid, AC_VEH_HP_NAN, "NaN vehicle hp");
 	} else if (hp > 1000.0f) {
-		playerid = common_find_vehicle_driver(amx, vehicleid);
+		playerid = common_find_vehicle_driver(vehicleid);
 		if (playerid == INVALID_PLAYER_ID) {
 			goto resethp;
 		}
 		sprintf(cbuf144, "vehicle hp %.4f", hp);
-		anticheat_log(amx, playerid, AC_VEH_HP_HIGH, cbuf144);
+		anticheat_log(playerid, AC_VEH_HP_HIGH, cbuf144);
 	} else if (hp < 0.0f) {
 		return 0.0f;
 	} else {
 		return hp;
 	}
-	common_crash_player(amx, playerid);
+	common_crash_player(playerid);
 	sprintf(cbuf4096,
 		"%s[%d] was kicked by system (invalid vehicle hp)",
 		pdata[playerid]->name,
@@ -229,28 +229,28 @@ float anticheat_NC_GetVehicleHealth(AMX *amx, int vehicleid)
 	NC_SendClientMessageToAll(COL_WARN, buf144a);
 	natives_NC_Kick(playerid);
 resethp:
-	nc_params[0] = 2;
+	NC_PARS(2);
 	nc_params[1] = vehicleid;
 	nc_paramf[2] = 1000.0f;
 	NC(n_SetVehicleHealth);
 	return 1000.0f;
 }
 
-void anticheat_disallowed_vehicle_1s(AMX *amx, int playerid)
+void anticheat_disallowed_vehicle_1s(int playerid)
 {
-	anticheat_log(amx, playerid, AC_UNAUTH_VEHICLE_ACCESS,
+	anticheat_log(playerid, AC_UNAUTH_VEHICLE_ACCESS,
 		"unauthorized vehicle access");
-	anticheat_infraction(amx, playerid, AC_IF_DISALLOWED_VEHICLE);
+	anticheat_infraction(playerid, AC_IF_DISALLOWED_VEHICLE);
 }
 
 void anticheat_on_player_enter_vehicle(
-	AMX *amx, int playerid, int vehicleid, int ispassenger)
+	int playerid, int vehicleid, int ispassenger)
 {
 	if (!ispassenger) {
-		nc_params[0] = 2;
+		NC_PARS(2);
 		nc_params[1] = vehicleid;
 		nc_params[2] = buf32a;
-		NC(n_GetVehicleHealth);
+		NC(n_GetVehicleHealth_);
 		if (*fbuf32 != *fbuf32 || *fbuf32 < 0.0f || 1000.0f < *fbuf32) {
 			*fbuf32 = 1000.0f;
 			NC(n_SetVehicleHealth);
@@ -258,11 +258,11 @@ void anticheat_on_player_enter_vehicle(
 	}
 }
 
-int anticheat_on_player_text(AMX *amx, int playerid)
+int anticheat_on_player_text(int playerid)
 {
 	static const char *DONTSPAM = "Don't spam!";
 
-	if (anticheat_flood(amx, playerid, AC_FLOOD_AMOUNT_CHAT)) {
+	if (anticheat_flood(playerid, AC_FLOOD_AMOUNT_CHAT)) {
 		return 0;
 	}
 	if (floodcount[playerid] > AC_FLOOD_WARN_THRESHOLD) {

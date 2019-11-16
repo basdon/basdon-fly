@@ -27,9 +27,10 @@ Elements may be NULL is associated value in numspawns is zero.
 */
 static char *spawn_list_text[NUMCLASSES];
 
-void spawn_init(AMX *amx)
+void spawn_init()
 {
 	int querycacheid, row, rows, ap, klass = NUMCLASSES;
+	int *field = nc_params + 2;
 	struct vec4 *sp;
 	char buf[144], *txt;
 
@@ -40,8 +41,8 @@ void spawn_init(AMX *amx)
 			"JOIN apt ON spw.ap=apt.i "
 			"WHERE apt.e AND (class&%d)", CLASSMAPPING[klass]);
 		amx_SetUString(buf144, buf, 144);
-		NC_mysql_query_(buf144a, &querycacheid);
-		NC_cache_get_row_count_(&rows);
+		querycacheid = NC_mysql_query(buf144a);
+		rows = NC_cache_get_row_count();
 		numspawns[klass] = rows;
 		if (!rows) {
 			spawns[klass] = NULL;
@@ -53,12 +54,14 @@ void spawn_init(AMX *amx)
 		spawns[klass] = sp;
 		spawn_list_text[klass] = txt;
 		row = 0;
+		NC_PARS(2);
 		while (row != rows) {
-			NC_cache_get_field_int(row, 0, &ap);
-			NC_cache_get_field_flt(row, 1, sp->coords.x);
-			NC_cache_get_field_flt(row, 2, sp->coords.y);
-			NC_cache_get_field_flt(row, 3, sp->coords.z);
-			NC_cache_get_field_flt(row, 4, sp->r);
+			nc_params[1] = row;
+			ap = (*field = 0, NC(n_cache_get_field_i));
+			sp->coords.x = (*field = 1, NC(n_cache_get_field_f));
+			sp->coords.y = (*field = 2, NC(n_cache_get_field_f));
+			sp->coords.z = (*field = 3, NC(n_cache_get_field_f));
+			sp->r = (*field = 4, NC(n_cache_get_field_f));
 			txt += sprintf(txt, "%s\n", (airports + ap)->name);
 			sp++;
 			row++;
@@ -88,16 +91,16 @@ void spawn_dispose()
 	}
 }
 
-void spawn_on_dialog_response(AMX *amx, int playerid, int response, int idx)
+void spawn_on_dialog_response(int playerid, int response, int idx)
 {
 	int klass = classidx[playerid];
 
 	if (response && 0 <= idx && idx < numspawns[klass]) {
-		common_tp_player(amx, playerid, spawns[klass][idx]);
+		common_tp_player(playerid, spawns[klass][idx]);
 	}
 }
 
-void spawn_prespawn(AMX *amx, int playerid)
+void spawn_prespawn(int playerid)
 {
 	int spawnidx, klass = classidx[playerid];
 
@@ -105,10 +108,10 @@ void spawn_prespawn(AMX *amx, int playerid)
 	/*if no spawns, take first spawn of pilot class*/
 	case 0: klass = 0;
 	case 1: spawnidx = 0; break;
-	default: NC_random_(numspawns[klass], &spawnidx); break;
+	default: spawnidx = NC_random(numspawns[klass]); break;
 	}
 
-	nc_params[0] = 13;
+	NC_PARS(13);
 	nc_params[1] = playerid;
 	nc_params[2] = NO_TEAM;
 	nc_params[3] = CLASS_SKINS[klass];
@@ -120,14 +123,14 @@ void spawn_prespawn(AMX *amx, int playerid)
 	NC(n_SetSpawnInfo);
 }
 
-void spawn_on_player_spawn(AMX *amx, int playerid)
+void spawn_on_player_spawn(int playerid)
 {
 	int klass = classidx[playerid];
 
 	/*TODO: spawn preference*/
 	if (numspawns[klass] > 1) {
 		dialog_NC_ShowPlayerDialog(
-			amx, playerid, DIALOG_SPAWN_SELECTION,
+			playerid, DIALOG_SPAWN_SELECTION,
 			DIALOG_STYLE_LIST, "Spawn selection",
 			spawn_list_text[klass],
 			"Spawn", "Cancel", -1);

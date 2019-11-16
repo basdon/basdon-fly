@@ -28,15 +28,13 @@ void pdata_init();
 /**
 Initializes player data for a player.
 
-@param amx abstract machine
 @param playerid playerid for which to initialize their data
 */
-void pdata_init_player(AMX*, int playerid);
+void pdata_init_player(int playerid);
 /**
 Refetches the player's name and stores it in the plugin.
 Will crash the server if pdata memory hasn't been allocated.
 
-@param amx abstract machine
 @param playerid player of which to refetch the name
 */
-void pdata_update_name(AMX*, int playerid);
+void pdata_update_name(int playerid);

@@ -10,7 +10,7 @@ The session id of the currently running server.
 */
 static int sessionid = -1;
 
-void heartbeat_timed_update(AMX *amx)
+void heartbeat_timed_update()
 {
 	if (sessionid != -1) {
 		sprintf(cbuf4096,
@@ -23,18 +23,20 @@ void heartbeat_timed_update(AMX *amx)
 	}
 }
 
-void heartbeat_create_session(AMX *amx)
+void heartbeat_create_session()
 {
+	int cacheid;
+
 	amx_SetUString(buf144,
 		"INSERT INTO heartbeat(tstart,tlast) "
 		"VALUES(UNIX_TIMESTAMP(),UNIX_TIMESTAMP())",
 		144);
-	NC_mysql_query_(buf144a, buf4096);
-	NC_cache_insert_id_(&sessionid);
-	NC_cache_delete(*buf4096);
+	cacheid = NC_mysql_query(buf144a);
+	sessionid = NC_cache_insert_id();
+	NC_cache_delete(cacheid);
 }
 
-void heartbeat_end_session(AMX *amx)
+void heartbeat_end_session()
 {
 	if (sessionid != -1) {
 		sprintf(cbuf4096,

@@ -29,7 +29,7 @@ Call when a player is in a vehicle it can not be in.
 Should be called at most once per second, player will be kicked when it happens
 too often.
 */
-void anticheat_disallowed_vehicle_1s(AMX*, int playerid);
+void anticheat_disallowed_vehicle_1s(int playerid);
 /**
 Add given flood amount to given player's flood value.
 
@@ -37,22 +37,26 @@ Player will be kicked on excess flood.
 
 @returns non-zero if player is kicked as result
 */
-int anticheat_flood(AMX*, int playerid, int amount);
+int anticheat_flood(int playerid, int amount);
 /**
 Log some anticheat related thing.
 
 @param eventtype one of AC_ definitions
 @param info not escaped into db query
 */
-void anticheat_log(AMX*, int playerid, int eventtype, char *info);
+void anticheat_log(int playerid, int eventtype, char *info);
 void anticheat_on_player_connect(int playerid);
+/**
+Stops the player from entering a vehicle they shouldn't be in.
+*/
+void anticheat_on_player_enter_vehicle(int pid, int vid, int ispassenger);
 /**
 @return zero if the message should be stopped from being sent to players.
 */
-int anticheat_on_player_text(AMX*, int playerid);
+int anticheat_on_player_text(int playerid);
 /**
 Gets vehicle hp, after checking for unnacceptable values and handling offenders.
 
 Only works on valid vehicles!
 */
-float anticheat_NC_GetVehicleHealth(AMX*, int vehicleid);
+float anticheat_NC_GetVehicleHealth(int vehicleid);

@@ -90,7 +90,7 @@ TODO: move this somewhere else.
 */
 float playerodoKM[MAX_PLAYERS];
 
-void veh_on_player_connect(AMX *amx, int playerid)
+void veh_on_player_connect(int playerid)
 {
 	struct PLAYERSERVICEPOINT *psvp = player_servicepoints[playerid];
 	int i;
@@ -335,7 +335,7 @@ Make given vehicle consumer fuel. Should be called every second.
 @param throttle whether the player is holding the throttle down
 */
 static
-void veh_consume_fuel(AMX *amx, int playerid, int vehicleid, int throttle,
+void veh_consume_fuel(int playerid, int vehicleid, int throttle,
 	struct VEHICLEPARAMS *vparams, struct dbvehicle *veh)
 {
 	const float consumptionmp = throttle ? 1.0f : 0.2f;
@@ -352,7 +352,7 @@ void veh_consume_fuel(AMX *amx, int playerid, int vehicleid, int throttle,
 
 	if (lastpercentage > 0.0f && newpercentage == 0.0f) {
 		vparams->engine = 0;
-		common_SetVehicleParamsEx(amx, vehicleid, vparams);
+		common_SetVehicleParamsEx(vehicleid, vparams);
 		buf = (char*) MSG_FUEL_0;
 	} else if (lastpercentage > 0.05f && newpercentage <= 0.05f) {
 		buf = (char*) MSG_FUEL_5;
@@ -676,7 +676,7 @@ Prevent player from entering or being in vehicle and send them a message.
 If player is already inside, this will instantly eject them.
 */
 static
-void veh_disallow_player_in_vehicle(AMX *amx, int playerid, struct dbvehicle *v)
+void veh_disallow_player_in_vehicle(int playerid, struct dbvehicle *v)
 {
 	/*when player is entering, this stops them*/
 	/*when player is already in, this should instantly eject the player*/
@@ -696,51 +696,50 @@ int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh)
 			veh->owneruserid == pdata[playerid]->userid);
 }
 
-void veh_on_player_enter_vehicle(
-	AMX *amx, int playerid, int vehicleid, int ispassenger)
+void veh_on_player_enter_vehicle(int playerid, int vehicleid, int ispassenger)
 {
 	struct dbvehicle *veh;
 
 	veh = gamevehicles[vehicleid].dbvehicle;
 	if (!ispassenger && !veh_is_player_allowed_in_vehicle(playerid, veh)) {
-		veh_disallow_player_in_vehicle(amx, playerid, veh);
+		veh_disallow_player_in_vehicle(playerid, veh);
 	}
 }
 
-void veh_on_player_now_driving(AMX *amx, int playerid, int vehicleid)
+void veh_on_player_now_driving(int playerid, int vehicleid)
 {
 	struct dbvehicle *veh;
 	int reqenginestate;
 
 	lastvehicle[playerid] = vehicleid;
-	common_GetVehiclePos(amx, vehicleid, &lastvpos[playerid]);
+	common_GetVehiclePos(vehicleid, &lastvpos[playerid]);
 
 	reqenginestate =
 		(veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
 		veh->fuel > 0.0f;
-	common_set_vehicle_engine(amx, vehicleid, reqenginestate);
+	common_set_vehicle_engine(vehicleid, reqenginestate);
 	if (!reqenginestate) {
 		amx_SetUString(buf144, WARN"This vehicle is out of fuel!", 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	}
 }
 
-void veh_update_service_point_mapicons(AMX *amx, int playerid, float x, float y)
+void veh_update_service_point_mapicons(int playerid, float x, float y)
 {
 	static const char* SVP_TXT = "Service Point\n/repair - /refuel";
 
 	struct servicepoint *svp;
-	struct PLAYERSERVICEPOINT *psvps = player_servicepoints[playerid];
+	struct PLAYERSERVICEPOINT *psvps = player_servicepoints[playerid], *sp;
 	float dx, dy;
 	int i, selectedpsvp;
 
 	/* remove old, now out of range ones */
+	NC_PARS(2);
 	for (i = 0; i < MAX_SERVICE_MAP_ICONS; i++) {
 		if ((svp = psvps[i].svp) != NULL) {
 			dx = svp->x - x;
 			dy = svp->y - y;
 			if (dx * dx + dy * dy > SERVICE_MAP_DISTANCE_SQ) {
-				nc_params[0] = 2;
 				nc_params[1] = playerid;
 				nc_params[2] = psvps[i].textid;
 				NC(n_DeletePlayer3DTextLabel);
@@ -770,7 +769,8 @@ void veh_update_service_point_mapicons(AMX *amx, int playerid, float x, float y)
 				/*no more map icon slots*/
 				break;
 			}
-			nc_params[0] = 7;
+			sp = psvps + selectedpsvp;
+			NC_PARS(7);
 			nc_params[1] = playerid;
 			nc_params[2] = selectedpsvp;
 			nc_paramf[3] = svp->x;
@@ -780,7 +780,7 @@ void veh_update_service_point_mapicons(AMX *amx, int playerid, float x, float y)
 			nc_params[7] = MAPICON_GLOBAL;
 			NC(n_SetPlayerMapIcon);
 			amx_SetUString(buf144, SVP_TXT, 144);
-			nc_params[0] = 10;
+			NC_PARS(10);
 			nc_params[2] = buf144a;
 			nc_params[6] = nc_params[5];
 			nc_params[5] = nc_params[4];
@@ -789,16 +789,15 @@ void veh_update_service_point_mapicons(AMX *amx, int playerid, float x, float y)
 			nc_paramf[7] = 50.0f;
 			nc_params[8] = nc_params[9] = INVALID_PLAYER_ID;
 			nc_params[10] = 1;
-			NC(n_CreatePlayer3DTextLabel);
-			(psvps + selectedpsvp)->svp = svp;
-			(psvps + selectedpsvp)->textid = nc_result;
+			sp->textid = NC(n_CreatePlayer3DTextLabel);
+			sp->svp = svp;
 		}
 alreadyshown:
 		;
 	}
 }
 
-int veh_commit_next_vehicle_odo_to_db(AMX *amx)
+int veh_commit_next_vehicle_odo_to_db()
 {
 	struct dbvehicle *veh;
 	struct vehnode *tofree;
@@ -820,7 +819,7 @@ int veh_commit_next_vehicle_odo_to_db(AMX *amx)
 	return 0;
 }
 
-void veh_update_odo(AMX *amx, int playerid, int vehicleid, struct vec3 pos)
+void veh_update_odo(int playerid, int vehicleid, struct vec3 pos)
 {
 	struct vehnode *vuq;
 	struct dbvehicle *veh;
@@ -870,7 +869,7 @@ Called when player is still in same in air vehicle as last in update.
 */
 static
 void veh_timed_1s_update_a(
-	AMX *amx, int playerid, int vehicleid, struct vec3 *vpos,
+	int playerid, int vehicleid, struct vec3 *vpos,
 	struct dbvehicle *v)
 {
 	struct VEHICLEPARAMS vparams;
@@ -880,71 +879,71 @@ void veh_timed_1s_update_a(
 	float hp;
 	int afk = temp_afk[playerid];
 
-	common_GetVehicleParamsEx(amx, vehicleid, &vparams);
+	common_GetVehicleParamsEx(vehicleid, &vparams);
 
 	if (!afk) {
-		common_GetVehicleRotationQuat(amx, vehicleid, &vrot);
-		missions_update_satisfaction(amx, playerid, vehicleid, &vrot);
+		common_GetVehicleRotationQuat(vehicleid, &vrot);
+		missions_update_satisfaction(playerid, vehicleid, &vrot);
 
 		if (vparams.engine) {
-			common_GetPlayerKeys(amx, playerid, &pkeys);
-			veh_consume_fuel(amx, playerid, vehicleid,
+			common_GetPlayerKeys(playerid, &pkeys);
+			veh_consume_fuel(playerid, vehicleid,
 				pkeys.keys & KEY_SPRINT, &vparams, v);
 		}
 	}
 
 	if (missions_get_stage(playerid) == MISSION_STAGE_FLIGHT) {
-		hp = anticheat_NC_GetVehicleHealth(amx, vehicleid);
-		common_GetVehicleVelocity(amx, vehicleid, &vvel);
+		hp = anticheat_NC_GetVehicleHealth(vehicleid);
+		common_GetVehicleVelocity(vehicleid, &vvel);
 		missions_send_tracker_data(
-			amx, playerid, vehicleid, hp,
+			playerid, vehicleid, hp,
 			vpos, &vvel, afk, vparams.engine);
 	}
 }
 
-void veh_timed_1s_update(AMX *amx)
+void veh_timed_1s_update()
 {
 	struct dbvehicle *v;
 	struct vec3 vpos, *ppos = &vpos;
-	int playerid, vehicleid, n = playercount;
+	int playerid, vehicleid, vehiclemodel, n = playercount;
 
 	while (n--) {
 		playerid = players[n];
 
-		common_GetPlayerPos(amx, playerid, ppos);
-		veh_update_service_point_mapicons(
-			amx,
-			playerid,
-			ppos->x,
-			ppos->y);
+		common_GetPlayerPos(playerid, ppos);
+		veh_update_service_point_mapicons(playerid, ppos->x, ppos->y);
 
-		nc_params[0] = 1;
+		NC_PARS(1);
 		nc_params[1] = playerid;
-		NC_(n_GetPlayerVehicleID, &vehicleid);
+		vehicleid = NC(n_GetPlayerVehicleID);
 		if (!vehicleid) {
 			continue;
 		}
-		NC(n_GetPlayerVehicleSeat);
-		if (nc_result != 0) {
+		if (NC(n_GetPlayerVehicleSeat) != 0) {
 			continue;
 		}
 
 		v = gamevehicles[vehicleid].dbvehicle;
 		if (!veh_is_player_allowed_in_vehicle(playerid, v)) {
-			veh_disallow_player_in_vehicle(amx, playerid, v);
-			anticheat_disallowed_vehicle_1s(amx, playerid);
+			veh_disallow_player_in_vehicle(playerid, v);
+			anticheat_disallowed_vehicle_1s(playerid);
 			continue;
+		}
+
+		if (v != NULL) {
+			vehiclemodel = v->model;
+		} else {
+			vehiclemodel = NC_GetVehicleModel(vehicleid);
 		}
 
 
 		if (vehicleid == lastvehicle[playerid]) {
-			common_GetVehiclePos(amx, vehicleid, &vpos);
-			veh_update_odo(amx, playerid, vehicleid, vpos);
+			common_GetVehiclePos(vehicleid, &vpos);
+			veh_update_odo(playerid, vehicleid, vpos);
 
-			NC_GetVehicleModel(vehicleid);
-			if (game_is_air_vehicle(nc_result)) {
+			if (game_is_air_vehicle(vehiclemodel)) {
 				veh_timed_1s_update_a(
-					amx, playerid, vehicleid,
+					playerid, vehicleid,
 					&vpos, v);
 			}
 		}
@@ -952,39 +951,38 @@ void veh_timed_1s_update(AMX *amx)
 	}
 }
 
-int veh_NC_CreateVehicle(AMX *amx, int model, float x, float y, float z,
+int veh_NC_CreateVehicle(int model, float x, float y, float z,
 		     float r, int col1, int col2, int respawn_delay,
 		     int addsiren)
 {
 	int vehicleid;
 
-	nc_params[0] = 9;
+	NC_PARS(9);
 	nc_params[1] = model;
-	nc_params[2] = amx_ftoc(x);
-	nc_params[3] = amx_ftoc(y);
-	nc_params[4] = amx_ftoc(z);
-	nc_params[5] = amx_ftoc(r);
+	nc_paramf[2] = x;
+	nc_paramf[3] = y;
+	nc_paramf[4] = z;
+	nc_paramf[5] = r;
 	nc_params[6] = col1;
 	nc_params[7] = col2;
 	nc_params[8] = respawn_delay;
 	nc_params[9] = addsiren;
-	amx_Callback(amx, n_CreateVehicle_, (cell*) &vehicleid, nc_params);
+	vehicleid = NC(n_CreateVehicle_);
 	gamevehicles[vehicleid].dbvehicle = NULL;
 	gamevehicles[vehicleid].reincarnation++;
 	gamevehicles[vehicleid].need_recreation = 0;
 	return vehicleid;
 }
 
-int veh_NC_DestroyVehicle(AMX *amx, int vehicleid)
+int veh_NC_DestroyVehicle(int vehicleid)
 {
 	if (gamevehicles[vehicleid].dbvehicle) {
 		gamevehicles[vehicleid].dbvehicle->spawnedvehicleid = 0;
 		gamevehicles[vehicleid].dbvehicle = NULL;
 	}
-	nc_params[0] = 1;
+	NC_PARS(1);
 	nc_params[1] = vehicleid;
-	amx_Callback(amx, n_DestroyVehicle_, &nc_result, nc_params);
-	return nc_result;
+	return NC(n_DestroyVehicle_);
 }
 
 /**
@@ -992,17 +990,17 @@ Creates a vehicle from a dbvehicle struct.
 Makes sure references from vehicleid to db vehicle are updated.
 */
 static
-int veh_create_from_dbvehicle(AMX *amx, struct dbvehicle *veh)
+int veh_create_from_dbvehicle(struct dbvehicle *veh)
 {
 	int vehicleid = veh_NC_CreateVehicle(
-		amx, veh->model, veh->x, veh->y, veh->z,
+		veh->model, veh->x, veh->y, veh->z,
 		veh->r, veh->col1, veh->col2, VEHICLE_RESPAWN_DELAY, 0);
 	veh->spawnedvehicleid = vehicleid;
 	gamevehicles[vehicleid].dbvehicle = veh;
 	return vehicleid;
 }
 
-int veh_OnVehicleSpawn(AMX *amx, int vehicleid)
+int veh_OnVehicleSpawn(int vehicleid)
 {
 	struct dbvehicle *veh;
 	float min_fuel;
@@ -1011,8 +1009,8 @@ int veh_OnVehicleSpawn(AMX *amx, int vehicleid)
 
 	if (veh) {
 		if (gamevehicles[vehicleid].need_recreation) {
-			veh_NC_DestroyVehicle(amx, vehicleid);
-			vehicleid = veh_create_from_dbvehicle(amx, veh);
+			veh_NC_DestroyVehicle(vehicleid);
+			vehicleid = veh_create_from_dbvehicle(veh);
 			if (vehicleid == INVALID_VEHICLE_ID) {
 				/*expect things to crash*/
 				logprintf("ERR: veh_OnVehicleSpawn: failed "
@@ -1034,14 +1032,14 @@ int veh_OnVehicleSpawn(AMX *amx, int vehicleid)
 Updates vehicle panel for a single player.
 */
 static
-void veh_update_panel_for_player(AMX *amx, int playerid)
+void veh_update_panel_for_player(int playerid)
 {
 	struct dbvehicle *veh;
 	int vehicleid;
 	float odo, hp, fuel;
 	short cache;
 
-	NC_GetPlayerVehicleID_(playerid, &vehicleid);
+	vehicleid = NC_GetPlayerVehicleID(playerid);
 	if (!vehicleid) {
 		return;
 	}
@@ -1055,7 +1053,7 @@ void veh_update_panel_for_player(AMX *amx, int playerid)
 		fuel = odo = 0.0f;
 	}
 
-	hp = anticheat_NC_GetVehicleHealth(amx, vehicleid);
+	hp = anticheat_NC_GetVehicleHealth(vehicleid);
 	hp -= 250.0f;
 	if (hp < 0.0f) {
 		hp = 0.0f;
@@ -1077,7 +1075,7 @@ void veh_update_panel_for_player(AMX *amx, int playerid)
 		}
 	}
 	amx_SetUString(buf144, cbuf64, 64);
-	nc_params[0] = 3;
+	NC_PARS(3);
 	nc_params[1] = playerid;
 	nc_params[2] = ptxt_txt[playerid];
 	nc_params[3] = buf144a;
@@ -1086,26 +1084,26 @@ void veh_update_panel_for_player(AMX *amx, int playerid)
 	cache = (short) (fuel * 100.0f);
 	if (ptxtcache_fl[playerid] != cache) {
 		ptxtcache_fl[playerid] = cache;
-		nc_params[0] = 2;
+		NC_PARS(2);
 		nc_params[1] = playerid;
 		nc_params[2] = ptxt_fl[playerid];
 		NC(n_PlayerTextDrawDestroy);
 
 		buf144[0] = 'i';
 		buf144[1] = 0;
-		nc_params[0] = 4;
+		NC_PARS(4);
 		nc_params[1] = playerid;
 		nc_paramf[2] = 555.0f + (608.0f - 555.0f) * fuel;
 		nc_paramf[3] = 413.0f;
 		nc_params[4] = buf144a;
-		NC_(n_CreatePlayerTextDraw, ptxt_fl + playerid);
+		ptxt_fl[playerid] = NC(n_CreatePlayerTextDraw);
 
 		nc_params[2] = ptxt_fl[playerid];
 		nc_paramf[3] = 0.25f;
 		nc_paramf[4] = 1.0f;
 		NC(n_PlayerTextDrawLetterSize);
 
-		nc_params[0] = 3;
+		NC_PARS(3);
 		nc_params[3] = 0xFF00FFFF;
 		NC(n_PlayerTextDrawColor);
 		NC(n_PlayerTextDrawBackgroundColor);
@@ -1115,33 +1113,33 @@ void veh_update_panel_for_player(AMX *amx, int playerid)
 		nc_params[3] = 2;
 		NC(n_PlayerTextDrawFont);
 
-		nc_params[0] = 2;
+		NC_PARS(2);
 		NC(n_PlayerTextDrawShow);
 	}
 
 	cache = (short) (hp * 100.0f);
 	if (ptxtcache_hp[playerid] != cache) {
 		ptxtcache_hp[playerid] = cache;
-		nc_params[0] = 2;
+		NC_PARS(2);
 		nc_params[1] = playerid;
 		nc_params[2] = ptxt_hp[playerid];
 		NC(n_PlayerTextDrawDestroy);
 
 		buf144[0] = 'i';
 		buf144[1] = 0;
-		nc_params[0] = 4;
+		NC_PARS(4);
 		nc_params[1] = playerid;
 		nc_paramf[2] = 555.0f + (608.0f - 555.0f) * hp;
 		nc_paramf[3] = 422.0f;
 		nc_params[4] = buf144a;
-		NC_(n_CreatePlayerTextDraw, ptxt_hp + playerid);
+		ptxt_hp[playerid] = NC(n_CreatePlayerTextDraw);
 
 		nc_params[2] = ptxt_hp[playerid];
 		nc_paramf[3] = 0.25f;
 		nc_paramf[4] = 1.0f;
 		NC(n_PlayerTextDrawLetterSize);
 
-		nc_params[0] = 3;
+		NC_PARS(3);
 		nc_params[3] = 0xFF00FFFF;
 		NC(n_PlayerTextDrawColor);
 		NC(n_PlayerTextDrawBackgroundColor);
@@ -1151,25 +1149,27 @@ void veh_update_panel_for_player(AMX *amx, int playerid)
 		nc_params[3] = 2;
 		NC(n_PlayerTextDrawFont);
 
-		nc_params[0] = 2;
+		NC_PARS(2);
 		NC(n_PlayerTextDrawShow);
 	}
 }
 
-void veh_on_player_state_change(AMX *amx, int playerid, int from, int to)
+void veh_on_player_state_change(int playerid, int from, int to)
 {
+	int vehicleid;
+
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
 		buf144[0] = '_';
 		buf144[1] = 0;
-		nc_params[0] = 4;
+		NC_PARS(4);
 		nc_params[1] = playerid;
 		nc_paramf[2] = -10.0f;
 		nc_paramf[3] = -10.0f;
 		nc_params[4] = buf144a;
-		NC_(n_CreatePlayerTextDraw, ptxt_hp + playerid);
-		NC_(n_CreatePlayerTextDraw, ptxt_fl + playerid);
+		ptxt_hp[playerid] = NC(n_CreatePlayerTextDraw);
+		ptxt_fl[playerid] = NC(n_CreatePlayerTextDraw);
 
-		nc_params[0] = 2;
+		NC_PARS(2);
 		nc_params[2] = txt_bg;
 		NC(n_TextDrawShowForPlayer);
 		nc_params[2] = ptxt_txt[playerid];
@@ -1178,9 +1178,9 @@ void veh_on_player_state_change(AMX *amx, int playerid, int from, int to)
 		ptxtcache_fl[playerid] = -1;
 		ptxtcache_hp[playerid] = -1;
 
-		veh_update_panel_for_player(amx, playerid);
+		veh_update_panel_for_player(playerid);
 	} else if (ptxt_fl[playerid] != -1 /*if panel active*/) {
-		nc_params[0] = 2;
+		NC_PARS(2);
 		nc_params[1] = playerid;
 		nc_params[2] = txt_bg;
 		NC(n_TextDrawHideForPlayer);
@@ -1199,48 +1199,42 @@ void veh_on_player_state_change(AMX *amx, int playerid, int from, int to)
 	}
 
 	if (to == PLAYER_STATE_DRIVER) {
-		NC_GetPlayerVehicleID(playerid);
-		veh_on_player_now_driving(amx, playerid, nc_result);
+		vehicleid = NC_GetPlayerVehicleID(playerid);
+		veh_on_player_now_driving(playerid, vehicleid);
 	}
 }
 
-void veh_timed_panel_update(AMX *amx)
+void veh_timed_panel_update()
 {
 	int n = playercount;
 
 	while (n--) {
 		if (spawned[players[n]]) {
-			veh_update_panel_for_player(amx, players[n]);
+			veh_update_panel_for_player(players[n]);
 		}
 	}
 }
 
-void veh_create_player_textdraws(AMX *amx, int playerid)
+void veh_create_player_textdraws(int playerid)
 {
-	float *f2, *f3, *f4;
-
 	ptxt_fl[playerid] = ptxt_hp[playerid] = -1;
 
-	f2 = nc_paramf + 2;
-	f3 = nc_paramf + 3;
-	f4 = nc_paramf + 4;
-
 	/*create em first*/
-	nc_params[0] = 4;
+	NC_PARS(4);
 	nc_params[1] = playerid;
-	*f2 = 528.0f;
-	*f3 = 404.0f;
+	nc_paramf[2] = 528.0f;
+	nc_paramf[3] = 404.0f;
 	nc_params[4] = buf144a;
 	SETB144("ODO 00000000~n~_FL i-------i~n~_HP i-------i");
-	NC_(n_CreatePlayerTextDraw, ptxt_txt + playerid);
+	ptxt_txt[playerid] = NC(n_CreatePlayerTextDraw);
 
 	/*letter sizes*/
 	nc_params[2] = ptxt_txt[playerid];
-	*f3 = 0.25f;
-	*f4 = 1.0f;
+	nc_paramf[3] = 0.25f;
+	nc_paramf[4] = 1.0f;
 	NC(n_PlayerTextDrawLetterSize);
 
-	nc_params[0] = 3;
+	NC_PARS(3);
 	/*rest*/
 	nc_params[2] = ptxt_txt[playerid];
 	nc_params[3] = -1;
@@ -1253,28 +1247,22 @@ void veh_create_player_textdraws(AMX *amx, int playerid)
 	NC(n_PlayerTextDrawFont);
 }
 
-void veh_create_global_textdraws(AMX *amx)
+void veh_create_global_textdraws()
 {
-	float *f1, *f2, *f3;
-
-	f1 = nc_paramf + 1;
-	f2 = nc_paramf + 2;
-	f3 = nc_paramf + 3;
-
-	nc_params[0] = 3;
-	*f1 = 570.0f;
-	*f2 = 405.0f;
+	NC_PARS(3);
+	nc_paramf[1] = 570.0f;
+	nc_paramf[2] = 405.0f;
 	nc_params[3] = buf144a;
 	SETB144("~n~~n~~n~");
-	NC_(n_TextDrawCreate, &txt_bg);
+	txt_bg = NC(n_TextDrawCreate);
 	nc_params[1] = txt_bg;
-	*f2 = 0.5f;
-	*f3 = 1.0f;
+	nc_paramf[2] = 0.5f;
+	nc_paramf[3] = 1.0f;
 	NC(n_TextDrawLetterSize);
-	*f2 = 30.0f;
-	*f3 = 90.0f;
+	nc_paramf[2] = 30.0f;
+	nc_paramf[3] = 90.0f;
 	NC(n_TextDrawTextSize);
-	nc_params[0] = 2;
+	NC_PARS(2);
 	nc_params[2] = 0x00000077; /*should be same as PANEL_BG*/
 	NC(n_TextDrawBoxColor);
 	nc_params[2] = 1;

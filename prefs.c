@@ -35,7 +35,7 @@ char *prefs_append_pref(char *buf, char *description, const int state)
 Shows a dialog with preferences which the player can modify.
 */
 static
-void prefs_show_dialog(AMX *amx, int playerid)
+void prefs_show_dialog(int playerid)
 {
 	int p = prefs[playerid];
 	char buf[255], *bp = buf;
@@ -50,7 +50,6 @@ void prefs_show_dialog(AMX *amx, int playerid)
 	*(--bp) = 0;
 
 	dialog_NC_ShowPlayerDialog(
-		amx,
 		playerid,
 		DIALOG_PREFERENCES,
 		DIALOG_STYLE_TABLIST,
@@ -66,18 +65,18 @@ void prefs_on_player_connect(int playerid)
 	prefs[playerid] = DEFAULTPREFS;
 }
 
-void prefs_on_dialog_response(AMX *amx, int playerid, int response, int idx)
+void prefs_on_dialog_response(int playerid, int response, int idx)
 {
 	/*must be same order the calls to prefs_append_pref in
 	prefs_cmd_preferences*/
 	if (response && 0 <= idx && idx <= 3) {
 		prefs[playerid] ^= 1 << idx;
-		prefs_show_dialog(amx, playerid);
+		prefs_show_dialog(playerid);
 	}
 }
 
 int prefs_cmd_preferences(CMDPARAMS)
 {
-	prefs_show_dialog(amx, playerid);
+	prefs_show_dialog(playerid);
 	return 1;
 }

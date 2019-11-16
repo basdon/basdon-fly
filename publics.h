@@ -22,4 +22,4 @@ extern cell pc_result;
 /**
 Finds required exported symbols.
 */
-int publics_find(AMX*);
+int publics_find();

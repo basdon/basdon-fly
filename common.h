@@ -51,7 +51,7 @@ EXPECT_SIZE(struct VEHICLEPARAMS, 7 * sizeof(cell));
 #include "natives.h"
 #include "publics.h"
 
-typedef void (*mysql_cb)(AMX*, void* data);
+typedef void (*mysql_cb)(void* data);
 
 typedef void (*logprintf_t)(char* format, ...);
 
@@ -87,8 +87,6 @@ extern char *cemptystring, *cbuf32, *cbuf32_1, *cbuf64, *cbuf144, *cbuf4096;
 extern char *cunderscorestring;
 /* float pointers to buffers */
 extern float *fbuf32_1, *fbuf32, *fbuf64, *fbuf144, *fbuf4096;
-/* nc parameters as floats */
-extern float *nc_paramf;
 /**
 Connection count per player id. Incremented every time playerid connects.
 
@@ -144,69 +142,69 @@ extern int time_m;
 /**
 Teleport the player to a coordinate, and set facing angle and reset camera.
 */
-void common_tp_player(AMX*, int playerid, struct vec4 pos);
+void common_tp_player(int playerid, struct vec4 pos);
 /**
 Hides game text for given player.
 */
-void common_hide_gametext_for_player(AMX*, int playerid);
+void common_hide_gametext_for_player(int playerid);
 /**
 Try to find the player that is in given seat of given vehicle.
 
 @return player id or INVALID_PLAYER_ID
 */
-int common_find_player_in_vehicle_seat(AMX*, int vehicleid, int seat);
-#define common_find_vehicle_driver(X,Y) \
-	common_find_player_in_vehicle_seat(X,Y,0)
+int common_find_player_in_vehicle_seat(int vehicleid, int seat);
+#define common_find_vehicle_driver(VEHICLEID) \
+	common_find_player_in_vehicle_seat(VEHICLEID,0)
 /**
 Attempt to crash the player.
 */
-void common_crash_player(AMX*, int playerid);
+void common_crash_player(int playerid);
 /**
 Sets the state of the engine for given vehicle id.
 */
-void common_set_vehicle_engine(AMX*, int vehicleid, int enginestatus);
+void common_set_vehicle_engine(int vehicleid, int enginestatus);
 /**
 Alternative for GetPlayerKeys to get it directly into a PLAYERKEYS struct.
 
 Will use buf32.
 */
-void common_GetPlayerKeys(AMX*, int playerid, struct PLAYERKEYS *keys);
+void common_GetPlayerKeys(int playerid, struct PLAYERKEYS *keys);
 /**
 Alternative for GetPlayerPos to get it directly into a vec3 struct.
 
 Will use buf32, buf64, buf144.
 */
-int common_GetPlayerPos(AMX*, int playerid, struct vec3 *pos);
+int common_GetPlayerPos(int playerid, struct vec3 *pos);
 /**
 Gets vehicle params of given vehicle into given VEHICLEPARAMS struct.
 
 Uses buf32.
 */
-int common_GetVehicleParamsEx(AMX*, int vehicleid, struct VEHICLEPARAMS *p);
+int common_GetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p);
 /**
 Alternative for GetVehiclePos to get it directly into a vec3 struct.
 
 Will use buf32, buf64, buf144.
 */
-int common_GetVehiclePos(AMX*, int vehicleid, struct vec3 *pos);
+int common_GetVehiclePos(int vehicleid, struct vec3 *pos);
 /**
 Alternative for GetVehicleRotationQuat to get it directly into a quat struct.
 
 Will use buf32, buf64, buf144, buf32_1.
 */
-int common_GetVehicleRotationQuat(AMX*, int vehicleid, struct quat *rot);
+int common_GetVehicleRotationQuat(int vehicleid, struct quat *rot);
 /**
 Alternative for GetVehicleVelocity to get it directly into a vec3 struct.
 
 Will use buf32, buf64, buf144.
 */
-int common_GetVehicleVelocity(AMX*, int vehicleid, struct vec3 *vel);
+int common_GetVehicleVelocity(int vehicleid, struct vec3 *vel);
 /**
 Sets vehicle params of given vehicle into given VEHICLEPARAMS struct.
 
 Uses buf32.
 */
-int common_SetVehicleParamsEx(AMX*, int vehicleid, struct VEHICLEPARAMS *p);
+int common_SetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p);
 /**
 Calls mysql_tquery with a callback and data to pass.
 
@@ -215,4 +213,4 @@ Uses buf4096 for query. Also uses the last 8 components of buf4096.
 @param callback cb to call when the query has been executed
 @param data usually a pointer to allocated memory that should be freed in the cb
 */
-void common_mysql_tquery(AMX*, char *query, mysql_cb callback, void *data);
+void common_mysql_tquery(char *query, mysql_cb callback, void *data);

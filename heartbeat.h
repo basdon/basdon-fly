@@ -4,12 +4,12 @@
 /**
 Performs query to update endtime of current session. Call every 30 seconds.
 */
-void heartbeat_timed_update(AMX*);
+void heartbeat_timed_update();
 /**
 Call from OnGameModeInit.
 */
-void heartbeat_create_session(AMX*);
+void heartbeat_create_session();
 /**
 Call from OnGameModeExit.
 */
-void heartbeat_end_session(AMX*);
+void heartbeat_end_session();

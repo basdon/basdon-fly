@@ -134,7 +134,7 @@ Value should have leading zeros.
 +--------+
 */
 static
-void panel_update_altitude(AMX *amx, int playerid, int altitude)
+void panel_update_altitude(int playerid, int altitude)
 {
 	int altitude50 = altitude / 50;
 	int i, tmp, tmp2;
@@ -146,7 +146,7 @@ void panel_update_altitude(AMX *amx, int playerid, int altitude)
 	}
 	pcache->altitude = altitude;
 
-	nc_params[0] = 3;
+	NC_PARS(3);
 	nc_params[1] = playerid;
 	nc_params[3] = buf144a;
 
@@ -222,7 +222,7 @@ Value should have leading zeros.
 +--------+
 */
 static
-void panel_update_speed(AMX *amx, int playerid, int speed)
+void panel_update_speed(int playerid, int speed)
 {
 	static const char SPDMETERDATA[] =
 		"160-~n~150-~n~140-~n~130-~n~120-~n~110-~n~100-~n~_90-~n~_"
@@ -238,7 +238,7 @@ void panel_update_speed(AMX *amx, int playerid, int speed)
 	}
 	pcache->speed = speed;
 
-	nc_params[0] = 3;
+	NC_PARS(3);
 	nc_params[1] = playerid;
 	nc_params[3] = buf144a;
 
@@ -280,7 +280,7 @@ void panel_update_speed(AMX *amx, int playerid, int speed)
 Update heading textdraws.
 */
 static
-void panel_update_heading(AMX *amx, int playerid, int heading)
+void panel_update_heading(int playerid, int heading)
 {
 	char buf[50];
 
@@ -295,7 +295,7 @@ void panel_update_heading(AMX *amx, int playerid, int heading)
 	}
 	caches[playerid].heading = heading;
 
-	nc_params[0] = 3;
+	NC_PARS(3);
 	nc_params[1] = playerid;
 	nc_params[3] = buf144a;
 
@@ -320,7 +320,7 @@ void panel_update_heading(AMX *amx, int playerid, int heading)
 	NC(n_PlayerTextDrawSetString);
 }
 
-void panel_timed_update(AMX *amx)
+void panel_timed_update()
 {
 	struct vec3 vpos;
 	int playerid, vehicleid, n = numpanelplayers;
@@ -329,21 +329,20 @@ void panel_timed_update(AMX *amx)
 	while (n--) {
 		playerid = panelplayers[n];
 
-		NC_GetPlayerVehicleID_(playerid, &vehicleid);
+		vehicleid = NC_GetPlayerVehicleID(playerid);
 
-		common_GetVehiclePos(amx, vehicleid, &vpos);
-		panel_update_altitude(amx, playerid, (int) vpos.z);
+		common_GetVehiclePos(vehicleid, &vpos);
+		panel_update_altitude(playerid, (int) vpos.z);
 
 		NC_GetVehicleZAngle(vehicleid, buf144a);
 		heading = *fbuf144;
-		panel_update_heading(amx, playerid, (int) heading);
+		panel_update_heading(playerid, (int) heading);
 
-		NC_GetPlayerState(playerid);
-		if (nc_result == PLAYER_STATE_DRIVER) {
-			nav_update(amx, vehicleid, &vpos, heading);
+		if (NC_GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
+			nav_update(vehicleid, &vpos, heading);
 		}
 
-		nav_update_textdraws(amx,
+		nav_update_textdraws(
 			playerid,
 			vehicleid,
 			ptxt_adf_dis,
@@ -358,7 +357,7 @@ void panel_timed_update(AMX *amx)
 		y = *fbuf64;
 		z = *fbuf144;
 		x = VEL_TO_KTS_VAL * sqrt(x * x + y * y + z * z);
-		panel_update_speed(amx, playerid, (int) x);
+		panel_update_speed(playerid, (int) x);
 
 		z *= VEL_TO_KFPM_VAL * 14.5f;
 		if (z < -34.0f) {
@@ -366,11 +365,11 @@ void panel_timed_update(AMX *amx)
 		} else if (z > 34.0f) {
 			z = 34.0f;
 		}
-		nc_params[0] = 2;
+		NC_PARS(2);
 		nc_params[1] = playerid;
 		nc_params[2] = ptxt_vai[playerid];
 		NC(n_PlayerTextDrawDestroy);
-		nc_params[0] = 4;
+		NC_PARS(4);
 		buf144[0] = '~';
 		buf144[1] = '<';
 		buf144[2] = '~';
@@ -379,12 +378,12 @@ void panel_timed_update(AMX *amx)
 		nc_paramf[2] = 458.0f;
 		nc_paramf[3] = 391.0f - z;
 		nc_params[4] = buf144a;
-		NC_(n_CreatePlayerTextDraw, ptxt_vai + playerid);
+		ptxt_vai[playerid] = NC(n_CreatePlayerTextDraw);
 		nc_params[2] = ptxt_vai[playerid];
 		nc_paramf[3] = 0.25f;
 		nc_paramf[4] = 1.1f;
 		NC(n_PlayerTextDrawLetterSize);
-		nc_params[0] = 3;
+		NC_PARS(3);
 		nc_params[3] = 0xFF0000FF;
 		NC(n_PlayerTextDrawColor);
 		nc_params[3] = 2;
@@ -393,7 +392,7 @@ void panel_timed_update(AMX *amx)
 		nc_params[3] = 0;
 		NC(n_PlayerTextDrawSetOutline);
 		NC(n_PlayerTextDrawSetShadow);
-		nc_params[0] = 2;
+		NC_PARS(2);
 		NC(n_PlayerTextDrawShow);
 	}
 }
@@ -414,12 +413,12 @@ void panel_remove_panel_player(int playerid)
 Reset nav textdraws, meaning dashes for values and hide vor/ils textdraws.
 */
 static
-void panel_reset_nav(AMX *amx, int playerid)
+void panel_reset_nav(int playerid)
 {
 	if (ptxt_vai[playerid] != -1) {
 		buf144[0] = '-';
 		buf144[1] = 0;
-		nc_params[0] = 3;
+		NC_PARS(3);
 		nc_params[1] = playerid;
 		nc_params[2] = ptxt_adf_dis[playerid];
 		nc_params[3] = buf144a;
@@ -444,7 +443,7 @@ void panel_reset_nav(AMX *amx, int playerid)
 	panel_reset_caches(playerid);
 }
 
-void panel_show_vor_bar_for_passengers(AMX *amx, int vehicleid)
+void panel_show_vor_bar_for_passengers(int vehicleid)
 {
 	/*TODO: use on_player_was_afk to show VOR bar to passengers that
 	were afk while the pilot enabled VOR,
@@ -453,14 +452,13 @@ void panel_show_vor_bar_for_passengers(AMX *amx, int vehicleid)
 
 	while (n--) {
 		playerid = players[n];
-		NC_GetPlayerVehicleID(playerid);
-		if (nc_result == vehicleid) {
+		if (NC_GetPlayerVehicleID(playerid) == vehicleid) {
 			NC_TextDrawShowForPlayer(playerid, txt_vorbar);
 		}
 	}
 }
 
-void panel_hide_vor_bar_for_passengers(AMX *amx, int vehicleid)
+void panel_hide_vor_bar_for_passengers(int vehicleid)
 {
 	/*TODO: use on_player_was_afk to hide VOR bar to passengers that
 	were afk while the pilot disabled VOR,
@@ -469,8 +467,7 @@ void panel_hide_vor_bar_for_passengers(AMX *amx, int vehicleid)
 
 	while (n--) {
 		pid = players[n];
-		NC_GetPlayerVehicleID(pid);
-		if (nc_result == vehicleid) {
+		if (NC_GetPlayerVehicleID(pid) == vehicleid) {
 			NC_TextDrawHideForPlayer(pid, txt_vorbar);
 			if (ptxt_vor[pid] != -1) {
 				NC_PlayerTextDrawHide(pid, ptxt_vor[pid]);
@@ -479,7 +476,7 @@ void panel_hide_vor_bar_for_passengers(AMX *amx, int vehicleid)
 	}
 }
 
-void panel_show_ils_for_passengers(AMX *amx, int vehicleid)
+void panel_show_ils_for_passengers(int vehicleid)
 {
 	/*TODO: use on_player_was_afk to hide VOR bar to passengers that
 	were afk while the pilot disabled VOR,
@@ -488,14 +485,13 @@ void panel_show_ils_for_passengers(AMX *amx, int vehicleid)
 
 	while (n--) {
 		pid = players[n];
-		NC_GetPlayerVehicleID(pid);
-		if (nc_result == vehicleid) {
+		if (NC_GetPlayerVehicleID(pid) == vehicleid) {
 			NC_PlayerTextDrawShow(pid, ptxt_ils[pid]);
 		}
 	}
 }
 
-void panel_hide_ils_for_passengers(AMX *amx, int vehicleid)
+void panel_hide_ils_for_passengers(int vehicleid)
 {
 	/*TODO: use on_player_was_afk to hide VOR bar to passengers that
 	were afk while the pilot disabled VOR,
@@ -504,14 +500,13 @@ void panel_hide_ils_for_passengers(AMX *amx, int vehicleid)
 
 	while (n--) {
 		pid = players[n];
-		NC_GetPlayerVehicleID(pid);
-		if (nc_result == vehicleid) {
+		if (NC_GetPlayerVehicleID(pid) == vehicleid) {
 			NC_PlayerTextDrawHide(pid, ptxt_ils[pid]);
 		}
 	}
 }
 
-void panel_reset_nav_for_passengers(AMX *amx, int vehicleid)
+void panel_reset_nav_for_passengers(int vehicleid)
 {
 	/*TODO: use on_player_was_afk to hide VOR bar to passengers that
 	were afk while the pilot disabled VOR,
@@ -520,14 +515,13 @@ void panel_reset_nav_for_passengers(AMX *amx, int vehicleid)
 
 	while (n--) {
 		playerid = players[n];
-		NC_GetPlayerVehicleID(playerid);
-		if (nc_result == vehicleid) {
-			panel_reset_nav(amx, playerid);
+		if (NC_GetPlayerVehicleID(playerid) == vehicleid) {
+			panel_reset_nav(playerid);
 		}
 	}
 }
 
-void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
+void panel_on_player_state_change(int playerid, int from, int to)
 {
 	int nav_get_active_type(int);
 	void nav_reset_cache(int);
@@ -535,29 +529,28 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 	int vehicleid, activenav;
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
-		NC_GetPlayerVehicleID_(playerid, &vehicleid);
+		vehicleid = NC_GetPlayerVehicleID(playerid);
 		if (!vehicleid) {
 			return;
 		}
-		NC_GetVehicleModel(vehicleid);
-		if (!game_is_air_vehicle(nc_result)) {
+		if (!game_is_air_vehicle(NC_GetVehicleModel(vehicleid))) {
 			return;
 		}
 
 		panelplayers[numpanelplayers++] = playerid;
-		panel_reset_nav(amx, playerid);
+		panel_reset_nav(playerid);
 		nav_reset_cache(playerid);
 
 		buf144[0] = '_';
 		buf144[1] = 0;
-		nc_params[0] = 4;
+		NC_PARS(4);
 		nc_params[1] = playerid;
 		nc_paramf[2] = -10.0f;
 		nc_paramf[3] = -10.0f;
 		nc_params[4] = buf144a;
-		NC_(n_CreatePlayerTextDraw, ptxt_vai + playerid);
+		ptxt_vai[playerid] = NC(n_CreatePlayerTextDraw);
 
-		nc_params[0] = 2;
+		NC_PARS(2);
 		nc_params[2] = ptxt_adf_alt[playerid];
 		NC(n_PlayerTextDrawShow);
 		nc_params[2] = ptxt_spd_large[playerid];
@@ -613,7 +606,7 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 			NC(n_TextDrawShowForPlayer);
 		}
 	} else if (ptxt_vai[playerid] != -1 /*if panel active*/) {
-		nc_params[0] = 2;
+		NC_PARS(2);
 		nc_params[1] = playerid;
 		nc_params[2] = ptxt_adf_alt[playerid];
 		NC(n_PlayerTextDrawHide);
@@ -666,239 +659,232 @@ void panel_on_player_state_change(AMX *amx, int playerid, int from, int to)
 	}
 }
 
-void panel_on_player_was_afk(AMX *amx, int playerid)
+void panel_on_player_was_afk(int playerid)
 {
-	NC_GetPlayerVehicleID(playerid);
-	if (nc_result) {
-		NC_GetVehicleModel(nc_result);
-		if (game_is_air_vehicle(nc_result)) {
+	int vehicleid, vehiclemodel;
+	vehicleid = NC_GetPlayerVehicleID(playerid);
+	if (vehicleid) {
+		vehiclemodel = NC_GetVehicleModel(vehicleid);
+		if (game_is_air_vehicle(vehiclemodel)) {
 			panelplayers[numpanelplayers++] = playerid;
 		}
 	}
 }
 
-void panel_on_player_connect(AMX *amx, int playerid)
+void panel_on_player_connect(int playerid)
 {
-	float *f2, *f3, *f4;
-	int *i2, *i3;
-
-	f2 = (float*) (nc_params + 2);
-	f3 = (float*) (nc_params + 3);
-	f4 = (float*) (nc_params + 4);
-	i2 = (int*) (nc_params + 2);
-	i3 = (int*) (nc_params + 3);
-
 	panel_reset_caches(playerid);
 	ptxt_vai[playerid] = ptxt_vor[playerid] = ptxt_ils[playerid] = -1;
 
-	nc_params[0] = 4;
+	NC_PARS(4);
 	nc_params[1] = playerid;
 	buf144[0] = '_';
 	buf144[1] = 0;
-	*f2 = 220.0f;
-	*f3 = 360.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_spd_large[playerid]);
-	*f2 = 217.0f;
-	*f3 = 380.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_spd_small[playerid]);
-	*f2 = 222.0f;
-	*f3 = 389.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_spd_value[playerid]);
-	*f2 = 453.0f;
-	*f3 = 360.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_alt_large[playerid]);
-	*f2 = 442.0f;
-	*f3 = 380.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_alt_small[playerid]);
-	*f2 = 455.0f;
-	*f3 = 389.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_alt_value[playerid]);
-	*f2 = 320.0f;
-	*f3 = 100.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_ils[playerid]);
-	*f3 = 423.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_hdg_meter[playerid]);
-	*f3 = 420.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_hdg_value[playerid]);
-	*f2 = 265.0f;
-	*f3 = 360.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_adf_dis[playerid]);
-	*f2 = 330.0f;
-	*f3 = 360.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_adf_alt[playerid]);
-	*f2 = 395.0f;
-	*f3 = 360.0f;
-	NC_(n_CreatePlayerTextDraw, &ptxt_adf_crs[playerid]);
+	nc_params[4] = buf144a;
+	nc_paramf[2] = 220.0f;
+	nc_paramf[3] = 360.0f;
+	ptxt_spd_large[playerid] = NC(n_CreatePlayerTextDraw);
+	nc_paramf[2] = 217.0f;
+	nc_paramf[3] = 380.0f;
+	ptxt_spd_small[playerid] = NC(n_CreatePlayerTextDraw);
+	nc_paramf[2] = 222.0f;
+	nc_paramf[3] = 389.0f;
+	ptxt_spd_value[playerid] = NC(n_CreatePlayerTextDraw);
+	nc_paramf[2] = 453.0f;
+	nc_paramf[3] = 360.0f;
+	ptxt_alt_large[playerid] = NC(n_CreatePlayerTextDraw);
+	nc_paramf[2] = 442.0f;
+	nc_paramf[3] = 380.0f;
+	ptxt_alt_small[playerid] = NC(n_CreatePlayerTextDraw);
+	nc_paramf[2] = 455.0f;
+	nc_paramf[3] = 389.0f;
+	ptxt_alt_value[playerid] = NC(n_CreatePlayerTextDraw);
+	nc_paramf[2] = 320.0f;
+	nc_paramf[3] = 100.0f;
+	ptxt_ils[playerid] = NC(n_CreatePlayerTextDraw);
+	nc_paramf[3] = 423.0f;
+	ptxt_hdg_meter[playerid] = NC(n_CreatePlayerTextDraw);
+	nc_paramf[3] = 420.0f;
+	ptxt_hdg_value[playerid] = NC(n_CreatePlayerTextDraw);
+	nc_paramf[2] = 265.0f;
+	nc_paramf[3] = 360.0f;
+	ptxt_adf_dis[playerid] = NC(n_CreatePlayerTextDraw);
+	nc_paramf[2] = 330.0f;
+	nc_paramf[3] = 360.0f;
+	ptxt_adf_alt[playerid] = NC(n_CreatePlayerTextDraw);
+	nc_paramf[2] = 395.0f;
+	nc_paramf[3] = 360.0f;
+	ptxt_adf_crs[playerid] = NC(n_CreatePlayerTextDraw);
 
 	/*letter size*/
-	*i2 = ptxt_spd_small[playerid];
-	*f3 = 0.3f;
-	*f4 = 1.2f;
+	nc_params[2] = ptxt_spd_small[playerid];
+	nc_paramf[3] = 0.3f;
+	nc_paramf[4] = 1.2f;
 	NC(n_PlayerTextDrawLetterSize);
-	*i2 = ptxt_alt_small[playerid];
+	nc_params[2] = ptxt_alt_small[playerid];
 	NC(n_PlayerTextDrawLetterSize);
-	*i2 = ptxt_hdg_meter[playerid];
-	*f3 = 0.22f;
-	*f4 = 1.0f;
+	nc_params[2] = ptxt_hdg_meter[playerid];
+	nc_paramf[3] = 0.22f;
+	nc_paramf[4] = 1.0f;
 	NC(n_PlayerTextDrawLetterSize);
-	*i2 = ptxt_spd_value[playerid];
-	*f3 = 0.4f;
-	*f4 = 1.6f;
+	nc_params[2] = ptxt_spd_value[playerid];
+	nc_paramf[3] = 0.4f;
+	nc_paramf[4] = 1.6f;
 	NC(n_PlayerTextDrawLetterSize);
-	*i2 = ptxt_alt_value[playerid];
+	nc_params[2] = ptxt_alt_value[playerid];
 	NC(n_PlayerTextDrawLetterSize);
-	*i2 = ptxt_hdg_value[playerid];
+	nc_params[2] = ptxt_hdg_value[playerid];
 	NC(n_PlayerTextDrawLetterSize);
-	*i2 = ptxt_spd_large[playerid];
-	*f3 = 0.25f;
-	*f4 = 1.0f;
+	nc_params[2] = ptxt_spd_large[playerid];
+	nc_paramf[3] = 0.25f;
+	nc_paramf[4] = 1.0f;
 	NC(n_PlayerTextDrawLetterSize);
-	*i2 = ptxt_alt_large[playerid];
+	nc_params[2] = ptxt_alt_large[playerid];
 	NC(n_PlayerTextDrawLetterSize);
-	*i2 = ptxt_adf_dis[playerid];
+	nc_params[2] = ptxt_adf_dis[playerid];
 	NC(n_PlayerTextDrawLetterSize);
-	*i2 = ptxt_adf_alt[playerid];
+	nc_params[2] = ptxt_adf_alt[playerid];
 	NC(n_PlayerTextDrawLetterSize);
-	*i2 = ptxt_adf_crs[playerid];
+	nc_params[2] = ptxt_adf_crs[playerid];
 	NC(n_PlayerTextDrawLetterSize);
-	*i2 = ptxt_ils[playerid];
-	*f3 = 0.45f;
-	*f4 = 2.5f;
+	nc_params[2] = ptxt_ils[playerid];
+	nc_paramf[3] = 0.45f;
+	nc_paramf[4] = 2.5f;
 	NC(n_PlayerTextDrawLetterSize);
 
-	nc_params[0] = 3;
+	NC_PARS(3);
 	/*rest*/
-	*i2 = ptxt_spd_large[playerid];
-	*i3 = LARGE_METER_COLOR;
+	nc_params[2] = ptxt_spd_large[playerid];
+	nc_params[3] = LARGE_METER_COLOR;
 	NC(n_PlayerTextDrawColor);
-	*i3 = 3;
+	nc_params[3] = 3;
 	NC(n_PlayerTextDrawAlignment);
-	*i3 = 2;
+	nc_params[3] = 2;
 	NC(n_PlayerTextDrawFont);
-	*i3 = 0;
+	nc_params[3] = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
 	NC(n_PlayerTextDrawSetProportional);
 
-	*i2 = ptxt_spd_small[playerid];
-	*i3 = SMALL_METER_COLOR;
+	nc_params[2] = ptxt_spd_small[playerid];
+	nc_params[3] = SMALL_METER_COLOR;
 	NC(n_PlayerTextDrawColor);
-	*i3 = 2;
+	nc_params[3] = 2;
 	NC(n_PlayerTextDrawAlignment);
 	NC(n_PlayerTextDrawFont);
-	*i3 = 0;
+	nc_params[3] = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
 	NC(n_PlayerTextDrawSetProportional);
 
-	*i2 = ptxt_spd_value[playerid];
-	*i3 = -1;
+	nc_params[2] = ptxt_spd_value[playerid];
+	nc_params[3] = -1;
 	NC(n_PlayerTextDrawColor);
-	*i3 = 3;
+	nc_params[3] = 3;
 	NC(n_PlayerTextDrawAlignment);
-	*i3 = 2;
+	nc_params[3] = 2;
 	NC(n_PlayerTextDrawFont);
-	*i3 = 0;
+	nc_params[3] = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
 	NC(n_PlayerTextDrawSetProportional);
 
-	*i2 = ptxt_alt_large[playerid];
-	*i3 = LARGE_METER_COLOR;
+	nc_params[2] = ptxt_alt_large[playerid];
+	nc_params[3] = LARGE_METER_COLOR;
 	NC(n_PlayerTextDrawColor);
-	*i3 = 3;
+	nc_params[3] = 3;
 	NC(n_PlayerTextDrawAlignment);
-	*i3 = 2;
+	nc_params[3] = 2;
 	NC(n_PlayerTextDrawFont);
-	*i3 = 0;
+	nc_params[3] = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
 	NC(n_PlayerTextDrawSetProportional);
 
-	*i2 = ptxt_alt_small[playerid];
-	*i3 = SMALL_METER_COLOR;
+	nc_params[2] = ptxt_alt_small[playerid];
+	nc_params[3] = SMALL_METER_COLOR;
 	NC(n_PlayerTextDrawColor);
-	*i3 = 2;
+	nc_params[3] = 2;
 	NC(n_PlayerTextDrawAlignment);
 	NC(n_PlayerTextDrawFont);
-	*i3 = 0;
+	nc_params[3] = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
 	NC(n_PlayerTextDrawSetProportional);
 
-	*i2 = ptxt_alt_value[playerid];
-	*i3 = -1;
+	nc_params[2] = ptxt_alt_value[playerid];
+	nc_params[3] = -1;
 	NC(n_PlayerTextDrawColor);
-	*i3 = 3;
+	nc_params[3] = 3;
 	NC(n_PlayerTextDrawAlignment);
-	*i3 = 2;
+	nc_params[3] = 2;
 	NC(n_PlayerTextDrawFont);
-	*i3 = 0;
+	nc_params[3] = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
 	NC(n_PlayerTextDrawSetProportional);
 
-	*i2 = ptxt_hdg_meter[playerid];
-	*i3 = LARGE_METER_COLOR;
+	nc_params[2] = ptxt_hdg_meter[playerid];
+	nc_params[3] = LARGE_METER_COLOR;
 	NC(n_PlayerTextDrawColor);
-	*i3 = 2;
+	nc_params[3] = 2;
 	NC(n_PlayerTextDrawAlignment);
 	NC(n_PlayerTextDrawFont);
-	*i3 = 0;
+	nc_params[3] = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
 	NC(n_PlayerTextDrawSetProportional);
 
-	*i2 = ptxt_hdg_value[playerid];
-	*i3 = -1;
+	nc_params[2] = ptxt_hdg_value[playerid];
+	nc_params[3] = -1;
 	NC(n_PlayerTextDrawColor);
-	*i3 = 2;
+	nc_params[3] = 2;
 	NC(n_PlayerTextDrawAlignment);
 	NC(n_PlayerTextDrawFont);
-	*i3 = 0;
+	nc_params[3] = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
 	NC(n_PlayerTextDrawSetProportional);
 
-	*i2 = ptxt_adf_dis[playerid];
-	*i3 = 0xFF00FFFF;
+	nc_params[2] = ptxt_adf_dis[playerid];
+	nc_params[3] = 0xFF00FFFF;
 	NC(n_PlayerTextDrawColor);
-	*i3 = 2;
+	nc_params[3] = 2;
 	NC(n_PlayerTextDrawAlignment);
 	NC(n_PlayerTextDrawFont);
-	*i3 = 0;
+	nc_params[3] = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
 
-	*i2 = ptxt_adf_alt[playerid];
-	*i3 = 0xFF00FFFF;
+	nc_params[2] = ptxt_adf_alt[playerid];
+	nc_params[3] = 0xFF00FFFF;
 	NC(n_PlayerTextDrawColor);
-	*i3 = 2;
+	nc_params[3] = 2;
 	NC(n_PlayerTextDrawAlignment);
 	NC(n_PlayerTextDrawFont);
-	*i3 = 0;
+	nc_params[3] = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
 
-	*i2 = ptxt_adf_crs[playerid];
-	*i3 = 0xFF00FFFF;
+	nc_params[2] = ptxt_adf_crs[playerid];
+	nc_params[3] = 0xFF00FFFF;
 	NC(n_PlayerTextDrawColor);
-	*i3 = 2;
+	nc_params[3] = 2;
 	NC(n_PlayerTextDrawAlignment);
 	NC(n_PlayerTextDrawFont);
-	*i3 = 0;
+	nc_params[3] = 0;
 	NC(n_PlayerTextDrawSetOutline);
 	NC(n_PlayerTextDrawSetShadow);
 
-	*i2 = ptxt_ils[playerid];
-	*i3 = 2;
+	nc_params[2] = ptxt_ils[playerid];
+	nc_params[3] = 2;
 	NC(n_PlayerTextDrawAlignment);
 	NC(n_PlayerTextDrawFont);
-	*i3 = 1;
+	nc_params[3] = 1;
 	NC(n_PlayerTextDrawSetOutline);
 }
 
-void panel_on_gamemode_init(AMX *amx)
+void panel_on_gamemode_init()
 {
 	/*glorious write-only code*/
 	int *i1, *i2, *i3;
@@ -910,34 +896,34 @@ void panel_on_gamemode_init(AMX *amx)
 	f2 = (float*) (nc_params + 2);
 	f3 = (float*) (nc_params + 3);
 
-	nc_params[0] = 3;
+	NC_PARS(3);
 	*f1 = 320.0f;
 	*f2 = 360.0f;
 	*i3 = buf144a;
 	SETB144("~n~~n~~n~~n~~n~~n~~n~~n~");
-	NC_(n_TextDrawCreate, &txt_bg);
+	txt_bg = NC(n_TextDrawCreate);
 
 	*f2 = 410.0f;
 	SETB144("O_____O_____O_____-_____O_____O_____O");
-	NC_(n_TextDrawCreate, &txt_vorbar);
+	txt_vorbar = NC(n_TextDrawCreate);
 
 	*f1 = 461.0f;
 	*f2 = 364.0f;
 	SETB144("-2~n~-_~n~-1~n~-_~n~-0~n~-_~n~-1~n~-_~n~-2");
-	NC_(n_TextDrawCreate, &txt_vai);
+	txt_vai = NC(n_TextDrawCreate);
 
 	*f1 = 203.0f;
 	*f2 = 383.0f;
 	SETB144("~n~~n~~n~");
-	NC_(n_TextDrawCreate, &txt_bg_spd);
+	txt_bg_spd = NC(n_TextDrawCreate);
 
 	*f1 = 436.0f;
-	NC_(n_TextDrawCreate, &txt_bg_alt);
+	txt_bg_alt = NC(n_TextDrawCreate);
 
 	*f1 = 227.0f;
 	*f2 = 360.0f;
 	SETB144("DIS_______________ALT_______________CRS");
-	NC_(n_TextDrawCreate, &txt_adf_labels);
+	txt_adf_labels = NC(n_TextDrawCreate);
 
 	/*x y txt*/
 	*f2 = 0.5f;  *f3 = 1.0f; *i1 = txt_bg; NC(n_TextDrawLetterSize);
@@ -956,7 +942,7 @@ void panel_on_gamemode_init(AMX *amx)
 	*f2 = 476.0f; *f3 = 7.0f;   *i1 = txt_vai; NC(n_TextDrawTextSize);
 	*f2 = 0.0f;   *f3 = 170.0f; *i1 = txt_vorbar; NC(n_TextDrawTextSize);
 
-	nc_params[0] = 2;
+	NC_PARS(2);
 
 	/*boxcolor txt col*/
 	*i2 = SMALL_METER_BG;

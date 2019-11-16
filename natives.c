@@ -11,112 +11,114 @@
 /* Natives ending in _ means that they have
 custom code and shouldn't be used directly.*/
 
-int n_AddPlayerClass;
-int n_ChangeVehicleColor;
-int n_ClearAnimations;
-int n_CreateObject;
-int n_CreatePlayer3DTextLabel;
-int n_CreatePlayerObject;
-int n_CreatePlayerTextDraw;
-int n_CreateVehicle_;
-int n_DeletePlayer3DTextLabel;
-int n_DestroyObject;
-int n_DestroyPlayerObject;
-int n_DestroyVehicle_;
-int n_DisablePlayerRaceCheckpoint;
-int n_ForceClassSelection;
-int n_GameTextForPlayer;
-int n_GetConsoleVarAsInt;
-int n_GetPlayerFacingAngle;
-int n_GetPlayerIp;
-int n_GetPlayerKeys;
-int n_GetPlayerName;
-int n_GetPlayerPos;
-int n_GetPlayerState;
-int n_GetPlayerVehicleID;
-int n_GetPlayerVehicleSeat;
-int n_GetVehicleHealth;
-int n_GetVehicleModel;
-int n_GetVehicleParamsEx;
-int n_GetVehiclePos;
-int n_GetVehicleRotationQuat;
-int n_GetVehicleVelocity;
-int n_GetVehicleZAngle;
-int n_GivePlayerMoney_;
-int n_GivePlayerWeapon;
-int n_Kick;
-int n_PlayerPlaySound;
-int n_PlayerTextDrawAlignment;
-int n_PlayerTextDrawBackgroundColor;
-int n_PlayerTextDrawColor;
-int n_PlayerTextDrawDestroy;
-int n_PlayerTextDrawFont;
-int n_PlayerTextDrawHide;
-int n_PlayerTextDrawLetterSize;
-int n_PlayerTextDrawSetOutline;
-int n_PlayerTextDrawSetProportional;
-int n_PlayerTextDrawSetShadow;
-int n_PlayerTextDrawSetString;
-int n_PlayerTextDrawShow;
-int n_PutPlayerInVehicle_;
-int n_RemoveBuildingForPlayer;
-int n_ResetPlayerMoney_;
-int n_RemovePlayerMapIcon;
-int n_SendClientMessage;
-int n_SendClientMessageToAll;
-int n_SendRconCommand;
-int n_SetCameraBehindPlayer;
-int n_SetPlayerCameraPos;
-int n_SetPlayerCameraLookAt;
-int n_SetPlayerColor;
-int n_SetPlayerFacingAngle;
-int n_SetPlayerMapIcon;
-int n_SetPlayerPos_;
-int n_SetPlayerRaceCheckpoint;
-int n_SetPlayerSpecialAction;
-int n_SetPlayerTime;
-int n_SetPlayerWeather;
-int n_SetSpawnInfo;
-int n_SetVehicleHealth;
-int n_SetVehicleParamsEx;
-int n_SetVehicleToRespawn;
-int n_ShowPlayerDialog_;
-int n_SpawnPlayer_;
-int n_TextDrawAlignment;
-int n_TextDrawBoxColor;
-int n_TextDrawColor;
-int n_TextDrawCreate;
-int n_TextDrawFont;
-int n_TextDrawHideForPlayer;
-int n_TextDrawLetterSize;
-int n_TextDrawSetOutline;
-int n_TextDrawSetProportional;
-int n_TextDrawSetShadow;
-int n_TextDrawShowForPlayer;
-int n_TextDrawTextSize;
-int n_TextDrawUseBox;
-int n_TogglePlayerClock;
-int n_TogglePlayerSpectating;
-int n_cache_delete;
-int n_cache_get_row;
-int n_cache_get_row_count;
-int n_cache_get_row_float;
-int n_cache_get_row_int;
-int n_cache_insert_id;
-int n_printf;
-int n_mysql_tquery;
-int n_mysql_query;
-int n_ssocket_connect;
-int n_ssocket_create;
-int n_ssocket_destroy;
-int n_ssocket_listen;
-int n_ssocket_send;
-int n_random;
-int n_tickcount;
+AMX_NATIVE n_AddPlayerClass;
+AMX_NATIVE n_ChangeVehicleColor;
+AMX_NATIVE n_ClearAnimations;
+AMX_NATIVE n_CreateObject;
+AMX_NATIVE n_CreatePlayer3DTextLabel;
+AMX_NATIVE n_CreatePlayerObject;
+AMX_NATIVE n_CreatePlayerTextDraw;
+AMX_NATIVE n_CreateVehicle_;
+AMX_NATIVE n_DeletePlayer3DTextLabel;
+AMX_NATIVE n_DestroyObject;
+AMX_NATIVE n_DestroyPlayerObject;
+AMX_NATIVE n_DestroyVehicle_;
+AMX_NATIVE n_DisablePlayerRaceCheckpoint;
+AMX_NATIVE n_ForceClassSelection;
+AMX_NATIVE n_GameTextForPlayer;
+AMX_NATIVE n_GetConsoleVarAsInt;
+AMX_NATIVE n_GetPlayerFacingAngle;
+AMX_NATIVE n_GetPlayerIp;
+AMX_NATIVE n_GetPlayerKeys;
+AMX_NATIVE n_GetPlayerName;
+AMX_NATIVE n_GetPlayerPos;
+AMX_NATIVE n_GetPlayerState;
+AMX_NATIVE n_GetPlayerVehicleID;
+AMX_NATIVE n_GetPlayerVehicleSeat;
+AMX_NATIVE n_GetVehicleHealth_;
+AMX_NATIVE n_GetVehicleModel;
+AMX_NATIVE n_GetVehicleParamsEx;
+AMX_NATIVE n_GetVehiclePos;
+AMX_NATIVE n_GetVehicleRotationQuat;
+AMX_NATIVE n_GetVehicleVelocity;
+AMX_NATIVE n_GetVehicleZAngle;
+AMX_NATIVE n_GivePlayerMoney_;
+AMX_NATIVE n_GivePlayerWeapon;
+AMX_NATIVE n_Kick_;
+AMX_NATIVE n_PlayerPlaySound;
+AMX_NATIVE n_PlayerTextDrawAlignment;
+AMX_NATIVE n_PlayerTextDrawBackgroundColor;
+AMX_NATIVE n_PlayerTextDrawColor;
+AMX_NATIVE n_PlayerTextDrawDestroy;
+AMX_NATIVE n_PlayerTextDrawFont;
+AMX_NATIVE n_PlayerTextDrawHide;
+AMX_NATIVE n_PlayerTextDrawLetterSize;
+AMX_NATIVE n_PlayerTextDrawSetOutline;
+AMX_NATIVE n_PlayerTextDrawSetProportional;
+AMX_NATIVE n_PlayerTextDrawSetShadow;
+AMX_NATIVE n_PlayerTextDrawSetString;
+AMX_NATIVE n_PlayerTextDrawShow;
+AMX_NATIVE n_PutPlayerInVehicle_;
+AMX_NATIVE n_RemoveBuildingForPlayer;
+AMX_NATIVE n_ResetPlayerMoney_;
+AMX_NATIVE n_RemovePlayerMapIcon;
+AMX_NATIVE n_SendClientMessage;
+AMX_NATIVE n_SendClientMessageToAll;
+AMX_NATIVE n_SendRconCommand;
+AMX_NATIVE n_SetCameraBehindPlayer;
+AMX_NATIVE n_SetPlayerCameraPos;
+AMX_NATIVE n_SetPlayerCameraLookAt;
+AMX_NATIVE n_SetPlayerColor;
+AMX_NATIVE n_SetPlayerFacingAngle;
+AMX_NATIVE n_SetPlayerMapIcon;
+AMX_NATIVE n_SetPlayerPos_;
+AMX_NATIVE n_SetPlayerRaceCheckpoint;
+AMX_NATIVE n_SetPlayerSpecialAction;
+AMX_NATIVE n_SetPlayerTime;
+AMX_NATIVE n_SetPlayerWeather;
+AMX_NATIVE n_SetSpawnInfo;
+AMX_NATIVE n_SetVehicleHealth;
+AMX_NATIVE n_SetVehicleParamsEx;
+AMX_NATIVE n_SetVehicleToRespawn;
+AMX_NATIVE n_ShowPlayerDialog_;
+AMX_NATIVE n_SpawnPlayer_;
+AMX_NATIVE n_TextDrawAlignment;
+AMX_NATIVE n_TextDrawBoxColor;
+AMX_NATIVE n_TextDrawColor;
+AMX_NATIVE n_TextDrawCreate;
+AMX_NATIVE n_TextDrawFont;
+AMX_NATIVE n_TextDrawHideForPlayer;
+AMX_NATIVE n_TextDrawLetterSize;
+AMX_NATIVE n_TextDrawSetOutline;
+AMX_NATIVE n_TextDrawSetProportional;
+AMX_NATIVE n_TextDrawSetShadow;
+AMX_NATIVE n_TextDrawShowForPlayer;
+AMX_NATIVE n_TextDrawTextSize;
+AMX_NATIVE n_TextDrawUseBox;
+AMX_NATIVE n_TogglePlayerClock;
+AMX_NATIVE n_TogglePlayerSpectating;
+AMX_NATIVE n_cache_delete;
+AMX_NATIVE n_cache_get_row;
+AMX_NATIVE n_cache_get_row_count;
+AMX_NATIVE_FLOAT n_cache_get_row_float;
+AMX_NATIVE n_cache_get_row_int;
+AMX_NATIVE n_cache_insert_id;
+AMX_NATIVE n_mysql_tquery;
+AMX_NATIVE n_mysql_query;
+AMX_NATIVE n_ssocket_connect;
+AMX_NATIVE n_ssocket_create;
+AMX_NATIVE n_ssocket_destroy;
+AMX_NATIVE n_ssocket_listen;
+AMX_NATIVE n_ssocket_send;
+AMX_NATIVE n_random;
+AMX_NATIVE n_tickcount;
+
+AMX *amx;
 
 static cell nc_params_d[20];
+
 cell *nc_params = nc_params_d;
-cell nc_result;
+float *nc_paramf = (float*) nc_params_d;
 
 cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
 cell underscorestringa;
@@ -125,12 +127,11 @@ cell *underscorestring;
 char *cemptystring, *cbuf32, *cbuf32_1, *cbuf64, *cbuf144, *cbuf4096;
 char *cunderscorestring;
 float *fbuf32_1, *fbuf32, *fbuf64, *fbuf144, *fbuf4096;
-float *nc_paramf = (float*) nc_params_d;
 
-int natives_find(AMX *amx)
+int natives_find()
 {
-#define N(X) {#X,&n_##X}
-#define N_(X) {#X,&n_##X##_}
+#define N(X) {#X,(int*)&n_##X}
+#define N_(X) {#X,(int*)&n_##X##_}
 	struct NATIVE {
 		char *name;
 		int *var;
@@ -161,7 +162,7 @@ int natives_find(AMX *amx)
 		N(GetPlayerState),
 		N(GetPlayerVehicleID),
 		N(GetPlayerVehicleSeat),
-		N(GetVehicleHealth),
+		N_(GetVehicleHealth),
 		N(GetVehicleModel),
 		N(GetVehicleRotationQuat),
 		N(GetVehicleParamsEx),
@@ -170,7 +171,7 @@ int natives_find(AMX *amx)
 		N(GetVehicleZAngle),
 		N_(GivePlayerMoney),
 		N(GivePlayerWeapon),
-		N(Kick),
+		N_(Kick),
 		N(PlayerPlaySound),
 		N(PlayerTextDrawAlignment),
 		N(PlayerTextDrawBackgroundColor),
@@ -229,7 +230,6 @@ int natives_find(AMX *amx)
 		N(cache_get_row_float),
 		N(cache_get_row_int),
 		N(cache_insert_id),
-		N(printf),
 		N(mysql_tquery),
 		N(mysql_query),
 		N(random),
@@ -241,13 +241,23 @@ int natives_find(AMX *amx)
 		N(tickcount),
 	};
 	struct NATIVE *n = natives + sizeof(natives)/sizeof(struct NATIVE);
+	AMX_HEADER *header;
+	AMX_FUNCSTUB *func;
+	unsigned char *nativetable;
+	int nativesize;
+	int idx;
+
+	header = (AMX_HEADER*) amx->base;
+	nativetable = (unsigned char*) header + header->natives;
+	nativesize = (int) header->defsize;
 
 	while (n-- != natives) {
-		amx_FindNative(amx, n->name, n->var);
-		if (*n->var == 0x7FFFFFFF) {
+		if (amx_FindNative(amx, n->name, &idx) == AMX_ERR_NOTFOUND) {
 			logprintf("ERR: no %s native", n->name);
 			return 0;
 		}
+		func = (AMX_FUNCSTUB*) (nativetable + idx * nativesize);
+		*n->var = func->address;
 	}
 	return 1;
 }
@@ -260,17 +270,16 @@ void natives_NC_Kick(int playerid)
 	kickdelay[playerid] = 2;
 }
 
-int natives_NC_PutPlayerInVehicle(
-	AMX *amx, int playerid, int vehicleid, int seat)
+int natives_NC_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 {
 	float hp;
 	struct vec3 pos;
 
 	if (seat == 0) {
-		nc_params[0] = 2;
+		NC_PARS(2);
 		nc_params[1] = vehicleid;
 		nc_params[2] = buf32a;
-		NC(n_GetVehicleHealth);
+		NC(n_GetVehicleHealth_);
 		hp = *fbuf32;
 		if (hp != hp || hp < 0.0f || 1000.0f < hp) {
 			*fbuf32 = 1000.0f;
@@ -278,51 +287,43 @@ int natives_NC_PutPlayerInVehicle(
 		}
 	}
 
-	common_GetVehiclePos(amx, vehicleid, &pos);
-	maps_stream_for_player(amx, playerid, pos);
-	veh_on_player_now_driving(amx, playerid, vehicleid);
-	veh_update_service_point_mapicons(amx, playerid, pos.x, pos.y);
-	zones_update(amx, playerid, pos);
+	common_GetVehiclePos(vehicleid, &pos);
+	maps_stream_for_player(playerid, pos);
+	veh_on_player_now_driving(playerid, vehicleid);
+	veh_update_service_point_mapicons( playerid, pos.x, pos.y);
+	zones_update(playerid, pos);
 
-	nc_params[0] = 3;
+	NC_PARS(3);
 	nc_params[1] = playerid;
 	nc_params[2] = vehicleid;
 	nc_params[3] = seat;
-	NC(n_PutPlayerInVehicle_);
-	return nc_result;
+	return NC(n_PutPlayerInVehicle_);
 }
 
-int natives_NC_SetPlayerPos(AMX *amx, int playerid, struct vec3 pos)
+int natives_NC_SetPlayerPos(int playerid, struct vec3 pos)
 {
-	void maps_stream_for_player(AMX*, int, struct vec3);
-	void veh_update_service_point_mapicons(AMX*, int, float, float);
-	void zones_update(AMX*, int, struct vec3);
+	maps_stream_for_player(playerid, pos);
+	veh_update_service_point_mapicons(playerid, pos.x, pos.y);
+	zones_update(playerid, pos);
 
-	maps_stream_for_player(amx, playerid, pos);
-	veh_update_service_point_mapicons(amx, playerid, pos.x, pos.y);
-	zones_update(amx, playerid, pos);
-
-	nc_params[0] = 4;
+	NC_PARS(4);
 	nc_params[1] = playerid;
 	nc_paramf[2] = pos.x;
 	nc_paramf[3] = pos.y;
 	nc_paramf[4] = pos.z;
-	NC(n_SetPlayerPos_);
-	return nc_result;
+	return NC(n_SetPlayerPos_);
 }
 
-int natives_NC_SpawnPlayer(AMX *amx, int playerid)
+void natives_NC_SpawnPlayer(int playerid)
 {
 	/*eject player first if they're in a vehicle*/
-	NC_GetPlayerVehicleID(playerid);
-	if (nc_result) {
+	if (NC_GetPlayerVehicleID(playerid)) {
 		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
 		NC(n_SetPlayerPos_);
 	}
-	nc_params[0] = 1;
+	NC_PARS(1);
 	/*nc_params[1] = playerid;*/
 	NC(n_SpawnPlayer_);
 
-	spawn_prespawn(amx, playerid);
-	return nc_result;
+	spawn_prespawn(playerid);
 }

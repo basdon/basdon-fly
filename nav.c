@@ -72,14 +72,14 @@ void nav_reset_cache(int playerid)
 	pcache[playerid].ils = INVALID_CACHE;
 }
 
-void nav_disable(AMX* amx, int vehicleid)
+void nav_disable(int vehicleid)
 {
 	free(nav[vehicleid]);
 	nav[vehicleid] = NULL;
-	panel_reset_nav_for_passengers(amx, vehicleid);
+	panel_reset_nav_for_passengers(vehicleid);
 }
 
-void nav_enable(AMX *amx, int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
+void nav_enable(int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 {
 	struct NAVDATA *np;
 	int playerid, n = playercount;
@@ -93,14 +93,13 @@ void nav_enable(AMX *amx, int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 	np->vor = vor;
 	np->ils = 0;
 	if (vor) {
-		panel_show_vor_bar_for_passengers(amx, vehicleid);
+		panel_show_vor_bar_for_passengers(vehicleid);
 	} else {
-		panel_hide_vor_bar_for_passengers(amx, vehicleid);
+		panel_hide_vor_bar_for_passengers(vehicleid);
 	}
 	while (n--) {
 		playerid = players[n];
-		NC_GetPlayerVehicleID(playerid);
-		if (nc_result == vehicleid) {
+		if (NC_GetPlayerVehicleID(playerid) == vehicleid) {
 			nav_reset_cache(playerid);
 		}
 	}
@@ -114,28 +113,29 @@ Checks if a player can do a nav cmd by checking if the vehicle can do the nav.
 @return 0 on failure, a message will have been sent to the player
 */
 static
-int nav_check_can_do_cmd(AMX *amx, int playerid, int navtype, int *vehicleid)
+int nav_check_can_do_cmd(int playerid, int navtype, int *vehicleid)
 {
 	static const char
 		*NO_NAV = WARN"You're not in an %s capable vehicle",
 		*NO_PILOT = WARN"Only the pilot can change navigation settings";
-	char buf[144], *b;
 
-	NC_GetPlayerVehicleID_(playerid, vehicleid);
-	NC_GetVehicleModel(*vehicleid);
+	char buf[144], *b;
+	int vehiclemodel;
+
+	*vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehiclemodel = NC_GetVehicleModel(*vehicleid);
 	if (navtype == NAV_ADF) {
-		if (!game_is_air_vehicle(nc_result)) {
+		if (!game_is_air_vehicle(vehiclemodel)) {
 			sprintf(buf, NO_NAV, "ADF");
 			b = buf;
 			goto sendmsgfail;
 		}
-	} else if (!game_is_plane(nc_result)) {
+	} else if (!game_is_plane(vehiclemodel)) {
 		sprintf(buf, NO_NAV, navtype == NAV_VOR ? "VOR" : "ILS");
 		b = buf;
 		goto sendmsgfail;
 	}
-	NC_GetPlayerState(playerid);
-	if (nc_result != PLAYER_STATE_DRIVER) {
+	if (NC_GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
 		b = (char*) NO_PILOT;
 sendmsgfail:	amx_SetUString(buf144, b, 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
@@ -151,20 +151,17 @@ int nav_cmd_adf(CMDPARAMS)
 	static const char
 		*SYN = WARN"Syntax: /adf [beacon] - see /beacons or /nearest";
 
-	void panel_hide_vor_bar_for_passengers(AMX*, int);
-	void panel_reset_nav_for_passengers(AMX*, int);
-
 	struct AIRPORT *ap;
 	int vehicleid, len;
 	char beacon[144], *bp;
 
-	if (!nav_check_can_do_cmd(amx, playerid, NAV_ADF, &vehicleid)) {
+	if (!nav_check_can_do_cmd(playerid, NAV_ADF, &vehicleid)) {
 		return 1;
 	}
 
 	if (!cmd_get_str_param(cmdtext, &parseidx, beacon)) {
 		if (nav[vehicleid] != NULL) {
-			nav_disable(amx, vehicleid);
+			nav_disable(vehicleid);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL);
 			return 1;
 		}
@@ -190,7 +187,7 @@ int nav_cmd_adf(CMDPARAMS)
 	len = numairports;
 	while (len--) {
 		if (strcmp(beacon, ap->beacon) == 0) {
-			nav_enable(amx, vehicleid, &ap->pos, NULL);
+			nav_enable(vehicleid, &ap->pos, NULL);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_SET);
 			return 1;
 		}
@@ -216,13 +213,13 @@ int nav_cmd_vor(CMDPARAMS)
 	int combinedparameter;
 	int len;
 
-	if (!nav_check_can_do_cmd(amx, playerid, NAV_VOR, &vehicleid)) {
+	if (!nav_check_can_do_cmd(playerid, NAV_VOR, &vehicleid)) {
 		return 1;
 	}
 
 	if (!cmd_get_str_param(cmdtext, &parseidx, beaconpar)) {
 		if (nav[vehicleid] != NULL) {
-			nav_disable(amx, vehicleid);
+			nav_disable(vehicleid);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL);
 			return 1;
 		}
@@ -278,7 +275,7 @@ haveairport:
 	rw = ap->runways;
 	while (rw != ap->runwaysend) {
 		if (rw->type == RUNWAY_TYPE_RUNWAY && strcmp(rw->id, b) == 0) {
-			nav_enable(amx, vehicleid, NULL, rw);
+			nav_enable(vehicleid, NULL, rw);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_SET);
 			return 1;
 		}
@@ -316,7 +313,7 @@ int nav_cmd_ils(CMDPARAMS)
 	struct NAVDATA *np;
 	int vehicleid;
 
-	if (!nav_check_can_do_cmd(amx, playerid, NAV_ILS, &vehicleid)) {
+	if (!nav_check_can_do_cmd(playerid, NAV_ILS, &vehicleid)) {
 		return 1;
 	}
 	if ((np = nav[vehicleid]) == NULL || np->vor == NULL) {
@@ -334,15 +331,15 @@ retmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 #endif
 	NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL - (np->ils ^= 1));
 	if (np->ils) {
-		panel_show_ils_for_passengers(amx, vehicleid);
+		panel_show_ils_for_passengers(vehicleid);
 	} else {
-		panel_hide_ils_for_passengers(amx, vehicleid);
+		panel_hide_ils_for_passengers(vehicleid);
 	}
 	return 1;
 }
 
 void nav_update_textdraws(
-	AMX *amx, int playerid, int vehicleid,
+	int playerid, int vehicleid,
 	int *ptxt_adf_dis_base, int *ptxt_adf_alt_base, int *ptxt_adf_crs_base,
 	int *ptxt_vor_base, int *ptxt_ils_base)
 {
@@ -372,7 +369,7 @@ void nav_update_textdraws(
 		return;
 	}
 
-	nc_params[0] = 3;
+	NC_PARS(3);
 	nc_params[1] = playerid;
 	nc_params[3] = buf144a;
 
@@ -429,7 +426,7 @@ void nav_update_textdraws(
 				buf144[ILS_X_OFFSETS[n->ilsz]] = 'r';
 			}
 doils:
-			nc_params[0] = 3;
+			NC_PARS(3);
 			nc_params[1] = playerid;
 			nc_params[2] = ptxt_ils_base[playerid];
 			nc_params[3] = buf144a;
@@ -440,7 +437,7 @@ doils:
 
 	if (n->vorvalue != INVALID_VOR_VALUE) {
 		if (ptxt_vor_base[playerid] != -1) {
-			nc_params[0] = 2;
+			NC_PARS(2);
 			nc_params[1] = playerid;
 			nc_params[2] = ptxt_vor_base[playerid];
 			NC(n_PlayerTextDrawDestroy);
@@ -467,19 +464,19 @@ doils:
 			amx_SetUString(buf144, cbuf64, 64);
 			vorbarlettersizex = 0.2f;
 		}
-		nc_params[0] = 4;
+		NC_PARS(4);
 		nc_params[1] = playerid;
 		nc_paramf[2] = 320.0f - vorbarx;
 		nc_paramf[3] = 407.0f;
 		nc_params[4] = buf144a;
-		NC(n_CreatePlayerTextDraw);
+		ptxt_vor_base[playerid] = NC(n_CreatePlayerTextDraw);
 
-		nc_params[2] = ptxt_vor_base[playerid] = nc_result;
+		nc_params[2] = ptxt_vor_base[playerid];
 		nc_paramf[3] = vorbarlettersizex;
 		nc_paramf[4] = 1.6f;
 		NC(n_PlayerTextDrawLetterSize);
 
-		nc_params[0] = 3;
+		NC_PARS(3);
 		nc_params[3] = 0xFF00FFFF;
 		NC(n_PlayerTextDrawColor);
 		nc_params[3] = 2;
@@ -491,10 +488,10 @@ doils:
 		NC(n_PlayerTextDrawSetOutline);
 		NC(n_PlayerTextDrawSetShadow);
 
-		nc_params[0] = 2;
+		NC_PARS(2);
 		NC(n_PlayerTextDrawShow);
 	} else if (ptxt_vor_base[playerid] != -1) {
-		nc_params[0] = 2;
+		NC_PARS(2);
 		nc_params[1] = playerid;
 		nc_params[2] = ptxt_vor_base[playerid];
 		NC(n_PlayerTextDrawDestroy);
@@ -520,7 +517,7 @@ int nav_get_active_type(int vehicleid)
 }
 
 void nav_navigate_to_airport(
-	AMX *amx, int vehicleid, int vehiclemodel,
+	int vehicleid, int vehiclemodel,
 	struct AIRPORT *ap)
 {
 	struct vec3 vpos;
@@ -530,7 +527,7 @@ void nav_navigate_to_airport(
 	rw = ap->runways;
 	mindist = 0x7F800000;
 	closestrw = NULL;
-	common_GetVehiclePos(amx, vehicleid, &vpos);
+	common_GetVehiclePos(vehicleid, &vpos);
 
 	/* if plane, try VOR if available, prioritizing ILS runways */
 	if (game_is_plane(vehiclemodel)) {
@@ -548,7 +545,7 @@ void nav_navigate_to_airport(
 			rw++;
 		}
 		if (closestrw != NULL) {
-			nav_enable(amx, vehicleid, NULL, closestrw);
+			nav_enable(vehicleid, NULL, closestrw);
 			return;
 		}
 	} else if (game_is_heli(vehiclemodel)) {
@@ -566,12 +563,12 @@ void nav_navigate_to_airport(
 			rw++;
 		}
 		if (closestrw != NULL) {
-			nav_enable(amx, vehicleid, &closestrw->pos, NULL);
+			nav_enable(vehicleid, &closestrw->pos, NULL);
 			return;
 		}
 	}
 
-	nav_enable(amx, vehicleid, &ap->pos, NULL);
+	nav_enable(vehicleid, &ap->pos, NULL);
 }
 
 void nav_reset_for_vehicle(int vehicleid)
@@ -586,13 +583,11 @@ void nav_reset_for_vehicle(int vehicleid)
 /* native Nav_Reset(vehicleid) */
 cell AMX_NATIVE_CALL Nav_Reset(AMX *amx, cell *params)
 {
-	void panel_reset_nav_for_passengers(AMX*, int);
-
 	int vid = params[1];
 	if (nav[vid] != NULL) {
 		free(nav[vid]);
 		nav[vid] = NULL;
-		panel_reset_nav_for_passengers(amx, vid);
+		panel_reset_nav_for_passengers(vid);
 		return 1;
 	}
 	return 0;
@@ -633,7 +628,7 @@ void nav_calc_ils_values(
 	*ilsx = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2);
 }
 
-void nav_update(AMX *amx, int vehicleid, struct vec3 *pos, float heading)
+void nav_update(int vehicleid, struct vec3 *pos, float heading)
 {
 	struct NAVDATA *n = nav[vehicleid];
 	float dx, dy;

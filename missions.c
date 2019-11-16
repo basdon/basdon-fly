@@ -71,9 +71,9 @@ int missions_is_player_on_mission(int playerid)
 	return activemission[playerid] != NULL;
 }
 
-void missions_create_tracker_socket(AMX *amx)
+void missions_create_tracker_socket()
 {
-	NC_ssocket_create_(SOCKET_UDP, &tracker);
+	tracker = NC_ssocket_create(SOCKET_UDP);
 	if (tracker == SOCKET_INVALID_SOCKET) {
 		logprintf("failed to create flighttracker socket");
 	} else {
@@ -84,7 +84,7 @@ void missions_create_tracker_socket(AMX *amx)
 	}
 }
 
-void missions_destroy_tracker_socket(AMX *amx)
+void missions_destroy_tracker_socket()
 {
 	if (tracker != SOCKET_INVALID_SOCKET) {
 		*buf32 = 0x05594C46;
@@ -92,11 +92,11 @@ void missions_destroy_tracker_socket(AMX *amx)
 	}
 }
 
-void missions_init(AMX *amx)
+void missions_init()
 {
 	struct AIRPORT *ap;
 	struct MISSIONPOINT *msp;
-	int apid, lastapid, i, dbcache;
+	int apid, lastapid, i, cacheid, *f = nc_params + 2;
 
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		activemission[i] = NULL;
@@ -104,15 +104,18 @@ void missions_init(AMX *amx)
 
 	/*load missionpoints*/
 	amx_SetUString(buf144,
-		"SELECT a,i,x,y,z,name,t "
+		"SELECT a,i,x,y,z,t,name "
 		"FROM msp "
 		"ORDER BY a ASC,i ASC",
 		144);
-	NC_mysql_query_(buf144a, &dbcache);
-	NC_cache_get_row_count_(&i);
+	cacheid = NC_mysql_query(buf144a);
+	i = NC_cache_get_row_count();
 	lastapid = -1;
+	nc_params[3] = buf144a;
 	while (i--) {
-		NC_cache_get_field_int(i, 0, &apid);
+		NC_PARS(2);
+		nc_params[1] = i;
+		apid = (*f = 0, NC(n_cache_get_field_i));
 		if (apid != lastapid) {
 			lastapid = apid;
 			ap = airports + apid;
@@ -125,17 +128,18 @@ void missions_init(AMX *amx)
 		msp->next = NULL;
 		msp->ap = ap;
 		msp->currentlyactivemissions = 0;
-		NC_cache_get_field_int(i, 1, &msp->id);
-		NC_cache_get_field_flt(i, 2, msp->x);
-		NC_cache_get_field_flt(i, 3, msp->y);
-		NC_cache_get_field_flt(i, 4, msp->z);
-		NC_cache_get_field_str(i, 6, buf32a);
-		NC_cache_get_field_int(i, 6, &msp->type);
+		msp->id = (unsigned short) (*f = 1, NC(n_cache_get_field_i));
+		msp->x = (*f = 2, NC(n_cache_get_field_f));
+		msp->y = (*f = 3, NC(n_cache_get_field_f));
+		msp->z = (*f = 4, NC(n_cache_get_field_f));
+		msp->type = (*f = 5, NC(n_cache_get_field_i));
+		NC_PARS(3);
+		*f = 6; NC(n_cache_get_field_s);
 		amx_GetUString(msp->name, buf32, MAX_MSP_NAME + 1);
 		ap->missiontypes |= msp->type;
 		ap->num_missionpts++;
 	}
-	NC_cache_delete(dbcache);
+	NC_cache_delete(cacheid);
 
 	/*end unfinished dangling flights*/
 	amx_SetUString(buf144,
@@ -232,7 +236,7 @@ float missions_get_vehicle_maximum_speed(int model)
 	case MODEL_SKIMMER: return 135.0f / 270.0f * 81.6f;
 	default:
 		logprintf("mission_get_vehicle_maximum_speed: "
-			"unknown model: %d", model);
+			"unk model: %d", model);
 	case MODEL_SHAMAL:
 	case MODEL_HYDRA:
 	case MODEL_ANDROM:
@@ -268,7 +272,7 @@ float missions_get_vehicle_paymp(int model)
 	case MODEL_RUSTLER: return 270.0f / 235.0f;
 	case MODEL_SKIMMER: return 270.0f / 135.0f;
 	default:
-		logprintf("mission_get_vehicle_paymp: unknown model: %d", model);
+		logprintf("mission_get_vehicle_paymp: unk model: %d", model);
 		return 1.0f;
 	}
 }
@@ -361,7 +365,7 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 */
 static int dev_show_closest_point = 0;
 
-void dev_missions_toggle_closest_point(AMX *amx)
+void dev_missions_toggle_closest_point()
 {
 	int i;
 	char buf[144];
@@ -375,13 +379,14 @@ void dev_missions_toggle_closest_point(AMX *amx)
 	NC_SendClientMessageToAll(-1, buf144a);
 }
 
-void dev_missions_update_closest_point(AMX *amx)
+void dev_missions_update_closest_point()
 {
 	static struct MISSIONPOINT *dev_closest_point[MAX_PLAYERS];
 
 	const float size = 11.0f;
 	int i, playerid;
-	float px, py, dx, dy, shortestdistance, dist;
+	struct vec3 ppos;
+	float dx, dy, shortestdistance, dist;
 	struct AIRPORT *ap, *apend, *closestap;
 	struct MISSIONPOINT *mp, *closestmp;
 
@@ -393,15 +398,13 @@ void dev_missions_update_closest_point(AMX *amx)
 
 	for (i = 0; i < playercount; i++) {
 		playerid = players[i];
-		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
-		px = amx_ctof(*buf32);
-		py = amx_ctof(*buf64);
+		common_GetPlayerPos(playerid, &ppos);
 		shortestdistance = 0x7F800000;
 		closestap = NULL;
 		ap = airports;
 		while (ap != apend) {
-			dx = ap->pos.x - px;
-			dy = ap->pos.y - py;
+			dx = ap->pos.x - ppos.x;
+			dy = ap->pos.y - ppos.y;
 			dist = dx * dx + dy * dy;
 			if (dist < shortestdistance) {
 				shortestdistance = dist;
@@ -416,8 +419,8 @@ void dev_missions_update_closest_point(AMX *amx)
 		closestmp = NULL;
 		mp = closestap->missionpoints;
 		while (mp) {
-			dx = mp->x - px;
-			dy = mp->y - py;
+			dx = mp->x - ppos.x;
+			dy = mp->y - ppos.y;
 			dist = dx * dx + dy * dy;
 			if (dist < shortestdistance) {
 				shortestdistance = dist;
@@ -427,13 +430,13 @@ void dev_missions_update_closest_point(AMX *amx)
 		}
 		if (closestmp && dev_closest_point[playerid] != closestmp) {
 			dev_closest_point[playerid] = closestmp;
-			nc_params[0] = 9;
+			NC_PARS(9);
 			nc_params[1] = playerid;
 			nc_params[2] = 2;
-			nc_params[3] = nc_params[6] = amx_ftoc(closestmp->x);
-			nc_params[4] = nc_params[7] = amx_ftoc(closestmp->y);
-			nc_params[5] = nc_params[8] = amx_ftoc(closestmp->z);
-			nc_params[9] = amx_ftoc(size);
+			nc_paramf[3] = nc_paramf[6] = closestmp->x;
+			nc_paramf[4] = nc_paramf[7] = closestmp->y;
+			nc_paramf[5] = nc_paramf[8] = closestmp->z;
+			nc_paramf[9] = size;
 			NC(n_SetPlayerRaceCheckpoint);
 		}
 	}
@@ -448,7 +451,7 @@ Find a random endpoint for given missiontype, skipping airport of startpoint.
 */
 static
 struct MISSIONPOINT *missions_get_random_endpoint(
-	AMX *amx, int missiontype, struct MISSIONPOINT *startpoint)
+	int missiontype, struct MISSIONPOINT *startpoint)
 {
 	struct MISSIONPOINT *msp, **possible_missionpts;
 	struct AIRPORT *airport, **possible_airports;
@@ -476,8 +479,7 @@ struct MISSIONPOINT *missions_get_random_endpoint(
 	case 0: airport = NULL; break;
 	case 1: airport = possible_airports[0]; break;
 	default:
-		NC_random(num_possible_airports);
-		airport = possible_airports[nc_result];
+		airport = possible_airports[NC_random(num_possible_airports)];
 		break;
 	}
 
@@ -511,8 +513,7 @@ struct MISSIONPOINT *missions_get_random_endpoint(
 		msp = possible_missionpts[0];
 		break;
 	default:
-		NC_random(num_possible_missionpts);
-		msp = possible_missionpts[nc_result];
+		msp = possible_missionpts[NC_random(num_possible_missionpts)];
 		break;
 	}
 	free(possible_missionpts);
@@ -528,8 +529,7 @@ distance.
 @return NULL on no applicable points found
 */
 static
-struct MISSIONPOINT *missions_get_startpoint(
-	int missiontype, struct vec3 *ppos)
+struct MISSIONPOINT *missions_get_startpoint(int missiontype, struct vec3 *ppos)
 {
 	struct AIRPORT *airport;
 	struct MISSIONPOINT *msp, **free_missionpts;
@@ -589,7 +589,7 @@ struct MISSIONPOINT *missions_get_startpoint(
 	return msp;
 }
 
-void missions_cb_create(AMX *amx, void* data)
+void missions_cb_create(void* data)
 {
 	static const char *AUTOWORKNOTICE = "Constant work is ON, "
 		"a new mission will be started when you complete this one "
@@ -606,13 +606,13 @@ void missions_cb_create(AMX *amx, void* data)
 		return;
 	}
 
-	common_hide_gametext_for_player(amx, playerid);
+	common_hide_gametext_for_player(playerid);
 	tracker_afk_packet_sent[playerid] = 0;
 
-	NC_cache_insert_id_(&mission->id);
+	mission->id = NC_cache_insert_id();
 	mission->stage = MISSION_STAGE_PRELOAD;
 
-	nc_params[0] = 9;
+	NC_PARS(9);
 	nc_params[1] = playerid;
 	nc_params[2] = 2;
 	nc_paramf[3] = mission->startpoint->x;
@@ -640,7 +640,6 @@ void missions_cb_create(AMX *amx, void* data)
 
 	if (prefs[playerid] & PREF_WORK_AUTONAV) {
 		nav_navigate_to_airport(
-			amx,
 			mission->veh->spawnedvehicleid,
 			mission->veh->model,
 			mission->startpoint->ap);
@@ -659,14 +658,14 @@ void missions_cb_create(AMX *amx, void* data)
 }
 
 /**
-Cleanup stuff and free memory. Does not query. Does send a tracker msg.
+Cleanup a mission and free memory. Does not query. Does send a tracker msg.
 
 Call when ending a mission.
 
 @param mission mission of the player. Must match with given playerid.
 */
 static
-void missions_cleanup(AMX *amx, struct MISSION *mission, int playerid)
+void missions_cleanup(struct MISSION *mission, int playerid)
 {
 	/* flight tracker packet 3 */
 	buf32[0] = 0x03594C46;
@@ -687,8 +686,7 @@ void missions_cleanup(AMX *amx, struct MISSION *mission, int playerid)
 @param reason one of MISSION_STATE_ constants
 */
 static
-void missions_end_unfinished(
-	AMX *amx, struct MISSION *mission, int playerid, int reason)
+void missions_end_unfinished(struct MISSION *mission, int playerid, int reason)
 {
 	sprintf(cbuf144,
 	        "UPDATE flg "
@@ -700,23 +698,23 @@ void missions_end_unfinished(
 	amx_SetUString(buf4096, cbuf144, 144);
 	NC_mysql_tquery_nocb(buf4096a);
 
-	missions_cleanup(amx, mission, playerid);
+	missions_cleanup(mission, playerid);
 }
 
-void missions_on_player_connect(AMX *amx, int playerid)
+void missions_on_player_connect(int playerid)
 {
-	nc_params[0] = 4;
+	NC_PARS(4);
 	nc_params[1] = playerid;
 	nc_paramf[2] = 88.0f;
 	nc_paramf[3] = 425.0f;
 	nc_params[4] = underscorestringa;
-	NC_(n_CreatePlayerTextDraw, nc_params + 2);
+	nc_params[2] = NC(n_CreatePlayerTextDraw);
 	ptxt_satisfaction[playerid] = nc_params[2];
 	nc_paramf[3] = 0.3f;
 	nc_paramf[4] = 1.0f;
 	NC(n_PlayerTextDrawLetterSize);
 
-	nc_params[0] = 3;
+	NC_PARS(3);
 	nc_params[3] = 255;
 	NC(n_PlayerTextDrawBackgroundColor);
 	nc_params[3] = 2;
@@ -729,37 +727,37 @@ void missions_on_player_connect(AMX *amx, int playerid)
 	NC(n_PlayerTextDrawColor);
 }
 
-void missions_on_player_death(AMX *amx, int playerid)
+void missions_on_player_death(int playerid)
 {
 	struct MISSION *mission;
-	int stopreason;
+	int stopreason, vehicleid;
 	float hp;
 
 	if ((mission = activemission[playerid]) != NULL) {
 		NC_DisablePlayerRaceCheckpoint(playerid);
 		stopreason = MISSION_STATE_DIED;
-		NC_GetPlayerVehicleID(playerid);
-		if (nc_result) {
-			hp = anticheat_NC_GetVehicleHealth(amx, nc_result);
+		vehicleid = NC_GetPlayerVehicleID(playerid);
+		if (vehicleid) {
+			hp = anticheat_NC_GetVehicleHealth(vehicleid);
 			if (hp <= 200.0f) {
 				stopreason = MISSION_STATE_CRASHED;
 			}
 		}
-		missions_end_unfinished(amx, mission, playerid, stopreason);
+		missions_end_unfinished(mission, playerid, stopreason);
 	}
 }
 
-void missions_on_player_disconnect(AMX *amx, int playerid)
+void missions_on_player_disconnect(int playerid)
 {
 	struct MISSION *miss;
 
 	if ((miss = activemission[playerid]) != NULL) {
 		missions_end_unfinished(
-			amx, miss, playerid, MISSION_STATE_ABANDONED);
+			miss, playerid, MISSION_STATE_ABANDONED);
 	}
 }
 
-void missions_on_weather_changed(AMX *amx, int weather)
+void missions_on_weather_changed(int weather)
 {
 	int bonusvalue, i;
 
@@ -778,8 +776,7 @@ void missions_on_weather_changed(AMX *amx, int weather)
 	default:
 		return;
 	}
-	NC_random(MISSION_WEATHERBONUS_DEVIATION);
-	bonusvalue += nc_result;
+	bonusvalue += NC_random(MISSION_WEATHERBONUS_DEVIATION);
 	i = playercount;
 	while (i--) {
 		if (activemission[players[i]] != NULL) {
@@ -789,7 +786,7 @@ void missions_on_weather_changed(AMX *amx, int weather)
 }
 
 void missions_send_tracker_data(
-	AMX *amx, int playerid, int vehicleid, float hp,
+	int playerid, int vehicleid, float hp,
 	struct vec3 *vpos, struct vec3 *vvel, int afk, int engine)
 {
 	struct MISSION *mission;
@@ -850,8 +847,8 @@ int missions_cmd_cancelmission(CMDPARAMS)
 
 	if ((mission = activemission[playerid]) != NULL) {
 		NC_DisablePlayerRaceCheckpoint(playerid);
-		money_take(amx, playerid, 5000);
-		missions_end_unfinished(amx, mission,
+		money_take(playerid, 5000);
+		missions_end_unfinished(mission,
 			playerid, MISSION_STATE_DECLINED);
 	} else {
 		amx_SetUString(buf144, NOMISSION, 144);
@@ -886,14 +883,13 @@ int missions_cmd_mission(CMDPARAMS)
 		return 1;
 	}
 
-	nc_params[0] = 1;
+	NC_PARS(1);
 	nc_params[1] = playerid;
-	NC(n_GetPlayerVehicleSeat);
-	if (nc_result != 0) {
+	if (NC(n_GetPlayerVehicleSeat) != 0) {
 		errmsg = (char*) MUSTBEDRIVER;
 		goto err;
 	}
-	NC_(n_GetPlayerVehicleID, &vehicleid);
+	vehicleid = NC(n_GetPlayerVehicleID);
 
 	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL) {
 		goto unknownvehicle;
@@ -923,17 +919,17 @@ unknownvehicle:
 		goto err;
 	}
 
-	common_GetPlayerPos(amx, playerid, &ppos);
+	common_GetPlayerPos(playerid, &ppos);
 
 	startpoint = missions_get_startpoint(missiontype, &ppos);
-	endpoint = missions_get_random_endpoint(amx, missiontype, startpoint);
+	endpoint = missions_get_random_endpoint(missiontype, startpoint);
 	/*endpoint will also be NULL when startpoint is NULL*/
 	if (endpoint == NULL) {
 		errmsg = (char*) NOMISS;
 		goto err;
 	}
 
-	vhp = anticheat_NC_GetVehicleHealth(amx, vehicleid);
+	vhp = anticheat_NC_GetVehicleHealth(vehicleid);
 
 	dx = startpoint->x - endpoint->x;
 	dy = startpoint->y - endpoint->y;
@@ -981,7 +977,7 @@ unknownvehicle:
 		startpoint->id,
 		endpoint->id,
 		mission->distance);
-	common_mysql_tquery(amx, cbuf4096 + 2000,
+	common_mysql_tquery(cbuf4096 + 2000,
 		missions_cb_create, (void*) MK_PLAYER_CC(playerid));
 
 	amx_SetUString(buf144, RETRIEV, 144);
@@ -996,25 +992,6 @@ err:
 /* native Missions_EndUnfinished(playerid, reason) */
 cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
 {
-	const int playerid = params[1], reason = params[2];
-	struct MISSION *mission;
-	char q[200];
-
-	if ((mission = activemission[playerid]) == NULL) {
-		return 0;
-	}
-
-	sprintf(q,
-	        "UPDATE flg "
-		"SET state=%d,tlastupdate=UNIX_TIMESTAMP(),adistance=%f "
-		"WHERE id=%d",
-	        reason,
-		mission->actualdistanceM,
-	        mission->id);
-	amx_SetUString(buf4096, q, sizeof(q));
-	NC_mysql_tquery_nocb(buf4096a);
-
-	missions_cleanup(amx, mission, playerid);
 	return 1;
 }
 
@@ -1137,7 +1114,6 @@ cell AMX_NATIVE_CALL Missions_PostLoad(AMX *amx, cell *params)
 
 	if (prefs[playerid] & PREF_WORK_AUTONAV) {
 		nav_navigate_to_airport(
-			amx,
 			mission->veh->spawnedvehicleid,
 			mission->veh->model,
 			mission->endpoint->ap);
@@ -1146,12 +1122,12 @@ cell AMX_NATIVE_CALL Missions_PostLoad(AMX *amx, cell *params)
 	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
 		sprintf(cbuf32, SATISFACTION_TEXT_FORMAT, 100);
 		amx_SetUString(buf32_1, cbuf32, 32);
-		nc_params[0] = 3;
+		NC_PARS(3);
 		nc_params[1] = playerid;
 		nc_params[2] = ptxt_satisfaction[playerid];
 		nc_params[3] = buf32_1a;
 		NC(n_PlayerTextDrawSetString);
-		nc_params[0] = 2;
+		NC_PARS(2);
 		NC(n_PlayerTextDrawShow);
 	}
 
@@ -1320,11 +1296,11 @@ cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
 	amx_GetAddr(amx, params[3], &addr);
 	*addr = ptotal;
 
-	missions_cleanup(amx, mission, playerid);
+	missions_cleanup(mission, playerid);
 	return 1;
 }
 
-void missions_update_satisfaction(AMX *amx, int pid, int vid, struct quat *vrot)
+void missions_update_satisfaction(int pid, int vid, struct quat *vrot)
 {
 	struct MISSION *miss;
 	int last_satisfaction;

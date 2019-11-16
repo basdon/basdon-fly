@@ -73,14 +73,14 @@ DIALOG_DUMMY can be used as dialog id if no response is handled.
          dialog was queued.
 */
 int dialog_NC_ShowPlayerDialog(
-	AMX*, int playerid, int dialogid, int style,
+	int playerid, int dialogid, int style,
 	char *caption, char *info,
 	char *button1, char *button2, int transactionid);
-int dialog_on_response(AMX*, int, int);
-void dialog_on_player_connect(AMX*, int playerid);
-void dialog_on_player_disconnect(AMX*, int playerid);
+int dialog_on_response(int, int);
+void dialog_on_player_connect(int playerid);
+void dialog_on_player_disconnect(int playerid);
 /**
 @return 0 when the response should be dropped
 */
-int dialog_on_response(AMX*, int playerid, int dialogid);
-void dialog_pop_queue(AMX*);
+int dialog_on_response(int playerid, int dialogid);
+void dialog_pop_queue();

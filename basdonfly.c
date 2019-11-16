@@ -113,8 +113,6 @@ FORWARD(Veh_UpdateServicePointTextId);
 FORWARD(Veh_UpdateServicePtsVisibility);
 FORWARD(Veh_UpdateSlot);
 
-static AMX *gamemode_amx = NULL;
-
 int temp_afk[MAX_PLAYERS];
 int _cc[MAX_PLAYERS];
 
@@ -151,12 +149,12 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 {
 }
 
-#define amx gamemode_amx
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
 	static int count = 0;
 #ifdef LOG_SLOW_TICKS
 	static int tickcount = 0;
+	int newtickcount;
 #endif /*LOG_SLOW_TICKS*/
 
 	int n = playercount;
@@ -164,41 +162,41 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	while (n--) {
 		if (kickdelay[players[n]]) {
 			if(--kickdelay[players[n]]) {
-				nc_params[0] = 1;
+				NC_PARS(1);
 				nc_params[1] = players[n];
-				NC(n_Kick);
+				NC(n_Kick_);
 			}
 		}
 	}
 
 	/*occurs when doing gmx*/
-	if (gamemode_amx == NULL) {
+	if (amx == NULL) {
 		count = 0;
 		return;
 	}
 
-	timer_tick(amx);
+	timer_tick();
 
 	if (count++ >= 19) {
 		count = 0;
 
 #ifdef LOG_SLOW_TICKS
-		NC_tickcount();
-		if (tickcount && nc_result - tickcount > 120) {
-			logprintf("slow 20 ticks %d", nc_result - tickcount);
+		newtickcount = NC_tickcount();
+		if (tickcount && newtickcount - tickcount > 120) {
+			logprintf("slow 20 ticks %d", newtickcount - tickcount);
 		}
-		tickcount = nc_result;
+		tickcount = newtickcount;
 #endif /*LOG_SLOW_TICKS*/
 
 		/*timer100*/
 		anticheat_decrease_flood();
-		maps_process_tick(amx);
+		maps_process_tick();
 #ifdef DEV
-		dev_missions_update_closest_point(amx);
+		dev_missions_update_closest_point();
 #endif /*DEV*/
-		panel_timed_update(amx);
+		panel_timed_update();
 
-		timecyc_tick(amx);
+		timecyc_tick();
 	}
 }
 #undef amx
@@ -206,7 +204,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 static
 cell AMX_NATIVE_CALL REMOVEME_onplayerreqclassimpl(AMX *amx, cell *params)
 {
-	class_on_player_request_class(amx,params[1],params[2]);
+	class_on_player_request_class(params[1],params[2]);
 	return 1;
 }
 
@@ -234,8 +232,8 @@ static
 cell AMX_NATIVE_CALL REMOVEME_onplayerwasafk(AMX *amx, cell *params)
 {
 	temp_afk[params[1]] = 0;
-	panel_on_player_was_afk(amx, params[1]);
-	timecyc_on_player_was_afk(amx, params[1]);
+	panel_on_player_was_afk(params[1]);
+	timecyc_on_player_was_afk(params[1]);
 	return 1;
 }
 
@@ -255,7 +253,7 @@ cell AMX_NATIVE_CALL REMOVEME_getplayerodo(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL REMOVEME_setplayermoney(AMX *amx, cell *params)
 {
-	money_set(amx,params[1], params[2]);
+	money_set(params[1], params[2]);
 	return 1;
 }
 
@@ -366,10 +364,10 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx)
 	return amx_Register(amx, PluginNatives, -1);
 }
 
-PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx)
+PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *a)
 {
-	if (amx == gamemode_amx) {
-		gamemode_amx = NULL;
+	if (amx == a) {
+		amx = NULL;
 		/*Most likely doing gmx for update, so the server needs
 		to restart (exit and start) to copy and load the new plugin.*/
 		buf32[0] = 'e'; buf32[1] = 'x'; buf32[2] = 'i'; buf32[3] = 't';

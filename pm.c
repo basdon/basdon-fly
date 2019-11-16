@@ -35,7 +35,7 @@ void pm_on_player_disconnect(int playerid)
 Sends a pm. Target player is assumed to be online.
 */
 static
-void pm_send(AMX *amx, int from, int to, char *msg)
+void pm_send(int from, int to, char *msg)
 {
 	static const char
 		*FROM_DIS = WARN"Your PMs are disabled, use /p to enable them.",
@@ -91,7 +91,7 @@ errmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		parseidx++;
 	}
 	if (cmdtext[parseidx]) {
-		pm_send(amx, playerid, targetid, (char*) cmdtext + parseidx);
+		pm_send(playerid, targetid, (char*) cmdtext + parseidx);
 	} else {
 		goto synerr;
 	}
@@ -118,7 +118,7 @@ int pm_cmd_r(CMDPARAMS)
 			amx_SetUString(buf144, INVALID, 144);
 			goto errmsg;
 		}
-		pm_send(amx, playerid, lastpmtarget[playerid],
+		pm_send(playerid, lastpmtarget[playerid],
 			(char*) cmdtext + parseidx);
 	} else {
 		amx_SetUString(buf144, SYN, 144);
