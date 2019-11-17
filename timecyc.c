@@ -590,31 +590,45 @@ void timecyc_reset()
 	lasttime = time_timestamp();
 }
 
+/**
+Syncs everyone's clock if there's no transition going on.
+
+Note: SA-MP syncs time for people with SetPlayerTime set every 5 minutes, so by
+doing it here that's being prevented.
+*/
+static
+void
+timecyc_sync_clocks()
+{
+	int i, playerid;
+
+	if (weather.current == weather.upcoming &&
+		weather.current == weather.locked)
+	{
+		NC_PARS(3);
+		nc_params[2] = time_h;
+		nc_params[3] = time_m;
+		i = playercount;
+		while (i--) {
+			playerid = players[i];
+			if (spawned[playerid] && !temp_afk[playerid] &&
+				timecycstate[playerid] == SYNC_STATE_NONE)
+			{
+				nc_params[1] = playerid;
+				NC(n_SetPlayerTime);
+			}
+		}
+	}
+}
+
 void timecyc_tick()
 {
 	unsigned long nowtime;
-	int i, playerid;
 
 	nowtime = time_timestamp();
 	if (nowtime - lasttime > 1000) {
 		lasttime += 1000;
 		if (time_m++ == 30) {
-			/*sync everyone on :30 when there's no transition*/
-			if (weather.current == weather.upcoming &&
-				weather.current == weather.locked)
-			{
-				i = playercount;
-				while (i--) {
-					playerid = players[i];
-					if (spawned[playerid] &&
-						!temp_afk[playerid] &&
-						timecycstate[playerid] ==
-							SYNC_STATE_NONE)
-					{
-						timecyc_sync(playerid);
-					}
-				}
-			}
 			goto timer30s;
 		} else if (time_m >= 60) {
 			time_m = 0;
@@ -639,6 +653,7 @@ timer30s:
 			anticheat_decrease_infractions();
 			dialog_pop_queue();
 			veh_commit_next_vehicle_odo_to_db();
+			timecyc_sync_clocks();
 		}
 	}
 }
@@ -657,6 +672,22 @@ int timecyc_cmd_dev_fweather(CMDPARAMS)
 		amx_SetUString(buf144, WARN"Syntax: /fweather <weather>", 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	}
+	return 1;
+}
+
+int timecyc_cmd_dev_timecyc(CMDPARAMS)
+{
+	sprintf(cbuf4096,
+		"%02d:%02d current %d upcoming %d locked %d "
+		"syncstate %d\n",
+		time_h,
+		time_m,
+		weather.current,
+		weather.upcoming,
+		weather.locked,
+		timecycstate[playerid]);
+	amx_SetUString(buf144, cbuf4096, 144);
+	NC_SendClientMessage(playerid, -1, buf144a);
 	return 1;
 }
 

@@ -159,6 +159,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "//owner", GROUPS_ALL, cmd_dev_owner },
 	{ 0, "/fweather", GROUPS_ALL, timecyc_cmd_dev_fweather },
 	{ 0, "/nweather", GROUPS_ALL, timecyc_cmd_dev_nweather },
+	{ 0, "/timecyc", GROUPS_ALL, timecyc_cmd_dev_timecyc },
 	{ 0, "/tweather", GROUPS_ALL, timecyc_cmd_dev_tweather },
 	{ 0, "/v", GROUPS_ALL, cmd_dev_v },
 #endif /*DEV*/
@@ -183,9 +184,9 @@ static struct COMMAND cmds[] = {
 	{ 0, "/preferences", GROUPS_ALL, prefs_cmd_preferences },
 	{ 0, "/protip", GROUPS_ALL, protips_cmd_protip },
 	{ 0, "/r", GROUPS_ALL, pm_cmd_r },
-	{ 0, "/s", GROUPS_ALL, missions_cmd_cancelmission },
 	{ 0, "/reclass", GROUPS_ALL, cmd_reclass },
 	{ 0, "/respawn", GROUPS_ALL, cmd_respawn },
+	{ 0, "/s", GROUPS_ALL, missions_cmd_cancelmission },
 	{ 0, "/spray", GROUPS_ALL, cmd_spray },
 	{ 0, "/vor", GROUPS_ALL, nav_cmd_vor },
 	{ 0, "/w", GROUPS_ALL, missions_cmd_mission },

@@ -13,6 +13,10 @@ Dev /fweather <weather> command to force weather now.
 */
 int timecyc_cmd_dev_fweather(CMDPARAMS);
 /**
+Dev /timecyc to see current timecyc data.
+*/
+int timecyc_cmd_dev_timecyc(CMDPARAMS);
+/**
 Dev /tweather <weather> command to change weather to given id, with transition.
 */
 int timecyc_cmd_dev_tweather(CMDPARAMS);
