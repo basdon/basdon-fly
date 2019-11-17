@@ -129,7 +129,7 @@ void spawn_on_player_spawn(int playerid)
 
 	/*TODO: spawn preference*/
 	if (numspawns[klass] > 1) {
-		dialog_NC_ShowPlayerDialog(
+		dialog_ShowPlayerDialog(
 			playerid, DIALOG_SPAWN_SELECTION,
 			DIALOG_STYLE_LIST, "Spawn selection",
 			spawn_list_text[klass],

@@ -73,7 +73,7 @@ DIALOG_DUMMY can be used as dialog id if no response is handled.
 @returns 0 on failure, player is not connected. NOTE: also returns 1 if the
          dialog was queued.
 */
-int dialog_NC_ShowPlayerDialog(
+int dialog_ShowPlayerDialog(
 	int playerid, int dialogid, int style,
 	char *caption, char *info,
 	char *button1, char *button2, int transactionid);

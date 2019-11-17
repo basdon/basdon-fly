@@ -49,7 +49,7 @@ void prefs_show_dialog(int playerid)
 		p & PREF_WORK_AUTONAV);
 	*(--bp) = 0;
 
-	dialog_NC_ShowPlayerDialog(
+	dialog_ShowPlayerDialog(
 		playerid,
 		DIALOG_PREFERENCES,
 		DIALOG_STYLE_TABLIST,

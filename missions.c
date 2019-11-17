@@ -1108,7 +1108,7 @@ void missions_after_unload(struct MISSION *miss, int playerid, float vehhp)
 	}
 	dlg += missions_append_pay(dlg, "\n\n\t{ffffff}Total Pay: ", ptotal);
 	*--dlg = 0;
-	dialog_NC_ShowPlayerDialog(
+	dialog_ShowPlayerDialog(
 		playerid,
 		DIALOG_DUMMY,
 		DIALOG_STYLE_MSGBOX,

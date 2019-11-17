@@ -225,7 +225,7 @@ int airport_cmd_nearest(CMDPARAMS)
 		b += sprintf(b, "\t%s\t[%s]", ap->name, ap->code);
 	}
 
-	dialog_NC_ShowPlayerDialog(
+	dialog_ShowPlayerDialog(
 		playerid,
 		DIALOG_AIRPORT_NEAREST,
 		DIALOG_STYLE_TABLIST,
@@ -254,7 +254,7 @@ int airport_cmd_beacons(CMDPARAMS)
 	if (b == buf) {
 		strcpy(buf, " None!");
 	}
-	dialog_NC_ShowPlayerDialog(
+	dialog_ShowPlayerDialog(
 		playerid,
 		DIALOG_DUMMY,
 		DIALOG_STYLE_MSGBOX,
@@ -316,7 +316,7 @@ void airport_list_dialog_response(int playerid, int response, int idx)
 	}
 	b += sprintf(b, "\nHelipads:\t%d", helipads);
 
-	dialog_NC_ShowPlayerDialog(
+	dialog_ShowPlayerDialog(
 		playerid,
 		DIALOG_DUMMY,
 		DIALOG_STYLE_MSGBOX,

@@ -118,7 +118,7 @@ void dialog_queue(
 	prev->next = data;
 }
 
-int dialog_NC_ShowPlayerDialog(
+int dialog_ShowPlayerDialog(
 	int playerid, int dialogid, int style,
 	char *caption, char *info,
 	char *button1, char *button2, int transactionid)
@@ -171,8 +171,8 @@ void dialog_pop_queue()
 				transaction[playerid] == q->transactionid))
 		{
 			dialogqueue[playerid] = q->next;
-			dialog_NC_ShowPlayerDialog(
-						playerid, q->dialogid, q->style,
+			dialog_ShowPlayerDialog(
+				playerid, q->dialogid, q->style,
 				q->caption, q->info, q->button1, q->button2,
 				q->transactionid);
 			free(q);
@@ -194,7 +194,7 @@ cell AMX_NATIVE_CALL Dialog_ShowPlayerDialog(AMX *amx, cell *params)
 	amx_GetUString(b32, addr, 32);
 	amx_GetAddr(amx, params[7], &addr);
 	amx_GetUString(b32_1, addr, 32);
-	*addr = dialog_NC_ShowPlayerDialog(
+	*addr = dialog_ShowPlayerDialog(
 		params[1], params[2], params[3],
 		b64, b4096, b32, b32_1,
 		params[0] < 8 ? -1 : params[8]);
