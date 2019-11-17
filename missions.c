@@ -593,74 +593,6 @@ struct MISSIONPOINT *missions_get_startpoint(int missiontype, struct vec3 *ppos)
 	return msp;
 }
 
-void missions_cb_create(void* data)
-{
-	static const char *AUTOWORKNOTICE = "Constant work is ON, "
-		"a new mission will be started when you complete this one "
-		"(/autow to disable).";
-
-	struct MISSION *mission;
-	unsigned int cc = (int) data;
-	int playerid;
-
-	playerid = PLAYER_CC_GETID(cc);
-	if (!PLAYER_CC_CHECK(cc, playerid) ||
-		(mission = activemission[playerid]) == NULL)
-	{
-		return;
-	}
-
-	common_hide_gametext_for_player(playerid);
-	tracker_afk_packet_sent[playerid] = 0;
-
-	mission->id = NC_cache_insert_id();
-	mission->stage = MISSION_STAGE_PRELOAD;
-
-	NC_PARS(9);
-	nc_params[1] = playerid;
-	nc_params[2] = 2;
-	nc_paramf[3] = mission->startpoint->pos.x;
-	nc_paramf[4] = mission->startpoint->pos.y;
-	nc_paramf[5] = mission->startpoint->pos.z;
-	nc_paramf[6] = nc_paramf[7] = nc_paramf[8] = 0.0f;
-	nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
-	NC(n_SetPlayerRaceCheckpoint);
-
-	sprintf(cbuf4096,
-		"Flight from %s (%s) %s to %s (%s) %s",
-		mission->startpoint->ap->name,
-		mission->startpoint->ap->beacon,
-		mission->startpoint->name,
-		mission->endpoint->ap->name,
-		mission->endpoint->ap->beacon,
-		mission->endpoint->name);
-	amx_SetUString(buf144, cbuf4096, 144);
-	NC_SendClientMessage(playerid, COL_MISSION, buf144a);
-
-	if (prefs[playerid] & PREF_CONSTANT_WORK) {
-		amx_SetUString(buf144, AUTOWORKNOTICE, 144);
-		NC_SendClientMessage(playerid, COL_SAMP_GREY, buf144a);
-	}
-
-	if (prefs[playerid] & PREF_WORK_AUTONAV) {
-		nav_navigate_to_airport(
-			mission->veh->spawnedvehicleid,
-			mission->veh->model,
-			mission->startpoint->ap);
-	}
-
-	/* flight tracker packet 1 */
-	buf32[0] = 0x01594C46;
-	buf32[1] = mission->id;
-	*((float*) (cbuf32 + 8)) = model_fuel_capacity(mission->veh->model);
-	*((short*) (cbuf32 + 12)) = (short) mission->veh->model;
-	cbuf32[14] = pdata[playerid]->namelen;
-	memset(cbuf32 + 15, 0, 24); /* don't leak random data */
-	strcpy(cbuf32 + 15, pdata[playerid]->name);
-	/*buf32 is len 32 * 4 so 40 is fine*/
-	NC_ssocket_send(tracker, buf32a, 40);
-}
-
 /**
 Cleanup a mission and free memory. Does not query. Does send a tracker msg.
 
@@ -761,8 +693,111 @@ void missions_on_player_disconnect(int playerid)
 	}
 }
 
+struct MISSION_CB_DATA {
+	int player_cc;
+	struct MISSION *mission;
+};
+
+struct MISSION_LOAD_UNLOAD_DATA {
+	struct MISSION_CB_DATA cbdata;
+	char isload;
+	float vehiclehp;
+};
+
+/**
+Starts the FLIGHT stage of the mission.
+
+This is called either by missions_cb_create or missions_after_load, which ever
+comes last (query is started when missions starts and might be ongoing during
+PRELOAD/LOAD stages).
+*/
+static
+void missions_start_flight(int playerid, struct MISSION *mission)
+{
+	if (prefs[playerid] & PREF_WORK_AUTONAV) {
+		nav_navigate_to_airport(
+			mission->veh->spawnedvehicleid,
+			mission->veh->model,
+			mission->endpoint->ap);
+	}
+
+	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
+		sprintf(cbuf32, SATISFACTION_TEXT_FORMAT, 100);
+		amx_SetUString(buf32_1, cbuf32, 32);
+		NC_PARS(3);
+		nc_params[1] = playerid;
+		nc_params[2] = ptxt_satisfaction[playerid];
+		nc_params[3] = buf32_1a;
+		NC(n_PlayerTextDrawSetString);
+		NC_PARS(2);
+		NC(n_PlayerTextDrawShow);
+	}
+
+	mission->stage = MISSION_STAGE_FLIGHT;
+
+	NC_PARS(9);
+	nc_params[1] = playerid;
+	nc_params[2] = MISSION_CHECKPOINT_TYPE;
+	nc_paramf[3] = nc_paramf[6] = mission->endpoint->pos.x;
+	nc_paramf[4] = nc_paramf[7] = mission->endpoint->pos.y;
+	nc_paramf[5] = nc_paramf[8] = mission->endpoint->pos.z;
+	nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
+	NC(n_SetPlayerRaceCheckpoint);
+
+	common_hide_gametext_for_player(playerid);
+	NC_TogglePlayerControllable(playerid, 1);
+
+	sprintf(cbuf4096,
+	        "UPDATE flg "
+		"SET tload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP() "
+		"WHERE id=%d",
+	        mission->id);
+	amx_SetUString(buf144, cbuf4096, 144);
+	NC_mysql_tquery_nocb(buf144a);
+}
+
+/**
+Called when mission create query has been executed.
+*/
+static
+void missions_querycb_create(void* d)
+{
+	struct MISSION_CB_DATA *data;
+	struct MISSION *mission;
+	int playerid;
+
+	data = (struct MISSION_CB_DATA*) d;
+	playerid = PLAYER_CC_GETID(data->player_cc);
+	if (!PLAYER_CC_CHECK(data->player_cc, playerid) ||
+		activemission[playerid] != data->mission)
+	{
+		goto ret;
+	}
+
+	mission = data->mission;
+	mission->id = NC_cache_insert_id();
+
+	/* flight tracker packet 1 */
+	buf32[0] = 0x01594C46;
+	buf32[1] = mission->id;
+	*((float*) (cbuf32 + 8)) = model_fuel_capacity(mission->veh->model);
+	*((short*) (cbuf32 + 12)) = (short) mission->veh->model;
+	cbuf32[14] = pdata[playerid]->namelen;
+	memset(cbuf32 + 15, 0, 24); /* don't leak random data */
+	strcpy(cbuf32 + 15, pdata[playerid]->name);
+	/*buf32 is len 32 * 4 so 40 is fine*/
+	NC_ssocket_send(tracker, buf32a, 40);
+
+	if (mission->stage == MISSION_STAGE_POSTLOAD) {
+		/*loading timer already done, start flight stage*/
+		missions_start_flight(playerid, mission);
+	}
+
+ret:
+	free(d);
+}
+
 static const char
-	*RETRIEV = "~b~Retrieving flight data...",
 	*NOTYPES = WARN"This vehicle can't complete any type of missions!",
 	*NOMISS = WARN"There are no missions available for this type "
 		"of vehicle!",
@@ -775,6 +810,11 @@ Starts a mission for giving player that is in given vehicle.
 static
 void missions_start_mission(int playerid)
 {
+	static const char *AUTOWORKNOTICE = "Constant work is ON, "
+		"a new mission will be started when you complete this one "
+		"(/autow to disable).";
+
+	struct MISSION_CB_DATA *cbdata;
 	struct MISSION *mission;
 	struct MISSIONPOINT *startpoint, *endpoint;
 	struct dbvehicle *veh;
@@ -836,7 +876,7 @@ unknownvehicle:
 
 	activemission[playerid] = mission = malloc(sizeof(struct MISSION));
 	mission->id = -1;
-	mission->stage = MISSION_STAGE_CREATE;
+	mission->stage = MISSION_STAGE_PRELOAD;
 	mission->missiontype = missiontype;
 	mission->startpoint = startpoint;
 	mission->endpoint = endpoint;
@@ -877,74 +917,71 @@ unknownvehicle:
 		startpoint->id,
 		endpoint->id,
 		mission->distance);
-	common_mysql_tquery(cbuf4096 + 2000,
-		missions_cb_create, (void*) MK_PLAYER_CC(playerid));
+	cbdata = malloc(sizeof(struct MISSION_CB_DATA));
+	cbdata->mission = mission;
+	cbdata->player_cc = MK_PLAYER_CC(playerid);
+	common_mysql_tquery(cbuf4096 + 2000, missions_querycb_create, cbdata);
 
-	amx_SetUString(buf144, RETRIEV, 144);
-	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+	tracker_afk_packet_sent[playerid] = 0;
+
+	NC_PARS(9);
+	nc_params[1] = playerid;
+	nc_params[2] = 2;
+	nc_paramf[3] = mission->startpoint->pos.x;
+	nc_paramf[4] = mission->startpoint->pos.y;
+	nc_paramf[5] = mission->startpoint->pos.z;
+	nc_paramf[6] = nc_paramf[7] = nc_paramf[8] = 0.0f;
+	nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
+	NC(n_SetPlayerRaceCheckpoint);
+
+	sprintf(cbuf4096,
+		"Flight from %s (%s) %s to %s (%s) %s",
+		mission->startpoint->ap->name,
+		mission->startpoint->ap->beacon,
+		mission->startpoint->name,
+		mission->endpoint->ap->name,
+		mission->endpoint->ap->beacon,
+		mission->endpoint->name);
+	amx_SetUString(buf144, cbuf4096, 144);
+	NC_SendClientMessage(playerid, COL_MISSION, buf144a);
+
+	if (prefs[playerid] & PREF_CONSTANT_WORK) {
+		amx_SetUString(buf144, AUTOWORKNOTICE, 144);
+		NC_SendClientMessage(playerid, COL_SAMP_GREY, buf144a);
+	}
+
+	if (prefs[playerid] & PREF_WORK_AUTONAV) {
+		nav_navigate_to_airport(
+			mission->veh->spawnedvehicleid,
+			mission->veh->model,
+			mission->startpoint->ap);
+	}
 	return;
 err:
 	amx_SetUString(buf144, errmsg, 144);
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 }
 
-struct MISSION_LOAD_UNLOAD_DATA {
-	char isload;
-	int player_cc;
-	float vehiclehp;
-	struct MISSION *mission;
-};
-
 /**
 Called from timer callback for mission load checkpoint.
 */
 static
-void missions_after_load(struct MISSION *mission, int playerid)
+void missions_after_load(int playerid, struct MISSION *mission)
 {
-	if (prefs[playerid] & PREF_WORK_AUTONAV) {
-		nav_navigate_to_airport(
-			mission->veh->spawnedvehicleid,
-			mission->veh->model,
-			mission->endpoint->ap);
+	if (mission->id != -1) {
+		/*create query finished, the mission can be started*/
+		missions_start_flight(playerid, mission);
+	} else {
+		/*otherwise missions_querycb_create will start it*/
+		mission->stage = MISSION_STAGE_POSTLOAD;
 	}
-
-	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
-		sprintf(cbuf32, SATISFACTION_TEXT_FORMAT, 100);
-		amx_SetUString(buf32_1, cbuf32, 32);
-		NC_PARS(3);
-		nc_params[1] = playerid;
-		nc_params[2] = ptxt_satisfaction[playerid];
-		nc_params[3] = buf32_1a;
-		NC(n_PlayerTextDrawSetString);
-		NC_PARS(2);
-		NC(n_PlayerTextDrawShow);
-	}
-
-	mission->stage = MISSION_STAGE_FLIGHT;
-
-	NC_PARS(9);
-	nc_params[1] = playerid;
-	nc_params[2] = MISSION_CHECKPOINT_TYPE;
-	nc_paramf[3] = nc_paramf[6] = mission->endpoint->pos.x;
-	nc_paramf[4] = nc_paramf[7] = mission->endpoint->pos.y;
-	nc_paramf[5] = nc_paramf[8] = mission->endpoint->pos.z;
-	nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
-	NC(n_SetPlayerRaceCheckpoint);
-
-	sprintf(cbuf4096,
-	        "UPDATE flg "
-		"SET tload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP() "
-		"WHERE id=%d",
-	        mission->id);
-	amx_SetUString(buf144, cbuf4096, 144);
-	NC_mysql_tquery_nocb(buf144a);
 }
 
 /**
 Called from timer callback for mission unload checkpoint.
 */
 static
-void missions_after_unload(struct MISSION *miss, int playerid, float vehhp)
+void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 {
 	float paymp, mintime;
 	int ptax, psatisfaction, pdistance, pbonus = 0, ptotal, pdamage, pcheat;
@@ -1134,21 +1171,24 @@ int missions_after_load_unload(void *d)
 	int playerid;
 
 	data = (struct MISSION_LOAD_UNLOAD_DATA*) d;
-	playerid = PLAYER_CC_GETID(data->player_cc);
-	if (!PLAYER_CC_CHECK(data->player_cc, playerid) ||
-		activemission[playerid] != data->mission)
+	playerid = PLAYER_CC_GETID(data->cbdata.player_cc);
+	if (!PLAYER_CC_CHECK(data->cbdata.player_cc, playerid) ||
+		activemission[playerid] != data->cbdata.mission)
 	{
 		goto ret;
 	}
 
 	/*TODO: what if vehicle is destroyed?*/
-	common_hide_gametext_for_player(playerid);
-	NC_TogglePlayerControllable(playerid, 1);
 
 	if (data->isload) {
-		missions_after_load(data->mission, playerid);
+		/*don't hide gametext or toggle player controllable,
+		query might still be ongoing*/
+		missions_after_load(playerid, data->cbdata.mission);
 	} else {
-		missions_after_unload(data->mission, playerid, data->vehiclehp);
+		common_hide_gametext_for_player(playerid);
+		NC_TogglePlayerControllable(playerid, 1);
+		missions_after_unload(playerid,
+			data->cbdata.mission, data->vehiclehp);
 	}
 ret:
 	free(d);
@@ -1163,7 +1203,7 @@ int missions_on_player_enter_race_checkpoint(int playerid)
 		*TOOFAST = WARN"You need to slow down to load/unload! "
 				"Re-enter the checkpoint.";
 
-	struct MISSION_LOAD_UNLOAD_DATA *cbdata;
+	struct MISSION_LOAD_UNLOAD_DATA *lddata;
 	struct MISSION *mission;
 	struct vec3 cppos, vpos, vvel;
 	struct dbvehicle *veh;
@@ -1215,29 +1255,29 @@ int missions_on_player_enter_race_checkpoint(int playerid)
 		nav_reset_for_vehicle(vehicleid);
 		panel_reset_nav_for_passengers(vehicleid);
 	}
-	cbdata = malloc(sizeof(struct MISSION_LOAD_UNLOAD_DATA));
-	cbdata->mission = mission;
-	cbdata->player_cc = MK_PLAYER_CC(playerid);
+	lddata = malloc(sizeof(struct MISSION_LOAD_UNLOAD_DATA));
+	lddata->cbdata.mission = mission;
+	lddata->cbdata.player_cc = MK_PLAYER_CC(playerid);
 
 	switch (mission->stage) {
 	case MISSION_STAGE_PRELOAD:
 		mission->stage = MISSION_STAGE_LOAD;
 		gametext = (char*) LOADING;
-		cbdata->isload = 1;
+		lddata->isload = 1;
 		break;
 	case MISSION_STAGE_FLIGHT:
 		mission->stage = MISSION_STAGE_UNLOAD;
 		gametext = (char*) UNLOADING;
-		cbdata->isload = 0;
-		NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
-		cbdata->vehiclehp = anticheat_GetVehicleHealth(vehicleid);
-		if (cbdata->vehiclehp < 251.0f) {
+		lddata->isload = 0;
+		lddata->vehiclehp = anticheat_GetVehicleHealth(vehicleid);
+		if (lddata->vehiclehp < 251.0f) {
 			NC_SetVehicleHealth(vehicleid, 300.0f);
 		}
+		NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
 		break;
 	}
 
-	timer_set(MISSION_LOAD_UNLOAD_TIME, missions_after_load_unload, cbdata);
+	timer_set(MISSION_LOAD_UNLOAD_TIME, missions_after_load_unload, lddata);
 	amx_SetUString(buf144, gametext, 144);
 	NC_GameTextForPlayer(playerid, buf144a, 0x8000000, 3);
 	return 1;

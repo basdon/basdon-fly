@@ -2,11 +2,11 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #define MISSION_STAGE_NOMISSION -1
-#define MISSION_STAGE_CREATE	1
-#define MISSION_STAGE_PRELOAD	2
-#define MISSION_STAGE_LOAD	4
-#define MISSION_STAGE_FLIGHT	8
-#define MISSION_STAGE_UNLOAD	16
+#define MISSION_STAGE_PRELOAD	1 /*taxiing to CP*/
+#define MISSION_STAGE_LOAD	2 /*loading timer*/
+#define MISSION_STAGE_POSTLOAD	4 /*loading done, but waiting for create query*/
+#define MISSION_STAGE_FLIGHT	8 /*flight*/
+#define MISSION_STAGE_UNLOAD	16 /*unloading timer*/
 
 #define MISSION_STATE_INPROGRESS 1
 #define MISSION_STATE_ABANDONED  2
