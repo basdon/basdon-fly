@@ -116,8 +116,8 @@ extern AMX_NATIVE n_tickcount;
 #define NC_PARS(X)
 #define NC_PARS_(X)
 #else
-#define NC_PARS(X) nc_params[0]=X
-#define NC_PARS_(X) nc_params[0]=X,
+#define NC_PARS(X) nc_params[0]=X<<2
+#define NC_PARS_(X) nc_params[0]=X<<2,
 #endif /*NO_NC_PARAM_SIZE*/
 
 extern AMX *amx;
