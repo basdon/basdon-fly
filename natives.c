@@ -100,7 +100,7 @@ AMX_NATIVE n_TogglePlayerSpectating;
 AMX_NATIVE n_cache_delete;
 AMX_NATIVE n_cache_get_row;
 AMX_NATIVE n_cache_get_row_count;
-AMX_NATIVE_FLOAT n_cache_get_row_float;
+AMX_NATIVE n_cache_get_row_float;
 AMX_NATIVE n_cache_get_row_int;
 AMX_NATIVE n_cache_insert_id;
 AMX_NATIVE n_mysql_tquery;
@@ -119,6 +119,8 @@ static cell nc_params_d[20];
 
 cell *nc_params = nc_params_d;
 float *nc_paramf = (float*) nc_params_d;
+
+cell tmpfloat;
 
 cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
 cell underscorestringa;

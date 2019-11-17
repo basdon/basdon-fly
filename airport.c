@@ -51,7 +51,7 @@ void airports_init()
 
 	/*load airports*/
 	amx_SetUString(buf144,
-		"SELECT c,e,n,b,x,y,z,flags "
+		"SELECT c,n,b,e,x,y,z,flags "
 		"FROM apt ORDER BY i ASC", 144);
 	cacheid = NC_mysql_query(buf144a);
 	rowcount = NC_cache_get_row_count();
@@ -77,9 +77,10 @@ void airports_init()
 		*field = 2; NC(n_cache_get_field_s);
 		amx_GetUString(ap->beacon, buf144, sizeof(ap->beacon));
 		NC_PARS(2);
-		ap->pos.x = (*field = 4, NC(n_cache_get_field_f));
-		ap->pos.y = (*field = 5, NC(n_cache_get_field_f));
-		ap->pos.z = (*field = 6, NC(n_cache_get_field_f));
+		ap->enabled = (char) (*field = 3, NC(n_cache_get_field_i));
+		ap->pos.x = (*field = 4, NCF(n_cache_get_field_f));
+		ap->pos.y = (*field = 5, NCF(n_cache_get_field_f));
+		ap->pos.z = (*field = 6, NCF(n_cache_get_field_f));
 		ap->flags = (*field = 7, NC(n_cache_get_field_i));
 	}
 noairports:
@@ -116,19 +117,17 @@ noairports:
 		ap->runways = rnw = malloc(sizeof(struct RUNWAY) * i);
 		ap->runwaysend = ap->runways + i;
 		nc_params[1] = rowcount;
-		nc_params[3] = buf144a;
+		nc_params[3] = buf32a;
 		while (i--) {
 			NC_PARS(2);
 			nc_params[1] = rowcount;
-			rnw->pos.x = (*field = 1, NC(n_cache_get_field_f));
-			rnw->pos.y = (*field = 2, NC(n_cache_get_field_f));
-			rnw->pos.z = (*field = 3, NC(n_cache_get_field_f));
+			rnw->pos.x = (*field = 1, NCF(n_cache_get_field_f));
+			rnw->pos.y = (*field = 2, NCF(n_cache_get_field_f));
+			rnw->pos.z = (*field = 3, NCF(n_cache_get_field_f));
 			rnw->nav = (*field = 4, NC(n_cache_get_field_i));
 			rnw->type = (*field = 5, NC(n_cache_get_field_i));
-
-			rnw->heading = (*field = 6, NC(n_cache_get_field_f));
+			rnw->heading = (*field = 6, NCF(n_cache_get_field_f));
 			rnw->headingr = rnw->heading * DEG_TO_RAD;
-
 			NC_PARS(3);
 			*field = 7; NC(n_cache_get_field_s);
 			sprintf(rnw->id, "%02.0f", rnw->heading / 10.0f);

@@ -163,10 +163,10 @@ void maps_load_from_db()
 			}
 			NC_PARS(2);
 			map->id = (*f = 1, NC(n_cache_get_field_i));
-			map->x = (*f = 2, NC(n_cache_get_field_f));
-			map->y = (*f = 3, NC(n_cache_get_field_f));
-			map->radius_in_sq = (*f = 4, NC(n_cache_get_field_f));
-			map->radius_out_sq = (*f = 5, NC(n_cache_get_field_f));
+			map->x = (*f = 2, NCF(n_cache_get_field_f));
+			map->y = (*f = 3, NCF(n_cache_get_field_f));
+			map->radius_in_sq = (*f = 4, NCF(n_cache_get_field_f));
+			map->radius_out_sq = (*f = 5, NCF(n_cache_get_field_f));
 			map->radius_in_sq *= map->radius_in_sq;
 			map->radius_out_sq *= map->radius_out_sq;
 		}

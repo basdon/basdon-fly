@@ -58,10 +58,10 @@ void spawn_init()
 		while (row != rows) {
 			nc_params[1] = row;
 			ap = (*field = 0, NC(n_cache_get_field_i));
-			sp->coords.x = (*field = 1, NC(n_cache_get_field_f));
-			sp->coords.y = (*field = 2, NC(n_cache_get_field_f));
-			sp->coords.z = (*field = 3, NC(n_cache_get_field_f));
-			sp->r = (*field = 4, NC(n_cache_get_field_f));
+			sp->coords.x = (*field = 1, NCF(n_cache_get_field_f));
+			sp->coords.y = (*field = 2, NCF(n_cache_get_field_f));
+			sp->coords.z = (*field = 3, NCF(n_cache_get_field_f));
+			sp->r = (*field = 4, NCF(n_cache_get_field_f));
 			txt += sprintf(txt, "%s\n", (airports + ap)->name);
 			sp++;
 			row++;

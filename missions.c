@@ -129,9 +129,9 @@ void missions_init()
 		msp->ap = ap;
 		msp->currentlyactivemissions = 0;
 		msp->id = (unsigned short) (*f = 1, NC(n_cache_get_field_i));
-		msp->x = (*f = 2, NC(n_cache_get_field_f));
-		msp->y = (*f = 3, NC(n_cache_get_field_f));
-		msp->z = (*f = 4, NC(n_cache_get_field_f));
+		msp->x = (*f = 2, NCF(n_cache_get_field_f));
+		msp->y = (*f = 3, NCF(n_cache_get_field_f));
+		msp->z = (*f = 4, NCF(n_cache_get_field_f));
 		msp->type = (*f = 5, NC(n_cache_get_field_i));
 		NC_PARS(3);
 		*f = 6; NC(n_cache_get_field_s);

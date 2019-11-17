@@ -1,8 +1,6 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-typedef float (AMX_NATIVE_CALL *AMX_NATIVE_FLOAT)(AMX *amx, cell *params);
-
 int natives_find();
 
 extern AMX_NATIVE n_AddPlayerClass;
@@ -94,7 +92,7 @@ extern AMX_NATIVE n_TogglePlayerSpectating;
 extern AMX_NATIVE n_cache_delete;
 extern AMX_NATIVE n_cache_get_row;
 extern AMX_NATIVE n_cache_get_row_count;
-extern AMX_NATIVE_FLOAT n_cache_get_row_float;
+extern AMX_NATIVE n_cache_get_row_float;
 extern AMX_NATIVE n_cache_get_row_int;
 extern AMX_NATIVE n_cache_insert_id;
 extern AMX_NATIVE n_mysql_tquery;
@@ -127,6 +125,11 @@ extern AMX *amx;
 extern cell *nc_params;
 extern float *nc_paramf;
 
+/**
+Used to reinterpret cell return values as a float.
+*/
+extern cell tmpfloat;
+
 #define SOCKET_TCP 1
 #define SOCKET_UDP 2
 #define SOCKET_INVALID_SOCKET -1
@@ -134,6 +137,7 @@ extern float *nc_paramf;
 /* NC = NativeCall */
 
 #define NC(NATIVE) NATIVE(amx,nc_params)
+#define NCF(NATIVE) (tmpfloat=NATIVE(amx,nc_params),amx_ctof(tmpfloat))
 
 #define NC_ClearAnimations(PLAYERID,FORCESYNC) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FORCESYNC,\
