@@ -9,24 +9,6 @@
 #define ECHO_PORT_OUT 7767
 #define ECHO_PORT_IN 7768
 
-#define PACK_HELLO 2
-#define PACK_IMTHERE 3
-#define PACK_BYE 4
-#define PACK_PING 5
-#define PACK_PONG 6
-#define PACK_CHAT 10
-#define PACK_ACTION 11
-#define PACK_PLAYER_CONNECTION 30
-
-#define CONN_REASON_GAME_TIMEOUT 0
-#define CONN_REASON_GAME_QUIT 1
-#define CONN_REASON_GAME_KICK 2
-#define CONN_REASON_GAME_CONNECTED 3
-#define CONN_REASON_IRC_QUIT 6
-#define CONN_REASON_IRC_PART 7
-#define CONN_REASON_IRC_KICK 8
-#define CONN_REASON_IRC_JOIN 9
-
 #define COL_IRC COL_INFO_GENERIC
 
 static cell socket_in = SOCKET_INVALID_SOCKET;
@@ -86,6 +68,23 @@ void echo_on_player_connection(int playerid, int reason)
 			((nicklen & 0xFF) << 24);
 		memcpy(cbuf144 + 8, pd->name, nicklen + 1);
 		NC_ssocket_send(socket_out, buf144a, 8 + nicklen);
+	}
+}
+
+void echo_on_flight_finished(char *text)
+{
+	int textlen;
+
+	if (socket_out != SOCKET_INVALID_SOCKET) {
+		textlen = strlen(text);
+		if (textlen > 144) {
+			textlen = 144;
+		}
+		buf144[0] = 0x0C594C46;
+		cbuf144[4] = textlen;
+		memcpy(cbuf144 + 5, text, textlen);
+		cbuf144[5 + textlen] = 0;
+		NC_ssocket_send(socket_out, buf144a, 5 + textlen);
 	}
 }
 
@@ -225,19 +224,19 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			b += 4;
 			*(b++) = ' ';
 			switch (data[6]) {
-			case CONN_REASON_IRC_QUIT:
+			case ECHO_CONN_REASON_IRC_QUIT:
 				memcpy(b, "Quits: ", 7);
 				b += 7;
 				break;
-			case CONN_REASON_IRC_PART:
+			case ECHO_CONN_REASON_IRC_PART:
 				memcpy(b, "Parts: ", 7);
 				b += 7;
 				break;
-			case CONN_REASON_IRC_KICK:
+			case ECHO_CONN_REASON_IRC_KICK:
 				memcpy(b, "Kicked: ", 8);
 				b += 8;
 				break;
-			case CONN_REASON_IRC_JOIN:
+			case ECHO_CONN_REASON_IRC_JOIN:
 				memcpy(b, "Joins: ", 7);
 				b += 7;
 				break;

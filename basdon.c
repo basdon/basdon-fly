@@ -207,7 +207,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	temp_afk[playerid] = 0;
 
 	class_on_player_connect(playerid);
-	echo_on_player_connection(playerid, 3);
+	echo_on_player_connection(playerid, ECHO_CONN_REASON_GAME_CONNECTED);
 	dialog_on_player_connect(playerid);
 	maps_on_player_connect(playerid);
 	missions_on_player_connect(playerid);

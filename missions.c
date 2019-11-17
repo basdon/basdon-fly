@@ -6,6 +6,7 @@
 #include "anticheat.h"
 #include "cmd.h"
 #include "dialog.h"
+#include "echo.h"
 #include "game_sa.h"
 #include "playerdata.h"
 #include "math.h"
@@ -1052,6 +1053,7 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 	        miss->endpoint->ap->beacon,
 	        duration_h,
 	        duration_m);
+	echo_on_flight_finished(cbuf4096);
 	amx_SetUString(buf144, cbuf4096, 144);
 	NC_PARS(3);
 	nc_params[2] = COL_MISSION;
@@ -1063,7 +1065,6 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 			NC(n_SendClientMessage);
 		}
 	}
-	/*TODO: echo*/
 
 	/*buf4096 has 4096 cells or 16396 chars, so use the end of it because
 	dialog code sets it into buf4096*/
