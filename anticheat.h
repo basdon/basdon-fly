@@ -39,10 +39,10 @@ Player will be kicked on excess flood.
 */
 int anticheat_flood(int playerid, int amount);
 /**
-Log some anticheat related thing.
+Log some anticheat related thing. Uses buf4096 after info is copied.
 
 @param eventtype one of AC_ definitions
-@param info not escaped into db query
+@param info primitively escaped into db query
 */
 void anticheat_log(int playerid, int eventtype, char *info);
 void anticheat_on_player_connect(int playerid);
@@ -59,4 +59,4 @@ Gets vehicle hp, after checking for unnacceptable values and handling offenders.
 
 Only works on valid vehicles!
 */
-float anticheat_NC_GetVehicleHealth(int vehicleid);
+float anticheat_GetVehicleHealth(int vehicleid);

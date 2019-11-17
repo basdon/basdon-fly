@@ -82,6 +82,11 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 	{
 		return 0;
 	}
+
+	if (dialogid == DIALOG_DUMMY) {
+		return 1;
+	}
+
 	amx_GetAddr(amx, params[5], &addr);
 	amx_GetUString(inputtext, addr, sizeof(inputtext));
 
@@ -265,6 +270,15 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 		}
 	}
 	return 1;
+}
+
+/* native B_OnPlayerEnterRaceCP(playerid) */
+static
+cell AMX_NATIVE_CALL B_OnPlayerEnterRaceCP(AMX *amx, cell *params)
+{
+	const int playerid = params[1];
+
+	return missions_on_player_enter_race_checkpoint(playerid);
 }
 
 /* native B_OnPlayerEnterVehicle(playerid, vehicleid, ispassenger) */

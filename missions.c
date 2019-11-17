@@ -5,12 +5,15 @@
 #include "airport.h"
 #include "anticheat.h"
 #include "cmd.h"
+#include "dialog.h"
 #include "game_sa.h"
 #include "playerdata.h"
 #include "math.h"
 #include "missions.h"
 #include "money.h"
 #include "nav.h"
+#include "panel.h"
+#include "timer.h"
 #include "vehicles.h"
 #include <string.h>
 #include <time.h>
@@ -18,10 +21,12 @@
 #define TRACKER_PORT 7766
 
 const static char *SATISFACTION_TEXT_FORMAT = "Passenger~n~Satisfaction: %d%%";
+const static char *LOADING = "~p~Loading...";
+const static char *UNLOADING = "~p~Unloading...";
 
 struct MISSIONPOINT {
 	unsigned short id;
-	float x, y, z;
+	struct vec3 pos;
 	unsigned int type;
 	char name[MAX_MSP_NAME + 1];
 	unsigned short currentlyactivemissions;
@@ -129,9 +134,9 @@ void missions_init()
 		msp->ap = ap;
 		msp->currentlyactivemissions = 0;
 		msp->id = (unsigned short) (*f = 1, NC(n_cache_get_field_i));
-		msp->x = (*f = 2, NCF(n_cache_get_field_f));
-		msp->y = (*f = 3, NCF(n_cache_get_field_f));
-		msp->z = (*f = 4, NCF(n_cache_get_field_f));
+		msp->pos.x = (*f = 2, NCF(n_cache_get_field_f));
+		msp->pos.y = (*f = 3, NCF(n_cache_get_field_f));
+		msp->pos.z = (*f = 4, NCF(n_cache_get_field_f));
 		msp->type = (*f = 5, NC(n_cache_get_field_i));
 		NC_PARS(3);
 		*f = 6; NC(n_cache_get_field_s);
@@ -383,7 +388,6 @@ void dev_missions_update_closest_point()
 {
 	static struct MISSIONPOINT *dev_closest_point[MAX_PLAYERS];
 
-	const float size = 11.0f;
 	int i, playerid;
 	struct vec3 ppos;
 	float dx, dy, shortestdistance, dist;
@@ -419,8 +423,8 @@ void dev_missions_update_closest_point()
 		closestmp = NULL;
 		mp = closestap->missionpoints;
 		while (mp) {
-			dx = mp->x - ppos.x;
-			dy = mp->y - ppos.y;
+			dx = mp->pos.x - ppos.x;
+			dy = mp->pos.y - ppos.y;
 			dist = dx * dx + dy * dy;
 			if (dist < shortestdistance) {
 				shortestdistance = dist;
@@ -432,11 +436,11 @@ void dev_missions_update_closest_point()
 			dev_closest_point[playerid] = closestmp;
 			NC_PARS(9);
 			nc_params[1] = playerid;
-			nc_params[2] = 2;
-			nc_paramf[3] = nc_paramf[6] = closestmp->x;
-			nc_paramf[4] = nc_paramf[7] = closestmp->y;
-			nc_paramf[5] = nc_paramf[8] = closestmp->z;
-			nc_paramf[9] = size;
+			nc_params[2] = MISSION_CHECKPOINT_TYPE;
+			nc_paramf[3] = nc_paramf[6] = closestmp->pos.x;
+			nc_paramf[4] = nc_paramf[7] = closestmp->pos.y;
+			nc_paramf[5] = nc_paramf[8] = closestmp->pos.z;
+			nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
 			NC(n_SetPlayerRaceCheckpoint);
 		}
 	}
@@ -575,9 +579,9 @@ struct MISSIONPOINT *missions_get_startpoint(int missiontype, struct vec3 *ppos)
 	/*then choose the missionpoint that is the closest to the player*/
 	shortest_distance = FLOAT_PINF;
 	while (num_free_missionpts--) {
-		dx = free_missionpts[num_free_missionpts]->x - ppos->x;
-		dy = free_missionpts[num_free_missionpts]->y - ppos->y;
-		dz = free_missionpts[num_free_missionpts]->z - ppos->z;
+		dx = free_missionpts[num_free_missionpts]->pos.x - ppos->x;
+		dy = free_missionpts[num_free_missionpts]->pos.y - ppos->y;
+		dz = free_missionpts[num_free_missionpts]->pos.z - ppos->z;
 		dist = dx * dx + dy * dy + dz * dz;
 		if (dist < shortest_distance) {
 			shortest_distance = dist;
@@ -615,9 +619,9 @@ void missions_cb_create(void* data)
 	NC_PARS(9);
 	nc_params[1] = playerid;
 	nc_params[2] = 2;
-	nc_paramf[3] = mission->startpoint->x;
-	nc_paramf[4] = mission->startpoint->y;
-	nc_paramf[5] = mission->startpoint->z;
+	nc_paramf[3] = mission->startpoint->pos.x;
+	nc_paramf[4] = mission->startpoint->pos.y;
+	nc_paramf[5] = mission->startpoint->pos.z;
 	nc_paramf[6] = nc_paramf[7] = nc_paramf[8] = 0.0f;
 	nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
 	NC(n_SetPlayerRaceCheckpoint);
@@ -738,7 +742,7 @@ void missions_on_player_death(int playerid)
 		stopreason = MISSION_STATE_DIED;
 		vehicleid = NC_GetPlayerVehicleID(playerid);
 		if (vehicleid) {
-			hp = anticheat_NC_GetVehicleHealth(vehicleid);
+			hp = anticheat_GetVehicleHealth(vehicleid);
 			if (hp <= 200.0f) {
 				stopreason = MISSION_STATE_CRASHED;
 			}
@@ -755,6 +759,492 @@ void missions_on_player_disconnect(int playerid)
 		missions_end_unfinished(
 			miss, playerid, MISSION_STATE_ABANDONED);
 	}
+}
+
+static const char
+	*RETRIEV = "~b~Retrieving flight data...",
+	*NOTYPES = WARN"This vehicle can't complete any type of missions!",
+	*NOMISS = WARN"There are no missions available for this type "
+		"of vehicle!",
+	*MUSTBEDRIVER = WARN"You must be the driver of a vehicle "
+		"before starting work!";
+
+/**
+Starts a mission for giving player that is in given vehicle.
+*/
+static
+void missions_start_mission(int playerid)
+{
+	struct MISSION *mission;
+	struct MISSIONPOINT *startpoint, *endpoint;
+	struct dbvehicle *veh;
+	struct vec3 ppos;
+	char *errmsg, tmpuseridornullbuf[10];
+	int vehicleid, missiontype;
+	float vhp, dx, dy;
+
+	NC_PARS(1);
+	nc_params[1] = playerid;
+	if (NC(n_GetPlayerVehicleSeat) != 0) {
+		errmsg = (char*) MUSTBEDRIVER;
+		goto err;
+	}
+	vehicleid = NC(n_GetPlayerVehicleID);
+
+	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL) {
+		goto unknownvehicle;
+	}
+
+	switch (veh->model) {
+	case MODEL_DODO: missiontype = MISSION_TYPE_PASSENGER_S; break;
+	case MODEL_SHAMAL:
+	case MODEL_BEAGLE: missiontype = MISSION_TYPE_PASSENGER_M; break;
+	case MODEL_AT400:
+	case MODEL_ANDROM: missiontype = MISSION_TYPE_PASSENGER_L; break;
+	case MODEL_NEVADA: missiontype = MISSION_TYPE_CARGO_M; break;
+	case MODEL_MAVERICK:
+	case MODEL_VCNMAV:
+	case MODEL_RAINDANC:
+	case MODEL_LEVIATHN:
+	case MODEL_POLMAV:
+	case MODEL_SPARROW: missiontype = MISSION_TYPE_HELI; break;
+	case MODEL_HUNTER:
+	case MODEL_CARGOBOB: missiontype = MISSION_TYPE_MIL_HELI; break;
+	case MODEL_HYDRA:
+	case MODEL_RUSTLER: missiontype = MISSION_TYPE_MIL; break;
+	case MODEL_SKIMMER: missiontype = MISSION_TYPE_PASSENGER_WATER; break;
+	default:
+unknownvehicle:
+		errmsg = (char*) NOTYPES;
+		goto err;
+	}
+
+	common_GetPlayerPos(playerid, &ppos);
+
+	startpoint = missions_get_startpoint(missiontype, &ppos);
+	endpoint = missions_get_random_endpoint(missiontype, startpoint);
+	/*endpoint will also be NULL when startpoint is NULL*/
+	if (endpoint == NULL) {
+		errmsg = (char*) NOMISS;
+		goto err;
+	}
+
+	vhp = anticheat_GetVehicleHealth(vehicleid);
+
+	dx = startpoint->pos.x - endpoint->pos.x;
+	dy = startpoint->pos.y - endpoint->pos.y;
+
+	activemission[playerid] = mission = malloc(sizeof(struct MISSION));
+	mission->id = -1;
+	mission->stage = MISSION_STAGE_CREATE;
+	mission->missiontype = missiontype;
+	mission->startpoint = startpoint;
+	mission->endpoint = endpoint;
+	mission->distance = sqrt(dx * dx + dy * dy);
+	mission->actualdistanceM = 0.0f;
+	mission->passenger_satisfaction = 100;
+	mission->veh = veh;
+	mission->vehicleid = vehicleid;
+	mission->vehicle_reincarnation = gamevehicles[vehicleid].reincarnation;
+	mission->starttime = time(NULL);
+	mission->lastvehiclehp = (short) vhp;
+	mission->damagetaken = 0;
+	mission->lastfuel = veh->fuel;
+	mission->fuelburned = 0.0f;
+	mission->weatherbonus = 0;
+
+	startpoint->currentlyactivemissions++;
+	endpoint->currentlyactivemissions++;
+
+	sprintf(cbuf144, "UPDATE msp SET o=o+1 WHERE i=%d", startpoint->id);
+	amx_SetUString(buf4096, cbuf144, 144);
+	NC_mysql_tquery_nocb(buf4096a);
+	sprintf(cbuf144 + 100, "UPDATE msp SET p=p+1 WHERE i=%d", endpoint->id);
+	amx_SetUString(buf4096, cbuf144, 144);
+	NC_mysql_tquery_nocb(buf4096a);
+
+	useridornull(playerid, tmpuseridornullbuf);
+	sprintf(cbuf4096 + 2000,
+	        "INSERT INTO flg(player,vehicle,missiontype,fapt,tapt,fmsp,"
+		"tmsp,distance,tstart,tlastupdate) "
+		"VALUES(%s,%d,%d,%d,%d,%d,%d,%.4f,"
+		"UNIX_TIMESTAMP(),UNIX_TIMESTAMP())",
+	        tmpuseridornullbuf,
+		veh->id,
+		missiontype,
+		startpoint->ap->id,
+		endpoint->ap->id,
+		startpoint->id,
+		endpoint->id,
+		mission->distance);
+	common_mysql_tquery(cbuf4096 + 2000,
+		missions_cb_create, (void*) MK_PLAYER_CC(playerid));
+
+	amx_SetUString(buf144, RETRIEV, 144);
+	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+	return;
+err:
+	amx_SetUString(buf144, errmsg, 144);
+	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+}
+
+struct MISSION_LOAD_UNLOAD_DATA {
+	char isload;
+	int player_cc;
+	float vehiclehp;
+	struct MISSION *mission;
+};
+
+/**
+Called from timer callback for mission load checkpoint.
+*/
+static
+void missions_after_load(struct MISSION *mission, int playerid)
+{
+	if (prefs[playerid] & PREF_WORK_AUTONAV) {
+		nav_navigate_to_airport(
+			mission->veh->spawnedvehicleid,
+			mission->veh->model,
+			mission->endpoint->ap);
+	}
+
+	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
+		sprintf(cbuf32, SATISFACTION_TEXT_FORMAT, 100);
+		amx_SetUString(buf32_1, cbuf32, 32);
+		NC_PARS(3);
+		nc_params[1] = playerid;
+		nc_params[2] = ptxt_satisfaction[playerid];
+		nc_params[3] = buf32_1a;
+		NC(n_PlayerTextDrawSetString);
+		NC_PARS(2);
+		NC(n_PlayerTextDrawShow);
+	}
+
+	mission->stage = MISSION_STAGE_FLIGHT;
+
+	NC_PARS(9);
+	nc_params[1] = playerid;
+	nc_params[2] = MISSION_CHECKPOINT_TYPE;
+	nc_paramf[3] = nc_paramf[6] = mission->endpoint->pos.x;
+	nc_paramf[4] = nc_paramf[7] = mission->endpoint->pos.y;
+	nc_paramf[5] = nc_paramf[8] = mission->endpoint->pos.z;
+	nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
+	NC(n_SetPlayerRaceCheckpoint);
+
+	sprintf(cbuf4096,
+	        "UPDATE flg "
+		"SET tload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP() "
+		"WHERE id=%d",
+	        mission->id);
+	amx_SetUString(buf144, cbuf4096, 144);
+	NC_mysql_tquery_nocb(buf144a);
+}
+
+/**
+Called from timer callback for mission unload checkpoint.
+*/
+static
+void missions_after_unload(struct MISSION *miss, int playerid, float vehhp)
+{
+	float paymp, mintime;
+	int ptax, psatisfaction, pdistance, pbonus = 0, ptotal, pdamage, pcheat;
+	int totaltime, duration_h, duration_m, extra_damage_taken;
+	int i;
+	char *dlg, *dlgbase;
+
+	pcheat = 0;
+	psatisfaction = 0;
+
+	extra_damage_taken = (int) (miss->lastvehiclehp - (short) vehhp);
+	if (extra_damage_taken < 0) {
+		pcheat -= 250000;
+		sprintf(cbuf144,
+			"flg(#%d) vhh: was: %hd now: %.0f",
+			miss->id,
+			miss->lastvehiclehp,
+			vehhp);
+		anticheat_log(playerid, AC_VEH_HP_MISSION_INCREASE, cbuf144);
+	} else {
+		miss->damagetaken += extra_damage_taken;
+	}
+	miss->lastvehiclehp = (short) vehhp;
+	miss->fuelburned += miss->lastfuel - miss->veh->fuel;
+
+	totaltime = (int) difftime(time(NULL), miss->starttime);
+	duration_m = totaltime % 60;
+	duration_h = (totaltime - duration_m) / 60;
+
+	/* don't use adistance because it also includes z changes */
+	mintime = miss->distance;
+	mintime /= missions_get_vehicle_maximum_speed(miss->veh->model);
+	if (totaltime < (int) mintime) {
+		pcheat -= 250000;
+		sprintf(cbuf144,
+			"flg(#%d) too fast: min: %d actual: %d",
+			miss->id,
+			(int) mintime,
+			totaltime);
+		anticheat_log(playerid, AC_MISSION_TOOFAST, cbuf144);
+	}
+
+	paymp = missions_get_vehicle_paymp(miss->veh->model);
+	ptax = -calculate_airport_tax(miss->endpoint->ap, miss->missiontype);
+	pdistance = 500 + (int) (miss->distance * 1.135f);
+	pdistance = (int) (pdistance * paymp);
+	if (miss->missiontype & PASSENGER_MISSIONTYPES) {
+		if (miss->passenger_satisfaction == 100) {
+			psatisfaction = 500;
+		} else {
+			psatisfaction = miss->passenger_satisfaction - 100;
+			psatisfaction *= 30;
+		}
+	}
+	pdamage = -3 * miss->damagetaken;
+
+	ptotal = miss->weatherbonus + psatisfaction + pdistance + pbonus;
+	ptotal += ptax + pdamage + pcheat;
+	money_give(playerid, ptotal);
+
+	sprintf(cbuf4096,
+		"%s completed flight #%d from %s (%s) to %s (%s) in %dh%02dm",
+		pdata[playerid]->name,
+	        miss->id,
+		miss->startpoint->ap->name,
+	        miss->startpoint->ap->beacon,
+	        miss->endpoint->ap->name,
+	        miss->endpoint->ap->beacon,
+	        duration_h,
+	        duration_m);
+	amx_SetUString(buf144, cbuf4096, 144);
+	NC_PARS(3);
+	nc_params[2] = COL_MISSION;
+	nc_params[3] = buf144a;
+	i = playercount;
+	while (i--) {
+		if (prefs[players[i]] & PREF_SHOW_MISSION_MSGS) {
+			nc_params[1] = players[i];
+			NC(n_SendClientMessage);
+		}
+	}
+	/*TODO: echo*/
+
+	/*buf4096 has 4096 cells or 16396 chars, so use the end of it because
+	dialog code sets it into buf4096*/
+	dlgbase = cbuf4096 + 10000;
+
+	sprintf(dlgbase,
+		"UPDATE flg SET tunload=UNIX_TIMESTAMP(),"
+		"tlastupdate=UNIX_TIMESTAMP(),"
+		"state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
+		"pdistance=%d,pdamage=%d,pcheat=%d,pbonus=%d,ptotal=%d,"
+		"satisfaction=%d,adistance=%f,paymp=%f,damage=%d "
+		"WHERE id=%d",
+		MISSION_STATE_FINISHED,
+		miss->fuelburned,
+		ptax,
+		miss->weatherbonus,
+		psatisfaction,
+		pdistance,
+		pdamage,
+		pcheat,
+		pbonus,
+		ptotal,
+		miss->passenger_satisfaction,
+		miss->actualdistanceM,
+		paymp,
+		miss->damagetaken,
+		miss->id);
+	amx_SetUString(buf4096, dlgbase, 4096);
+	NC_mysql_tquery_nocb(buf4096a);
+
+	dlg = dlgbase;
+	dlg += sprintf(dlg,
+	             "{ffffff}Flight:\t\t\t"ECOL_MISSION"#%d\n"
+	             "{ffffff}Origin:\t\t\t"ECOL_MISSION"%s\n"
+	             "{ffffff}Destination:\t\t"ECOL_MISSION"%s\n"
+	             "{ffffff}Distance (pt to pt):\t"ECOL_MISSION"%.0fm\n"
+	             "{ffffff}Distance (actual):\t"ECOL_MISSION"%.0fm\n"
+	             "{ffffff}Duration:\t\t"ECOL_MISSION"%dh%02dm\n"
+	             "{ffffff}Fuel Burned:\t\t"ECOL_MISSION"%.1fL\n"
+	             "{ffffff}Vehicle pay category:\t"ECOL_MISSION"%.1fx\n",
+	             miss->id,
+	             miss->startpoint->ap->name,
+	             miss->endpoint->ap->name,
+	             miss->distance,
+	             miss->actualdistanceM,
+	             duration_h,
+	             duration_m,
+		     miss->fuelburned,
+	             paymp);
+	if (miss->missiontype & PASSENGER_MISSIONTYPES) {
+		dlg += sprintf(dlg,
+		             "{ffffff}Passenger Satisfaction:\t"ECOL_MISSION"%d%%\n",
+		             miss->passenger_satisfaction);
+	}
+	*dlg++ = '\n';
+	*dlg++ = '\n';
+	if (ptax) {
+		dlg += missions_append_pay(dlg, "{ffffff}Airport Tax:\t\t", ptax);
+	}
+	if (miss->weatherbonus) {
+		dlg += missions_append_pay(dlg, "{ffffff}Weather bonus:\t\t", miss->weatherbonus);
+	}
+	dlg += missions_append_pay(dlg, "{ffffff}Distance Pay:\t\t", pdistance);
+	if (miss->missiontype & PASSENGER_MISSIONTYPES) {
+		if (psatisfaction > 0) {
+			dlg += missions_append_pay(dlg, "{ffffff}Satisfaction Bonus:\t", psatisfaction);
+		} else {
+			dlg += missions_append_pay(dlg, "{ffffff}Satisfaction Penalty:\t", psatisfaction);
+		}
+	}
+	if (pdamage) {
+		dlg += missions_append_pay(dlg, "{ffffff}Damage Penalty:\t", pdamage);
+	}
+	if (pcheat) {
+		dlg += missions_append_pay(dlg, "{ffffff}Cheat Penalty:\t\t", pcheat);
+	}
+	if (pbonus) {
+		dlg += missions_append_pay(dlg, "{ffffff}Bonus:\t\t\t", pbonus);
+	}
+	dlg += missions_append_pay(dlg, "\n\n\t{ffffff}Total Pay: ", ptotal);
+	*--dlg = 0;
+	dialog_NC_ShowPlayerDialog(
+		playerid,
+		DIALOG_DUMMY,
+		DIALOG_STYLE_MSGBOX,
+		"Flight Overview",
+		dlgbase,
+		"Close", "",
+		TRANSACTION_MISSION_OVERVIEW);
+
+	missions_cleanup(miss, playerid);
+
+	if (prefs[playerid] & PREF_CONSTANT_WORK) {
+		missions_start_mission(playerid);
+	}
+}
+
+/**
+Callback for timer set when player enters mission unload checkpoint.
+*/
+static
+int missions_after_load_unload(void *d)
+{
+	struct MISSION_LOAD_UNLOAD_DATA *data;
+	int playerid;
+
+	data = (struct MISSION_LOAD_UNLOAD_DATA*) d;
+	playerid = PLAYER_CC_GETID(data->player_cc);
+	if (!PLAYER_CC_CHECK(data->player_cc, playerid) ||
+		activemission[playerid] != data->mission)
+	{
+		goto ret;
+	}
+
+	/*TODO: what if vehicle is destroyed?*/
+	common_hide_gametext_for_player(playerid);
+	NC_TogglePlayerControllable(playerid, 1);
+
+	if (data->isload) {
+		missions_after_load(data->mission, playerid);
+	} else {
+		missions_after_unload(data->mission, playerid, data->vehiclehp);
+	}
+ret:
+	free(d);
+	return 0; /*non-repeating timer*/
+}
+
+int missions_on_player_enter_race_checkpoint(int playerid)
+{
+	static const char
+		*WRONGVEHICLE = WARN"You must be in the starting vehicle "
+				"to continue!",
+		*TOOFAST = WARN"You need to slow down to load/unload! "
+				"Re-enter the checkpoint.";
+
+	struct MISSION_LOAD_UNLOAD_DATA *cbdata;
+	struct MISSION *mission;
+	struct vec3 cppos, vpos, vvel;
+	struct dbvehicle *veh;
+	int vehicleid, vv;
+	char *errmsg, *gametext;
+
+	if ((mission = activemission[playerid]) == NULL ||
+		NC_GetPlayerVehicleSeat(playerid) != 0)
+	{
+		return 0;
+	}
+
+	switch (mission->stage) {
+	case MISSION_STAGE_PRELOAD: cppos = mission->startpoint->pos; break;
+	case MISSION_STAGE_FLIGHT: cppos = mission->endpoint->pos; break;
+	default: return 0;
+	}
+
+	vehicleid = veh_GetPlayerVehicle(playerid, &vv, &veh);
+
+	common_GetVehiclePos(vehicleid, &vpos);
+	/*this check might not be needed, but just in case the checkpoint
+	position changes...*/
+	if (common_dist_sq(cppos, vpos) >
+		MISSION_CHECKPOINT_SIZE * MISSION_CHECKPOINT_SIZE * 2.0f)
+	{
+		return 0;
+	}
+
+	if (vehicleid != mission->vehicleid ||
+		vv != mission->vehicle_reincarnation ||
+		veh->id != mission->veh->id)
+	{
+		errmsg = (char*) WRONGVEHICLE;
+		goto reterr;
+	}
+
+	common_GetVehicleVelocity(vehicleid, &vvel);
+	if (common_vectorsize(vvel) >
+		35.0f/VEL_TO_KTS_VAL*35.0f/VEL_TO_KTS_VAL)
+	{
+		errmsg = (char*) TOOFAST;
+		goto reterr;
+	}
+
+	NC_DisablePlayerRaceCheckpoint(playerid);
+	NC_TogglePlayerControllable(playerid, 0);
+	if (prefs[playerid] & PREF_WORK_AUTONAV) {
+		nav_reset_for_vehicle(vehicleid);
+		panel_reset_nav_for_passengers(vehicleid);
+	}
+	cbdata = malloc(sizeof(struct MISSION_LOAD_UNLOAD_DATA));
+	cbdata->mission = mission;
+	cbdata->player_cc = MK_PLAYER_CC(playerid);
+
+	switch (mission->stage) {
+	case MISSION_STAGE_PRELOAD:
+		mission->stage = MISSION_STAGE_LOAD;
+		gametext = (char*) LOADING;
+		cbdata->isload = 1;
+		break;
+	case MISSION_STAGE_FLIGHT:
+		mission->stage = MISSION_STAGE_UNLOAD;
+		gametext = (char*) UNLOADING;
+		cbdata->isload = 0;
+		NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
+		cbdata->vehiclehp = anticheat_GetVehicleHealth(vehicleid);
+		if (cbdata->vehiclehp < 251.0f) {
+			NC_SetVehicleHealth(vehicleid, 300.0f);
+		}
+		break;
+	}
+
+	timer_set(MISSION_LOAD_UNLOAD_TIME, missions_after_load_unload, cbdata);
+	amx_SetUString(buf144, gametext, 144);
+	NC_GameTextForPlayer(playerid, buf144a, 0x8000000, 3);
+	return 1;
+reterr:
+	amx_SetUString(buf144, errmsg, 144);
+	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	return 1;
 }
 
 void missions_on_weather_changed(int weather)
@@ -857,198 +1347,19 @@ int missions_cmd_cancelmission(CMDPARAMS)
 	return 1;
 }
 
-static const char
-	*RETRIEV = "~b~Retrieving flight data...",
-	*NOTYPES = WARN"This vehicle can't complete any type of missions!",
-	*NOMISS = WARN"There are no missions available for this type "
-		"of vehicle!",
+const static char
 	*ALREADYWORKING = WARN"You're already working! Use /s to stop "
-		"your current work first ($"Q(MISSION_CANCEL_FINE_)" fine).",
-	*MUSTBEDRIVER = WARN"You must be the driver of a vehicle "
-		"before starting work!";
+		"your current work first ($"Q(MISSION_CANCEL_FINE_)" fine).";
 
 int missions_cmd_mission(CMDPARAMS)
 {
-	struct MISSION *mission;
-	struct MISSIONPOINT *startpoint, *endpoint;
-	struct dbvehicle *veh;
-	struct vec3 ppos;
-	char *errmsg, tmpuseridornullbuf[10];
-	int vehicleid, missiontype;
-	float vhp, dx, dy;
-
 	if (activemission[playerid] != NULL) {
 		amx_SetUString(buf144, ALREADYWORKING, 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
-		return 1;
+	} else {
+		missions_start_mission(playerid);
 	}
-
-	NC_PARS(1);
-	nc_params[1] = playerid;
-	if (NC(n_GetPlayerVehicleSeat) != 0) {
-		errmsg = (char*) MUSTBEDRIVER;
-		goto err;
-	}
-	vehicleid = NC(n_GetPlayerVehicleID);
-
-	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL) {
-		goto unknownvehicle;
-	}
-
-	switch (veh->model) {
-	case MODEL_DODO: missiontype = MISSION_TYPE_PASSENGER_S; break;
-	case MODEL_SHAMAL:
-	case MODEL_BEAGLE: missiontype = MISSION_TYPE_PASSENGER_M; break;
-	case MODEL_AT400:
-	case MODEL_ANDROM: missiontype = MISSION_TYPE_PASSENGER_L; break;
-	case MODEL_NEVADA: missiontype = MISSION_TYPE_CARGO_M; break;
-	case MODEL_MAVERICK:
-	case MODEL_VCNMAV:
-	case MODEL_RAINDANC:
-	case MODEL_LEVIATHN:
-	case MODEL_POLMAV:
-	case MODEL_SPARROW: missiontype = MISSION_TYPE_HELI; break;
-	case MODEL_HUNTER:
-	case MODEL_CARGOBOB: missiontype = MISSION_TYPE_MIL_HELI; break;
-	case MODEL_HYDRA:
-	case MODEL_RUSTLER: missiontype = MISSION_TYPE_MIL; break;
-	case MODEL_SKIMMER: missiontype = MISSION_TYPE_PASSENGER_WATER; break;
-	default:
-unknownvehicle:
-		errmsg = (char*) NOTYPES;
-		goto err;
-	}
-
-	common_GetPlayerPos(playerid, &ppos);
-
-	startpoint = missions_get_startpoint(missiontype, &ppos);
-	endpoint = missions_get_random_endpoint(missiontype, startpoint);
-	/*endpoint will also be NULL when startpoint is NULL*/
-	if (endpoint == NULL) {
-		errmsg = (char*) NOMISS;
-		goto err;
-	}
-
-	vhp = anticheat_NC_GetVehicleHealth(vehicleid);
-
-	dx = startpoint->x - endpoint->x;
-	dy = startpoint->y - endpoint->y;
-
-	activemission[playerid] = mission = malloc(sizeof(struct MISSION));
-	mission->id = -1;
-	mission->stage = MISSION_STAGE_CREATE;
-	mission->missiontype = missiontype;
-	mission->startpoint = startpoint;
-	mission->endpoint = endpoint;
-	mission->distance = sqrt(dx * dx + dy * dy);
-	mission->actualdistanceM = 0.0f;
-	mission->passenger_satisfaction = 100;
-	mission->veh = veh;
-	mission->vehicleid = vehicleid;
-	mission->vehicle_reincarnation = gamevehicles[vehicleid].reincarnation;
-	mission->starttime = time(NULL);
-	mission->lastvehiclehp = (short) vhp;
-	mission->damagetaken = 0;
-	mission->lastfuel = veh->fuel;
-	mission->fuelburned = 0.0f;
-	mission->weatherbonus = 0;
-
-	startpoint->currentlyactivemissions++;
-	endpoint->currentlyactivemissions++;
-
-	sprintf(cbuf144, "UPDATE msp SET o=o+1 WHERE i=%d", startpoint->id);
-	amx_SetUString(buf4096, cbuf144, 144);
-	NC_mysql_tquery_nocb(buf4096a);
-	sprintf(cbuf144 + 100, "UPDATE msp SET p=p+1 WHERE i=%d", endpoint->id);
-	amx_SetUString(buf4096, cbuf144, 144);
-	NC_mysql_tquery_nocb(buf4096a);
-
-	useridornull(playerid, tmpuseridornullbuf);
-	sprintf(cbuf4096 + 2000,
-	        "INSERT INTO flg(player,vehicle,missiontype,fapt,tapt,fmsp,"
-		"tmsp,distance,tstart,tlastupdate) "
-		"VALUES(%s,%d,%d,%d,%d,%d,%d,%.4f,"
-		"UNIX_TIMESTAMP(),UNIX_TIMESTAMP())",
-	        tmpuseridornullbuf,
-		veh->id,
-		missiontype,
-		startpoint->ap->id,
-		endpoint->ap->id,
-		startpoint->id,
-		endpoint->id,
-		mission->distance);
-	common_mysql_tquery(cbuf4096 + 2000,
-		missions_cb_create, (void*) MK_PLAYER_CC(playerid));
-
-	amx_SetUString(buf144, RETRIEV, 144);
-	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
 	return 1;
-err:
-	amx_SetUString(buf144, errmsg, 144);
-	NC_SendClientMessage(playerid, COL_WARN, buf144a);
-	return 1;
-}
-
-/* native Missions_EndUnfinished(playerid, reason) */
-cell AMX_NATIVE_CALL Missions_EndUnfinished(AMX *amx, cell *params)
-{
-	return 1;
-}
-
-/* native Missions_EnterCheckpoint(playerid, vehicleid, vv, x, y, z, errmsg[]) */
-cell AMX_NATIVE_CALL Missions_EnterCheckpoint(AMX *amx, cell *params)
-{
-	const int playerid = params[1], vehicleid = params[2], vv = params[3];
-	float x, y, z;
-	struct MISSION *mission;
-	struct dbvehicle *veh;
-	cell *addr;
-	char msg[144];
-
-	if ((mission = activemission[playerid]) == NULL) {
-		return 0;
-	}
-
-	if (vehicleid != mission->vehicleid ||
-		vv != mission->vehicle_reincarnation ||
-		(veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
-		veh->id != mission->veh->id)
-	{
-		strcpy(msg, WARN"You must be in the starting vehicle to continue!");
-		goto exit_set_errmsg;
-	}
-
-	x = amx_ctof(params[4]);
-	y = amx_ctof(params[5]);
-	z = amx_ctof(params[6]);
-
-#if VEL_VER != 2
-#error "recalc this"
-#endif
-	if (x * x + y * y + z * z > /*(35/VEL_TO_KTS_VAL)^2*/0.1307962) {
-		strcpy(msg, WARN"You need to slow down to load/unload! Re-enter the checkpoint.");
-		goto exit_set_errmsg;
-	}
-
-	switch (mission->stage) {
-	case MISSION_STAGE_PRELOAD:
-		mission->stage = MISSION_STAGE_LOAD;
-		return MISSION_ENTERCHECKPOINTRES_LOAD;
-	case MISSION_STAGE_FLIGHT:
-		mission->stage = MISSION_STAGE_UNLOAD;
-		NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
-		return MISSION_ENTERCHECKPOINTRES_UNLOAD;
-	default:
-		logprintf("ERR: player uid %d entered mission checkpoint in invalid stage: %d",
-		          pdata[playerid] == NULL ? -1 : pdata[playerid]->userid,
-		          mission->stage);
-		return 0;
-	}
-
-exit_set_errmsg:
-	amx_GetAddr(amx, params[7], &addr);
-	amx_SetUString(addr, msg, sizeof(msg));
-	return MISSION_ENTERCHECKPOINTRES_ERR;
 }
 
 int missions_get_stage(int playerid)
@@ -1058,12 +1369,6 @@ int missions_get_stage(int playerid)
 		return mission->stage;
 	}
 	return MISSION_STAGE_NOMISSION;
-}
-
-/* native Missions_GetState(playerid) */
-cell AMX_NATIVE_CALL Missions_GetState(AMX *amx, cell *params)
-{
-	return missions_get_stage(params[1]);
 }
 
 /* native Missions_OnVehicleRefueled(playerid, vehicleid, Float:refuelamount) */
@@ -1095,208 +1400,6 @@ cell AMX_NATIVE_CALL Missions_OnVehicleRepaired(AMX *amx, cell *params)
 		miss->damagetaken += (short) hpdiff;
 		miss->lastvehiclehp = (short) newhp;
 	}
-	return 1;
-}
-
-/* native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z buf[]) */
-cell AMX_NATIVE_CALL Missions_PostLoad(AMX *amx, cell *params)
-{
-	const int playerid = params[1];
-	struct MISSION *mission;
-	cell *addr;
-	char buf[144];
-
-	if ((mission = activemission[playerid]) == NULL ||
-		mission->stage != MISSION_STAGE_LOAD)
-	{
-		return 0;
-	}
-
-	if (prefs[playerid] & PREF_WORK_AUTONAV) {
-		nav_navigate_to_airport(
-			mission->veh->spawnedvehicleid,
-			mission->veh->model,
-			mission->endpoint->ap);
-	}
-
-	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
-		sprintf(cbuf32, SATISFACTION_TEXT_FORMAT, 100);
-		amx_SetUString(buf32_1, cbuf32, 32);
-		NC_PARS(3);
-		nc_params[1] = playerid;
-		nc_params[2] = ptxt_satisfaction[playerid];
-		nc_params[3] = buf32_1a;
-		NC(n_PlayerTextDrawSetString);
-		NC_PARS(2);
-		NC(n_PlayerTextDrawShow);
-	}
-
-	mission->stage = MISSION_STAGE_FLIGHT;
-	sprintf(buf,
-	        "UPDATE flg "
-		"SET tload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP() "
-		"WHERE id=%d",
-	        mission->id);
-	amx_GetAddr(amx, params[2], &addr);
-	*addr = amx_ftoc(mission->endpoint->x);
-	amx_GetAddr(amx, params[3], &addr);
-	*addr = amx_ftoc(mission->endpoint->y);
-	amx_GetAddr(amx, params[4], &addr);
-	*addr = amx_ftoc(mission->endpoint->z);
-	amx_GetAddr(amx, params[5], &addr);
-	amx_SetUString(addr, buf, sizeof(buf));
-	return 1;
-}
-
-/* native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[]) */
-cell AMX_NATIVE_CALL Missions_PostUnload(AMX *amx, cell *params)
-{
-	struct MISSION *mission;
-	const int playerid = params[1];
-	const float vehiclehp = amx_ctof(params[2]);
-	float paymp;
-	cell *addr;
-	char buf[4096];
-	int ptax, psatisfaction = 0, pdistance, pbonus = 0, ptotal, pdamage, pcheat = 0, tmp;
-	int totaltime, mintime, duration_h, duration_m;
-	int p;
-
-	if ((mission = activemission[playerid]) == NULL || pdata[playerid] == NULL) {
-		return 0;
-	}
-
-	amx_GetAddr(amx, params[4], &addr);
-
-	tmp = (int) (mission->lastvehiclehp - vehiclehp);
-	if (tmp < 0) {
-		tmp = 0;
-		pcheat -= 250000;
-		sprintf(buf, "flg(#%d) vhh: was: %hd now: %.0f", mission->id, mission->lastvehiclehp, vehiclehp);
-		amx_SetUString(addr + 2100, buf, sizeof(buf));
-	} else {
-		*(addr + 2100) = 0; /* ac log hp cheat */
-	}
-	mission->damagetaken += tmp;
-	mission->lastvehiclehp = (short) vehiclehp;
-	mission->fuelburned += mission->lastfuel - mission->veh->fuel;
-
-	totaltime = (int) difftime(time(NULL), mission->starttime);
-	duration_m = totaltime % 60;
-	duration_h = (totaltime - duration_m) / 60;
-
-	/* don't use adistance because it also includes z changes */
-	mintime = (int) (mission->distance / missions_get_vehicle_maximum_speed(mission->veh->model));
-	if (totaltime < mintime) {
-		pcheat -= 250000;
-		sprintf(buf, "flg(#%d) too fast: min: %d actual: %d", mission->id, mintime, totaltime);
-		amx_SetUString(addr + 2000, buf, sizeof(buf));
-	} else {
-		*(addr + 2000) = 0; /* ac log speed cheat */
-	}
-
-	paymp = missions_get_vehicle_paymp(mission->veh->model);
-	ptax = -calculate_airport_tax(mission->endpoint->ap, mission->missiontype);
-	pdistance = 500 + (int) (mission->distance * 1.135f);
-	pdistance = (int) (pdistance * paymp);
-	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
-		if (mission->passenger_satisfaction == 100) {
-			psatisfaction = 500;
-		} else {
-			psatisfaction = (mission->passenger_satisfaction - 100) * 30;
-		}
-	}
-	pdamage = -3 * mission->damagetaken;
-	ptotal = mission->weatherbonus + psatisfaction + pdistance + pbonus + ptax + pdamage + pcheat;
-
-	sprintf(buf,
-		"%s completed flight #%d from %s (%s) to %s (%s) in %dh%02dm",
-		pdata[playerid]->name,
-	        mission->id,
-		mission->startpoint->ap->name,
-	        mission->startpoint->ap->beacon,
-	        mission->endpoint->ap->name,
-	        mission->endpoint->ap->beacon,
-	        duration_h,
-	        duration_m);
-	amx_SetUString(addr, buf, sizeof(buf));
-	sprintf(buf,
-	        "UPDATE flg SET tunload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP(),"
-	        "state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
-	        "pdistance=%d,pdamage=%d,pcheat=%d,pbonus=%d,ptotal=%d,satisfaction=%d,adistance=%f,"
-	        "paymp=%f,damage=%d WHERE id=%d",
-	        MISSION_STATE_FINISHED,
-	        mission->fuelburned,
-	        ptax,
-	        mission->weatherbonus,
-	        psatisfaction,
-	        pdistance,
-	        pdamage,
-		pcheat,
-	        pbonus,
-	        ptotal,
-	        mission->passenger_satisfaction,
-	        mission->actualdistanceM,
-	        paymp,
-	        mission->damagetaken,
-	        mission->id);
-	amx_SetUString(addr + 200, buf, sizeof(buf));
-	p = 0;
-	p += sprintf(buf,
-	             "{ffffff}Flight:\t\t\t"ECOL_MISSION"#%d\n"
-	             "{ffffff}Origin:\t\t\t"ECOL_MISSION"%s\n"
-	             "{ffffff}Destination:\t\t"ECOL_MISSION"%s\n"
-	             "{ffffff}Distance (pt to pt):\t"ECOL_MISSION"%.0fm\n"
-	             "{ffffff}Distance (actual):\t"ECOL_MISSION"%.0fm\n"
-	             "{ffffff}Duration:\t\t"ECOL_MISSION"%dh%02dm\n"
-	             "{ffffff}Fuel Burned:\t\t"ECOL_MISSION"%.1fL\n"
-	             "{ffffff}Vehicle pay category:\t"ECOL_MISSION"%.1fx\n",
-	             mission->id,
-	             mission->startpoint->ap->name,
-	             mission->endpoint->ap->name,
-	             mission->distance,
-	             mission->actualdistanceM,
-	             duration_h,
-	             duration_m,
-		     mission->fuelburned,
-	             paymp);
-	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
-		p += sprintf(buf + p,
-		             "{ffffff}Passenger Satisfaction:\t"ECOL_MISSION"%d%%\n",
-		             mission->passenger_satisfaction);
-	}
-	buf[p++] = '\n';
-	buf[p++] = '\n';
-	if (ptax) {
-		p += missions_append_pay(buf + p, "{ffffff}Airport Tax:\t\t", ptax);
-	}
-	if (mission->weatherbonus) {
-		p += missions_append_pay(buf + p, "{ffffff}Weather bonus:\t\t", mission->weatherbonus);
-	}
-	p += missions_append_pay(buf + p, "{ffffff}Distance Pay:\t\t", pdistance);
-	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
-		if (psatisfaction > 0) {
-			p += missions_append_pay(buf + p, "{ffffff}Satisfaction Bonus:\t", psatisfaction);
-		} else {
-			p += missions_append_pay(buf + p, "{ffffff}Satisfaction Penalty:\t", psatisfaction);
-		}
-	}
-	if (pdamage) {
-		p += missions_append_pay(buf + p, "{ffffff}Damage Penalty:\t", pdamage);
-	}
-	if (pcheat) {
-		p += missions_append_pay(buf + p, "{ffffff}Cheat Penalty:\t\t", pcheat);
-	}
-	if (pbonus) {
-		p += missions_append_pay(buf + p, "{ffffff}Bonus:\t\t\t", pbonus);
-	}
-	p += missions_append_pay(buf + p, "\n\n\t{ffffff}Total Pay: ", ptotal);
-	buf[--p] = 0;
-	amx_SetUString(addr + 1000, buf, sizeof(buf));
-
-	amx_GetAddr(amx, params[3], &addr);
-	*addr = ptotal;
-
-	missions_cleanup(mission, playerid);
 	return 1;
 }
 

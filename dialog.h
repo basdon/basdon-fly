@@ -13,6 +13,7 @@
 /*max transaction id is int max*/
 #define TRANSACTION_NONE 0
 #define TRANSACTION_OVERRIDE 1
+#define TRANSACTION_MISSION_OVERVIEW 1004
 
 #define DIALOG_STYLE_MSGBOX 0
 #define DIALOG_STYLE_INPUT 1

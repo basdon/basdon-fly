@@ -1,8 +1,32 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#define MISSION_STAGE_NOMISSION -1
+#define MISSION_STAGE_CREATE	1
+#define MISSION_STAGE_PRELOAD	2
+#define MISSION_STAGE_LOAD	4
+#define MISSION_STAGE_FLIGHT	8
+#define MISSION_STAGE_UNLOAD	16
+
+#define MISSION_STATE_INPROGRESS 1
+#define MISSION_STATE_ABANDONED  2
+#define MISSION_STATE_CRASHED    4
+#define MISSION_STATE_FINISHED   8
+#define MISSION_STATE_DECLINED   16
+#define MISSION_STATE_DIED       32
+#define MISSION_STATE_SERVER_ERR 64
+
+#define MISSION_CANCEL_FINE 5000
+
+#define MISSION_WEATHERBONUS_RAINY     1250
+#define MISSION_WEATHERBONUS_FOGGY     2250
+#define MISSION_WEATHERBONUS_SANDSTORM 3250
+
+#define MISSION_WEATHERBONUS_DEVIATION 500
+
 #define MISSION_LOAD_UNLOAD_TIME 2200
 #define MISSION_CHECKPOINT_SIZE 11.0f
+#define MISSION_CHECKPOINT_TYPE 2
 
 /*excluding zero term*/
 #define MAX_MSP_NAME (9)
@@ -65,6 +89,10 @@ int missions_is_player_on_mission(int playerid);
 void missions_on_player_connect(int playerid);
 void missions_on_player_death(int playerid);
 void missions_on_player_disconnect(int playerid);
+/**
+@return non-zero if the event was handled
+*/
+int missions_on_player_enter_race_checkpoint(int playerid);
 /**
 Call when weather changed to add dangerous weather bonus to missions if needed.
 */

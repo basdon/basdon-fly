@@ -88,6 +88,7 @@ extern AMX_NATIVE n_TextDrawShowForPlayer;
 extern AMX_NATIVE n_TextDrawTextSize;
 extern AMX_NATIVE n_TextDrawUseBox;
 extern AMX_NATIVE n_TogglePlayerClock;
+extern AMX_NATIVE n_TogglePlayerControllable;
 extern AMX_NATIVE n_TogglePlayerSpectating;
 extern AMX_NATIVE n_cache_delete;
 extern AMX_NATIVE n_cache_get_row;
@@ -334,7 +335,7 @@ extern cell tmpfloat;
 	n_SetPlayerWeather(amx,nc_params))
 
 #define NC_SetVehicleHealth(VEHICLEID,HP) \
-	(NC_PARS_(2)nc_params[1]=VEHICLEID,nc_params[2]=HP,\
+	(NC_PARS_(2)nc_params[1]=VEHICLEID,nc_paramf[2]=HP,\
 	n_SetVehicleHealth(amx,nc_params))
 
 #define NC_SetVehicleParamsEx(VID,ENGINE,LIGHTS,ALARM,DOORS,BONNET,BOOT,OBJ) \
@@ -362,6 +363,10 @@ extern cell tmpfloat;
 #define NC_TogglePlayerClock(PLAYERID,FLAG) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
 	n_TogglePlayerClock(amx,nc_params))
+
+#define NC_TogglePlayerControllable(PLAYERID,FLAG) \
+	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
+	n_TogglePlayerControllable(amx,nc_params))
 
 #define NC_TogglePlayerSpectating(PLAYERID,FLAG) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\

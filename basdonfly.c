@@ -75,13 +75,8 @@ FORWARD(Login_PasswordConfirmStore);
 FORWARD(Login_PasswordConfirmValidate);
 FORWARD(Login_UsePassword);
 /* missions.c */
-FORWARD(Missions_EndUnfinished);
-FORWARD(Missions_EnterCheckpoint);
-FORWARD(Missions_GetState);
 FORWARD(Missions_OnVehicleRefueled);
 FORWARD(Missions_OnVehicleRepaired);
-FORWARD(Missions_PostLoad);
-FORWARD(Missions_PostUnload);
 /* nav.c */
 FORWARD(Nav_Reset);
 /* playerdata.c */
@@ -279,6 +274,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnPlayerConnect),
 	REGISTERNATIVE(B_OnPlayerDeath),
 	REGISTERNATIVE(B_OnPlayerDisconnect),
+	REGISTERNATIVE(B_OnPlayerEnterRaceCP),
 	REGISTERNATIVE(B_OnPlayerEnterVehicle),
 	REGISTERNATIVE(B_OnPlayerRequestClass),
 	REGISTERNATIVE(B_OnPlayerRequestSpawn),
@@ -323,13 +319,8 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Login_PasswordConfirmValidate),
 	REGISTERNATIVE(Login_UsePassword),
 	/* missions.c */
-	REGISTERNATIVE(Missions_EndUnfinished),
-	REGISTERNATIVE(Missions_EnterCheckpoint),
-	REGISTERNATIVE(Missions_GetState),
 	REGISTERNATIVE(Missions_OnVehicleRefueled),
 	REGISTERNATIVE(Missions_OnVehicleRepaired),
-	REGISTERNATIVE(Missions_PostLoad),
-	REGISTERNATIVE(Missions_PostUnload),
 	/* nav.c */
 	REGISTERNATIVE(Nav_Reset),
 	/* playerdata.c */

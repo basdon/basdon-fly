@@ -51,6 +51,15 @@ void common_crash_player(int playerid)
 	NC_GameTextForPlayer(playerid, buf144a, 5, 5);
 }
 
+float common_dist_sq(struct vec3 a, struct vec3 b)
+{
+	float dx, dy, dz;
+	dx = a.x - b.x;
+	dy = a.y - b.y;
+	dz = a.z - b.z;
+	return dx * dx + dy * dy + dz * dz;
+}
+
 void common_set_vehicle_engine(int vehicleid, int enginestatus)
 {
 	struct VEHICLEPARAMS params;
@@ -178,4 +187,9 @@ void common_mysql_tquery(char *query, mysql_cb callback, void *data)
 	nc_params[5] = buf4096a + 4094 * 4;
 	nc_params[6] = buf4096a + 4095 * 4;
 	NC(n_mysql_tquery);
+}
+
+float common_vectorsize(struct vec3 vec)
+{
+	return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z;
 }

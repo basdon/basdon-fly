@@ -160,6 +160,10 @@ Attempt to crash the player.
 */
 void common_crash_player(int playerid);
 /**
+@return squared distance between given points
+*/
+float common_dist_sq(struct vec3 a, struct vec3 b);
+/**
 Sets the state of the engine for given vehicle id.
 */
 void common_set_vehicle_engine(int vehicleid, int enginestatus);
@@ -220,3 +224,4 @@ Uses buf4096 for query. Also uses the last 8 components of buf4096.
 @param data usually a pointer to allocated memory that should be freed in the cb
 */
 void common_mysql_tquery(char *query, mysql_cb callback, void *data);
+float common_vectorsize(struct vec3 vec);

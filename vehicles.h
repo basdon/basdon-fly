@@ -60,6 +60,13 @@ OnGameModeExit.
 @return 0 if there was nothing to commit
 */
 int veh_commit_next_vehicle_odo_to_db();
+/**
+Convenience method to get a player's vehicle data.
+
+@param reinc reincarnation value
+@return vehicleid
+*/
+int veh_GetPlayerVehicle(int playerid, int *reinc, struct dbvehicle **veh);
 void veh_init();
 /**
 Check if a player is allowed to be in given vehicle.

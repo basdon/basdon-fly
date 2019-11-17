@@ -164,7 +164,7 @@ void anticheat_on_player_connect(int playerid)
 
 void anticheat_log(int playerid, int eventtype, char *info)
 {
-	char buf[512], *b = buf;
+	char buf[512], *b = info;
 
 	while (*b != 0) {
 		if (*b == '\'') {
@@ -192,7 +192,7 @@ void anticheat_log(int playerid, int eventtype, char *info)
 	NC_mysql_tquery_nocb(buf4096a);
 }
 
-float anticheat_NC_GetVehicleHealth(int vehicleid)
+float anticheat_GetVehicleHealth(int vehicleid)
 {
 	float hp;
 	int playerid;

@@ -40,6 +40,9 @@ native B_OnPlayerDeath(playerid, killerid, reason)
 //@summary Plugin callback for {@link OnPlayerDisconnect}
 native B_OnPlayerDisconnect(playerid, reason)
 
+//@summary Plugin callback for {@link OnPlayerEnterRaceCP}
+native B_OnPlayerEnterRaceCP(playerid)
+
 //@summary Plugin callback for {@link OnPlayerEnterVehicle}
 native B_OnPlayerEnterVehicle(playerid, vehicleid, ispassenger)
 
@@ -271,32 +274,6 @@ native Login_UsePassword(playerid, buf[]);
 
 #namespace "missions.c"
 
-//@summary Ends the active mission for given player (when applicable)
-//@param playerid the playerid to cancel their mission for
-//@param reason the reason, see {@code MISSION_CANCELREASON_} constants
-//@returns {@code 0} if no mission was active for player
-native Missions_EndUnfinished(playerid, reason)
-
-//@summary Try to advance any active mission for player when they entered a race checkpoint
-//@param playerid player that entered a checkpoint
-//@param vehicleid vehicle id the player is in (may be {@code 0})
-//@param vv vehicle reincarnation value (see {@link vv})
-//@param x x velocity of the vehicle
-//@param y y velocity of the vehicle
-//@param z z velocity of the vehicle
-//@param errmsg buffer to store errormessage in to be sent if returnvalue is {@code MISSION_ENTERCHECKPOINTRES_ERR}
-//@returns {@code 0} if nothing should happen or one of <ul>\
-	<li>{@code MISSION_ENTERCHECKPOINTRES_LOAD} if player is now loading cargo</li>\
-	<li>{@code MISSION_ENTERCHECKPOINTRES_UNLOAD} if player is now unloading cargo</li>\
-	<li>{@code MISSION_ENTERCHECKPOINTRES_ERR} if vehicle does not match for player's mission, send {@param errmsg} to player</li></ul>
-//@remarks also checks if {@param vehicleid} is valid
-native Missions_EnterCheckpoint(playerid, vehicleid, vv, Float:x, Float:y, Float:z, errmsg[])
-
-//@summary Get mission state of a player
-//@param playerid player to get the mission state of
-//@returns {@code -1} if not in a mission, or one of the flight-statuses.txt constants
-native Missions_GetState(playerid)
-
 //@summary Let the mission logic know a vehicle was refueled, to know the total fuel burned during flight
 //@param playerid the vehicle driver
 //@param vehicleid the vehicle that was refueled
@@ -309,47 +286,6 @@ native Missions_OnVehicleRefueled(playerid, vehicleid, Float:refuelamount)
 //@param oldhp old hp of the vehicle
 //@param newhp new hp of the vehicle
 native Missions_OnVehicleRepaired(playerid, vehicleid, Float:oldhp, Float:newhp)
-
-//@summary Let mission logic know the weather has been changed, to give dangerous weather bonuses when appropriate
-//@param newweatherid the new weather
-native Missions_OnWeatherChanged(newweatherid)
-
-//@summary Advances mission stage after load, gets coordinates for unload point and update queries
-//@param playerid the player that has finished loading
-//@param x will contain x coordinate of unloading point on return
-//@param y will contain y coordinate of unloading point on return
-//@param z will contain z coordinate of unloading point on return
-//@param buf will contain update query to execute
-//@returns {@code 0} if something is wrong and nothing should happen
-native Missions_PostLoad(playerid, &Float:x, &Float:y, &Float:z, buf[])
-
-//@summary Ends the mission after unloading has finished
-//@param playerid player to end their mission for
-//@param vehiclehp hp of the vehicle used for the mission
-//@param pay amount of money to be paid to player
-//@param buf buffer to put messages and queries in, only to be done when returned non-zero
-//@returns {@code 0} on failure
-/// <remarks>
-///   <ul>
-///     <li>{@code buf}: global mission msg</li><li>{@code buf+200}: flg query</li>
-///     <li>{@code buf+1000}: result dialog text</li>
-///     <li>{@code buf+2000}: optional ac speed cheat msg (use {@link Ac_FormatLog}) (only if first char is non-zero)</li>
-///     <li>{@code buf+2100}: optional ac vhh cheat msg (use {@link Ac_FormatLog}) (only if first char is non-zero)</li>
-///   </ul>
-/// </remarks>
-native Missions_PostUnload(playerid, Float:vehiclehp, &pay, buf[])
-
-//@summary Updates passenger satisfaction. Should be called every second.\
-	Has no effect when player is not in a mission (or in a mission that has no passengers).
-//@param playerid player that may or may not be on a mission
-//@param vehicleid vehicle the player is in
-//@param qw vehicle w rotation
-//@param qx vehicle x rotation
-//@param qy vehicle y rotation
-//@param qz vehicle z rotation
-//@param buf buffer to store satisfaction string in
-//@returns {@code 1} if the satisfaction textdraw should be updated
-native Missions_UpdateSatisfaction(playerid, vehicleid, Float:qw, Float:qx, Float:qy, Float:qz, buf[])
 
 #namespace "nav.c"
 

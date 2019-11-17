@@ -819,6 +819,16 @@ int veh_commit_next_vehicle_odo_to_db()
 	return 0;
 }
 
+int veh_GetPlayerVehicle(int playerid, int *reinc, struct dbvehicle **veh)
+{
+	int vehicleid;
+
+	vehicleid = NC_GetPlayerVehicleID(playerid);
+	*reinc = gamevehicles[vehicleid].reincarnation;
+	*veh = gamevehicles[vehicleid].dbvehicle;
+	return vehicleid;
+}
+
 void veh_update_odo(int playerid, int vehicleid, struct vec3 pos)
 {
 	struct vehnode *vuq;
@@ -893,7 +903,7 @@ void veh_timed_1s_update_a(
 	}
 
 	if (missions_get_stage(playerid) == MISSION_STAGE_FLIGHT) {
-		hp = anticheat_NC_GetVehicleHealth(vehicleid);
+		hp = anticheat_GetVehicleHealth(vehicleid);
 		common_GetVehicleVelocity(vehicleid, &vvel);
 		missions_send_tracker_data(
 			playerid, vehicleid, hp,
@@ -1052,7 +1062,7 @@ void veh_update_panel_for_player(int playerid)
 		fuel = odo = 0.0f;
 	}
 
-	hp = anticheat_NC_GetVehicleHealth(vehicleid);
+	hp = anticheat_GetVehicleHealth(vehicleid);
 	hp -= 250.0f;
 	if (hp < 0.0f) {
 		hp = 0.0f;

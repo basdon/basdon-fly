@@ -96,6 +96,7 @@ AMX_NATIVE n_TextDrawShowForPlayer;
 AMX_NATIVE n_TextDrawTextSize;
 AMX_NATIVE n_TextDrawUseBox;
 AMX_NATIVE n_TogglePlayerClock;
+AMX_NATIVE n_TogglePlayerControllable;
 AMX_NATIVE n_TogglePlayerSpectating;
 AMX_NATIVE n_cache_delete;
 AMX_NATIVE n_cache_get_row;
@@ -226,6 +227,7 @@ int natives_find()
 		N(TextDrawShowForPlayer),
 		N(TextDrawTextSize),
 		N(TextDrawUseBox),
+		N(TogglePlayerControllable),
 		N(cache_delete),
 		N(cache_get_row),
 		N(cache_get_row_count),
@@ -284,8 +286,7 @@ int natives_NC_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 		NC(n_GetVehicleHealth_);
 		hp = *fbuf32;
 		if (hp != hp || hp < 0.0f || 1000.0f < hp) {
-			*fbuf32 = 1000.0f;
-			NC_SetVehicleHealth(vehicleid, *buf32);
+			NC_SetVehicleHealth(vehicleid, 1000.0f);
 		}
 	}
 
