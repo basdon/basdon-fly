@@ -43,12 +43,14 @@
 <?php 
 try{
 	++$db_querycount;
-	$r = $db->query('SELECT _f.*,_u.name,_a.n fromname,_a.c fromcode,_b.n toname,_b.c tocode,_v.m vehmodel 
+	$r = $db->query('SELECT _f.*,_u.name,_a.n fromname,_a.c fromcode,_b.n toname,_b.c tocode,_v.m vehmodel ,_m.name fromgate,_n.name togate 
 	                 FROM flg _f 
 	                 JOIN usr _u ON _f.player=_u.i 
 	                 JOIN apt _a ON _f.fapt=_a.i 
 	                 JOIN apt _b ON _f.tapt=_b.i 
 	                 JOIN veh _v ON _f.vehicle=_v.i 
+	                 JOIN msp _m ON _f.fmsp = _m.i 
+	                 JOIN msp _n ON _f.fmsp = _n.i 
 	                 WHERE id=' . $id);
 	if ($r === false || ($r = $r->fetchAll()) === false || empty($r)) {
 		echo '<p>Flight not found (or something went wrong)!</p>';
@@ -63,8 +65,8 @@ try{
 			<ul>
 				<li><strong>Status:</strong> <span class="flight-state-{@unsafe $r->state}" style="padding:.1em .4em">{@unsafe fmt_flight_status($r->state, $r->tload)}</span></li>
 				<li><strong>Pilot:</strong> <a href="user.php?name={@urlencode $r->name}">{@unsafe $r->name}</a></li>
-				<li><strong>Departure Airport:</strong> <a href="airport.php?code={@unsafe $r->fromcode}">{@unsafe $r->fromname} ({@unsafe $r->fromcode})</a></li>
-				<li><strong>Arrival Airport:</strong> <a href="airport.php?code={@unsafe $r->tocode}">{@unsafe $r->toname} ({@unsafe $r->tocode})</a></li>
+				<li><strong>Origin:</strong> <a href="airport.php?code={@unsafe $r->fromcode}">{@unsafe $r->fromname} ({@unsafe $r->fromcode})</a> {@unsafe $r->fromgate}</li>
+				<li><strong>Destination:</strong> <a href="airport.php?code={@unsafe $r->tocode}">{@unsafe $r->toname} ({@unsafe $r->tocode})</a> {@unsafe $r->togate}</li>
 				<li><strong>Point-to-point distance:</strong> {@unsafe $r->distance}m</li>
 				<li><strong>Actual flown distance:</strong> {@unsafe $r->adistance}m</li>
 				<li><strong>Flight start:</strong> {@unsafe date('j M Y H:i', $r->tstart)} (GMT{@unsafe date('O')})</li>
