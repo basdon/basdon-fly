@@ -379,7 +379,7 @@ extern cell tmpfloat;
 
 #define NC_cache_get_field_flt(ROW,COL) (NC_PARS_(2)\
 	nc_params[1]=ROW,nc_params[2]=COL,\
-	n_cache_get_row_float(amx,nc_params))
+	NCF(n_cache_get_row_float))
 
 #define NC_cache_get_field_str(ROW,COL,BUF) (NC_PARS_(3)\
 	nc_params[1]=ROW,nc_params[2]=COL,nc_params[3]=BUF,\

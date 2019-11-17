@@ -101,9 +101,9 @@ noairports:
 	while (rowcount >= 0) {
 		lastap = NC_cache_get_field_int(rowcount, 0);
 		ap = airports + lastap;
+
 		/*look 'ahead' to see how many runways there are*/
 		i = rowcount - 1;
-		nc_params[2] = 1;
 		while (i > 0) {
 			i--;
 			nc_params[1] = i;
