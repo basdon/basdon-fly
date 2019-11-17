@@ -116,7 +116,7 @@ void missions_init()
 	cacheid = NC_mysql_query(buf144a);
 	i = NC_cache_get_row_count();
 	lastapid = -1;
-	nc_params[3] = buf144a;
+	nc_params[3] = buf32a;
 	while (i--) {
 		NC_PARS(2);
 		nc_params[1] = i;
