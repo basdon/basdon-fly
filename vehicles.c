@@ -246,10 +246,10 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 	veh->id = params[1];
 	veh->model = model = params[2];
 	veh->owneruserid = params[3];
-	veh->x = amx_ctof(params[4]);
-	veh->y = amx_ctof(params[5]);
-	veh->z = amx_ctof(params[6]);
-	veh->r = amx_ctof(params[7]);
+	veh->pos.coords.x = amx_ctof(params[4]);
+	veh->pos.coords.y = amx_ctof(params[5]);
+	veh->pos.coords.z = amx_ctof(params[6]);
+	veh->pos.r = amx_ctof(params[7]);
 	veh->col1 = params[8];
 	veh->col2 = params[9];
 	veh->odoKM = (float) params[10];
@@ -292,10 +292,10 @@ cell AMX_NATIVE_CALL Veh_CollectPlayerVehicles(AMX *amx, cell *params)
 		if (veh->owneruserid == userid) {
 			*(addr++) = veh->col2;
 			*(addr++) = veh->col1;
-			*(addr++) = amx_ftoc(veh->r);
-			*(addr++) = amx_ftoc(veh->z);
-			*(addr++) = amx_ftoc(veh->y);
-			*(addr++) = amx_ftoc(veh->x);
+			*(addr++) = amx_ftoc(veh->pos.r);
+			*(addr++) = amx_ftoc(veh->pos.coords.z);
+			*(addr++) = amx_ftoc(veh->pos.coords.y);
+			*(addr++) = amx_ftoc(veh->pos.coords.x);
 			*(addr++) = veh->model;
 			*(addr++) = veh->id;
 			amount++;
@@ -951,18 +951,17 @@ void veh_timed_1s_update()
 	}
 }
 
-int veh_NC_CreateVehicle(int model, float x, float y, float z,
-		     float r, int col1, int col2, int respawn_delay,
-		     int addsiren)
+int veh_NC_CreateVehicle(int model, struct vec4 pos, int col1, int col2,
+	int respawn_delay, int addsiren)
 {
 	int vehicleid;
 
 	NC_PARS(9);
 	nc_params[1] = model;
-	nc_paramf[2] = x;
-	nc_paramf[3] = y;
-	nc_paramf[4] = z;
-	nc_paramf[5] = r;
+	nc_paramf[2] = pos.coords.x;
+	nc_paramf[3] = pos.coords.y;
+	nc_paramf[4] = pos.coords.z;
+	nc_paramf[5] = pos.r;
 	nc_params[6] = col1;
 	nc_params[7] = col2;
 	nc_params[8] = respawn_delay;
@@ -993,8 +992,8 @@ static
 int veh_create_from_dbvehicle(struct dbvehicle *veh)
 {
 	int vehicleid = veh_NC_CreateVehicle(
-		veh->model, veh->x, veh->y, veh->z,
-		veh->r, veh->col1, veh->col2, VEHICLE_RESPAWN_DELAY, 0);
+		veh->model, veh->pos, veh->col1, veh->col2,
+		VEHICLE_RESPAWN_DELAY, 0);
 	veh->spawnedvehicleid = vehicleid;
 	gamevehicles[vehicleid].dbvehicle = veh;
 	return vehicleid;

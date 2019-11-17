@@ -188,6 +188,12 @@ Will use buf32, buf64, buf144.
 */
 int common_GetVehiclePos(int vehicleid, struct vec3 *pos);
 /**
+Gets a vehicle's position and Z angle into a vec4 struct.
+
+Will use buf32, buf64, buf144.
+*/
+int common_GetVehiclePosRot(int vehicleid, struct vec4 *pos);
+/**
 Alternative for GetVehicleRotationQuat to get it directly into a quat struct.
 
 Will use buf32, buf64, buf144, buf32_1.

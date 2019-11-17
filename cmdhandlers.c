@@ -111,9 +111,7 @@ int cmd_park(CMDPARAMS)
 {
 	char q[144];
 	struct dbvehicle *veh;
-	struct vec3 vpos;
 	int vehicleid;
-	float r;
 
 	vehicleid = NC_GetPlayerVehicleID(playerid);
 	if (vehicleid) {
@@ -124,25 +122,24 @@ int cmd_park(CMDPARAMS)
 			NC_SendClientMessage(playerid, COL_WARN, buf144a);
 			return 1;
 		}
-		common_GetVehiclePos(vehicleid, &vpos);
-		NC_GetVehicleZAngle(vehicleid, buf32_1a);
-		r = amx_ctof(*buf32_1);
-		if (356.0f < r || r < 4.0f) {
-			r = 0.0f;
-		} else if (86.0f < r && r < 94.0f) {
-			r = 90.0f;
-		} else if (176.0f < r && r < 184.0f) {
-			r = 180.0f;
-		} else if (266.0f < r && r < 274.0f) {
-			r = 270.0f;
+		common_GetVehiclePosRot(vehicleid, &veh->pos);
+		if (356.0f < veh->pos.r || veh->pos.r < 4.0f) {
+			veh->pos.r = 0.0f;
+		} else if (86.0f < veh->pos.r && veh->pos.r < 94.0f) {
+			veh->pos.r = 90.0f;
+		} else if (176.0f < veh->pos.r && veh->pos.r < 184.0f) {
+			veh->pos.r = 180.0f;
+		} else if (266.0f < veh->pos.r && veh->pos.r < 274.0f) {
+			veh->pos.r = 270.0f;
 		}
-		veh->x = vpos.x;
-		veh->y = vpos.y;
-		veh->z = vpos.z;
-		veh->r = r;
 		gamevehicles[vehicleid].need_recreation = 1;
-		sprintf(q, "UPDATE veh SET x=%f,y=%f,z=%f,r=%f WHERE i=%d",
-			vpos.x, vpos.y, vpos.z, r, veh->id);
+		sprintf(q,
+			"UPDATE veh SET x=%f,y=%f,z=%f,r=%f WHERE i=%d",
+			veh->pos.coords.x,
+			veh->pos.coords.y,
+			veh->pos.coords.z,
+			veh->pos.r,
+			veh->id);
 		amx_SetUString(buf144, q, sizeof(q));
 		NC_mysql_tquery_nocb(buf144a);
 		amx_SetUString(buf144, MSG_VEH_PARK_Y, 144);

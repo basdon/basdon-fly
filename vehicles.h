@@ -5,7 +5,7 @@ struct dbvehicle {
 	int id;
 	int model;
 	int owneruserid;
-	float x, y, z, r;
+	struct vec4 pos;
 	int col1, col2;
 	float odoKM;
 	float fuel;
@@ -76,9 +76,8 @@ Creates a vehicle (see CreateVehicle doc).
 
 @remarks Resets values of gamevehicles struct reflecting the created vehicle.
 */
-int veh_NC_CreateVehicle(int model, float x, float y, float z,
-		         float r, int col1, int col2, int respawn_delay,
-		         int addsiren);
+int veh_NC_CreateVehicle(int model, struct vec4 pos, int col1, int col2,
+	int respawn_delay, int addsiren);
 int veh_NC_DestroyVehicle(int vehicleid);
 void veh_on_player_connect(int playerid);
 /**

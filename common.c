@@ -109,6 +109,19 @@ int common_GetVehiclePos(int vehicleid, struct vec3 *pos)
 	return res;
 }
 
+int common_GetVehiclePosRot(int vehicleid, struct vec4 *pos)
+{
+	int res;
+	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
+	pos->coords.x = *fbuf32;
+	pos->coords.y = *fbuf64;
+	pos->coords.z = *fbuf144;
+	NC_PARS(2);
+	res = NC(n_GetVehiclePos);
+	pos->r = *fbuf32;
+	return res;
+}
+
 int common_GetVehicleRotationQuat(int vehicleid, struct quat *rot)
 {
 	int res;
