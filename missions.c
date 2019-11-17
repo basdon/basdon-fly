@@ -1115,35 +1115,52 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 	             paymp);
 	if (miss->missiontype & PASSENGER_MISSIONTYPES) {
 		dlg += sprintf(dlg,
-		             "{ffffff}Passenger Satisfaction:\t"ECOL_MISSION"%d%%\n",
+		             "{ffffff}Passenger Satisfaction:\t"
+			     ""ECOL_MISSION"%d%%\n",
 		             miss->passenger_satisfaction);
 	}
 	*dlg++ = '\n';
 	*dlg++ = '\n';
 	if (ptax) {
-		dlg += missions_append_pay(dlg, "{ffffff}Airport Tax:\t\t", ptax);
+		dlg += missions_append_pay(dlg,
+			"{ffffff}Airport Tax:\t\t",
+			ptax);
 	}
 	if (miss->weatherbonus) {
-		dlg += missions_append_pay(dlg, "{ffffff}Weather bonus:\t\t", miss->weatherbonus);
+		dlg += missions_append_pay(dlg,
+			"{ffffff}Weather bonus:\t\t",
+			miss->weatherbonus);
 	}
 	dlg += missions_append_pay(dlg, "{ffffff}Distance Pay:\t\t", pdistance);
 	if (miss->missiontype & PASSENGER_MISSIONTYPES) {
 		if (psatisfaction > 0) {
-			dlg += missions_append_pay(dlg, "{ffffff}Satisfaction Bonus:\t", psatisfaction);
+			dlg += missions_append_pay(dlg,
+				"{ffffff}Satisfaction Bonus:\t",
+				psatisfaction);
 		} else {
-			dlg += missions_append_pay(dlg, "{ffffff}Satisfaction Penalty:\t", psatisfaction);
+			dlg += missions_append_pay(dlg,
+				"{ffffff}Satisfaction Penalty:\t",
+				psatisfaction);
 		}
 	}
 	if (pdamage) {
-		dlg += missions_append_pay(dlg, "{ffffff}Damage Penalty:\t", pdamage);
+		dlg += missions_append_pay(dlg,
+			"{ffffff}Damage Penalty:\t",
+			pdamage);
 	}
 	if (pcheat) {
-		dlg += missions_append_pay(dlg, "{ffffff}Cheat Penalty:\t\t", pcheat);
+		dlg += missions_append_pay(dlg,
+			"{ffffff}Cheat Penalty:\t\t",
+			pcheat);
 	}
 	if (pbonus) {
-		dlg += missions_append_pay(dlg, "{ffffff}Bonus:\t\t\t", pbonus);
+		dlg += missions_append_pay(dlg,
+			"{ffffff}Bonus:\t\t\t",
+			pbonus);
 	}
-	dlg += missions_append_pay(dlg, "\n\n\t{ffffff}Total Pay: ", ptotal);
+	dlg += missions_append_pay(dlg,
+		"\n\n\t{ffffff}Total Pay: ",
+		ptotal);
 	*--dlg = 0;
 	dialog_ShowPlayerDialog(
 		playerid,
