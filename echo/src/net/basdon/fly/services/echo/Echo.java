@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 import net.basdon.anna.api.ChannelUser;
+import net.basdon.anna.api.Constants;
 import net.basdon.anna.api.IAnna;
 
 import static net.basdon.anna.api.Constants.*;
@@ -29,6 +30,7 @@ private static final char
 	PACK_PONG = 6,
 	PACK_CHAT = 10,
 	PACK_ACTION = 11,
+	PACK_FLIGHT_MESSAGE = 12,
 	PACK_PLAYER_CONNECTION = 30;
 private static final InetAddress ADDR_OUT;
 
@@ -195,6 +197,23 @@ throws InterruptedIOException
 			return;
 		}
 		break;
+	}
+	case PACK_FLIGHT_MESSAGE:
+	{
+		byte msglen;
+		if (length > 5 && 5 + (msglen = buf[4]) == length) {
+			char[] msg = new char[4 + msglen];
+			msg[0] = Constants.CTRL_COLOR;
+			msg[1] = '0';
+			msg[2] = '7'; // '0' + Constants.COL_ORANGE
+			msg[3] = 'Z'; // prevent nickalerts
+			for (int i = 4, j = 5; i < msg.length; i++, j++) {
+				msg[i] = (char) buf[j];
+			}
+			this.anna.sync_exec(() -> {
+				this.anna.privmsg(this.channel, msg);
+			});
+		}
 	}
 	case PACK_PLAYER_CONNECTION:
 		byte nicklen;
