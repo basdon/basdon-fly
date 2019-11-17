@@ -1336,7 +1336,14 @@ int missions_cmd_cancelmission(CMDPARAMS)
 	struct MISSION *mission;
 
 	if ((mission = activemission[playerid]) != NULL) {
-		NC_DisablePlayerRaceCheckpoint(playerid);
+		if (mission->stage == MISSION_STAGE_LOAD ||
+			mission->stage == MISSION_STAGE_UNLOAD)
+		{
+			NC_TogglePlayerControllable(playerid, 1);
+			common_hide_gametext_for_player(playerid);
+		} else {
+			NC_DisablePlayerRaceCheckpoint(playerid);
+		}
 		money_take(playerid, 5000);
 		missions_end_unfinished(mission,
 			playerid, MISSION_STATE_DECLINED);
