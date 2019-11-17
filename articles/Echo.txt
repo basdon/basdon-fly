@@ -71,7 +71,19 @@ total len: 10+[byte6]+[byte7]
 
 {@h4(id=p11) Packet 11: Action}
 
-Basically a copy of the {@#=p10 Chat} packet, but for an action ({@code /me} command).
+Basically a copy of the {@#=p10 Chat} packet, but for an action ({@code /me}
+command).
+
+{@h4(id=p12) Packet 12: Flight message}
+
+Sent from the game when a flight has been finished.
+
+<pre>
+byte 4: length of the message
+byte 5 - 4+[byte4]: message
+
+total len: 5+[byte4]
+</pre>
 
 {@h4(id=p30) Packet 30: Player connection}
 
