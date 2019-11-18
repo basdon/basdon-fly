@@ -18,6 +18,63 @@ int cmd_dev_closestmp(CMDPARAMS)
 }
 
 /**
+The /cp command creates a checkpoint on top of the player.
+*/
+static
+int cmd_dev_cp(CMDPARAMS)
+{
+	struct vec3 pos;
+	int vehicleid = NC_GetPlayerVehicleID(playerid);
+	if (vehicleid) {
+		common_GetVehiclePos(vehicleid, &pos);
+	} else {
+		common_GetPlayerPos(playerid, &pos);
+	}
+	NC_SetPlayerRaceCheckpoint(playerid, 2,
+		pos.x, pos.y, pos.z,0.0f, 0.0f, 0.0f, 8.0f);
+	return 1;
+}
+
+/**
+The /gt command shows gametext for the player.
+*/
+static
+int cmd_dev_gt(CMDPARAMS)
+{
+	int style;
+	if (cmd_get_int_param(cmdtext, &parseidx, &style) &&
+		cmd_get_str_param(cmdtext, &parseidx, cbuf4096))
+	{
+		amx_SetUString(buf144, cbuf4096, 144);
+		NC_GameTextForPlayer(playerid, buf144a, 4000, style);
+	} else {
+		amx_SetUString(buf144, WARN"Syntax: /gt <style> <text>", 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	}
+	return 1;
+}
+
+/**
+The /crashme command crashes the player.
+*/
+static
+int cmd_dev_crashme(CMDPARAMS)
+{
+	common_crash_player(playerid);
+	return 1;
+}
+
+/**
+The /jetpack command gives player a jetpack.
+*/
+static
+int cmd_dev_jetpack(CMDPARAMS)
+{
+	NC_SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USEJETPACK);
+	return 1;
+}
+
+/**
 The /*m <amount> command to give or take money.
 */
 static
@@ -87,6 +144,28 @@ int cmd_dev_platform(CMDPARAMS)
 }
 
 /**
+The /kill command kills the player.
+*/
+static
+int cmd_dev_kill(CMDPARAMS)
+{
+	NC_SetPlayerHealth(playerid, 0.0f);
+	return 1;
+}
+
+/**
+The /kickme commands kicks the player.
+*/
+static
+int cmd_dev_kickme(CMDPARAMS)
+{
+	amx_SetUString(buf144, "you're kicked, bye", 144);
+	NC_SendClientMessage(playerid, -1, buf144a);
+	natives_NC_Kick(playerid);
+	return 1;
+}
+
+/**
 Toggle owner group on yourself.
 */
 static
@@ -131,6 +210,82 @@ int cmd_dev_v(CMDPARAMS)
 		devvehicle = NC(n_CreateVehicle_);
 		natives_NC_PutPlayerInVehicle(playerid, devvehicle, 0);
 	}
+	return 1;
+}
+
+/**
+The /sound <soundid> command plays a sound.
+*/
+static
+int cmd_dev_sound(CMDPARAMS)
+{
+	int soundid;
+	if (!cmd_get_int_param(cmdtext, &parseidx, &soundid)) {
+		amx_SetUString(buf144, WARN"Syntax: /sound <soundid>", 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	} else {
+		NC_PlayerPlaySound0(playerid, soundid);
+	}
+	return 1;
+}
+
+/**
+The /vehrespawn command respawns the player's vehicle.
+*/
+static
+int cmd_dev_vehrespawn(CMDPARAMS)
+{
+	int vehicleid = NC_GetPlayerVehicleID(playerid);
+	NC_SetVehicleToRespawn(vehicleid);
+	return 1;
+}
+
+/**
+The /vhp command prints the hp of the player's vehicle.
+*/
+static
+int cmd_dev_vhp(CMDPARAMS)
+{
+	NC_PARS(2);
+	nc_params[1] = NC_GetPlayerVehicleID(playerid);
+	nc_params[2] = buf32a;
+	NC(n_GetVehicleHealth_);
+	sprintf(cbuf32, "hp %f", *fbuf32);
+	amx_SetUString(buf32_1, cbuf32, 32);
+	NC_SendClientMessageToAll(-1, buf32_1a);
+	return 1;
+}
+
+/**
+The /vphnan command sets player's vehicle to NaN hp.
+*/
+static
+int cmd_dev_vhpnan(CMDPARAMS)
+{
+	int vehicleid = NC_GetPlayerVehicleID(playerid);
+	NC_SetVehicleHealth(vehicleid, 0x7F800100);
+	return 1;
+}
+
+/**
+The /vphninf command sets player's vehicle to negative infinite hp.
+*/
+static
+int cmd_dev_vhpninf(CMDPARAMS)
+{
+	int vehicleid = NC_GetPlayerVehicleID(playerid);
+	NC_SetVehicleHealth(vehicleid, FLOAT_NINF);
+	return 1;
+}
+
+/**
+The /vphpinf command sets player's vehicle to positive infinite hp.
+*/
+static
+int cmd_dev_vhppinf(CMDPARAMS)
+{
+	int vehicleid = NC_GetPlayerVehicleID(playerid);
+	NC_SetVehicleHealth(vehicleid, FLOAT_PINF);
 	return 1;
 }
 

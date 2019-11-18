@@ -36,6 +36,7 @@ AMX_NATIVE n_GetPlayerPos;
 AMX_NATIVE n_GetPlayerState;
 AMX_NATIVE n_GetPlayerVehicleID;
 AMX_NATIVE n_GetPlayerVehicleSeat;
+AMX_NATIVE n_GetServerTickRate;
 AMX_NATIVE n_GetVehicleHealth_;
 AMX_NATIVE n_GetVehicleModel;
 AMX_NATIVE n_GetVehicleParamsEx;
@@ -72,6 +73,7 @@ AMX_NATIVE n_SetPlayerCameraPos;
 AMX_NATIVE n_SetPlayerCameraLookAt;
 AMX_NATIVE n_SetPlayerColor;
 AMX_NATIVE n_SetPlayerFacingAngle;
+AMX_NATIVE n_SetPlayerHealth;
 AMX_NATIVE n_SetPlayerMapIcon;
 AMX_NATIVE n_SetPlayerPos_;
 AMX_NATIVE n_SetPlayerRaceCheckpoint;
@@ -167,6 +169,7 @@ int natives_find()
 		N(GetPlayerState),
 		N(GetPlayerVehicleID),
 		N(GetPlayerVehicleSeat),
+		N(GetServerTickRate),
 		N_(GetVehicleHealth),
 		N(GetVehicleModel),
 		N(GetVehicleRotationQuat),
@@ -202,6 +205,7 @@ int natives_find()
 		N(SetPlayerCameraPos),
 		N(SetPlayerCameraLookAt),
 		N(SetPlayerColor),
+		N(SetPlayerHealth),
 		N(SetPlayerMapIcon),
 		N_(SetPlayerPos),
 		N(SetPlayerFacingAngle),

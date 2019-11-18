@@ -77,6 +77,20 @@ int cmd_camera(CMDPARAMS)
 	return 1;
 }
 
+/**
+The /helpkeys command shows gametext with important keys.
+*/
+static
+int cmd_helpkeys(CMDPARAMS)
+{
+	amx_SetUString(buf144,
+		"~w~start/stop engine: ~b~~k~~CONVERSATION_NO~~n~"
+		"~w~landing gear: ~b~~k~~TOGGLE_SUBMISSIONS~",
+		144);
+	NC_GameTextForPlayer(playerid, buf144a, 5000, 3);
+	return 1;
+}
+
 static
 int cmd_me(CMDPARAMS)
 {
@@ -222,6 +236,18 @@ rand2nd:
 			NC_mysql_tquery_nocb(buf144a);
 		}
 	}
+	return 1;
+}
+
+/**
+The /tickrate command to print the server's current tick rate.
+*/
+static
+int cmd_tickrate(CMDPARAMS)
+{
+	sprintf(cbuf32, "%d", NC_GetServerTickRate());
+	amx_SetUString(buf32_1, cbuf32, 32);
+	NC_SendClientMessage(playerid, -1, buf32_1a);
 	return 1;
 }
 

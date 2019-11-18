@@ -43,11 +43,13 @@ int common_find_player_in_vehicle_seat(int vehicleid, int seat)
 
 void common_crash_player(int playerid)
 {
-	static const char
-		*CRASHSTR = "Wasted~~k~SWITCH_DEBUG_CAM_ON~~k~~TOGGLE_DPAD~"
-			"~k~~NETWORK_TALK~~k~~SHOW_MOUSE_POINTER_TOGGLE~";
-
-	amx_SetUString(buf144, CRASHSTR, 144);
+	amx_SetUString(buf144,
+		"Wasted"
+		"~k~SWITCH_DEBUG_CAM_ON~"
+		"~k~~TOGGLE_DPAD~"
+		"~k~~NETWORK_TALK~"
+		"~k~~SHOW_MOUSE_POINTER_TOGGLE~",
+		144);
 	NC_GameTextForPlayer(playerid, buf144a, 5, 5);
 }
 

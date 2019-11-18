@@ -2,6 +2,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "a_samp.h"
 #include "airport.h"
 #include "echo.h"
 #include "game_sa.h"
@@ -156,15 +157,27 @@ static struct COMMAND cmds[] = {
 #ifdef DEV
 	{ 0, "/*m", GROUPS_ALL, cmd_dev_STARm },
 	{ 0, "/closestmp", GROUPS_ALL, cmd_dev_closestmp },
+	{ 0, "/cp", GROUPS_ALL, cmd_dev_cp },
+	{ 0, "/crashme", GROUPS_ALL, cmd_dev_crashme },
+	{ 0, "/gt", GROUPS_ALL, cmd_dev_gt },
+	{ 0, "/jetpack", GROUPS_ALL, cmd_dev_jetpack },
+	{ 0, "/kickme", GROUPS_ALL, cmd_dev_kickme },
+	{ 0, "/kill", GROUPS_ALL, cmd_dev_kill },
 	{ 0, "/platform", GROUPS_ALL, cmd_dev_platform },
 	{ 0, "/testparpl", GROUPS_ALL, cmd_dev_testparpl },
 	{ 0, "/timex", GROUPS_ALL, cmd_dev_timex },
 	{ 0, "//owner", GROUPS_ALL, cmd_dev_owner },
 	{ 0, "/fweather", GROUPS_ALL, timecyc_cmd_dev_fweather },
 	{ 0, "/nweather", GROUPS_ALL, timecyc_cmd_dev_nweather },
+	{ 0, "/sound", GROUPS_ALL, cmd_dev_sound },
 	{ 0, "/timecyc", GROUPS_ALL, timecyc_cmd_dev_timecyc },
 	{ 0, "/tweather", GROUPS_ALL, timecyc_cmd_dev_tweather },
 	{ 0, "/v", GROUPS_ALL, cmd_dev_v },
+	{ 0, "/vehrespawn", GROUPS_ALL, cmd_dev_vehrespawn },
+	{ 0, "/vhp", GROUPS_ALL, cmd_dev_vhp },
+	{ 0, "/vhpnan", GROUPS_ALL, cmd_dev_vhpnan },
+	{ 0, "/vhpninf", GROUPS_ALL, cmd_dev_vhpninf },
+	{ 0, "/vhppinf", GROUPS_ALL, cmd_dev_vhppinf },
 #endif /*DEV*/
 	{ 0, "//respawn", GROUPS_ADMIN, cmd_admin_respawn },
 	{ 0, "/adf", GROUPS_ALL, nav_cmd_adf },
@@ -175,6 +188,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/camera", GROUPS_ALL, cmd_camera },
 	{ 0, "/cancelwork", GROUPS_ALL, missions_cmd_cancelmission },
 	{ 0, "/fix", GROUPS_ALL, svp_cmd_repair },
+	{ 0, "/helpkeys", GROUPS_ALL, cmd_helpkeys },
 	{ 0, "/ils", GROUPS_ALL, nav_cmd_ils },
 	{ 0, "/loc", GROUPS_ALL, zones_cmd_loc },
 	{ 0, "/nearest", GROUPS_ALL, airport_cmd_nearest },
@@ -193,6 +207,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/refuel", GROUPS_ALL, svp_cmd_refuel },
 	{ 0, "/respawn", GROUPS_ALL, cmd_respawn },
 	{ 0, "/s", GROUPS_ALL, missions_cmd_cancelmission },
+	{ 0, "/tickrate", GROUPS_ALL, cmd_tickrate },
 	{ 0, "/spray", GROUPS_ALL, cmd_spray },
 	{ 0, "/vor", GROUPS_ALL, nav_cmd_vor },
 	{ 0, "/w", GROUPS_ALL, missions_cmd_mission },

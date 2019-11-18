@@ -27,6 +27,7 @@ extern AMX_NATIVE n_GetPlayerPos;
 extern AMX_NATIVE n_GetPlayerState;
 extern AMX_NATIVE n_GetPlayerVehicleID;
 extern AMX_NATIVE n_GetPlayerVehicleSeat;
+extern AMX_NATIVE n_GetServerTickRate;
 extern AMX_NATIVE n_GetVehicleHealth_;
 extern AMX_NATIVE n_GetVehicleModel;
 extern AMX_NATIVE n_GetVehicleParamsEx;
@@ -63,6 +64,7 @@ extern AMX_NATIVE n_SetPlayerCameraPos;
 extern AMX_NATIVE n_SetPlayerCameraLookAt;
 extern AMX_NATIVE n_SetPlayerColor;
 extern AMX_NATIVE n_SetPlayerFacingAngle;
+extern AMX_NATIVE n_SetPlayerHealth;
 extern AMX_NATIVE n_SetPlayerMapIcon;
 extern AMX_NATIVE n_SetPlayerPos_;
 extern AMX_NATIVE n_SetPlayerRaceCheckpoint;
@@ -204,6 +206,9 @@ extern cell tmpfloat;
 	(NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_GetPlayerVehicleSeat(amx,nc_params))
 
+#define NC_GetServerTickRate() (NC_PARS_(0)\
+	n_GetServerTickRate(amx,nc_params))
+
 #define NC_GetVehicleHealth __USE__anticheat_NC_GetVehicleHealth__
 
 #define NC_GetVehicleModel(VEHICLEID) \
@@ -319,13 +324,21 @@ extern cell tmpfloat;
 	nc_params[1]=PLAYERID,nc_params[2]=FR,\
 	n_SetPlayerFacingAngle(amx,nc_params))
 
+#define NC_SetPlayerHealth(PLAYERID,FHEALTH) \
+	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_paramf[2]=FHEALTH,\
+	n_SetPlayerHealth(amx,nc_params))
+
 #define NC_SetPlayerPos __USE__natives_NC_SetPlayerPos__
 
 #define NC_SetPlayerRaceCheckpoint(PLAYERID,TYPE,FX,FY,FZ,FNX,FNY,FNZ,FSIZE) \
 	(NC_PARS_(9)nc_params[1]=PLAYERID,nc_params[2]=TYPE,\
-	nc_params[3]=FX,nc_params[4]=FY,nc_params[5]=FZ,nc_params[6]=FNX,\
-	nc_params[7]=FNY,nc_params[8]=FNZ,nc_params[9]=FSIZE,\
+	nc_paramf[3]=FX,nc_paramf[4]=FY,nc_paramf[5]=FZ,nc_paramf[6]=FNX,\
+	nc_paramf[7]=FNY,nc_paramf[8]=FNZ,nc_paramf[9]=FSIZE,\
 	n_SetPlayerRaceCheckpoint(amx,nc_params))
+
+#define NC_SetPlayerSpecialAction(PLAYERID,ACTION) \
+	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=ACTION,\
+	n_SetPlayerSpecialAction(amx,nc_params))
 
 #define NC_SetPlayerTime(PLAYERID,H,M) \
 	(NC_PARS_(3)nc_params[1]=PLAYERID,nc_params[2]=H,nc_params[3]=M,\
