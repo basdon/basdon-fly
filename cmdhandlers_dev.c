@@ -18,6 +18,19 @@ int cmd_dev_closestmp(CMDPARAMS)
 }
 
 /**
+The /*m <amount> command to give or take money.
+*/
+static
+int cmd_dev_STARm(CMDPARAMS)
+{
+	int i;
+	if (cmd_get_int_param(cmdtext, &parseidx, &i)) {
+		money_give(playerid, i);
+	}
+	return 1;
+}
+
+/**
 Command to test parameter parsing in plugin code.
 */
 static

@@ -244,6 +244,12 @@ cell AMX_NATIVE_CALL REMOVEME_setplayermoney(AMX *amx, cell *params)
 	return 1;
 }
 
+static
+cell AMX_NATIVE_CALL REMOVEME_getplayermoney(AMX *amx, cell *params)
+{
+	return money_get(params[1]);
+}
+
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
@@ -255,6 +261,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(REMOVEME_setloggedstatus),
 	REGISTERNATIVE(REMOVEME_getplayerodo),
 	REGISTERNATIVE(REMOVEME_setplayermoney),
+	REGISTERNATIVE(REMOVEME_getplayermoney),
 	/* anticheat.c */
 	REGISTERNATIVE(Ac_FormatLog),
 	/* basdon.c */

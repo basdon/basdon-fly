@@ -11,6 +11,7 @@
 #include "protips.h"
 #include "nav.h"
 #include "missions.h"
+#include "money.h"
 #include "servicepoints.h"
 #include "timecyc.h"
 #include "vehicles.h"
@@ -153,6 +154,7 @@ struct COMMAND {
 /* command must prefixed by forward slash and be lower case */
 static struct COMMAND cmds[] = {
 #ifdef DEV
+	{ 0, "/*m", GROUPS_ALL, cmd_dev_STARm },
 	{ 0, "/closestmp", GROUPS_ALL, cmd_dev_closestmp },
 	{ 0, "/platform", GROUPS_ALL, cmd_dev_platform },
 	{ 0, "/testparpl", GROUPS_ALL, cmd_dev_testparpl },
