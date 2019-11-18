@@ -243,6 +243,21 @@ void anticheat_disallowed_vehicle_1s(int playerid)
 	anticheat_infraction(playerid, AC_IF_DISALLOWED_VEHICLE);
 }
 
+static const char *DONTSPAM = "Don't spam!";
+
+int anticheat_on_player_command(int playerid)
+{
+
+	if (anticheat_flood(playerid, AC_FLOOD_AMOUNT_CMD)) {
+		return 0;
+	}
+	if (floodcount[playerid] > AC_FLOOD_WARN_THRESHOLD) {
+		amx_SetUString(buf144, DONTSPAM, 144);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	}
+	return 1;
+}
+
 void anticheat_on_player_enter_vehicle(
 	int playerid, int vehicleid, int ispassenger)
 {
@@ -260,8 +275,6 @@ void anticheat_on_player_enter_vehicle(
 
 int anticheat_on_player_text(int playerid)
 {
-	static const char *DONTSPAM = "Don't spam!";
-
 	if (anticheat_flood(playerid, AC_FLOOD_AMOUNT_CHAT)) {
 		return 0;
 	}
