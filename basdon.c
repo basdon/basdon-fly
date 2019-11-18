@@ -114,6 +114,7 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 	heartbeat_end_session();
 	missions_destroy_tracker_socket();
 	spawn_dispose();
+	svp_dispose();
 	while (veh_commit_next_vehicle_odo_to_db());
 	return 1;
 }
@@ -137,6 +138,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	heartbeat_create_session();
 	panel_on_gamemode_init();
 	spawn_init(); /*MUST run after airports_init*/
+	svp_init();
 	timecyc_init();
 	veh_create_global_textdraws();
 
@@ -215,6 +217,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	panel_on_player_connect(playerid);
 	pm_on_player_connect(playerid);
 	prefs_on_player_connect(playerid);
+	svp_on_player_connect(playerid);
 	timecyc_on_player_connect(playerid);
 	veh_create_player_textdraws(playerid);
 	zones_on_player_connect(playerid);
@@ -330,7 +333,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 	common_GetPlayerPos(playerid, &pos);
 	maps_stream_for_player(playerid, pos);
 	spawn_on_player_spawn(playerid);
-	veh_update_service_point_mapicons(playerid, pos.x, pos.y);
+	svp_update_mapicons(playerid, pos.x, pos.y);
 	zones_on_player_spawn(playerid, pos);
 	return 1;
 }

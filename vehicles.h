@@ -63,7 +63,7 @@ int veh_commit_next_vehicle_odo_to_db();
 /**
 Convenience method to get a player's vehicle data.
 
-@param reinc reincarnation value
+@param reinc will be set to reincarnation value (may be NULL if not needed)
 @return vehicleid
 */
 int veh_GetPlayerVehicle(int playerid, int *reinc, struct dbvehicle **veh);
@@ -116,10 +116,3 @@ Given player must be driver of given vehicle.
 @param pos the position of the given vehicle
 */
 void veh_update_odo(int playerid, int vehicleid, struct vec3 pos);
-/**
-Updates the service point mapicons (and 3D text) for given playerid.
-
-@param x x-position of the player
-@param y y-position of the player
-*/
-void veh_update_service_point_mapicons(int playerid, float x, float y);

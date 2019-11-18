@@ -19,6 +19,7 @@
 #include "pm.h"
 #include "prefs.h"
 #include "protips.h"
+#include "servicepoints.h"
 #include "spawn.h"
 #include "timecyc.h"
 #include "timer.h"
@@ -74,9 +75,6 @@ FORWARD(Login_PasswordConfirmFree);
 FORWARD(Login_PasswordConfirmStore);
 FORWARD(Login_PasswordConfirmValidate);
 FORWARD(Login_UsePassword);
-/* missions.c */
-FORWARD(Missions_OnVehicleRefueled);
-FORWARD(Missions_OnVehicleRepaired);
 /* nav.c */
 FORWARD(Nav_Reset);
 /* playerdata.c */
@@ -90,22 +88,16 @@ FORWARD(Playtime_FormatUpdateTimes);
 /* vehicles.c */
 FORWARD(Veh_Add);
 FORWARD(Veh_AddOdo);
-FORWARD(Veh_AddServicePoint);
 FORWARD(Veh_CollectSpawnedVehicles);
 FORWARD(Veh_CollectPlayerVehicles);
 FORWARD(Veh_Destroy);
 FORWARD(Veh_GetLabelToDelete);
 FORWARD(Veh_GetNextUpdateQuery);
 FORWARD(Veh_Init);
-FORWARD(Veh_InitServicePoints);
 FORWARD(Veh_IsFuelEmpty);
 FORWARD(Veh_OnPlayerDisconnect);
-FORWARD(Veh_Refuel);
 FORWARD(Veh_RegisterLabel);
-FORWARD(Veh_Repair);
 FORWARD(Veh_ShouldCreateLabel);
-FORWARD(Veh_UpdateServicePointTextId);
-FORWARD(Veh_UpdateServicePtsVisibility);
 FORWARD(Veh_UpdateSlot);
 
 int temp_afk[MAX_PLAYERS];
@@ -318,9 +310,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Login_PasswordConfirmStore),
 	REGISTERNATIVE(Login_PasswordConfirmValidate),
 	REGISTERNATIVE(Login_UsePassword),
-	/* missions.c */
-	REGISTERNATIVE(Missions_OnVehicleRefueled),
-	REGISTERNATIVE(Missions_OnVehicleRepaired),
 	/* nav.c */
 	REGISTERNATIVE(Nav_Reset),
 	/* playerdata.c */
@@ -333,18 +322,14 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Playtime_FormatUpdateTimes),
 	/* vehicles.c */
 	REGISTERNATIVE(Veh_Add),
-	REGISTERNATIVE(Veh_AddServicePoint),
 	REGISTERNATIVE(Veh_CollectSpawnedVehicles),
 	REGISTERNATIVE(Veh_CollectPlayerVehicles),
 	REGISTERNATIVE(Veh_Destroy),
 	REGISTERNATIVE(Veh_GetLabelToDelete),
 	REGISTERNATIVE(Veh_Init),
-	REGISTERNATIVE(Veh_InitServicePoints),
 	REGISTERNATIVE(Veh_IsFuelEmpty),
 	REGISTERNATIVE(Veh_OnPlayerDisconnect),
-	REGISTERNATIVE(Veh_Refuel),
 	REGISTERNATIVE(Veh_RegisterLabel),
-	REGISTERNATIVE(Veh_Repair),
 	REGISTERNATIVE(Veh_ShouldCreateLabel),
 	REGISTERNATIVE(Veh_UpdateSlot),
 	{0, 0}

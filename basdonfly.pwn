@@ -272,21 +272,6 @@ native Login_PasswordConfirmValidate(playerid, pwhash[])
 //@seealso Login_GetPassword
 native Login_UsePassword(playerid, buf[]);
 
-#namespace "missions.c"
-
-//@summary Let the mission logic know a vehicle was refueled, to know the total fuel burned during flight
-//@param playerid the vehicle driver
-//@param vehicleid the vehicle that was refueled
-//@param refuelamount the amount of fuel that was loaded into the vehicle
-native Missions_OnVehicleRefueled(playerid, vehicleid, Float:refuelamount)
-
-//@summary Let the mission logic know a vehicle was repaired, to know the total damage inflicted during flight
-//@param playerid the vehicle driver
-//@param vehicleid the vehicle that was repaired
-//@param oldhp old hp of the vehicle
-//@param newhp new hp of the vehicle
-native Missions_OnVehicleRepaired(playerid, vehicleid, Float:oldhp, Float:newhp)
-
 #namespace "nav.c"
 
 //@summary Resets all nav for a vehicle
@@ -385,15 +370,6 @@ native Timecyc_GetNextWeatherMsgQuery(nextweatherindex, bufmsg[], bufquery[])
 //@seealso Veh_UpdateSlot
 native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, odo, ownername[])
 
-//@summary Add a service point to the service point table
-//@param index index in the servicepoints table to store this point
-//@param id id of the service point
-//@param x x-coord
-//@param y y-coord
-//@param z z-coord
-//@seealso Veh_InitServicePoints
-native Veh_AddServicePoint(index, id, Float:x, Float:y, Float:z)
-
 //@summary Collects all vehicles from the table that are owned by a player
 //@param userid user id of the player of whom to collect all vehicles
 //@param buf buffer to put in the vehicle data
@@ -409,9 +385,7 @@ native Veh_CollectSpawnedVehicles(userid, buf[])
 
 //@summary Destroys the db vehicle table and service points table and frees used memory
 //@seealso Veh_Add
-//@seealso Veh_AddServicePoint
 //@seealso Veh_Init
-//@seealso Veh_InitServicePoints
 native Veh_Destroy();
 
 //@summary Check if there is a label on given vehicle for given player, {@b and unregister it}
@@ -427,12 +401,6 @@ native Veh_GetLabelToDelete(vehicleid, playerid, &PlayerText3D:labelid)
 //@seealso Veh_Destroy
 native Veh_Init(dbvehiclecount)
 
-//@summary Inits the service points table
-//@param servicepointscount amount of service points
-//@seealso Veh_AddServicePoint
-//@seealso Veh_Init
-native Veh_InitServicePoints(servicepointscount)
-
 //@summary Check if a vehicle has no fuel anymore
 //@param vehicleid vehicle to check
 //@returns {@code 0} if the vehicle still has fuel
@@ -442,39 +410,11 @@ native Veh_IsFuelEmpty(vehicleid)
 //@param playerid the player that disconnected
 native Veh_OnPlayerDisconnect(playerid)
 
-//@summary Refuels a vehicle within given fuel budget
-//@param x x-position of vehicle
-//@param y y-position of vehicle
-//@param z z-position of vehicle
-//@param vehicleid vehicle to refuel
-//@param playerid player that wants to refuel the vehicle
-//@param priceperlitre price per litre
-//@param budget max amount of money to spend on fuel
-//@param refuelamount amount of fuel that was loaded, passed by ref on non-zero return value
-//@param msg buffer to store message in to send to player, use {@code COL_INFO} on non-zero return value, {@code COL_WARN} otherwise
-//@param querybuf buffer to store log query in to execute when returned non-zero {@b and} first element is non-zero
-//@returns the actual amont of money it costed to refuel the vehicle, {@code 0} if error
-native Veh_Refuel(Float:x, Float:y, Float:z, vehicleid, playerid, Float:priceperlitre, budget, &Float:refuelamount, msg[], querybuf[])
-
 //@summary Let the plugin know a label was created on a vehicle for a player
 //@param vehicleid the vehicle the label is attached to
 //@param playerid the player the label was made for
 //@param labelid the label id assigned to the newly created label
 native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid)
-
-//@summary Calculate cost and new hp of vehicle to repair it using given budget
-//@param x x-position of vehicle
-//@param y y-position of vehicle
-//@param z z-position of vehicle
-//@param vehicleid vehicle to repair
-//@param playerid player that wants to repair the vehicle
-//@param budget max amount of money to spend on the repair
-//@param hp current hp of the vehicle
-//@param newhp new hp to set, when returned non-zero
-//@param buf buffer to store message in to send to player, use {@code COL_INFO} on non-zero return value, {@code COL_WARN} otherwise
-//@param querybuf buffer to store log query in to execute when returned non-zero {@b and} first element is non-zero
-//@returns the actual amont of money it costs to repair the vehicle, {@code 0} if error
-native Veh_Repair(Float:x, Float:y, Float:z, vehicleid, playerid, budget, Float:hp, &Float:newhp, buf[], querybuf[])
 
 //@summary Check if a label should be created on a vehicle for a player
 //@param vehicleid vehicle on which the label would be attached

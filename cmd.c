@@ -11,6 +11,7 @@
 #include "protips.h"
 #include "nav.h"
 #include "missions.h"
+#include "servicepoints.h"
 #include "timecyc.h"
 #include "vehicles.h"
 #include "zones.h"
@@ -171,6 +172,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/beacons", GROUPS_ALL, airport_cmd_beacons },
 	{ 0, "/camera", GROUPS_ALL, cmd_camera },
 	{ 0, "/cancelwork", GROUPS_ALL, missions_cmd_cancelmission },
+	{ 0, "/fix", GROUPS_ALL, svp_cmd_repair },
 	{ 0, "/ils", GROUPS_ALL, nav_cmd_ils },
 	{ 0, "/loc", GROUPS_ALL, zones_cmd_loc },
 	{ 0, "/nearest", GROUPS_ALL, airport_cmd_nearest },
@@ -185,6 +187,8 @@ static struct COMMAND cmds[] = {
 	{ 0, "/protip", GROUPS_ALL, protips_cmd_protip },
 	{ 0, "/r", GROUPS_ALL, pm_cmd_r },
 	{ 0, "/reclass", GROUPS_ALL, cmd_reclass },
+	{ 0, "/repair", GROUPS_ALL, svp_cmd_repair },
+	{ 0, "/refuel", GROUPS_ALL, svp_cmd_refuel },
 	{ 0, "/respawn", GROUPS_ALL, cmd_respawn },
 	{ 0, "/s", GROUPS_ALL, missions_cmd_cancelmission },
 	{ 0, "/spray", GROUPS_ALL, cmd_spray },

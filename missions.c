@@ -1436,36 +1436,36 @@ int missions_get_stage(int playerid)
 	return MISSION_STAGE_NOMISSION;
 }
 
-/* native Missions_OnVehicleRefueled(playerid, vehicleid, Float:refuelamount) */
-cell AMX_NATIVE_CALL Missions_OnVehicleRefueled(AMX *amx, cell *params)
+void missions_on_vehicle_refueled(int vehicleid, float refuelamount)
 {
 	struct MISSION *miss;
-	const int playerid = params[1], vehicleid = params[2];
-	const float refuelamount = amx_ctof(params[3]);
+	int i;
 
-	if ((miss = activemission[playerid]) != NULL &&
-		miss->veh->spawnedvehicleid == vehicleid)
-	{
-		miss->fuelburned += refuelamount;
-		miss->lastfuel = miss->veh->fuel;
+	for (i = 0; i < playercount; i++) {
+		if ((miss = activemission[players[i]]) != NULL &&
+			miss->veh->spawnedvehicleid == vehicleid)
+		{
+			miss->fuelburned += refuelamount;
+			miss->lastfuel = miss->veh->fuel;
+			return;
+		}
 	}
-	return 1;
 }
 
-/* native Missions_OnVehicleRepaired(playerid, vehicleid, Float:oldhp, Float:newhp) */
-cell AMX_NATIVE_CALL Missions_OnVehicleRepaired(AMX *amx, cell *params)
+void missions_on_vehicle_repaired(int vehicleid, float fixamount, float newhp)
 {
 	struct MISSION *miss;
-	const int playerid = params[1], vehicleid = params[2];
-	const float newhp = amx_ctof(params[4]), hpdiff = newhp - amx_ctof(params[3]);
+	int i;
 
-	if ((miss = activemission[playerid]) != NULL &&
-		miss->veh->spawnedvehicleid == vehicleid)
-	{
-		miss->damagetaken += (short) hpdiff;
-		miss->lastvehiclehp = (short) newhp;
+	for (i = 0; i < playercount; i++) {
+		if ((miss = activemission[players[i]]) != NULL &&
+			miss->veh->spawnedvehicleid == vehicleid)
+		{
+			miss->damagetaken += (short) fixamount;
+			miss->lastvehiclehp = (short) newhp;
+			return;
+		}
 	}
-	return 1;
 }
 
 void missions_update_satisfaction(int pid, int vid, struct quat *vrot)

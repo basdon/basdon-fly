@@ -2,6 +2,10 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 /**
+Get amount of money player has.
+*/
+int money_get(int playerid);
+/**
 Gives money to a player.
 
 Will not actually give anything if it would cause an overflow.

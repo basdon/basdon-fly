@@ -53,6 +53,7 @@ extern AMX_NATIVE n_PlayerTextDrawShow;
 extern AMX_NATIVE n_PutPlayerInVehicle_;
 extern AMX_NATIVE n_RemoveBuildingForPlayer;
 extern AMX_NATIVE n_RemovePlayerMapIcon;
+extern AMX_NATIVE n_RepairVehicle;
 extern AMX_NATIVE n_ResetPlayerMoney_;
 extern AMX_NATIVE n_SendClientMessage;
 extern AMX_NATIVE n_SendClientMessageToAll;

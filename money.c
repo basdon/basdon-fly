@@ -9,6 +9,11 @@ Money per player.
 */
 static int playermoney[MAX_PLAYERS];
 
+int money_get(int playerid)
+{
+	return playermoney[playerid];
+}
+
 int money_give(int playerid, int amount)
 {
 	if (amount < 0) {

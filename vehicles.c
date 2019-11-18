@@ -8,12 +8,9 @@
 #include "math.h"
 #include "missions.h"
 #include "playerdata.h"
+#include "servicepoints.h"
 #include "vehicles.h"
 #include <string.h>
-
-#define SERVICE_MAP_DISTANCE 350.0f
-#define SERVICE_MAP_DISTANCE_SQ (SERVICE_MAP_DISTANCE * SERVICE_MAP_DISTANCE)
-#define SERVICE_MAP_ICON_TYPE 38 /*S sweet icon*/
 
 #define FUEL_WARNING_SOUND 3200 /*air horn*/
 
@@ -22,23 +19,6 @@ struct vehnode {
 	struct vehnode *next;
 };
 
-struct servicepoint {
-	int id;
-	float x, y, z;
-};
-
-struct PLAYERSERVICEPOINT {
-	struct servicepoint *svp;
-	int textid;
-};
-
-/**
-Array holding which service points are shown per player.
-*/
-static struct PLAYERSERVICEPOINT
-	player_servicepoints[MAX_PLAYERS][MAX_SERVICE_MAP_ICONS];
-static int servicepointc;
-static struct servicepoint *servicepoints;
 /**
 Linked list of vehicles that need an ODO update in db.
 */
@@ -92,12 +72,6 @@ float playerodoKM[MAX_PLAYERS];
 
 void veh_on_player_connect(int playerid)
 {
-	struct PLAYERSERVICEPOINT *psvp = player_servicepoints[playerid];
-	int i;
-
-	for (i = 0; i < MAX_SERVICE_MAP_ICONS; i++) {
-		psvp[i].svp = NULL;
-	}
 	ptxt_hp[playerid] = -1;
 	ptxt_fl[playerid] = -1;
 	ptxt_txt[playerid] = -1;
@@ -114,8 +88,6 @@ void veh_init()
 		gamevehicles[i].need_recreation = 0;
 	}
 	vehstoupdate = NULL;
-	servicepoints = NULL;
-	servicepointc = 0;
 	dbvehicles = NULL;
 }
 
@@ -124,23 +96,6 @@ int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh)
 	return veh &&
 		(pdata[playerid]->userid == veh->owneruserid ||
 		GROUPS_ISADMIN(pdata[playerid]->groups));
-}
-
-static
-int findServicePoint(float x, float y, float z)
-{
-	float dx, dy, dz;
-	int i = servicepointc;
-
-	while (i--) {
-		dx = x - servicepoints[i].x;
-		dy = y - servicepoints[i].y;
-		dz = z - servicepoints[i].z;
-		if (dx * dx + dy * dy + dz * dz < 50.0f * 50.0f) {
-			return servicepoints[i].id;
-		}
-	}
-	return -1;
 }
 
 static
@@ -268,17 +223,6 @@ cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
 	return dbvehiclenextid - 1;
 }
 
-/* native Veh_AddServicePoint(index, id, Float:x, Float:y, Float:z) */
-cell AMX_NATIVE_CALL Veh_AddServicePoint(AMX *amx, cell *params)
-{
-	struct servicepoint *svp = servicepoints + params[1];
-	svp->id = params[2];
-	svp->x = amx_ctof(params[3]);
-	svp->y = amx_ctof(params[4]);
-	svp->z = amx_ctof(params[5]);
-	return 1;
-}
-
 /* native Veh_CollectPlayerVehicles(userid, buf[]) */
 cell AMX_NATIVE_CALL Veh_CollectPlayerVehicles(AMX *amx, cell *params)
 {
@@ -374,11 +318,6 @@ cell AMX_NATIVE_CALL Veh_Destroy(AMX *amx, cell *params)
 	if (dbvehicles != NULL) {
 		freeDbVehicleTable();
 	}
-	if (servicepoints != NULL) {
-		free(servicepoints);
-		servicepoints = NULL;
-		servicepointc = 0;
-	}
 	return 1;
 }
 
@@ -425,18 +364,6 @@ cell AMX_NATIVE_CALL Veh_Init(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Veh_InitServicePoints(servicepointscount) */
-cell AMX_NATIVE_CALL Veh_InitServicePoints(AMX *amx, cell *params)
-{
-	if (servicepoints != NULL) {
-		logprintf("Veh_InitServicePoints: servicepoints table was not empty");
-		free(servicepoints);
-	}
-	servicepointc = params[1];
-	servicepoints = malloc(sizeof(struct servicepoint) * servicepointc);
-	return 1;
-}
-
 /* native Veh_IsFuelEmpty(vehicleid) */
 cell AMX_NATIVE_CALL Veh_IsFuelEmpty(AMX *amx, cell *params)
 {
@@ -459,161 +386,12 @@ cell AMX_NATIVE_CALL Veh_OnPlayerDisconnect(AMX *amx, cell *params)
 	return 1;
 }
 
-static const char *MSG_REFUEL_NEED_SVP = WARN"You need to be at a service point to do this!";
-
-/* native Veh_Refuel(Float:x, Float:y, Float:z, vehicleid, playerid, Float:priceperlitre,
-                     budget, &refuelamount, msg[], querybuf[]) */
-cell AMX_NATIVE_CALL Veh_Refuel(AMX *amx, cell *params)
-{
-	struct dbvehicle *veh;
-	const int vehicleid = params[4], playerid = params[5], budget = params[7];
-	int cost, svpid, userid;
-	const float priceperlitre = amx_ctof(params[6]);
-	float capacity, refuelamount;
-	cell *addr;
-	char buf1[11], buf[144];
-
-	amx_GetAddr(amx, params[9], &addr);
-	if ((svpid = findServicePoint(amx_ctof(params[1]), amx_ctof(params[2]), amx_ctof(params[3]))) == -1) {
-		amx_SetUString(addr, MSG_REFUEL_NEED_SVP, 144);
-		return 0;
-	}
-	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
-		(refuelamount = (capacity = model_fuel_capacity(veh->model)) - veh->fuel) < 1.0f)
-	{
-		sprintf(buf,
-		        WARN"This vehicle is already fueled up! capacity: %.0f/%.0f",
-		        veh->fuel,
-		        capacity);
-		amx_SetUString(addr, buf, sizeof(buf));
-		return 0;
-	}
-
-	cost = 50 + (int) (refuelamount * priceperlitre);
-	if (cost > budget) {
-		refuelamount = (budget - 50) / priceperlitre;
-		if (refuelamount <= 0) {
-			sprintf(buf,
-			        WARN"You can't pay the refuel fee! capacity: %.0f/%.0f",
-			        veh->fuel,
-			        capacity);
-			amx_SetUString(addr, buf, sizeof(buf));
-			return 0;
-		}
-		cost = budget;
-		strcpy(buf1, "partially");
-	} else {
-		strcpy(buf1, "fully");
-	}
-
-	veh->fuel += refuelamount;
-	sprintf(buf,
-		INFO"Your vehicle has been %s refueled for $%d (%.2f litres @ $%.2f/litre) capacity: %.0f/%.0f",
-	        buf1,
-	        cost,
-	        refuelamount,
-	        priceperlitre,
-	        veh->fuel,
-	        capacity);
-	amx_SetUString(addr, buf, sizeof(buf));
-
-	amx_GetAddr(amx, params[8], &addr);
-	*addr = amx_ftoc(refuelamount);
-
-	amx_GetAddr(amx, params[10], &addr);
-	if (veh == NULL ||
-		pdata[playerid] == NULL ||
-		(userid = pdata[playerid]->userid) < 1)
-	{
-		logprintf("Veh_Repair: unknown vehicle or unknown playerid");
-		*addr = 0;
-		return cost;
-	}
-	sprintf(buf,
-	        "INSERT INTO refuellog(stamp,vehicle,player,svp,paid,fuel) "
-	        "VALUES (UNIX_TIMESTAMP(),%d,%d,%d,%d,%.4f)",
-	        veh->id,
-		userid,
-		svpid,
-		cost,
-		refuelamount);
-	amx_SetUString(addr, buf, sizeof(buf));
-	return cost;
-}
-
 /* native Veh_RegisterLabel(vehicleid, playerid, PlayerText3D:labelid) */
 cell AMX_NATIVE_CALL Veh_RegisterLabel(AMX *amx, cell *params)
 {
 	const int vehicleid = params[1], playerid = params[2], labelid = params[3];
 	labelids[playerid][vehicleid] = labelid;
 	return 1;
-}
-
-static const char *MSG_REPAIR_NONEED = WARN"Your vehicle doesn't need to be repaired!";
-static const char *MSG_REPAIR_NOAFFORD = WARN"You can't afford the repair fee!";
-
-/* native Veh_Repair(Float:x, Float:y, Float:z, vehicleid, playerid, budget,
-                     Float:hp, &Float:newhp, buf[], querybuf[]) */
-cell AMX_NATIVE_CALL Veh_Repair(AMX *amx, cell *params)
-{
-	struct dbvehicle *veh;
-	const int vehicleid = params[4], playerid = params[5], budget = params[6];
-	cell *addr;
-	const float hp = amx_ctof(params[7]);
-	float fixamount, newhp;
-	int cost, svpid, userid;
-	char buf1[11], buf[144];
-
-	amx_GetAddr(amx, params[9], &addr);
-	if ((svpid = findServicePoint(amx_ctof(params[1]), amx_ctof(params[2]), amx_ctof(params[3]))) == -1) {
-		amx_SetUString(addr, MSG_REFUEL_NEED_SVP, 144);
-		return 0;
-	}
-	if (hp > 999.9f) {
-		amx_SetUString(addr, MSG_REPAIR_NONEED, 144);
-		return 0;
-	}
-
-	fixamount = 1000.0f - hp;
-	cost = 150 + (int) (fixamount * 2.0f);
-	if (cost > budget) {
-		fixamount = (float) ((budget - 150) / 2);
-		if (fixamount <= 0.0f) {
-			amx_SetUString(addr, MSG_REPAIR_NOAFFORD, 144);
-			return 0;
-		}
-		cost = budget;
-		strcpy(buf1, "partially");
-	} else {
-		strcpy(buf1, "fully");
-	}
-	newhp = fixamount + hp;
-
-	sprintf(buf, INFO"Your vehicle has been %s repaired for $%d", buf1, cost);
-	amx_SetUString(addr, buf, sizeof(buf));
-
-	amx_GetAddr(amx, params[8], &addr);
-	*addr = amx_ftoc(newhp);
-
-	amx_GetAddr(amx, params[10], &addr);
-	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
-		pdata[playerid] == NULL ||
-		(userid = pdata[playerid]->userid) < 1)
-	{
-		logprintf("Veh_Repair: unknown vehicle or unknown playerid");
-		*addr = 0;
-		return cost;
-	}
-	sprintf(buf,
-	        "INSERT INTO repairlog(stamp,vehicle,player,svp,paid,damage) "
-	        "VALUES (UNIX_TIMESTAMP(),%d,%d,%d,%d,%d)",
-	        veh->id,
-		userid,
-		svpid,
-		cost,
-		(int) fixamount);
-	amx_SetUString(addr, buf, sizeof(buf));
-	return cost;
 }
 
 /* native Veh_ShouldCreateLabel(vehicleid, playerid, buf[]) */
@@ -724,79 +502,6 @@ void veh_on_player_now_driving(int playerid, int vehicleid)
 	}
 }
 
-void veh_update_service_point_mapicons(int playerid, float x, float y)
-{
-	static const char* SVP_TXT = "Service Point\n/repair - /refuel";
-
-	struct servicepoint *svp;
-	struct PLAYERSERVICEPOINT *psvps = player_servicepoints[playerid], *sp;
-	float dx, dy;
-	int i, selectedpsvp;
-
-	/* remove old, now out of range ones */
-	NC_PARS(2);
-	for (i = 0; i < MAX_SERVICE_MAP_ICONS; i++) {
-		if ((svp = psvps[i].svp) != NULL) {
-			dx = svp->x - x;
-			dy = svp->y - y;
-			if (dx * dx + dy * dy > SERVICE_MAP_DISTANCE_SQ) {
-				nc_params[1] = playerid;
-				nc_params[2] = psvps[i].textid;
-				NC(n_DeletePlayer3DTextLabel);
-				nc_params[2] = i;
-				NC(n_RemovePlayerMapIcon);
-				psvps[i].svp = NULL;
-			}
-		}
-	}
-
-	/* add new ones */
-	svp = servicepoints + servicepointc;
-	while (svp-- != servicepoints) {
-		dx = x - svp->x;
-		dy = y - svp->y;
-		if (dx * dx + dy * dy < SERVICE_MAP_DISTANCE_SQ) {
-			selectedpsvp = -1;
-			for (i = 0; i < MAX_SERVICE_MAP_ICONS; i++) {
-				if (psvps[i].svp == svp) {
-					goto alreadyshown;
-				}
-				if (psvps[i].svp == NULL) {
-					selectedpsvp = i;
-				}
-			}
-			if (selectedpsvp == -1) {
-				/*no more map icon slots*/
-				break;
-			}
-			sp = psvps + selectedpsvp;
-			NC_PARS(7);
-			nc_params[1] = playerid;
-			nc_params[2] = selectedpsvp;
-			nc_paramf[3] = svp->x;
-			nc_paramf[4] = svp->y;
-			nc_paramf[5] = svp->z;
-			nc_params[6] = SERVICE_MAP_ICON_TYPE,
-			nc_params[7] = MAPICON_GLOBAL;
-			NC(n_SetPlayerMapIcon);
-			amx_SetUString(buf144, SVP_TXT, 144);
-			NC_PARS(10);
-			nc_params[2] = buf144a;
-			nc_params[6] = nc_params[5];
-			nc_params[5] = nc_params[4];
-			nc_params[4] = nc_params[3];
-			nc_params[3] = -1;
-			nc_paramf[7] = 50.0f;
-			nc_params[8] = nc_params[9] = INVALID_PLAYER_ID;
-			nc_params[10] = 1;
-			sp->textid = NC(n_CreatePlayer3DTextLabel);
-			sp->svp = svp;
-		}
-alreadyshown:
-		;
-	}
-}
-
 int veh_commit_next_vehicle_odo_to_db()
 {
 	struct dbvehicle *veh;
@@ -824,7 +529,9 @@ int veh_GetPlayerVehicle(int playerid, int *reinc, struct dbvehicle **veh)
 	int vehicleid;
 
 	vehicleid = NC_GetPlayerVehicleID(playerid);
-	*reinc = gamevehicles[vehicleid].reincarnation;
+	if (reinc != NULL) {
+		*reinc = gamevehicles[vehicleid].reincarnation;
+	}
 	*veh = gamevehicles[vehicleid].dbvehicle;
 	return vehicleid;
 }
@@ -921,7 +628,7 @@ void veh_timed_1s_update()
 		playerid = players[n];
 
 		common_GetPlayerPos(playerid, ppos);
-		veh_update_service_point_mapicons(playerid, ppos->x, ppos->y);
+		svp_update_mapicons(playerid, ppos->x, ppos->y);
 
 		NC_PARS(1);
 		nc_params[1] = playerid;

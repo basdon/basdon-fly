@@ -4,6 +4,7 @@
 #include "common.h"
 #include "maps.h"
 #include "natives.h"
+#include "servicepoints.h"
 #include "spawn.h"
 #include "vehicles.h"
 #include "zones.h"
@@ -61,6 +62,7 @@ AMX_NATIVE n_PlayerTextDrawShow;
 AMX_NATIVE n_PutPlayerInVehicle_;
 AMX_NATIVE n_RemoveBuildingForPlayer;
 AMX_NATIVE n_ResetPlayerMoney_;
+AMX_NATIVE n_RepairVehicle;
 AMX_NATIVE n_RemovePlayerMapIcon;
 AMX_NATIVE n_SendClientMessage;
 AMX_NATIVE n_SendClientMessageToAll;
@@ -191,6 +193,7 @@ int natives_find()
 		N_(PutPlayerInVehicle),
 		N(RemoveBuildingForPlayer),
 		N(RemovePlayerMapIcon),
+		N(RepairVehicle),
 		N_(ResetPlayerMoney),
 		N(SendClientMessage),
 		N(SendClientMessageToAll),
@@ -293,7 +296,7 @@ int natives_NC_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 	common_GetVehiclePos(vehicleid, &pos);
 	maps_stream_for_player(playerid, pos);
 	veh_on_player_now_driving(playerid, vehicleid);
-	veh_update_service_point_mapicons( playerid, pos.x, pos.y);
+	svp_update_mapicons(playerid, pos.x, pos.y);
 	zones_update(playerid, pos);
 
 	NC_PARS(3);
@@ -306,7 +309,7 @@ int natives_NC_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 int natives_NC_SetPlayerPos(int playerid, struct vec3 pos)
 {
 	maps_stream_for_player(playerid, pos);
-	veh_update_service_point_mapicons(playerid, pos.x, pos.y);
+	svp_update_mapicons(playerid, pos.x, pos.y);
 	zones_update(playerid, pos);
 
 	NC_PARS(4);
