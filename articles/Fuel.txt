@@ -10,4 +10,5 @@ engine.
 {@ul
   {@li {@article List_of_aircraft}}
   {@li {@article Keys}}
+  {@li {@article Service_points}}
 }
