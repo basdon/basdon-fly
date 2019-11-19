@@ -19,7 +19,11 @@
 #define SERVICE_DISTANCE (50.0f)
 #define SERVICE_DISTANCE_SQ (SERVICE_DISTANCE * SERVICE_DISTANCE)
 
-#define PRICE_PER_LITRE (1.2f)
+#define FIX_BASE_COST 150
+#define FIX_HP_COST 2
+
+#define FUEL_BASE_COST 75
+#define FUEL_PCT_COST 10
 
 static const char *MSG_REFUEL_NEED_SVP =
 	WARN"You need to be at a service point to do this!";
@@ -106,7 +110,7 @@ int svp_cmd_refuel(CMDPARAMS)
 	struct VEHICLEPARAMS vparams;
 	struct dbvehicle *veh;
 	struct vec3 vpos;
-	int vehicleid, driverid, budget, svpid, msgcol, cost;
+	int vehicleid, driverid, budget, svpid, msgcol, cost, refuelpct;
 	float capacity, refuelamount;
 	char *msg, buf1[10];
 
@@ -133,32 +137,36 @@ int svp_cmd_refuel(CMDPARAMS)
 
 	capacity = model_fuel_capacity(veh->model);
 	refuelamount = capacity - veh->fuel;
-	if (refuelamount < 1.0f) {
+	refuelpct = (int) (100.0f * refuelamount / capacity);
+	if (refuelpct <= 0) {
 		sprintf(cbuf4096,
-		        WARN"This vehicle is already fueled up! "
-			"Capacity: %.0f/%.0f",
+		        WARN"Refueling is not needed yet! "
+			"Capacity: %.0f/%.0f (%.0f'/.)",
 		        veh->fuel,
-		        capacity);
+		        capacity,
+			100.0f * veh->fuel / capacity);
 		msg = cbuf4096;
 		msgcol = COL_WARN;
 		goto retmsg;
 	}
 
-	cost = 50 + (int) (refuelamount * PRICE_PER_LITRE);
+	cost = FUEL_BASE_COST + FUEL_PCT_COST * refuelpct;
 	budget = money_get(playerid);
 	if (cost > budget) {
-		refuelamount = (budget - 50) / PRICE_PER_LITRE;
-		if (refuelamount <= 0) {
+		refuelpct = (budget - FUEL_BASE_COST) / FUEL_PCT_COST;
+		if (refuelpct < 1.0f) {
 			sprintf(cbuf4096,
 			        WARN"You can't pay the refuel fee! "
-				"Capacity: %.0f/%.0f",
+				"Capacity: %.0f/%.0f (%.0f'/.)",
 			        veh->fuel,
-			        capacity);
+			        capacity,
+				100.0f * veh->fuel / capacity);
 			msg = cbuf4096;
 			msgcol = COL_WARN;
 			goto retmsg;
 		}
-		cost = budget;
+		refuelamount = refuelpct * capacity / 100.0f;
+		cost = FUEL_BASE_COST + FUEL_PCT_COST * refuelpct;
 		strcpy(buf1, "partially");
 	} else {
 		strcpy(buf1, "fully");
@@ -169,14 +177,14 @@ int svp_cmd_refuel(CMDPARAMS)
 	veh->fuel += refuelamount;
 
 	sprintf(cbuf4096,
-		INFO"Your vehicle has been %s refueled for $%d "
-		"(%.2f litres @ $%.2f/litre) capacity: %.0f/%.0f",
+		INFO"Your vehicle has been %s refueled for $%d (+%d'/.) "
+		"capacity: %.0f/%.0f (%.0f'/.)",
 	        buf1,
 	        cost,
-	        refuelamount,
-	        PRICE_PER_LITRE,
+		refuelpct,
 	        veh->fuel,
-	        capacity);
+	        capacity,
+		100.0f * veh->fuel / capacity);
 	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessage(playerid, COL_INFO, buf144a);
 
@@ -245,16 +253,16 @@ int svp_cmd_repair(CMDPARAMS)
 	}
 
 	fixamount = 1000.0f - hp;
-	cost = 150 + (int) (fixamount * 2.0f);
+	cost = FIX_BASE_COST + FIX_HP_COST * (int) fixamount;
 	budget = money_get(playerid);
 	if (cost > budget) {
-		fixamount = (float) ((budget - 150) / 2);
+		fixamount = (float) ((budget - FIX_BASE_COST) / FIX_HP_COST);
 		if (fixamount <= 0.0f) {
 			msg = WARN"You can't afford the repair fee!";
 			msgcol = COL_WARN;
 			goto retmsg;
 		}
-		cost = budget;
+		cost = FIX_BASE_COST + FIX_HP_COST * (int) fixamount;
 		sprintf(cbuf4096,
 			INFO"Your vehicle has been partially repaired for $%d",
 			cost);
