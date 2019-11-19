@@ -2,14 +2,18 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "missions.h"
 #include <string.h>
 
 static const char *protips[] = {
 	/*max length:*/
 	/*--------------------------------------------------------------------*/
 	/*--------------------------------------------------------------------*/
+#ifndef MISSION_CANCEL_FINE
+#error need MISSION_CANCE_FINE
+#endif
 	"Pro Tip: Use /w(ork) to start a random mission. /s(top) to cancel "
-		"your mission ($"EQ(MISSION_CANCEL_FINE_)" fine).",
+		"your mission ($"EQ(MISSION_CANCEL_FINE)" fine).",
 	"Pro Tip: Use /nearest to get a list of all airports, sorted by "
 		"proximity!",
 	"Pro Tip: Enable navigation with /adf [beacon] or "
