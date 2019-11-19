@@ -93,6 +93,20 @@ int common_GetPlayerPos(int playerid, struct vec3 *pos)
 	return res;
 }
 
+int common_GetVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d)
+{
+	int res;
+	NC_PARS(5);
+	nc_params[1] = vehicleid;
+	nc_params[2] = buf32a;
+	nc_params[3] = buf32a + 0x4;
+	nc_params[4] = buf32a + 0x8;
+	nc_params[5] = buf32a + 0xC;
+	res = NC(n_GetVehicleDamageStatus);
+	memcpy(d, buf32, sizeof(struct VEHICLEDAMAGE));
+	return res;
+}
+
 int common_GetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p)
 {
 	int res;
@@ -168,7 +182,14 @@ int common_SetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p)
 	memcpy(nc_params + 2, p, sizeof(struct VEHICLEPARAMS));
 	return NC(n_SetVehicleParamsEx);
 }
-#undef _
+
+int common_UpdateVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d)
+{
+	NC_PARS(5);
+	nc_params[1] = vehicleid;
+	memcpy(nc_params + 2, d, sizeof(struct VEHICLEDAMAGE));
+	return NC(n_UpdateVehicleDamageStatus);
+}
 
 void common_mysql_tquery(char *query, mysql_cb callback, void *data)
 {

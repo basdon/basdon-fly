@@ -37,6 +37,7 @@ AMX_NATIVE n_GetPlayerState;
 AMX_NATIVE n_GetPlayerVehicleID;
 AMX_NATIVE n_GetPlayerVehicleSeat;
 AMX_NATIVE n_GetServerTickRate;
+AMX_NATIVE n_GetVehicleDamageStatus;
 AMX_NATIVE n_GetVehicleHealth_;
 AMX_NATIVE n_GetVehicleModel;
 AMX_NATIVE n_GetVehicleParamsEx;
@@ -98,6 +99,7 @@ AMX_NATIVE n_TextDrawSetProportional;
 AMX_NATIVE n_TextDrawSetShadow;
 AMX_NATIVE n_TextDrawShowForPlayer;
 AMX_NATIVE n_TextDrawTextSize;
+AMX_NATIVE n_UpdateVehicleDamageStatus;
 AMX_NATIVE n_TextDrawUseBox;
 AMX_NATIVE n_TogglePlayerClock;
 AMX_NATIVE n_TogglePlayerControllable;
@@ -170,6 +172,7 @@ int natives_find()
 		N(GetPlayerVehicleID),
 		N(GetPlayerVehicleSeat),
 		N(GetServerTickRate),
+		N(GetVehicleDamageStatus),
 		N_(GetVehicleHealth),
 		N(GetVehicleModel),
 		N(GetVehicleRotationQuat),
@@ -235,6 +238,7 @@ int natives_find()
 		N(TextDrawTextSize),
 		N(TextDrawUseBox),
 		N(TogglePlayerControllable),
+		N(UpdateVehicleDamageStatus),
 		N(cache_delete),
 		N(cache_get_row),
 		N(cache_get_row_count),

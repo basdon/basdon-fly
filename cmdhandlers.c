@@ -70,10 +70,23 @@ static const char
 	*MSG_VEH_PARK_N = WARN"You are not allowed to park this vehicle",
 	*MSG_VEH_SPRAY_N = WARN"You are not allowed to respray this vehicle";
 
+/**
+The /camera command gives the player a camera.
+*/
 static
 int cmd_camera(CMDPARAMS)
 {
 	NC_GivePlayerWeapon(playerid, WEAPON_CAMERA, 3036);
+	return 1;
+}
+
+/**
+The /chute command gives the player a parachute.
+*/
+static
+int cmd_chute(CMDPARAMS)
+{
+	NC_GivePlayerWeapon(playerid, WEAPON_PARACHUTE, 1);
 	return 1;
 }
 

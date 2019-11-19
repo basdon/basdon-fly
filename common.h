@@ -47,6 +47,14 @@ struct VEHICLEPARAMS {
 };
 EXPECT_SIZE(struct VEHICLEPARAMS, 7 * sizeof(cell));
 
+struct VEHICLEDAMAGE {
+	unsigned int panels;
+	unsigned int doors;
+	unsigned int lights;
+	unsigned int tires;
+};
+EXPECT_SIZE(struct VEHICLEDAMAGE, 4 * sizeof(cell));
+
 #include "cmd.h"
 #include "natives.h"
 #include "publics.h"
@@ -180,6 +188,12 @@ Will use buf32, buf64, buf144.
 */
 int common_GetPlayerPos(int playerid, struct vec3 *pos);
 /**
+Convenience method for GetVehicleDamageStatus.
+
+Uses buf32.
+*/
+int common_GetVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d);
+/**
 Gets vehicle params of given vehicle into given VEHICLEPARAMS struct.
 
 Uses buf32.
@@ -215,6 +229,12 @@ Sets vehicle params of given vehicle into given VEHICLEPARAMS struct.
 Uses buf32.
 */
 int common_SetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p);
+/**
+Convenience method for UpdateVehicleDamageStatus.
+
+Uses buf32.
+*/
+int common_UpdateVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d);
 /**
 Calls mysql_tquery with a callback and data to pass.
 

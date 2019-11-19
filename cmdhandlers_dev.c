@@ -230,6 +230,28 @@ int cmd_dev_sound(CMDPARAMS)
 }
 
 /**
+The /vdamage command prints vehicle damage status.
+*/
+static
+int cmd_dev_vdamage(CMDPARAMS)
+{
+	struct VEHICLEDAMAGE vdmg;
+	int vehicleid;
+
+	vehicleid = NC_GetPlayerVehicleID(playerid);
+	common_GetVehicleDamageStatus(vehicleid, &vdmg);
+	sprintf(cbuf64,
+		"panels %p doors %p lights %02x tires %02x",
+		vdmg.panels,
+		vdmg.doors,
+		vdmg.lights,
+		vdmg.tires);
+	amx_SetUString(buf144, cbuf64, 144);
+	NC_SendClientMessageToAll(-1, buf144a);
+	return 1;
+}
+
+/**
 The /vehrespawn command respawns the player's vehicle.
 */
 static
