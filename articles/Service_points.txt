@@ -15,7 +15,7 @@ there will also be a floating text label.
 To repair your vehicle, use the command {@code /repair} or {@code /fix}.
 
 To refuel your vehicle, use the command {@code /refuel}. You can only refuel
-when the engine is turned off (see {@article=Keys Keys} on how to turn your
+when the engine is turned off (see {@article Keys}) on how to turn your
 engine off).
 
 Aside from the driver, passengers can also repair and refuel vehicles. In
@@ -52,8 +52,8 @@ choose to fly bigger aircraft.
 {@h3 See also}
 
 {@ul
-  {@li {@article=Fuel Fuel}}
-  {@li {@article=Keys Keys}}
-  {@li {@article=List_of_aircraft List of aircraft}}
+  {@li {@article Fuel}}
+  {@li {@article Keys}}
+  {@li {@article List_of_aircraft}}
 }
 

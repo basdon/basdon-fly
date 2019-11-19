@@ -80,4 +80,6 @@ Sent when the server closes, used to close all active missions.
 
 {@h3 See also}
 
-{@article=Flight_File_Format Flight file format}
+{@ul
+  {@li {@article Flight_File_Format}}
+}

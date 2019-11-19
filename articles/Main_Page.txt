@@ -31,15 +31,15 @@
 	<tbody>
 		<tr valign="top">
 			<td><ul>
-				{@li {@article=Fuel Fuel}}
-				{@li {@article=List_of_aircraft List of aircraft}}
+				{@li {@article Fuel}}
+				{@li {@article List_of_aircraft}}
 			</ul></td>
 			<td><ul>
-				{@li {@article=Area_69 Area 69}}
-				{@li {@article=Las_Venturas_Airport Las Venturas Airport}}
-				{@li {@article=Los_Santos_Airport Los Santos Airport}}
-				{@li {@article=San_Fierro_Airport San Fierro Airport}}
-				{@li {@article=Verdant_Meadows Verdant Meadows}}
+				{@li {@article Area_69}}
+				{@li {@article Las_Venturas_Airport}}
+				{@li {@article Los_Santos_Airport}}
+				{@li {@article San_Fierro_Airport}}
+				{@li {@article Verdant_Meadows}}
 			</ul></td>
 		</tr>
 	</tbody>

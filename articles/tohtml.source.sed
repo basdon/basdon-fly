@@ -199,6 +199,15 @@ s_{@clear}_<div class="clear"></div>_
 		b nexttag
 	}
 
+	/{@article / {
+		H
+		g
+		s/\(.*\)\n.*$/\1\n<\/a>/
+		x
+		s/.*\n\(.*\){@article \([^}]*\)/\1<?php echo map_article('\2'); ?>/
+		b nexttag
+	}
+
 	/{@article=[^ ]*\( \|$\)/ {
 		H
 		g

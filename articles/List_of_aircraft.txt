@@ -384,4 +384,6 @@ A single prop engine plane equipped with two machine guns. Very agile, used a lo
 
 {@h3 See also}
 
-{@article=Fuel Fuel}
+{@ul
+  {@li {@article Fuel}}
+}

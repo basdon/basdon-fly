@@ -5,7 +5,7 @@
 
 Verdant Meadows, also known as Verdant Meadows Aircraft Graveyard, is an
 abandoned airfield located in the desert of Bone County. It is very close to
-{@article=Area_69 Area 69}. There are many old, crashed planes and parts laying
+{@article Area_69}. There are many old, crashed planes and parts laying
 around close to the runway. There is a small ATC building near the eastern end
 of the runway.
 

@@ -1,13 +1,13 @@
 Flying and driving consumes fuel. Each vehicle has its own fuel capacity and
-fuel usage, which can be seen on the
-{@article=List_of_aircraft list of aircraft} page. The indicated fuel usage is
-applicable when throttle is applied. On idle usage, the actual fuel usage is
-1/5th of the indicated fuel usage. No fuel is being used when the engine is
-shut down. See {@article=Keys keys} on how to shut down the engine.
+fuel usage, which can be seen on the {@article List_of_aircraft} page.  The
+indicated fuel usage is applicable when throttle is applied. On idle usage,
+the actual fuel usage is 1/5th of the indicated fuel usage. No fuel is being
+used when the engine is shut down. See {@article Keys} on how to shut down the
+engine.
 
 {@h3 See also}
 
 {@ul
-  {@li {@article=List_of_aircraft List of aircraft}}
-  {@li {@article=Keys Keys}}
+  {@li {@article List_of_aircraft}}
+  {@li {@article Keys}}
 }

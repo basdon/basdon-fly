@@ -31,6 +31,7 @@
 				{@if !is_file($file)}
 					<p style="color:red">Failed to get article contents.</p>
 				{@else}
+					{@eval include('../articles/gen/articlemap.php')}
 					{@eval include($file)}
 				{@endif}
 				{@if isset($cat)}
