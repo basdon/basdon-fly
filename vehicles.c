@@ -587,26 +587,16 @@ Called when player is still in same in air vehicle as last in update.
 static
 void veh_timed_1s_update_a(
 	int playerid, int vehicleid, struct vec3 *vpos,
-	struct dbvehicle *v)
+	struct VEHICLEPARAMS *vparams, struct dbvehicle *v)
 {
-	struct VEHICLEPARAMS vparams;
-	struct PLAYERKEYS pkeys;
 	struct vec3 vvel;
 	struct quat vrot;
 	float hp;
 	int afk = temp_afk[playerid];
 
-	common_GetVehicleParamsEx(vehicleid, &vparams);
-
 	if (!afk) {
 		common_GetVehicleRotationQuat(vehicleid, &vrot);
 		missions_update_satisfaction(playerid, vehicleid, &vrot);
-
-		if (vparams.engine) {
-			common_GetPlayerKeys(playerid, &pkeys);
-			veh_consume_fuel(playerid, vehicleid,
-				pkeys.keys & KEY_SPRINT, &vparams, v);
-		}
 	}
 
 	if (missions_get_stage(playerid) == MISSION_STAGE_FLIGHT) {
@@ -614,7 +604,7 @@ void veh_timed_1s_update_a(
 		common_GetVehicleVelocity(vehicleid, &vvel);
 		missions_send_tracker_data(
 			playerid, vehicleid, hp,
-			vpos, &vvel, afk, vparams.engine);
+			vpos, &vvel, afk, vparams->engine);
 	}
 }
 
@@ -622,6 +612,8 @@ void veh_timed_1s_update()
 {
 	struct dbvehicle *v;
 	struct vec3 vpos, *ppos = &vpos;
+	struct VEHICLEPARAMS vparams;
+	struct PLAYERKEYS pkeys;
 	int playerid, vehicleid, vehiclemodel, n = playercount;
 
 	while (n--) {
@@ -658,10 +650,18 @@ void veh_timed_1s_update()
 			common_GetVehiclePos(vehicleid, &vpos);
 			veh_update_odo(playerid, vehicleid, vpos);
 
+			common_GetVehicleParamsEx(vehicleid, &vparams);
+
+			if (vparams.engine) {
+				common_GetPlayerKeys(playerid, &pkeys);
+				veh_consume_fuel(playerid, vehicleid,
+					pkeys.keys & KEY_SPRINT, &vparams, v);
+			}
+
 			if (game_is_air_vehicle(vehiclemodel)) {
 				veh_timed_1s_update_a(
 					playerid, vehicleid,
-					&vpos, v);
+					&vpos, &vparams, v);
 			}
 		}
 
