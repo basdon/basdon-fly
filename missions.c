@@ -802,6 +802,7 @@ static const char
 	*NOTYPES = WARN"This vehicle can't complete any type of missions!",
 	*NOMISS = WARN"There are no missions available for this type "
 		"of vehicle!",
+	*VEHUSED = WARN"This vehicle is already used in a mission!",
 	*MUSTBEDRIVER = WARN"You must be the driver of a vehicle "
 		"before starting work!";
 
@@ -821,7 +822,7 @@ void missions_start_mission(int playerid)
 	struct dbvehicle *veh;
 	struct vec3 ppos;
 	char *errmsg, tmpuseridornullbuf[10];
-	int vehicleid, missiontype;
+	int vehicleid, missiontype, i;
 	float vhp, dx, dy;
 
 	NC_PARS(1);
@@ -834,6 +835,15 @@ void missions_start_mission(int playerid)
 
 	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL) {
 		goto unknownvehicle;
+	}
+
+	for (i = 0; i < playercount; i++) {
+		if ((mission = activemission[players[i]]) != NULL &&
+			mission->veh == veh)
+		{
+			errmsg = (char*) VEHUSED;
+			goto err;
+		}
 	}
 
 	switch (veh->model) {
