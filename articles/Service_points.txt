@@ -1,0 +1,59 @@
+
+{@infoboxright
+  {@aimg(style="width:100%;max-width:242")=svplbl.jpg;Service point 3D text;\
+Service point 3D text}
+  <small>Floating text label indicating a service point.</small>
+}
+
+Service points are areas where you can repair and refuel your vehicle. They are
+marked on the radar with a S symbol: <img
+src="<?=$STATICPATH?>/articles/servicepoint.png" alt="Sweet mission icon"
+title="Service point marker"/>. Beware: because of SA-MP limits, a service point
+map icon does not show unless you are close to it. If you are close enough,
+there will also be a floating text label.
+
+To repair your vehicle, use the command {@code /repair} or {@code /fix}.
+
+To refuel your vehicle, use the command {@code /refuel}. You can only refuel
+when the engine is turned off (see {@article=Keys Keys} on how to turn your
+engine off).
+
+Aside from the driver, passengers can also repair and refuel vehicles. In
+that case, the passenger will pay the fee. The driver will receive a message
+when this happens.
+
+{@clear}
+
+{@h3 Repair cost}
+
+The repair cost is {@code $150 + $2 * (missing health)}. Every vehicle has a
+maximum health of 1000 (they start burning at 250). So if your vehicle has 900
+health, repairing will cost $350. This means you'll pay at least $152 and at
+most $2150 (if you manage to get enough damage and then fix your vehicle before
+it explodes).
+
+If you don't have enough money, the vehicle will be partially repaired. The base
+$150 cost covers the visual damage (including damage to aircraft controls) and
+servicing fees, every $2 after that will fix one health point.
+
+{@h3 Refuel cost}
+
+The refuel cost is {@code $75 + $10 * (missing fuel percentage)}. This means
+you'll pay at least $85 and at most $1075.
+
+If you don't have enough money, the vehicle will be refueled as much as your
+budget allows. The base $75 is paid for handling fees, every $10 after that
+will add one percentage of fuel.
+
+Note that not all aircraft have the same fuel capacity and usage, but the refuel
+price is determined by percentages to not financially ruin players if they
+choose to fly bigger aircraft.
+
+{@h3 See also}
+
+{@ul
+  {@li {@article=Fuel Fuel}}
+  {@li {@article=Keys Keys}}
+  {@li {@article=List_of_aircraft List of aircraft}}
+}
+
