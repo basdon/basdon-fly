@@ -82,7 +82,7 @@ Kicks and broadcasts kickmessage when needed. Does not log.
 static
 void anticheat_kick(int playerid, char *reason)
 {
-	natives_NC_Kick(playerid);
+	natives_Kick(playerid);
 	sprintf(cbuf4096,
 		"%s[%d] was kicked by system (%s)",
 		pdata[playerid]->name,
@@ -227,7 +227,7 @@ float anticheat_GetVehicleHealth(int vehicleid)
 		playerid);
 	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessageToAll(COL_WARN, buf144a);
-	natives_NC_Kick(playerid);
+	natives_Kick(playerid);
 resethp:
 	NC_PARS(2);
 	nc_params[1] = vehicleid;

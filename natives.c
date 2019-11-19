@@ -273,7 +273,7 @@ int natives_find()
 	return 1;
 }
 
-void natives_NC_Kick(int playerid)
+void natives_Kick(int playerid)
 {
 	/*TODO: log?*/
 	/*TODO: more delay when player is afk?
@@ -281,7 +281,7 @@ void natives_NC_Kick(int playerid)
 	kickdelay[playerid] = 2;
 }
 
-int natives_NC_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
+int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 {
 	float hp;
 	struct vec3 pos;
@@ -310,7 +310,7 @@ int natives_NC_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 	return NC(n_PutPlayerInVehicle_);
 }
 
-int natives_NC_SetPlayerPos(int playerid, struct vec3 pos)
+int natives_SetPlayerPos(int playerid, struct vec3 pos)
 {
 	maps_stream_for_player(playerid, pos);
 	svp_update_mapicons(playerid, pos.x, pos.y);
@@ -324,7 +324,7 @@ int natives_NC_SetPlayerPos(int playerid, struct vec3 pos)
 	return NC(n_SetPlayerPos_);
 }
 
-void natives_NC_SpawnPlayer(int playerid)
+void natives_SpawnPlayer(int playerid)
 {
 	/*eject player first if they're in a vehicle*/
 	if (NC_GetPlayerVehicleID(playerid)) {

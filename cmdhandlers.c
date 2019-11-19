@@ -59,7 +59,7 @@ int cmd_at400(CMDPARAMS)
 		}
 	}
 	if (found_vehicle && shortest_distance < 25.0f * 25.0f) {
-		natives_NC_PutPlayerInVehicle(playerid, found_vehicle, 0);
+		natives_PutPlayerInVehicle(playerid, found_vehicle, 0);
 	}
 
 	return 1;
@@ -190,7 +190,7 @@ int cmd_respawn(CMDPARAMS)
 		amx_SetUString(buf144, NO_RECLASSSPAWN, 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	} else {
-		natives_NC_SpawnPlayer(playerid);
+		natives_SpawnPlayer(playerid);
 	}
 	return 1;
 }

@@ -147,7 +147,7 @@ extern cell tmpfloat;
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FORCESYNC,\
 	n_ClearAnimations(amx,nc_params))
 
-#define CreateVehicle __USE__veh_NC_CreateVehicle__
+#define CreateVehicle __USE__veh_CreateVehicle__
 
 #define NC_DeletePlayer3DTextLabel(PLAYERID,TXTID) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=TXTID,\
@@ -160,7 +160,7 @@ extern cell tmpfloat;
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=OBJECTID,\
 	n_DestroyPlayerObject(amx,nc_params))
 
-#define NC_DestroyVehicle __USE__veh_NC_DestroyVehicle__
+#define NC_DestroyVehicle __USE__veh_DestroyVehicle__
 
 #define NC_DisablePlayerRaceCheckpoint(PLAYERID) \
 	(NC_PARS_(1)nc_params[1]=PLAYERID,\
@@ -209,7 +209,7 @@ extern cell tmpfloat;
 #define NC_GetServerTickRate() (NC_PARS_(0)\
 	n_GetServerTickRate(amx,nc_params))
 
-#define NC_GetVehicleHealth __USE__anticheat_NC_GetVehicleHealth__
+#define NC_GetVehicleHealth __USE__anticheat_GetVehicleHealth__
 
 #define NC_GetVehicleModel(VEHICLEID) \
 	(NC_PARS_(1)nc_params[1]=VEHICLEID,\
@@ -244,7 +244,7 @@ extern cell tmpfloat;
 	nc_params[1]=PLAYERID,nc_params[2]=WEAPONID,nc_params[3]=AMMO,\
 	n_GivePlayerWeapon(amx,nc_params))
 
-#define NC_Kick(PLAYERID) __USE__common_NC_Kick__
+#define NC_Kick(PLAYERID) __USE__natives_Kick__
 
 #define NC_PlayerPlaySound(PLAYERID,SOUNDID,FX,FY,FZ) \
 	(NC_PARS_(5)nc_params[1]=PLAYERID,nc_params[2]=SOUNDID,\
@@ -298,7 +298,7 @@ extern cell tmpfloat;
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=TD,\
 	n_PlayerTextDrawShow(amx,nc_params))
 
-#define NC_PutPlayerInVehicle __USE__natives_NC_PutPlayerInVehicle__
+#define NC_PutPlayerInVehicle __USE__natives_PutPlayerInVehicle__
 
 #define NC_RemovePlayerMapIcon(PLAYERID,MAPICONID) (NC_PARS_(2)\
 	nc_params[1]=PLAYERID,nc_params[2]=MAPICONID,\
@@ -328,7 +328,7 @@ extern cell tmpfloat;
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_paramf[2]=FHEALTH,\
 	n_SetPlayerHealth(amx,nc_params))
 
-#define NC_SetPlayerPos __USE__natives_NC_SetPlayerPos__
+#define NC_SetPlayerPos __USE__natives_SetPlayerPos__
 
 #define NC_SetPlayerRaceCheckpoint(PLAYERID,TYPE,FX,FY,FZ,FNX,FNY,FNZ,FSIZE) \
 	(NC_PARS_(9)nc_params[1]=PLAYERID,nc_params[2]=TYPE,\
@@ -362,9 +362,9 @@ extern cell tmpfloat;
 	(NC_PARS_(1)nc_params[1]=VEHICLEID,\
 	n_SetVehicleToRespawn(amx,nc_params))
 
-#define NC_ShowPlayerDialog __USE__dialog_NC_ShowPlayerDialog__
+#define NC_ShowPlayerDialog __USE__dialog_ShowPlayerDialog__
 
-#define NC_SpawnPlayer __USE__natives_NC_SpawnPlayer__
+#define NC_SpawnPlayer __USE__natives_SpawnPlayer__
 
 #define NC_TextDrawHideForPlayer(PLAYERID,TXT) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=TXT,\
@@ -442,21 +442,21 @@ extern cell tmpfloat;
 /**
 Done here to do stuff, like streaming maps, anticheat?
 */
-int natives_NC_SetPlayerPos(int playerid, struct vec3 pos);
+int natives_SetPlayerPos(int playerid, struct vec3 pos);
 /**
 SpawnPlayer kills players that are in vehicles, and spawns them with a bottle.
 
 So this wrapper does SetPlayerPos (directly) if needed, because that will
 eject a player.
 */
-void natives_NC_SpawnPlayer(int playerid);
+void natives_SpawnPlayer(int playerid);
 /**
 Puts a player in vehicle, updating map, zone, vehiclestuff ...
 
 Also resets the vehicle HP to 1000.0 when it's invalid.
 */
-int natives_NC_PutPlayerInVehicle(int playerid, int vehicleid, int seat);
+int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat);
 /**
 Kick a player next server tick.
 */
-void natives_NC_Kick(int playerid);
+void natives_Kick(int playerid);

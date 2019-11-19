@@ -668,7 +668,7 @@ void veh_timed_1s_update()
 	}
 }
 
-int veh_NC_CreateVehicle(int model, struct vec4 pos, int col1, int col2,
+int veh_CreateVehicle(int model, struct vec4 pos, int col1, int col2,
 	int respawn_delay, int addsiren)
 {
 	int vehicleid;
@@ -690,7 +690,7 @@ int veh_NC_CreateVehicle(int model, struct vec4 pos, int col1, int col2,
 	return vehicleid;
 }
 
-int veh_NC_DestroyVehicle(int vehicleid)
+int veh_DestroyVehicle(int vehicleid)
 {
 	if (gamevehicles[vehicleid].dbvehicle) {
 		gamevehicles[vehicleid].dbvehicle->spawnedvehicleid = 0;
@@ -708,7 +708,7 @@ Makes sure references from vehicleid to db vehicle are updated.
 static
 int veh_create_from_dbvehicle(struct dbvehicle *veh)
 {
-	int vehicleid = veh_NC_CreateVehicle(
+	int vehicleid = veh_CreateVehicle(
 		veh->model, veh->pos, veh->col1, veh->col2,
 		VEHICLE_RESPAWN_DELAY, 0);
 	veh->spawnedvehicleid = vehicleid;
@@ -725,7 +725,7 @@ int veh_OnVehicleSpawn(int vehicleid)
 
 	if (veh) {
 		if (gamevehicles[vehicleid].need_recreation) {
-			veh_NC_DestroyVehicle(vehicleid);
+			veh_DestroyVehicle(vehicleid);
 			vehicleid = veh_create_from_dbvehicle(veh);
 			if (vehicleid == INVALID_VEHICLE_ID) {
 				/*expect things to crash*/

@@ -9,7 +9,7 @@ short kickdelay[MAX_PLAYERS];
 
 void common_tp_player(int playerid, struct vec4 pos)
 {
-	natives_NC_SetPlayerPos(playerid, pos.coords);
+	natives_SetPlayerPos(playerid, pos.coords);
 	NC_PARS(2);
 	nc_params[1] = playerid;
 	nc_paramf[2] = pos.r;

@@ -83,9 +83,9 @@ Creates a vehicle (see CreateVehicle doc).
 
 @remarks Resets values of gamevehicles struct reflecting the created vehicle.
 */
-int veh_NC_CreateVehicle(int model, struct vec4 pos, int col1, int col2,
+int veh_CreateVehicle(int model, struct vec4 pos, int col1, int col2,
 	int respawn_delay, int addsiren);
-int veh_NC_DestroyVehicle(int vehicleid);
+int veh_DestroyVehicle(int vehicleid);
 void veh_on_player_connect(int playerid);
 /**
 To be called from OnPlayerEnterVehicle

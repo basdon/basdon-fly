@@ -161,7 +161,7 @@ int cmd_dev_kickme(CMDPARAMS)
 {
 	amx_SetUString(buf144, "you're kicked, bye", 144);
 	NC_SendClientMessage(playerid, -1, buf144a);
-	natives_NC_Kick(playerid);
+	natives_Kick(playerid);
 	return 1;
 }
 
@@ -208,7 +208,7 @@ int cmd_dev_v(CMDPARAMS)
 		nc_params[6] = nc_params[7] = nc_params[8] = 126;
 		nc_params[9] = 0;
 		devvehicle = NC(n_CreateVehicle_);
-		natives_NC_PutPlayerInVehicle(playerid, devvehicle, 0);
+		natives_PutPlayerInVehicle(playerid, devvehicle, 0);
 	}
 	return 1;
 }
