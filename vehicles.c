@@ -8,8 +8,10 @@
 #include "math.h"
 #include "missions.h"
 #include "playerdata.h"
+#include "score.h"
 #include "servicepoints.h"
 #include "vehicles.h"
+#include "time/time.h"
 #include <string.h>
 
 #define FUEL_WARNING_SOUND 3200 /*air horn*/
@@ -66,6 +68,10 @@ Last vehicle position for player (when driver), for ODO purposes.
 To be inited in veh_on_player_now_driving and updated on ODO update.
 */
 static struct vec3 lastvpos[MAX_PLAYERS];
+/**
+Last timestamp when a player had some sort of control activity.
+*/
+static unsigned long lastcontrolactivity[MAX_PLAYERS];
 
 /**
 Each player's total ODO value (m).
@@ -528,6 +534,9 @@ void veh_on_player_key_state_change(int playerid, int oldkeys, int newkeys)
 
 	int vehicleid;
 
+	/*not checking vehicle... for now*/
+	lastcontrolactivity[playerid] = time_timestamp();
+
 	if (newkeys & KEY_NO && !(oldkeys & KEY_NO)) {
 		vehicleid = NC_GetPlayerVehicleID(playerid);
 		if (vehicleid && NC_GetPlayerVehicleSeat(playerid) == 0) {
@@ -545,6 +554,7 @@ void veh_on_player_now_driving(int playerid, int vehicleid)
 	lastvehicle[playerid] = vehicleid;
 	common_GetVehiclePos(vehicleid, &lastvpos[playerid]);
 
+	lastcontrolactivity[playerid] = time_timestamp();
 	reqenginestate =
 		(veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
 		veh->fuel > 0.0f;
@@ -668,6 +678,8 @@ void veh_timed_1s_update()
 	struct VEHICLEPARAMS vparams;
 	struct PLAYERKEYS pkeys;
 	int playerid, vehicleid, vehiclemodel, n = playercount;
+	unsigned long timestamp = time_timestamp();
+	unsigned long ctrla = timestamp - 30000;
 
 	while (n--) {
 		playerid = players[n];
@@ -715,6 +727,12 @@ void veh_timed_1s_update()
 				veh_timed_1s_update_a(
 					playerid, vehicleid,
 					&vpos, &vparams, v);
+
+				if (vparams.engine && !temp_afk[playerid] &&
+					lastcontrolactivity[playerid] > ctrla)
+				{
+					score_flight_time[playerid]++;
+				}
 			}
 		}
 

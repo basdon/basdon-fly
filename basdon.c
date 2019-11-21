@@ -217,6 +217,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	panel_on_player_connect(playerid);
 	pm_on_player_connect(playerid);
 	prefs_on_player_connect(playerid);
+	score_on_player_connect(playerid);
 	svp_on_player_connect(playerid);
 	timecyc_on_player_connect(playerid);
 	veh_create_player_textdraws(playerid);
