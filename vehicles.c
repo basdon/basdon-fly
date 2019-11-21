@@ -14,6 +14,10 @@
 
 #define FUEL_WARNING_SOUND 3200 /*air horn*/
 
+#define MAX_ENGINE_CUTOFF_KPH (3.0f)
+#define MAX_ENGINE_CUTOFF_VEL (MAX_ENGINE_CUTOFF_KPH / VEL_TO_KPH_VAL)
+#define MAX_ENGINE_CUTOFF_VEL_SQ (MAX_ENGINE_CUTOFF_VEL * MAX_ENGINE_CUTOFF_VEL)
+
 struct vehnode {
 	struct dbvehicle *veh;
 	struct vehnode *next;
@@ -364,16 +368,6 @@ cell AMX_NATIVE_CALL Veh_Init(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native Veh_IsFuelEmpty(vehicleid) */
-cell AMX_NATIVE_CALL Veh_IsFuelEmpty(AMX *amx, cell *params)
-{
-	struct dbvehicle *veh;
-	if ((veh = gamevehicles[params[1]].dbvehicle) == NULL) {
-		return 0;
-	}
-	return veh->fuel == 0.0f;
-}
-
 /* native Veh_OnPlayerDisconnect(playerid) */
 cell AMX_NATIVE_CALL Veh_OnPlayerDisconnect(AMX *amx, cell *params)
 {
@@ -482,6 +476,65 @@ void veh_on_player_enter_vehicle(int playerid, int vehicleid, int ispassenger)
 	if (!ispassenger && !veh_is_player_allowed_in_vehicle(playerid, veh)) {
 		veh_disallow_player_in_vehicle(playerid, veh);
 	}
+}
+
+/**
+Handle player engine key press.
+
+Pre: playerid is the driver of vehicleid and pressed the engine key.
+*/
+static
+void veh_start_or_stop_engine(int playerid, int vehicleid)
+{
+	static const char
+		*NOFUEL = WARN"The engine cannot be started, there is no fuel!",
+		*MOVING = WARN"The engine cannot be shut down while moving!",
+		*STARTED = INFO"Engine started",
+		*STOPPED = INFO"Engine stopped";
+
+	struct VEHICLEPARAMS vpars;
+	struct dbvehicle *veh;
+	struct vec3 vvel;
+
+	common_GetVehicleParamsEx(vehicleid, &vpars);
+	if (vpars.engine) {
+		common_GetVehicleVelocity(vehicleid, &vvel);
+		if (common_vectorsize_sq(vvel) > MAX_ENGINE_CUTOFF_VEL_SQ)
+		{
+			amx_SetUString(buf144, (char*) MOVING, 144);
+			NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		} else {
+			vpars.engine = 0;
+			common_SetVehicleParamsEx(vehicleid, &vpars);
+			amx_SetUString(buf144, (char*) STOPPED, 144);
+			NC_SendClientMessage(playerid, COL_INFO, buf144a);
+		}
+	} else {
+		veh = gamevehicles[vehicleid].dbvehicle;
+		if (veh != NULL && veh->fuel == 0.0f) {
+			amx_SetUString(buf144, (char*) NOFUEL, 144);
+			NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		} else {
+			vpars.engine = 1;
+			common_SetVehicleParamsEx(vehicleid, &vpars);
+			amx_SetUString(buf144, (char*) STARTED, 144);
+			NC_SendClientMessage(playerid, COL_INFO, buf144a);
+		}
+	}
+}
+
+void veh_on_player_key_state_change(int playerid, int oldkeys, int newkeys)
+{
+
+	int vehicleid;
+
+	if (newkeys & KEY_NO && !(oldkeys & KEY_NO)) {
+		vehicleid = NC_GetPlayerVehicleID(playerid);
+		if (vehicleid && NC_GetPlayerVehicleSeat(playerid) == 0) {
+			veh_start_or_stop_engine(playerid, vehicleid);
+		}
+	}
+	return;
 }
 
 void veh_on_player_now_driving(int playerid, int vehicleid)

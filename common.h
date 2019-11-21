@@ -244,4 +244,4 @@ Uses buf4096 for query. Also uses the last 8 components of buf4096.
 @param data usually a pointer to allocated memory that should be freed in the cb
 */
 void common_mysql_tquery(char *query, mysql_cb callback, void *data);
-float common_vectorsize(struct vec3 vec);
+float common_vectorsize_sq(struct vec3 vec);

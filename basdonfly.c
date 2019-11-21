@@ -94,7 +94,6 @@ FORWARD(Veh_Destroy);
 FORWARD(Veh_GetLabelToDelete);
 FORWARD(Veh_GetNextUpdateQuery);
 FORWARD(Veh_Init);
-FORWARD(Veh_IsFuelEmpty);
 FORWARD(Veh_OnPlayerDisconnect);
 FORWARD(Veh_RegisterLabel);
 FORWARD(Veh_ShouldCreateLabel);
@@ -275,6 +274,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnPlayerDisconnect),
 	REGISTERNATIVE(B_OnPlayerEnterRaceCP),
 	REGISTERNATIVE(B_OnPlayerEnterVehicle),
+	REGISTERNATIVE(B_OnPlayerKeyStateChange),
 	REGISTERNATIVE(B_OnPlayerRequestClass),
 	REGISTERNATIVE(B_OnPlayerRequestSpawn),
 	REGISTERNATIVE(B_OnPlayerSpawn),
@@ -334,7 +334,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_Destroy),
 	REGISTERNATIVE(Veh_GetLabelToDelete),
 	REGISTERNATIVE(Veh_Init),
-	REGISTERNATIVE(Veh_IsFuelEmpty),
 	REGISTERNATIVE(Veh_OnPlayerDisconnect),
 	REGISTERNATIVE(Veh_RegisterLabel),
 	REGISTERNATIVE(Veh_ShouldCreateLabel),

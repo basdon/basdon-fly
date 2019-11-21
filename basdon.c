@@ -296,6 +296,17 @@ cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 	return 1;
 }
 
+/* native B_OnPlayerKeyStateChange(playerid, oldkeys, newkeys) */
+static
+cell AMX_NATIVE_CALL B_OnPlayerKeyStateChange(AMX *amx, cell *params)
+{
+	const int playerid = params[1], oldkeys = params[2];
+	const int newkeys = params[3];
+
+	veh_on_player_key_state_change(playerid, oldkeys, newkeys);
+	return 1;
+}
+
 /* native B_OnPlayerRequestClass(playerid, classid) */
 static
 cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)

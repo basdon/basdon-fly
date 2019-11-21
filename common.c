@@ -212,7 +212,7 @@ void common_mysql_tquery(char *query, mysql_cb callback, void *data)
 	NC(n_mysql_tquery);
 }
 
-float common_vectorsize(struct vec3 vec)
+float common_vectorsize_sq(struct vec3 vec)
 {
 	return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z;
 }

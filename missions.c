@@ -21,6 +21,10 @@
 
 #define TRACKER_PORT 7766
 
+#define MAX_UNLOAD_SPEED_KNOTS (35.0f)
+#define MAX_UNLOAD_SPEED_VEL (MAX_UNLOAD_SPEED_KNOTS / VEL_TO_KTS_VAL)
+#define MAX_UNLOAD_SPEED_SQ_VEL (MAX_UNLOAD_SPEED_VEL * MAX_UNLOAD_SPEED_VEL)
+
 const static char *SATISFACTION_TEXT_FORMAT = "Passenger~n~Satisfaction: %d%%";
 const static char *LOADING = "~p~Loading...";
 const static char *UNLOADING = "~p~Unloading...";
@@ -1270,8 +1274,7 @@ int missions_on_player_enter_race_checkpoint(int playerid)
 	}
 
 	common_GetVehicleVelocity(vehicleid, &vvel);
-	if (common_vectorsize(vvel) >
-		35.0f/VEL_TO_KTS_VAL*35.0f/VEL_TO_KTS_VAL)
+	if (common_vectorsize_sq(vvel) > MAX_UNLOAD_SPEED_SQ_VEL)
 	{
 		errmsg = (char*) TOOFAST;
 		goto reterr;

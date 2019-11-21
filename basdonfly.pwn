@@ -46,6 +46,10 @@ native B_OnPlayerEnterRaceCP(playerid)
 //@summary Plugin callback for {@link OnPlayerEnterVehicle}
 native B_OnPlayerEnterVehicle(playerid, vehicleid, ispassenger)
 
+//@summary Plugin callback for {@link OnPlayerKeyStateChange}
+//@remarks parameters {@code oldkeys} and {@code newkeys} are swapped
+native B_OnPlayerKeyStateChange(playerid, oldkeys, newkeys)
+
 //@summary Plugin callback for {@link OnPlayerRequestClass}
 native B_OnPlayerRequestClass(playerid, classid)
 
@@ -400,11 +404,6 @@ native Veh_GetLabelToDelete(vehicleid, playerid, &PlayerText3D:labelid)
 //@seealso Veh_Add
 //@seealso Veh_Destroy
 native Veh_Init(dbvehiclecount)
-
-//@summary Check if a vehicle has no fuel anymore
-//@param vehicleid vehicle to check
-//@returns {@code 0} if the vehicle still has fuel
-native Veh_IsFuelEmpty(vehicleid)
 
 //@summary Clears data when a player disconnects
 //@param playerid the player that disconnected
