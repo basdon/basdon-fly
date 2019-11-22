@@ -39,6 +39,7 @@ extern AMX_NATIVE n_GetVehicleZAngle;
 extern AMX_NATIVE n_GivePlayerMoney_;
 extern AMX_NATIVE n_GivePlayerWeapon;
 extern AMX_NATIVE n_Kick_;
+extern AMX_NATIVE n_MoveObject;
 extern AMX_NATIVE n_PlayerPlaySound;
 extern AMX_NATIVE n_PlayerTextDrawAlignment;
 extern AMX_NATIVE n_PlayerTextDrawBackgroundColor;

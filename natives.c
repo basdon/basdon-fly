@@ -48,6 +48,7 @@ AMX_NATIVE n_GetVehicleZAngle;
 AMX_NATIVE n_GivePlayerMoney_;
 AMX_NATIVE n_GivePlayerWeapon;
 AMX_NATIVE n_Kick_;
+AMX_NATIVE n_MoveObject;
 AMX_NATIVE n_PlayerPlaySound;
 AMX_NATIVE n_PlayerTextDrawAlignment;
 AMX_NATIVE n_PlayerTextDrawBackgroundColor;
@@ -184,6 +185,7 @@ int natives_find()
 		N_(GivePlayerMoney),
 		N(GivePlayerWeapon),
 		N_(Kick),
+		N(MoveObject),
 		N(PlayerPlaySound),
 		N(PlayerTextDrawAlignment),
 		N(PlayerTextDrawBackgroundColor),

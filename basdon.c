@@ -132,11 +132,12 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 
 	airports_init();
 	class_init();
+	echo_init();
+	heartbeat_create_session();
 	maps_load_from_db();
 	missions_create_tracker_socket();
 	missions_init();
-	echo_init();
-	heartbeat_create_session();
+	objs_on_gamemode_init();
 	panel_on_gamemode_init();
 	playtime_init();
 	spawn_init(); /*MUST run after airports_init*/
@@ -216,6 +217,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	maps_on_player_connect(playerid);
 	missions_on_player_connect(playerid);
 	money_set(playerid, 0);
+	objs_on_player_connect(playerid);
 	panel_on_player_connect(playerid);
 	playtime_on_player_connect(playerid);
 	pm_on_player_connect(playerid);
