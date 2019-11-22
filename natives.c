@@ -4,6 +4,7 @@
 #include "common.h"
 #include "maps.h"
 #include "natives.h"
+#include "playerdata.h"
 #include "servicepoints.h"
 #include "spawn.h"
 #include "timer.h"
@@ -113,6 +114,7 @@ AMX_NATIVE n_cache_get_row_count;
 AMX_NATIVE n_cache_get_row_float;
 AMX_NATIVE n_cache_get_row_int;
 AMX_NATIVE n_cache_insert_id;
+AMX_NATIVE n_mysql_escape_string;
 AMX_NATIVE n_mysql_tquery;
 AMX_NATIVE n_mysql_query;
 AMX_NATIVE n_ssocket_connect;
@@ -251,6 +253,7 @@ int natives_find()
 		N(cache_get_row_float),
 		N(cache_get_row_int),
 		N(cache_insert_id),
+		N(mysql_escape_string),
 		N(mysql_tquery),
 		N(mysql_query),
 		N(random),
@@ -300,14 +303,58 @@ int kick_timer_cb(void *data)
 	return 0;
 }
 
-int natives_Kick(int playerid)
+int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 {
+	const static char *SYSTEM_ISSUER = "system", *REASONNULL = "(NULL)";
+
 	int intv;
+	char uid[10], issueruid[10], *escapedreason;
 
 	if (!kick_update_delay[playerid]) {
+		if (issuer == NULL) {
+			issuer = (char*) SYSTEM_ISSUER;
+		}
+
+		if (reason != NULL) {
+			sprintf(cbuf4096,
+				"%s[%d] was kicked by %s (%s)",
+				pdata[playerid]->name,
+				playerid,
+				issuer,
+				reason);
+			amx_SetUString(buf144, cbuf4096, 144);
+			NC_SendClientMessageToAll(COL_WARN, buf144a);
+		}
+
 		amx_SetUString(buf144, "~r~You've been kicked.", 144);
 		NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
 		kick_update_delay[playerid] = 2;
+
+		if (reason != NULL) {
+			escapedreason = malloc(1000);
+			common_mysql_escape_string(reason, escapedreason, 1000);
+			reason = escapedreason;
+		} else {
+			escapedreason = NULL;
+			reason = (char*) REASONNULL;
+		}
+
+		useridornull(playerid, uid);
+		if (issuer_userid != -1) {
+			sprintf(issueruid, "%d", issuer_userid);
+		} else {
+			strcpy(issueruid, "NULL");
+		}
+		sprintf(cbuf4096_,
+			"INSERT INTO kck(usr,ip,stamp,issuer,reason)"
+			"VALUES (%s,'%s',UNIX_TIMESTAMP(),%s,'%s')",
+			uid,
+			pdata[playerid]->ip,
+			issueruid,
+			escapedreason);
+		amx_SetUString(buf4096, cbuf4096_, 1000);
+		NC_mysql_tquery_nocb(buf4096a);
+		free(escapedreason);
 
 		/*Interval should be smaller than 1000, since if it's a kick
 		caused by system, player should be gone before the next

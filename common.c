@@ -191,6 +191,18 @@ int common_UpdateVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d)
 	return NC(n_UpdateVehicleDamageStatus);
 }
 
+void common_mysql_escape_string(char *data, char *dest, int maxlen)
+{
+	amx_SetUString(buf4096, data, 4096);
+	NC_PARS(4);
+	nc_params[1] = nc_params[2] = buf4096a;
+	nc_params[3] = 1; /*connectionhandle*/
+	nc_params[4] = maxlen;
+	NC(n_mysql_escape_string);
+	amx_GetUString(dest, buf4096, maxlen);
+	dest[maxlen - 1] = 0;
+}
+
 void common_mysql_tquery(char *query, mysql_cb callback, void *data)
 {
 	amx_SetUString(buf4096, query, 2000);

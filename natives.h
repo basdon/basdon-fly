@@ -103,6 +103,7 @@ extern AMX_NATIVE n_cache_get_row_count;
 extern AMX_NATIVE n_cache_get_row_float;
 extern AMX_NATIVE n_cache_get_row_int;
 extern AMX_NATIVE n_cache_insert_id;
+extern AMX_NATIVE n_mysql_escape_string;
 extern AMX_NATIVE n_mysql_tquery;
 extern AMX_NATIVE n_mysql_query;
 extern AMX_NATIVE n_random;
@@ -464,8 +465,11 @@ Also resets the vehicle HP to 1000.0 when it's invalid.
 */
 int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat);
 /**
-Kick a player next server tick.
+Kicks (delayed), broadcasts message and logs.
 
+@param reason NULL to not broadcast a message (will have empty reason in table)
+@param issuer name of issuer (NULL for system kick) (does not get saved to db)
+@param issuer_userid may be -1 for system kick
 @return 1 if the player is kicked, 0 if they were already kicked.
 */
-int natives_Kick(int playerid);
+int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid);

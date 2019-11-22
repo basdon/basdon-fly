@@ -234,6 +234,12 @@ Uses buf32.
 */
 int common_UpdateVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d);
 /**
+Uses the mysql plugin escape string routine.
+
+Uses buf4096
+*/
+void common_mysql_escape_string(char *data, char *dest, int maxlen);
+/**
 Calls mysql_tquery with a callback and data to pass.
 
 Uses buf4096 for query. Also uses the last 8 components of buf4096.

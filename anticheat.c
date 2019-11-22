@@ -77,23 +77,6 @@ cell AMX_NATIVE_CALL Ac_FormatLog(AMX *amx, cell *params)
 }
 
 /**
-Kicks and broadcasts kickmessage when needed. Does not log.
-*/
-static
-void anticheat_kick(int playerid, char *reason)
-{
-	if (natives_Kick(playerid)) {
-		sprintf(cbuf4096,
-			"%s[%d] was kicked by system (%s)",
-			pdata[playerid]->name,
-			playerid,
-			reason);
-		amx_SetUString(buf144, cbuf4096, 144);
-		NC_SendClientMessageToAll(COL_WARN, buf144a);
-	}
-}
-
-/**
 Adds infraction value, kicking the player if they exceeded the max value.
 
 @param type infraction type, one of AC_IF_ constants.
@@ -104,7 +87,7 @@ void anticheat_infraction(int playerid, int type)
 	struct INFRACTIONDATA d = infractiondata[type];
 
 	if ((infractionvalue[type][playerid] += d.increment) >= d.maxvalue) {
-		anticheat_kick(playerid, d.kickreason);
+		natives_Kick(playerid, d.kickreason, NULL, -1);
 	}
 }
 
@@ -147,7 +130,7 @@ int anticheat_flood(int playerid, int amount)
 
 	if ((floodcount[playerid] += amount) >= AC_FLOOD_LIMIT) {
 		anticheat_log(playerid, AC_FLOOD, EXCESS_FLOOD);
-		anticheat_kick(playerid, EXCESS_FLOOD);
+		natives_Kick(playerid, EXCESS_FLOOD, NULL, -1);
 		return 1;
 	}
 	return 0;
@@ -227,13 +210,7 @@ float anticheat_GetVehicleHealth(int vehicleid)
 		return hp;
 	}
 	common_crash_player(playerid);
-	sprintf(cbuf4096,
-		"%s[%d] was kicked by system (invalid vehicle hp)",
-		pdata[playerid]->name,
-		playerid);
-	amx_SetUString(buf144, cbuf4096, 144);
-	NC_SendClientMessageToAll(COL_WARN, buf144a);
-	natives_Kick(playerid);
+	natives_Kick(playerid, "invalid vehicle hp", NULL, -1);
 resethp:
 	NC_PARS(2);
 	nc_params[1] = vehicleid;

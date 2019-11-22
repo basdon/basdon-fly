@@ -161,7 +161,7 @@ int cmd_dev_kickme(CMDPARAMS)
 {
 	amx_SetUString(buf144, "you're kicked, bye", 144);
 	NC_SendClientMessage(playerid, -1, buf144a);
-	natives_Kick(playerid);
+	natives_Kick(playerid, "requested \n''\n \0 ok", NULL, -1);
 	return 1;
 }
 
