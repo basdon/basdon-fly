@@ -40,21 +40,23 @@ static
 void playtime_update_player_last_seen(int playerid, int isdisconnecting)
 {
 	unsigned long now;
-	int playtime_to_add, userid;
+	int temp_ms, playtime_to_add, userid;
 
 	if (isafk[playerid]) {
-		playtime_to_add = uncommitted_playtime[playerid];
-		uncommitted_playtime[playerid] = 0;
+		temp_ms = uncommitted_playtime[playerid];
+		playtime_to_add = temp_ms / 1000;
+		uncommitted_playtime[playerid] = temp_ms % 1000;
 	} else {
 		now = time_timestamp();
-		playtime_to_add = now - uncommitted_playtime[playerid];
-		uncommitted_playtime[playerid] = now;
+		temp_ms = now - uncommitted_playtime[playerid];
+		playtime_to_add = temp_ms / 1000;
+		uncommitted_playtime[playerid] = now - temp_ms % 1000;
 	}
 
 	/*TODO: why does this happen*/
 	if (playtime_to_add > 60) {
-		logprintf("it happened %d isafk %d",
-			playtime_to_add, isafk[playerid]);
+		logprintf("it happened %d isafk %d isdisconnect %d",
+			playtime_to_add, isafk[playerid], isdisconnecting);
 		playtime_to_add = 5;
 	}
 
