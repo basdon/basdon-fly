@@ -82,14 +82,15 @@ Kicks and broadcasts kickmessage when needed. Does not log.
 static
 void anticheat_kick(int playerid, char *reason)
 {
-	natives_Kick(playerid);
-	sprintf(cbuf4096,
-		"%s[%d] was kicked by system (%s)",
-		pdata[playerid]->name,
-		playerid,
-		reason);
-	amx_SetUString(buf144, cbuf4096, 144);
-	NC_SendClientMessageToAll(COL_WARN, buf144a);
+	if (natives_Kick(playerid)) {
+		sprintf(cbuf4096,
+			"%s[%d] was kicked by system (%s)",
+			pdata[playerid]->name,
+			playerid,
+			reason);
+		amx_SetUString(buf144, cbuf4096, 144);
+		NC_SendClientMessageToAll(COL_WARN, buf144a);
+	}
 }
 
 /**
@@ -165,6 +166,11 @@ void anticheat_on_player_connect(int playerid)
 void anticheat_log(int playerid, int eventtype, char *info)
 {
 	char buf[512], *b = info;
+
+	if (kick_update_delay[playerid]) {
+		/*player already kicked*/	
+		return;
+	}
 
 	while (*b != 0) {
 		if (*b == '\'') {

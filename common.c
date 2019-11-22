@@ -5,7 +5,7 @@
 #include <string.h>
 
 int loggedstatus[MAX_PLAYERS];
-short kickdelay[MAX_PLAYERS];
+char kick_update_delay[MAX_PLAYERS];
 
 void common_tp_player(int playerid, struct vec4 pos)
 {

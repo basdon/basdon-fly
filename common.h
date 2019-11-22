@@ -82,7 +82,8 @@ extern logprintf_t logprintf;
 #define MK_PLAYER_CC(PLAYERID) \
 	((_cc[PLAYERID] & 0x003FFFFF) | (PLAYERID << 22))
 #define PLAYER_CC_GETID(VALUE) (((unsigned int) VALUE >> 22) & 0x3FF)
-#define PLAYER_CC_CHECK(VALUE,PLAYERID) (_cc[PLAYERID] == (VALUE & 0x003FFFFF))
+#define PLAYER_CC_CHECK(VALUE,PLAYERID) \
+	(_cc[PLAYERID] == ((unsigned int) VALUE & 0x003FFFFF))
 
 /* amx addresses of buffers */
 extern cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
@@ -114,10 +115,9 @@ contains 'playercount' elements, ids of connected players (not sorted)
 extern short players[MAX_PLAYERS];
 extern int playercount;
 /**
-Kickdelay, when larger than 0, should be decremented in ProcessTick and
-player kicked on 0.
+Should be decremented in OnPlayerUpdate and player kicked when it reaches 0.
 */
-extern short kickdelay[MAX_PLAYERS];
+extern char kick_update_delay[MAX_PLAYERS];
 /**
 Holds spawned status of players.
 */

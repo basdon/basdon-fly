@@ -6,6 +6,7 @@
 #include "natives.h"
 #include "servicepoints.h"
 #include "spawn.h"
+#include "timer.h"
 #include "vehicles.h"
 #include "zones.h"
 
@@ -32,6 +33,7 @@ AMX_NATIVE n_GetPlayerFacingAngle;
 AMX_NATIVE n_GetPlayerIp;
 AMX_NATIVE n_GetPlayerKeys;
 AMX_NATIVE n_GetPlayerName;
+AMX_NATIVE n_GetPlayerPing;
 AMX_NATIVE n_GetPlayerPos;
 AMX_NATIVE n_GetPlayerState;
 AMX_NATIVE n_GetPlayerVehicleID;
@@ -169,6 +171,7 @@ int natives_find()
 		N(GetPlayerFacingAngle),
 		N(GetPlayerKeys),
 		N(GetPlayerName),
+		N(GetPlayerPing),
 		N(GetPlayerPos),
 		N(GetPlayerState),
 		N(GetPlayerVehicleID),
@@ -280,12 +283,46 @@ int natives_find()
 	return 1;
 }
 
-void natives_Kick(int playerid)
+/**
+Callback for kicking a player, backup when OnPlayerUpdate doesn't get called.
+*/
+static
+int kick_timer_cb(void *data)
 {
-	/*TODO: log?*/
-	/*TODO: more delay when player is afk?
-	gamemode kicked after x player updates, or x ms if player is afk*/
-	kickdelay[playerid] = 2;
+	int playerid;
+
+	playerid = PLAYER_CC_GETID(data);
+	if (PLAYER_CC_CHECK(data, playerid)) {
+		NC_PARS(1);
+		nc_params[1] = playerid;
+		NC(n_Kick_);
+	}
+	return 0;
+}
+
+int natives_Kick(int playerid)
+{
+	int intv;
+
+	if (!kick_update_delay[playerid]) {
+		amx_SetUString(buf144, "~r~You've been kicked.", 144);
+		NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+		kick_update_delay[playerid] = 2;
+
+		/*Interval should be smaller than 1000, since if it's a kick
+		caused by system, player should be gone before the next
+		check (since most of them run at 1Hz).*/
+		intv = NC_GetPlayerPing(playerid) * 2;
+		if (intv > 970) {
+			intv = 970;
+		}
+		if (intv < 20) {
+			intv = 20;
+		}
+		timer_set(intv, kick_timer_cb, (void*) MK_PLAYER_CC(playerid));
+		return 1;
+	}
+	return 0;
 }
 
 int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)

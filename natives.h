@@ -23,6 +23,7 @@ extern AMX_NATIVE n_GetPlayerFacingAngle;
 extern AMX_NATIVE n_GetPlayerIp;
 extern AMX_NATIVE n_GetPlayerKeys;
 extern AMX_NATIVE n_GetPlayerName;
+extern AMX_NATIVE n_GetPlayerPing;
 extern AMX_NATIVE n_GetPlayerPos;
 extern AMX_NATIVE n_GetPlayerState;
 extern AMX_NATIVE n_GetPlayerVehicleID;
@@ -192,6 +193,9 @@ extern cell tmpfloat;
 #define NC_GetPlayerName(PLAYERID,BUF,LEN) (NC_PARS_(3)\
 	nc_params[1]=PLAYERID,nc_params[2]=BUF,nc_params[3]=LEN,\
 	n_GetPlayerName(amx,nc_params))
+
+#define NC_GetPlayerPing(PLAYERID) (NC_PARS_(1)nc_params[1]=PLAYERID,\
+	n_GetPlayerPing(amx,nc_params))
 
 #define NC_GetPlayerPos(PLAYERID,FREFX,FREFY,FREFZ) (NC_PARS_(4)\
 	nc_params[1]=PLAYERID,nc_params[2]=FREFX,nc_params[3]=FREFY,\
@@ -461,5 +465,7 @@ Also resets the vehicle HP to 1000.0 when it's invalid.
 int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat);
 /**
 Kick a player next server tick.
+
+@return 1 if the player is kicked, 0 if they were already kicked.
 */
-void natives_Kick(int playerid);
+int natives_Kick(int playerid);

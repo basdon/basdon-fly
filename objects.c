@@ -98,7 +98,6 @@ void objs_on_gamemode_init()
 	nc_paramf[4] = OBJ_RADAR_LA_Z - 11.4f;
 	nc_paramf[7] = 180.0f;
 	NC(n_CreateObject);
-	printf("%d %d %d\n", obj_radar_la, obj_radar_lv, obj_radar_sf);
 }
 
 void objs_on_player_connect(int playerid)

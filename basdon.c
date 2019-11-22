@@ -208,7 +208,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 
 	playeronlineflag[playerid] = 1;
 	loggedstatus[playerid] = LOGGED_NO;
-	kickdelay[playerid] = 0;
+	kick_update_delay[playerid] = 0;
 	temp_afk[playerid] = 0;
 
 	class_on_player_connect(playerid);
@@ -393,6 +393,14 @@ cell AMX_NATIVE_CALL B_OnPlayerUpdate(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
 
+	if (kick_update_delay[playerid] > 0) {
+		if (--kick_update_delay[playerid] == 0) {
+			NC_PARS(1);
+			nc_params[1] = playerid;
+			NC(n_Kick_);
+		}
+		return 0;
+	}
 	playtime_on_player_update(playerid);
 	timecyc_on_player_update(playerid);
 	return 1;

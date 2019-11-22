@@ -144,18 +144,6 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	int newtickcount;
 #endif /*LOG_SLOW_TICKS*/
 
-	int n = playercount;
-
-	while (n--) {
-		if (kickdelay[players[n]]) {
-			if(--kickdelay[players[n]]) {
-				NC_PARS(1);
-				nc_params[1] = players[n];
-				NC(n_Kick_);
-			}
-		}
-	}
-
 	/*occurs when doing gmx*/
 	if (amx == NULL) {
 		count = 0;
