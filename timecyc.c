@@ -453,7 +453,11 @@ int timecyc_next_weather(void *unused)
 
 int timecyc_cmd_metar(CMDPARAMS)
 {
-	timecyc_make_weather_msg("weather report", weather.current);
+	if (weather.upcoming != weather.current) {
+		timecyc_make_weather_msg("weather forecast", weather.upcoming);
+	} else {
+		timecyc_make_weather_msg("weather report", weather.current);
+	}
 	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessage(playerid, COL_METAR, buf144a);
 	return 1;
