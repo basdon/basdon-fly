@@ -321,22 +321,6 @@ native PlayerData_UpdateGroup(playerid, group)
 //@returns {@code 0} if there was no player data saved for {@param playerid}
 native PlayerData_UpdateName(playerid, name[], namelen)
 
-#namespace "playertime.c"
-
-//@summary Formats 0-3 queries to update a user's playtimes in the db
-//@param userid the userid of the player, may be {@code -1}
-//@param sessionid the sessionid of the player's current session, may be {@code -1}
-//@param playtimetoadd how much actual (non-afk) play time to add (is ignored when {@param isdisconnect} is {@code 1})
-//@param isdisconnect should be {@code 1} when updating the times during player disconnect
-//@param buf buffer to store queries in
-//@returns {@code 0} if userid is {@code -1}, meaning no queries must be executed!
-//@remarks {@code buf[2]} will have a query to update the player's online times
-//@remarks {@code buf[0]} is either {@code 0} when {@param sessionid} was {@code -1}, or contains the\
-		position of the query to update the session's endtime in {@param buf}
-//@remarks {@code buf[1]} is either {@code 0} when {@param sessionid} was {@code -1} or {@code isdisconnect} is {@code 0},\
-		or contains the position of the query to update a player's online time (accurate) in {@param buf}
-native Playtime_FormatUpdateTimes(userid, sessionid, playtimetoadd, isdisconnect, buf[])
-
 #namespace "timecyc.c"
 
 //@summary Gets the current weather message

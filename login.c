@@ -7,6 +7,8 @@
 #include <string.h>
 #include <time.h>
 
+int sessionid[MAX_PLAYERS];
+
 /* actual password, stored for later checking */
 static char *pwdata[MAX_PLAYERS];
 /* some hash of new password, stored between dialogs when player is changing password */

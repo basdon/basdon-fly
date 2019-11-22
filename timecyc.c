@@ -9,6 +9,7 @@
 #include "game_sa.h"
 #include "heartbeat.h"
 #include "missions.h"
+#include "playtime.h"
 #include "protips.h"
 #include "timecyc.h"
 #include "timer.h"
@@ -411,7 +412,7 @@ void timecyc_set_weather(int newweather)
 		i = playercount;
 		while (i--) {
 			playerid = players[i];
-			if (spawned[playerid] && !temp_afk[playerid]) {
+			if (spawned[playerid] && !isafk[playerid]) {
 				nc_params[1] = playerid;
 				NC(n_SetPlayerWeather);
 			}
@@ -611,7 +612,7 @@ timecyc_sync_clocks()
 		i = playercount;
 		while (i--) {
 			playerid = players[i];
-			if (spawned[playerid] && !temp_afk[playerid] &&
+			if (spawned[playerid] && !isafk[playerid] &&
 				timecycstate[playerid] == SYNC_STATE_NONE)
 			{
 				nc_params[1] = playerid;

@@ -93,6 +93,8 @@ extern cell *underscorestring;
 /* buffers as char pointers */
 extern char *cemptystring, *cbuf32, *cbuf32_1, *cbuf64, *cbuf144, *cbuf4096;
 extern char *cunderscorestring;
+/*special buf using last 4000 of cbuf4096 (which has size 16k)*/
+extern char *cbuf4096_;
 /* float pointers to buffers */
 extern float *fbuf32_1, *fbuf32, *fbuf64, *fbuf144, *fbuf4096;
 /**
@@ -132,10 +134,6 @@ extern int prefs[MAX_PLAYERS];
 Logged-in status of each player (one of the LOGGED_ definitions).
 */
 extern int loggedstatus[MAX_PLAYERS];
-/**
-Variable holding afk state of players (temp until all is moved to plugin).
-*/
-extern int temp_afk[MAX_PLAYERS];
 /**
 Current in-game hour.
 */

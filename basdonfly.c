@@ -16,6 +16,7 @@
 #include "nav.h"
 #include "panel.h"
 #include "playerdata.h"
+#include "playtime.h"
 #include "pm.h"
 #include "prefs.h"
 #include "protips.h"
@@ -84,8 +85,6 @@ FORWARD(PlayerData_FormatUpdateQuery);
 FORWARD(PlayerData_SetUserId);
 FORWARD(PlayerData_UpdateGroup);
 FORWARD(PlayerData_UpdateName);
-/* playtime.c */
-FORWARD(Playtime_FormatUpdateTimes);
 /* vehicles.c */
 FORWARD(Veh_Add);
 FORWARD(Veh_AddOdo);
@@ -182,6 +181,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 		dev_missions_update_closest_point();
 #endif /*DEV*/
 		panel_timed_update();
+		playtime_check_for_afk();
 
 		timecyc_tick();
 	}
@@ -212,22 +212,6 @@ static
 cell AMX_NATIVE_CALL REMOVEME_setloggedstatus(AMX *amx, cell *params)
 {
 	loggedstatus[params[1]] = params[2];
-	return 1;
-}
-
-static
-cell AMX_NATIVE_CALL REMOVEME_onplayerwasafk(AMX *amx, cell *params)
-{
-	temp_afk[params[1]] = 0;
-	panel_on_player_was_afk(params[1]);
-	timecyc_on_player_was_afk(params[1]);
-	return 1;
-}
-
-cell AMX_NATIVE_CALL REMOVEME_onplayernowafk(AMX *amx, cell *params)
-{
-	temp_afk[params[1]] = 1;
-	panel_remove_panel_player(params[1]);
 	return 1;
 }
 
@@ -263,11 +247,17 @@ cell AMX_NATIVE_CALL REMOVEME_setflighttime(AMX *amx, cell *params)
 	return 1;
 }
 
+static
+cell AMX_NATIVE_CALL REMOVEME_setsessionid(AMX *amx, cell *params)
+{
+	sessionid[params[1]] = params[2];
+	return 1;
+}
+
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
-	REGISTERNATIVE(REMOVEME_onplayernowafk),
-	REGISTERNATIVE(REMOVEME_onplayerwasafk),
+	REGISTERNATIVE(REMOVEME_setsessionid),
 	REGISTERNATIVE(REMOVEME_onplayerreqclassimpl),
 	REGISTERNATIVE(REMOVEME_setprefs),
 	REGISTERNATIVE(REMOVEME_getprefs),
@@ -341,8 +331,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PlayerData_SetUserId),
 	REGISTERNATIVE(PlayerData_UpdateGroup),
 	REGISTERNATIVE(PlayerData_UpdateName),
-	/* playtime.c */
-	REGISTERNATIVE(Playtime_FormatUpdateTimes),
 	/* vehicles.c */
 	REGISTERNATIVE(Veh_Add),
 	REGISTERNATIVE(Veh_CollectSpawnedVehicles),

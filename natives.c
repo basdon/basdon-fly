@@ -135,6 +135,7 @@ cell *emptystring, *buf32, *buf32_1, *buf64, *buf144, *buf4096;
 cell *underscorestring;
 char *cemptystring, *cbuf32, *cbuf32_1, *cbuf64, *cbuf144, *cbuf4096;
 char *cunderscorestring;
+char *cbuf4096_;
 float *fbuf32_1, *fbuf32, *fbuf64, *fbuf144, *fbuf4096;
 
 int natives_find()

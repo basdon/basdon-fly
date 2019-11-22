@@ -9,6 +9,7 @@
 #include "echo.h"
 #include "game_sa.h"
 #include "playerdata.h"
+#include "playtime.h"
 #include "math.h"
 #include "missions.h"
 #include "money.h"
@@ -1348,7 +1349,7 @@ void missions_on_weather_changed(int weather)
 
 void missions_send_tracker_data(
 	int playerid, int vehicleid, float hp,
-	struct vec3 *vpos, struct vec3 *vvel, int afk, int engine)
+	struct vec3 *vpos, struct vec3 *vvel, int engine)
 {
 	struct MISSION *mission;
 	unsigned char flags;
@@ -1356,12 +1357,12 @@ void missions_send_tracker_data(
 
 	if ((mission = activemission[playerid]) == NULL ||
 		mission->veh->spawnedvehicleid != vehicleid ||
-		(afk && tracker_afk_packet_sent[playerid]))
+		(isafk[playerid] && tracker_afk_packet_sent[playerid]))
 	{
 		return;
 	}
 
-	tracker_afk_packet_sent[playerid] = flags = afk == 1;
+	tracker_afk_packet_sent[playerid] = flags = isafk[playerid] == 1;
 	if (engine) {
 		flags |= 2;
 	}

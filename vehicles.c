@@ -8,6 +8,7 @@
 #include "math.h"
 #include "missions.h"
 #include "playerdata.h"
+#include "playtime.h"
 #include "score.h"
 #include "servicepoints.h"
 #include "vehicles.h"
@@ -655,9 +656,8 @@ void veh_timed_1s_update_a(
 	struct vec3 vvel;
 	struct quat vrot;
 	float hp;
-	int afk = temp_afk[playerid];
 
-	if (!afk) {
+	if (!isafk[playerid]) {
 		common_GetVehicleRotationQuat(vehicleid, &vrot);
 		missions_update_satisfaction(playerid, vehicleid, &vrot);
 	}
@@ -667,7 +667,7 @@ void veh_timed_1s_update_a(
 		common_GetVehicleVelocity(vehicleid, &vvel);
 		missions_send_tracker_data(
 			playerid, vehicleid, hp,
-			vpos, &vvel, afk, vparams->engine);
+			vpos, &vvel, vparams->engine);
 	}
 }
 
@@ -728,7 +728,7 @@ void veh_timed_1s_update()
 					playerid, vehicleid,
 					&vpos, &vparams, v);
 
-				if (vparams.engine && !temp_afk[playerid] &&
+				if (vparams.engine && !isafk[playerid] &&
 					lastcontrolactivity[playerid] > ctrla)
 				{
 					score_flight_time[playerid]++;

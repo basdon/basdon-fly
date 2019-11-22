@@ -38,6 +38,7 @@ cell AMX_NATIVE_CALL B_Validate(AMX *local_amx, cell *params)
 	cbuf64 = (char*) buf64;
 	cbuf144 = (char*) buf144;
 	cbuf4096 = (char*) buf4096;
+	cbuf4096_ = cbuf4096 + 4096 * 4 - 4000;
 	cemptystring = (char*) emptystring;
 	cunderscorestring = (char*) underscorestring;
 	fbuf32_1 = (float*) buf32_1;
@@ -137,6 +138,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	echo_init();
 	heartbeat_create_session();
 	panel_on_gamemode_init();
+	playtime_init();
 	spawn_init(); /*MUST run after airports_init*/
 	svp_init();
 	timecyc_init();
@@ -215,6 +217,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	missions_on_player_connect(playerid);
 	money_set(playerid, 0);
 	panel_on_player_connect(playerid);
+	playtime_on_player_connect(playerid);
 	pm_on_player_connect(playerid);
 	prefs_on_player_connect(playerid);
 	score_on_player_connect(playerid);
@@ -261,6 +264,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	maps_on_player_disconnect(playerid);
 	missions_on_player_disconnect(playerid);
 	panel_remove_panel_player(playerid);
+	playtime_on_player_disconnect(playerid);
 	pm_on_player_disconnect(playerid);
 
 	playeronlineflag[playerid] = 0;
@@ -387,6 +391,7 @@ cell AMX_NATIVE_CALL B_OnPlayerUpdate(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
 
+	playtime_on_player_update(playerid);
 	timecyc_on_player_update(playerid);
 	return 1;
 }
@@ -418,6 +423,17 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 	nav_reset_for_vehicle(vehicleid);
 
 	return 1;
+}
+
+void OnPlayerNowAfk(int playerid)
+{
+	panel_remove_panel_player(playerid);
+}
+
+void OnPlayerWasAfk(int playerid)
+{
+	panel_on_player_was_afk(playerid);
+	timecyc_on_player_was_afk(playerid);
 }
 
 #endif /*IN_BASDONFLY*/

@@ -5,6 +5,7 @@
 #include "common.h"
 #include "game_sa.h"
 #include "playerdata.h"
+#include "playtime.h"
 #include "zones.h"
 #include <string.h>
 #include <math.h>
@@ -182,8 +183,7 @@ void zones_update_for_all()
 	idx = playercount;
 	while (idx--) {
 		playerid = players[idx];
-		PC_REMOVEME_isafk(playerid);
-		if (!pc_result) {
+		if (!isafk[playerid]) {
 			common_GetPlayerPos(playerid, &pos);
 			zones_update(playerid, pos);
 		}
