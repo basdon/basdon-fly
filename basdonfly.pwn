@@ -313,25 +313,6 @@ native PlayerData_UpdateName(playerid, name[], namelen)
 
 #namespace "vehicles.c"
 
-//@summary Adds a vehicle in the db vehicle table
-//@param dbid id of the vehicle in db
-//@param model model of the vehicle
-//@param owneruserid user id of the owning player
-//@param x saved x position
-//@param y saved y position
-//@param z saved z position
-//@param r saved z rotation
-//@param col1 first color
-//@param col2 second color
-//@param odo odometer value
-//@param ownername name of the owner
-//@returns the position of the vehicle in the vehicle table
-//@remarks table will be resized and reallocated if it's already full
-//@seealso Veh_Destroy
-//@seealso Veh_Init
-//@seealso Veh_UpdateSlot
-native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, odo, ownername[])
-
 //@summary Collects all vehicles from the table that are owned by a player
 //@param userid user id of the player of whom to collect all vehicles
 //@param buf buffer to put in the vehicle data
@@ -344,17 +325,6 @@ native Veh_CollectPlayerVehicles(userid, buf[])
 //@param buf buffer to put the vehicle ids in
 //@returns the amount of vehicles that were placed in {@param buf}
 native Veh_CollectSpawnedVehicles(userid, buf[])
-
-//@summary Destroys the db vehicle table and service points table and frees used memory
-//@seealso Veh_Add
-//@seealso Veh_Init
-native Veh_Destroy();
-
-//@summary Inits the db vehicle table
-//@param dbvehiclecount initial size of the table
-//@seealso Veh_Add
-//@seealso Veh_Destroy
-native Veh_Init(dbvehiclecount)
 
 //@summary Clears data when a player disconnects
 //@param playerid the player that disconnected

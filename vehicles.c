@@ -31,7 +31,7 @@ Linked list of vehicles that need an ODO update in db.
 */
 static struct vehnode *vehstoupdate;
 static struct dbvehicle *dbvehicles;
-int dbvehiclenextid, dbvehiclealloc;
+int numdbvehicles, dbvehiclealloc;
 struct vehicle gamevehicles[MAX_VEHICLES];
 short labelids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB+ of mapping, errrr */
 
@@ -81,6 +81,28 @@ TODO: move this somewhere else.
 */
 float playerodoKM[MAX_PLAYERS];
 
+
+/**
+Enlarges the vehicle database table pointed to by dbvehicles by 100.
+*/
+static
+void veh_dbtable_grow()
+{
+	struct dbvehicle *nw;
+	int i;
+
+	dbvehiclealloc += 100;
+	dbvehicles = realloc(dbvehicles,
+		sizeof(struct dbvehicle) * dbvehiclealloc);
+	nw = dbvehicles;
+	for (i = 0; i < numdbvehicles; i++) {
+		if (nw->spawnedvehicleid) {
+			gamevehicles[nw->spawnedvehicleid].dbvehicle = nw;
+		}
+		nw++;
+	}
+}
+
 void veh_on_player_connect(int playerid)
 {
 	ptxt_hp[playerid] = -1;
@@ -92,14 +114,90 @@ void veh_on_player_connect(int playerid)
 
 void veh_init()
 {
-	int i;
+	struct dbvehicle *veh;
+	int i, pid, tmp, rowcount, dbcache, vehicleid, *field = nc_params + 2;
+	char ownername[MAX_PLAYER_NAME + 1];
+
 	for (i = 0; i < MAX_VEHICLES; i++) {
 		gamevehicles[i].dbvehicle = NULL;
 		gamevehicles[i].reincarnation = 0;
 		gamevehicles[i].need_recreation = 0;
+
+		pid = MAX_PLAYERS;
+		while (pid--) {
+			labelids[pid][i] = INVALID_3DTEXT_ID;
+		}
 	}
 	vehstoupdate = NULL;
 	dbvehicles = NULL;
+
+	amx_SetUString(buf4096,
+		"SELECT v.i,m,IFNULL(ownerplayer,0),v.x,v.y,v.z,v.r,"
+		"v.col1,v.col2,v.odo,u.name "
+		"FROM veh v "
+		"LEFT OUTER JOIN usr u ON v.ownerplayer = u.i "
+		"LEFT OUTER JOIN apt a ON v.ap = a.i "
+		"WHERE v.e=1 AND (ISNULL(v.ap) OR a.e = 1)",
+		4096);
+	dbcache = NC_mysql_query(buf4096a);
+	rowcount = dbvehiclealloc = NC_cache_get_row_count();
+	if (dbvehiclealloc <= 0) {
+		dbvehiclealloc = 100;
+	}
+	numdbvehicles = 0;
+	dbvehicles = malloc(sizeof(struct dbvehicle) * dbvehiclealloc);
+	veh = dbvehicles;
+	while (rowcount--) {
+		nc_params[1] = rowcount;
+		NC_PARS(2);
+		veh->id = (*field = 0, NC(n_cache_get_field_i));
+		veh->model = (*field = 1, NC(n_cache_get_field_i));
+		veh->owneruserid = (*field = 2, NC(n_cache_get_field_i));
+		veh->pos.coords.x = (*field = 3, NCF(n_cache_get_field_f));
+		veh->pos.coords.y = (*field = 4, NCF(n_cache_get_field_f));
+		veh->pos.coords.z = (*field = 5, NCF(n_cache_get_field_f));
+		veh->pos.r = (*field = 6, NCF(n_cache_get_field_f));
+		veh->col1 = (*field = 7, NC(n_cache_get_field_i));
+		veh->col2 = (*field = 8, NC(n_cache_get_field_i));
+		veh->odoKM = (*field = 9, NCF(n_cache_get_field_f));
+		if (veh->owneruserid) {
+			NC_PARS(3);
+			nc_params[3] = buf32a;
+			*field = 10, NC(n_cache_get_field_s);
+			amx_GetUString(ownername, buf32, sizeof(ownername));
+			tmp = 7 + strlen(vehnames[veh->model - 400]);
+			veh->ownerstringowneroffset = tmp;
+			tmp += strlen(ownername) + 1;
+			veh->ownerstring = malloc(tmp * sizeof(char));
+			sprintf(veh->ownerstring,
+				"%s Owner\n%s",
+				vehnames[veh->model - 400],
+				ownername);
+		} else {
+			veh->ownerstring = NULL;
+
+			NC_PARS(9);
+			nc_params[1] = veh->model;
+			nc_paramf[2] = veh->pos.coords.x;
+			nc_paramf[3] = veh->pos.coords.y;
+			nc_paramf[4] = veh->pos.coords.z;
+			nc_paramf[5] = veh->pos.r;
+			nc_params[6] = veh->col1;
+			nc_params[7] = veh->col2;
+			nc_params[8] = VEHICLE_RESPAWN_DELAY;
+			nc_params[9] = 0; /*addsiren*/
+			vehicleid = NC(n_AddStaticVehicleEx);
+			if (vehicleid != INVALID_VEHICLE_ID) {
+				veh->spawnedvehicleid = vehicleid;
+				gamevehicles[vehicleid].dbvehicle = veh;
+			}
+		}
+		veh->fuel = model_fuel_capacity(veh->model);
+		veh->spawnedvehicleid = 0;
+		veh++;
+		numdbvehicles++;
+	}
+	NC_cache_delete(dbcache);
 }
 
 int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh)
@@ -107,37 +205,6 @@ int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh)
 	return veh &&
 		(pdata[playerid]->userid == veh->owneruserid ||
 		GROUPS_ISADMIN(pdata[playerid]->groups));
-}
-
-static
-void freeDbVehicleTable()
-{
-	struct dbvehicle *veh = dbvehicles;
-	while (dbvehiclealloc--) {
-		if (veh->ownerstring != NULL) {
-			free(veh->ownerstring);
-			veh->ownerstring = NULL;
-		}
-		veh++;
-	}
-	free(dbvehicles);
-        dbvehicles = NULL;
-}
-
-static
-void resizeDbVehicleTable()
-{
-	struct dbvehicle *nw;
-	int i;
-	dbvehiclealloc += 100;
-	dbvehicles = realloc(dbvehicles, sizeof(struct dbvehicle) * dbvehiclealloc);
-	nw = dbvehicles;
-	for (i = 0; i < dbvehiclenextid; i++) {
-		if (nw->spawnedvehicleid) {
-			gamevehicles[nw->spawnedvehicleid].dbvehicle = nw;
-		}
-		nw++;
-	}
 }
 
 float model_fuel_capacity(int modelid)
@@ -197,50 +264,13 @@ float model_fuel_usage(int modelid)
 	}
 }
 
-/* native Veh_Add(dbid, model, owneruserid, Float:x, Float:y, Float:z, Float:r, col1, col2, odo, ownername[]) */
-cell AMX_NATIVE_CALL Veh_Add(AMX *amx, cell *params)
-{
-	cell *ownernameaddr;
-	char ownername[MAX_PLAYER_NAME + 1];
-	int model;
-	struct dbvehicle *veh;
-	if (dbvehiclenextid == dbvehiclealloc) {
-		resizeDbVehicleTable();
-	}
-	veh = dbvehicles + dbvehiclenextid;
-	dbvehiclenextid++;
-	veh->id = params[1];
-	veh->model = model = params[2];
-	veh->owneruserid = params[3];
-	veh->pos.coords.x = amx_ctof(params[4]);
-	veh->pos.coords.y = amx_ctof(params[5]);
-	veh->pos.coords.z = amx_ctof(params[6]);
-	veh->pos.r = amx_ctof(params[7]);
-	veh->col1 = params[8];
-	veh->col2 = params[9];
-	veh->odoKM = (float) params[10];
-	veh->fuel = model_fuel_capacity(model);
-	if (veh->owneruserid != 0 && 400 <= model && model <= 611) {
-		amx_GetAddr(amx, params[11], &ownernameaddr);
-		amx_GetUString(ownername, ownernameaddr, sizeof(ownername));
-		veh->ownerstringowneroffset = 7 + strlen(vehnames[model - 400]);
-		veh->ownerstring = malloc((veh->ownerstringowneroffset + strlen(ownername) + 1) * sizeof(char));
-		sprintf(veh->ownerstring, "%s Owner\n%s", vehnames[model - 400], ownername);
-	} else {
-		veh->owneruserid = 0;
-		veh->ownerstring = NULL;
-	}
-	veh->spawnedvehicleid = 0;
-	return dbvehiclenextid - 1;
-}
-
 /* native Veh_CollectPlayerVehicles(userid, buf[]) */
 cell AMX_NATIVE_CALL Veh_CollectPlayerVehicles(AMX *amx, cell *params)
 {
 	const int userid = params[1];
 	int amount = 0;
 	struct dbvehicle *veh = dbvehicles;
-	int ctr = dbvehiclenextid;
+	int ctr = numdbvehicles;
 	cell *addr;
 	amx_GetAddr(amx, params[2], &addr);
 	while (ctr--) {
@@ -323,41 +353,19 @@ void veh_consume_fuel(int playerid, int vehicleid, int throttle,
 	NC_PlayerPlaySound0(playerid, FUEL_WARNING_SOUND);
 }
 
-/* native Veh_Destroy() */
-cell AMX_NATIVE_CALL Veh_Destroy(AMX *amx, cell *params)
+void veh_dispose()
 {
-	if (dbvehicles != NULL) {
-		freeDbVehicleTable();
-	}
-	return 1;
-}
+	struct dbvehicle *veh = dbvehicles;
 
-/* native Veh_Init(dbvehiclecount) */
-cell AMX_NATIVE_CALL Veh_Init(AMX *amx, cell *params)
-{
-	int i = dbvehiclealloc = params[1];
-	int pid;
-	if (dbvehicles != NULL) {
-		logprintf("Veh_Init: warning: dbvehicles table was not empty");
-		freeDbVehicleTable();
-	}
-	dbvehiclenextid = 0;
-	if (dbvehiclealloc <= 0) {
-		dbvehiclealloc = 100;
-	}
-	dbvehicles = malloc(sizeof(struct dbvehicle) * dbvehiclealloc);
-	i = 0;
-	while (i < MAX_VEHICLES) {
-		gamevehicles[i].dbvehicle = NULL;
-		i++;
-	}
-	pid = MAX_PLAYERS;
-	while (pid--) {
-		for (i = 0; i < MAX_VEHICLES; i++) {
-			labelids[pid][i] = INVALID_3DTEXT_ID;
+	while (dbvehiclealloc--) {
+		if (veh->ownerstring != NULL) {
+			free(veh->ownerstring);
+			veh->ownerstring = NULL;
 		}
+		veh++;
 	}
-	return 1;
+	free(dbvehicles);
+        dbvehicles = NULL;
 }
 
 /* native Veh_OnPlayerDisconnect(playerid) */

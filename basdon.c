@@ -117,6 +117,7 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 	spawn_dispose();
 	svp_dispose();
 	while (veh_commit_next_vehicle_odo_to_db());
+	veh_dispose();
 	return 1;
 }
 
@@ -145,6 +146,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	svp_init();
 	timecyc_init();
 	veh_create_global_textdraws();
+	veh_init();
 
 	printf("OnGameModeInit: %ldms\n", time_timestamp() - t);
 

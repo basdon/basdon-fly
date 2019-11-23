@@ -61,6 +61,10 @@ OnGameModeExit.
 */
 int veh_commit_next_vehicle_odo_to_db();
 /**
+Free memory
+*/
+void veh_dispose();
+/**
 Convenience method to get a player's vehicle data.
 
 @param reinc will be set to reincarnation value (may be NULL if not needed)

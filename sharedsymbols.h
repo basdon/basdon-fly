@@ -21,7 +21,12 @@
 #ifdef INVALID_VEHICLE_ID
 #assert INVALID_VEHICLE_ID == 0xFFFF
 #else
-#define INVALID_VEHICLE_ID (0xFFFF)
+#define INVALID_VEHICLE_ID ((short) 0xFFFF)
+#endif
+#ifdef INVALID_3DTEXT_ID
+#assert INVALID_3DTEXT_ID == 0xFFFF
+#else
+#define INVALID_3DTEXT_ID ((short) 0xFFFF)
 #endif
 #ifdef MAX_OBJECTS
 #assert MAX_OBJECTS == 1000

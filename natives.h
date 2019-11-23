@@ -4,6 +4,7 @@
 int natives_find();
 
 extern AMX_NATIVE n_AddPlayerClass;
+extern AMX_NATIVE n_AddStaticVehicleEx;
 extern AMX_NATIVE n_ChangeVehicleColor;
 extern AMX_NATIVE n_ClearAnimations;
 extern AMX_NATIVE n_CreateObject;

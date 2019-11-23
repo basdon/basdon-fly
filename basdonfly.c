@@ -87,13 +87,9 @@ FORWARD(PlayerData_SetUserId);
 FORWARD(PlayerData_UpdateGroup);
 FORWARD(PlayerData_UpdateName);
 /* vehicles.c */
-FORWARD(Veh_Add);
-FORWARD(Veh_AddOdo);
 FORWARD(Veh_CollectSpawnedVehicles);
 FORWARD(Veh_CollectPlayerVehicles);
-FORWARD(Veh_Destroy);
 FORWARD(Veh_GetNextUpdateQuery);
-FORWARD(Veh_Init);
 FORWARD(Veh_OnPlayerDisconnect);
 FORWARD(Veh_UpdateSlot);
 
@@ -123,7 +119,6 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	nav_init();
 	pdata_init();
 	time_init();
-	veh_init();
 	zones_init();
 
 	return 1;
@@ -320,11 +315,8 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PlayerData_UpdateGroup),
 	REGISTERNATIVE(PlayerData_UpdateName),
 	/* vehicles.c */
-	REGISTERNATIVE(Veh_Add),
 	REGISTERNATIVE(Veh_CollectSpawnedVehicles),
 	REGISTERNATIVE(Veh_CollectPlayerVehicles),
-	REGISTERNATIVE(Veh_Destroy),
-	REGISTERNATIVE(Veh_Init),
 	REGISTERNATIVE(Veh_OnPlayerDisconnect),
 	REGISTERNATIVE(Veh_UpdateSlot),
 	{0, 0}

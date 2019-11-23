@@ -15,6 +15,7 @@
 custom code and shouldn't be used directly.*/
 
 AMX_NATIVE n_AddPlayerClass;
+AMX_NATIVE n_AddStaticVehicleEx;
 AMX_NATIVE n_ChangeVehicleColor;
 AMX_NATIVE n_ClearAnimations;
 AMX_NATIVE n_CreateObject;
@@ -154,7 +155,7 @@ int natives_find()
 	};
 	struct NATIVE natives[] = {
 		N(AddPlayerClass),
-		N(AddPlayerClass),
+		N(AddStaticVehicleEx),
 		N(ChangeVehicleColor),
 		N(ClearAnimations),
 		N(CreateObject),
