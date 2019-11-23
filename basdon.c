@@ -229,6 +229,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	svp_on_player_connect(playerid);
 	timecyc_on_player_connect(playerid);
 	veh_create_player_textdraws(playerid);
+	veh_on_player_connect(playerid);
 	zones_on_player_connect(playerid);
 
 	for (i = 0; i < playercount; ){
@@ -271,6 +272,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	panel_remove_panel_player(playerid);
 	playtime_on_player_disconnect(playerid);
 	pm_on_player_disconnect(playerid);
+	veh_on_player_disconnect(playerid);
 
 	playeronlineflag[playerid] = 0;
 	spawned[playerid] = 0;

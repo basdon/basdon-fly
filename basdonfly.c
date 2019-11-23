@@ -86,12 +86,6 @@ FORWARD(PlayerData_FormatUpdateQuery);
 FORWARD(PlayerData_SetUserId);
 FORWARD(PlayerData_UpdateGroup);
 FORWARD(PlayerData_UpdateName);
-/* vehicles.c */
-FORWARD(Veh_CollectSpawnedVehicles);
-FORWARD(Veh_CollectPlayerVehicles);
-FORWARD(Veh_GetNextUpdateQuery);
-FORWARD(Veh_OnPlayerDisconnect);
-FORWARD(Veh_UpdateSlot);
 
 int temp_afk[MAX_PLAYERS];
 int _cc[MAX_PLAYERS];
@@ -235,9 +229,25 @@ cell AMX_NATIVE_CALL REMOVEME_setsessionid(AMX *amx, cell *params)
 	return 1;
 }
 
+static
+cell AMX_NATIVE_CALL REMOVEME_onplayerlogin(AMX *amx, cell *params)
+{
+	veh_spawn_player_vehicles(params[1]);
+	return 1;
+}
+
+static
+cell REMOVEME_setplayerodo(AMX *amx, cell *params)
+{
+	playerodoKM[params[1]] = amx_ctof(params[2]);
+	return 1;
+}
+
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
+	REGISTERNATIVE(REMOVEME_setplayerodo),
+	REGISTERNATIVE(REMOVEME_onplayerlogin),
 	REGISTERNATIVE(REMOVEME_setsessionid),
 	REGISTERNATIVE(REMOVEME_onplayerreqclassimpl),
 	REGISTERNATIVE(REMOVEME_setprefs),
@@ -314,11 +324,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(PlayerData_SetUserId),
 	REGISTERNATIVE(PlayerData_UpdateGroup),
 	REGISTERNATIVE(PlayerData_UpdateName),
-	/* vehicles.c */
-	REGISTERNATIVE(Veh_CollectSpawnedVehicles),
-	REGISTERNATIVE(Veh_CollectPlayerVehicles),
-	REGISTERNATIVE(Veh_OnPlayerDisconnect),
-	REGISTERNATIVE(Veh_UpdateSlot),
 	{0, 0}
 };
 

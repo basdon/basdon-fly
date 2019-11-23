@@ -105,9 +105,14 @@ void veh_dbtable_grow()
 
 void veh_on_player_connect(int playerid)
 {
-	ptxt_hp[playerid] = -1;
-	ptxt_fl[playerid] = -1;
-	ptxt_txt[playerid] = -1;
+	short *labelid = &labelids[playerid][0];
+	int i = MAX_VEHICLES;
+
+	while (i--) {
+		*labelid = INVALID_3DTEXT_ID;
+		labelid++;
+	}
+
 	lastvehicle[playerid] = 0;
 	playerodoKM[playerid] = 0.0f;
 }
@@ -115,18 +120,13 @@ void veh_on_player_connect(int playerid)
 void veh_init()
 {
 	struct dbvehicle *veh;
-	int i, pid, tmp, rowcount, dbcache, vehicleid, *fld = nc_params + 2;
+	int i, tmp, rowcount, dbcache, vehicleid, *fld = nc_params + 2;
 	char ownername[MAX_PLAYER_NAME + 1];
 
 	for (i = 0; i < MAX_VEHICLES; i++) {
 		gamevehicles[i].dbvehicle = NULL;
 		gamevehicles[i].reincarnation = 0;
 		gamevehicles[i].need_recreation = 0;
-
-		pid = MAX_PLAYERS;
-		while (pid--) {
-			labelids[pid][i] = INVALID_3DTEXT_ID;
-		}
 	}
 	vehstoupdate = NULL;
 	dbvehicles = NULL;
@@ -264,51 +264,6 @@ float model_fuel_usage(int modelid)
 	}
 }
 
-/* native Veh_CollectPlayerVehicles(userid, buf[]) */
-cell AMX_NATIVE_CALL Veh_CollectPlayerVehicles(AMX *amx, cell *params)
-{
-	const int userid = params[1];
-	int amount = 0;
-	struct dbvehicle *veh = dbvehicles;
-	int ctr = numdbvehicles;
-	cell *addr;
-	amx_GetAddr(amx, params[2], &addr);
-	while (ctr--) {
-		if (veh->owneruserid == userid) {
-			*(addr++) = veh->col2;
-			*(addr++) = veh->col1;
-			*(addr++) = amx_ftoc(veh->pos.r);
-			*(addr++) = amx_ftoc(veh->pos.coords.z);
-			*(addr++) = amx_ftoc(veh->pos.coords.y);
-			*(addr++) = amx_ftoc(veh->pos.coords.x);
-			*(addr++) = veh->model;
-			*(addr++) = veh->id;
-			amount++;
-		}
-		veh++;
-	}
-	return amount;
-}
-
-/* native Veh_CollectSpawnedVehicles(userid, buf[]) */
-cell AMX_NATIVE_CALL Veh_CollectSpawnedVehicles(AMX *amx, cell *params)
-{
-	const int userid = params[1];
-	int amount = 0;
-	cell *addr;
-	int i = MAX_VEHICLES;
-	amx_GetAddr(amx, params[2], &addr);
-	while (i--) {
-		if (gamevehicles[i].dbvehicle != NULL &&
-			gamevehicles[i].dbvehicle->owneruserid == userid)
-		{
-			*(addr++) = i;
-			amount++;
-		}
-	}
-	return amount;
-}
-
 static const char *MSG_FUEL_0 = WARN"Your vehicle ran out of fuel!";
 static const char *MSG_FUEL_5 = WARN"Your vehicle has 5%% fuel left!";
 static const char *MSG_FUEL_10 = WARN"Your vehicle has 10%% fuel left!";
@@ -368,51 +323,6 @@ void veh_dispose()
         dbvehicles = NULL;
 }
 
-/* native Veh_OnPlayerDisconnect(playerid) */
-cell AMX_NATIVE_CALL Veh_OnPlayerDisconnect(AMX *amx, cell *params)
-{
-	short *labelid = &labelids[params[1]][0];
-	int i = MAX_VEHICLES;
-	while (i--) {
-		*labelid = -1;
-		labelid++;
-	}
-	return 1;
-}
-
-/* native Veh_UpdateSlot(vehicleid, dbid) */
-cell AMX_NATIVE_CALL Veh_UpdateSlot(AMX *amx, cell *params)
-{
-	const int vehicleid = params[1], dbid = params[2];
-	int i = dbvehiclealloc;
-	struct dbvehicle *veh = dbvehicles;
-
-	if (dbid == -1) {
-		if (gamevehicles[vehicleid].dbvehicle == NULL) {
-			logprintf("Veh_UpdateSlot: slot to empty was empty");
-			return 1;
-		}
-		gamevehicles[vehicleid].dbvehicle->spawnedvehicleid = 0;
-		gamevehicles[vehicleid].dbvehicle = NULL;
-		return 1;
-	}
-	while (i--) {
-		if (veh->id == dbid) {
-			if (gamevehicles[vehicleid].dbvehicle != NULL) {
-				logprintf("Veh_UpdateSlot: slot to assign was not empty");
-				gamevehicles[vehicleid].dbvehicle->spawnedvehicleid = 0;
-			}
-			gamevehicles[vehicleid].dbvehicle = veh;
-			veh->spawnedvehicleid = vehicleid;
-			return 1;
-		}
-		veh++;
-	}
-	gamevehicles[vehicleid].dbvehicle = NULL;
-	logprintf("Veh_UpdateSlot: unknown dbid: %d", dbid);
-	return 0;
-}
-
 /**
 Prevent player from entering or being in vehicle and send them a message.
 
@@ -439,6 +349,35 @@ int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh)
 			veh->owneruserid == pdata[playerid]->userid);
 }
 
+void veh_on_player_disconnect(int playerid)
+{
+	struct dbvehicle *veh;
+	int userid, n, vehicleid, driver;
+
+	userid = pdata[playerid]->userid;
+	if (userid > 0) {
+		veh = dbvehicles;
+		n = numdbvehicles;
+		while (n--) {
+			if (veh->owneruserid == userid &&
+				veh->spawnedvehicleid)
+			{
+				veh_DestroyVehicle(veh->spawnedvehicleid);
+			}
+			veh++;
+		}
+	}
+
+	vehicleid = lastvehicle[playerid];
+	if (vehicleid && NC_IsValidVehicle(vehicleid)) {
+		driver = common_find_vehicle_driver(vehicleid);
+		/*driver actually still is playerid at this point*/
+		if (driver == playerid || driver == INVALID_PLAYER_ID) {
+			NC_SetVehicleToRespawn(vehicleid);
+		}
+	}
+}
+
 void veh_on_player_enter_vehicle(int playerid, int vehicleid, int ispassenger)
 {
 	struct dbvehicle *veh;
@@ -446,6 +385,42 @@ void veh_on_player_enter_vehicle(int playerid, int vehicleid, int ispassenger)
 	veh = gamevehicles[vehicleid].dbvehicle;
 	if (!ispassenger && !veh_is_player_allowed_in_vehicle(playerid, veh)) {
 		veh_disallow_player_in_vehicle(playerid, veh);
+	}
+}
+
+void veh_spawn_player_vehicles(int playerid)
+{
+	int userid, vehicleid, n;
+	struct dbvehicle *veh;
+
+	userid = pdata[playerid]->userid;
+	if (userid < 1) {
+		return;
+	}
+
+	veh = dbvehicles;
+	n = numdbvehicles;
+	while (n--) {
+		if (veh->owneruserid == userid) {
+			NC_PARS(9);
+			nc_params[1] = veh->model;
+			nc_paramf[2] = veh->pos.coords.x;
+			nc_paramf[3] = veh->pos.coords.y;
+			nc_paramf[4] = veh->pos.coords.z;
+			nc_paramf[5] = veh->pos.r;
+			nc_params[6] = veh->col1;
+			nc_params[7] = veh->col2;
+			nc_params[8] = VEHICLE_RESPAWN_DELAY;
+			nc_params[9] = 0; /*addsiren*/
+			vehicleid = NC(n_CreateVehicle_);
+			if (vehicleid != INVALID_VEHICLE_ID) {
+				gamevehicles[vehicleid].dbvehicle = veh;
+				gamevehicles[vehicleid].reincarnation++;
+				gamevehicles[vehicleid].need_recreation = 0;
+				veh->spawnedvehicleid = vehicleid;
+			}
+		}
+		veh++;
 	}
 }
 
@@ -734,6 +709,8 @@ int veh_DestroyVehicle(int vehicleid)
 	NC_PARS(1);
 	nc_params[1] = vehicleid;
 	return NC(n_DestroyVehicle_);
+	/*DestroyVehicle triggers OnVehicleStreamOut,
+	so no need to destroy labels here*/
 }
 
 /**
@@ -786,23 +763,24 @@ static
 void veh_owner_label_create(int vehicleid, int playerid)
 {
 	struct dbvehicle *veh;
-	short *labelid = &labelids[playerid][vehicleid];
+	short *labelid;
 
-	if ((veh = gamevehicles[vehicleid].dbvehicle) != NULL &&
-		*labelid == INVALID_3DTEXT_ID &&
-		veh->owneruserid != 0)
-	{
-		amx_SetUString(buf144, veh->ownerstring, 144);
-		NC_PARS(10);
-		nc_params[1] = playerid;
-		nc_params[2] = buf144a;
-		nc_params[3] = 0xFFFF00FF;
-		nc_paramf[4] = nc_paramf[5] = nc_paramf[6] = 0.0f;
-		nc_paramf[7] = 75.0f;
-		nc_params[8] = INVALID_PLAYER_ID;
-		nc_params[9] = vehicleid;
-		nc_params[10] = 1; /*testLOS*/
-		*labelid = (short) NC(n_CreatePlayer3DTextLabel);
+	veh = gamevehicles[vehicleid].dbvehicle;
+	if (veh != NULL && veh->owneruserid != 0) {
+		labelid = &labelids[playerid][vehicleid];
+		if (*labelid == INVALID_3DTEXT_ID) {
+			amx_SetUString(buf144, veh->ownerstring, 144);
+			NC_PARS(10);
+			nc_params[1] = playerid;
+			nc_params[2] = buf144a;
+			nc_params[3] = 0xFFFF00FF;
+			nc_paramf[4] = nc_paramf[5] = nc_paramf[6] = 0.0f;
+			nc_paramf[7] = 75.0f;
+			nc_params[8] = INVALID_PLAYER_ID;
+			nc_params[9] = vehicleid;
+			nc_params[10] = 1; /*testLOS*/
+			*labelid = (short) NC(n_CreatePlayer3DTextLabel);
+		}
 	}
 }
 
@@ -813,13 +791,16 @@ static
 void veh_owner_label_destroy(int vehicleid, int playerid)
 {
 	struct dbvehicle *veh;
-	short *labelid = &labelids[playerid][vehicleid];
+	short *labelid;
 
-	if ((veh = gamevehicles[vehicleid].dbvehicle) != NULL &&
-		*labelid != INVALID_3DTEXT_ID)
+	veh = veh = gamevehicles[vehicleid].dbvehicle;
+	if (veh != NULL && veh->owneruserid != 0)
 	{
-		NC_DeletePlayer3DTextLabel(playerid, *labelid);
-		*labelid = INVALID_3DTEXT_ID;
+		labelid = &labelids[playerid][vehicleid];
+		if (*labelid != INVALID_3DTEXT_ID) {
+			NC_DeletePlayer3DTextLabel(playerid, *labelid);
+			*labelid = INVALID_3DTEXT_ID;
+		}
 	}
 }
 

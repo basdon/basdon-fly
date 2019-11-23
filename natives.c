@@ -51,6 +51,7 @@ AMX_NATIVE n_GetVehicleVelocity;
 AMX_NATIVE n_GetVehicleZAngle;
 AMX_NATIVE n_GivePlayerMoney_;
 AMX_NATIVE n_GivePlayerWeapon;
+AMX_NATIVE n_IsValidVehicle;
 AMX_NATIVE n_IsVehicleStreamedIn;
 AMX_NATIVE n_Kick_;
 AMX_NATIVE n_MoveObject;
@@ -191,6 +192,7 @@ int natives_find()
 		N(GetVehicleZAngle),
 		N_(GivePlayerMoney),
 		N(GivePlayerWeapon),
+		N(IsValidVehicle),
 		N(IsVehicleStreamedIn),
 		N_(Kick),
 		N(MoveObject),

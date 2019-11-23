@@ -40,6 +40,7 @@ extern AMX_NATIVE n_GetVehicleVelocity;
 extern AMX_NATIVE n_GetVehicleZAngle;
 extern AMX_NATIVE n_GivePlayerMoney_;
 extern AMX_NATIVE n_GivePlayerWeapon;
+extern AMX_NATIVE n_IsValidVehicle;
 extern AMX_NATIVE n_IsVehicleStreamedIn;
 extern AMX_NATIVE n_Kick_;
 extern AMX_NATIVE n_MoveObject;
@@ -253,6 +254,9 @@ extern cell tmpfloat;
 #define NC_GivePlayerWeapon(PLAYERID,WEAPONID,AMMO) (NC_PARS_(3)\
 	nc_params[1]=PLAYERID,nc_params[2]=WEAPONID,nc_params[3]=AMMO,\
 	n_GivePlayerWeapon(amx,nc_params))
+
+#define NC_IsValidVehicle(VEHICLEID) (NC_PARS_(1)nc_params[1]=VEHICLEID,\
+	n_IsValidVehicle(amx,nc_params))
 
 #define NC_Kick(PLAYERID) __USE__natives_Kick__
 

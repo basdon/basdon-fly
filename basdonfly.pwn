@@ -311,27 +311,3 @@ native PlayerData_UpdateGroup(playerid, group)
 //@returns {@code 0} if there was no player data saved for {@param playerid}
 native PlayerData_UpdateName(playerid, name[], namelen)
 
-#namespace "vehicles.c"
-
-//@summary Collects all vehicles from the table that are owned by a player
-//@param userid user id of the player of whom to collect all vehicles
-//@param buf buffer to put in the vehicle data
-//@returns the amount of vehicles that were placed in {@param buf}
-//@remarks vehicles are placed in buf in following order: {@code col2, col1, r, z, y, x, model, dbid}
-native Veh_CollectPlayerVehicles(userid, buf[])
-
-//@summary Collects all vehicle owned by player that are spawned
-//@param userid user id of the player of whom to collect spawned vehicles
-//@param buf buffer to put the vehicle ids in
-//@returns the amount of vehicles that were placed in {@param buf}
-native Veh_CollectSpawnedVehicles(userid, buf[])
-
-//@summary Clears data when a player disconnects
-//@param playerid the player that disconnected
-native Veh_OnPlayerDisconnect(playerid)
-
-//@summary Let the plugin know a vehicle was created or destroyed
-//@param vehicleid the id of the vehicle in SA-MP
-//@param dbid id of the vehicle in the vehicle table (returned by {@link Veh_Add}), or {@code -1} if slot is now free
-//@seealso Veh_Add
-native Veh_UpdateSlot(vehicleid, dbid)

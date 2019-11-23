@@ -91,6 +91,7 @@ int veh_CreateVehicle(int model, struct vec4 pos, unsigned char col1,
 	unsigned char col2, int respawn_delay, int addsiren);
 int veh_DestroyVehicle(int vehicleid);
 void veh_on_player_connect(int playerid);
+void veh_on_player_disconnect(int playerid);
 /**
 To be called from OnPlayerEnterVehicle
 */
@@ -111,6 +112,10 @@ void veh_on_player_state_change(int, int, int);
 int veh_on_vehicle_spawn(int vehicleid);
 void veh_on_vehicle_stream_in(int vehicleid, int forplayerid);
 void veh_on_vehicle_stream_out(int vehicleid, int forplayerid);
+/**
+To be called after a player logs in.
+*/
+void veh_spawn_player_vehicles(int playerid);
 /**
 Update vehicle related things like ODO, fuel, ...
 
