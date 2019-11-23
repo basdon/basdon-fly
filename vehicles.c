@@ -115,7 +115,7 @@ void veh_on_player_connect(int playerid)
 void veh_init()
 {
 	struct dbvehicle *veh;
-	int i, pid, tmp, rowcount, dbcache, vehicleid, *field = nc_params + 2;
+	int i, pid, tmp, rowcount, dbcache, vehicleid, *fld = nc_params + 2;
 	char ownername[MAX_PLAYER_NAME + 1];
 
 	for (i = 0; i < MAX_VEHICLES; i++) {
@@ -150,20 +150,20 @@ void veh_init()
 	while (rowcount--) {
 		nc_params[1] = rowcount;
 		NC_PARS(2);
-		veh->id = (*field = 0, NC(n_cache_get_field_i));
-		veh->model = (*field = 1, NC(n_cache_get_field_i));
-		veh->owneruserid = (*field = 2, NC(n_cache_get_field_i));
-		veh->pos.coords.x = (*field = 3, NCF(n_cache_get_field_f));
-		veh->pos.coords.y = (*field = 4, NCF(n_cache_get_field_f));
-		veh->pos.coords.z = (*field = 5, NCF(n_cache_get_field_f));
-		veh->pos.r = (*field = 6, NCF(n_cache_get_field_f));
-		veh->col1 = (*field = 7, NC(n_cache_get_field_i));
-		veh->col2 = (*field = 8, NC(n_cache_get_field_i));
-		veh->odoKM = (*field = 9, NCF(n_cache_get_field_f));
+		veh->id = (*fld = 0, NC(n_cache_get_field_i));
+		veh->model = (*fld = 1, NC(n_cache_get_field_i));
+		veh->owneruserid = (*fld = 2, NC(n_cache_get_field_i));
+		veh->pos.coords.x = (*fld = 3, NCF(n_cache_get_field_f));
+		veh->pos.coords.y = (*fld = 4, NCF(n_cache_get_field_f));
+		veh->pos.coords.z = (*fld = 5, NCF(n_cache_get_field_f));
+		veh->pos.r = (*fld = 6, NCF(n_cache_get_field_f));
+		veh->col1 = (unsigned char) (*fld = 7, NC(n_cache_get_field_i));
+		veh->col2 = (unsigned char) (*fld = 8, NC(n_cache_get_field_i));
+		veh->odoKM = (*fld = 9, NCF(n_cache_get_field_f));
 		if (veh->owneruserid) {
 			NC_PARS(3);
 			nc_params[3] = buf32a;
-			*field = 10, NC(n_cache_get_field_s);
+			*fld = 10, NC(n_cache_get_field_s);
 			amx_GetUString(ownername, buf32, sizeof(ownername));
 			tmp = 7 + strlen(vehnames[veh->model - 400]);
 			veh->ownerstringowneroffset = tmp;
@@ -703,8 +703,8 @@ void veh_timed_1s_update()
 	}
 }
 
-int veh_CreateVehicle(int model, struct vec4 pos, int col1, int col2,
-	int respawn_delay, int addsiren)
+int veh_CreateVehicle(int model, struct vec4 pos, unsigned char col1,
+	unsigned char col2, int respawn_delay, int addsiren)
 {
 	int vehicleid;
 

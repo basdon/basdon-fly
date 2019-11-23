@@ -237,13 +237,13 @@ rand2nd:
 		NC_PARS(2);
 		NC(n_ChangeVehicleColor);
 		if (veh != NULL) {
-			veh->col1 = *col1;
-			veh->col2 = *col2;
+			veh->col1 = (unsigned char) *col1;
+			veh->col2 = (unsigned char) *col2;
 			gamevehicles[vehicleid].need_recreation = 1;
 			sprintf(q,
 				"UPDATE veh SET col1=%d,col2=%d WHERE i=%d",
-				col1,
-				col2,
+				veh->col1,
+				veh->col2,
 				veh->id);
 			amx_SetUString(buf144, q, sizeof(q));
 			NC_mysql_tquery_nocb(buf144a);
