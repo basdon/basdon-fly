@@ -81,11 +81,9 @@ FORWARD(Login_UsePassword);
 /* nav.c */
 FORWARD(Nav_Reset);
 /* playerdata.c */
-FORWARD(PlayerData_Clear);
 FORWARD(PlayerData_FormatUpdateQuery);
 FORWARD(PlayerData_SetUserId);
 FORWARD(PlayerData_UpdateGroup);
-FORWARD(PlayerData_UpdateName);
 
 int temp_afk[MAX_PLAYERS];
 int _cc[MAX_PLAYERS];
@@ -243,9 +241,21 @@ cell REMOVEME_setplayerodo(AMX *amx, cell *params)
 	return 1;
 }
 
+static
+cell REMOVEME_setplayername(AMX *amx, cell *params)
+{
+	cell *addr;
+	char name[MAX_PLAYER_NAME + 1];
+	int playerid = params[1];
+	amx_GetAddr(amx, params[2], &addr);
+	amx_GetUString(name, addr, MAX_PLAYER_NAME + 1);
+	return natives_SetPlayerName(playerid, name);
+}
+
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
+	REGISTERNATIVE(REMOVEME_setplayername),
 	REGISTERNATIVE(REMOVEME_setplayerodo),
 	REGISTERNATIVE(REMOVEME_onplayerlogin),
 	REGISTERNATIVE(REMOVEME_setsessionid),
@@ -319,11 +329,9 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* nav.c */
 	REGISTERNATIVE(Nav_Reset),
 	/* playerdata.c */
-	REGISTERNATIVE(PlayerData_Clear),
 	REGISTERNATIVE(PlayerData_FormatUpdateQuery),
 	REGISTERNATIVE(PlayerData_SetUserId),
 	REGISTERNATIVE(PlayerData_UpdateGroup),
-	REGISTERNATIVE(PlayerData_UpdateName),
 	{0, 0}
 };
 

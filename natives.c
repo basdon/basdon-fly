@@ -83,6 +83,7 @@ AMX_NATIVE n_SetPlayerColor;
 AMX_NATIVE n_SetPlayerFacingAngle;
 AMX_NATIVE n_SetPlayerHealth;
 AMX_NATIVE n_SetPlayerMapIcon;
+AMX_NATIVE n_SetPlayerName_;
 AMX_NATIVE n_SetPlayerPos_;
 AMX_NATIVE n_SetPlayerRaceCheckpoint;
 AMX_NATIVE n_SetPlayerSpecialAction;
@@ -221,10 +222,11 @@ int natives_find()
 		N(SetPlayerCameraPos),
 		N(SetPlayerCameraLookAt),
 		N(SetPlayerColor),
+		N(SetPlayerFacingAngle),
 		N(SetPlayerHealth),
 		N(SetPlayerMapIcon),
+		N_(SetPlayerName),
 		N_(SetPlayerPos),
-		N(SetPlayerFacingAngle),
 		N(SetPlayerRaceCheckpoint),
 		N(SetPlayerSpecialAction),
 		N(SetPlayerTime),
@@ -402,6 +404,30 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 	nc_params[2] = vehicleid;
 	nc_params[3] = seat;
 	return NC(n_PutPlayerInVehicle_);
+}
+
+int natives_SetPlayerName(int playerid, char *name)
+{
+	int res;
+
+	amx_SetUString(buf32, name, 32);
+	NC_PARS(2);
+	nc_params[1] = playerid;
+	nc_params[2] = buf32a;
+	res = NC(n_SetPlayerName_);
+	if (res) {
+		strcpy(pdata[playerid]->name, name);
+		pdata_on_name_updated(playerid);
+		sprintf(cbuf4096,
+			"Your name has been changed to '%s'",
+			pdata[playerid]->name);
+		amx_SetUString(buf144, cbuf4096, 144);
+		NC_PARS(3);
+		nc_params[2] = COL_SAMP_GREEN;
+		nc_params[3] = buf144a;
+		NC(n_SendClientMessage);
+	}
+	return res;
 }
 
 int natives_SetPlayerPos(int playerid, struct vec3 pos)

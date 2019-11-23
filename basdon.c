@@ -207,7 +207,8 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 
 	_cc[playerid]++;
 
-	pdata_init_player(playerid);
+	/*keep this top*/
+	pdata_on_player_connect(playerid);
 
 	playeronlineflag[playerid] = 1;
 	loggedstatus[playerid] = LOGGED_NO;
@@ -273,6 +274,9 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	playtime_on_player_disconnect(playerid);
 	pm_on_player_disconnect(playerid);
 	veh_on_player_disconnect(playerid);
+
+	/*keep this last*/
+	pdata_on_player_disconnect(playerid);
 
 	playeronlineflag[playerid] = 0;
 	spawned[playerid] = 0;

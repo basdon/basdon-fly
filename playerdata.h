@@ -20,15 +20,14 @@ extern struct playerdata *pdata[MAX_PLAYERS];
 
 void pdata_init();
 /**
-Initializes player data for a player.
-
-@param playerid playerid for which to initialize their data
+Call after changing pdata->name so it can recalculate normalized name and len.
 */
-void pdata_init_player(int playerid);
+void pdata_on_name_updated(int playerid);
 /**
-Refetches the player's name and stores it in the plugin.
-Will crash the server if pdata memory hasn't been allocated.
-
-@param playerid player of which to refetch the name
+Initializes player data for a player.
 */
-void pdata_update_name(int playerid);
+void pdata_on_player_connect(int playerid);
+/**
+Destroys player data for a player.
+*/
+void pdata_on_player_disconnect(int playerid);

@@ -72,6 +72,7 @@ extern AMX_NATIVE n_SetPlayerColor;
 extern AMX_NATIVE n_SetPlayerFacingAngle;
 extern AMX_NATIVE n_SetPlayerHealth;
 extern AMX_NATIVE n_SetPlayerMapIcon;
+extern AMX_NATIVE n_SetPlayerName_;
 extern AMX_NATIVE n_SetPlayerPos_;
 extern AMX_NATIVE n_SetPlayerRaceCheckpoint;
 extern AMX_NATIVE n_SetPlayerSpecialAction;
@@ -453,6 +454,10 @@ extern cell tmpfloat;
 #define NC_tickcount() (NC_PARS_(0)\
 	n_tickcount(amx,nc_params))
 
+/**
+To store player name and normalized name in plugin.
+*/
+int natives_SetPlayerName(int playerid, char *name);
 /**
 Done here to do stuff, like streaming maps, anticheat?
 */
