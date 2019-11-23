@@ -10,7 +10,6 @@
 #include "heartbeat.h"
 #include "missions.h"
 #include "playtime.h"
-#include "protips.h"
 #include "timecyc.h"
 #include "timer.h"
 #include "vehicles.h"
@@ -644,7 +643,6 @@ void timecyc_tick()
 			}
 			/*timer1m*/
 			echo_init();
-			protips_timed_broadcast();
 timer30s:
 			/*timer30s*/
 			heartbeat_timed_update();

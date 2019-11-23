@@ -140,6 +140,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	objs_on_gamemode_init();
 	panel_on_gamemode_init();
 	playtime_init();
+	protips_init();
 	spawn_init(); /*MUST run after airports_init*/
 	svp_init();
 	timecyc_init();

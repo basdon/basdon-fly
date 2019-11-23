@@ -2,8 +2,12 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "cmd.h"
 #include "missions.h"
+#include "timer.h"
 #include <string.h>
+
+#define PROTIPS_INTERVAL (8 * 60000)
 
 static const char *protips[] = {
 	/*max length:*/
@@ -35,15 +39,17 @@ static const char *protips[] = {
 };
 static const int numprotips = sizeof(protips)/sizeof(protips[0]);
 
-void protips_timed_broadcast()
+static
+int protips_timed_broadcast(void *data)
 {
-	static int delay = 0;
+	amx_SetUString(buf144, protips[NC_random(numprotips)], 144);
+	NC_SendClientMessageToAll(COL_INFO_LIGHT, buf144a);
+	return PROTIPS_INTERVAL;
+}
 
-	if (delay++ == 8) {
-		delay = 0;
-		amx_SetUString(buf144, protips[NC_random(numprotips)], 144);
-		NC_SendClientMessageToAll(COL_INFO_LIGHT, buf144a);
-	}
+void protips_init()
+{
+	timer_set(PROTIPS_INTERVAL, protips_timed_broadcast, NULL);
 }
 
 int protips_cmd_protip(CMDPARAMS)
