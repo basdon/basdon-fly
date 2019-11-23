@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <stdio.h>
 #else
+#include <unistd.h>
 #include <sys/time.h>
 #endif
 
@@ -59,4 +60,13 @@ int time_elapsed_millis()
 	diff = (int) (now - last_value);
 	last_value = now;
 	return diff;
+}
+
+void time_sleep(int millis)
+{
+#if ISWIN
+	Sleep(millis);
+#else
+	usleep(millis * 1000);
+#endif
 }

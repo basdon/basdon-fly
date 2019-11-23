@@ -15,3 +15,7 @@ unsigned long time_timestamp();
 Get amount of elapsed milliseconds since last call.
 */
 int time_elapsed_millis();
+/**
+Sleep.
+*/
+void time_sleep(int millis);

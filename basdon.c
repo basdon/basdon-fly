@@ -109,6 +109,8 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 {
+	unsigned long starttime;
+
 	missions_freepoints(); /*call this before airports_destroy!*/
 	airports_destroy();
 	echo_dispose();
@@ -118,6 +120,23 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 	svp_dispose();
 	while (veh_commit_next_vehicle_odo_to_db());
 	veh_dispose();
+
+	NC_PARS(1);
+	nc_params[1] = 1;
+	if (NC(n_mysql_unprocessed_queries)) {
+		logprintf("waiting on queries before exiting\n");
+		starttime = time_timestamp();
+		do {
+			if (time_timestamp() - starttime > 10000) {
+				logprintf("taking > 10s, fuckit\n");
+				goto fuckit;
+			}
+			time_sleep(500);
+		} while (NC(n_mysql_unprocessed_queries));
+		logprintf("done\n");
+	}
+fuckit:
+	NC(n_mysql_close);
 	return 1;
 }
 
