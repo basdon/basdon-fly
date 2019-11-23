@@ -104,7 +104,9 @@ this won't trigger a OnPlayerStateChange.
 */
 void veh_on_player_now_driving(int playerid, int vehicleid);
 void veh_on_player_state_change(int, int, int);
-int veh_OnVehicleSpawn(int vehicleid);
+int veh_on_vehicle_spawn(int vehicleid);
+void veh_on_vehicle_stream_in(int vehicleid, int forplayerid);
+void veh_on_vehicle_stream_out(int vehicleid, int forplayerid);
 /**
 Update vehicle related things like ODO, fuel, ...
 

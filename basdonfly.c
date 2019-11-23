@@ -92,12 +92,9 @@ FORWARD(Veh_AddOdo);
 FORWARD(Veh_CollectSpawnedVehicles);
 FORWARD(Veh_CollectPlayerVehicles);
 FORWARD(Veh_Destroy);
-FORWARD(Veh_GetLabelToDelete);
 FORWARD(Veh_GetNextUpdateQuery);
 FORWARD(Veh_Init);
 FORWARD(Veh_OnPlayerDisconnect);
-FORWARD(Veh_RegisterLabel);
-FORWARD(Veh_ShouldCreateLabel);
 FORWARD(Veh_UpdateSlot);
 
 int temp_afk[MAX_PLAYERS];
@@ -278,6 +275,8 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnPlayerUpdate),
 	REGISTERNATIVE(B_OnRecv),
 	REGISTERNATIVE(B_OnVehicleSpawn),
+	REGISTERNATIVE(B_OnVehicleStreamIn),
+	REGISTERNATIVE(B_OnVehicleStreamOut),
 	REGISTERNATIVE(B_Validate),
 	/* commands.c */
 	REGISTERNATIVE(Command_Is),
@@ -325,11 +324,8 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Veh_CollectSpawnedVehicles),
 	REGISTERNATIVE(Veh_CollectPlayerVehicles),
 	REGISTERNATIVE(Veh_Destroy),
-	REGISTERNATIVE(Veh_GetLabelToDelete),
 	REGISTERNATIVE(Veh_Init),
 	REGISTERNATIVE(Veh_OnPlayerDisconnect),
-	REGISTERNATIVE(Veh_RegisterLabel),
-	REGISTERNATIVE(Veh_ShouldCreateLabel),
 	REGISTERNATIVE(Veh_UpdateSlot),
 	{0, 0}
 };

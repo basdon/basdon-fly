@@ -429,10 +429,30 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 
 	/*keep this first*/
 	amx_GetAddr(amx, params[1], &addr);
-	*addr = vehicleid = veh_OnVehicleSpawn(*addr);
+	*addr = vehicleid = veh_on_vehicle_spawn(*addr);
 
 	nav_reset_for_vehicle(vehicleid);
 
+	return 1;
+}
+
+/* native B_OnVehicleStreamIn(vehicleid, forplayerid) */
+static
+cell AMX_NATIVE_CALL B_OnVehicleStreamIn(AMX *amx, cell *params)
+{
+	const int vehicleid = params[1], forplayerid = params[2];
+
+	veh_on_vehicle_stream_in(vehicleid, forplayerid);
+	return 1;
+}
+
+/* native B_OnVehicleStreamOut(vehicleid, forplayerid) */
+static
+cell AMX_NATIVE_CALL B_OnVehicleStreamOut(AMX *amx, cell *params)
+{
+	const int vehicleid = params[1], forplayerid = params[2];
+
+	veh_on_vehicle_stream_out(vehicleid, forplayerid);
 	return 1;
 }
 
