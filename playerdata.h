@@ -9,8 +9,8 @@ struct playerdata {
 	/**
 	User id of player.
 
-	May be NULL in rare cases when login failed to create a guest account,
-	so always use useridornull to get the userid to use in db queries.
+	May be -1 in rare cases when login failed to create a guest account,
+	so always check in db queries to use NULL instead when needed.
 	*/
 	int userid;
 	int groups;
@@ -18,12 +18,6 @@ struct playerdata {
 
 extern struct playerdata *pdata[MAX_PLAYERS];
 
-/**
-Gets given user id or NULL as string (useful for SQL formatting).
-
-TODO: remove?
-*/
-void useridornull(int playerid, char *storage);
 void pdata_init();
 /**
 Initializes player data for a player.

@@ -826,7 +826,7 @@ void missions_start_mission(int playerid)
 	struct MISSIONPOINT *startpoint, *endpoint;
 	struct dbvehicle *veh;
 	struct vec3 ppos;
-	char *errmsg, tmpuseridornullbuf[10];
+	char *errmsg;
 	int vehicleid, missiontype, i;
 	float vhp, dx, dy;
 
@@ -919,13 +919,13 @@ unknownvehicle:
 	amx_SetUString(buf4096, cbuf144, 144);
 	NC_mysql_tquery_nocb(buf4096a);
 
-	useridornull(playerid, tmpuseridornullbuf);
 	sprintf(cbuf4096 + 2000,
 	        "INSERT INTO flg(player,vehicle,missiontype,fapt,tapt,fmsp,"
 		"tmsp,distance,tstart,tlastupdate) "
-		"VALUES(%s,%d,%d,%d,%d,%d,%d,%.4f,"
+		"VALUES(IF(%d<1,NULL,%d),%d,%d,%d,%d,%d,%d,%.4f,"
 		"UNIX_TIMESTAMP(),UNIX_TIMESTAMP())",
-	        tmpuseridornullbuf,
+	        pdata[playerid]->userid,
+	        pdata[playerid]->userid,
 		veh->id,
 		missiontype,
 		startpoint->ap->id,

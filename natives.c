@@ -313,7 +313,7 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 	const static char *SYSTEM_ISSUER = "system", *REASONNULL = "(NULL)";
 
 	int intv;
-	char uid[10], issueruid[10], *escapedreason;
+	char *escapedreason;
 
 	if (!kick_update_delay[playerid]) {
 		if (issuer == NULL) {
@@ -344,18 +344,16 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 			reason = (char*) REASONNULL;
 		}
 
-		useridornull(playerid, uid);
-		if (issuer_userid != -1) {
-			sprintf(issueruid, "%d", issuer_userid);
-		} else {
-			strcpy(issueruid, "NULL");
-		}
 		sprintf(cbuf4096_,
 			"INSERT INTO kck(usr,ip,stamp,issuer,reason)"
-			"VALUES (%s,'%s',UNIX_TIMESTAMP(),%s,'%s')",
-			uid,
+			"VALUES ("
+			"IF(%d<1,NULL,%d),'%s',UNIX_TIMESTAMP(),"
+			"IF(%d<1,NULL,%d),'%s')",
+			pdata[playerid]->userid,
+			pdata[playerid]->userid,
 			pdata[playerid]->ip,
-			issueruid,
+			issuer_userid,
+			issuer_userid,
 			escapedreason);
 		amx_SetUString(buf4096, cbuf4096_, 1000);
 		NC_mysql_tquery_nocb(buf4096a);
