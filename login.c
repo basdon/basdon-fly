@@ -8,6 +8,7 @@
 #include <time.h>
 
 int sessionid[MAX_PLAYERS];
+int loggedstatus[MAX_PLAYERS];
 
 /* actual password, stored for later checking */
 static char *pwdata[MAX_PLAYERS];

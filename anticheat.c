@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include "anticheat.h"
+#include "login.h"
 #include "vehicles.h"
 #include <math.h>
 #include <string.h>

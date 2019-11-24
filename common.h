@@ -131,10 +131,6 @@ Player preferences, see sharedsymbols.h.
 */
 extern int prefs[MAX_PLAYERS];
 /**
-Logged-in status of each player (one of the LOGGED_ definitions).
-*/
-extern int loggedstatus[MAX_PLAYERS];
-/**
 Current in-game hour.
 */
 extern int time_h;

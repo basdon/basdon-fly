@@ -204,6 +204,17 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 	/*TODO: remove cmd_hash (make it a static func)*/
 	hash = cmd_hash(cmdtext);
 
+	common_mysql_escape_string(cmdtext, cbuf144, 144 * sizeof(cell));
+	sprintf(cbuf4096_,
+		"INSERT INTO cmdlog(player,loggedstatus,stamp,cmd) "
+		"VALUES(IF(%d<1,NULL,%d),%d,UNIX_TIMESTAMP(),'%s')",
+		pdata[playerid]->userid,
+		pdata[playerid]->userid,
+		loggedstatus[playerid],
+		cbuf144);
+	amx_SetUString(buf4096, cbuf4096_, 4096);
+	NC_mysql_tquery_nocb(buf4096a);
+
 	if (cmd_check(playerid, hash, cmdtext)) {
 		return 1;
 	}
