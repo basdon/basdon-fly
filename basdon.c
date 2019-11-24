@@ -48,14 +48,14 @@ cell AMX_NATIVE_CALL B_Validate(AMX *local_amx, cell *params)
 	fbuf4096 = (float*) buf4096;
 
 	if (!natives_find() || !publics_find()) {
-		return 0;
+		goto fail;
 	}
 
 	amx_SetUString(buf144, "sleep", 6);
 	sleep = NC_GetConsoleVarAsInt(buf144a);
 	if (sleep != 5) {
 		logprintf("ERR: sleep value %d should be 5", sleep);
-		return 0;
+		goto fail;
 	}
 
 	if (MAX_PLAYERS != params[1]) {
@@ -63,10 +63,13 @@ cell AMX_NATIVE_CALL B_Validate(AMX *local_amx, cell *params)
 			"ERR: MAX_PLAYERS mismatch: %d (plugin) vs %d (gm)",
 			MAX_PLAYERS,
 			params[1]);
-		return 0;
+		goto fail;
 	}
 
 	return MAX_PLAYERS;
+fail:
+	time_sleep(10000);
+	return 0;
 }
 
 /* native B_OnDialogResponse() */
@@ -121,19 +124,21 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 	while (veh_commit_next_vehicle_odo_to_db());
 	veh_dispose();
 
+	/*mysql_close might actually already wait for queued queries so maybe
+	this can be removed...*/
 	NC_PARS(1);
 	nc_params[1] = 1;
 	if (NC(n_mysql_unprocessed_queries)) {
-		logprintf("waiting on queries before exiting\n");
+		logprintf("waiting on queries before exiting");
 		starttime = time_timestamp();
 		do {
 			if (time_timestamp() - starttime > 10000) {
-				logprintf("taking > 10s, fuckit\n");
+				logprintf("taking > 10s, fuckit");
 				goto fuckit;
 			}
 			time_sleep(500);
 		} while (NC(n_mysql_unprocessed_queries));
-		logprintf("done\n");
+		logprintf("done");
 	}
 fuckit:
 	NC(n_mysql_close);
@@ -145,10 +150,69 @@ static
 cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 {
 	unsigned long t;
+	FILE *mysqldat;
+	char mysqlcreds[255], *m;
+	char usrlen, dblen, pwlen, mysqllen;
+	int errno;
 
 	t = time_timestamp();
 
 	memset(spawned, 0, sizeof(spawned));
+
+	if (!(mysqldat = fopen("scriptfiles/mysql.dat", "rb"))) {
+		logprintf("cannot read mysql.dat");
+		goto exit;
+	}
+	mysqllen = fread(mysqlcreds, 1, 255, mysqldat);
+	fclose(mysqldat);
+	usrlen = mysqlcreds[0];
+	dblen = mysqlcreds[4];
+	pwlen = mysqlcreds[8];
+	if (mysqllen != 12 + usrlen + dblen + pwlen) {
+		logprintf("invalid mysql.dat format");
+		goto exit;
+	}
+
+	m = mysqlcreds + 12;
+	memcpy(cbuf32, m, usrlen);
+	*((int*) (cbuf32 + usrlen)) = 0;
+	m += usrlen;
+	memcpy(cbuf32_1, m, dblen);
+	*((int*) (cbuf32_1 + dblen)) = 0;
+	m += dblen;
+	memcpy(cbuf144, m, pwlen);
+	*((int*) (cbuf144 + pwlen)) = 0;
+	amx_SetUString(buf64, "127.0.0.1", 64);
+
+	NC_PARS(2);
+	nc_params[1] = 1 | 2; /*LOG_ERROR | LOG_WARNING*/
+	nc_params[2] = 1; /*LOG_TYPE_TEXT*/
+	NC(n_mysql_log);
+
+	NC_PARS(7);
+	nc_params[1] = buf64a; /*host*/
+	nc_params[2] = buf32a; /*user*/
+	nc_params[3] = buf32_1a; /*database*/
+	nc_params[4] = buf144a; /*password*/
+	nc_params[5] = 3306;
+	nc_params[6] = 1; /*autoreconnect*/
+	nc_params[7] = 2; /*pool_size, 2 is default in a_mysql.inc*/
+	if (!NC(n_mysql_connect)) {
+		logprintf("no db connection error");
+		goto exit;
+	}
+	errno = NC_mysql_errno();
+	if (errno) {
+		logprintf("db errno %d", errno);
+exit:
+		buf32[0] = 'e'; buf32[1] = 'x'; buf32[2] = 'i'; buf32[3] = 't';
+		buf32[4] = 0;
+		NC_SendRconCommand(buf32a);
+		time_sleep(10000);
+		return 1;
+
+	}
+	//mysql_set_charset "Windows-1252"
 
 	airports_init();
 	class_init();

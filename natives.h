@@ -107,8 +107,11 @@ extern AMX_NATIVE n_cache_get_row_count;
 extern AMX_NATIVE n_cache_get_row_float;
 extern AMX_NATIVE n_cache_get_row_int;
 extern AMX_NATIVE n_cache_insert_id;
+extern AMX_NATIVE n_mysql_connect;
 extern AMX_NATIVE n_mysql_close;
 extern AMX_NATIVE n_mysql_escape_string;
+extern AMX_NATIVE n_mysql_errno;
+extern AMX_NATIVE n_mysql_log;
 extern AMX_NATIVE n_mysql_tquery;
 extern AMX_NATIVE n_mysql_query;
 extern AMX_NATIVE n_mysql_unprocessed_queries;
@@ -423,6 +426,9 @@ extern cell tmpfloat;
 
 #define NC_cache_insert_id() (NC_PARS_(0)\
 	n_cache_insert_id(amx,nc_params))
+
+#define NC_mysql_errno() (NC_PARS_(1)nc_params[1]=1,\
+	n_mysql_errno(amx,nc_params))
 
 #define NC_mysql_query(BUF) \
 	(NC_PARS_(3)nc_params[1]=1,nc_params[2]=BUF,nc_params[3]=1,\

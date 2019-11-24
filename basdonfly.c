@@ -29,6 +29,7 @@
 #include "vehicles.h"
 #include "zones.h"
 #include "time/time.h"
+#include <stdio.h>
 #include <string.h>
 
 logprintf_t logprintf;

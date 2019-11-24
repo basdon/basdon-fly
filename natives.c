@@ -118,10 +118,13 @@ AMX_NATIVE n_cache_get_row_count;
 AMX_NATIVE n_cache_get_row_float;
 AMX_NATIVE n_cache_get_row_int;
 AMX_NATIVE n_cache_insert_id;
+AMX_NATIVE n_mysql_connect;
 AMX_NATIVE n_mysql_close;
+AMX_NATIVE n_mysql_errno;
 AMX_NATIVE n_mysql_escape_string;
-AMX_NATIVE n_mysql_tquery;
+AMX_NATIVE n_mysql_log;
 AMX_NATIVE n_mysql_query;
+AMX_NATIVE n_mysql_tquery;
 AMX_NATIVE n_mysql_unprocessed_queries;
 AMX_NATIVE n_ssocket_connect;
 AMX_NATIVE n_ssocket_create;
@@ -262,10 +265,13 @@ int natives_find()
 		N(cache_get_row_float),
 		N(cache_get_row_int),
 		N(cache_insert_id),
+		N(mysql_connect),
 		N(mysql_close),
+		N(mysql_errno),
 		N(mysql_escape_string),
-		N(mysql_tquery),
+		N(mysql_log),
 		N(mysql_query),
+		N(mysql_tquery),
 		N(mysql_unprocessed_queries),
 		N(random),
 		N(ssocket_connect),
