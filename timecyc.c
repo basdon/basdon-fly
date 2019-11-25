@@ -238,7 +238,7 @@ static const unsigned char weather_mapping[NEXT_WEATHER_POSSIBILITIES] = {
 };
 
 static const char
-	WTH_DESC_CLEAR[] = "clear",
+	WTH_DESC_CLEAR[] = "clear skies",
 	WTH_DESC_LIGHT_CLOUDS[] = "light clouds",
 	WTH_DESC_OVERCAST[] = "overcast",
 	WTH_DESC_THUNDERSTORMS[] = "thunderstorms",
@@ -647,6 +647,13 @@ timer30s:
 			/*timer30s*/
 			heartbeat_timed_update();
 		}
+		sprintf(cbuf4096,
+			"worldtime %02d:%02d %s",
+			time_h,
+			time_m,
+			weather_descriptions[weather.current]);
+		amx_SetUString(buf144, cbuf4096, 144);
+		NC_SendRconCommand(buf144a);
 		/*timer1000*/
 		veh_timed_1s_update();
 		veh_timed_panel_update();
