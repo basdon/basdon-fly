@@ -151,7 +151,7 @@ void veh_init()
 		nc_params[1] = rowcount;
 		NC_PARS(2);
 		veh->id = (*fld = 0, NC(n_cache_get_field_i));
-		veh->model = (*fld = 1, NC(n_cache_get_field_i));
+		veh->model = (short) (*fld = 1, NC(n_cache_get_field_i));
 		veh->owneruserid = (*fld = 2, NC(n_cache_get_field_i));
 		veh->pos.coords.x = (*fld = 3, NCF(n_cache_get_field_f));
 		veh->pos.coords.y = (*fld = 4, NCF(n_cache_get_field_f));
@@ -207,7 +207,7 @@ int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh)
 		GROUPS_ISADMIN(pdata[playerid]->groups));
 }
 
-float model_fuel_capacity(int modelid)
+float model_fuel_capacity(short modelid)
 {
 	switch (modelid)
 	{

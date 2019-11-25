@@ -36,6 +36,7 @@ logprintf_t logprintf;
 extern void *pAMXFunctions;
 
 EXPECT_SIZE(char, 1);
+EXPECT_SIZE(short, 2);
 EXPECT_SIZE(int, 4);
 EXPECT_SIZE(cell, 4);
 EXPECT_SIZE(float, 4);

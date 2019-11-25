@@ -787,7 +787,7 @@ void missions_querycb_create(void* d)
 	buf32[0] = 0x01594C46;
 	buf32[1] = mission->id;
 	*((float*) (cbuf32 + 8)) = model_fuel_capacity(mission->veh->model);
-	*((short*) (cbuf32 + 12)) = (short) mission->veh->model;
+	*((short*) (cbuf32 + 12)) = mission->veh->model;
 	cbuf32[14] = pdata[playerid]->namelen;
 	memset(cbuf32 + 15, 0, 24); /* don't leak random data */
 	strcpy(cbuf32 + 15, pdata[playerid]->name);

@@ -3,7 +3,7 @@
 
 struct dbvehicle {
 	int id;
-	int model;
+	short model;
 	int owneruserid;
 	struct vec4 pos;
 	unsigned char col1, col2;
@@ -81,7 +81,7 @@ be NULL when this functions returns 0.
 @param veh may be NULL.
 */
 int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh);
-float model_fuel_capacity(int modelid);
+float model_fuel_capacity(short modelid);
 /**
 Creates a vehicle (see CreateVehicle doc).
 
