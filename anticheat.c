@@ -49,27 +49,15 @@ cell AMX_NATIVE_CALL Ac_FormatLog(AMX *amx, cell *params)
 {
 	const int pid = params[1], loggedstatus = params[2];
 	cell *addr;
-	char msg[144];
-	char buf[512];
-	char uid[12];
-	char ip[16];
-	if (pdata[pid] == NULL) {
-		strcpy(uid, "NULL");
-		strcpy(ip, "0.0.0.0");
-	} else {
-		if (pdata[pid]->userid < 1) {
-			strcpy(uid, "NULL");
-		} else {
-			sprintf(uid, "%d", pdata[pid]->userid);
-		}
-		strcpy(ip, pdata[pid]->ip);
-	}
+	char buf[512], msg[144];
+
 	amx_GetAddr(amx, params[3], &addr);
 	amx_GetUString(msg, addr, sizeof(msg));
 	sprintf(buf,
-	        "INSERT INTO acl(t,j,u,l,e) VALUES(UNIX_TIMESTAMP(),'%s',%s,%d,'%s')",
-	        ip,
-	        uid,
+	        "INSERT INTO acl(t,j,u,l,e) "
+		"VALUES(UNIX_TIMESTAMP(),'%s',IF(%d<1,NULL,%d),%d,'%s')",
+	        pdata[pid]->ip,
+	        userid, userid,
 		loggedstatus,
 		msg);
 	amx_GetAddr(amx, params[4], &addr);
@@ -174,7 +162,7 @@ void anticheat_log(int playerid, int eventtype, char *info)
 		b += sprintf(b,
 			"'%s',%d,%d",
 			pdata[playerid]->ip,
-			pdata[playerid]->userid,
+			userid[playerid],
 			loggedstatus[playerid]);
 	}
 	sprintf(b, ",%d,'%s')", eventtype, info);

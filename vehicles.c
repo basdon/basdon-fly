@@ -5,6 +5,7 @@
 #include "a_samp.h"
 #include "anticheat.h"
 #include "game_sa.h"
+#include "login.h"
 #include "math.h"
 #include "missions.h"
 #include "playerdata.h"
@@ -203,8 +204,8 @@ void veh_init()
 int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh)
 {
 	return veh &&
-		(pdata[playerid]->userid == veh->owneruserid ||
-		GROUPS_ISADMIN(pdata[playerid]->groups));
+		userid[playerid] == veh->owneruserid ||
+		GROUPS_ISADMIN(pdata[playerid]->groups);
 }
 
 float model_fuel_capacity(short modelid)
@@ -344,22 +345,21 @@ void veh_disallow_player_in_vehicle(int playerid, struct dbvehicle *v)
 
 int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh)
 {
-	return veh == NULL || veh->owneruserid == 0 ||
-		(pdata[playerid] != NULL &&
-			veh->owneruserid == pdata[playerid]->userid);
+	return veh == NULL ||
+		veh->owneruserid == 0 ||
+		veh->owneruserid == userid[playerid];
 }
 
 void veh_on_player_disconnect(int playerid)
 {
 	struct dbvehicle *veh;
-	int userid, n, vehicleid, driver;
+	int n, vehicleid, driver;
 
-	userid = pdata[playerid]->userid;
-	if (userid > 0) {
+	if (userid[playerid] > 0) {
 		veh = dbvehicles;
 		n = numdbvehicles;
 		while (n--) {
-			if (veh->owneruserid == userid &&
+			if (veh->owneruserid == userid[playerid] &&
 				veh->spawnedvehicleid)
 			{
 				veh_DestroyVehicle(veh->spawnedvehicleid);
@@ -390,18 +390,17 @@ void veh_on_player_enter_vehicle(int playerid, int vehicleid, int ispassenger)
 
 void veh_spawn_player_vehicles(int playerid)
 {
-	int userid, vehicleid, n;
+	int vehicleid, n;
 	struct dbvehicle *veh;
 
-	userid = pdata[playerid]->userid;
-	if (userid < 1) {
+	if (userid[playerid] < 1) {
 		return;
 	}
 
 	veh = dbvehicles;
 	n = numdbvehicles;
 	while (n--) {
-		if (veh->owneruserid == userid) {
+		if (veh->owneruserid == userid[playerid]) {
 			NC_PARS(9);
 			nc_params[1] = veh->model;
 			nc_paramf[2] = veh->pos.coords.x;

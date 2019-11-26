@@ -7,6 +7,7 @@
 #include <string.h>
 #include <time.h>
 
+int userid[MAX_PLAYERS];
 int sessionid[MAX_PLAYERS];
 int loggedstatus[MAX_PLAYERS];
 
@@ -23,19 +24,27 @@ void login_init()
 	}
 }
 
+void login_on_player_connect(int playerid)
+{
+	userid[playerid] = -1;
+	sessionid[playerid] = -1;
+}
+
 /* native Login_FormatAddFailedLogin(playerid, bufq1[], bufq2[]) */
 cell AMX_NATIVE_CALL Login_FormatAddFailedLogin(AMX *amx, cell *params)
 {
 	const int pid = params[1];
 	cell *addr;
 	char buf[144];
-	long int t = (long int) time(NULL);
-	if (pdata[pid] == NULL) {
-		return 0;
-	}
+	long int t;
+
+	/*using time here instead of UNIX_TIMESTAMP() in SQL because the values
+	in the two INSERTs must be the same*/
+	t = (long int) time(NULL);
+
 	sprintf(buf,
 	        "INSERT INTO fal(u,stamp,ip) VALUES(%d,%ld,'%s')",
-	        pdata[pid]->userid,
+	        userid[pid],
 	        t,
 	        pdata[pid]->ip);
 	amx_GetAddr(amx, params[2], &addr);
@@ -43,7 +52,7 @@ cell AMX_NATIVE_CALL Login_FormatAddFailedLogin(AMX *amx, cell *params)
 	sprintf(buf,
 	        "UPDATE usr SET lastfal=%ld WHERE i=%d",
 	        t,
-	        pdata[pid]->userid);
+	        userid[pid]);
 	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, buf, sizeof(buf));
 	return 1;
@@ -106,12 +115,12 @@ cell AMX_NATIVE_CALL Login_FormatCheckUserExist(AMX *amx, cell *params)
 	return 1;
 }
 
-void formatCreateSessionQuery(char *buf, struct playerdata *pd)
+void formatCreateSessionQuery(char *buf, int playerid)
 {
 	sprintf(buf,
 	        "INSERT INTO ses(u,s,e,ip) VALUES(%d,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'%s')",
-	        pd->userid,
-	        pd->ip);
+	        userid[playerid],
+	        pdata[playerid]->ip);
 }
 
 /* native Login_FormatCreateSession(playerid, buf[]) */
@@ -123,7 +132,7 @@ cell AMX_NATIVE_CALL Login_FormatCreateSession(AMX *amx, cell *params)
 	if (pdata[pid] == NULL) {
 		return 0;
 	}
-	formatCreateSessionQuery(data, pdata[pid]);
+	formatCreateSessionQuery(data, pid);
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, data, sizeof(data));
 	return 1;
@@ -159,9 +168,7 @@ cell AMX_NATIVE_CALL Login_FormatCreateUserSession(AMX *amx, cell *params)
 	char data[255];
 	cell *addr;
 	int p;
-	if (pdata[pid] == NULL) {
-		return 0;
-	}
+
 	p = sprintf(data,
 	            "UPDATE usr SET lastseengame=UNIX_TIMESTAMP() WHERE i=%d LIMIT 1",
 	            (int) params[1]);
@@ -172,7 +179,7 @@ cell AMX_NATIVE_CALL Login_FormatCreateUserSession(AMX *amx, cell *params)
 	p += 2;
 	*addr = p;
 	amx_SetUString(addr + 1, data, sizeof(data));
-	formatCreateSessionQuery(data, pdata[pid]);
+	formatCreateSessionQuery(data, pid);
 	amx_SetUString(addr + p, data, sizeof(data));
 	return 1;
 }
@@ -258,7 +265,7 @@ cell AMX_NATIVE_CALL Login_FormatSavePlayerName(AMX *amx, cell *params)
 	sprintf(data,
 	        "UPDATE usr SET name='%s' WHERE i=%d",
 	        pdata[pid]->name,
-	        pdata[pid]->userid);
+	        userid[pid]);
 	amx_GetAddr(amx, params[2], &addr);
 	amx_SetUString(addr, data, sizeof(data));
 	return 1;
@@ -270,10 +277,7 @@ cell AMX_NATIVE_CALL Login_FormatUpdateFalng(AMX *amx, cell *params)
 	const int pid = params[1], lastfal = params[2];
 	char data[64];
 	cell *addr;
-	if (pdata[pid] == NULL) {
-		return 0;
-	}
-	sprintf(data, "UPDATE usr SET falng=%d WHERE i=%d", lastfal, pdata[pid]->userid);
+	sprintf(data, "UPDATE usr SET falng=%d WHERE i=%d", lastfal, userid[pid]);
 	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, data, sizeof(data));
 	return 1;
@@ -285,9 +289,6 @@ cell AMX_NATIVE_CALL Login_FormatUpgradeGuestAcc(AMX *amx, cell *params)
 	int pid = params[1];
 	char pw[144], data[512];
 	cell *addr;
-	if (pdata[pid] == NULL) {
-		return 0;
-	}
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(pw, addr, sizeof(pw));
 	sprintf(data,
@@ -295,7 +296,7 @@ cell AMX_NATIVE_CALL Login_FormatUpgradeGuestAcc(AMX *amx, cell *params)
 	        pw,
 		pdata[pid]->name,
 		GROUP_MEMBER,
-	        pdata[pid]->userid);
+	        userid[pid]);
 	amx_GetAddr(amx, params[3], &addr);
 	amx_SetUString(addr, data, sizeof(data));
 	return 1;

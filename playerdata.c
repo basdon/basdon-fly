@@ -2,6 +2,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "login.h"
 #include "playerdata.h"
 #include <string.h>
 
@@ -51,7 +52,6 @@ void pdata_on_player_connect(int playerid)
 	amx_GetUString(pd->name, buf144, MAX_PLAYER_NAME + 1);
 	pdata_on_name_updated(playerid);
 
-	pd->userid = -1;
 	pd->groups = GROUP_GUEST;
 }
 
@@ -86,11 +86,7 @@ cell AMX_NATIVE_CALL PlayerData_FormatUpdateQuery(AMX *amx, cell *params)
 /* native PlayerData_SetUserId(playerid, id) */
 cell AMX_NATIVE_CALL PlayerData_SetUserId(AMX *amx, cell *params)
 {
-	int pid = params[1];
-	if (pdata[pid] == NULL) {
-		return 0;
-	}
-	pdata[pid]->userid = params[2];
+	userid[params[1]] = params[2];
 	return 1;
 }
 

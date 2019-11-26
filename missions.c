@@ -8,13 +8,14 @@
 #include "dialog.h"
 #include "echo.h"
 #include "game_sa.h"
-#include "playerdata.h"
-#include "playtime.h"
+#include "login.h"
 #include "math.h"
 #include "missions.h"
 #include "money.h"
 #include "nav.h"
 #include "panel.h"
+#include "playerdata.h"
+#include "playtime.h"
 #include "timer.h"
 #include "vehicles.h"
 #include <string.h>
@@ -919,13 +920,13 @@ unknownvehicle:
 	amx_SetUString(buf4096, cbuf144, 144);
 	NC_mysql_tquery_nocb(buf4096a);
 
-	sprintf(cbuf4096 + 2000,
+	sprintf(cbuf4096_,
 	        "INSERT INTO flg(player,vehicle,missiontype,fapt,tapt,fmsp,"
 		"tmsp,distance,tstart,tlastupdate) "
 		"VALUES(IF(%d<1,NULL,%d),%d,%d,%d,%d,%d,%d,%.4f,"
 		"UNIX_TIMESTAMP(),UNIX_TIMESTAMP())",
-	        pdata[playerid]->userid,
-	        pdata[playerid]->userid,
+	        userid[playerid],
+	        userid[playerid],
 		veh->id,
 		missiontype,
 		startpoint->ap->id,
@@ -936,7 +937,7 @@ unknownvehicle:
 	cbdata = malloc(sizeof(struct MISSION_CB_DATA));
 	cbdata->mission = mission;
 	cbdata->player_cc = MK_PLAYER_CC(playerid);
-	common_mysql_tquery(cbuf4096 + 2000, missions_querycb_create, cbdata);
+	common_mysql_tquery(cbuf4096_, missions_querycb_create, cbdata);
 
 	tracker_afk_packet_sent[playerid] = 0;
 

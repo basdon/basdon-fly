@@ -272,8 +272,8 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 	sprintf(cbuf4096_,
 		"INSERT INTO cmdlog(player,loggedstatus,stamp,cmd) "
 		"VALUES(IF(%d<1,NULL,%d),%d,UNIX_TIMESTAMP(),'%s')",
-		pdata[playerid]->userid,
-		pdata[playerid]->userid,
+		userid[playerid],
+		userid[playerid],
 		loggedstatus[playerid],
 		cbuf144);
 	amx_SetUString(buf4096, cbuf4096_, 4096);
@@ -303,6 +303,8 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 
 	/*keep this top*/
 	pdata_on_player_connect(playerid);
+	/*keep this second*/
+	login_on_player_connect(playerid);
 
 	playeronlineflag[playerid] = 1;
 	loggedstatus[playerid] = LOGGED_NO;

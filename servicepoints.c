@@ -5,6 +5,7 @@
 #include "a_samp.h"
 #include "anticheat.h"
 #include "cmd.h"
+#include "login.h"
 #include "missions.h"
 #include "money.h"
 #include "playerdata.h"
@@ -188,14 +189,14 @@ int svp_cmd_refuel(CMDPARAMS)
 	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessage(playerid, COL_INFO, buf144a);
 
-	if (veh && pdata[playerid]->userid > 0) {
+	if (veh && userid[playerid] > 0) {
 		sprintf(cbuf4096 + 2000,
 			"INSERT INTO refuellog"
 			"(stamp,vehicle,player,svp,paid,fuel) "
 			"VALUES "
 			"(UNIX_TIMESTAMP(),%d,%d,%d,%d,%.4f)",
 			veh->id,
-			pdata[playerid]->userid,
+			userid[playerid],
 			svpid,
 			cost,
 			refuelamount);
@@ -284,18 +285,18 @@ int svp_cmd_repair(CMDPARAMS)
 	nc_paramf[2] = hp;
 	NC(n_SetVehicleHealth);
 
-	if (veh && pdata[playerid]->userid > 0) {
-		sprintf(cbuf4096 + 2000,
+	if (veh && userid[playerid] > 0) {
+		sprintf(cbuf4096_,
 			"INSERT INTO "
 			"repairlog(stamp,vehicle,player,svp,paid,damage) "
 			"VALUES "
 			"(UNIX_TIMESTAMP(),%d,%d,%d,%d,%d)",
 			veh->id,
-			pdata[playerid]->userid,
+			userid[playerid],
 			svpid,
 			cost,
 			(int) fixamount);
-		amx_SetUString(buf4096, cbuf4096 + 2000, 4096);
+		amx_SetUString(buf4096, cbuf4096_, 4096);
 		NC_mysql_tquery_nocb(buf4096a);
 	}
 

@@ -40,7 +40,7 @@ static
 void playtime_update_player_last_seen(int playerid, int isdisconnecting)
 {
 	unsigned long now;
-	int temp_ms, playtime_to_add, userid;
+	int temp_ms, playtime_to_add;
 
 	if (isafk[playerid]) {
 		temp_ms = uncommitted_playtime[playerid];
@@ -60,8 +60,7 @@ void playtime_update_player_last_seen(int playerid, int isdisconnecting)
 		playtime_to_add = 5;
 	}
 
-	userid = pdata[playerid]->userid;
-	if (userid == -1) {
+	if (userid[playerid] == -1) {
 		return;
 	}
 
@@ -96,7 +95,7 @@ void playtime_update_player_last_seen(int playerid, int isdisconnecting)
 		"UPDATE usr "
 		"SET onlinetime=(SELECT SUM(e-s) FROM ses WHERE u=usr.i) "
 		"WHERE i=%d",
-		userid);
+		userid[playerid]);
 	amx_SetUString(buf4096, cbuf4096_, 1000);
 	NC_mysql_tquery_nocb(buf4096a);
 }

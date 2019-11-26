@@ -2,6 +2,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "login.h"
 #include "maps.h"
 #include "natives.h"
 #include "playerdata.h"
@@ -361,8 +362,8 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 			"VALUES ("
 			"IF(%d<1,NULL,%d),'%s',UNIX_TIMESTAMP(),"
 			"IF(%d<1,NULL,%d),'%s')",
-			pdata[playerid]->userid,
-			pdata[playerid]->userid,
+			userid[playerid],
+			userid[playerid],
 			pdata[playerid]->ip,
 			issuer_userid,
 			issuer_userid,
