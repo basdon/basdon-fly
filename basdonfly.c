@@ -60,26 +60,6 @@ FORWARD(Echo_Init);
 FORWARD(Game_IsAirVehicle);
 FORWARD(Game_IsHelicopter);
 FORWARD(Game_IsPlane);
-/* login.c */
-FORWARD(Login_FormatAddFailedLogin);
-FORWARD(Login_FormatChangePassword);
-FORWARD(Login_FormatChangePasswordBox);
-FORWARD(Login_FormatCheckUserExist);
-FORWARD(Login_FormatCreateSession);
-FORWARD(Login_FormatCreateUser);
-FORWARD(Login_FormatCreateUserSession);
-FORWARD(Login_FormatGuestRegisterBox);
-FORWARD(Login_FormatLoadAccountData);
-FORWARD(Login_FormatOnJoinRegisterBox);
-FORWARD(Login_FormatSavePlayerName);
-FORWARD(Login_FormatUpdateFalng);
-FORWARD(Login_FormatUpgradeGuestAcc);
-FORWARD(Login_FreePassword);
-FORWARD(Login_GetPassword);
-FORWARD(Login_PasswordConfirmFree);
-FORWARD(Login_PasswordConfirmStore);
-FORWARD(Login_PasswordConfirmValidate);
-FORWARD(Login_UsePassword);
 /* nav.c */
 FORWARD(Nav_Reset);
 /* playerdata.c */
@@ -109,7 +89,6 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 
 	cmd_init();
 	game_sa_init();
-	login_init();
 	nav_init();
 	pdata_init();
 	time_init();
@@ -273,10 +252,10 @@ AMX_NATIVE_INFO PluginNatives[] =
 	/* anticheat.c */
 	REGISTERNATIVE(Ac_FormatLog),
 	/* basdon.c */
+	REGISTERNATIVE(B_OnCallbackHit),
 	REGISTERNATIVE(B_OnDialogResponse),
 	REGISTERNATIVE(B_OnGameModeExit),
 	REGISTERNATIVE(B_OnGameModeInit),
-	REGISTERNATIVE(B_OnMysqlResponse),
 	REGISTERNATIVE(B_OnPlayerCommandText),
 	REGISTERNATIVE(B_OnPlayerConnect),
 	REGISTERNATIVE(B_OnPlayerDeath),
@@ -308,26 +287,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(Game_IsAirVehicle),
 	REGISTERNATIVE(Game_IsHelicopter),
 	REGISTERNATIVE(Game_IsPlane),
-	/* login.c */
-	REGISTERNATIVE(Login_FormatAddFailedLogin),
-	REGISTERNATIVE(Login_FormatChangePassword),
-	REGISTERNATIVE(Login_FormatChangePasswordBox),
-	REGISTERNATIVE(Login_FormatCheckUserExist),
-	REGISTERNATIVE(Login_FormatCreateSession),
-	REGISTERNATIVE(Login_FormatCreateUser),
-	REGISTERNATIVE(Login_FormatCreateUserSession),
-	REGISTERNATIVE(Login_FormatGuestRegisterBox),
-	REGISTERNATIVE(Login_FormatLoadAccountData),
-	REGISTERNATIVE(Login_FormatOnJoinRegisterBox),
-	REGISTERNATIVE(Login_FormatSavePlayerName),
-	REGISTERNATIVE(Login_FormatUpdateFalng),
-	REGISTERNATIVE(Login_FormatUpgradeGuestAcc),
-	REGISTERNATIVE(Login_FreePassword),
-	REGISTERNATIVE(Login_GetPassword),
-	REGISTERNATIVE(Login_PasswordConfirmFree),
-	REGISTERNATIVE(Login_PasswordConfirmStore),
-	REGISTERNATIVE(Login_PasswordConfirmValidate),
-	REGISTERNATIVE(Login_UsePassword),
 	/* nav.c */
 	REGISTERNATIVE(Nav_Reset),
 	/* playerdata.c */

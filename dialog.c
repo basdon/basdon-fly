@@ -69,7 +69,7 @@ int dialog_on_response(int playerid, int dialogid)
 
 void dialog_end_transaction(int playerid, int transactionid)
 {
-	if (transaction[playerid] != transactionid) {
+	if (transaction[playerid] && transaction[playerid] != transactionid) {
 		logprintf(
 			"dialog_end_transaction: not ending %d while %d "
 			"is active", transactionid, transaction[playerid]);

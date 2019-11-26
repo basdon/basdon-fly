@@ -190,6 +190,38 @@ int common_UpdateVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d)
 	return NC(n_UpdateVehicleDamageStatus);
 }
 
+static
+void common_common_varargs_cb_call(cell p1, cell p2, cb_t callback, void *data)
+{
+	buf4096[4088] = 'M';
+	buf4096[4089] = 'M';
+	buf4096[4090] = 0;
+	buf4096[4091] = 'i';
+	buf4096[4092] = 'i';
+	buf4096[4093] = 0;
+	buf4096[4094] = (cell) callback;
+	buf4096[4095] = (cell) data;
+	nc_params[0] = 6 << 2; /*varargs, don't remove*/
+	nc_params[1] = p1;
+	nc_params[2] = p2;
+	nc_params[3] = buf4096a + 4088 * 4;
+	nc_params[4] = buf4096a + 4091 * 4;
+	nc_params[5] = buf4096a + 4094 * 4;
+	nc_params[6] = buf4096a + 4095 * 4;
+}
+
+void common_bcrypt_check(cell pw, cell hash, cb_t callback, void *data)
+{
+	common_common_varargs_cb_call(pw, hash, callback, data);
+	NC(n_bcrypt_check);
+}
+
+void common_bcrypt_hash(cell pw, cb_t callback, void *data)
+{
+	common_common_varargs_cb_call(pw, 12 /*cost*/, callback, data);
+	NC(n_bcrypt_hash);
+}
+
 void common_mysql_escape_string(char *data, char *dest, int maxlen)
 {
 	amx_SetUString(buf4096, data, 4096);
@@ -202,24 +234,10 @@ void common_mysql_escape_string(char *data, char *dest, int maxlen)
 	dest[maxlen - 1] = 0;
 }
 
-void common_mysql_tquery(char *query, mysql_cb callback, void *data)
+void common_mysql_tquery(char *query, cb_t callback, void *data)
 {
 	amx_SetUString(buf4096, query, 2000);
-	buf4096[4088] = 'M';
-	buf4096[4089] = 'M';
-	buf4096[4090] = 0;
-	buf4096[4091] = 'i';
-	buf4096[4092] = 'i';
-	buf4096[4093] = 0;
-	buf4096[4094] = (cell) callback;
-	buf4096[4095] = (cell) data;
-	nc_params[0] = 6 << 2; /*varargs, don't remove*/
-	nc_params[1] = 1;
-	nc_params[2] = buf4096a;
-	nc_params[3] = buf4096a + 4088 * 4;
-	nc_params[4] = buf4096a + 4091 * 4;
-	nc_params[5] = buf4096a + 4094 * 4;
-	nc_params[6] = buf4096a + 4095 * 4;
+	common_common_varargs_cb_call(1 /*handle*/, buf4096a, callback, data);
 	NC(n_mysql_tquery);
 }
 

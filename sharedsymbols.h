@@ -102,10 +102,10 @@
 
 /* login.c / login.pwn */
 #define PW_HASH_LENGTH (65) /* including zero term */
-#define MONEY_DEFAULTAMOUNT 15000
+#define MONEY_DEFAULT_AMOUNT 15000
 
 #define GROUP_BANNED (1)
-#define GROUP_GUEST (3)
+#define GROUP_GUEST (2)
 #define GROUP_MEMBER (4)
 #define GROUP_ADMIN (268435456)
 #define GROUP_OWNER (1073741824)

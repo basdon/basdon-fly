@@ -3,6 +3,9 @@
 
 #namespace "basdon.c"
 
+//@summary Plugin callback for mysql/bcrypt callback
+native B_OnCallbackHit(function, data)
+
 //@summary Plugin callback for {@link B_OnDialogResponse}
 //@returns {@code 0} if further processing should be cancelled
 native B_OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
@@ -14,9 +17,6 @@ native B_OnGameModeExit()
 //@summary Plugin callback for {@link OnGameModeInit}
 //@remarks call after db has been initialized
 native B_OnGameModeInit()
-
-//@summary Plugin callback for mysql callback
-native B_OnMysqlResponse(function, data)
 
 //@summary Plugin callback for {@link OnPlayerCommandText}
 //@remarks will call {@link OnPlayerCommandTextHash}
@@ -139,175 +139,4 @@ native Game_IsHelicopter(model)
 //@param model the model of the vehicle to check, {@b MUST} be either a valid model or {@code 0}
 //@returns {@code 0} if the model given is not a plane
 native Game_IsPlane(model)
-
-#namespace "login.c"
-
-//@summary Format query to add failed login
-//@param playerid player id
-//@param bufq1 buffer for query to insert failed login
-//@param bufq2 buffer for query to update lastfal column
-//@returns {@code 0} on failure
-//@remarks user id and ip must be set to succeed!
-native Login_FormatAddFailedLogin(playerid, bufq1[], bufq2[])
-
-//@summary Format query to change password
-//@param userid user id
-//@param password hashed password to set
-//@param buf the buffer to store the query in
-native Login_FormatChangePassword(userid, password[], buf[])
-
-//@summary Formats text to show in change password box {@b during gameplay}
-//@param buf buffer to store result text in
-//@param pwmismatch whether to show the password mismatch error msg (optional={@code 0})
-//@param step current step ({@code 0}=current pw, {@code 1}=password, {@code 2}=confirm password)
-native Login_FormatChangePasswordBox(buf[], pwmismatch=0, step)
-
-//@summary Formats query to check if user exists
-//@param playerid player
-//@param buf buffer to store query in
-//@returns {@code 0} if something failed and query could not be made
-native Login_FormatCheckUserExist(playerid, buf[]);
-
-//@summary Formats query to create a game session
-//@param playerid player
-//@param buf buffer to store query in
-//@returns {@code 0} if something failed and query could not be made
-native Login_FormatCreateSession(playerid, buf[])
-
-//@summary Formats query to create a user
-//@param playerid player
-//@param buf buffer to store query in
-//@param password password for user (hashed or empty for guest account)
-//@param group group for the new user
-//@returns {@code 0} if something failed (user has no data)
-native Login_FormatCreateUser(playerid, buf[], password[], group)
-
-//@summary Formats query to create session, and updates user last seen time
-//@param playerid player
-//@param buf buffer to store queries in
-//@remarks buffer will have two querys: on {@code buf[1]} and {@code buf[buf[0]]}
-native Login_FormatCreateUserSession(playerid, buf[])
-
-//@summary Formats text to show in register dialog box {@b in a guest session}
-//@param playerid player to show for (will show current name)
-//@param buf buffer to store result text in
-//@param invalid_name_error whether to show the invalid name error msg (optional={@code 0})
-//@param pwmismatch whether to show the password mismatch error msg (optional={@code 0})
-//@param step current step ({@code 0}=choose name, {@code 1}=password, {@code 2}=confirm password)
-//@seealso Login_FormatOnJoinRegisterBox
-native Login_FormatGuestRegisterBox(playerid, buf[], invalid_name_error=0, pwmismatch=0, step)
-
-//@summary Formats query to load account data
-//@param userid user id
-//@param buf buffer to store query in
-native Login_FormatLoadAccountData(userid, buf[]);
-
-//@summary Formats text to show in register dialog box {@b on join}
-//@param buf buffer to store result text in
-//@param pwmismatch whether to show the password mismatch error msg (optional={@code 0})
-//@param step current step ({@code 0}=password, {@code 1}=confirm password)
-//@seealso Login_FormatGuestRegisterBox
-native Login_FormatOnJoinRegisterBox(buf[], pwmismatch=0, step)
-
-//@summary Formats query to save a player's name
-//@param playerid player
-//@param buf buffer to store query in
-//@returns {@code 0} on failure
-native Login_FormatSavePlayerName(playerid, buf[])
-
-//@summary Formats query to update a user's last in-game failed login notice time
-//@param playerid player
-//@param lastfal timestamp of the last failed login that the player has now seen in-game
-//@param buf144 buffer to store query in
-//@returns {@code 0} on failure (no data for playerid, shouldn't happen)
-native Login_FormatUpdateFalng(playerid, lastfal, buf144[])
-
-//@summary Formats query to upgrade a guest account to a real account
-//@param playerid player
-//@param password hashed password
-//@param buf buffer to store queries in
-//@returns {@code 0} on failure (but should not happen if login is inited for player)
-native Login_FormatUpgradeGuestAcc(playerid, password[], buf[])
-
-//@summary Frees the hashed password stored for player
-//@param playerid player to free stored password for
-//@seealso Login_GetPassword
-//@seealso Login_UsePassword
-native Login_FreePassword(playerid)
-
-//@summary Retrieves the hashed password
-//@param playerid player
-//@param buf buffer to put password in
-//@seealso Login_UsePassword
-//@seealso Login_FreePassword
-//@returns {@code 0} if there's no password stored for player
-native Login_GetPassword(playerid, buf[]);
-
-//@summary Free memory that was used to confirm a player's password
-//@param playerid the player for which the data was saved
-//@remarks Has no effect if the data was already reset
-//@seealso Login_PasswordConfirmStore
-//@seealso Login_PasswordConfirmValidate
-native Login_PasswordConfirmFree(playerid)
-
-//@summary Store password hash to confirm it later using {@link Login_PasswordConfirmValidate}
-//@param playerid the player for which to store the hash
-//@param pwhash the hash to store
-//@seealso Login_PasswordConfirmFree
-//@seealso Login_PasswordConfirmValidate
-native Login_PasswordConfirmStore(playerid, pwhash[])
-
-//@summary Check if {@param pwhash} equals the previously saved hash
-//@param playerid the player for which the data was saved
-//@param pwhash the hash to check
-//@returns {@code 0} if the hash doesn't match the hash previously saved with {@link Login_PasswordConfirmStore}
-//@remarks The saved data gets reset after the check, so no need to call {@link Login_PasswordConfirmFree}
-//@seealso Login_PasswordConfirmStore
-//@seealso Login_PasswordConfirmFree
-native Login_PasswordConfirmValidate(playerid, pwhash[])
-
-//@summary Stores the hashed password so it can be checked against later
-//@param playerid player
-//@param buf buffer containing password
-//@seealso Login_FreePassword
-//@seealso Login_GetPassword
-native Login_UsePassword(playerid, buf[]);
-
-#namespace "playerdata.c"
-
-//@summary Clears login data for a player
-//@param playerid player to clear login data for
-native PlayerData_Clear(playerid)
-
-//@summary Formats query to update player's basic data
-//@param userid user id of the player to update stuff for
-//@param score score of the player to store
-//@param money money of the player to store
-//@param dis total distance flown (odo)
-//@param flighttime total seconds spent flying
-//@param prefs player's preferences
-//@param buf buffer to store query in
-native PlayerData_FormatUpdateQuery(userid, score, money, Float:dis, flighttime, prefs, buf[])
-
-//@summary Updates the player's user ID
-//@param playerid player
-//@param id userid of the player
-//@seealso PlayerData_Clear
-//@returns {@code 0} if there was no player data saved for {@param playerid}
-native PlayerData_SetUserId(playerid, id)
-
-//@summary Update the player's group
-//@param playerid player
-//@param group new groups mask of the player (see {@code GROUP_*} constants)
-//@returns {@code 0} if there was no player data saved for {@param playerid}
-native PlayerData_UpdateGroup(playerid, group)
-
-//@summary Updates the stored player's name on the plugin side
-//@param playerid the playerid
-//@param name new name
-//@param namelen length of {@param name}, excluding zero term
-//@seealso PlayerData_SetUserId
-//@seealso PlayerData_Clear
-//@returns {@code 0} if there was no player data saved for {@param playerid}
-native PlayerData_UpdateName(playerid, name[], namelen)
 

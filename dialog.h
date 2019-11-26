@@ -3,17 +3,20 @@
 
 /*can be used when no response is needed*/
 #define DIALOG_DUMMY 127
-/*used ids from 1000 and up; gm uses < 1000*/
 /*max dialog is 32767*/
 #define DIALOG_SPAWN_SELECTION 1001
 #define DIALOG_PREFERENCES 1002
 #define DIALOG_AIRPORT_NEAREST 1003
+#define DIALOG_REGISTER_FIRSTPASS 1004
+#define DIALOG_LOGIN_LOGIN_OR_NAMECHANGE 1005
+#define DIALOG_REGISTER_CONFIRMPASS 1006
 
-/*don't use an id that is used in a dialog id (unless they relate)*/
+/*don't use an id that is used in a dialog id (unless they relate), use 32768+*/
 /*max transaction id is int max*/
 #define TRANSACTION_NONE 0
 #define TRANSACTION_OVERRIDE 1
-#define TRANSACTION_MISSION_OVERVIEW 1004
+#define TRANSACTION_LOGIN DIALOG_REGISTER_FIRSTPASS
+#define TRANSACTION_MISSION_OVERVIEW 100000
 
 #define DIALOG_STYLE_MSGBOX 0
 #define DIALOG_STYLE_INPUT 1

@@ -900,21 +900,21 @@ void panel_on_gamemode_init()
 	*f1 = 320.0f;
 	*f2 = 360.0f;
 	*i3 = buf144a;
-	SETB144("~n~~n~~n~~n~~n~~n~~n~~n~");
+	B144("~n~~n~~n~~n~~n~~n~~n~~n~");
 	txt_bg = NC(n_TextDrawCreate);
 
 	*f2 = 410.0f;
-	SETB144("O_____O_____O_____-_____O_____O_____O");
+	B144("O_____O_____O_____-_____O_____O_____O");
 	txt_vorbar = NC(n_TextDrawCreate);
 
 	*f1 = 461.0f;
 	*f2 = 364.0f;
-	SETB144("-2~n~-_~n~-1~n~-_~n~-0~n~-_~n~-1~n~-_~n~-2");
+	B144("-2~n~-_~n~-1~n~-_~n~-0~n~-_~n~-1~n~-_~n~-2");
 	txt_vai = NC(n_TextDrawCreate);
 
 	*f1 = 203.0f;
 	*f2 = 383.0f;
-	SETB144("~n~~n~~n~");
+	B144("~n~~n~~n~");
 	txt_bg_spd = NC(n_TextDrawCreate);
 
 	*f1 = 436.0f;
@@ -922,7 +922,7 @@ void panel_on_gamemode_init()
 
 	*f1 = 227.0f;
 	*f2 = 360.0f;
-	SETB144("DIS_______________ALT_______________CRS");
+	B144("DIS_______________ALT_______________CRS");
 	txt_adf_labels = NC(n_TextDrawCreate);
 
 	/*x y txt*/

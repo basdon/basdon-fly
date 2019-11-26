@@ -62,6 +62,7 @@ extern AMX_NATIVE n_RemoveBuildingForPlayer;
 extern AMX_NATIVE n_RemovePlayerMapIcon;
 extern AMX_NATIVE n_RepairVehicle;
 extern AMX_NATIVE n_ResetPlayerMoney_;
+extern AMX_NATIVE n_SHA256_PassHash;
 extern AMX_NATIVE n_SendClientMessage;
 extern AMX_NATIVE n_SendClientMessageToAll;
 extern AMX_NATIVE n_SendRconCommand;
@@ -101,6 +102,10 @@ extern AMX_NATIVE n_TogglePlayerClock;
 extern AMX_NATIVE n_TogglePlayerControllable;
 extern AMX_NATIVE n_TogglePlayerSpectating;
 extern AMX_NATIVE n_UpdateVehicleDamageStatus;
+extern AMX_NATIVE n_bcrypt_check;
+extern AMX_NATIVE n_bcrypt_get_hash;
+extern AMX_NATIVE n_bcrypt_hash;
+extern AMX_NATIVE n_bcrypt_is_equal;
 extern AMX_NATIVE n_cache_delete;
 extern AMX_NATIVE n_cache_get_row;
 extern AMX_NATIVE n_cache_get_row_count;
@@ -324,6 +329,11 @@ extern cell tmpfloat;
 	nc_params[1]=PLAYERID,nc_params[2]=MAPICONID,\
 	n_RemovePlayerMapIcon(amx,nc_params))
 
+#define NC_SHA256_PassHash(INPUT,SALT,DEST,MAXLEN) \
+	(NC_PARS_(4)nc_params[1]=INPUT,nc_params[2]=SALT,\
+	nc_params[3]=DEST,nc_params[4]=MAXLEN,\
+	n_SHA256_PassHash(amx,nc_params))
+
 #define NC_SendClientMessage(PLAYERID,COLOR,BUF) \
 	(NC_PARS_(3)\
 	nc_params[1]=PLAYERID,nc_params[2]=COLOR,nc_params[3]=BUF,\
@@ -405,6 +415,12 @@ extern cell tmpfloat;
 #define NC_TogglePlayerSpectating(PLAYERID,FLAG) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
 	n_TogglePlayerSpectating(amx,nc_params))
+
+#define NC_bcrypt_get_hash(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
+	n_bcrypt_get_hash(amx,nc_params))
+
+#define NC_bcrypt_is_equal() (NC_PARS_(0)\
+	n_bcrypt_is_equal(amx,nc_params))
 
 #define NC_cache_delete(ID) (NC_PARS_(2)nc_params[1]=ID,nc_params[2]=1,\
 	n_cache_delete(amx,nc_params))

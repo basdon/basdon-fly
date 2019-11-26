@@ -1037,7 +1037,7 @@ void veh_create_player_textdraws(int playerid)
 	nc_paramf[2] = 528.0f;
 	nc_paramf[3] = 404.0f;
 	nc_params[4] = buf144a;
-	SETB144("ODO 00000000~n~_FL i-------i~n~_HP i-------i");
+	B144("ODO 00000000~n~_FL i-------i~n~_HP i-------i");
 	ptxt_txt[playerid] = NC(n_CreatePlayerTextDraw);
 
 	/*letter sizes*/
@@ -1065,7 +1065,7 @@ void veh_create_global_textdraws()
 	nc_paramf[1] = 570.0f;
 	nc_paramf[2] = 405.0f;
 	nc_params[3] = buf144a;
-	SETB144("~n~~n~~n~");
+	B144("~n~~n~~n~");
 	txt_bg = NC(n_TextDrawCreate);
 	nc_params[1] = txt_bg;
 	nc_paramf[2] = 0.5f;

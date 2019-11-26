@@ -74,6 +74,7 @@ AMX_NATIVE n_RemoveBuildingForPlayer;
 AMX_NATIVE n_ResetPlayerMoney_;
 AMX_NATIVE n_RepairVehicle;
 AMX_NATIVE n_RemovePlayerMapIcon;
+AMX_NATIVE n_SHA256_PassHash;
 AMX_NATIVE n_SendClientMessage;
 AMX_NATIVE n_SendClientMessageToAll;
 AMX_NATIVE n_SendRconCommand;
@@ -113,6 +114,10 @@ AMX_NATIVE n_TextDrawUseBox;
 AMX_NATIVE n_TogglePlayerClock;
 AMX_NATIVE n_TogglePlayerControllable;
 AMX_NATIVE n_TogglePlayerSpectating;
+AMX_NATIVE n_bcrypt_check;
+AMX_NATIVE n_bcrypt_get_hash;
+AMX_NATIVE n_bcrypt_hash;
+AMX_NATIVE n_bcrypt_is_equal;
 AMX_NATIVE n_cache_delete;
 AMX_NATIVE n_cache_get_row;
 AMX_NATIVE n_cache_get_row_count;
@@ -221,6 +226,7 @@ int natives_find()
 		N(RemovePlayerMapIcon),
 		N(RepairVehicle),
 		N_(ResetPlayerMoney),
+		N(SHA256_PassHash),
 		N(SendClientMessage),
 		N(SendClientMessageToAll),
 		N(SendRconCommand),
@@ -260,6 +266,10 @@ int natives_find()
 		N(TextDrawUseBox),
 		N(TogglePlayerControllable),
 		N(UpdateVehicleDamageStatus),
+		N(bcrypt_check),
+		N(bcrypt_get_hash),
+		N(bcrypt_hash),
+		N(bcrypt_is_equal),
 		N(cache_delete),
 		N(cache_get_row),
 		N(cache_get_row_count),
@@ -427,7 +437,9 @@ int natives_SetPlayerName(int playerid, char *name)
 	nc_params[2] = buf32a;
 	res = NC(n_SetPlayerName_);
 	if (res) {
-		strcpy(pdata[playerid]->name, name);
+		if (pdata[playerid]->name != name) {
+			strcpy(pdata[playerid]->name, name);
+		}
 		pdata_on_name_updated(playerid);
 		sprintf(cbuf4096,
 			"Your name has been changed to '%s'",

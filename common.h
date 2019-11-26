@@ -59,7 +59,7 @@ EXPECT_SIZE(struct VEHICLEDAMAGE, 4 * sizeof(cell));
 #include "natives.h"
 #include "publics.h"
 
-typedef void (*mysql_cb)(void* data);
+typedef void (*cb_t)(void* data);
 
 typedef void (*logprintf_t)(char* format, ...);
 
@@ -67,7 +67,7 @@ extern logprintf_t logprintf;
 
 #define amx_GetUString(dest, source, size) amx_GetString(dest, source, 0, size)
 #define amx_SetUString(dest, source, size) amx_SetString(dest, source, 0, 0, size)
-#define SETB144(X) amx_SetUString(buf144,X,144)
+#define B144(X) amx_SetUString(buf144,X,144)
 
 #define FLOAT_PINF (0x7F800000)
 #define FLOAT_NINF (0xFF800000)
@@ -81,6 +81,7 @@ extern logprintf_t logprintf;
 
 #define MK_PLAYER_CC(PLAYERID) \
 	((_cc[PLAYERID] & 0x003FFFFF) | (PLAYERID << 22))
+#define V_MK_PLAYER_CC(PLAYERID) ((void*) MK_PLAYER_CC(PLAYERID))
 #define PLAYER_CC_GETID(VALUE) (((unsigned int) VALUE >> 22) & 0x3FF)
 #define PLAYER_CC_CHECK(VALUE,PLAYERID) \
 	(_cc[PLAYERID] == ((unsigned int) VALUE & 0x003FFFFF))
@@ -230,6 +231,24 @@ Uses buf32.
 */
 int common_UpdateVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d);
 /**
+Check a string agains its hash.
+
+Uses the last 8 components of buf4096 for callback stuff.
+
+@param callback function to call when the checking is done
+@param data usually a pointer to allocated memory that should be freed in the cb
+*/
+void common_bcrypt_check(cell pw, cell hash, cb_t callback, void *data);
+/**
+Hash a string.
+
+Uses the last 8 components of buf4096 for callback stuff.
+
+@param callback function to call when the hasing is done
+@param data usually a pointer to allocated memory that should be freed in the cb
+*/
+void common_bcrypt_hash(cell pw, cb_t callback, void *data);
+/**
 Uses the mysql plugin escape string routine.
 
 Uses buf4096
@@ -240,8 +259,8 @@ Calls mysql_tquery with a callback and data to pass.
 
 Uses buf4096 for query. Also uses the last 8 components of buf4096.
 
-@param callback cb to call when the query has been executed
+@param callback function to call when the query has been executed
 @param data usually a pointer to allocated memory that should be freed in the cb
 */
-void common_mysql_tquery(char *query, mysql_cb callback, void *data);
+void common_mysql_tquery(char *query, cb_t callback, void *data);
 float common_vectorsize_sq(struct vec3 vec);

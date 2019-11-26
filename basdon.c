@@ -12,6 +12,8 @@ short players[MAX_PLAYERS];
 int playercount;
 int spawned[MAX_PLAYERS];
 
+static const char *NOLOG = WARN"Log in first.";
+
 /* native B_Validate(maxplayers, buf4096[], buf144[], buf64[], buf32[],
                      buf32_1[], emptystring, underscorestring) */
 static
@@ -72,6 +74,15 @@ fail:
 	return 0;
 }
 
+/* native B_OnCallbackHit(function, data) */
+static
+cell AMX_NATIVE_CALL B_OnCallbackHit(AMX *amx, cell *params)
+{
+	/*TODO: maybe I shouldn't be doing it like this*/
+	((cb_t) params[1])((void*) params[2]);
+	return 1;
+}
+
 /* native B_OnDialogResponse() */
 static
 cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
@@ -103,6 +114,13 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 		return 1;
 	case DIALOG_AIRPORT_NEAREST:
 		airport_list_dialog_response(playerid, response, listitem);
+		return 1;
+	case DIALOG_REGISTER_FIRSTPASS:
+		login_dlg_register_firstpass(playerid, response, params[5]);
+		return 1;
+	case DIALOG_REGISTER_CONFIRMPASS:
+		login_dlg_register_confirmpass(
+			playerid, response, params[5], inputtext);
 		return 1;
 	}
 	return 1;
@@ -239,26 +257,25 @@ exit:
 	return 1;
 }
 
-static
-cell AMX_NATIVE_CALL B_OnMysqlResponse(AMX *amx, cell *params)
-{
-	/*TODO: maybe I shouldn't be doing it like this*/
-	((mysql_cb) params[1])((void*) params[2]);
-	return 1;
-}
-
 /* native B_OnPlayerCommandText(playerid, cmdtext[]) */
 static
 cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 {
 	static const char *NO = WARN"You can't use commands when not spawned.";
+
 	const int playerid = params[1];
 	char cmdtext[145];
 	cell *addr;
 	int hash;
 
+	if (!ISPLAYING(playerid)) {
+		B144(NOLOG);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		return 1;
+	}
+
 	if (!spawned[playerid]) {
-		amx_SetUString(buf144, NO, 144);
+		B144(NO);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
@@ -292,7 +309,6 @@ static
 cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
-	int i;
 
 #ifdef DEV
 	amx_SetUString(buf144, "PL: DEVELOPMENT BUILD", 144);
@@ -301,15 +317,17 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 
 	_cc[playerid]++;
 
-	/*keep this top*/
-	pdata_on_player_connect(playerid);
-	/*keep this second*/
-	login_on_player_connect(playerid);
-
 	playeronlineflag[playerid] = 1;
 	loggedstatus[playerid] = LOGGED_NO;
 	kick_update_delay[playerid] = 0;
 	temp_afk[playerid] = 0;
+
+	/*keep this top*/
+	pdata_on_player_connect(playerid);
+	/*keep this second*/
+	if (!login_on_player_connect(playerid)) {
+		return 1;
+	}
 
 	class_on_player_connect(playerid);
 	echo_on_player_connection(playerid, ECHO_CONN_REASON_GAME_CONNECTED);
@@ -329,12 +347,6 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	veh_on_player_connect(playerid);
 	zones_on_player_connect(playerid);
 
-	for (i = 0; i < playercount; ){
-		if (players[i] == playerid) {
-			return 1;
-		}
-	}
-	players[playercount++] = playerid;
 	return 1;
 }
 
@@ -371,6 +383,8 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	pm_on_player_disconnect(playerid);
 	veh_on_player_disconnect(playerid);
 
+	/*keep this here, clears logged in status*/
+	login_on_player_disconnect(playerid, reason);
 	/*keep this last*/
 	pdata_on_player_disconnect(playerid);
 
@@ -436,6 +450,12 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 {
 	const int playerid = params[1];
 
+	if (!ISPLAYING(playerid)) {
+		B144(NOLOG);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		return 1;
+	}
+
 	if (class_on_player_request_spawn(playerid)) {
 		spawn_prespawn(playerid);
 		return 1;
@@ -480,6 +500,12 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 	cell *addr;
 	char buf[144];
 	const int playerid = params[1];
+
+	if (!ISPLAYING(playerid)) {
+		B144(NOLOG);
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		return 1;
+	}
 
 	if (!anticheat_on_player_text(playerid)) {
 		return 0;
