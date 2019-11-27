@@ -37,6 +37,10 @@ struct vehicle {
 };
 
 extern struct vehicle gamevehicles[MAX_VEHICLES];
+/**
+TODO: decide where this goes
+*/
+extern float playerodoKM[MAX_PLAYERS];
 
 /**
 Should be called in OnGameModeInit.

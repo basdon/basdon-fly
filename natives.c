@@ -38,6 +38,7 @@ AMX_NATIVE n_GetPlayerKeys;
 AMX_NATIVE n_GetPlayerName;
 AMX_NATIVE n_GetPlayerPing;
 AMX_NATIVE n_GetPlayerPos;
+AMX_NATIVE n_GetPlayerScore;
 AMX_NATIVE n_GetPlayerState;
 AMX_NATIVE n_GetPlayerVehicleID;
 AMX_NATIVE n_GetPlayerVehicleSeat;
@@ -88,6 +89,7 @@ AMX_NATIVE n_SetPlayerMapIcon;
 AMX_NATIVE n_SetPlayerName_;
 AMX_NATIVE n_SetPlayerPos_;
 AMX_NATIVE n_SetPlayerRaceCheckpoint;
+AMX_NATIVE n_SetPlayerScore;
 AMX_NATIVE n_SetPlayerSpecialAction;
 AMX_NATIVE n_SetPlayerTime;
 AMX_NATIVE n_SetPlayerWeather;
@@ -190,6 +192,7 @@ int natives_find()
 		N(GetPlayerName),
 		N(GetPlayerPing),
 		N(GetPlayerPos),
+		N(GetPlayerScore),
 		N(GetPlayerState),
 		N(GetPlayerVehicleID),
 		N(GetPlayerVehicleSeat),
@@ -240,6 +243,7 @@ int natives_find()
 		N_(SetPlayerName),
 		N_(SetPlayerPos),
 		N(SetPlayerRaceCheckpoint),
+		N(SetPlayerScore),
 		N(SetPlayerSpecialAction),
 		N(SetPlayerTime),
 		N(SetPlayerWeather),

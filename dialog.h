@@ -10,6 +10,7 @@
 #define DIALOG_REGISTER_FIRSTPASS 1004
 #define DIALOG_LOGIN_LOGIN_OR_NAMECHANGE 1005
 #define DIALOG_REGISTER_CONFIRMPASS 1006
+#define DIALOG_LOGIN_NAMECHANGE 1007
 
 /*don't use an id that is used in a dialog id (unless they relate), use 32768+*/
 /*max transaction id is int max*/

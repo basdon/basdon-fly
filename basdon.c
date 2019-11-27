@@ -122,6 +122,12 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 		login_dlg_register_confirmpass(
 			playerid, response, params[5], inputtext);
 		return 1;
+	case DIALOG_LOGIN_LOGIN_OR_NAMECHANGE:
+		login_dlg_login_or_namechange(playerid, response, inputtext);
+		return 1;
+	case DIALOG_LOGIN_NAMECHANGE:
+		login_dlg_namechange(playerid, response, inputtext);
+		return 1;
 	}
 	return 1;
 }

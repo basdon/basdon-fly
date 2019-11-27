@@ -26,6 +26,7 @@ extern AMX_NATIVE n_GetPlayerKeys;
 extern AMX_NATIVE n_GetPlayerName;
 extern AMX_NATIVE n_GetPlayerPing;
 extern AMX_NATIVE n_GetPlayerPos;
+extern AMX_NATIVE n_GetPlayerScore;
 extern AMX_NATIVE n_GetPlayerState;
 extern AMX_NATIVE n_GetPlayerVehicleID;
 extern AMX_NATIVE n_GetPlayerVehicleSeat;
@@ -76,6 +77,7 @@ extern AMX_NATIVE n_SetPlayerMapIcon;
 extern AMX_NATIVE n_SetPlayerName_;
 extern AMX_NATIVE n_SetPlayerPos_;
 extern AMX_NATIVE n_SetPlayerRaceCheckpoint;
+extern AMX_NATIVE n_SetPlayerScore;
 extern AMX_NATIVE n_SetPlayerSpecialAction;
 extern AMX_NATIVE n_SetPlayerTime;
 extern AMX_NATIVE n_SetPlayerWeather;
@@ -216,6 +218,9 @@ extern cell tmpfloat;
 	nc_params[1]=PLAYERID,nc_params[2]=FREFX,nc_params[3]=FREFY,\
 	nc_params[4]=FREFZ,\
 	n_GetPlayerPos(amx,nc_params))
+
+#define NC_GetPlayerScore(PLAYERID) (NC_PARS_(1)nc_params[1]=PLAYERID,\
+	n_GetPlayerScore(amx,nc_params))
 
 #define NC_GetPlayerState(PLAYERID) (NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_GetPlayerState(amx,nc_params))
@@ -365,6 +370,10 @@ extern cell tmpfloat;
 	nc_paramf[3]=FX,nc_paramf[4]=FY,nc_paramf[5]=FZ,nc_paramf[6]=FNX,\
 	nc_paramf[7]=FNY,nc_paramf[8]=FNZ,nc_paramf[9]=FSIZE,\
 	n_SetPlayerRaceCheckpoint(amx,nc_params))
+
+#define NC_SetPlayerScore(PLAYERID,SCORE) \
+	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=SCORE,\
+	n_SetPlayerScore(amx,nc_params))
 
 #define NC_SetPlayerSpecialAction(PLAYERID,ACTION) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=ACTION,\

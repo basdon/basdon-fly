@@ -26,10 +26,17 @@ extern int loggedstatus[MAX_PLAYERS];
 int login_on_player_connect(int playerid);
 void login_on_player_disconnect(int playerid, int reason);
 /**
+Function to call on response from showing login dialog.
+*/
+void login_dlg_login_or_namechange(int playerid, int response, char *inputtext);
+/**
+Function to call on response from namechange dialog.
+*/
+void login_dlg_namechange(int playerid, int response, char *inputtext);
+/**
 Function to call on response from showing register confirm pass dialog.
 */
-void login_dlg_register_confirmpass(
-	int playerid, int response, cell inputaddr, char *inputtext);
+void login_dlg_register_confirmpass(int pid, int resp, cell ia, char *i);
 /**
 Function to call on response from showing register first pass dialog.
 */
