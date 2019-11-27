@@ -16,7 +16,9 @@ extern AMX_NATIVE n_DeletePlayer3DTextLabel;
 extern AMX_NATIVE n_DestroyObject;
 extern AMX_NATIVE n_DestroyPlayerObject;
 extern AMX_NATIVE n_DestroyVehicle_;
+extern AMX_NATIVE n_DisablePlayerCheckpoint;
 extern AMX_NATIVE n_DisablePlayerRaceCheckpoint;
+extern AMX_NATIVE n_EnableStuntBonusForAll;
 extern AMX_NATIVE n_ForceClassSelection;
 extern AMX_NATIVE n_GameTextForPlayer;
 extern AMX_NATIVE n_GetConsoleVarAsInt;
@@ -68,6 +70,7 @@ extern AMX_NATIVE n_SendClientMessage;
 extern AMX_NATIVE n_SendClientMessageToAll;
 extern AMX_NATIVE n_SendRconCommand;
 extern AMX_NATIVE n_SetCameraBehindPlayer;
+extern AMX_NATIVE n_SetGameModeText;
 extern AMX_NATIVE n_SetPlayerCameraPos;
 extern AMX_NATIVE n_SetPlayerCameraLookAt;
 extern AMX_NATIVE n_SetPlayerColor;
@@ -104,6 +107,7 @@ extern AMX_NATIVE n_TogglePlayerClock;
 extern AMX_NATIVE n_TogglePlayerControllable;
 extern AMX_NATIVE n_TogglePlayerSpectating;
 extern AMX_NATIVE n_UpdateVehicleDamageStatus;
+extern AMX_NATIVE n_UsePlayerPedAnims;
 extern AMX_NATIVE n_bcrypt_check;
 extern AMX_NATIVE n_bcrypt_get_hash;
 extern AMX_NATIVE n_bcrypt_hash;
@@ -186,6 +190,9 @@ extern cell tmpfloat;
 #define NC_DisablePlayerRaceCheckpoint(PLAYERID) \
 	(NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_DisablePlayerRaceCheckpoint(amx,nc_params))
+
+#define NC_EnableStuntBonusForAll(FLAG) (NC_PARS_(1)nc_params[1]=FLAG,\
+	n_EnableStuntBonusForAll(amx,nc_params))
 
 #define NC_ForceClassSelection(PLAYERID) \
 	(NC_PARS_(1)nc_params[1]=PLAYERID,\
@@ -355,6 +362,9 @@ extern cell tmpfloat;
 	(NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_SetCameraBehindPlayer(amx,nc_params))
 
+#define NC_SetGameModeText(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
+	n_SetGameModeText(amx,nc_params))
+
 #define NC_SetPlayerFacingAngle(PLAYERID,FR) (NC_PARS_(2)\
 	nc_params[1]=PLAYERID,nc_params[2]=FR,\
 	n_SetPlayerFacingAngle(amx,nc_params))
@@ -424,6 +434,9 @@ extern cell tmpfloat;
 #define NC_TogglePlayerSpectating(PLAYERID,FLAG) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
 	n_TogglePlayerSpectating(amx,nc_params))
+
+#define NC_UsePlayerPedAnims() (NC_PARS_(0)\
+	n_UsePlayerPedAnims(amx,nc_params))
 
 #define NC_bcrypt_get_hash(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
 	n_bcrypt_get_hash(amx,nc_params))

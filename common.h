@@ -3,6 +3,8 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 
+#define VERSION "0.1"
+
 #include <stdlib.h>
 #include <stdio.h>
 

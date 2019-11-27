@@ -28,7 +28,9 @@ AMX_NATIVE n_DeletePlayer3DTextLabel;
 AMX_NATIVE n_DestroyObject;
 AMX_NATIVE n_DestroyPlayerObject;
 AMX_NATIVE n_DestroyVehicle_;
+AMX_NATIVE n_DisablePlayerCheckpoint;
 AMX_NATIVE n_DisablePlayerRaceCheckpoint;
+AMX_NATIVE n_EnableStuntBonusForAll;
 AMX_NATIVE n_ForceClassSelection;
 AMX_NATIVE n_GameTextForPlayer;
 AMX_NATIVE n_GetConsoleVarAsInt;
@@ -80,6 +82,7 @@ AMX_NATIVE n_SendClientMessage;
 AMX_NATIVE n_SendClientMessageToAll;
 AMX_NATIVE n_SendRconCommand;
 AMX_NATIVE n_SetCameraBehindPlayer;
+AMX_NATIVE n_SetGameModeText;
 AMX_NATIVE n_SetPlayerCameraPos;
 AMX_NATIVE n_SetPlayerCameraLookAt;
 AMX_NATIVE n_SetPlayerColor;
@@ -112,6 +115,7 @@ AMX_NATIVE n_TextDrawSetShadow;
 AMX_NATIVE n_TextDrawShowForPlayer;
 AMX_NATIVE n_TextDrawTextSize;
 AMX_NATIVE n_UpdateVehicleDamageStatus;
+AMX_NATIVE n_UsePlayerPedAnims;
 AMX_NATIVE n_TextDrawUseBox;
 AMX_NATIVE n_TogglePlayerClock;
 AMX_NATIVE n_TogglePlayerControllable;
@@ -182,7 +186,9 @@ int natives_find()
 		N(DestroyObject),
 		N(DestroyPlayerObject),
 		N_(DestroyVehicle),
+		N(DisablePlayerCheckpoint),
 		N(DisablePlayerRaceCheckpoint),
+		N(EnableStuntBonusForAll),
 		N(ForceClassSelection),
 		N(GameTextForPlayer),
 		N(GetConsoleVarAsInt),
@@ -234,6 +240,7 @@ int natives_find()
 		N(SendClientMessageToAll),
 		N(SendRconCommand),
 		N(SetCameraBehindPlayer),
+		N(SetGameModeText),
 		N(SetPlayerCameraPos),
 		N(SetPlayerCameraLookAt),
 		N(SetPlayerColor),
@@ -270,6 +277,7 @@ int natives_find()
 		N(TextDrawUseBox),
 		N(TogglePlayerControllable),
 		N(UpdateVehicleDamageStatus),
+		N(UsePlayerPedAnims),
 		N(bcrypt_check),
 		N(bcrypt_get_hash),
 		N(bcrypt_hash),

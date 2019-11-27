@@ -70,6 +70,9 @@ cell AMX_NATIVE_CALL B_Validate(AMX *local_amx, cell *params)
 
 	return MAX_PLAYERS;
 fail:
+	buf32[0] = 'e'; buf32[1] = 'x'; buf32[2] = 'i'; buf32[3] = 't';
+	buf32[4] = 0;
+	NC_SendRconCommand(buf32a);
 	time_sleep(10000);
 	return 0;
 }
@@ -255,7 +258,14 @@ exit:
 	veh_create_global_textdraws();
 	veh_init();
 
-	printf("OnGameModeInit: %ldms\n", time_timestamp() - t);
+	amx_SetUString(buf144, "basdon-fly "VERSION, 144);
+	NC_SetGameModeText(buf144a);
+
+	NC_EnableStuntBonusForAll(0);
+	NC_UsePlayerPedAnims();
+
+	logprintf("  Loaded gamemode basdon-fly "VERSION" in %ldms\n",
+		time_timestamp() - t);
 
 	/*must be last*/
 	timecyc_reset();
@@ -312,6 +322,11 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	amx_SetUString(buf144, "PL: DEVELOPMENT BUILD", 144);
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 #endif /*DEV*/
+
+	NC_PARS(1);
+	nc_params[1] = playerid;
+	NC(n_DisablePlayerCheckpoint);
+	NC(n_DisablePlayerRaceCheckpoint);
 
 	_cc[playerid]++;
 
