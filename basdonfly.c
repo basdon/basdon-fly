@@ -41,32 +41,6 @@ EXPECT_SIZE(int, 4);
 EXPECT_SIZE(cell, 4);
 EXPECT_SIZE(float, 4);
 
-#define FORWARD(X) cell AMX_NATIVE_CALL X(AMX *amx, cell *params)
-
-/* anticheat.c */
-FORWARD(Ac_FormatLog);
-/* commands.c */
-FORWARD(Command_Is);
-FORWARD(Command_GetIntParam);
-FORWARD(Command_GetPlayerParam);
-FORWARD(Command_GetStringParam);
-/* dialog.c */
-FORWARD(Dialog_EndTransaction);
-FORWARD(Dialog_EnsureTransaction);
-FORWARD(Dialog_ShowPlayerDialog);
-/* echo.c */
-FORWARD(Echo_Init);
-/* game_sa.c */
-FORWARD(Game_IsAirVehicle);
-FORWARD(Game_IsHelicopter);
-FORWARD(Game_IsPlane);
-/* nav.c */
-FORWARD(Nav_Reset);
-/* playerdata.c */
-FORWARD(PlayerData_FormatUpdateQuery);
-FORWARD(PlayerData_SetUserId);
-FORWARD(PlayerData_UpdateGroup);
-
 int temp_afk[MAX_PLAYERS];
 int _cc[MAX_PLAYERS];
 
@@ -142,116 +116,9 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 }
 #undef amx
 
-static
-cell AMX_NATIVE_CALL REMOVEME_onplayerreqclassimpl(AMX *amx, cell *params)
-{
-	class_on_player_request_class(params[1],params[2]);
-	return 1;
-}
-
-static
-cell AMX_NATIVE_CALL REMOVEME_setprefs(AMX *amx, cell *params)
-{
-	prefs[params[1]] = params[2];
-	return 1;
-}
-
-static
-cell AMX_NATIVE_CALL REMOVEME_getprefs(AMX *amx, cell *params)
-{
-	return prefs[params[1]];
-}
-
-static
-cell AMX_NATIVE_CALL REMOVEME_setloggedstatus(AMX *amx, cell *params)
-{
-	loggedstatus[params[1]] = params[2];
-	return 1;
-}
-
-extern float playerodoKM[MAX_PLAYERS];
-cell AMX_NATIVE_CALL REMOVEME_getplayerodo(AMX *amx, cell *params)
-{
-	return amx_ftoc(playerodoKM[params[1]]);
-}
-
-static
-cell AMX_NATIVE_CALL REMOVEME_setplayermoney(AMX *amx, cell *params)
-{
-	money_set(params[1], params[2]);
-	return 1;
-}
-
-static
-cell AMX_NATIVE_CALL REMOVEME_getplayermoney(AMX *amx, cell *params)
-{
-	return money_get(params[1]);
-}
-
-static
-cell AMX_NATIVE_CALL REMOVEME_getflighttime(AMX *amx, cell *params)
-{
-	return score_flight_time[params[1]];
-}
-
-static
-cell AMX_NATIVE_CALL REMOVEME_setflighttime(AMX *amx, cell *params)
-{
-	score_flight_time[params[1]] = params[2];
-	return 1;
-}
-
-static
-cell AMX_NATIVE_CALL REMOVEME_setsessionid(AMX *amx, cell *params)
-{
-	sessionid[params[1]] = params[2];
-	return 1;
-}
-
-static
-cell AMX_NATIVE_CALL REMOVEME_onplayerlogin(AMX *amx, cell *params)
-{
-	veh_spawn_player_vehicles(params[1]);
-	return 1;
-}
-
-static
-cell REMOVEME_setplayerodo(AMX *amx, cell *params)
-{
-	playerodoKM[params[1]] = amx_ctof(params[2]);
-	return 1;
-}
-
-static
-cell REMOVEME_setplayername(AMX *amx, cell *params)
-{
-	cell *addr;
-	char name[MAX_PLAYER_NAME + 1];
-	int playerid = params[1];
-	amx_GetAddr(amx, params[2], &addr);
-	amx_GetUString(name, addr, MAX_PLAYER_NAME + 1);
-	return natives_SetPlayerName(playerid, name);
-}
-
 #define REGISTERNATIVE(X) {#X, X}
 AMX_NATIVE_INFO PluginNatives[] =
 {
-	REGISTERNATIVE(REMOVEME_setplayername),
-	REGISTERNATIVE(REMOVEME_setplayerodo),
-	REGISTERNATIVE(REMOVEME_onplayerlogin),
-	REGISTERNATIVE(REMOVEME_setsessionid),
-	REGISTERNATIVE(REMOVEME_onplayerreqclassimpl),
-	REGISTERNATIVE(REMOVEME_setprefs),
-	REGISTERNATIVE(REMOVEME_getprefs),
-	REGISTERNATIVE(REMOVEME_setloggedstatus),
-	REGISTERNATIVE(REMOVEME_getplayerodo),
-	REGISTERNATIVE(REMOVEME_setplayermoney),
-	REGISTERNATIVE(REMOVEME_getplayermoney),
-	REGISTERNATIVE(REMOVEME_getflighttime),
-	REGISTERNATIVE(REMOVEME_setflighttime),
-	/* anticheat.c */
-	REGISTERNATIVE(Ac_FormatLog),
-	/* basdon.c */
 	REGISTERNATIVE(B_OnCallbackHit),
 	REGISTERNATIVE(B_OnDialogResponse),
 	REGISTERNATIVE(B_OnGameModeExit),
@@ -274,25 +141,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnVehicleStreamIn),
 	REGISTERNATIVE(B_OnVehicleStreamOut),
 	REGISTERNATIVE(B_Validate),
-	/* commands.c */
-	REGISTERNATIVE(Command_Is),
-	REGISTERNATIVE(Command_GetIntParam),
-	REGISTERNATIVE(Command_GetPlayerParam),
-	REGISTERNATIVE(Command_GetStringParam),
-	/* dialog.c */
-	REGISTERNATIVE(Dialog_EndTransaction),
-	REGISTERNATIVE(Dialog_EnsureTransaction),
-	REGISTERNATIVE(Dialog_ShowPlayerDialog),
-	/* game_sa.c */
-	REGISTERNATIVE(Game_IsAirVehicle),
-	REGISTERNATIVE(Game_IsHelicopter),
-	REGISTERNATIVE(Game_IsPlane),
-	/* nav.c */
-	REGISTERNATIVE(Nav_Reset),
-	/* playerdata.c */
-	REGISTERNATIVE(PlayerData_FormatUpdateQuery),
-	REGISTERNATIVE(PlayerData_SetUserId),
-	REGISTERNATIVE(PlayerData_UpdateGroup),
 	{0, 0}
 };
 

@@ -363,6 +363,10 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 	const int playerid = params[1]/*, killerdid = params[2]*/;
 	/*const int reason = params[3];*/
 
+	if (!ISPLAYING(playerid)) {
+		return 0;
+	}
+
 	spawned[playerid] = 0;
 
 	missions_on_player_death(playerid);
@@ -476,6 +480,10 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 {
 	struct vec3 pos;
 	const int playerid = params[1];
+
+	if (!ISPLAYING(playerid)) {
+		return 0;
+	}
 
 	spawned[playerid] = 1;
 
