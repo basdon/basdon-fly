@@ -44,27 +44,6 @@ Flood value of player.
 */
 static int floodcount[MAX_PLAYERS];
 
-/* native Ac_FormatLog(playerid, loggedstatus, const message[], buf[]) */
-cell AMX_NATIVE_CALL Ac_FormatLog(AMX *amx, cell *params)
-{
-	const int pid = params[1], loggedstatus = params[2];
-	cell *addr;
-	char buf[512], msg[144];
-
-	amx_GetAddr(amx, params[3], &addr);
-	amx_GetUString(msg, addr, sizeof(msg));
-	sprintf(buf,
-	        "INSERT INTO acl(t,j,u,l,e) "
-		"VALUES(UNIX_TIMESTAMP(),'%s',IF(%d<1,NULL,%d),%d,'%s')",
-	        pdata[pid]->ip,
-	        userid, userid,
-		loggedstatus,
-		msg);
-	amx_GetAddr(amx, params[4], &addr);
-	amx_SetUString(addr, buf, sizeof(buf));
-	return 1;
-}
-
 /**
 Adds infraction value, kicking the player if they exceeded the max value.
 

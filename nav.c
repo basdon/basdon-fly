@@ -579,20 +579,6 @@ void nav_reset_for_vehicle(int vehicleid)
 	}
 }
 
-/*TOREMOVE*/
-/* native Nav_Reset(vehicleid) */
-cell AMX_NATIVE_CALL Nav_Reset(AMX *amx, cell *params)
-{
-	int vid = params[1];
-	if (nav[vid] != NULL) {
-		free(nav[vid]);
-		nav[vid] = NULL;
-		panel_reset_nav_for_passengers(vid);
-		return 1;
-	}
-	return 0;
-}
-
 /**
 Calculates ILS values.
 

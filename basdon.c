@@ -49,7 +49,7 @@ cell AMX_NATIVE_CALL B_Validate(AMX *local_amx, cell *params)
 	fbuf144 = (float*) buf144;
 	fbuf4096 = (float*) buf4096;
 
-	if (!natives_find() || !publics_find()) {
+	if (!natives_find()) {
 		goto fail;
 	}
 
@@ -272,7 +272,6 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 	const int playerid = params[1];
 	char cmdtext[145];
 	cell *addr;
-	int hash;
 
 	if (!ISPLAYING(playerid)) {
 		B144(NOLOG);
@@ -288,8 +287,6 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 
 	amx_GetAddr(amx, params[2], &addr);
 	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
-	/*TODO: remove cmd_hash (make it a static func)*/
-	hash = cmd_hash(cmdtext);
 
 	common_mysql_escape_string(cmdtext, cbuf144, 144 * sizeof(cell));
 	sprintf(cbuf4096_,
@@ -302,12 +299,7 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 	amx_SetUString(buf4096, cbuf4096_, 4096);
 	NC_mysql_tquery_nocb(buf4096a);
 
-	if (cmd_check(playerid, hash, cmdtext)) {
-		return 1;
-	}
-
-	PC_OnPlayerCommandTextHash(playerid, hash, params[2]);
-	return pc_result;
+	return cmd_check(playerid, cmdtext);
 }
 
 /* native B_OnPlayerConnect(playerid) */

@@ -5,6 +5,7 @@
 #include "a_samp.h"
 #include "class.h"
 #include "game_sa.h"
+#include "login.h"
 #include "zones.h"
 
 #define VINEWOOD_CAM_POS_X 1496.7052f
@@ -102,8 +103,7 @@ void class_on_player_request_class(int playerid, int _classid)
 	/*This is also called when the player is connecting, but then they
 	aren't logged in yet, so SetPlayerPos to hide the player and don't
 	do class thingies.*/
-	PC_REMOVEME_isplaying(playerid);
-	if (!pc_result) {
+	if (!ISPLAYING(playerid)) {
 		/*position behind the camera, to hide during login*/
 		nc_paramf[2] = 1500.9938f;
 		nc_paramf[3] = -891.3679f;
@@ -124,7 +124,7 @@ void class_on_player_request_class(int playerid, int _classid)
 	nc_params[2] = SPECIAL_ACTION_DANCE1;
 	NC(n_SetPlayerSpecialAction);
 
-	if (!pc_result) {
+	if (!ISPLAYING(playerid)) {
 		/*don't do classy thingies when not logged in*/
 		return;
 	}

@@ -216,6 +216,12 @@ static struct COMMAND cmds[] = {
 	{ 0, "/weather", GROUPS_ALL, timecyc_cmd_metar },
 }, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
 
+/*
+Hashes command part of command text (case-insensitive).
+End delimiter for the command part is either a zero terminator, or anything
+with a value below the space character.
+*/
+static
 int cmd_hash(const char *cmdtext)
 {
 	int val, pos = 0, result = 0;
@@ -259,70 +265,6 @@ nextchar:
 	return 0;
 }
 
-/* native Command_GetIntParam(cmdtext[], &idx, &value) */
-cell AMX_NATIVE_CALL Command_GetIntParam(AMX *amx, cell *params)
-{
-	char cmdtext[144];
-	cell *idx, *value;
-
-	amx_GetAddr(amx, params[1], &idx);
-	amx_GetUString(cmdtext, idx, sizeof(cmdtext));
-	amx_GetAddr(amx, params[2], &idx);
-	amx_GetAddr(amx, params[3], &value);
-	return cmd_get_int_param(cmdtext, (int*) idx, (int*) value);
-}
-
-/* native Command_GetPlayerParam(cmdtext[], &idx, &player) */
-cell AMX_NATIVE_CALL Command_GetPlayerParam(AMX *amx, cell *params)
-{
-	char cmdtext[144];
-	cell *idx, *player;
-
-	amx_GetAddr(amx, params[1], &idx);
-	amx_GetUString(cmdtext, idx, sizeof(cmdtext));
-	amx_GetAddr(amx, params[2], &idx);
-	amx_GetAddr(amx, params[3], &player);
-	return cmd_get_player_param(cmdtext, (int*) idx, (int*) player);
-}
-
-/* native Command_GetStringParam(cmdtext[], &idx, buf[]) */
-cell AMX_NATIVE_CALL Command_GetStringParam(AMX *amx, cell *params)
-{
-	char cmdtext[144], param[144];
-	cell *addr;
-
-	amx_GetAddr(amx, params[1], &addr);
-	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
-	amx_GetAddr(amx, params[2], &addr);
-
-	if (cmd_get_str_param(cmdtext, (int*) addr, param)) {
-		amx_GetAddr(amx, params[3], &addr);
-		amx_SetUString(addr, param, sizeof(param));
-		return 1;
-	}
-	return 0;
-}
-
-/* native Command_Is(cmdtext[], const cmd[], &idx) */
-cell AMX_NATIVE_CALL Command_Is(AMX *amx, cell *params)
-{
-	char cmdtext[50], cmd[50];
-	cell *addr;
-	int len;
-
-	amx_GetAddr(amx, params[1], &addr);
-	amx_GetUString(cmdtext, addr, 50);
-	amx_GetAddr(amx, params[2], &addr);
-	amx_GetUString(cmd, addr, 50);
-	amx_StrLen(addr, &len);
-
-	if (len > 49) {
-		return 0;
-	}
-	amx_GetAddr(amx, params[3], &addr);
-	return cmd_is(cmdtext, cmd, (int*) addr);
-}
-
 void cmd_init()
 {
 	struct COMMAND *c = cmds;
@@ -336,10 +278,12 @@ void cmd_init()
 /*
 Checks incoming command and calls handler if one found and group matched.
 */
-int cmd_check(const int playerid, const int hash, const char *cmdtext)
+int cmd_check(const int playerid, const char *cmdtext)
 {
 	struct COMMAND *c = cmds;
-	int parseidx;
+	int parseidx, hash;
+
+	hash = cmd_hash(cmdtext);
 
 	while (c != cmds_end) {
 		if (hash == c->hash &&

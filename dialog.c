@@ -179,39 +179,3 @@ void dialog_pop_queue()
 		}
 	}
 }
-
-/**to be removed*/
-cell AMX_NATIVE_CALL Dialog_ShowPlayerDialog(AMX *amx, cell *params)
-{
-	char *b4096, b64[64], b32[32], b32_1[32];
-	cell *addr;
-	b4096 = malloc(4096);
-	amx_GetAddr(amx, params[4], &addr);
-	amx_GetUString(b64, addr, 64);
-	amx_GetAddr(amx, params[5], &addr);
-	amx_GetUString(b4096, addr, 4096);
-	amx_GetAddr(amx, params[6], &addr);
-	amx_GetUString(b32, addr, 32);
-	amx_GetAddr(amx, params[7], &addr);
-	amx_GetUString(b32_1, addr, 32);
-	*addr = dialog_ShowPlayerDialog(
-		params[1], params[2], params[3],
-		b64, b4096, b32, b32_1,
-		params[0] < 8 ? -1 : params[8]);
-	free(b4096);
-	return *addr;
-}
-
-/**to be removed*/
-cell AMX_NATIVE_CALL Dialog_EnsureTransaction(AMX *amx, cell *params)
-{
-	dialog_ensure_transaction(params[1], params[2]);
-	return 1;
-}
-
-/**to be removed*/
-cell AMX_NATIVE_CALL Dialog_EndTransaction(AMX *amx, cell *params)
-{
-	dialog_end_transaction(params[1], params[2]);
-	return 1;
-}

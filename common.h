@@ -57,7 +57,6 @@ EXPECT_SIZE(struct VEHICLEDAMAGE, 4 * sizeof(cell));
 
 #include "cmd.h"
 #include "natives.h"
-#include "publics.h"
 
 typedef void (*cb_t)(void* data);
 
