@@ -435,6 +435,17 @@ int login_give_guest_name(int playerid)
 }
 
 /**
+Give the user a random name with guest prefix and spawn them as guest.
+*/
+static
+void login_give_guest_name_and_spawn(int playerid)
+{
+	if (login_give_guest_name(playerid)) {
+		login_login_player(playerid, LOGGED_GUEST);
+	}
+}
+
+/**
 Callback when player logged in and account load query is done.
 */
 static
@@ -456,9 +467,7 @@ void login_cb_load_account_data(void *data)
 			"you will be spawned as a guest",
 			"Ok", "",
 			-1);
-		if (login_give_guest_name(playerid)) {
-			login_spawn_as_guest(playerid);
-		}
+		login_give_guest_name_and_spawn(playerid);
 		return;
 	}
 
@@ -561,9 +570,7 @@ void login_cb_member_user_created(void *data)
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		B144(WARN"You will be spawned as a guest.");
 		NC(n_SendClientMessage);
-		if (login_give_guest_name(playerid)) {
-			login_spawn_as_guest(playerid);
-		}
+		login_give_guest_name_and_spawn(playerid);
 		return;
 	}
 	B144("~b~Creating game session...");
@@ -628,9 +635,7 @@ void login_cb_check_user_exists(void *data)
 asguest:
 		B144("You will be spawned as a guest.");
 		NC_SendClientMessage(playerid, COL_SAMP_GREEN, buf144a);
-		if (login_give_guest_name(playerid)) {
-			login_spawn_as_guest(playerid);
-		}
+		login_give_guest_name_and_spawn(playerid);
 		return;
 	}
 	failedattempts = MAX_LOGIN_ATTEMPTS_IN_ONE_SESSION -
@@ -721,9 +726,7 @@ void login_dlg_namechange(int playerid, int response, char *inputtext)
 	} else {
 		/*cancel should not go back to login dialog,
 		otherwise spamming escape will keep you in a loop*/
-		if (login_give_guest_name(playerid)) {
-			login_spawn_as_guest(playerid);
-		}
+		login_give_guest_name_and_spawn(playerid);
 	}
 }
 
@@ -782,9 +785,7 @@ void login_dlg_register_firstpass(int playerid, int response, cell inputaddr)
 		memcpy(pwdata[playerid], buf144, 4 * PW_HASH_LENGTH);
 		login_show_dialog_register_step2(playerid);
 	} else {
-		if (login_give_guest_name(playerid)) {
-			login_login_player(playerid, LOGGED_GUEST);
-		}
+		login_give_guest_name_and_spawn(playerid);
 	}
 }
 
