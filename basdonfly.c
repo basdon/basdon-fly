@@ -41,7 +41,6 @@ EXPECT_SIZE(int, 4);
 EXPECT_SIZE(cell, 4);
 EXPECT_SIZE(float, 4);
 
-int temp_afk[MAX_PLAYERS];
 int _cc[MAX_PLAYERS];
 
 #define IN_BASDONFLY

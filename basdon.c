@@ -333,7 +333,6 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	playeronlineflag[playerid] = 1;
 	loggedstatus[playerid] = LOGGED_NO;
 	kick_update_delay[playerid] = 0;
-	temp_afk[playerid] = 0;
 
 	/*keep this top*/
 	pdata_on_player_connect(playerid);
