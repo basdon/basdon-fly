@@ -57,6 +57,7 @@ struct VEHICLEDAMAGE {
 };
 EXPECT_SIZE(struct VEHICLEDAMAGE, 4 * sizeof(cell));
 
+/*include cmd here because lots of headers files need it*/
 #include "cmd.h"
 #include "natives.h"
 
@@ -66,8 +67,8 @@ typedef void (*logprintf_t)(char* format, ...);
 
 extern logprintf_t logprintf;
 
-#define amx_GetUString(dest, source, size) amx_GetString(dest, source, 0, size)
-#define amx_SetUString(dest, source, size) amx_SetString(dest, source, 0, 0, size)
+#define amx_GetUString(DST,SRC,SIZE) amx_GetString(DST,SRC,0,SIZE)
+#define amx_SetUString(DST,SRC,SIZE) amx_SetString(DST,SRC,0,0,SIZE)
 #define B144(X) amx_SetUString(buf144,X,144)
 
 #define FLOAT_PINF (0x7F800000)
