@@ -83,6 +83,25 @@ login_dlg_namechange
 */
 
 /**
+Callback for insert failed login query, to update the last failed login
+field for the user where the failed login was on.
+*/
+static
+void login_cb_failed_login_added(void *data)
+{
+	sprintf(cbuf4096_,
+		"UPDATE usr SET lastfal="
+			"(SELECT stamp "
+			"FROM fal "
+			"WHERE u=%d "
+			"ORDER BY stamp DESC "
+			"LIMIT 1)",
+		(int) data);
+	amx_SetUString(buf4096, cbuf4096_, 1000);
+	NC_mysql_tquery_nocb(buf4096a);
+}
+
+/**
 Formats text to be displayed in the register dialog box.
 
 @param d destination buffer
@@ -528,6 +547,14 @@ void login_cb_verify_password(void *data)
 
 	if (!NC_bcrypt_is_equal()) {
 		common_hide_gametext_for_player(playerid);
+
+		sprintf(cbuf4096_,
+			"INSERT INTO fal(u,stamp,ip) "
+			"VALUES (%d,UNIX_TIMESTAMP(),'%s')",
+			userid[playerid],
+			pdata[playerid]->ip);
+		common_mysql_tquery(cbuf4096_,
+			login_cb_failed_login_added, (void*) userid[playerid]);
 
 		failedlogins[playerid]++;
 		if (failedlogins[playerid] > MAX_LOGIN_ATTEMPTS_IN_ONE_SESSION)
