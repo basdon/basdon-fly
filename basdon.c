@@ -111,27 +111,30 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 	switch (dialogid) {
 	case DIALOG_SPAWN_SELECTION:
 		spawn_on_dialog_response(playerid, response, listitem);
-		return 1;
+		goto ret;
 	case DIALOG_PREFERENCES:
 		prefs_on_dialog_response(playerid, response, listitem);
-		return 1;
+		goto ret;
 	case DIALOG_AIRPORT_NEAREST:
 		airport_list_dialog_response(playerid, response, listitem);
-		return 1;
+		goto ret;
 	case DIALOG_REGISTER_FIRSTPASS:
 		login_dlg_register_firstpass(playerid, response, params[5]);
-		return 1;
+		goto ret;
 	case DIALOG_REGISTER_CONFIRMPASS:
 		login_dlg_register_confirmpass(
 			playerid, response, params[5], inputtext);
-		return 1;
+		goto ret;
 	case DIALOG_LOGIN_LOGIN_OR_NAMECHANGE:
 		login_dlg_login_or_namechange(playerid, response, inputtext);
-		return 1;
+		goto ret;
 	case DIALOG_LOGIN_NAMECHANGE:
 		login_dlg_namechange(playerid, response, inputtext);
-		return 1;
+		goto ret;
 	}
+
+ret:
+	dialog_pop_queue(playerid);
 	return 1;
 }
 

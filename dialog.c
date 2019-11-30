@@ -159,23 +159,19 @@ int dialog_ShowPlayerDialog(
 	return NC(n_ShowPlayerDialog_);
 }
 
-void dialog_pop_queue()
+void dialog_pop_queue(int playerid)
 {
 	struct DIALOGDATA *q;
-	int playerid, i;
 
-	for (i = 0; i < playercount; i++) {
-		playerid = players[i];
-		if ((q = dialogqueue[playerid]) != NULL &&
-			!showndialog[playerid] && (!transaction[playerid] ||
-				transaction[playerid] == q->transactionid))
-		{
-			dialogqueue[playerid] = q->next;
-			dialog_ShowPlayerDialog(
-				playerid, q->dialogid, q->style,
-				q->caption, q->info, q->button1, q->button2,
-				q->transactionid);
-			free(q);
-		}
+	if ((q = dialogqueue[playerid]) != NULL &&
+		!showndialog[playerid] && (!transaction[playerid] ||
+			transaction[playerid] == q->transactionid))
+	{
+		dialogqueue[playerid] = q->next;
+		dialog_ShowPlayerDialog(
+			playerid, q->dialogid, q->style,
+			q->caption, q->info, q->button1, q->button2,
+			q->transactionid);
+		free(q);
 	}
 }

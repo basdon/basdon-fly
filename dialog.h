@@ -88,4 +88,4 @@ void dialog_on_player_disconnect(int playerid);
 @return 0 when the response should be dropped
 */
 int dialog_on_response(int playerid, int dialogid);
-void dialog_pop_queue();
+void dialog_pop_queue(int playerid);

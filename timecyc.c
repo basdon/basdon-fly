@@ -5,7 +5,6 @@
 #include "anticheat.h"
 #include "cmd.h"
 #include "echo.h"
-#include "dialog.h"
 #include "game_sa.h"
 #include "heartbeat.h"
 #include "missions.h"
@@ -661,7 +660,6 @@ timer30s:
 		if ((time_m % 5) == 0) {
 			/*timer5000*/
 			anticheat_decrease_infractions();
-			dialog_pop_queue();
 			veh_commit_next_vehicle_odo_to_db();
 			timecyc_sync_clocks();
 		}
