@@ -2,6 +2,7 @@
 $__timer = microtime(true);
 
 $__msgs = [];
+$__rawmsgs = [];
 
 require('../inc/conf.php');
 include('../inc/db.php');
@@ -9,13 +10,16 @@ include('../inc/db.php');
 $__clientip = $_SERVER['REMOTE_ADDR'];
 
 if (isset($_COOKIE[$COOKIENAME]) && strlen($__sesid = $_COOKIE[$COOKIENAME]) == 32) {
-	if (!isset($__extrauserfields)) $__extrauserfields = '';
 	++$db_querycount;
 	$s = $db->prepare('SELECT stay,u.i,u.name,u.groups,lastfal,falnw,falng FROM webses w JOIN usr u ON w.usr=u.i WHERE id=?');
 	$s->bindValue(1, $__sesid);
 	if ($s->execute() && ($r = $s->fetchAll()) && count($r)) {
 		$loggeduser = $r[0];
 		$loggeduser->logoutkey = md5($SECRET1 . $__sesid);
+		$loggeduser->hasfailedlogins = $loggeduser->falnw < $loggeduser->lastfal;
+		if ($loggeduser->hasfailedlogins) {
+			$__rawmsgs[] = 'New <a href="account.php?action=fal">failed login attempts</a> on your account!';
+		}
 		$expire = $loggeduser->stay ? (time() + 30 * 24 * 3600) : 0;
 		setcookie($COOKIENAME, $__sesid, $expire, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
 		++$db_querycount;

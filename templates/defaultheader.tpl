@@ -18,3 +18,6 @@
 {@foreach $__msgs as $msg}
 	<p class="msg">{$msg}</p>
 {@endforeach}
+{@foreach $__rawmsgs as $msg}
+	<p class="msg">{@unsafe $msg}</p>
+{@endforeach}
