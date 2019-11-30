@@ -628,8 +628,8 @@ void login_cb_check_user_exists(void *data)
 	nc_params[1] = 0;
 	nc_params[3] = buf144a;
 	failedattempts = (nc_params[2] = 0, NC(n_cache_get_field_i));
-	uid = (nc_params[2] = 1, NC(n_cache_get_field_i));
-	(nc_params[2] = 2, NC(n_cache_get_field_s));
+	(nc_params[2] = 1, NC(n_cache_get_field_s));
+	uid = (nc_params[2] = 2, NC(n_cache_get_field_i));
 	
 	if (failedattempts > MAX_ALLOWED_FAILED_LOGINS_IN_30_MINUTES) {
 asguest:
