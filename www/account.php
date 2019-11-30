@@ -35,5 +35,15 @@ if (!isset($loggeduser)) {
 	$pagination = simple_pagination('account.php?action=fal&amp;page=', $page, $pages);
 }
 
+function acclink($name, $target)
+{
+	global $action, $BASEPATH;
+	if ($action == $target) {
+		echo '<strong>'.$name.'</strong>';
+	} else {
+		echo '<a href="account.php?action='.$target.'">'.$name.'</a>';
+	}
+}
+
 $__script = '_account';
 include('../inc/output.php');

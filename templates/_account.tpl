@@ -7,7 +7,7 @@
 		@media (max-width: 800px) {
 			aside {
 				border-top: 0;
-				border-bottom: 2px solid #444;
+				border-bottom: 5px solid #444;
 				width: 100%;
 			}
 		}
@@ -21,16 +21,6 @@
 	<div>
 		<aside>
 			{@if isset($loggeduser)}
-				<?php
-				function acclink($name, $target) {
-					global $action,$BASEPATH;
-					if ($action == $target) {
-						echo('<strong>'.$name.'</strong>');
-					} else {
-						echo('<a href="account.php?action='.$target.'">'.$name.'</a>');
-					}
-				}
-				?>
 				<ul>
 					<li><?php acclink('Public profile', 'publicprofile'); ?></li>
 					<li><?php acclink('Failed logins', 'fal'); ?></li>
