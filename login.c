@@ -602,7 +602,7 @@ Callback for login_query_check_user_exists
 static
 void login_cb_check_user_exists(void *data)
 {
-	int playerid, failedattempts, uid;
+	int playerid, failedattempts;
 	char password[PW_HASH_LENGTH];
 
 	playerid = PLAYER_CC_GETID(data);
@@ -628,8 +628,6 @@ void login_cb_check_user_exists(void *data)
 	nc_params[1] = 0;
 	nc_params[3] = buf144a;
 	failedattempts = (nc_params[2] = 0, NC(n_cache_get_field_i));
-	(nc_params[2] = 1, NC(n_cache_get_field_s));
-	uid = (nc_params[2] = 2, NC(n_cache_get_field_i));
 	
 	if (failedattempts > MAX_ALLOWED_FAILED_LOGINS_IN_30_MINUTES) {
 asguest:
@@ -638,13 +636,19 @@ asguest:
 		login_give_guest_name_and_spawn(playerid);
 		return;
 	}
-	failedattempts = MAX_LOGIN_ATTEMPTS_IN_ONE_SESSION -
-		(MAX_ALLOWED_FAILED_LOGINS_IN_30_MINUTES - failedattempts);
+	/*Adjust failedlogins for player to allow the maximum amount possible
+	without hitting MAX_ALLOWED_FAILED_LOGINS_IN_30_MINUTES. This means if
+	they already had 9 failed attempts, they now have 1 more attempt. This
+	equivalents to failedlogins value MAX_LOGIN_ATTEMPTS_IN_ONE_SESSION - 1,
+	since the next failed attempt will kick them.*/
+	failedattempts -= MAX_ALLOWED_FAILED_LOGINS_IN_30_MINUTES;
+	failedattempts += MAX_LOGIN_ATTEMPTS_IN_ONE_SESSION;
 	if (failedattempts > failedlogins[playerid]) {
 		failedlogins[playerid] = failedattempts;
 	}
 
 	/*user doesn't exist when password is NULL*/
+	(nc_params[2] = 1, NC(n_cache_get_field_s));
 	amx_GetUString(password, buf144, 144);
 	if (strcmp(password, "NULL") == 0) {
 		login_show_dialog_register_step1(playerid, 0);
@@ -653,7 +657,7 @@ asguest:
 			pwdata[playerid] = malloc(PW_HASH_LENGTH);
 		}
 		memcpy(pwdata[playerid], password, PW_HASH_LENGTH);
-		userid[playerid] = uid;
+		userid[playerid] = (nc_params[2] = 2, NC(n_cache_get_field_i));
 		login_show_dialog_login(playerid, 0);
 	}
 }
