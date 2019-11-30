@@ -122,7 +122,7 @@ void login_show_dialog_change_name(int playerid, int show_invalid_name_error)
 	dialog_ShowPlayerDialog(
 		playerid, DIALOG_LOGIN_NAMECHANGE,
 		DIALOG_STYLE_INPUT, NAMECHANGE_CAPTION,
-		(char*) CHANGE_NAME_TEXT + 60 * show_invalid_name_error,
+		(char*) CHANGE_NAME_TEXT + 60 * (show_invalid_name_error ^ 1),
 		"Login", "Change name",
 		TRANSACTION_LOGIN);
 }
@@ -144,7 +144,7 @@ void login_show_dialog_login(int playerid, int show_invalid_pw_error)
 	dialog_ShowPlayerDialog(
 		playerid, DIALOG_LOGIN_LOGIN_OR_NAMECHANGE,
 		DIALOG_STYLE_PASSWORD, LOGIN_CAPTION,
-		(char*) LOGIN_TEXT + 37 * show_invalid_pw_error,
+		(char*) LOGIN_TEXT + 37 * (show_invalid_pw_error ^ 1),
 		"Login", "Change name",
 		TRANSACTION_LOGIN);
 }
