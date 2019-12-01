@@ -89,19 +89,19 @@
 		<table border="0" width="100%">
 		{@try}
 			{@eval ++$db_querycount}
-			{@eval $r = $db->query("SELECT COUNT(s.i) c FROM ses s JOIN usr u ON s.i=u.i WHERE u.groups=0")}
+			{@eval $r = $db->query('SELECT COUNT(s.i) c FROM ses s JOIN usr u ON s.i=u.i WHERE u.groups&'.$GROUP_GUEST)}
 			{@if $r !== false && ($r = $r->fetch()) !== false}
 				<tr><td>Guest sessions:</td><td>{@unsafe $r->c}</td></tr>
 			{@endif}
 			{@eval ++$db_querycount}
-			{@eval $r = $db->query("SELECT COUNT(i) c FROM usr WHERE groups!=0")}
+			{@eval $r = $db->query('SELECT COUNT(i) c FROM usr WHERE groups&'.$GROUP_GUEST.'=0')}
 			{@if $r !== false && ($r = $r->fetch()) !== false}
 				<tr><td>Registered users:</td><td>{@unsafe $r->c}</td></tr>
 			{@endif}
 			{@eval ++$db_querycount}
-			{@eval $r = $db->query("SELECT n FROM usr WHERE groups!=0 ORDER BY i DESC LIMIT 1")}
+			{@eval $r = $db->query('SELECT name FROM usr WHERE groups&'.$GROUP_GUEST.'=0 ORDER BY i DESC LIMIT 1')}
 			{@if $r !== false && ($r = $r->fetch()) !== false}
-				<tr><td>Latest:</td><td><a href="user.php?name={@urlencode $r->n}">{$r->n}</a></td></tr>
+				<tr><td>Latest:</td><td><a href="user.php?name={@urlencode $r->name}">{$r->name}</a></td></tr>
 			{@endif}
 		{@catch PDOException $e}
 		{@endtry}

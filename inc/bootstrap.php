@@ -7,6 +7,12 @@ $__rawmsgs = [];
 require('../inc/conf.php');
 include('../inc/db.php');
 
+$GROUP_BANNED = 1;
+$GROUP_GUEST = 2;
+$GROUP_MEMBER = 4;
+$GROUP_ADMIN = 268435456;
+$GROUP_OWNER = 1073741824;
+
 $__clientip = $_SERVER['REMOTE_ADDR'];
 
 if (isset($_COOKIE[$COOKIENAME]) && strlen($__sesid = $_COOKIE[$COOKIENAME]) == 32) {
