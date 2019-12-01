@@ -208,15 +208,18 @@ void chpw_cb_new_password_hashed(void *data)
 
 	struct NEWPWDATA_PLAYER_CC *pd;
 	struct NEWPWDATA *d;
-	int playerid;
+	int player_cc, playerid;
 
 	pd = (struct NEWPWDATA_PLAYER_CC*) data;
-	playerid = PLAYER_CC_GETID(pd->player_cc);
-	if (!PLAYER_CC_CHECK(pd->player_cc, playerid)) {
+	player_cc = pd->player_cc;
+	d = pd->data;
+	free(pd);
+
+	playerid = PLAYER_CC_GETID(player_cc);
+	if (!PLAYER_CC_CHECK(player_cc, playerid)) {
 		return;
 	}
 
-	d = pd->data;
 	if (d->aborted) {
 		/*reference in pwdata is already removed and it needs us to
 		free it*/
