@@ -438,9 +438,11 @@ extern cell tmpfloat;
 #define NC_UsePlayerPedAnims() (NC_PARS_(0)\
 	n_UsePlayerPedAnims(amx,nc_params))
 
-#define NC_bcrypt_get_hash(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
+/*bcrypt_get_hash fails when argument size does not match*/
+#define NC_bcrypt_get_hash(BUF) (nc_params[0]=4,nc_params[1]=BUF,\
 	n_bcrypt_get_hash(amx,nc_params))
 
+/*bcrypt_is_equal doesn't check argument size*/
 #define NC_bcrypt_is_equal() (NC_PARS_(0)\
 	n_bcrypt_is_equal(amx,nc_params))
 
