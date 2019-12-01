@@ -263,7 +263,7 @@ void login_login_player(int playerid, int status)
 
 	loggedstatus[playerid] = status;
 
-	for (i = 0; i < playercount; ){
+	for (i = 0; i < playercount; i++){
 		if (players[i] == playerid) {
 			goto alreadyin; /*wtf?*/
 		}
