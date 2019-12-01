@@ -341,6 +341,8 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	NC(n_DisablePlayerCheckpoint);
 	NC(n_DisablePlayerRaceCheckpoint);
 
+	/*do not remove so callbacks can validate*/
+	/*needs to be present both on connect and disconnect*/
 	_cc[playerid]++;
 
 	playeronlineflag[playerid] = 1;
@@ -422,6 +424,8 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	playeronlineflag[playerid] = 0;
 	spawned[playerid] = 0;
 
+	/*do not remove so callbacks can validate*/
+	/*needs to be present both on connect and disconnect*/
 	_cc[playerid]++;
 
 	for (i = 0; i < playercount; i++) {

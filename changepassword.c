@@ -217,6 +217,7 @@ void chpw_cb_new_password_hashed(void *data)
 
 	playerid = PLAYER_CC_GETID(player_cc);
 	if (!PLAYER_CC_CHECK(player_cc, playerid)) {
+		/*pwdata has been free'd on player disconnect*/
 		return;
 	}
 
