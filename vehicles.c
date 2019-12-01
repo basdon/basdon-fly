@@ -589,7 +589,7 @@ Called when player is still in same in air vehicle as last in update.
 static
 void veh_timed_1s_update_a(
 	int playerid, int vehicleid, struct vec3 *vpos,
-	struct VEHICLEPARAMS *vparams, struct dbvehicle *v)
+	struct VEHICLEPARAMS *vparams)
 {
 	struct vec3 vvel;
 	struct quat vrot;
@@ -655,7 +655,7 @@ void veh_timed_1s_update()
 
 			common_GetVehicleParamsEx(vehicleid, &vparams);
 
-			if (vparams.engine) {
+			if (vparams.engine && v != NULL) {
 				common_GetPlayerKeys(playerid, &pkeys);
 				veh_consume_fuel(playerid, vehicleid,
 					pkeys.keys & KEY_SPRINT, &vparams, v);
@@ -663,8 +663,7 @@ void veh_timed_1s_update()
 
 			if (game_is_air_vehicle(vehiclemodel)) {
 				veh_timed_1s_update_a(
-					playerid, vehicleid,
-					&vpos, &vparams, v);
+					playerid, vehicleid, &vpos, &vparams);
 
 				if (vparams.engine && !isafk[playerid] &&
 					lastcontrolactivity[playerid] > ctrla)
