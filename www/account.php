@@ -16,7 +16,7 @@ if (!isset($loggeduser)) {
 	$paginationbaseurl = 'account.php?action=publicprofile';
 } else if ($action == 'fal') {
 	$clearkey = md5($__sesid . $SECRET1);
-	if (isset($_GET['clear'], $_GET['confirm'], $_GET['cleartime']) && $clearkey === $_GET['confirm']) {
+	if (isset($_GET['cleartime'], $_GET['confirm']) && $clearkey === $_GET['confirm']) {
 		$t = $_GET['cleartime'];
 		$t++;
 		$t--;
@@ -26,11 +26,17 @@ if (!isset($loggeduser)) {
 		$loggeduser->falnw = $t;
 		$falcleared = true;
 	}
-	$lastseen = max($loggeduser->falnw, $loggeduser->falng);
+	$lastseen = $loggeduser->falnw;
 	$page = get_page();
-	$db_querycount += 2;
-	$numfal = $db->query('SELECT COUNT(u) AS c FROM fal WHERE u='.$loggeduser->i)->fetchAll()[0]->c;
+	$db_querycount += 3;
+	$data = $db->query('SELECT COUNT(u) AS numfal, MAX(stamp) AS cleartime FROM fal WHERE u='.$loggeduser->i)->fetchAll()[0];
+	$numfal = $data->numfal;
+	$cleartime = $data->cleartime;
 	$failedlogins = $db->query('SELECT stamp,ip,isweb FROM fal WHERE u='.$loggeduser->i.' ORDER BY stamp DESC LIMIT 50 OFFSET '.(($page - 1) * 50));
+	$firstunseen = $db->query('SELECT stamp FROM fal WHERE u='.$loggeduser->i.' AND stamp>'.$lastseen.' ORDER BY stamp ASC LIMIT 1')->fetchAll();
+	if (count($firstunseen)) {
+		$firstunseen = $firstunseen[0]->stamp;
+	}
 	$pagination = simple_pagination('account.php?action=fal&amp;page=', $page, $numfal, 50);
 }
 

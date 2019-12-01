@@ -10,24 +10,21 @@
 		</tr>
 	</thead>
 	<tbody>
-		{@eval $maxstamp = 0;$l = $failedlogins->fetch()}
-		{@if $l}
-			{@do}
-				<tr>
-					<td>
-						{@unsafe format_time_since($l->stamp)} ({@unsafe date('j M Y H:i', $l->stamp)})
-						{@if $hasnew = ($l->stamp > $lastseen)} <strong>(new!)</strong>{@eval $maxstamp = max($maxstamp, $l->stamp)}{@endif}
-					</td>
-					<td>{$l->ip}</td>
-					<td>{@if $l->isweb}web{@else}game{@endif}</td>
-				</tr>
-				{@eval $l = $failedlogins->fetch()}
-				{@if $hasnew && (!$l || $l->stamp <= $lastseen)}
-					<tr><td colspan="3" style="text-align:center"><a href="account.php?action=fal&amp;clear&amp;cleartime={@unsafe $maxstamp}&amp;confirm={@unsafe $clearkey}">Mark as seen</a></td></tr>
-					{@eval $hasnew = false}
-				{@endif}
-			{@enddowhile $l}
-		{@endif}
+		{@while $l = $failedlogins->fetch()}
+			<tr>
+				<td>
+					{@if $l->stamp > $lastseen}
+						<strong>(new!) </strong>
+					{@endif}
+					{@unsafe format_time_since($l->stamp)} ({@unsafe date('j M Y H:i', $l->stamp)})
+				</td>
+				<td>{$l->ip}</td>
+				<td>{@if $l->isweb}web{@else}game{@endif}</td>
+			</tr>
+			{@if $l->stamp == $firstunseen}
+				<tr><td colspan="3" style="text-align:center"><a href="account.php?action=fal&amp;cleartime={@unsafe $cleartime}&amp;confirm={@unsafe $clearkey}">Mark all as seen</a></td></tr>
+			{@endif}
+		{@endwhile}
 	</tbody>
 </table>
 {@unsafe $pagination}
