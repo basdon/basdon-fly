@@ -145,7 +145,7 @@ void login_show_dialog_change_name(int playerid, int show_invalid_name_error)
 		playerid, DIALOG_LOGIN_NAMECHANGE,
 		DIALOG_STYLE_INPUT, NAMECHANGE_CAPTION,
 		(char*) CHANGE_NAME_TEXT + 60 * (show_invalid_name_error ^ 1),
-		"Login", "Change name",
+		"Change", "Play as guest",
 		TRANSACTION_LOGIN);
 }
 
@@ -541,7 +541,7 @@ Callback for bcrypt password check when logging in.
 static
 void login_cb_verify_password(void *data)
 {
-	int playerid;
+	int playerid, fal;
 
 	playerid = PLAYER_CC_GETID(data);
 	if (!PLAYER_CC_CHECK(data, playerid)) {
@@ -559,11 +559,12 @@ void login_cb_verify_password(void *data)
 		common_mysql_tquery(cbuf4096_,
 			login_cb_failed_login_added, (void*) userid[playerid]);
 
-		failedlogins[playerid]++;
-		if (failedlogins[playerid] > MAX_LOGIN_ATTEMPTS_IN_ONE_SESSION)
-		{
+		fal = failedlogins[playerid] + 1;
+		if (fal > MAX_LOGIN_ATTEMPTS_IN_ONE_SESSION) {
 			natives_Kick(playerid, "too many failed logins", 0, -1);
 		}
+		failedlogins[playerid] = fal;
+
 		login_show_dialog_login(playerid, 1);
 	} else {
 		B144("~b~Loading account...");
@@ -746,8 +747,11 @@ void login_dlg_namechange(int playerid, int response, char *inputtext)
 {
 	/*Change | Play as guest*/
 	if (response) {
-		if (!inputtext[0]) {
-			/*edge case: if empty string, go back to login dialog*/
+		if (!inputtext[0] ||
+			strcmp(pdata[playerid]->name, inputtext) == 0)
+		{
+			/*edge case: if empty string or same name as current,
+			go back to login dialog*/
 			login_show_dialog_login(playerid, 0);
 		} else if (!login_change_name_from_input(playerid, inputtext)) {
 			login_show_dialog_change_name(playerid, 1);
