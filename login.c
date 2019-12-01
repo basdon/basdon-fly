@@ -404,17 +404,6 @@ void login_cb_create_guest_usr(void *data)
 }
 
 /**
-Create a guest account and session for player and log them in and spawn them.
-*/
-static
-void login_spawn_as_guest(int playerid)
-{
-	B144("~b~Creating guest account...");
-	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
-	login_create_user(playerid, "", GROUP_GUEST, login_cb_create_guest_usr);
-}
-
-/**
 Give the user a name prefixed with an '@' symbol, indicating they're a guest.
 
 @return 0 on failure and player will be kicked
@@ -457,10 +446,35 @@ int login_give_guest_name(int playerid)
 }
 
 /**
-Give the user a random name with guest prefix and spawn them as guest.
+Create a guest account and session for player and log them in and spawn them.
+
+If the player does not have a guest name, they will be given one (or kicked on
+failure).
 */
 static
-void login_give_guest_name_and_spawn(int playerid)
+void login_spawn_as_guest(int playerid)
+{
+	if (pdata[playerid]->name[0] != '@' &&
+		!login_give_guest_name(playerid))
+	{
+		/*user is kicked at this point*/
+		return;
+	}
+	B144("~b~Creating guest account...");
+	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+	login_create_user(playerid, "", GROUP_GUEST, login_cb_create_guest_usr);
+}
+
+/**
+Spawns a player as a guest without account or session. ONLY USE ON ERROR!
+
+Use login_spawn_as_guest when wanting to let player continue as a guest.
+
+If the player does not have a guest name, they will be given one (or kicked on
+failure).
+*/
+static
+void login_spawn_as_guest_WITHOUT_ACCOUNT(int playerid)
 {
 	if (login_give_guest_name(playerid)) {
 		login_login_player(playerid, LOGGED_GUEST);
@@ -489,7 +503,7 @@ void login_cb_load_account_data(void *data)
 			"you will be spawned as a guest",
 			"Ok", "",
 			-1);
-		login_give_guest_name_and_spawn(playerid);
+		login_spawn_as_guest_WITHOUT_ACCOUNT(playerid);
 		return;
 	}
 
@@ -601,7 +615,7 @@ void login_cb_member_user_created(void *data)
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		B144(WARN"You will be spawned as a guest.");
 		NC(n_SendClientMessage);
-		login_give_guest_name_and_spawn(playerid);
+		login_spawn_as_guest_WITHOUT_ACCOUNT(playerid);
 		return;
 	}
 	B144("~b~Creating game session...");
@@ -664,7 +678,7 @@ void login_cb_check_user_exists(void *data)
 asguest:
 		B144("You will be spawned as a guest.");
 		NC_SendClientMessage(playerid, COL_SAMP_GREEN, buf144a);
-		login_give_guest_name_and_spawn(playerid);
+		login_spawn_as_guest(playerid);
 		return;
 	}
 	/*Adjust failedlogins for player to allow the maximum amount possible
@@ -764,7 +778,7 @@ void login_dlg_namechange(int playerid, int response, char *inputtext)
 	} else {
 		/*cancel should not go back to login dialog,
 		otherwise spamming escape will keep you in a loop*/
-		login_give_guest_name_and_spawn(playerid);
+		login_spawn_as_guest(playerid);
 	}
 }
 
@@ -823,7 +837,7 @@ void login_dlg_register_firstpass(int playerid, int response, cell inputaddr)
 		memcpy(pwdata[playerid], buf144, 4 * PW_HASH_LENGTH);
 		login_show_dialog_register_step2(playerid);
 	} else {
-		login_give_guest_name_and_spawn(playerid);
+		login_spawn_as_guest(playerid);
 	}
 }
 
