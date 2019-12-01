@@ -98,11 +98,12 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 	if (anticheat_flood(playerid, AC_FLOOD_AMOUNT_DIALOG) ||
 		!dialog_on_response(playerid, dialogid))
 	{
+		dialog_pop_queue(playerid);
 		return 0;
 	}
 
 	if (dialogid == DIALOG_DUMMY) {
-		return 1;
+		goto ret;
 	}
 
 	amx_GetAddr(amx, params[5], &addr);

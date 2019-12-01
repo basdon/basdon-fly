@@ -527,7 +527,7 @@ void login_cb_load_account_data(void *data)
 				"since your last visit.\n"
 				"Check the website for more details.",
 			"Ok", "",
-			-1);
+			TRANSACTION_LOGIN);
 
 	}
 }

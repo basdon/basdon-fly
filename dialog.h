@@ -27,7 +27,8 @@
 #define DIALOG_STYLE_TABLIST_HEADERS 5
 
 /**
-Ends dialog transaction for player if it matches given transactionid.
+Ends dialog transaction for player if it matches given transactionid and no
+dialogs are shown.
 
 If the player has a different transaction going, it will not be
 ended and a warning will be logged.
