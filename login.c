@@ -777,7 +777,7 @@ void login_dlg_register_confirmpass(
 		nc_params[3] = buf144a;
 		nc_params[4] = PW_HASH_LENGTH;
 		NC(n_SHA256_PassHash);
-		res = strcmp(cbuf144, pwdata[playerid]);
+		res = memcmp(cbuf144, pwdata[playerid], 256);
 		free(pwdata[playerid]);
 		pwdata[playerid] = NULL;
 		if (res) {
