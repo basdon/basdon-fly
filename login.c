@@ -90,12 +90,15 @@ static
 void login_cb_failed_login_added(void *data)
 {
 	sprintf(cbuf4096_,
-		"UPDATE usr SET lastfal="
+		"UPDATE usr "
+		"SET lastfal="
 			"(SELECT stamp "
 			"FROM fal "
 			"WHERE u=%d "
 			"ORDER BY stamp DESC "
-			"LIMIT 1)",
+			"LIMIT 1) "
+		"WHERE i=%d",
+		(int) data,
 		(int) data);
 	amx_SetUString(buf4096, cbuf4096_, 1000);
 	NC_mysql_tquery_nocb(buf4096a);
