@@ -41,8 +41,10 @@ function generate_random_key()
 	return $key;
 }
 
-function simple_pagination($urlWithParam, $currentPageFromOne, $totalPages)
+function simple_pagination($urlWithParam, $currentPageFromOne, $totalItems, $itemsPerPage)
 {
+	// totalItems - 1 since if it's 50 and itemsPerPage would be 50, totalPages would be 2 (wrong)
+	$totalPages = floor(max(0, $totalItems - 1) / $itemsPerPage) + 1;
 	$str = '<p class="pagination">Page:';
 	for ($i = 0; $i < $totalPages; ) {
 		$i++;

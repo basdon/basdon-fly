@@ -1,4 +1,4 @@
-{@unsafe $pagination = simple_pagination($flightlist_pagination_url, $page, floor($totalrows / 50) + 1)}
+{@unsafe $pagination = simple_pagination($flightlist_pagination_url, $page, $totalrows, 50)}
 {@if $flightlist !== false}
 	{@render flightstatuses.php}
 	{@render aircraftnames.php}
