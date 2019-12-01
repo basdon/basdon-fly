@@ -24,6 +24,11 @@ we've showed.
 */
 static int showndialog[MAX_PLAYERS];
 
+int dialog_current_transaction(int playerid)
+{
+	return transaction[playerid];
+}
+
 void dialog_on_player_connect(int playerid)
 {
 	dialogqueue[playerid] = NULL;

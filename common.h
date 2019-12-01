@@ -71,6 +71,15 @@ extern logprintf_t logprintf;
 #define amx_SetUString(DST,SRC,SIZE) amx_SetString(DST,SRC,0,0,SIZE)
 #define B144(X) amx_SetUString(buf144,X,144)
 
+#ifdef DEV
+#define DBG(...) sprintf(cbuf64,__VA_ARGS__);\
+			printf("%s\n", cbuf64);\
+			amx_SetUString(buf144,cbuf64,144);\
+			NC_SendClientMessageToAll(-1,buf144a);
+#else
+#define DBG(...)
+#endif
+
 #define FLOAT_PINF (0x7F800000)
 #define FLOAT_NINF (0xFF800000)
 #define M_PI 3.14159265358979323846f

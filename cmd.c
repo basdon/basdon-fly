@@ -4,6 +4,7 @@
 #include "common.h"
 #include "a_samp.h"
 #include "airport.h"
+#include "changepassword.h"
 #include "echo.h"
 #include "game_sa.h"
 #include "playerdata.h"
@@ -188,6 +189,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/beacons", GROUPS_ALL, airport_cmd_beacons },
 	{ 0, "/camera", GROUPS_ALL, cmd_camera },
 	{ 0, "/cancelwork", GROUPS_ALL, missions_cmd_cancelmission },
+	{ 0, "/changepassword", GROUPS_REGISTERED, chpw_cmd_changepassword },
 	{ 0, "/chute", GROUPS_ALL, cmd_chute },
 	{ 0, "/fix", GROUPS_ALL, svp_cmd_repair },
 	{ 0, "/helpkeys", GROUPS_ALL, cmd_helpkeys },

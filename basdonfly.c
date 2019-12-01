@@ -3,8 +3,9 @@
 
 #include "common.h"
 #include "airport.h"
-#include "class.h"
 #include "anticheat.h"
+#include "class.h"
+#include "changepassword.h"
 #include "dialog.h"
 #include "echo.h"
 #include "game_sa.h"

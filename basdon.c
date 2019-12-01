@@ -93,7 +93,7 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 	const int playerid = params[1], dialogid = params[2];
 	const int response = params[3], listitem = params[4];
 	char inputtext[128];
-	cell *addr;
+	cell *ia;
 
 	if (anticheat_flood(playerid, AC_FLOOD_AMOUNT_DIALOG) ||
 		!dialog_on_response(playerid, dialogid))
@@ -106,8 +106,8 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 		goto ret;
 	}
 
-	amx_GetAddr(amx, params[5], &addr);
-	amx_GetUString(inputtext, addr, sizeof(inputtext));
+	amx_GetAddr(amx, params[5], &ia);
+	amx_GetUString(inputtext, ia, sizeof(inputtext));
 
 	switch (dialogid) {
 	case DIALOG_SPAWN_SELECTION:
@@ -131,6 +131,15 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 		goto ret;
 	case DIALOG_LOGIN_NAMECHANGE:
 		login_dlg_namechange(playerid, response, inputtext);
+		goto ret;
+	case DIALOG_CHANGEPASS_PREVPASS:
+		chpw_dlg_previous_password(playerid, response, params[5], ia);
+		goto ret;
+	case DIALOG_CHANGEPASS_NEWPASS:
+		chpw_dlg_new_password(playerid, response, params[5], ia);
+		goto ret;
+	case DIALOG_CHANGEPASS_CONFIRMPASS:
+		chpw_dlg_confirm_password(playerid, response, params[5], ia);
 		goto ret;
 	}
 
@@ -346,6 +355,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	}
 
 	class_on_player_connect(playerid);
+	chpw_on_player_connect(playerid);
 	echo_on_player_connection(playerid, ECHO_CONN_REASON_GAME_CONNECTED);
 	dialog_on_player_connect(playerid);
 	maps_on_player_connect(playerid);
@@ -394,6 +404,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	int i;
 
 	airport_on_player_disconnect(playerid);
+	chpw_on_player_disconnect(playerid);
 	echo_on_player_connection(playerid, reason);
 	dialog_on_player_disconnect(playerid);
 	maps_on_player_disconnect(playerid);
@@ -410,6 +421,8 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 
 	playeronlineflag[playerid] = 0;
 	spawned[playerid] = 0;
+
+	_cc[playerid]++;
 
 	for (i = 0; i < playercount; i++) {
 		if (players[i] == playerid) {

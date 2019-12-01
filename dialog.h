@@ -11,13 +11,18 @@
 #define DIALOG_LOGIN_LOGIN_OR_NAMECHANGE 1005
 #define DIALOG_REGISTER_CONFIRMPASS 1006
 #define DIALOG_LOGIN_NAMECHANGE 1007
+#define DIALOG_CHANGEPASS_PREVPASS 1008
+#define DIALOG_CHANGEPASS_NEWPASS 1009
+#define DIALOG_CHANGEPASS_CONFIRMPASS 1010
 
 /*don't use an id that is used in a dialog id (unless they relate), use 32768+*/
 /*max transaction id is int max*/
 #define TRANSACTION_NONE 0
 #define TRANSACTION_OVERRIDE 1
-#define TRANSACTION_LOGIN DIALOG_REGISTER_FIRSTPASS
 #define TRANSACTION_MISSION_OVERVIEW 100000
+#define TRANSACTION_LOGIN 100001
+#define TRANSACTION_CHANGEPASS 100002
+#define TRANSACTION_CHANGEPASS_ABORTED 100003
 
 #define DIALOG_STYLE_MSGBOX 0
 #define DIALOG_STYLE_INPUT 1
@@ -26,6 +31,10 @@
 #define DIALOG_STYLE_TABLIST 4
 #define DIALOG_STYLE_TABLIST_HEADERS 5
 
+/**
+Gets the currently active transaction for the given player.
+*/
+int dialog_current_transaction(int playerid);
 /**
 Ends dialog transaction for player if it matches given transactionid and no
 dialogs are shown.
