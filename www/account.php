@@ -21,10 +21,13 @@ if (!isset($loggeduser)) {
 		$t++;
 		$t--;
 		$t = (int) $t;
-		++$db_querycount;
-		$db->query('UPDATE usr SET falnw='.$t.',falng='.$t.' WHERE i='.$loggeduser->i);
-		$loggeduser->falnw = $t;
-		$falcleared = true;
+		if ($t > $loggeduser->falnw) {
+			++$db_querycount;
+			$db->query('UPDATE usr SET falnw='.$t.',falng='.$t.' WHERE i='.$loggeduser->i);
+			$loggeduser->hasfailedlogins = $t < $loggeduser->lastfal;
+			$loggeduser->falnw = $t;
+			$falcleared = true;
+		}
 	}
 	$lastseen = $loggeduser->falnw;
 	$page = get_page();

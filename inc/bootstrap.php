@@ -17,9 +17,6 @@ if (isset($_COOKIE[$COOKIENAME]) && strlen($__sesid = $_COOKIE[$COOKIENAME]) == 
 		$loggeduser = $r[0];
 		$loggeduser->logoutkey = md5($SECRET1 . $__sesid);
 		$loggeduser->hasfailedlogins = $loggeduser->falnw < $loggeduser->lastfal;
-		if ($loggeduser->hasfailedlogins) {
-			$__rawmsgs[] = 'New <a href="account.php?action=fal">failed login attempts</a> on your account!';
-		}
 		$expire = $loggeduser->stay ? (time() + 30 * 24 * 3600) : 0;
 		setcookie($COOKIENAME, $__sesid, $expire, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
 		++$db_querycount;
