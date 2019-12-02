@@ -20,11 +20,8 @@
 int userid[MAX_PLAYERS];
 int sessionid[MAX_PLAYERS];
 int loggedstatus[MAX_PLAYERS];
+void *pwdata[MAX_PLAYERS];
 
-/**
-Some password data that needs to be persisted for password confirmation things.
-*/
-static char *pwdata[MAX_PLAYERS];
 /**
 Failed login attempts.
 */

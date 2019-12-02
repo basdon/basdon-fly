@@ -31,15 +31,6 @@ struct NEWPWDATA_PLAYER_CC {
 	struct NEWPWDATA *data;
 };
 
-/**
-To hold either previous password to check, or new password to confirm.
-
-Previous password can be the actual previous password or the previous password
-entered in the dialog, since the query is executed while the dialog is shown.
-(Those are stored in their cell representation)
-*/
-static void *pwdata[MAX_PLAYERS];
-
 static char *CHANGEPASS_CAPTION = "Change password";
 
 /**

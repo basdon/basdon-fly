@@ -39,8 +39,6 @@ struct CBDATA {
 	struct REGISTERDATA *data;
 };
 
-static void *pwdata[MAX_PLAYERS];
-
 /**
 Check if the given name is a valid name given by player.
 

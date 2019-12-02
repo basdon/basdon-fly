@@ -19,6 +19,10 @@ extern int sessionid[MAX_PLAYERS];
 Logged-in status of each player (one of the LOGGED_ definitions).
 */
 extern int loggedstatus[MAX_PLAYERS];
+/**
+Some data saved to use in the progress of login in, registering, or changing pw.
+*/
+extern void *pwdata[MAX_PLAYERS];
 
 /**
 Give the user a name prefixed with an '@' symbol, indicating they're a guest.
