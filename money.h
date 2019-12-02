@@ -15,6 +15,10 @@ Will not actually give anything if it would cause an overflow.
 */
 int money_give(int playerid, int amount);
 /**
+Used to set the player their money, to combat random -$100 on spawn.
+*/
+void money_on_player_spawn(int playerid);
+/**
 Take money from a player.
 
 Will not actually give anything if it would cause an underflow.

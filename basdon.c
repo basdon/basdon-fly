@@ -524,6 +524,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 
 	common_GetPlayerPos(playerid, &pos);
 	maps_stream_for_player(playerid, pos);
+	money_on_player_spawn(playerid);
 	spawn_on_player_spawn(playerid);
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	zones_on_player_spawn(playerid, pos);

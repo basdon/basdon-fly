@@ -31,6 +31,17 @@ int money_give(int playerid, int amount)
 	return 1;
 }
 
+void money_on_player_spawn(int playerid)
+{
+	/*spawning might take $100 randomly, so reset it here just in case*/
+	NC_PARS(1);
+	nc_params[1] = playerid;
+	NC(n_ResetPlayerMoney_);
+	NC_PARS(2);
+	nc_params[2] = playermoney[playerid];
+	NC(n_GivePlayerMoney_);
+}
+
 int money_take(int playerid, int amount)
 {
 	if (amount < 0) {
