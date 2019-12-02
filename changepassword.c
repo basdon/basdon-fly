@@ -288,6 +288,8 @@ void chpw_dlg_confirm_password(int playerid, int response,
 		if (d->bcryptdone) {
 			/*bcrypt was already done so we can free*/
 			free(d);
+		} else {
+			d->aborted = 1;
 		}
 	}
 }
