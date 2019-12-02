@@ -7,6 +7,7 @@
 #include "login.h"
 #include "money.h"
 #include "playerdata.h"
+#include "prefs.h"
 #include "score.h"
 #include "vehicles.h"
 #include <string.h>

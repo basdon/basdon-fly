@@ -1,6 +1,9 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#define VEHICLE_RESPAWN_DELAY 300
+#define MAX_SERVICE_MAP_ICONS 4
+
 struct dbvehicle {
 	int id;
 	short model;

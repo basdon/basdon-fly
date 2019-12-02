@@ -227,7 +227,7 @@ int zones_cmd_loc(CMDPARAMS)
 		vy = *fbuf64;
 		vz = *fbuf144;
 		sprintf(b, "travelling at %.0f KPH in a %s (%.0f FT)",
-			VEL_TO_KPH_VAL * sqrt(vx * vx + vy * vy + vz * vz),
+			VEL_TO_KPH * sqrt(vx * vx + vy * vy + vz * vz),
 			vehnames[model - 400],
 			pos.z);
 	} else {

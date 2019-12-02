@@ -1,6 +1,14 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#define PREF_ENABLE_PM 1
+#define PREF_SHOW_MISSION_MSGS 2
+#define PREF_CONSTANT_WORK 4
+#define PREF_WORK_AUTONAV 8
+
+#define DEFAULTPREFS \
+	(PREF_ENABLE_PM | PREF_SHOW_MISSION_MSGS | PREF_WORK_AUTONAV)
+
 /**
 The /preferences command.
 

@@ -28,6 +28,44 @@
 #define MISSION_CHECKPOINT_SIZE 11.0f
 #define MISSION_CHECKPOINT_TYPE 2
 
+/*dodo*/
+#define MISSION_TYPE_PASSENGER_S 1
+/*shamal, beagle*/
+#define MISSION_TYPE_PASSENGER_M 2
+/*at-400, andro*/
+#define MISSION_TYPE_PASSENGER_L 4
+/*beagle*/
+#define MISSION_TYPE_CARGO_S 8
+/*nevada*/
+#define MISSION_TYPE_CARGO_M 16
+/*andro*/
+#define MISSION_TYPE_CARGO_L 32
+/*(news,police) maverick, raindance, leviatha, sparrow*/
+#define MISSION_TYPE_HELI 64
+/*cargobob*/
+#define MISSION_TYPE_HELI_CARGO 128
+/*hunter, cargobob*/
+#define MISSION_TYPE_MIL_HELI 256
+/*hydra, rustler*/
+#define MISSION_TYPE_MIL 512
+/*andro*/
+#define MISSION_TYPE_AWACS 1024
+/*stuntplane*/
+#define MISSION_TYPE_STUNT 2048
+/*cropduster*/
+#define MISSION_TYPE_CROPD 4096
+/*skimmer*/
+#define MISSION_TYPE_PASSENGER_WATER 8192
+
+#define PASSENGER_MISSIONTYPES \
+	(MISSION_TYPE_PASSENGER_S | MISSION_TYPE_PASSENGER_M | \
+	MISSION_TYPE_PASSENGER_L | MISSION_TYPE_PASSENGER_WATER)
+/*all heli missions, including cargo*/
+#define HELI_MISSIONTYPES \
+	(MISSION_TYPE_HELI | MISSION_TYPE_HELI_CARGO | MISSION_TYPE_MIL_HELI)
+#define MIL_MISSIONTYPES \
+	(MISSION_TYPE_MIL | MISSION_TYPE_MIL_HELI)
+
 /*excluding zero term*/
 #define MAX_MSP_NAME (9)
 

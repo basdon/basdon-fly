@@ -4,6 +4,7 @@
 #include "common.h"
 #include "playerdata.h"
 #include "pm.h"
+#include "prefs.h"
 #include <string.h>
 
 #define LAST_PMTARGET_NOBODY -1

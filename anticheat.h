@@ -12,6 +12,16 @@
 #define AC_FLOOD_WARN_THRESHOLD \
 	(AC_FLOOD_LIMIT - AC_FLOOD_AMOUNT_CHAT - AC_FLOOD_AMOUNT_CHAT / 2)
 
+/*ac log event type*/
+#define AC_GENERIC 0
+#define AC_VEH_HP_NAN 1
+#define AC_VEH_HP_HIGH 2
+#define AC_WRONG_DIALOGID 3
+#define AC_UNAUTH_VEHICLE_ACCESS 4
+#define AC_FLOOD 5
+#define AC_VEH_HP_MISSION_INCREASE 6
+#define AC_MISSION_TOOFAST 7
+
 /**
 Decreate flood count for all players.
 

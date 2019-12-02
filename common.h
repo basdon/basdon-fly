@@ -97,6 +97,54 @@ extern logprintf_t logprintf;
 #define PLAYER_CC_CHECK(VALUE,PLAYERID) \
 	(_cc[PLAYERID] == ((unsigned int) VALUE & 0x003FFFFF))
 
+#define ECOL_INFO "{3498db}"
+#define ECOL_WARN "{e84c3d}"
+#define ECOL_SUCC "{2cc36b}"
+#define ECOL_DIALOG_CAPTION "{d2d2d2}"
+#define ECOL_DIALOG_TEXT "{a9c4e4}"
+#define ECOL_DIALOG_BUTTON "{c8c8c8}"
+#define ECOL_MISSION "{ff9900}"
+
+#define WARN "! "
+#define INFO "* "
+#define SUCC "+ "
+
+#define COL_SAMP_GREEN 0x88aa62ff // as in username error message
+#define COL_SAMP_GREY 0xa9c4e4ff // as in 'Connected to..'
+#define COL_SAMP_BLUE 0x2587ceff // as in '* Admin:'
+#define COL_INFO 0x3498dbff
+#define COL_WARN 0xe84c3dff
+#define COL_SUCC 0x2cc36bff
+#define COL_INFO_GENERIC 0xffffffff
+#define COL_INFO_LIGHT 0x33ccffff
+#define COL_PRIVMSG 0xffff00ff
+#define COL_PRIVMSG_HINT 0xafafafff
+#define COL_MISSION 0xff9900ff
+#define COL_JOIN 0x1b8ae4ff
+#define COL_QUIT 0x1674Bcff
+#define COL_METAR COL_INFO_LIGHT
+
+#define VEL_MAX (0.66742320819112627986348122866894f)
+#define VEL_TO_KPH (VEL_MAX * 270.0f)
+#define VEL_TO_KTS (VEL_MAX * 145.0f)
+#define VEL_TO_MPS (VEL_TO_KPH / 3.6f) /*(KPH / 3.6)*/
+#define VEL_TO_KFPM (VEL_TO_MPS * 3.28084f * 60.0f / 1000.0f) /* K feet/m*/
+
+#define GROUP_BANNED (1)
+#define GROUP_GUEST (2)
+#define GROUP_MEMBER (4)
+#define GROUP_ADMIN (268435456)
+#define GROUP_OWNER (1073741824)
+
+#define GROUPS_ALL \
+	(GROUP_BANNED|GROUP_GUEST|GROUP_MEMBER|\
+	GROUP_ADMIN|GROUP_OWNER)
+#define GROUPS_ADMIN (GROUP_ADMIN|GROUP_OWNER)
+#define GROUPS_NOTBANNED (GROUPS_ALL&~GROUPS_BANNED)
+#define GROUPS_REGISTERED (GROUPS_ALL&~GROUP_GUEST)
+
+#define GROUPS_ISADMIN(X) ((X) >= GROUP_ADMIN)
+
 /* amx addresses of buffers */
 extern cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
 extern cell underscorestringa;

@@ -16,6 +16,7 @@
 #include "panel.h"
 #include "playerdata.h"
 #include "playtime.h"
+#include "prefs.h"
 #include "timer.h"
 #include "vehicles.h"
 #include <string.h>
@@ -24,7 +25,7 @@
 #define TRACKER_PORT 7766
 
 #define MAX_UNLOAD_SPEED_KNOTS (35.0f)
-#define MAX_UNLOAD_SPEED_VEL (MAX_UNLOAD_SPEED_KNOTS / VEL_TO_KTS_VAL)
+#define MAX_UNLOAD_SPEED_VEL (MAX_UNLOAD_SPEED_KNOTS / VEL_TO_KTS)
 #define MAX_UNLOAD_SPEED_SQ_VEL (MAX_UNLOAD_SPEED_VEL * MAX_UNLOAD_SPEED_VEL)
 
 const static char *SATISFACTION_TEXT_FORMAT = "Passenger~n~Satisfaction: %d%%";
@@ -1370,7 +1371,7 @@ void missions_send_tracker_data(
 
 	hpv = (short) hp;
 	alt = (short) vpos->z;
-	spd = (short) (VEL_TO_KTS_VAL * sqrt(
+	spd = (short) (VEL_TO_KTS * sqrt(
 		vvel->x * vvel->x + vvel->y * vvel->y + vvel->z * vvel->z));
 
 	/* flight tracker packet 2 */

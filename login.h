@@ -1,7 +1,14 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#define LOGGED_NO 0
+#define LOGGED_IN 1
+#define LOGGED_GUEST 2
+
 #define ISPLAYING(PLAYERID) (loggedstatus[PLAYERID])
+
+#define PW_HASH_LENGTH (65) /* including zero term */
+#define MONEY_DEFAULT_AMOUNT 15000
 
 /**
 User id of player, -1 if no valid session (should be extremely rare)

@@ -1,6 +1,19 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#define MAX_AIRPORT_NAME (24)
+
+#define APT_FLAG_TOWERED (0x1)
+
+#define RUNWAY_SURFACE_ASPHALT (1)
+#define RUNWAY_SURFACE_DIRT (2)
+#define RUNWAY_SURFACE_CONCRETE (3)
+#define RUNWAY_SURFACE_GRASS (4)
+#define RUNWAY_SURFACE_WATER (5)
+
+#define RUNWAY_TYPE_RUNWAY (1)
+#define RUNWAY_TYPE_HELIPAD (2)
+
 struct RUNWAY {
 	char id[4];
 	float heading, headingr;

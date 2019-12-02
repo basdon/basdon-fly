@@ -356,10 +356,10 @@ void panel_timed_update()
 		x = *fbuf32;
 		y = *fbuf64;
 		z = *fbuf144;
-		x = VEL_TO_KTS_VAL * sqrt(x * x + y * y + z * z);
+		x = VEL_TO_KTS * sqrt(x * x + y * y + z * z);
 		panel_update_speed(playerid, (int) x);
 
-		z *= VEL_TO_KFPM_VAL * 14.5f;
+		z *= VEL_TO_KFPM * 14.5f;
 		if (z < -34.0f) {
 			z = -34.0f;
 		} else if (z > 34.0f) {

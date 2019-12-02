@@ -1,6 +1,11 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
+#define NAV_NONE 0
+#define NAV_ADF 1
+#define NAV_VOR 2
+#define NAV_ILS 4
+
 /**
 The /adf cmd.
 

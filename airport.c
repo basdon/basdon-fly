@@ -5,6 +5,7 @@
 #include "airport.h"
 #include "dialog.h"
 #include "math.h"
+#include "nav.h"
 #include <string.h>
 
 struct AIRPORT *airports = NULL;
