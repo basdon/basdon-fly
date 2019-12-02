@@ -9,6 +9,7 @@
 #include "dialog.h"
 #include "echo.h"
 #include "game_sa.h"
+#include "guestregister.h"
 #include "heartbeat.h"
 #include "login.h"
 #include "maps.h"

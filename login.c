@@ -403,12 +403,6 @@ void login_cb_create_guest_usr(void *data)
 	login_create_session(playerid, login_cb_create_session_guest);
 }
 
-/**
-Give the user a name prefixed with an '@' symbol, indicating they're a guest.
-
-@return 0 on failure and player will be kicked
-*/
-static
 int login_give_guest_name(int playerid)
 {
 	struct playerdata *p;
@@ -916,4 +910,3 @@ void login_on_player_disconnect(int playerid, int reason)
 	}
 	loggedstatus[playerid] = LOGGED_NO;
 }
-

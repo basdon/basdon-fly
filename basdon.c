@@ -90,15 +90,15 @@ cell AMX_NATIVE_CALL B_OnCallbackHit(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 {
-	const int playerid = params[1], dialogid = params[2];
-	const int response = params[3], listitem = params[4];
+	const int pid = params[1], dialogid = params[2];
+	const int res = params[3], listitem = params[4];
 	char inputtext[128];
 	cell *ia;
 
-	if (anticheat_flood(playerid, AC_FLOOD_AMOUNT_DIALOG) ||
-		!dialog_on_response(playerid, dialogid))
+	if (anticheat_flood(pid, AC_FLOOD_AMOUNT_DIALOG) ||
+		!dialog_on_response(pid, dialogid))
 	{
-		dialog_pop_queue(playerid);
+		dialog_pop_queue(pid);
 		return 0;
 	}
 
@@ -111,40 +111,48 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 
 	switch (dialogid) {
 	case DIALOG_SPAWN_SELECTION:
-		spawn_on_dialog_response(playerid, response, listitem);
+		spawn_on_dialog_response(pid, res, listitem);
 		goto ret;
 	case DIALOG_PREFERENCES:
-		prefs_on_dialog_response(playerid, response, listitem);
+		prefs_on_dialog_response(pid, res, listitem);
 		goto ret;
 	case DIALOG_AIRPORT_NEAREST:
-		airport_list_dialog_response(playerid, response, listitem);
+		airport_list_dialog_response(pid, res, listitem);
 		goto ret;
 	case DIALOG_REGISTER_FIRSTPASS:
-		login_dlg_register_firstpass(playerid, response, params[5]);
+		login_dlg_register_firstpass(pid, res, params[5]);
 		goto ret;
 	case DIALOG_REGISTER_CONFIRMPASS:
-		login_dlg_register_confirmpass(
-			playerid, response, params[5], inputtext);
+		login_dlg_register_confirmpass(pid, res, params[5], inputtext);
 		goto ret;
 	case DIALOG_LOGIN_LOGIN_OR_NAMECHANGE:
-		login_dlg_login_or_namechange(playerid, response, inputtext);
+		login_dlg_login_or_namechange(pid, res, inputtext);
 		goto ret;
 	case DIALOG_LOGIN_NAMECHANGE:
-		login_dlg_namechange(playerid, response, inputtext);
+		login_dlg_namechange(pid, res, inputtext);
 		goto ret;
 	case DIALOG_CHANGEPASS_PREVPASS:
-		chpw_dlg_previous_password(playerid, response, params[5], ia);
+		chpw_dlg_previous_password(pid, res, params[5], ia);
 		goto ret;
 	case DIALOG_CHANGEPASS_NEWPASS:
-		chpw_dlg_new_password(playerid, response, params[5], ia);
+		chpw_dlg_new_password(pid, res, params[5], ia);
 		goto ret;
 	case DIALOG_CHANGEPASS_CONFIRMPASS:
-		chpw_dlg_confirm_password(playerid, response, params[5], ia);
+		chpw_dlg_confirm_password(pid, res, params[5], ia);
+		goto ret;
+	case DIALOG_GUESTREGISTER_CHANGENAME:
+		guestreg_dlg_change_name(pid, res, inputtext);
+		goto ret;
+	case DIALOG_GUESTREGISTER_FIRSTPASS:
+		guestreg_dlg_register_firstpass(pid, res, params[5], ia);
+		goto ret;
+	case DIALOG_GUESTREGISTER_CONFIRMPASS:
+		guestreg_dlg_register_confirmpass(pid, res, params[5], ia);
 		goto ret;
 	}
 
 ret:
-	dialog_pop_queue(playerid);
+	dialog_pop_queue(pid);
 	return 1;
 }
 

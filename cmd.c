@@ -7,6 +7,7 @@
 #include "changepassword.h"
 #include "echo.h"
 #include "game_sa.h"
+#include "guestregister.h"
 #include "playerdata.h"
 #include "pm.h"
 #include "prefs.h"
@@ -207,6 +208,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/protip", GROUPS_ALL, protips_cmd_protip },
 	{ 0, "/r", GROUPS_ALL, pm_cmd_r },
 	{ 0, "/reclass", GROUPS_ALL, cmd_reclass },
+	{ 0, "/register", GROUP_GUEST, guestreg_cmd_register },
 	{ 0, "/repair", GROUPS_ALL, svp_cmd_repair },
 	{ 0, "/refuel", GROUPS_ALL, svp_cmd_refuel },
 	{ 0, "/respawn", GROUPS_ALL, cmd_respawn },

@@ -21,6 +21,12 @@ Logged-in status of each player (one of the LOGGED_ definitions).
 extern int loggedstatus[MAX_PLAYERS];
 
 /**
+Give the user a name prefixed with an '@' symbol, indicating they're a guest.
+
+@return 0 on failure and player will be kicked
+*/
+int login_give_guest_name(int playerid);
+/**
 @return 0 when player has unacceptable name
 */
 int login_on_player_connect(int playerid);
