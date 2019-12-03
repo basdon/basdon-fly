@@ -52,6 +52,9 @@ int _cc[MAX_PLAYERS];
 #include "time/time.c"
 #endif /*PRECOMPILED_TIME*/
 
+AMX *amx;
+struct FAKEAMX_DATA fakeamx_data;
+
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {
 	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES | SUPPORTS_PROCESS_TICK;
@@ -142,13 +145,84 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnVehicleSpawn),
 	REGISTERNATIVE(B_OnVehicleStreamIn),
 	REGISTERNATIVE(B_OnVehicleStreamOut),
-	REGISTERNATIVE(B_Validate),
 	{0, 0}
 };
 
-PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx)
+PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 {
-	return amx_Register(amx, PluginNatives, -1);
+	AMX_HEADER *hdr;
+	int tmp;
+
+	/*only the gamemode should reference B_OnGameModeInit*/
+	if (amx_FindNative(a, "B_OnGameModeInit", &tmp) == AMX_ERR_NONE) {
+		amx = a;
+		fakeamx_data.emptystring = 0;
+		fakeamx_data.underscorestring[0] = '_';
+		fakeamx_data.underscorestring[1] = 0;
+
+		/*relocate the data segment*/
+		hdr = (AMX_HEADER*) amx->base;
+		tmp = hdr->hea - hdr->dat;
+		if (tmp) {
+			/*data section will be cleared so whoever references it
+			will probably overwrite our precious data*/
+			logprintf("WARN: data section is not empty! (%d)", tmp);
+		}
+		tmp = hdr->stp - hdr->hea - STACK_HEAP_SIZE * sizeof(cell);
+		if (tmp) {
+			/*the value given to #pragma dynamic in the script
+			should correspond to STACK_HEAP_SIZE*/
+			logprintf("ERR: stack/heap size mismatch! "
+				"(excess %d cells)",
+				tmp / sizeof(cell));
+			return 0;
+		}
+		/*copy content of stack/heap to our data segment (this is most
+		likely empty, but better safe than sorry)*/
+		memcpy(fakeamx_data._stackheap,
+			amx->base + hdr->hea,
+			STACK_HEAP_SIZE * sizeof(cell));
+		/*finally do the relocation*/
+		amx->data = (unsigned char*) &fakeamx_data;
+		/*adjust pointers since the data segment grew*/
+		tmp = (char*) &fakeamx_data._stackheap - (char*) &fakeamx_data;
+		amx->frm += tmp;
+		amx->hea += tmp;
+		amx->hlw += tmp;
+		amx->stk += tmp;
+		amx->stp += tmp;
+		/*samp core doesn't seem to use amx_SetString or amx_GetString
+		so the data offset needs to be adjusted*/
+		hdr->dat = (int) &fakeamx_data - (int) hdr;
+
+		/*this will only work if this is the last plugin being loaded,
+		if it's not there should be another one in OnGameModeInit!*/
+		if (!natives_find()) {
+			return 0;
+		}
+
+		for (tmp = 0; tmp < MAX_PLAYERS; tmp++) {
+			playeronlineflag[tmp] = 0;
+		}
+		playercount = 0;
+
+		amx_SetUString(buf144, "sleep", 6);
+		tmp = NC_GetConsoleVarAsInt(buf144a);
+		if (tmp != 5) {
+			logprintf("ERR: sleep value %d should be 5", tmp);
+			return 0;
+		}
+
+		amx_SetUString(buf144, "maxplayers", 11);
+		tmp = NC_GetConsoleVarAsInt(buf144a);
+		if (tmp > MAX_PLAYERS) {
+			logprintf("ERR: slots (%d > %d)", tmp, MAX_PLAYERS);
+			return 0;
+		} else if (tmp < MAX_PLAYERS) {
+			logprintf("INFO: slots (%d < %d)", tmp, MAX_PLAYERS);
+		}
+	}
+	return amx_Register(a, PluginNatives, -1);
 }
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *a)

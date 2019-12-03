@@ -145,19 +145,72 @@ extern logprintf_t logprintf;
 
 #define GROUPS_ISADMIN(X) ((X) >= GROUP_ADMIN)
 
-/* amx addresses of buffers */
-extern cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
-extern cell underscorestringa;
-/* physical addresses of buffers */
-extern cell *emptystring, *buf32, *buf32_1, *buf64, *buf144, *buf4096;
-extern cell *underscorestring;
-/* buffers as char pointers */
-extern char *cemptystring, *cbuf32, *cbuf32_1, *cbuf64, *cbuf144, *cbuf4096;
-extern char *cunderscorestring;
-/*special buf using last 4000 of cbuf4096 (which has size 16k)*/
-extern char *cbuf4096_;
-/* float pointers to buffers */
-extern float *fbuf32_1, *fbuf32, *fbuf64, *fbuf144, *fbuf4096;
+/*in cells*/
+#define STACK_HEAP_SIZE 512
+
+struct FAKEAMX_DATA {
+	cell emptystring;
+	cell underscorestring[2];
+	union {
+		cell ascell[32];
+		char aschr[32 * sizeof(cell)];
+		float asflt[32];
+	} a32;
+	union {
+		cell ascell[32];
+		char aschr[32 * sizeof(cell)];
+		float asflt[32];
+	} a32_1;
+	union {
+		cell ascell[64];
+		char aschr[64 * sizeof(cell)];
+		float asflt[64];
+	} a64;
+	union {
+		cell ascell[144];
+		char aschr[144 * sizeof(cell)];
+		float asflt[144];
+	} a144;
+	union {
+		cell ascell[4096];
+		char aschr[4096 * sizeof(cell)];
+		float asflt[4096];
+		struct {
+			char _pad[4096 * 3];
+			char last4096[4096];
+		} splitted;
+	} a4096;
+	cell _stackheap[STACK_HEAP_SIZE];
+};
+#define basea ((int) &fakeamx_data)
+#define emptystringa ((int) &fakeamx_data.emptystring - basea)
+#define underscorestringa ((int) &fakeamx_data.underscorestring - basea)
+#define buf32a ((int) &fakeamx_data.a32 - basea)
+#define buf32_1a ((int) &fakeamx_data.a32_1 - basea)
+#define buf64a ((int) &fakeamx_data.a64 - basea)
+#define buf144a ((int) &fakeamx_data.a144 - basea)
+#define buf4096a ((int) &fakeamx_data.a4096 - basea)
+#define buf32 (fakeamx_data.a32.ascell)
+#define buf32_1 (fakeamx_data.a32_1.ascell)
+#define buf64 (fakeamx_data.a64.ascell)
+#define buf144 (fakeamx_data.a144.ascell)
+#define buf4096 (fakeamx_data.a4096.ascell)
+#define cbuf32 fakeamx_data.a32.aschr
+#define cbuf32_1 fakeamx_data.a32_1.aschr
+#define cbuf64 fakeamx_data.a64.aschr
+#define cbuf144 fakeamx_data.a144.aschr
+#define cbuf4096 fakeamx_data.a4096.aschr
+#define cbuf4096_ fakeamx_data.a4096.splitted.last4096
+#define fbuf32 fakeamx_data.a32.asflt
+#define fbuf32_1 fakeamx_data.a32_1.asflt
+#define fbuf64 fakeamx_data.a64.asflt
+#define fbuf144 fakeamx_data.a144.asflt
+#define fbuf4096 fakeamx_data.a4096.asflt
+
+/*amx*/
+extern AMX *amx;
+/*amx data segment*/
+extern struct FAKEAMX_DATA fakeamx_data;
 /**
 Connection count per player id. Incremented every time playerid connects.
 

@@ -14,70 +14,6 @@ int spawned[MAX_PLAYERS];
 
 static const char *NOLOG = WARN"Log in first.";
 
-/* native B_Validate(buf4096[], buf144[], buf64[], buf32[],
-                     buf32_1[], emptystring, underscorestring) */
-static
-cell AMX_NATIVE_CALL B_Validate(AMX *local_amx, cell *params)
-{
-	int i, tmp;
-
-	amx = local_amx;
-
-	for (i = 0; i < MAX_PLAYERS; i++) {
-		playeronlineflag[i] = 0;
-	}
-	playercount = 0;
-
-	amx_GetAddr(amx, buf4096a = params[1], &buf4096);
-	amx_GetAddr(amx, buf144a = params[2], &buf144);
-	amx_GetAddr(amx, buf64a = params[3], &buf64);
-	amx_GetAddr(amx, buf32a = params[4], &buf32);
-	amx_GetAddr(amx, buf32_1a = params[5], &buf32_1);
-	amx_GetAddr(amx, emptystringa = params[6], &emptystring);
-	amx_GetAddr(amx, underscorestringa = params[7], &underscorestring);
-	cbuf32_1 = (char*) buf32_1;
-	cbuf32 = (char*) buf32;
-	cbuf64 = (char*) buf64;
-	cbuf144 = (char*) buf144;
-	cbuf4096 = (char*) buf4096;
-	cbuf4096_ = cbuf4096 + 4096 * 4 - 4000;
-	cemptystring = (char*) emptystring;
-	cunderscorestring = (char*) underscorestring;
-	fbuf32_1 = (float*) buf32_1;
-	fbuf32 = (float*) buf32;
-	fbuf64 = (float*) buf64;
-	fbuf144 = (float*) buf144;
-	fbuf4096 = (float*) buf4096;
-
-	if (!natives_find()) {
-		goto fail;
-	}
-
-	amx_SetUString(buf144, "sleep", 6);
-	tmp = NC_GetConsoleVarAsInt(buf144a);
-	if (tmp != 5) {
-		logprintf("ERR: sleep value %d should be 5", tmp);
-		goto fail;
-	}
-
-	amx_SetUString(buf144, "maxplayers", 11);
-	tmp = NC_GetConsoleVarAsInt(buf144a);
-	if (tmp > MAX_PLAYERS) {
-		logprintf("ERR: max players (%d > %d)", tmp, MAX_PLAYERS);
-		goto fail;
-	} else if (tmp < MAX_PLAYERS) {
-		logprintf("INFO: less max players (%d < %d)", tmp, MAX_PLAYERS);
-	}
-
-	return MAX_PLAYERS;
-fail:
-	buf32[0] = 'e'; buf32[1] = 'x'; buf32[2] = 'i'; buf32[3] = 't';
-	buf32[4] = 0;
-	NC_SendRconCommand(buf32a);
-	time_sleep(10000);
-	return 0;
-}
-
 /* native B_OnCallbackHit(function, data) */
 static
 cell AMX_NATIVE_CALL B_OnCallbackHit(AMX *amx, cell *params)
@@ -341,7 +277,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	const int playerid = params[1];
 
 #ifdef DEV
-	amx_SetUString(buf144, "PL: DEVELOPMENT BUILD", 144);
+	amx_SetUString(buf144, "DEVELOPMENT BUILD", 144);
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 #endif /*DEV*/
 

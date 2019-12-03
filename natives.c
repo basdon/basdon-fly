@@ -145,20 +145,8 @@ AMX_NATIVE n_ssocket_send;
 AMX_NATIVE n_random;
 AMX_NATIVE n_tickcount;
 
-AMX *amx;
-
 union NCDATA nc_data;
-
 cell tmpfloat;
-
-cell emptystringa, buf32a, buf32_1a, buf64a, buf144a, buf4096a;
-cell underscorestringa;
-cell *emptystring, *buf32, *buf32_1, *buf64, *buf144, *buf4096;
-cell *underscorestring;
-char *cemptystring, *cbuf32, *cbuf32_1, *cbuf64, *cbuf144, *cbuf4096;
-char *cunderscorestring;
-char *cbuf4096_;
-float *fbuf32_1, *fbuf32, *fbuf64, *fbuf144, *fbuf4096;
 
 int natives_find()
 {

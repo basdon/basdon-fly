@@ -149,8 +149,6 @@ extern AMX_NATIVE n_tickcount;
 #define NC_PARS_(X) nc_params[0]=X<<2,
 #endif /*NO_NC_PARAM_SIZE*/
 
-extern AMX *amx;
-
 union NCDATA {
 	cell asint[20];
 	float asflt[20];
@@ -158,7 +156,6 @@ union NCDATA {
 extern union NCDATA nc_data;
 #define nc_params nc_data.asint
 #define nc_paramf nc_data.asflt
-
 /**
 Used to reinterpret cell return values as a float.
 */
