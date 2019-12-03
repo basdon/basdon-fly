@@ -14,7 +14,7 @@ int spawned[MAX_PLAYERS];
 
 static const char *NOLOG = WARN"Log in first.";
 
-/* native B_Validate(maxplayers, buf4096[], buf144[], buf64[], buf32[],
+/* native B_Validate(buf4096[], buf144[], buf64[], buf32[],
                      buf32_1[], emptystring, underscorestring) */
 static
 cell AMX_NATIVE_CALL B_Validate(AMX *local_amx, cell *params)
@@ -28,13 +28,13 @@ cell AMX_NATIVE_CALL B_Validate(AMX *local_amx, cell *params)
 	}
 	playercount = 0;
 
-	amx_GetAddr(amx, buf4096a = params[2], &buf4096);
-	amx_GetAddr(amx, buf144a = params[3], &buf144);
-	amx_GetAddr(amx, buf64a = params[4], &buf64);
-	amx_GetAddr(amx, buf32a = params[5], &buf32);
-	amx_GetAddr(amx, buf32_1a = params[6], &buf32_1);
-	amx_GetAddr(amx, emptystringa = params[7], &emptystring);
-	amx_GetAddr(amx, underscorestringa = params[8], &underscorestring);
+	amx_GetAddr(amx, buf4096a = params[1], &buf4096);
+	amx_GetAddr(amx, buf144a = params[2], &buf144);
+	amx_GetAddr(amx, buf64a = params[3], &buf64);
+	amx_GetAddr(amx, buf32a = params[4], &buf32);
+	amx_GetAddr(amx, buf32_1a = params[5], &buf32_1);
+	amx_GetAddr(amx, emptystringa = params[6], &emptystring);
+	amx_GetAddr(amx, underscorestringa = params[7], &underscorestring);
 	cbuf32_1 = (char*) buf32_1;
 	cbuf32 = (char*) buf32;
 	cbuf64 = (char*) buf64;
@@ -57,14 +57,6 @@ cell AMX_NATIVE_CALL B_Validate(AMX *local_amx, cell *params)
 	sleep = NC_GetConsoleVarAsInt(buf144a);
 	if (sleep != 5) {
 		logprintf("ERR: sleep value %d should be 5", sleep);
-		goto fail;
-	}
-
-	if (MAX_PLAYERS != params[1]) {
-		logprintf(
-			"ERR: MAX_PLAYERS mismatch: %d (plugin) vs %d (gm)",
-			MAX_PLAYERS,
-			params[1]);
 		goto fail;
 	}
 
@@ -584,6 +576,22 @@ cell AMX_NATIVE_CALL B_OnPlayerUpdate(AMX *amx, cell *params)
 	}
 	playtime_on_player_update(playerid);
 	timecyc_on_player_update(playerid);
+	return 1;
+}
+
+/* native B_OnQueryError(errorid, error[], callback[], query[], handle) */
+static
+cell AMX_NATIVE_CALL B_OnQueryError(AMX *amx, cell *params)
+{
+	const int errorid = params[1];
+	cell *addr;
+
+	amx_GetAddr(amx, params[2], &addr);
+	amx_GetUString(cbuf144, addr, 144 * sizeof(cell));
+	amx_GetAddr(amx, params[4], &addr);
+	amx_GetUString(cbuf4096, addr, 4096 * sizeof(cell));
+
+	logprintf("query err %d %s %s\n", errorid, cbuf144, cbuf4096);
 	return 1;
 }
 

@@ -137,6 +137,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnPlayerStateChange),
 	REGISTERNATIVE(B_OnPlayerText),
 	REGISTERNATIVE(B_OnPlayerUpdate),
+	REGISTERNATIVE(B_OnQueryError),
 	REGISTERNATIVE(B_OnRecv),
 	REGISTERNATIVE(B_OnVehicleSpawn),
 	REGISTERNATIVE(B_OnVehicleStreamIn),
