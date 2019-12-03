@@ -19,7 +19,7 @@ static const char *NOLOG = WARN"Log in first.";
 static
 cell AMX_NATIVE_CALL B_Validate(AMX *local_amx, cell *params)
 {
-	int i, sleep;
+	int i, tmp;
 
 	amx = local_amx;
 
@@ -54,10 +54,19 @@ cell AMX_NATIVE_CALL B_Validate(AMX *local_amx, cell *params)
 	}
 
 	amx_SetUString(buf144, "sleep", 6);
-	sleep = NC_GetConsoleVarAsInt(buf144a);
-	if (sleep != 5) {
-		logprintf("ERR: sleep value %d should be 5", sleep);
+	tmp = NC_GetConsoleVarAsInt(buf144a);
+	if (tmp != 5) {
+		logprintf("ERR: sleep value %d should be 5", tmp);
 		goto fail;
+	}
+
+	amx_SetUString(buf144, "maxplayers", 11);
+	tmp = NC_GetConsoleVarAsInt(buf144a);
+	if (tmp > MAX_PLAYERS) {
+		logprintf("ERR: max players (%d > %d)", tmp, MAX_PLAYERS);
+		goto fail;
+	} else if (tmp < MAX_PLAYERS) {
+		logprintf("INFO: less max players (%d < %d)", tmp, MAX_PLAYERS);
 	}
 
 	return MAX_PLAYERS;
