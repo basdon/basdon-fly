@@ -151,8 +151,13 @@ extern AMX_NATIVE n_tickcount;
 
 extern AMX *amx;
 
-extern cell *nc_params;
-extern float *nc_paramf;
+union NCDATA {
+	cell asint[20];
+	float asflt[20];
+};
+extern union NCDATA nc_data;
+#define nc_params nc_data.asint
+#define nc_paramf nc_data.asflt
 
 /**
 Used to reinterpret cell return values as a float.

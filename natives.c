@@ -4,7 +4,6 @@
 #include "common.h"
 #include "login.h"
 #include "maps.h"
-#include "natives.h"
 #include "playerdata.h"
 #include "servicepoints.h"
 #include "spawn.h"
@@ -148,10 +147,7 @@ AMX_NATIVE n_tickcount;
 
 AMX *amx;
 
-static cell nc_params_d[20];
-
-cell *nc_params = nc_params_d;
-float *nc_paramf = (float*) nc_params_d;
+union NCDATA nc_data;
 
 cell tmpfloat;
 
