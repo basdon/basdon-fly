@@ -289,7 +289,7 @@ void send_chat_or_action_to_game(boolean isaction, char prefix, char[] nickname,
 	if (prefix != 0) {
 		nicklen++;
 	}
-	byte msglen = (byte) Math.min(message.length, 144);
+	int msglen = Math.min(message.length, 144);
 	byte[] msg = new byte[10 + nicklen + msglen];
 	msg[0] = 'F';
 	msg[1] = 'L';
@@ -297,7 +297,7 @@ void send_chat_or_action_to_game(boolean isaction, char prefix, char[] nickname,
 	msg[3] = (byte) (isaction ? PACK_ACTION : PACK_CHAT);
 	msg[4] = msg[5] = 0; // as per spec
 	msg[6] = nicklen;
-	msg[7] = msglen;
+	msg[7] = (byte) msglen;
 	int j = 8;
 	if (prefix != 0) {
 		msg[j] = (byte) prefix;
