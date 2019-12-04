@@ -67,7 +67,7 @@ void echo_on_player_connection(int playerid, int reason)
 			((reason & 0xFF) << 16) |
 			((nicklen & 0xFF) << 24);
 		memcpy(cbuf144 + 8, pd->name, nicklen + 1);
-		NC_ssocket_send(socket_out, buf144a, 8 + nicklen);
+		NC_ssocket_send(socket_out, buf144a, 8 + nicklen + 1);
 	}
 }
 
