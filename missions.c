@@ -1065,7 +1065,7 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 	atoci(buf4096, i);
 	NC_PARS(3);
 	nc_params[2] = COL_MISSION;
-	nc_params[3] = buf144a;
+	nc_params[3] = buf4096a;
 	i = playercount;
 	while (i--) {
 		if (prefs[players[i]] & PREF_SHOW_MISSION_MSGS) {

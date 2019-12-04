@@ -83,7 +83,6 @@ void echo_on_flight_finished(char *text)
 		buf144[0] = 0x0C594C46;
 		cbuf144[4] = textlen;
 		memcpy(cbuf144 + 5, text, textlen);
-		cbuf144[5 + textlen] = 0;
 		NC_ssocket_send(socket_out, buf144a, 5 + textlen);
 	}
 }
