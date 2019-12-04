@@ -171,10 +171,11 @@ throws InterruptedIOException
 	case PACK_ACTION:
 	case PACK_CHAT:
 	{
-		byte nicklen, msglen;
+		byte nicklen;
+		int msglen;
 		if (length > 11 &&
 			(nicklen = buf[6]) > 0 && nicklen < 50 &&
-			(msglen = buf[7]) > 0 && msglen < 144 &&
+			(msglen = buf[7] & 0xFF) > 0 && msglen < 144 &&
 			10 + nicklen + msglen == length)
 		{
 			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
