@@ -201,8 +201,8 @@ throws InterruptedIOException
 	}
 	case PACK_FLIGHT_MESSAGE:
 	{
-		byte msglen;
-		if (length > 5 && 5 + (msglen = buf[4]) == length) {
+		int msglen;
+		if (length > 5 && 5 + (msglen = buf[4] & 0xFF) == length) {
 			char[] msg = new char[4 + msglen];
 			msg[0] = Constants.CTRL_COLOR;
 			msg[1] = '0';
