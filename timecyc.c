@@ -381,13 +381,16 @@ static unsigned long lasttime;
 #define WEATHER_TIMER_DEVIATION (3 * 60000)
 
 /**
-Formats the METAR weather message into cbuf4096.
+Formats the METAR weather message into buf144.
+
+@param type should be either 'report' or 'forecast'
 */
 static
-void timecyc_make_weather_msg(const char* type, int weather)
+void timecyc_fmt_metar_msg_into_buf144(const char* type, int weather)
 {
-	sprintf(cbuf4096,
-		"METAR %s: %s, visibility: %s, winds: %.0fkts, waves: %s",
+	csprintf(buf144,
+		"METAR weather %s: %s, "
+		"visibility: %s, winds: %.0fkts, waves: %s",
 		type,
 		weather_descriptions[weather],
 		weather_visibilities[weather],
@@ -432,18 +435,16 @@ int timecyc_next_weather(void *unused)
 
 	newweather = weather_mapping[NC_random(NEXT_WEATHER_POSSIBILITIES)];
 	if (weather.current != WEATHER_INITIAL) {
-		sprintf(cbuf4096,
+		csprintf(buf144,
 			"INSERT INTO wth(w,l,t) "
 			"VALUES(%d,%d,UNIX_TIMESTAMP())",
 			newweather,
 			weather.current);
-		amx_SetUString(buf144, cbuf4096, 144);
 		NC_mysql_tquery_nocb(buf144a);
 	}
 	timecyc_set_weather(newweather);
-	timecyc_make_weather_msg("forecast", newweather);
 	missions_on_weather_changed(newweather);
-	amx_SetUString(buf144, cbuf4096, 144);
+	timecyc_fmt_metar_msg_into_buf144("forecast", newweather);
 	NC_SendClientMessageToAll(COL_METAR, buf144a);
 
 	return WEATHER_TIMER_INTERVAL + NC_random(WEATHER_TIMER_DEVIATION);
@@ -452,11 +453,10 @@ int timecyc_next_weather(void *unused)
 int timecyc_cmd_metar(CMDPARAMS)
 {
 	if (weather.upcoming != weather.current) {
-		timecyc_make_weather_msg("weather forecast", weather.upcoming);
+		timecyc_fmt_metar_msg_into_buf144("forecast", weather.upcoming);
 	} else {
-		timecyc_make_weather_msg("weather report", weather.current);
+		timecyc_fmt_metar_msg_into_buf144("report", weather.current);
 	}
-	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessage(playerid, COL_METAR, buf144a);
 	return 1;
 }
@@ -646,12 +646,11 @@ timer30s:
 			/*timer30s*/
 			heartbeat_timed_update();
 		}
-		sprintf(cbuf4096,
+		csprintf(buf144,
 			"worldtime %02d:%02d %s",
 			time_h,
 			time_m,
 			weather_descriptions[weather.current]);
-		amx_SetUString(buf144, cbuf4096, 144);
 		NC_SendRconCommand(buf144a);
 		/*timer1000*/
 		veh_timed_1s_update();
@@ -674,10 +673,10 @@ int timecyc_cmd_dev_fweather(CMDPARAMS)
 	if (cmd_get_int_param(cmdtext, &parseidx, &w)) {
 		weather.current = weather.locked = weather.upcoming = w;
 		timecyc_sync(playerid);
-		amx_SetUString(buf144, "forced weather", 144);
+		B144("forced weather");
 		NC_SendClientMessageToAll(-1, buf144a);
 	} else {
-		amx_SetUString(buf144, WARN"Syntax: /fweather <weather>", 144);
+		B144(WARN"Syntax: /fweather <weather>");
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	}
 	return 1;
@@ -685,7 +684,7 @@ int timecyc_cmd_dev_fweather(CMDPARAMS)
 
 int timecyc_cmd_dev_timecyc(CMDPARAMS)
 {
-	sprintf(cbuf4096,
+	csprintf(buf144,
 		"%02d:%02d current %d upcoming %d locked %d "
 		"syncstate %d\n",
 		time_h,
@@ -694,7 +693,6 @@ int timecyc_cmd_dev_timecyc(CMDPARAMS)
 		weather.upcoming,
 		weather.locked,
 		timecycstate[playerid]);
-	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessage(playerid, -1, buf144a);
 	return 1;
 }
@@ -705,10 +703,10 @@ int timecyc_cmd_dev_tweather(CMDPARAMS)
 
 	if (cmd_get_int_param(cmdtext, &parseidx, &w)) {
 		timecyc_set_weather(w);
-		amx_SetUString(buf144, "changing weather", 144);
+		B144("changing weather");
 		NC_SendClientMessageToAll(-1, buf144a);
 	} else {
-		amx_SetUString(buf144, WARN"Syntax: /tweather <weather>", 144);
+		B144(WARN"Syntax: /tweather <weather>");
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	}
 	return 1;
@@ -721,7 +719,7 @@ int cmd_dev_timex(CMDPARAMS)
 	if (!cmd_get_int_param(cmdtext, &parseidx, &h) ||
 		!cmd_get_int_param(cmdtext, &parseidx, &m))
 	{
-		amx_SetUString(buf144, WARN"Syntax: /timex <h> <m>", 144);
+		B144(WARN"Syntax: /timex <h> <m>");
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	} else {
 		time_h = h;
@@ -733,7 +731,7 @@ int cmd_dev_timex(CMDPARAMS)
 
 int timecyc_cmd_dev_nweather(CMDPARAMS)
 {
-	amx_SetUString(buf144, "changing weather", 144);
+	B144("changing weather");
 	NC_SendClientMessageToAll(-1, buf144a);
 	timecyc_next_weather(NULL);
 	return 1;

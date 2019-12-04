@@ -137,7 +137,7 @@ void class_on_player_request_class(int playerid, int _classid)
 	NC(n_SetPlayerFacingAngle);
 
 	NC_PARS(4);
-	amx_SetUString(buf32, CLASS_NAMES[class_index], 32);
+	atoc(buf32, (char*) CLASS_NAMES[class_index], 32);
 	nc_params[2] = buf32a;
 	nc_params[3] = 0x800000;
 	nc_params[4] = 3;
@@ -153,7 +153,7 @@ int class_on_player_request_spawn(int playerid)
 	static const char *NO_TRUCK = WARN"Trucker class is not available yet.";
 
 	if (classid[playerid] == CLASS_TRUCKER) {
-		amx_SetUString(buf144, NO_TRUCK, 144);
+		B144((char*) NO_TRUCK);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 0;
 	}

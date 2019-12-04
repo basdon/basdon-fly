@@ -45,11 +45,11 @@ void pdata_on_player_connect(int playerid)
 	nc_params[2] = buf144a;
 	nc_params[3] = sizeof(pd->ip);
 	NC(n_GetPlayerIp);
-	amx_GetUString(pd->ip, buf144, sizeof(pd->ip));
+	ctoa(pd->ip, buf144, sizeof(pd->ip));
 
 	nc_params[3] = MAX_PLAYER_NAME + 1;
 	NC(n_GetPlayerName);
-	amx_GetUString(pd->name, buf144, MAX_PLAYER_NAME + 1);
+	ctoa(pd->name, buf144, MAX_PLAYER_NAME + 1);
 	pdata_on_name_updated(playerid);
 
 	pd->groups = GROUP_GUEST;

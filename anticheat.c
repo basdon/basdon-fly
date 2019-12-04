@@ -145,7 +145,7 @@ void anticheat_log(int playerid, int eventtype, char *info)
 			loggedstatus[playerid]);
 	}
 	sprintf(b, ",%d,'%s')", eventtype, info);
-	amx_SetUString(buf4096, buf, sizeof(buf));
+	atoc(buf4096, buf, sizeof(buf));
 	NC_mysql_tquery_nocb(buf4096a);
 }
 
@@ -203,7 +203,7 @@ int anticheat_on_player_command(int playerid)
 		return 0;
 	}
 	if (floodcount[playerid] > AC_FLOOD_WARN_THRESHOLD) {
-		amx_SetUString(buf144, DONTSPAM, 144);
+		B144((char*) DONTSPAM);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	}
 	return 1;
@@ -230,7 +230,7 @@ int anticheat_on_player_text(int playerid)
 		return 0;
 	}
 	if (floodcount[playerid] > AC_FLOOD_WARN_THRESHOLD) {
-		amx_SetUString(buf144, DONTSPAM, 144);
+		B144((char*) DONTSPAM);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	}
 	return 1;

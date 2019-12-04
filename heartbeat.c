@@ -13,12 +13,11 @@ static int sessionid = -1;
 void heartbeat_timed_update()
 {
 	if (sessionid != -1) {
-		sprintf(cbuf4096,
+		csprintf(buf144,
 			"UPDATE heartbeat "
 			"SET tlast=UNIX_TIMESTAMP() "
 			"WHERE id=%d",
 			sessionid);
-		amx_SetUString(buf144, cbuf4096, 144);
 		NC_mysql_tquery_nocb(buf144a);
 	}
 }
@@ -27,7 +26,7 @@ void heartbeat_create_session()
 {
 	int cacheid;
 
-	amx_SetUString(buf144,
+	atoc(buf144,
 		"INSERT INTO heartbeat(tstart,tlast) "
 		"VALUES(UNIX_TIMESTAMP(),UNIX_TIMESTAMP())",
 		144);
@@ -39,12 +38,11 @@ void heartbeat_create_session()
 void heartbeat_end_session()
 {
 	if (sessionid != -1) {
-		sprintf(cbuf4096,
+		csprintf(buf144,
 			"UPDATE heartbeat "
 			"SET tlast=UNIX_TIMESTAMP(),cleanexit=1 "
 			"WHERE id=%d",
 			sessionid);
-		amx_SetUString(buf144, cbuf4096, 144);
 		NC_mysql_tquery_nocb(buf144a);
 	}
 }

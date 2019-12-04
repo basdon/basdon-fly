@@ -132,7 +132,7 @@ void chpw_cb_current_password_loaded(void *data)
 			memcpy(pwdata[playerid], cbuf144, size);
 		} else {
 			/*user already responded to dialog, verify pw now*/
-			amx_SetUString(buf4096, (char*) pwdata[playerid], 144);
+			atoc(buf4096, (char*) pwdata[playerid], 144);
 			free(pwdata[playerid]);
 			pwdata[playerid] = NULL;
 			common_bcrypt_check(buf4096a, buf144a,
@@ -220,7 +220,7 @@ void chpw_cb_new_password_hashed(void *data)
 	}
 
 	NC_bcrypt_get_hash(buf144a);
-	amx_GetUString(d->bcrypt, buf144, PW_HASH_LENGTH);
+	ctoa(d->bcrypt, buf144, PW_HASH_LENGTH);
 
 	if (d->confirmed) {
 		chpw_update_user_password(playerid, d);

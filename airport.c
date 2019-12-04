@@ -51,7 +51,7 @@ void airports_init()
 	}
 
 	/*load airports*/
-	amx_SetUString(buf144,
+	atoc(buf144,
 		"SELECT c,n,b,e,x,y,z,flags "
 		"FROM apt ORDER BY i ASC", 144);
 	cacheid = NC_mysql_query(buf144a);
@@ -72,11 +72,11 @@ void airports_init()
 		NC_PARS(3);
 		nc_params[1] = rowcount;
 		*field = 0; NC(n_cache_get_field_s);
-		amx_GetUString(ap->code, buf144, sizeof(ap->code));
+		ctoa(ap->code, buf144, sizeof(ap->code));
 		*field = 1; NC(n_cache_get_field_s);
-		amx_GetUString(ap->name, buf144, sizeof(ap->name));
+		ctoa(ap->name, buf144, sizeof(ap->name));
 		*field = 2; NC(n_cache_get_field_s);
-		amx_GetUString(ap->beacon, buf144, sizeof(ap->beacon));
+		ctoa(ap->beacon, buf144, sizeof(ap->beacon));
 		NC_PARS(2);
 		ap->enabled = (char) (*field = 3, NC(n_cache_get_field_i));
 		ap->pos.x = (*field = 4, NCF(n_cache_get_field_f));
@@ -88,11 +88,10 @@ noairports:
 	NC_cache_delete(cacheid);
 
 	/*load runways*/
-	amx_SetUString(buf144,
-		"SELECT a,x,y,z,n,type,h,s "
+	B144("SELECT a,x,y,z,n,type,h,s "
 		"FROM rnw "
 		/*"WHERE type="EQ(RUNWAY_TYPE_RUNWAY)" "*/
-		"ORDER BY a ASC", 144);
+		"ORDER BY a ASC");
 	cacheid = NC_mysql_query(buf144a);
 	rowcount = NC_cache_get_row_count();
 	if (!rowcount) {
@@ -203,7 +202,7 @@ int airport_cmd_nearest(CMDPARAMS)
 		i++;
 	}
 	if (num == 0) {
-		amx_SetUString(buf144, NONE, 144);
+		B144((char*) NONE);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}

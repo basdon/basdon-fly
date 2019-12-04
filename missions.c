@@ -90,7 +90,7 @@ void missions_create_tracker_socket()
 	if (tracker == SOCKET_INVALID_SOCKET) {
 		logprintf("failed to create flighttracker socket");
 	} else {
-		amx_SetUString(buf144, "127.0.0.1", 144);
+		B144("127.0.0.1");
 		NC_ssocket_connect(tracker, buf144a, TRACKER_PORT);
 		*buf32 = 0x04594C46;
 		NC_ssocket_send(tracker, buf32a, 4);
@@ -116,7 +116,7 @@ void missions_init()
 	}
 
 	/*load missionpoints*/
-	amx_SetUString(buf144,
+	atoc(buf144,
 		"SELECT a,i,x,y,z,t,name "
 		"FROM msp "
 		"ORDER BY a ASC,i ASC",
@@ -148,14 +148,14 @@ void missions_init()
 		msp->type = (*f = 5, NC(n_cache_get_field_i));
 		NC_PARS(3);
 		*f = 6; NC(n_cache_get_field_s);
-		amx_GetUString(msp->name, buf32, MAX_MSP_NAME + 1);
+		ctoa(msp->name, buf32, MAX_MSP_NAME + 1);
 		ap->missiontypes |= msp->type;
 		ap->num_missionpts++;
 	}
 	NC_cache_delete(cacheid);
 
 	/*end unfinished dangling flights*/
-	amx_SetUString(buf144,
+	atoc(buf144,
 		"UPDATE flg "
 		"SET state="EQ(MISSION_STATE_SERVER_ERR)" "
 		"WHERE state="EQ(MISSION_STATE_INPROGRESS)"",
@@ -381,14 +381,13 @@ static int dev_show_closest_point = 0;
 void dev_missions_toggle_closest_point()
 {
 	int i;
-	char buf[144];
+
 	if (!(dev_show_closest_point ^= 1)) {
 		for (i = 0; i < playercount; i++) {
 			NC_DisablePlayerRaceCheckpoint(players[i]);
 		}
 	}
-	sprintf(buf, "showing mission points: %d", dev_show_closest_point);
-	amx_SetUString(buf144, buf, sizeof(buf));
+	csprintf(buf144, "showing mission points: %d", dev_show_closest_point);
 	NC_SendClientMessageToAll(-1, buf144a);
 }
 
@@ -632,15 +631,14 @@ void missions_cleanup(struct MISSION *mission, int playerid)
 static
 void missions_end_unfinished(struct MISSION *mission, int playerid, int reason)
 {
-	sprintf(cbuf144,
+	csprintf(buf144,
 	        "UPDATE flg "
 		"SET state=%d,tlastupdate=UNIX_TIMESTAMP(),adistance=%f "
 		"WHERE id=%d",
 	        reason,
 		mission->actualdistanceM,
 	        mission->id);
-	amx_SetUString(buf4096, cbuf144, 144);
-	NC_mysql_tquery_nocb(buf4096a);
+	NC_mysql_tquery_nocb(buf144a);
 
 	missions_cleanup(mission, playerid);
 }
@@ -730,12 +728,11 @@ void missions_start_flight(int playerid, struct MISSION *mission)
 	}
 
 	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
-		sprintf(cbuf32, SATISFACTION_TEXT_FORMAT, 100);
-		amx_SetUString(buf32_1, cbuf32, 32);
+		csprintf(buf32, SATISFACTION_TEXT_FORMAT, 100);
 		NC_PARS(3);
 		nc_params[1] = playerid;
 		nc_params[2] = ptxt_satisfaction[playerid];
-		nc_params[3] = buf32_1a;
+		nc_params[3] = buf32a;
 		NC(n_PlayerTextDrawSetString);
 		NC_PARS(2);
 		NC(n_PlayerTextDrawShow);
@@ -755,12 +752,11 @@ void missions_start_flight(int playerid, struct MISSION *mission)
 	common_hide_gametext_for_player(playerid);
 	NC_TogglePlayerControllable(playerid, 1);
 
-	sprintf(cbuf4096,
+	csprintf(buf144,
 	        "UPDATE flg "
 		"SET tload=UNIX_TIMESTAMP(),tlastupdate=UNIX_TIMESTAMP() "
 		"WHERE id=%d",
 	        mission->id);
-	amx_SetUString(buf144, cbuf4096, 144);
 	NC_mysql_tquery_nocb(buf144a);
 }
 
@@ -828,14 +824,13 @@ void missions_start_mission(int playerid)
 	struct MISSIONPOINT *startpoint, *endpoint;
 	struct dbvehicle *veh;
 	struct vec3 ppos;
-	char *errmsg;
 	int vehicleid, missiontype, i;
 	float vhp, dx, dy;
 
 	NC_PARS(1);
 	nc_params[1] = playerid;
 	if (NC(n_GetPlayerVehicleSeat) != 0) {
-		errmsg = (char*) MUSTBEDRIVER;
+		B144((char*) MUSTBEDRIVER);
 		goto err;
 	}
 	vehicleid = NC(n_GetPlayerVehicleID);
@@ -848,7 +843,7 @@ void missions_start_mission(int playerid)
 		if ((mission = activemission[players[i]]) != NULL &&
 			mission->veh == veh)
 		{
-			errmsg = (char*) VEHUSED;
+			B144((char*) VEHUSED);
 			goto err;
 		}
 	}
@@ -873,7 +868,7 @@ void missions_start_mission(int playerid)
 	case MODEL_SKIMMER: missiontype = MISSION_TYPE_PASSENGER_WATER; break;
 	default:
 unknownvehicle:
-		errmsg = (char*) NOTYPES;
+		B144((char*) NOTYPES);
 		goto err;
 	}
 
@@ -883,7 +878,7 @@ unknownvehicle:
 	endpoint = missions_get_random_endpoint(missiontype, startpoint);
 	/*endpoint will also be NULL when startpoint is NULL*/
 	if (endpoint == NULL) {
-		errmsg = (char*) NOMISS;
+		B144((char*) NOMISS);
 		goto err;
 	}
 
@@ -914,12 +909,10 @@ unknownvehicle:
 	startpoint->currentlyactivemissions++;
 	endpoint->currentlyactivemissions++;
 
-	sprintf(cbuf144, "UPDATE msp SET o=o+1 WHERE i=%d", startpoint->id);
-	amx_SetUString(buf4096, cbuf144, 144);
-	NC_mysql_tquery_nocb(buf4096a);
-	sprintf(cbuf144 + 100, "UPDATE msp SET p=p+1 WHERE i=%d", endpoint->id);
-	amx_SetUString(buf4096, cbuf144, 144);
-	NC_mysql_tquery_nocb(buf4096a);
+	csprintf(buf144, "UPDATE msp SET o=o+1 WHERE i=%d", startpoint->id);
+	NC_mysql_tquery_nocb(buf144a);
+	csprintf(buf144, "UPDATE msp SET p=p+1 WHERE i=%d", endpoint->id);
+	NC_mysql_tquery_nocb(buf144a);
 
 	sprintf(cbuf4096_,
 	        "INSERT INTO flg(player,vehicle,missiontype,fapt,tapt,fmsp,"
@@ -952,7 +945,7 @@ unknownvehicle:
 	nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
 	NC(n_SetPlayerRaceCheckpoint);
 
-	sprintf(cbuf4096,
+	csprintf(buf144,
 		"Flight from %s (%s) %s to %s (%s) %s",
 		mission->startpoint->ap->name,
 		mission->startpoint->ap->beacon,
@@ -960,11 +953,10 @@ unknownvehicle:
 		mission->endpoint->ap->name,
 		mission->endpoint->ap->beacon,
 		mission->endpoint->name);
-	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessage(playerid, COL_MISSION, buf144a);
 
 	if (prefs[playerid] & PREF_CONSTANT_WORK) {
-		amx_SetUString(buf144, AUTOWORKNOTICE, 144);
+		B144((char*) AUTOWORKNOTICE);
 		NC_SendClientMessage(playerid, COL_SAMP_GREY, buf144a);
 	}
 
@@ -976,7 +968,6 @@ unknownvehicle:
 	}
 	return;
 err:
-	amx_SetUString(buf144, errmsg, 144);
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 }
 
@@ -1060,7 +1051,7 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 	ptotal += ptax + pdamage + pcheat;
 	money_give(playerid, ptotal);
 
-	sprintf(cbuf4096,
+	i = sprintf(cbuf4096,
 		"%s completed flight #%d from %s (%s) to %s (%s) in %dh%02dm",
 		pdata[playerid]->name,
 	        miss->id,
@@ -1071,7 +1062,7 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 	        duration_h,
 	        duration_m);
 	echo_on_flight_finished(cbuf4096);
-	amx_SetUString(buf144, cbuf4096, 144);
+	atoci(buf4096, i);
 	NC_PARS(3);
 	nc_params[2] = COL_MISSION;
 	nc_params[3] = buf144a;
@@ -1083,11 +1074,7 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 		}
 	}
 
-	/*buf4096 has 4096 cells or 16396 chars, so use the end of it because
-	dialog code sets it into buf4096*/
-	dlgbase = cbuf4096 + 10000;
-
-	sprintf(dlgbase,
+	csprintf(buf4096,
 		"UPDATE flg SET tunload=UNIX_TIMESTAMP(),"
 		"tlastupdate=UNIX_TIMESTAMP(),"
 		"state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
@@ -1109,10 +1096,9 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 		paymp,
 		miss->damagetaken,
 		miss->id);
-	amx_SetUString(buf4096, dlgbase, 4096);
 	NC_mysql_tquery_nocb(buf4096a);
 
-	dlg = dlgbase;
+	dlg = dlgbase = malloc(4096); /*TODO: something :)*/
 	dlg += sprintf(dlg,
 	             "{ffffff}Flight:\t\t\t"ECOL_MISSION"#%d\n"
 	             "{ffffff}Origin:\t\t\t"ECOL_MISSION"%s\n"
@@ -1188,6 +1174,7 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 		dlgbase,
 		"Close", "",
 		TRANSACTION_MISSION_OVERVIEW);
+	free(dlgbase);
 
 	missions_cleanup(miss, playerid);
 
@@ -1243,7 +1230,6 @@ int missions_on_player_enter_race_checkpoint(int playerid)
 	struct vec3 cppos, vpos, vvel;
 	struct dbvehicle *veh;
 	int vehicleid, vv;
-	char *errmsg, *gametext;
 
 	if ((mission = activemission[playerid]) == NULL ||
 		NC_GetPlayerVehicleSeat(playerid) != 0)
@@ -1272,14 +1258,14 @@ int missions_on_player_enter_race_checkpoint(int playerid)
 		vv != mission->vehicle_reincarnation ||
 		veh->id != mission->veh->id)
 	{
-		errmsg = (char*) WRONGVEHICLE;
+		B144((char*) WRONGVEHICLE);
 		goto reterr;
 	}
 
 	common_GetVehicleVelocity(vehicleid, &vvel);
 	if (common_vectorsize_sq(vvel) > MAX_UNLOAD_SPEED_SQ_VEL)
 	{
-		errmsg = (char*) TOOFAST;
+		B144((char*) TOOFAST);
 		goto reterr;
 	}
 
@@ -1296,27 +1282,25 @@ int missions_on_player_enter_race_checkpoint(int playerid)
 	switch (mission->stage) {
 	case MISSION_STAGE_PRELOAD:
 		mission->stage = MISSION_STAGE_LOAD;
-		gametext = (char*) LOADING;
 		lddata->isload = 1;
+		B144((char*) LOADING);
 		break;
 	case MISSION_STAGE_FLIGHT:
 		mission->stage = MISSION_STAGE_UNLOAD;
-		gametext = (char*) UNLOADING;
 		lddata->isload = 0;
 		lddata->vehiclehp = anticheat_GetVehicleHealth(vehicleid);
 		if (lddata->vehiclehp < 251.0f) {
 			NC_SetVehicleHealth(vehicleid, 300.0f);
 		}
 		NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
+		B144((char*) UNLOADING);
 		break;
 	}
+	NC_GameTextForPlayer(playerid, buf144a, 0x8000000, 3);
 
 	timer_set(MISSION_LOAD_UNLOAD_TIME, missions_after_load_unload, lddata);
-	amx_SetUString(buf144, gametext, 144);
-	NC_GameTextForPlayer(playerid, buf144a, 0x8000000, 3);
 	return 1;
 reterr:
-	amx_SetUString(buf144, errmsg, 144);
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	return 1;
 }
@@ -1395,9 +1379,9 @@ int missions_cmd_automission(CMDPARAMS)
 		*DISABLED = "Constant work disabled.";
 
 	if ((prefs[playerid] ^= PREF_CONSTANT_WORK) & PREF_CONSTANT_WORK) {
-		amx_SetUString(buf144, ENABLED, 144);
+		B144((char*) ENABLED);
 	} else {
-		amx_SetUString(buf144, DISABLED, 144);
+		B144((char*) DISABLED);
 	}
 	NC_SendClientMessage(playerid, COL_SAMP_GREY, buf144a);
 	return 1;
@@ -1422,7 +1406,7 @@ int missions_cmd_cancelmission(CMDPARAMS)
 		missions_end_unfinished(mission,
 			playerid, MISSION_STATE_DECLINED);
 	} else {
-		amx_SetUString(buf144, NOMISSION, 144);
+		B144((char*) NOMISSION);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	}
 	return 1;
@@ -1435,7 +1419,7 @@ const static char
 int missions_cmd_mission(CMDPARAMS)
 {
 	if (activemission[playerid] != NULL) {
-		amx_SetUString(buf144, ALREADYWORKING, 144);
+		B144((char*) ALREADYWORKING);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	} else {
 		missions_start_mission(playerid);
@@ -1517,10 +1501,9 @@ void missions_update_satisfaction(int pid, int vid, struct quat *vrot)
 			}
 		}
 		if (last_satisfaction != miss->passenger_satisfaction) {
-			sprintf(cbuf32_1,
+			csprintf(buf32,
 				SATISFACTION_TEXT_FORMAT,
 				miss->passenger_satisfaction);
-			amx_SetUString(buf32, cbuf32_1, 32);
 			NC_PlayerTextDrawSetString(
 				pid, ptxt_satisfaction[pid], buf32a);
 		}

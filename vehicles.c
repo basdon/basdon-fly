@@ -132,7 +132,7 @@ void veh_init()
 	vehstoupdate = NULL;
 	dbvehicles = NULL;
 
-	amx_SetUString(buf4096,
+	atoc(buf4096,
 		"SELECT v.i,m,IFNULL(ownerplayer,0),v.x,v.y,v.z,v.r,"
 		"v.col1,v.col2,v.odo,u.name "
 		"FROM veh v "
@@ -165,7 +165,7 @@ void veh_init()
 			NC_PARS(3);
 			nc_params[3] = buf32a;
 			*fld = 10, NC(n_cache_get_field_s);
-			amx_GetUString(ownername, buf32, sizeof(ownername));
+			ctoa(ownername, buf32, sizeof(ownername));
 			tmp = 7 + strlen(vehnames[veh->model - 400]);
 			veh->ownerstringowneroffset = tmp;
 			tmp += strlen(ownername) + 1;
@@ -281,7 +281,6 @@ void veh_consume_fuel(int playerid, int vehicleid, int throttle,
 {
 	const float consumptionmp = throttle ? 1.0f : 0.2f;
 	float fuelcapacity, lastpercentage, newpercentage;
-	char *buf;
 
 	fuelcapacity = model_fuel_capacity(veh->model);
 	lastpercentage = veh->fuel / fuelcapacity;
@@ -294,17 +293,16 @@ void veh_consume_fuel(int playerid, int vehicleid, int throttle,
 	if (lastpercentage > 0.0f && newpercentage == 0.0f) {
 		vparams->engine = 0;
 		common_SetVehicleParamsEx(vehicleid, vparams);
-		buf = (char*) MSG_FUEL_0;
+		B144((char*) MSG_FUEL_0);
 	} else if (lastpercentage > 0.05f && newpercentage <= 0.05f) {
-		buf = (char*) MSG_FUEL_5;
+		B144((char*) MSG_FUEL_5);
 	} else if (lastpercentage > 0.1f && newpercentage <= 0.1f) {
-		buf = (char*) MSG_FUEL_10;
+		B144((char*) MSG_FUEL_10);
 	} else if (lastpercentage > 0.2f && newpercentage <= 0.2f) {
-		buf = (char*) MSG_FUEL_20;
+		B144((char*) MSG_FUEL_20);
 	} else {
 		return;
 	}
-	amx_SetUString(buf144, buf, 144);
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	NC_PlayerPlaySound0(playerid, FUEL_WARNING_SOUND);
 }
@@ -336,10 +334,9 @@ void veh_disallow_player_in_vehicle(int playerid, struct dbvehicle *v)
 	/*when player is already in, this should instantly eject the player*/
 	NC_ClearAnimations(playerid, 1);
 
-	sprintf(cbuf4096,
+	csprintf(buf4096,
 		WARN"This vehicle belongs to %s!",
 		v->ownerstring + v->ownerstringowneroffset);
-	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 }
 
@@ -446,23 +443,23 @@ void veh_start_or_stop_engine(int playerid, int vehicleid)
 		common_GetVehicleVelocity(vehicleid, &vvel);
 		if (common_vectorsize_sq(vvel) > MAX_ENGINE_CUTOFF_VEL_SQ)
 		{
-			amx_SetUString(buf144, (char*) MOVING, 144);
+			B144((char*) MOVING);
 			NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		} else {
 			vpars.engine = 0;
 			common_SetVehicleParamsEx(vehicleid, &vpars);
-			amx_SetUString(buf144, (char*) STOPPED, 144);
+			B144((char*) STOPPED);
 			NC_SendClientMessage(playerid, COL_INFO, buf144a);
 		}
 	} else {
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (veh != NULL && veh->fuel == 0.0f) {
-			amx_SetUString(buf144, (char*) NOFUEL, 144);
+			B144((char*) NOFUEL);
 			NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		} else {
 			vpars.engine = 1;
 			common_SetVehicleParamsEx(vehicleid, &vpars);
-			amx_SetUString(buf144, (char*) STARTED, 144);
+			B144((char*) STARTED);
 			NC_SendClientMessage(playerid, COL_INFO, buf144a);
 		}
 	}
@@ -499,7 +496,7 @@ void veh_on_player_now_driving(int playerid, int vehicleid)
 		veh->fuel > 0.0f;
 	common_set_vehicle_engine(vehicleid, reqenginestate);
 	if (!reqenginestate) {
-		amx_SetUString(buf144, WARN"This vehicle is out of fuel!", 144);
+		B144(WARN"This vehicle is out of fuel!");
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	}
 }
@@ -515,11 +512,10 @@ int veh_commit_next_vehicle_odo_to_db()
 		vehstoupdate = vehstoupdate->next;
 		free(tofree);
 		veh->needsodoupdate = 0;
-		sprintf(cbuf4096,
+		csprintf(buf144,
 			"UPDATE veh SET odo=%.4f WHERE i=%d",
 			veh->odoKM,
 			veh->id);
-		amx_SetUString(buf144, cbuf4096, 144);
 		NC_mysql_tquery_nocb(buf144a);
 		return 1;
 	}
@@ -767,7 +763,7 @@ void veh_owner_label_create(int vehicleid, int playerid)
 	if (veh != NULL && veh->owneruserid != 0) {
 		labelid = &labelids[playerid][vehicleid];
 		if (*labelid == INVALID_3DTEXT_ID) {
-			amx_SetUString(buf144, veh->ownerstring, 144);
+			atoc(buf144, veh->ownerstring, 144);
 			NC_PARS(10);
 			nc_params[1] = playerid;
 			nc_params[2] = buf144a;
@@ -860,7 +856,7 @@ void veh_update_panel_for_player(int playerid)
 			cbuf64[33] = '_';
 		}
 	}
-	amx_SetUString(buf144, cbuf64, 64);
+	B144(cbuf64);
 	NC_PARS(3);
 	nc_params[1] = playerid;
 	nc_params[2] = ptxt_txt[playerid];

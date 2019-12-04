@@ -43,25 +43,24 @@ void pm_send(int from, int to, char *msg)
 		*TO_DIS = WARN"That player has PMs disabled.",
 		*REPLYHINT = INFO"Use /r to quickly reply to the message.";
 
-	char buf[144 + MAX_PLAYER_NAME + 20];
-
 	if (!(prefs[from] & PREF_ENABLE_PM)) {
-		amx_SetUString(buf144, FROM_DIS, 144);
+		B144((char*) FROM_DIS);
 		goto errmsg;
 	}
 	if (!(prefs[to] & PREF_ENABLE_PM)) {
-		amx_SetUString(buf144, TO_DIS, 144);
+		B144((char*) TO_DIS);
 		goto errmsg;
 	}
-	sprintf(buf, ">> %s(%d): %s", pdata[to]->name, to, msg);
-	amx_SetUString(buf144, buf, 144);
-	NC_SendClientMessage(from, COL_PRIVMSG, buf144a);
-	sprintf(buf, "** %s(%d): %s", pdata[from]->name, from, msg);
-	amx_SetUString(buf144, buf, 144);
-	NC_SendClientMessage(to, COL_PRIVMSG, buf144a);
+	/*using buf4096 to not overflow 144 since formatted str might be long*/
+	csprintf(buf4096, ">> %s(%d): %s", pdata[to]->name, to, msg);
+	buf4096[143] = 0; /*message won't send if too long*/
+	NC_SendClientMessage(from, COL_PRIVMSG, buf4096a);
+	csprintf(buf4096, "** %s(%d): %s", pdata[from]->name, from, msg);
+	buf4096[143] = 0; /*message won't send if too long*/
+	NC_SendClientMessage(to, COL_PRIVMSG, buf4096a);
 	NC_PlayerPlaySound0(to, 1139 /*SOUND_CHECKPOINT_RED*/);
 	if (lastpmtarget[to] == LAST_PMTARGET_NOBODY) {
-		amx_SetUString(buf144, REPLYHINT, 144);
+		B144((char*) REPLYHINT);
 		NC_SendClientMessage(to, COL_PRIVMSG_HINT, buf144a);
 	}
 	lastpmtarget[to] = from;
@@ -80,11 +79,11 @@ int pm_cmd_pm(CMDPARAMS)
 	int targetid;
 
 	if (!cmd_get_player_param(cmdtext, &parseidx, &targetid)) {
-synerr:		amx_SetUString(buf144, SYNERR, 144);
+synerr:		B144((char*) SYNERR);
 		goto errmsg;
 	}
 	if (targetid == INVALID_PLAYER_ID) {
-		amx_SetUString(buf144, NOTONLINE, 144);
+		B144((char*) NOTONLINE);
 errmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
@@ -113,16 +112,16 @@ int pm_cmd_r(CMDPARAMS)
 	if (cmdtext[parseidx]) {
 		switch (lastpmtarget[playerid]) {
 		case LAST_PMTARGET_NOBODY:
-			amx_SetUString(buf144, NOTARGET, 144);
+			B144((char*) NOTARGET);
 			goto errmsg;
 		case LAST_PMTARGET_INVALID:
-			amx_SetUString(buf144, INVALID, 144);
+			B144((char*) INVALID);
 			goto errmsg;
 		}
 		pm_send(playerid, lastpmtarget[playerid],
 			(char*) cmdtext + parseidx);
 	} else {
-		amx_SetUString(buf144, SYN, 144);
+		B144((char*) SYN);
 errmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}

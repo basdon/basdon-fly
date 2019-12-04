@@ -42,7 +42,7 @@ static const int numprotips = sizeof(protips)/sizeof(protips[0]);
 static
 int protips_timed_broadcast(void *data)
 {
-	amx_SetUString(buf144, protips[NC_random(numprotips)], 144);
+	B144((char*) protips[NC_random(numprotips)]);
 	NC_SendClientMessageToAll(COL_INFO_LIGHT, buf144a);
 	return PROTIPS_INTERVAL;
 }
@@ -54,7 +54,7 @@ void protips_init()
 
 int protips_cmd_protip(CMDPARAMS)
 {
-	amx_SetUString(buf144, protips[NC_random(numprotips)], 144);
+	B144((char*) protips[NC_random(numprotips)]);
 	NC_SendClientMessage(playerid, COL_INFO_LIGHT, buf144a);
 	return 1;
 }

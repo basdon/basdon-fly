@@ -169,7 +169,7 @@ gotcha:
 			buf[1] = 'n';
 			strcpy(buf + 3, zonenames[lastregionid[playerid]]);
 		}
-		amx_SetUString(buf144, buf, 144);
+		atoc(buf144, buf, 144);
 		NC_PlayerTextDrawSetString(playerid, ptextid[playerid],
 			buf144a);
 	}
@@ -200,12 +200,12 @@ int zones_cmd_loc(CMDPARAMS)
 	char buf[144], *b;
 
 	if (!cmd_get_player_param(cmdtext, &parseidx, &target)) {
-		amx_SetUString(buf144, CMD_SYN, 144);
+		atoc(buf144, (char*) CMD_SYN, 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
 	if (target == INVALID_PLAYER_ID) {
-		amx_SetUString(buf144, CMD_NOT_ONLINE, 144);
+		atoc(buf144, (char*) CMD_NOT_ONLINE, 144);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
@@ -234,7 +234,7 @@ int zones_cmd_loc(CMDPARAMS)
 		sprintf(b, "on foot (%.0f FT)", pos.z);
 	}
 
-	amx_SetUString(buf144, buf, 144);
+	atoc(buf144, buf, 144);
 	NC_SendClientMessage(playerid, COL_INFO_GENERIC, buf144a);
 	return 1;
 }

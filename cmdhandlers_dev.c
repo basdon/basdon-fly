@@ -45,10 +45,10 @@ int cmd_dev_gt(CMDPARAMS)
 	if (cmd_get_int_param(cmdtext, &parseidx, &style) &&
 		cmd_get_str_param(cmdtext, &parseidx, cbuf4096))
 	{
-		amx_SetUString(buf144, cbuf4096, 144);
+		B144(cbuf4096);
 		NC_GameTextForPlayer(playerid, buf144a, 4000, style);
 	} else {
-		amx_SetUString(buf144, WARN"Syntax: /gt <style> <text>", 144);
+		B144(WARN"Syntax: /gt <style> <text>");
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	}
 	return 1;
@@ -159,7 +159,7 @@ The /kickme commands kicks the player.
 static
 int cmd_dev_kickme(CMDPARAMS)
 {
-	amx_SetUString(buf144, "you're kicked, bye", 144);
+	B144("you're kicked, bye");
 	NC_SendClientMessage(playerid, -1, buf144a);
 	natives_Kick(playerid, "requested \n''\n \0 ok", NULL, -1);
 	return 1;
@@ -189,7 +189,7 @@ int cmd_dev_v(CMDPARAMS)
 {
 	int modelid;
 	if (!cmd_get_int_param(cmdtext, &parseidx, &modelid)) {
-		amx_SetUString(buf144, WARN"Syntax: /v <modelid>", 144);
+		B144(WARN"Syntax: /v <modelid>");
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	} else {
 		if (devvehicle != INVALID_VEHICLE_ID) {
@@ -221,7 +221,7 @@ int cmd_dev_sound(CMDPARAMS)
 {
 	int soundid;
 	if (!cmd_get_int_param(cmdtext, &parseidx, &soundid)) {
-		amx_SetUString(buf144, WARN"Syntax: /sound <soundid>", 144);
+		B144(WARN"Syntax: /sound <soundid>");
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	} else {
 		NC_PlayerPlaySound0(playerid, soundid);
@@ -240,13 +240,12 @@ int cmd_dev_vdamage(CMDPARAMS)
 
 	vehicleid = NC_GetPlayerVehicleID(playerid);
 	common_GetVehicleDamageStatus(vehicleid, &vdmg);
-	sprintf(cbuf64,
+	csprintf(buf144,
 		"panels %p doors %p lights %02x tires %02x",
 		vdmg.panels,
 		vdmg.doors,
 		vdmg.lights,
 		vdmg.tires);
-	amx_SetUString(buf144, cbuf64, 144);
 	NC_SendClientMessageToAll(-1, buf144a);
 	return 1;
 }
@@ -272,9 +271,8 @@ int cmd_dev_vhp(CMDPARAMS)
 	nc_params[1] = NC_GetPlayerVehicleID(playerid);
 	nc_params[2] = buf32a;
 	NC(n_GetVehicleHealth_);
-	sprintf(cbuf32, "hp %f", *fbuf32);
-	amx_SetUString(buf32_1, cbuf32, 32);
-	NC_SendClientMessageToAll(-1, buf32_1a);
+	csprintf(buf32, "hp %f", *fbuf32);
+	NC_SendClientMessageToAll(-1, buf32a);
 	return 1;
 }
 

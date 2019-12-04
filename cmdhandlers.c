@@ -96,10 +96,8 @@ The /helpkeys command shows gametext with important keys.
 static
 int cmd_helpkeys(CMDPARAMS)
 {
-	amx_SetUString(buf144,
-		"~w~start/stop engine: ~b~~k~~CONVERSATION_NO~~n~"
-		"~w~landing gear: ~b~~k~~TOGGLE_SUBMISSIONS~",
-		144);
+	B144("~w~start/stop engine: ~b~~k~~CONVERSATION_NO~~n~"
+		"~w~landing gear: ~b~~k~~TOGGLE_SUBMISSIONS~");
 	NC_GameTextForPlayer(playerid, buf144a, 5000, 3);
 	return 1;
 }
@@ -111,8 +109,7 @@ int cmd_me(CMDPARAMS)
 	cell *to;
 	int hascontent = 0;
 
-	sprintf(cbuf144, "* %s", pdata[playerid]->name);
-	amx_SetUString(buf4096, cbuf144, 144);
+	csprintf(buf4096, "* %s", pdata[playerid]->name);
 	from = (char*) cmdtext + 3;
 	to = buf4096 + 2 + pdata[playerid]->namelen;
 	while ((*to = *from)) {
@@ -127,7 +124,7 @@ int cmd_me(CMDPARAMS)
 		NC_SendClientMessageToAll(-1, buf4096a);
 		echo_on_game_chat_or_action(1, playerid, (char*) cmdtext + 4);
 	} else {
-		amx_SetUString(buf144, WARN"Syntax: /me <action>", 144);
+		B144((char*) WARN"Syntax: /me <action>");
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	}
 	return 1;
@@ -136,7 +133,6 @@ int cmd_me(CMDPARAMS)
 static
 int cmd_park(CMDPARAMS)
 {
-	char q[144];
 	struct dbvehicle *veh;
 	int vehicleid;
 
@@ -145,7 +141,7 @@ int cmd_park(CMDPARAMS)
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (!veh_can_player_modify_veh(playerid, veh))
 		{
-			amx_SetUString(buf144, MSG_VEH_PARK_N, 144);
+			B144((char*) MSG_VEH_PARK_N);
 			NC_SendClientMessage(playerid, COL_WARN, buf144a);
 			return 1;
 		}
@@ -160,16 +156,15 @@ int cmd_park(CMDPARAMS)
 			veh->pos.r = 270.0f;
 		}
 		gamevehicles[vehicleid].need_recreation = 1;
-		sprintf(q,
+		csprintf(buf144,
 			"UPDATE veh SET x=%f,y=%f,z=%f,r=%f WHERE i=%d",
 			veh->pos.coords.x,
 			veh->pos.coords.y,
 			veh->pos.coords.z,
 			veh->pos.r,
 			veh->id);
-		amx_SetUString(buf144, q, sizeof(q));
 		NC_mysql_tquery_nocb(buf144a);
-		amx_SetUString(buf144, MSG_VEH_PARK_Y, 144);
+		B144((char*) MSG_VEH_PARK_Y);
 		NC_SendClientMessage(playerid, COL_SUCC, buf144a);
 	}
 	return 1;
@@ -184,7 +179,7 @@ static
 int cmd_reclass(CMDPARAMS)
 {
 	if (missions_is_player_on_mission(playerid)) {
-		amx_SetUString(buf144, NO_RECLASSSPAWN, 144);
+		B144((char*) NO_RECLASSSPAWN);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	} else {
 		spawned[playerid] = 0;
@@ -200,7 +195,7 @@ static
 int cmd_respawn(CMDPARAMS)
 {
 	if (missions_is_player_on_mission(playerid)) {
-		amx_SetUString(buf144, NO_RECLASSSPAWN, 144);
+		B144((char*) NO_RECLASSSPAWN);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	} else {
 		natives_SpawnPlayer(playerid);
@@ -211,7 +206,6 @@ int cmd_respawn(CMDPARAMS)
 static
 int cmd_spray(CMDPARAMS)
 {
-	char q[144];
 	struct dbvehicle *veh;
 	int vehicleid, *col1, *col2;
 
@@ -219,7 +213,7 @@ int cmd_spray(CMDPARAMS)
 	if (vehicleid) {
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (!veh_can_player_modify_veh(playerid, veh)) {
-			amx_SetUString(buf144, MSG_VEH_SPRAY_N, 144);
+			B144((char*) MSG_VEH_SPRAY_N);
 			NC_SendClientMessage(playerid, COL_WARN, buf144a);
 			return 1;
 		}
@@ -240,12 +234,11 @@ rand2nd:
 			veh->col1 = (unsigned char) *col1;
 			veh->col2 = (unsigned char) *col2;
 			gamevehicles[vehicleid].need_recreation = 1;
-			sprintf(q,
+			csprintf(buf144,
 				"UPDATE veh SET col1=%d,col2=%d WHERE i=%d",
 				veh->col1,
 				veh->col2,
 				veh->id);
-			amx_SetUString(buf144, q, sizeof(q));
 			NC_mysql_tquery_nocb(buf144a);
 		}
 	}
@@ -258,9 +251,8 @@ The /tickrate command to print the server's current tick rate.
 static
 int cmd_tickrate(CMDPARAMS)
 {
-	sprintf(cbuf32, "%d", NC_GetServerTickRate());
-	amx_SetUString(buf32_1, cbuf32, 32);
-	NC_SendClientMessage(playerid, -1, buf32_1a);
+	csprintf(buf32, "%d", NC_GetServerTickRate());
+	NC_SendClientMessage(playerid, -1, buf32a);
 	return 1;
 }
 

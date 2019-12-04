@@ -206,14 +206,14 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 		}
 		playercount = 0;
 
-		amx_SetUString(buf144, "sleep", 6);
+		B144("sleep");
 		tmp = NC_GetConsoleVarAsInt(buf144a);
 		if (tmp != 5) {
 			logprintf("ERR: sleep value %d should be 5", tmp);
 			return 0;
 		}
 
-		amx_SetUString(buf144, "maxplayers", 11);
+		B144("maxplayers");
 		tmp = NC_GetConsoleVarAsInt(buf144a);
 		if (tmp > MAX_PLAYERS) {
 			logprintf("ERR: slots (%d > %d)", tmp, MAX_PLAYERS);

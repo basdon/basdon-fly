@@ -87,7 +87,7 @@ field for the user where the failed login was on.
 static
 void login_cb_failed_login_added(void *data)
 {
-	sprintf(cbuf4096_,
+	csprintf(buf4096,
 		"UPDATE usr "
 		"SET lastfal="
 			"(SELECT stamp "
@@ -98,7 +98,6 @@ void login_cb_failed_login_added(void *data)
 		"WHERE i=%d",
 		(int) data,
 		(int) data);
-	amx_SetUString(buf4096, cbuf4096_, 1000);
 	NC_mysql_tquery_nocb(buf4096a);
 }
 
@@ -298,11 +297,10 @@ void login_cb_create_session_guest(void *data)
 		no real problem, but time will not be registered
 	}
 	*/
-	sprintf(cbuf4096,
+	csprintf(buf144,
 		"%s[%d] joined as a guest, welcome!",
 		pdata[playerid]->name,
 		playerid);
-	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessageToAll(COL_JOIN, buf144a);
 	B144(INFO"You are now playing as a guest. "
 		"You can use /register at any time to save your stats.");
@@ -332,11 +330,10 @@ void login_cb_create_session_new_member(void *data)
 		no real problem, but time will not be registered
 	}
 	*/
-	sprintf(cbuf4096,
+	csprintf(buf144,
 		"%s[%d] just registered an account, welcome!",
 		pdata[playerid]->name,
 		playerid);
-	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessageToAll(COL_JOIN, buf144a);
 	login_login_player(playerid, LOGGED_IN);
 }
@@ -363,11 +360,10 @@ void login_cb_create_session_existing_member(void *data)
 		no real problem, but time will not be registered
 	}
 	*/
-	sprintf(cbuf4096,
+	csprintf(buf144,
 		"%s[%d] just loggin in, welcome back!",
 		pdata[playerid]->name,
 		playerid);
-	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessageToAll(COL_JOIN, buf144a);
 	login_login_player(playerid, LOGGED_IN);
 }
@@ -512,10 +508,9 @@ void login_cb_load_account_data(void *data)
 
 	NC_SetPlayerScore(playerid, score);
 
-	sprintf(cbuf4096_,
+	csprintf(buf4096,
             "UPDATE usr SET lastseengame=UNIX_TIMESTAMP() WHERE i=%d LIMIT 1",
             userid[playerid]);
-	amx_SetUString(buf4096, cbuf4096_, 1000);
 	NC_mysql_tquery_nocb(buf4096a);
 
 	B144("~b~Creating game session...");
@@ -523,11 +518,10 @@ void login_cb_load_account_data(void *data)
 	login_create_session(playerid, login_cb_create_session_existing_member);
 
 	if (lastfal > falng) {
-		sprintf(cbuf4096_,
+		csprintf(buf4096,
 			"UPDATE usr SET falng=%d WHERE i=%d",
 			lastfal,
 			userid[playerid]);
-		amx_SetUString(buf4096, cbuf4096_, 1000);
 		NC_mysql_tquery_nocb(buf4096a);
 		dialog_ShowPlayerDialog(
 			playerid, DIALOG_DUMMY, DIALOG_STYLE_MSGBOX,
@@ -627,7 +621,7 @@ void login_cb_register_password_hashed(void *data)
 	if (PLAYER_CC_CHECK(data, playerid)) {
 		/*gametext still showing from previous*/
 		NC_bcrypt_get_hash(buf144a);
-		amx_GetUString(cbuf64, buf144, 144);
+		ctoa(cbuf64, buf144, 144);
 		login_create_user(playerid, cbuf64,
 			GROUP_MEMBER, login_cb_member_user_created);
 	}
@@ -686,7 +680,7 @@ asguest:
 
 	/*user doesn't exist when password is NULL*/
 	(nc_params[2] = 1, NC(n_cache_get_field_s));
-	amx_GetUString(password, buf144, 144);
+	ctoa(password, buf144, 144);
 	if (strcmp(password, "NULL") == 0) {
 		login_show_dialog_register_step1(playerid, 0);
 	} else {
@@ -735,8 +729,8 @@ void login_dlg_login_or_namechange(int playerid, int response, char *inputtext)
 		if (pwdata[playerid] == NULL) {
 			logprintf("login_dlg_login_or_namechange: no password");
 		} else {
-			amx_SetUString(buf144, inputtext, 144);
-			amx_SetUString(buf4096, pwdata[playerid], 144);
+			atoc(buf144, inputtext, 144);
+			atoc(buf4096, pwdata[playerid], 144);
 			common_bcrypt_check(
 				buf144a,
 				buf4096a,
@@ -875,7 +869,7 @@ void login_on_player_disconnect(int playerid, int reason)
 	char *b;
 
 	if (userid[playerid] != -1) {
-		sprintf(cbuf4096_,
+		csprintf(buf4096,
 			"UPDATE usr SET score=%d,cash=%d,distance=%d,"
 			"flighttime=%d,prefs=%d "
 			"WHERE i=%d",
@@ -885,7 +879,6 @@ void login_on_player_disconnect(int playerid, int reason)
 			score_flight_time[playerid],
 			prefs[playerid],
 			userid[playerid]);
-		amx_SetUString(buf4096, cbuf4096_, 144);
 		NC_mysql_tquery_nocb(buf4096a);
 	}
 	if (loggedstatus[playerid]) {
@@ -899,7 +892,7 @@ void login_on_player_disconnect(int playerid, int reason)
 		case 1: strcpy(b, " (quit)"); break;
 		case 2: strcpy(b, " (kicked)"); break;
 		}
-		amx_SetUString(buf144, cbuf64, 144);
+		atoc(buf144, cbuf64, 144);
 		NC_SendClientMessageToAll(COL_QUIT, buf144a);
 	}
 	if (pwdata[playerid] != NULL) {

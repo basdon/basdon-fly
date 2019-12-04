@@ -32,15 +32,15 @@ void spawn_init()
 	int querycacheid, row, rows, ap, klass = NUMCLASSES;
 	int *field = nc_params + 2;
 	struct vec4 *sp;
-	char buf[144], *txt;
+	char *txt;
 
 	while (klass--) {
-		sprintf(buf,
+		csprintf(buf144,
 			"SELECT ap,sx,sy,sz,sr "
 			"FROM spw "
 			"JOIN apt ON spw.ap=apt.i "
-			"WHERE apt.e AND (class&%d)", CLASSMAPPING[klass]);
-		amx_SetUString(buf144, buf, 144);
+			"WHERE apt.e AND (class&%d)",
+			CLASSMAPPING[klass]);
 		querycacheid = NC_mysql_query(buf144a);
 		rows = NC_cache_get_row_count();
 		numspawns[klass] = rows;

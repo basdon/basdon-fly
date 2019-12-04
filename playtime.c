@@ -64,7 +64,7 @@ void playtime_update_player_last_seen(int playerid, int isdisconnecting)
 		return;
 	}
 
-	sprintf(cbuf4096_,
+	csprintf(buf4096,
 		"UPDATE usr "
 		"SET lastseengame=UNIX_TIMESTAMP(),onlinetime=onlinetime+%d,"
 		"playtime=playtime+%d "
@@ -72,31 +72,28 @@ void playtime_update_player_last_seen(int playerid, int isdisconnecting)
 		isdisconnecting ? 0 : 30,
 		playtime_to_add,
 		userid);
-	amx_SetUString(buf4096, cbuf4096_, 1000);
 	NC_mysql_tquery_nocb(buf4096a);
 
 	if (sessionid[playerid] == -1) {
 		return;
 	}
 
-	sprintf(cbuf4096_,
+	csprintf(buf4096,
 		"UPDATE ses "
 		"SET e=UNIX_TIMESTAMP() "
 		"WHERE i=%d",
 		sessionid[playerid]);
-	amx_SetUString(buf4096, cbuf4096_, 1000);
 	NC_mysql_tquery_nocb(buf4096a);
 
 	if (!isdisconnecting) {
 		return;
 	}
 
-	sprintf(cbuf4096_,
+	csprintf(buf4096,
 		"UPDATE usr "
 		"SET onlinetime=(SELECT SUM(e-s) FROM ses WHERE u=usr.i) "
 		"WHERE i=%d",
 		userid[playerid]);
-	amx_SetUString(buf4096, cbuf4096_, 1000);
 	NC_mysql_tquery_nocb(buf4096a);
 }
 

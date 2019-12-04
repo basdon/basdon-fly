@@ -6,6 +6,40 @@
 
 char kick_update_delay[MAX_PLAYERS];
 
+
+void atoc(cell *dst, char *src, int max)
+{
+	while ((--max || (*dst = 0)) && (*dst++ = (cell) *src++));
+}
+
+void ctoa(char *dst, cell *src, int max)
+{
+	while ((--max || (*dst = 0)) && (*dst++ = (char) *src++));
+}
+
+void atoci(cell *dstsrc, int len)
+{
+	char *src;
+
+	src = ((char*) dstsrc) + len;
+	dstsrc += len;
+	*dstsrc = 0;
+a:
+	if (len) {
+		*--dstsrc = (cell) *--src;
+		len--;
+		goto a;
+	}
+}
+
+void ctoai(char *dstsrc)
+{
+	cell *src;
+
+	src = (cell*) dstsrc;
+	while ((*dstsrc++ = (char) *src++));
+}
+
 void common_tp_player(int playerid, struct vec4 pos)
 {
 	natives_SetPlayerPos(playerid, pos.coords);
@@ -42,13 +76,11 @@ int common_find_player_in_vehicle_seat(int vehicleid, int seat)
 
 void common_crash_player(int playerid)
 {
-	amx_SetUString(buf144,
-		"Wasted"
+	B144("Wasted"
 		"~k~SWITCH_DEBUG_CAM_ON~"
 		"~k~~TOGGLE_DPAD~"
 		"~k~~NETWORK_TALK~"
-		"~k~~SHOW_MOUSE_POINTER_TOGGLE~",
-		144);
+		"~k~~SHOW_MOUSE_POINTER_TOGGLE~");
 	NC_GameTextForPlayer(playerid, buf144a, 5, 5);
 }
 
@@ -224,19 +256,19 @@ void common_bcrypt_hash(cell pw, cb_t callback, void *data)
 
 void common_mysql_escape_string(char *data, char *dest, int maxlen)
 {
-	amx_SetUString(buf4096, data, 4096);
+	atoc(buf4096, data, 4096);
 	NC_PARS(4);
 	nc_params[1] = nc_params[2] = buf4096a;
 	nc_params[3] = 1; /*connectionhandle*/
 	nc_params[4] = maxlen;
 	NC(n_mysql_escape_string);
-	amx_GetUString(dest, buf4096, maxlen);
+	ctoa(dest, buf4096, maxlen);
 	dest[maxlen - 1] = 0;
 }
 
 void common_mysql_tquery(char *query, cb_t callback, void *data)
 {
-	amx_SetUString(buf4096, query, 2000);
+	atoc(buf4096, query, 2000);
 	common_common_varargs_cb_call(1 /*handle*/, buf4096a, callback, data);
 	NC(n_mysql_tquery);
 }

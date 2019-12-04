@@ -119,26 +119,22 @@ int nav_check_can_do_cmd(int playerid, int navtype, int *vehicleid)
 		*NO_NAV = WARN"You're not in an %s capable vehicle",
 		*NO_PILOT = WARN"Only the pilot can change navigation settings";
 
-	char buf[144], *b;
 	int vehiclemodel;
 
 	*vehicleid = NC_GetPlayerVehicleID(playerid);
 	vehiclemodel = NC_GetVehicleModel(*vehicleid);
 	if (navtype == NAV_ADF) {
 		if (!game_is_air_vehicle(vehiclemodel)) {
-			sprintf(buf, NO_NAV, "ADF");
-			b = buf;
+			csprintf(buf144, NO_NAV, "ADF");
 			goto sendmsgfail;
 		}
 	} else if (!game_is_plane(vehiclemodel)) {
-		sprintf(buf, NO_NAV, navtype == NAV_VOR ? "VOR" : "ILS");
-		b = buf;
+		csprintf(buf144, NO_NAV, navtype == NAV_VOR ? "VOR" : "ILS");
 		goto sendmsgfail;
 	}
 	if (NC_GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
-		b = (char*) NO_PILOT;
-sendmsgfail:	amx_SetUString(buf144, b, 144);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		B144((char*) NO_PILOT);
+sendmsgfail:	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 0;
 	}
 	return 1;
@@ -165,7 +161,7 @@ int nav_cmd_adf(CMDPARAMS)
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL);
 			return 1;
 		}
-		amx_SetUString(buf144, SYN, 144);
+		B144((char*) SYN);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
@@ -194,7 +190,7 @@ int nav_cmd_adf(CMDPARAMS)
 		ap++;
 	}
 unkbeacon:
-	amx_SetUString(buf144, UNK_BEACON, 144);
+	B144((char*) UNK_BEACON);
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	return 1;
 }
@@ -223,7 +219,7 @@ int nav_cmd_vor(CMDPARAMS)
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL);
 			return 1;
 		}
-		amx_SetUString(buf144, SYN, 144);
+		B144((char*) SYN);
 		goto sendwarnmsg;
 	}
 	combinedparameter = !cmd_get_str_param(cmdtext, &parseidx, runwaypar);
@@ -261,7 +257,7 @@ havebeacon:
 		ap++;
 	}
 unkbeacon:
-	amx_SetUString(buf144, UNK_BEACON, 144);
+	B144((char*) UNK_BEACON);
 	goto sendwarnmsg;
 haveairport:
 	if (b[0] < '0' || '9' < b[0] ||
@@ -295,9 +291,9 @@ tellrws:
 		rw++;
 	}
 	if (len) {
-		amx_SetUString(buf144, beaconpar, 144);
+		B144(beaconpar);
 	} else {
-		amx_SetUString(buf144, NO_CAP, 144);
+		B144((char*) NO_CAP);
 	}
 sendwarnmsg:
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
@@ -317,11 +313,11 @@ int nav_cmd_ils(CMDPARAMS)
 		return 1;
 	}
 	if ((np = nav[vehicleid]) == NULL || np->vor == NULL) {
-		amx_SetUString(buf144, N_VOR, 144);
+		B144((char*) N_VOR);
 		goto retmsg;
 	}
 	if ((np->vor->nav & NAV_ILS) != NAV_ILS) {
-		amx_SetUString(buf144, N_CAP, 144);
+		B144((char*) N_CAP);
 retmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
@@ -363,7 +359,6 @@ void nav_update_textdraws(
 
 	struct NAVDATA *n = nav[vehicleid];
 	float vorbarx, vorbarlettersizex;
-	char buf[144];
 
 	if (n == NULL) {
 		return;
@@ -376,28 +371,25 @@ void nav_update_textdraws(
 	if (n->dist != pcache[playerid].dist) {
 		pcache[playerid].dist = n->dist;
 		if (n->dist >= 1000) {
-			sprintf(buf, "%.1fK", n->dist / 1000.0f);
+			csprintf(buf144, "%.1fK", n->dist / 1000.0f);
 		} else {
-			sprintf(buf, "%d", n->dist);
+			csprintf(buf144, "%d", n->dist);
 		}
 		nc_params[2] = ptxt_adf_dis_base[playerid];
-		amx_SetUString(buf144, buf, sizeof(buf));
 		NC(n_PlayerTextDrawSetString);
 	}
 
 	if (n->alt != pcache[playerid].alt) {
 		pcache[playerid].alt = n->alt;
-		sprintf(buf, "%d", n->alt);
+		csprintf(buf144, "%d", n->alt);
 		nc_params[2] = ptxt_adf_alt_base[playerid];
-		amx_SetUString(buf144, buf, sizeof(buf));
 		NC(n_PlayerTextDrawSetString);
 	}
 
 	if (n->crs != pcache[playerid].crs) {
 		pcache[playerid].crs = n->crs;
-		sprintf(buf, "%d", n->crs);
+		csprintf(buf144, "%d", n->crs);
 		nc_params[2] = ptxt_adf_crs_base[playerid];
-		amx_SetUString(buf144, buf, sizeof(buf));
 		NC(n_PlayerTextDrawSetString);
 	}
 
@@ -405,10 +397,10 @@ void nav_update_textdraws(
 		((n->ilsx << 8) | (n->ilsz)) != pcache[playerid].ils)
 	{
 		if (n->ilsx == INVALID_ILS_VALUE) {
-			amx_SetUString(buf144, "~r~~h~no ILS signal", 144);
+			B144("~r~~h~no ILS signal");
 			goto doils;
 		} else if (-ILS_SIZE <= n->ilsx &&  n->ilsx < ILS_SIZE * 2) {
-			amx_SetUString(buf144, ILS_X, 144);
+			B144((char*) ILS_X);
 			if (n->ilsx < 0) {
 				buf144[38] = '-';
 				buf144[39] = '0' + (-n->ilsx);
@@ -451,17 +443,16 @@ doils:
 			vorbarlettersizex = 0.4f;
 		} else {
 			if (n->vorvalue < 0) {
-				sprintf(cbuf64,
+				csprintf(buf144,
 					"%d",
 					(n->vorvalue + 50) / -15 + 1);
 				vorbarx = -85.0f;
 			} else {
-				sprintf(cbuf64,
+				csprintf(buf144,
 					"%d",
 					(n->vorvalue - 50) / 15 + 1);
 				vorbarx = 85.0f;
 			}
-			amx_SetUString(buf144, cbuf64, 64);
 			vorbarlettersizex = 0.2f;
 		}
 		NC_PARS(4);

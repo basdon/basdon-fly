@@ -340,17 +340,16 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 		}
 
 		if (reason != NULL) {
-			sprintf(cbuf4096,
+			csprintf(buf144,
 				"%s[%d] was kicked by %s (%s)",
 				pdata[playerid]->name,
 				playerid,
 				issuer,
 				reason);
-			amx_SetUString(buf144, cbuf4096, 144);
 			NC_SendClientMessageToAll(COL_WARN, buf144a);
 		}
 
-		amx_SetUString(buf144, "~r~You've been kicked.", 144);
+		B144("~r~You've been kicked.");
 		NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
 		kick_update_delay[playerid] = 2;
 
@@ -363,7 +362,7 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 			reason = (char*) REASONNULL;
 		}
 
-		sprintf(cbuf4096_,
+		csprintf(buf4096,
 			"INSERT INTO kck(usr,ip,stamp,issuer,reason)"
 			"VALUES ("
 			"IF(%d<1,NULL,%d),'%s',UNIX_TIMESTAMP(),"
@@ -374,7 +373,6 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 			issuer_userid,
 			issuer_userid,
 			escapedreason);
-		amx_SetUString(buf4096, cbuf4096_, 1000);
 		NC_mysql_tquery_nocb(buf4096a);
 		free(escapedreason);
 
@@ -427,7 +425,7 @@ int natives_SetPlayerName(int playerid, char *name)
 {
 	int res;
 
-	amx_SetUString(buf32, name, 32);
+	atoc(buf32, name, 32);
 	NC_PARS(2);
 	nc_params[1] = playerid;
 	nc_params[2] = buf32a;
@@ -437,10 +435,9 @@ int natives_SetPlayerName(int playerid, char *name)
 			strcpy(pdata[playerid]->name, name);
 		}
 		pdata_on_name_updated(playerid);
-		sprintf(cbuf4096,
+		csprintf(buf144,
 			"Your name has been changed to '%s'",
 			pdata[playerid]->name);
-		amx_SetUString(buf144, cbuf4096, 144);
 		NC_PARS(3);
 		nc_params[2] = COL_SAMP_GREEN;
 		nc_params[3] = buf144a;

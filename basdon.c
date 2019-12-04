@@ -44,7 +44,7 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 	}
 
 	amx_GetAddr(amx, params[5], &ia);
-	amx_GetUString(inputtext, ia, sizeof(inputtext));
+	ctoa(inputtext, ia, sizeof(inputtext));
 
 	switch (dialogid) {
 	case DIALOG_SPAWN_SELECTION:
@@ -167,7 +167,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	m += dblen;
 	memcpy(cbuf144, m, pwlen);
 	*((int*) (cbuf144 + pwlen)) = 0;
-	amx_SetUString(buf64, "127.0.0.1", 64);
+	atoc(buf64, "127.0.0.1", 64);
 
 	NC_PARS(2);
 	nc_params[1] = 1 | 2; /*LOG_ERROR | LOG_WARNING*/
@@ -216,7 +216,7 @@ exit:
 	veh_create_global_textdraws();
 	veh_init();
 
-	amx_SetUString(buf144, "basdon-fly "VERSION, 144);
+	B144("basdon-fly "VERSION);
 	NC_SetGameModeText(buf144a);
 
 	NC_EnableStuntBonusForAll(0);
@@ -242,29 +242,28 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 	cell *addr;
 
 	if (!ISPLAYING(playerid)) {
-		B144(NOLOG);
+		B144((char*) NOLOG);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
 
 	if (!spawned[playerid]) {
-		B144(NO);
+		B144((char*) NO);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
 
 	amx_GetAddr(amx, params[2], &addr);
-	amx_GetUString(cmdtext, addr, sizeof(cmdtext));
+	ctoa(cmdtext, addr, sizeof(cmdtext));
 
 	common_mysql_escape_string(cmdtext, cbuf144, 144 * sizeof(cell));
-	sprintf(cbuf4096_,
+	csprintf(buf4096,
 		"INSERT INTO cmdlog(player,loggedstatus,stamp,cmd) "
 		"VALUES(IF(%d<1,NULL,%d),%d,UNIX_TIMESTAMP(),'%s')",
 		userid[playerid],
 		userid[playerid],
 		loggedstatus[playerid],
 		cbuf144);
-	amx_SetUString(buf4096, cbuf4096_, 4096);
 	NC_mysql_tquery_nocb(buf4096a);
 
 	return cmd_check(playerid, cmdtext);
@@ -277,7 +276,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	const int playerid = params[1];
 
 #ifdef DEV
-	amx_SetUString(buf144, "DEVELOPMENT BUILD", 144);
+	B144("DEVELOPMENT BUILD");
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 #endif /*DEV*/
 
@@ -433,7 +432,7 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 	const int playerid = params[1];
 
 	if (!ISPLAYING(playerid)) {
-		B144(NOLOG);
+		B144((char*) NOLOG);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
@@ -489,7 +488,7 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 	const int playerid = params[1];
 
 	if (!ISPLAYING(playerid)) {
-		B144(NOLOG);
+		B144((char*) NOLOG);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
@@ -499,7 +498,7 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 	}
 
 	amx_GetAddr(amx, params[2], &addr);
-	amx_GetUString(buf, addr, sizeof(buf));
+	ctoa(buf, addr, sizeof(buf));
 
 	echo_on_game_chat_or_action(0, playerid, buf);
 	return 1;
@@ -532,11 +531,11 @@ cell AMX_NATIVE_CALL B_OnQueryError(AMX *amx, cell *params)
 	cell *addr;
 
 	amx_GetAddr(amx, params[2], &addr);
-	amx_GetUString(cbuf144, addr, 144 * sizeof(cell));
+	ctoa(cbuf144, addr, 144);
 	amx_GetAddr(amx, params[4], &addr);
-	amx_GetUString(cbuf4096, addr, 4096 * sizeof(cell));
+	ctoa(cbuf4096, addr, 4096);
 
-	logprintf("query err %d %s %s\n", errorid, cbuf144, cbuf4096);
+	logprintf("query err %d %s %s", errorid, cbuf144, cbuf4096);
 	return 1;
 }
 

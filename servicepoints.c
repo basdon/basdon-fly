@@ -84,8 +84,7 @@ void svp_init()
 	servicepoints = NULL;
 	numservicepoints = 0;
 
-	amx_SetUString(
-		buf4096,
+	atoc(buf4096,
 		"SELECT s.id,s.x,s.y,s.z "
 		"FROM svp s "
 		"JOIN apt a ON s.apt=a.i "
@@ -177,7 +176,7 @@ int svp_cmd_refuel(CMDPARAMS)
 
 	veh->fuel += refuelamount;
 
-	sprintf(cbuf4096,
+	csprintf(buf144,
 		INFO"Your vehicle has been %s refueled for $%d (+%d'/.) "
 		"capacity: %.0f/%.0f (%.0f'/.)",
 	        buf1,
@@ -186,11 +185,10 @@ int svp_cmd_refuel(CMDPARAMS)
 	        veh->fuel,
 	        capacity,
 		100.0f * veh->fuel / capacity);
-	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessage(playerid, COL_INFO, buf144a);
 
 	if (veh && userid[playerid] > 0) {
-		sprintf(cbuf4096 + 2000,
+		csprintf(buf4096,
 			"INSERT INTO refuellog"
 			"(stamp,vehicle,player,svp,paid,fuel) "
 			"VALUES "
@@ -200,7 +198,6 @@ int svp_cmd_refuel(CMDPARAMS)
 			svpid,
 			cost,
 			refuelamount);
-		amx_SetUString(buf4096, cbuf4096 + 2000, 4096);
 		NC_mysql_tquery_nocb(buf4096a);
 	}
 
@@ -210,17 +207,16 @@ int svp_cmd_refuel(CMDPARAMS)
 		if (driverid == INVALID_PLAYER_ID) {
 			goto retmsg;
 		}
-		sprintf(cbuf4096,
+		csprintf(buf144,
 			INFO"Player %s[%s] refueled your vehicle!",
 			pdata[playerid]->name,
 			playerid);
-		amx_SetUString(buf144, cbuf4096, 144);
 		NC_SendClientMessage(driverid, COL_INFO, buf144a);
 	}
 	missions_on_vehicle_refueled(vehicleid, refuelamount);
 	return 1;
 retmsg:
-	amx_SetUString(buf144, msg, 144);
+	B144(msg);
 	NC_SendClientMessage(playerid, msgcol, buf144a);
 	return 1;
 }
@@ -264,15 +260,14 @@ int svp_cmd_repair(CMDPARAMS)
 			goto retmsg;
 		}
 		cost = FIX_BASE_COST + FIX_HP_COST * (int) fixamount;
-		sprintf(cbuf4096,
+		csprintf(buf144,
 			INFO"Your vehicle has been partially repaired for $%d",
 			cost);
 	} else {
-		sprintf(cbuf4096,
+		csprintf(buf144,
 			INFO"Your vehicle has been fully repaired for $%d",
 			cost);
 	}
-	amx_SetUString(buf144, cbuf4096, 144);
 	NC_SendClientMessage(playerid, COL_INFO, buf144a);
 
 	hp += fixamount;
@@ -286,7 +281,7 @@ int svp_cmd_repair(CMDPARAMS)
 	NC(n_SetVehicleHealth);
 
 	if (veh && userid[playerid] > 0) {
-		sprintf(cbuf4096_,
+		csprintf(buf4096,
 			"INSERT INTO "
 			"repairlog(stamp,vehicle,player,svp,paid,damage) "
 			"VALUES "
@@ -296,7 +291,6 @@ int svp_cmd_repair(CMDPARAMS)
 			svpid,
 			cost,
 			(int) fixamount);
-		amx_SetUString(buf4096, cbuf4096_, 4096);
 		NC_mysql_tquery_nocb(buf4096a);
 	}
 
@@ -306,17 +300,16 @@ int svp_cmd_repair(CMDPARAMS)
 		if (driverid == INVALID_PLAYER_ID) {
 			goto retmsg;
 		}
-		sprintf(cbuf4096,
+		csprintf(buf144,
 			INFO"Player %s[%s] repaired your vehicle!",
 			pdata[playerid]->name,
 			playerid);
-		amx_SetUString(buf144, cbuf4096, 144);
 		NC_SendClientMessage(driverid, COL_INFO, buf144a);
 	}
 	missions_on_vehicle_repaired(vehicleid, fixamount, hp);
 	return 1;
 retmsg:
-	amx_SetUString(buf144, msg, 144);
+	B144(msg);
 	NC_SendClientMessage(playerid, msgcol, buf144a);
 	return 1;
 }
@@ -386,7 +379,7 @@ void svp_update_mapicons(int playerid, float x, float y)
 			nc_params[6] = SERVICE_MAP_ICON_TYPE,
 			nc_params[7] = MAPICON_GLOBAL;
 			NC(n_SetPlayerMapIcon);
-			amx_SetUString(buf144, SVP_TXT, 144);
+			B144((char*) SVP_TXT);
 			NC_PARS(10);
 			nc_params[2] = buf144a;
 			nc_params[6] = nc_params[5];

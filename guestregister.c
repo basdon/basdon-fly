@@ -156,11 +156,10 @@ void guestreg_cb_registered(void *data)
 	B144(SUCC"Your account has been registered and "
 		"your stats are saved, welcome!");
 	NC_SendClientMessage(playerid, COL_SUCC, buf144a);
-	sprintf(cbuf64,
+	csprintf(buf144,
 		"Guest %s[%d] just registered their account, welcome!",
 		pdata[playerid]->name,
 		playerid);
-	amx_SetUString(buf144, cbuf64, 144);
 	NC_SendClientMessageToAll(COL_JOIN, buf144a);
 }
 
@@ -247,7 +246,7 @@ void guestreg_cb_password_hashed(void *data)
 	}
 
 	NC_bcrypt_get_hash(buf144a);
-	amx_GetUString(rd->bcrypt, buf144, PW_HASH_LENGTH);
+	ctoa(rd->bcrypt, buf144, PW_HASH_LENGTH);
 
 	if (rd->confirmed) {
 		guestreg_do_register(playerid, rd);

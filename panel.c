@@ -151,8 +151,7 @@ void panel_update_altitude(int playerid, int altitude)
 	nc_params[3] = buf144a;
 
 	/* alt */
-	sprintf(buf, "%03d", altitude);
-	amx_SetUString(buf144, buf, sizeof(buf));
+	csprintf(buf144, "%03d", altitude);
 	nc_params[2] = ptxt_alt_value[playerid];
 	NC(n_PlayerTextDrawSetString);
 
@@ -170,7 +169,7 @@ void panel_update_altitude(int playerid, int altitude)
 			sprintf(buf + tmp2, "%4d", (tmp * 50));
 			buf[tmp2 + 4] = '-';
 		}
-		amx_SetUString(buf144, buf, sizeof(buf));
+		B144(buf);
 		nc_params[2] = ptxt_alt_large[playerid];
 		NC(n_PlayerTextDrawSetString);
 	}
@@ -191,7 +190,7 @@ void panel_update_altitude(int playerid, int altitude)
 		}
 		buf[1] = '0' + (tmp / 10) % 10;
 		buf[10] = '0' + (tmp2 / 10) % 10;
-		amx_SetUString(buf144, buf, sizeof(buf));
+		B144(buf);
 		nc_params[2] = ptxt_alt_small[playerid];
 		NC(n_PlayerTextDrawSetString);
 	}
@@ -243,8 +242,7 @@ void panel_update_speed(int playerid, int speed)
 	nc_params[3] = buf144a;
 
 	/* spd */
-	sprintf(buf, "%03d", speed);
-	amx_SetUString(buf144, buf, sizeof(buf));
+	csprintf(buf144, "%03d", speed);
 	nc_params[2] = ptxt_spd_value[playerid];
 	NC(n_PlayerTextDrawSetString);
 
@@ -260,7 +258,7 @@ void panel_update_speed(int playerid, int speed)
 		strcpy(buf, "xxx-~n~xxx-~n~~n~~n~~n~~n~xxx-~n~xxx-~n~");
 		memcpy(buf, SPDMETERDATA + tmp, 11);
 		memcpy(buf + 26, SPDMETERDATA + tmp + 14, 11);
-		amx_SetUString(buf144, buf, sizeof(buf));
+		B144(buf);
 		nc_params[2] = ptxt_spd_large[playerid];
 		NC(n_PlayerTextDrawSetString);
 	}
@@ -271,7 +269,7 @@ void panel_update_speed(int playerid, int speed)
 	if (speed != 0) {
 		buf[7] = '0' + ((speed + 9) % 10);
 	}
-	amx_SetUString(buf144, buf, sizeof(buf));
+	B144(buf);
 	nc_params[2] = ptxt_spd_small[playerid];
 	NC(n_PlayerTextDrawSetString);
 }
@@ -282,8 +280,6 @@ Update heading textdraws.
 static
 void panel_update_heading(int playerid, int heading)
 {
-	char buf[50];
-
 	/* normalize before cache, because rounding (0 & 360)*/
 	heading = 360 - heading;
 	if (heading == 0) {
@@ -300,14 +296,13 @@ void panel_update_heading(int playerid, int heading)
 	nc_params[3] = buf144a;
 
 	/* hdg */
-	sprintf(buf, "%03d", heading);
-	amx_SetUString(buf144, buf, sizeof(buf));
+	csprintf(buf144, "%03d", heading);
 	nc_params[2] = ptxt_hdg_value[playerid];
 	NC(n_PlayerTextDrawSetString);
 
 	/* hdg meter */
 	heading--;
-	sprintf(buf,
+	csprintf(buf144,
 		"%03d_%03d_%03d________%03d_%03d_%03d",
 		((heading + 357) % 360) + 1,
 		((heading + 358) % 360) + 1,
@@ -315,7 +310,6 @@ void panel_update_heading(int playerid, int heading)
 		((heading + 1) % 360) + 1,
 		((heading + 2) % 360) + 1,
 		((heading + 3) % 360) + 1);
-	amx_SetUString(buf144, buf, sizeof(buf));
 	nc_params[2] = ptxt_hdg_meter[playerid];
 	NC(n_PlayerTextDrawSetString);
 }

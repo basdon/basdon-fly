@@ -67,14 +67,37 @@ typedef void (*logprintf_t)(char* format, ...);
 
 extern logprintf_t logprintf;
 
-#define amx_GetUString(DST,SRC,SIZE) amx_GetString(DST,SRC,0,SIZE)
-#define amx_SetUString(DST,SRC,SIZE) amx_SetString(DST,SRC,0,0,SIZE)
-#define B144(X) amx_SetUString(buf144,X,144)
+/**
+Convert char string to cell string.
+
+@param max must be gt 0
+*/
+void atoc(cell *dst, char *src, int max);
+/**
+Convert cell string to char string.
+
+@param max must be gt 0
+*/
+void ctoa(char *dst, cell *src, int max);
+/**
+Convert char string to cell string, in place.
+
+@param len length of the string, excluding zero term
+*/
+void atoci(cell *dstsrc, int len);
+/**
+Convert a cell string to a char string, in place.
+
+Relies on good faith that the cell string is zero terminated.
+*/
+void ctoai(char *dstsrc);
+#define csprintf(DST,FMT,...) atoci(DST,sprintf((char*)DST,FMT,__VA_ARGS__))
+#define B144(X) atoc(buf144,X,144)
 
 #ifdef DEV
 #define DBG(...) sprintf(cbuf64,__VA_ARGS__);\
 			printf("%s\n", cbuf64);\
-			amx_SetUString(buf144,cbuf64,144);\
+			atoc(buf144,cbuf64,144);\
 			NC_SendClientMessageToAll(-1,buf144a);
 #else
 #define DBG(...)
@@ -146,7 +169,7 @@ extern logprintf_t logprintf;
 #define GROUPS_ISADMIN(X) ((X) >= GROUP_ADMIN)
 
 /*in cells*/
-#define STACK_HEAP_SIZE 512
+#define STACK_HEAP_SIZE 1024
 
 struct FAKEAMX_DATA {
 	cell emptystring;

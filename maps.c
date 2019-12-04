@@ -144,7 +144,7 @@ void maps_load_from_db()
 		return;
 	}
 
-	amx_SetUString(buf4096, q, sizeof(q));
+	atoc(buf4096, q, sizeof(q));
 	cacheid = NC_mysql_query(buf4096a);
 	rowcount = NC_cache_get_row_count();
 	nummaps = rowcount;
@@ -156,7 +156,7 @@ void maps_load_from_db()
 			NC_PARS(3);
 			nc_params[1] = rowcount;
 			*f = 0; NC(n_cache_get_field_s);
-			amx_GetUString(map->name, buf32, sizeof(map->name));
+			ctoa(map->name, buf32, sizeof(map->name));
 			if (!maps_load_from_file(map)) {
 				map->id = -1;
 				continue;

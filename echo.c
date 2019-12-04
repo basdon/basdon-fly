@@ -16,7 +16,7 @@ static cell socket_out = SOCKET_INVALID_SOCKET;
 
 void echo_init()
 {
-	static const char *buflo = "127.0.0.1";
+	static const char *BUFLO = "127.0.0.1";
 
 	if (socket_in == SOCKET_INVALID_SOCKET) {
 		socket_in = NC_ssocket_create(SOCKET_UDP);
@@ -31,7 +31,7 @@ void echo_init()
 		if (socket_out == SOCKET_INVALID_SOCKET) {
 			logprintf("failed to create echo irc socket");
 		} else {
-			amx_SetUString(buf32, buflo, 32);
+			atoc(buf32, (char*) BUFLO, 32);
 			NC_ssocket_connect(socket_out, buf32a, ECHO_PORT_OUT);
 			buf144[0] = 0x02594C46;
 			buf144[1] = 0x07030301;
@@ -133,8 +133,8 @@ void echo_sendclientmessage_buf4096_filtered()
 	NC_SendClientMessageToAll(COL_IRC, buf4096a);
 }
 
-static const char *msg_bridge_up = "IRC bridge is up";
-static const char *msg_bridge_down = "IRC bridge is down";
+static const char *BRIDGE_UP = "IRC bridge is up";
+static const char *BRIDGE_DOWN = "IRC bridge is down";
 
 void echo_on_receive(cell socket_handle, cell data_a,
 		     char *data, int len)
@@ -144,8 +144,8 @@ void echo_on_receive(cell socket_handle, cell data_a,
 	{
 		switch (data[3]) {
 		case PACK_HELLO:
-			logprintf((char*) msg_bridge_up);
-			amx_SetUString(buf144, msg_bridge_up, 144);
+			logprintf((char*) BRIDGE_UP);
+			B144((char*) BRIDGE_UP);
 			NC_SendClientMessageToAll(COL_IRC, buf144a);
 			if (len == 8) {
 				data[3] = PACK_IMTHERE;
@@ -153,7 +153,7 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			}
 			break;
 		case PACK_IMTHERE:
-			logprintf((char*) msg_bridge_up);
+			logprintf((char*) BRIDGE_UP);
 			/*no point printing this to chat, because this only
 			happens right after the server starts, thus nobody
 			is connected yet*/
@@ -166,9 +166,9 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			break;
 		/*game doesn't send PING packets, so not checking PONG*/
 		case PACK_BYE:
-			logprintf((char*) msg_bridge_down);
+			logprintf((char*) BRIDGE_DOWN);
 			if (len == 4) {
-				amx_SetUString(buf144, msg_bridge_down, 144);
+				B144((char*) BRIDGE_DOWN);
 				NC_SendClientMessageToAll(COL_IRC, buf144a);
 			}
 			break;
@@ -197,13 +197,13 @@ void echo_on_receive(cell socket_handle, cell data_a,
 				*(b++) = '<';
 
 			}
-			amx_SetUString(b, data + 8, nicklen * sizeof(cell));
+			atoc(b, data + 8, nicklen * sizeof(cell));
 			b += nicklen;
 			if (data[3] != PACK_ACTION) {
 				*(b++) = '>';
 			}
 			*(b++) = ' ';
-			amx_SetUString(b,
+			atoc(b,
 				data + 9 + nicklen,
 				(msglen + 1) * sizeof(cell));
 			echo_sendclientmessage_buf4096_filtered();
@@ -242,8 +242,8 @@ void echo_on_receive(cell socket_handle, cell data_a,
 				break;
 			}
 			/*copy one more here because it'll add a 0-term*/
-			amx_SetUString(buf4096, buf, b - buf + 1);
-			amx_SetUString(buf4096 + (b - buf), data + 8,
+			atoc(buf4096, buf, b - buf + 1);
+			atoc(buf4096 + (b - buf), data + 8,
 				(nicklen + 1) * sizeof(cell));
 			echo_sendclientmessage_buf4096_filtered();
 			break;
