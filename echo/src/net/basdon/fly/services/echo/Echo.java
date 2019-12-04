@@ -213,7 +213,9 @@ throws InterruptedIOException
 			this.anna.sync_exec(() -> {
 				this.anna.privmsg(this.channel, msg);
 			});
+			return;
 		}
+		break;
 	}
 	case PACK_PLAYER_CONNECTION:
 		byte nicklen;
