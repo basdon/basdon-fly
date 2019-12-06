@@ -361,7 +361,7 @@ void login_cb_create_session_existing_member(void *data)
 	}
 	*/
 	csprintf(buf144,
-		"%s[%d] just loggin in, welcome back!",
+		"%s[%d] just logged in, welcome back!",
 		pdata[playerid]->name,
 		playerid);
 	NC_SendClientMessageToAll(COL_JOIN, buf144a);
