@@ -161,6 +161,7 @@ void veh_init()
 		veh->col1 = (unsigned char) (*fld = 7, NC(n_cache_get_field_i));
 		veh->col2 = (unsigned char) (*fld = 8, NC(n_cache_get_field_i));
 		veh->odoKM = (*fld = 9, NCF(n_cache_get_field_f));
+		veh->spawnedvehicleid = 0;
 		if (veh->owneruserid) {
 			NC_PARS(3);
 			nc_params[3] = buf32a;
@@ -194,7 +195,6 @@ void veh_init()
 			}
 		}
 		veh->fuel = model_fuel_capacity(veh->model);
-		veh->spawnedvehicleid = 0;
 		veh++;
 		numdbvehicles++;
 	}
