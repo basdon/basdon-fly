@@ -4,7 +4,6 @@
 #include "common.h"
 #include "anticheat.h"
 #include "cmd.h"
-#include "echo.h"
 #include "game_sa.h"
 #include "heartbeat.h"
 #include "missions.h"
@@ -641,7 +640,6 @@ void timecyc_tick()
 				time_h = 0;
 			}
 			/*timer1m*/
-			echo_init();
 timer30s:
 			/*timer30s*/
 			heartbeat_timed_update();

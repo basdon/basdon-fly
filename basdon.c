@@ -204,7 +204,6 @@ exit:
 
 	airports_init();
 	class_init();
-	echo_init();
 	heartbeat_create_session();
 	maps_load_from_db();
 	missions_create_tracker_socket();
@@ -231,6 +230,8 @@ exit:
 	/*must be last*/
 	timecyc_reset();
 	timer_reset();
+
+	timer_set(0, echo_init, NULL);
 	return 1;
 }
 

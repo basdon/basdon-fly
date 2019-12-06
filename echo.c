@@ -14,22 +14,31 @@
 static cell socket_in = SOCKET_INVALID_SOCKET;
 static cell socket_out = SOCKET_INVALID_SOCKET;
 
-void echo_init()
+int echo_init(void *data)
 {
 	static const char *BUFLO = "127.0.0.1";
 
+	int sin, timer_interval = 0;
+
 	if (socket_in == SOCKET_INVALID_SOCKET) {
-		socket_in = NC_ssocket_create(SOCKET_UDP);
-		if (socket_in == SOCKET_INVALID_SOCKET) {
+		sin = NC_ssocket_create(SOCKET_UDP);
+		if (sin == SOCKET_INVALID_SOCKET) {
 			logprintf("failed to create echo game socket");
+			timer_interval = 60000;
 		} else {
-			NC_ssocket_listen(socket_in, ECHO_PORT_IN);
+			if (!NC_ssocket_listen(sin, ECHO_PORT_IN)) {
+				NC_ssocket_destroy(sin);
+				timer_interval = 60000;
+			} else {
+				socket_in = sin;
+			}
 		}
 	}
 	if (socket_out == SOCKET_INVALID_SOCKET) {
 		socket_out = NC_ssocket_create(SOCKET_UDP);
 		if (socket_out == SOCKET_INVALID_SOCKET) {
 			logprintf("failed to create echo irc socket");
+			timer_interval = 60000;
 		} else {
 			atoc(buf32, (char*) BUFLO, 32);
 			NC_ssocket_connect(socket_out, buf32a, ECHO_PORT_OUT);
@@ -38,6 +47,8 @@ void echo_init()
 			NC_ssocket_send(socket_out, buf144a, 8);
 		}
 	}
+
+	return timer_interval;
 }
 
 void echo_dispose()

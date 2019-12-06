@@ -28,10 +28,14 @@ void echo_dispose();
 /**
 Creates the echo sockets.
 
+This is a timer callback and should be called by a 0 interval timer on game
+mode init. Timer will keep repeating until both listen and send sockets are
+successfully created.
+
 Call periodically, to up sockets in the case they couldn't be started from
 OnGameModeInit.
 */
-void echo_init();
+int echo_init(void *data);
 /**
 Send flight finish message to IRC echo.
 
