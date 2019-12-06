@@ -1414,7 +1414,7 @@ int missions_cmd_cancelmission(CMDPARAMS)
 
 const static char
 	*ALREADYWORKING = WARN"You're already working! Use /s to stop "
-		"your current work first ($"Q(MISSION_CANCEL_FINE_)" fine).";
+		"your current work first ($"Q(MISSION_CANCEL_FINE)" fine).";
 
 int missions_cmd_mission(CMDPARAMS)
 {
