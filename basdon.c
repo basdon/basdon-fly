@@ -14,12 +14,15 @@ int spawned[MAX_PLAYERS];
 
 static const char *NOLOG = WARN"Log in first.";
 
+/*adjusted parameter addr, since FRM and return addres are on top of the stack*/
+#define PARAM(X) (*(params + 2 + X))
+
 /* native B_OnCallbackHit(function, data) */
 static
 cell AMX_NATIVE_CALL B_OnCallbackHit(AMX *amx, cell *params)
 {
 	/*TODO: maybe I shouldn't be doing it like this*/
-	((cb_t) params[1])((void*) params[2]);
+	((cb_t) PARAM(1))((void*) PARAM(2));
 	return 1;
 }
 
@@ -27,8 +30,8 @@ cell AMX_NATIVE_CALL B_OnCallbackHit(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 {
-	const int pid = params[1], dialogid = params[2];
-	const int res = params[3], listitem = params[4];
+	const int pid = PARAM(1), dialogid = PARAM(2);
+	const int res = PARAM(3), listitem = PARAM(4);
 	char inputtext[128];
 	cell *ia;
 
@@ -43,7 +46,7 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 		goto ret;
 	}
 
-	amx_GetAddr(amx, params[5], &ia);
+	amx_GetAddr(amx, PARAM(5), &ia);
 	ctoa(inputtext, ia, sizeof(inputtext));
 
 	switch (dialogid) {
@@ -57,10 +60,10 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 		airport_list_dialog_response(pid, res, listitem);
 		goto ret;
 	case DIALOG_REGISTER_FIRSTPASS:
-		login_dlg_register_firstpass(pid, res, params[5]);
+		login_dlg_register_firstpass(pid, res, PARAM(5));
 		goto ret;
 	case DIALOG_REGISTER_CONFIRMPASS:
-		login_dlg_register_confirmpass(pid, res, params[5], inputtext);
+		login_dlg_register_confirmpass(pid, res, PARAM(5), inputtext);
 		goto ret;
 	case DIALOG_LOGIN_LOGIN_OR_NAMECHANGE:
 		login_dlg_login_or_namechange(pid, res, inputtext);
@@ -69,22 +72,22 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 		login_dlg_namechange(pid, res, inputtext);
 		goto ret;
 	case DIALOG_CHANGEPASS_PREVPASS:
-		chpw_dlg_previous_password(pid, res, params[5], ia);
+		chpw_dlg_previous_password(pid, res, PARAM(5), ia);
 		goto ret;
 	case DIALOG_CHANGEPASS_NEWPASS:
-		chpw_dlg_new_password(pid, res, params[5], ia);
+		chpw_dlg_new_password(pid, res, PARAM(5), ia);
 		goto ret;
 	case DIALOG_CHANGEPASS_CONFIRMPASS:
-		chpw_dlg_confirm_password(pid, res, params[5], ia);
+		chpw_dlg_confirm_password(pid, res, PARAM(5), ia);
 		goto ret;
 	case DIALOG_GUESTREGISTER_CHANGENAME:
 		guestreg_dlg_change_name(pid, res, inputtext);
 		goto ret;
 	case DIALOG_GUESTREGISTER_FIRSTPASS:
-		guestreg_dlg_register_firstpass(pid, res, params[5], ia);
+		guestreg_dlg_register_firstpass(pid, res, PARAM(5), ia);
 		goto ret;
 	case DIALOG_GUESTREGISTER_CONFIRMPASS:
-		guestreg_dlg_register_confirmpass(pid, res, params[5], ia);
+		guestreg_dlg_register_confirmpass(pid, res, PARAM(5), ia);
 		goto ret;
 	}
 
@@ -237,7 +240,7 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 {
 	static const char *NO = WARN"You can't use commands when not spawned.";
 
-	const int playerid = params[1];
+	const int playerid = PARAM(1);
 	char cmdtext[145];
 	cell *addr;
 
@@ -253,7 +256,7 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 		return 1;
 	}
 
-	amx_GetAddr(amx, params[2], &addr);
+	amx_GetAddr(amx, PARAM(2), &addr);
 	ctoa(cmdtext, addr, sizeof(cmdtext));
 
 	common_mysql_escape_string(cmdtext, cbuf144, 144 * sizeof(cell));
@@ -273,7 +276,7 @@ cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 {
-	const int playerid = params[1];
+	const int playerid = PARAM(1);
 
 #ifdef DEV
 	B144("DEVELOPMENT BUILD");
@@ -326,8 +329,8 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 {
-	const int playerid = params[1]/*, killerdid = params[2]*/;
-	/*const int reason = params[3];*/
+	const int playerid = PARAM(1)/*, killerdid = PARAM(2)*/;
+	/*const int reason = PARAM(3);*/
 
 	if (!ISPLAYING(playerid)) {
 		return 0;
@@ -346,7 +349,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 {
-	const int playerid = params[1], reason = params[2];
+	const int playerid = PARAM(1), reason = PARAM(2);
 	int i;
 
 	airport_on_player_disconnect(playerid);
@@ -386,7 +389,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerEnterRaceCP(AMX *amx, cell *params)
 {
-	const int playerid = params[1];
+	const int playerid = PARAM(1);
 
 	return missions_on_player_enter_race_checkpoint(playerid);
 }
@@ -395,8 +398,8 @@ cell AMX_NATIVE_CALL B_OnPlayerEnterRaceCP(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 {
-	const int playerid = params[1], vehicleid = params[2];
-	const int ispassenger = params[3];
+	const int playerid = PARAM(1), vehicleid = PARAM(2);
+	const int ispassenger = PARAM(3);
 
 	veh_on_player_enter_vehicle(playerid, vehicleid, ispassenger);
 
@@ -407,8 +410,8 @@ cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerKeyStateChange(AMX *amx, cell *params)
 {
-	const int playerid = params[1], oldkeys = params[2];
-	const int newkeys = params[3];
+	const int playerid = PARAM(1), oldkeys = PARAM(2);
+	const int newkeys = PARAM(3);
 
 	veh_on_player_key_state_change(playerid, oldkeys, newkeys);
 	return 1;
@@ -418,7 +421,7 @@ cell AMX_NATIVE_CALL B_OnPlayerKeyStateChange(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
 {
-	const int playerid = params[1], classid = params[2];
+	const int playerid = PARAM(1), classid = PARAM(2);
 
 	class_on_player_request_class(playerid, classid);
 	timecyc_on_player_request_class(playerid);
@@ -429,7 +432,7 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 {
-	const int playerid = params[1];
+	const int playerid = PARAM(1);
 
 	if (!ISPLAYING(playerid)) {
 		B144((char*) NOLOG);
@@ -450,7 +453,7 @@ static
 cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 {
 	struct vec3 pos;
-	const int playerid = params[1];
+	const int playerid = PARAM(1);
 
 	if (!ISPLAYING(playerid)) {
 		return 0;
@@ -471,8 +474,8 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 {
-	const int playerid = params[1];
-	const int newstate = params[2], oldstate = params[3];
+	const int playerid = PARAM(1);
+	const int newstate = PARAM(2), oldstate = PARAM(3);
 
 	panel_on_player_state_change(playerid, oldstate, newstate);
 	veh_on_player_state_change(playerid, oldstate, newstate);
@@ -485,7 +488,7 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 {
 	cell *addr;
 	char buf[144];
-	const int playerid = params[1];
+	const int playerid = PARAM(1);
 
 	if (!ISPLAYING(playerid)) {
 		B144((char*) NOLOG);
@@ -497,7 +500,7 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 		return 0;
 	}
 
-	amx_GetAddr(amx, params[2], &addr);
+	amx_GetAddr(amx, PARAM(2), &addr);
 	ctoa(buf, addr, sizeof(buf));
 
 	echo_on_game_chat_or_action(0, playerid, buf);
@@ -508,7 +511,7 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerUpdate(AMX *amx, cell *params)
 {
-	const int playerid = params[1];
+	const int playerid = PARAM(1);
 
 	if (kick_update_delay[playerid] > 0) {
 		if (--kick_update_delay[playerid] == 0) {
@@ -527,12 +530,12 @@ cell AMX_NATIVE_CALL B_OnPlayerUpdate(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnQueryError(AMX *amx, cell *params)
 {
-	const int errorid = params[1];
+	const int errorid = PARAM(1);
 	cell *addr;
 
-	amx_GetAddr(amx, params[2], &addr);
+	amx_GetAddr(amx, PARAM(2), &addr);
 	ctoa(cbuf144, addr, 144);
-	amx_GetAddr(amx, params[4], &addr);
+	amx_GetAddr(amx, PARAM(4), &addr);
 	ctoa(cbuf4096, addr, 4096);
 
 	logprintf("query err %d %s %s", errorid, cbuf144, cbuf4096);
@@ -543,12 +546,12 @@ cell AMX_NATIVE_CALL B_OnQueryError(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnRecv(AMX *amx, cell *params)
 {
-	const int len = params[3];
-	cell socket_handle = params[1];
+	const int len = PARAM(3);
+	cell socket_handle = PARAM(1);
 	cell *addr;
 
-	amx_GetAddr(amx, params[2], &addr);
-	echo_on_receive(socket_handle, params[2], (char*) addr, len);
+	amx_GetAddr(amx, PARAM(2), &addr);
+	echo_on_receive(socket_handle, PARAM(2), (char*) addr, len);
 	return 1;
 }
 
@@ -560,7 +563,7 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 	int vehicleid;
 
 	/*keep this first*/
-	amx_GetAddr(amx, params[1], &addr);
+	amx_GetAddr(amx, PARAM(1), &addr);
 	*addr = vehicleid = veh_on_vehicle_spawn(*addr);
 
 	nav_reset_for_vehicle(vehicleid);
@@ -572,7 +575,7 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnVehicleStreamIn(AMX *amx, cell *params)
 {
-	const int vehicleid = params[1], forplayerid = params[2];
+	const int vehicleid = PARAM(1), forplayerid = PARAM(2);
 
 	veh_on_vehicle_stream_in(vehicleid, forplayerid);
 	return 1;
@@ -582,7 +585,7 @@ cell AMX_NATIVE_CALL B_OnVehicleStreamIn(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnVehicleStreamOut(AMX *amx, cell *params)
 {
-	const int vehicleid = params[1], forplayerid = params[2];
+	const int vehicleid = PARAM(1), forplayerid = PARAM(2);
 
 	veh_on_vehicle_stream_out(vehicleid, forplayerid);
 	return 1;
