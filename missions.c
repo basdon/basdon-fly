@@ -1472,30 +1472,36 @@ void missions_update_satisfaction(int pid, int vid, struct quat *vrot)
 {
 	struct MISSION *miss;
 	int last_satisfaction;
-	float qw, qx, qy, qz;
-	float tmpvalue = 0.0f;;
+	float qw, qx, qy, qz, pitchlimit, rolllimit, tmp;
 
 	if ((miss = activemission[pid]) != NULL &&
+		miss->missiontype & PASSENGER_MISSIONTYPES &&
 		miss->stage == MISSION_STAGE_FLIGHT &&
 		miss->veh->spawnedvehicleid == vid)
 	{
+		if (game_is_heli(miss->veh->model)) {
+			pitchlimit = rolllimit = 57.0f;
+		} else {
+			pitchlimit = 46.0f;
+			rolllimit = 61.0f;
+		}
 		last_satisfaction = miss->passenger_satisfaction;
 		qx = vrot->qx;
 		qy = vrot->qy;
 		qz = vrot->qz;
 		qw = vrot->qw;
 		/* pitch */
-		tmpvalue = fabsf(100.0f * 2.0f * (qy * qz - qw * qx)) - 46.0f;
-		if (tmpvalue > 0.0) {
-			miss->passenger_satisfaction -= (int) (tmpvalue / 2.0f);
+		tmp = fabsf(100.0f * 2.0f * (qy * qz - qw * qx)) - pitchlimit;
+		if (tmp > 0.0) {
+			miss->passenger_satisfaction -= (int) (tmp / 2.0f);
 			if (miss->passenger_satisfaction < 0) {
 				miss->passenger_satisfaction = 0;
 			}
 		}
 		/* roll */
-		tmpvalue = fabsf(100.0f * 2.0f * (qx * qz + qw * qy)) - 61.0f;
-		if (tmpvalue > 0.0) {
-			miss->passenger_satisfaction -= (int) (tmpvalue / 2.0f);
+		tmp = fabsf(100.0f * 2.0f * (qx * qz + qw * qy)) - rolllimit;
+		if (tmp > 0.0) {
+			miss->passenger_satisfaction -= (int) (tmp / 2.0f);
 			if (miss->passenger_satisfaction < 0) {
 				miss->passenger_satisfaction = 0;
 			}

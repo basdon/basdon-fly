@@ -95,8 +95,8 @@ void ctoai(char *dstsrc);
 #define B144(X) atoc(buf144,X,144)
 
 #ifdef DEV
-#define DBG(...) sprintf(cbuf64,__VA_ARGS__);\
-			printf("%s\n", cbuf64);\
+#define DBG(format,...) sprintf(cbuf64,format,__VA_ARGS__);\
+			printf("%s\n", cbuf64);printf("\n");\
 			atoc(buf144,cbuf64,144);\
 			NC_SendClientMessageToAll(-1,buf144a);
 #else
