@@ -560,12 +560,10 @@ cell AMX_NATIVE_CALL B_OnRecv(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 {
-	cell *addr;
-	int vehicleid;
+	int vehicleid = PARAM(1);
 
-	/*keep this first*/
-	amx_GetAddr(amx, PARAM(1), &addr);
-	*addr = vehicleid = veh_on_vehicle_spawn(*addr);
+	/*TODO: don't recreate it.*/
+	vehicleid = veh_on_vehicle_spawn(vehicleid);
 
 	nav_reset_for_vehicle(vehicleid);
 
