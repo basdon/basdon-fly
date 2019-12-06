@@ -263,10 +263,6 @@ Holds class the players are playing as.
 */
 extern int playerclass[MAX_PLAYERS];
 /**
-Player preferences, see sharedsymbols.h.
-*/
-extern int prefs[MAX_PLAYERS];
-/**
 Current in-game hour.
 */
 extern int time_h;

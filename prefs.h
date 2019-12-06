@@ -10,6 +10,11 @@
 	(PREF_ENABLE_PM | PREF_SHOW_MISSION_MSGS | PREF_WORK_AUTONAV)
 
 /**
+Player preferences, see PREF_ constants.
+*/
+extern int prefs[MAX_PLAYERS];
+
+/**
 The /preferences command.
 
 Shows a dialog with preferences which the player can modify.
