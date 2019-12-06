@@ -116,7 +116,7 @@ static
 int nav_check_can_do_cmd(int playerid, int navtype, int *vehicleid)
 {
 	static const char
-		*NO_NAV = WARN"You're not in an %s capable vehicle",
+		*NO_NAV = WARN"You're not in a%s capable vehicle",
 		*NO_PILOT = WARN"Only the pilot can change navigation settings";
 
 	int vehiclemodel;
@@ -129,7 +129,7 @@ int nav_check_can_do_cmd(int playerid, int navtype, int *vehicleid)
 			goto sendmsgfail;
 		}
 	} else if (!game_is_plane(vehiclemodel)) {
-		csprintf(buf144, NO_NAV, navtype == NAV_VOR ? "VOR" : "ILS");
+		csprintf(buf144, NO_NAV, navtype == NAV_VOR ? " VOR" : "n ILS");
 		goto sendmsgfail;
 	}
 	if (NC_GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
