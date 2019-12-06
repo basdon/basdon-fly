@@ -437,7 +437,7 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 	if (!ISPLAYING(playerid)) {
 		B144((char*) NOLOG);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
-		return 1;
+		return 0;
 	}
 
 	if (class_on_player_request_spawn(playerid)) {

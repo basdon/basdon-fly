@@ -842,6 +842,7 @@ int login_on_player_connect(int playerid)
 	userid[playerid] = -1;
 	sessionid[playerid] = -1;
 	failedlogins[playerid] = 0;
+	loggedstatus[playerid] = LOGGED_NO;
 	pdata[playerid]->groups = GROUP_GUEST;
 
 	pd = pdata[playerid];
