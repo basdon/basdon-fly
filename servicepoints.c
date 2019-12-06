@@ -201,19 +201,19 @@ int svp_cmd_refuel(CMDPARAMS)
 		NC_mysql_tquery_nocb(buf4096a);
 	}
 
-	if (NC_GetPlayerVehicleSeat(playerid) != 0) {
-		/*inform driver that a passenger refueled the vehicle*/
-		driverid = common_find_player_in_vehicle_seat(vehicleid, 0);
-		if (driverid == INVALID_PLAYER_ID) {
-			goto retmsg;
-		}
+	missions_on_vehicle_refueled(vehicleid, refuelamount);
+
+	/*inform driver that a passenger refueled the vehicle*/
+	if (NC_GetPlayerVehicleSeat(playerid) != 0 &&
+		(driverid = common_find_player_in_vehicle_seat(vehicleid, 0)) !=
+			INVALID_PLAYER_ID)
+	{
 		csprintf(buf144,
 			INFO"Player %s[%s] refueled your vehicle!",
 			pdata[playerid]->name,
 			playerid);
 		NC_SendClientMessage(driverid, COL_INFO, buf144a);
 	}
-	missions_on_vehicle_refueled(vehicleid, refuelamount);
 	return 1;
 retmsg:
 	B144(msg);
@@ -294,19 +294,19 @@ int svp_cmd_repair(CMDPARAMS)
 		NC_mysql_tquery_nocb(buf4096a);
 	}
 
-	if (NC_GetPlayerVehicleSeat(playerid) != 0) {
-		/*inform driver that a passenger repaired the vehicle*/
-		driverid = common_find_player_in_vehicle_seat(vehicleid, 0);
-		if (driverid == INVALID_PLAYER_ID) {
-			goto retmsg;
-		}
+	missions_on_vehicle_repaired(vehicleid, fixamount, hp);
+
+	/*inform driver that a passenger refueled the vehicle*/
+	if (NC_GetPlayerVehicleSeat(playerid) != 0 &&
+		(driverid = common_find_player_in_vehicle_seat(vehicleid, 0)) !=
+			INVALID_PLAYER_ID)
+	{
 		csprintf(buf144,
 			INFO"Player %s[%s] repaired your vehicle!",
 			pdata[playerid]->name,
 			playerid);
 		NC_SendClientMessage(driverid, COL_INFO, buf144a);
 	}
-	missions_on_vehicle_repaired(vehicleid, fixamount, hp);
 	return 1;
 retmsg:
 	B144(msg);
