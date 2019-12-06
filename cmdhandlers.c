@@ -91,6 +91,23 @@ int cmd_chute(CMDPARAMS)
 }
 
 /**
+The /getspray command gets the colors of the vehicle the player is in.
+*/
+static
+int cmd_getspray(CMDPARAMS)
+{
+	struct dbvehicle *veh;
+	int vehicleid;
+
+	vehicleid = NC_GetPlayerVehicleID(playerid);
+	if (vehicleid && (veh = gamevehicles[vehicleid].dbvehicle)) {
+		csprintf(buf144, "colors: %d, %d", veh->col1, veh->col2);
+		NC_SendClientMessage(playerid, -1, buf144a);
+	}
+	return 1;
+}
+
+/**
 The /helpkeys command shows gametext with important keys.
 */
 static
