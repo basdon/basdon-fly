@@ -43,7 +43,7 @@
 <?php 
 try{
 	++$db_querycount;
-	$r = $db->query('SELECT _f.*,_u.name,_u.i,_a.n fromname,_a.c fromcode,_b.n toname,_b.c tocode,_v.m vehmodel ,_m.name fromgate,_n.name togate 
+	$r = $db->query('SELECT _f.*,_u.name,_u.i,_a.n fromname,_a.c fromcode,_b.n toname,_b.c tocode,_v.m vehmodel ,_m.name fromgate,_n.name togate,_o.name ownername 
 	                 FROM flg _f 
 	                 JOIN usr _u ON _f.player=_u.i 
 	                 JOIN apt _a ON _f.fapt=_a.i 
@@ -51,6 +51,7 @@ try{
 	                 JOIN veh _v ON _f.vehicle=_v.i 
 	                 JOIN msp _m ON _f.fmsp = _m.i 
 	                 JOIN msp _n ON _f.fmsp = _n.i 
+	                 LEFT OUTER JOIN usr _o ON _v.ownerplayer=_o.i 
 	                 WHERE id=' . $id);
 	if ($r === false || ($r = $r->fetchAll()) === false || empty($r)) {
 		echo '<p>Flight not found (or something went wrong)!</p>';
@@ -72,7 +73,7 @@ try{
 				<li><strong>Flight start:</strong> {@unsafe date('j M Y H:i', $r->tstart)} (GMT{@unsafe date('O')})</li>
 				<li><strong>Flight end:</strong> {@if $r->state != 1}{@unsafe date('j M Y H:i', $r->tlastupdate)} (GMT{@unsafe date('O')}){@endif}</li>
 				<li><strong>Flight duration:</strong> {@if $r->state != 1}{@unsafe sprintf('%02d:%02d', floor(($diff=$r->tlastupdate-$r->tstart)/60), $diff%60)}{@endif}</li>
-				<li><strong>Aircraft:</strong> {@unsafe aircraft_name($r->vehmodel)}</li>
+				<li><strong>Aircraft:</strong> {@unsafe aircraft_name($r->vehmodel)} (owned by: {@unsafe aircraftowner($r->ownername)})</li>
 				<li><strong>Flight type:</strong> {@unsafe fmt_mission_type($r->missiontype)}</li>
 				{@if $r->missiontype & $passenger_mission_types}
 					<li><strong>Passenger satisfaction:</strong> {@unsafe $r->satisfaction}%</li>
