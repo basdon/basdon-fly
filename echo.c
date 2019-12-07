@@ -77,8 +77,8 @@ void echo_on_player_connection(int playerid, int reason)
 			(playerid & 0xFFFF) |
 			((reason & 0xFF) << 16) |
 			((nicklen & 0xFF) << 24);
-		memcpy(cbuf144 + 8, pd->name, nicklen + 1);
-		NC_ssocket_send(socket_out, buf144a, 8 + nicklen + 1);
+		memcpy(cbuf144 + 8, pd->name, nicklen);
+		NC_ssocket_send(socket_out, buf144a, 8 + nicklen);
 	}
 }
 
@@ -117,10 +117,9 @@ void echo_on_game_chat_or_action(int t, int playerid, char *text)
 			(playerid & 0xFFFF) |
 			((pd->namelen & 0xFF) << 16) |
 			((msglen & 0xFF) << 24);
-		memcpy((cbuf144) + 8, pd->name, nicklen + 1);
-		memcpy((cbuf144) + 9 + nicklen, text, msglen);
-		*((cbuf144) + 9 + nicklen + msglen) = 0;
-		NC_ssocket_send(socket_out, buf144a, 10+nicklen+msglen);
+		memcpy((cbuf144) + 8, pd->name, nicklen);
+		memcpy((cbuf144) + 8 + nicklen, text, msglen);
+		NC_ssocket_send(socket_out, buf144a, 8 + nicklen + msglen);
 	}
 }
 
@@ -206,52 +205,50 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			int nicklen;
 			cell *b;
 
-			if (len < 13 ||
+			if (len < 10 ||
 				(nicklen = data[6]) < 1 || nicklen > 49 ||
 				(msglen = (data[7] & 0xFF)) < 1 ||
 				msglen > 144 ||
-				10 + nicklen + msglen != len)
+				8 + nicklen + msglen != len)
 			{
 				break;
 			}
 			buf4096[0] = 'I';
 			buf4096[1] = 'R';
 			buf4096[2] = 'C';
-			buf4096[3] = ' ';
-			b = buf4096 + 4;
+			buf4096[3] = ':';
+			buf4096[4] = ' ';
+			b = buf4096 + 5;
 			if (data[3] == PACK_ACTION) {
 				*(b++) = '*';
 				*(b++) = ' ';
 			} else {
 				*(b++) = '<';
-
 			}
-			atoc(b, data + 8, nicklen * sizeof(cell));
+			atoc(b, data + 8, nicklen + 1);
 			b += nicklen;
 			if (data[3] != PACK_ACTION) {
 				*(b++) = '>';
 			}
 			*(b++) = ' ';
-			atoc(b,
-				data + 9 + nicklen,
-				(msglen + 1) * sizeof(cell));
+			atoc(b, data + 8 + nicklen, msglen + 1);
 			echo_sendclientmessage_buf4096_filtered();
 			break;
 		}
 		case PACK_PLAYER_CONNECTION:
 		{
 			int nicklen;
-			char buf[144], *b = buf;
+			char *b;
 
-			if (len < 9 ||
+			if (len < 8 ||
 				(nicklen = data[7]) < 1 || nicklen > 49 ||
-				9 + nicklen != len)
+				8 + nicklen != len)
 			{
 				break;
 			}
-			*((int*) b) = 0x3A435249;
-			b += 4;
-			*(b++) = ' ';
+			buf4096[0] = 0x3A435249;
+			cbuf4096[4] = ' ';
+			b = cbuf4096 + 5;
 			switch (data[6]) {
 			case ECHO_CONN_REASON_IRC_QUIT:
 				memcpy(b, "Quits: ", 7);
@@ -270,10 +267,9 @@ void echo_on_receive(cell socket_handle, cell data_a,
 				b += 7;
 				break;
 			}
-			/*copy one more here because it'll add a 0-term*/
-			atoc(buf4096, buf, b - buf + 1);
-			atoc(buf4096 + (b - buf), data + 8,
-				(nicklen + 1) * sizeof(cell));
+			memcpy(b, data + 8, nicklen);
+			b[nicklen] = 0;
+			atoci(buf4096, (b - cbuf4096) + nicklen);
 			echo_sendclientmessage_buf4096_filtered();
 			break;
 		}
