@@ -5,7 +5,7 @@
 		{@try}
 			{@eval ++$db_querycount}
 			{@eval $players = []}
-			{@eval $r = $db->query("SELECT _u.name,_u.score
+			{@eval $r = $db->query("SELECT _u.name,_u.i,_u.score
 			                        FROM ses _s
 			                        JOIN usr _u ON _s.u=_u.i
 			                        WHERE _s.e>UNIX_TIMESTAMP()-40")}
@@ -15,7 +15,7 @@
 			<h6>Currently online ({@unsafe count($players)})</h6>
 			<table border="0" width="100%">
 				{@foreach $players as $p}
-					<tr><td><a href="user.php?name={@urlencode $p->name}">{$p->name}</a></td><td>{@unsafe $p->score}</td></tr>
+					<tr><td>{@unsafe linkuser($p)}</td><td>{@unsafe $p->score}</td></tr>
 				{@endforeach}
 			</table>
 		{@catch PDOException $e}
@@ -27,7 +27,7 @@
 		<h5>Active Flights</h5>
 		{@try}
 			{@eval ++$db_querycount}
-			{@eval $r = $db->query("SELECT id,_u.name,_a.c f,_b.c t
+			{@eval $r = $db->query("SELECT id,_u.name,_u.i,_a.c f,_b.c t
 		                                FROM flg _f
 		                                JOIN usr _u ON _f.player=_u.i
 		                                JOIN apt _a ON _a.i=_f.fapt
@@ -42,7 +42,7 @@
 							<tr>
 								<td><a href="flight.php?id={@unsafe $f->id}">#{@unsafe $f->id}</a></td>
 								<td>{@unsafe $f->f} -&gt; {@unsafe $f->t}</td>
-								<td><a href="user.php?name={@urlencode $f->name}">{$f->name}</a></td>
+								<td>{@unsafe linkuser($f)}</td>
 							</tr>
 						{@endforeach}
 					</table>
@@ -57,7 +57,7 @@
 		<h5>Last 7 Finished Flights</h5>
 		{@try}
 			{@eval ++$db_querycount}
-			{@eval $r = $db->query("SELECT id,_u.name,_a.c f,_b.c t
+			{@eval $r = $db->query("SELECT id,_u.name,_u.i,_a.c f,_b.c t
 			                        FROM flg _f
 			                        JOIN usr _u ON _f.player=_u.i
 			                        JOIN apt _a ON _a.i=_f.fapt
@@ -72,7 +72,7 @@
 							<tr>
 								<td><a href="flight.php?id={@unsafe $f->id}">#{@unsafe $f->id}</a></td>
 								<td>{@unsafe $f->f} -&gt; {@unsafe $f->t}</td>
-								<td><a href="user.php?name={@urlencode $f->name}">{$f->name}</a></td>
+								<td>{@unsafe linkuser($f)}</td>
 							</tr>
 						{@endforeach}
 					</table>
@@ -99,9 +99,9 @@
 				<tr><td>Registered users:</td><td>{@unsafe $r->c}</td></tr>
 			{@endif}
 			{@eval ++$db_querycount}
-			{@eval $r = $db->query('SELECT name FROM usr WHERE groups&'.$GROUP_GUEST.'=0 ORDER BY i DESC LIMIT 1')}
+			{@eval $r = $db->query('SELECT name,i FROM usr WHERE groups&'.$GROUP_GUEST.'=0 ORDER BY i DESC LIMIT 1')}
 			{@if $r !== false && ($r = $r->fetch()) !== false}
-				<tr><td>Latest:</td><td><a href="user.php?name={@urlencode $r->name}">{$r->name}</a></td></tr>
+				<tr><td>Latest:</td><td>{@unsafe linkuser($r)}</td></tr>
 			{@endif}
 		{@catch PDOException $e}
 		{@endtry}

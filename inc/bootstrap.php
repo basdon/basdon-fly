@@ -132,6 +132,16 @@ function get_page()
 	return 1;
 }
 
+function linkuser($user)
+{
+	// link guests by their id, other users by their name
+	if ($user->name[0] == '@') {
+		return '<a href="user.php?id='.$user->i.'">'.$user->name.'</a>';
+	} else {
+		return '<a href="user.php?name='.urlencode($user->name).'">'.htmlspecialchars($user->name, ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE).'</a>';
+	}
+}
+
 if (isset($__script)) {
 	include('../inc/output.php');
 }
