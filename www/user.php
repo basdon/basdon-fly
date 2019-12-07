@@ -4,9 +4,7 @@ include('../inc/bootstrap.php');
 $id = -1;
 $name = '';
 if (isset($_GET['id'])) {
-	$id = (int) $_GET['id'];
-	$id++;
-	$id--;
+	$id = intval($_GET['id']);
 	$r = $db->query('SELECT name FROM usr WHERE i=' . $id . ' LIMIT 1');
 	if ($r !== false && ($r = $r->fetchAll()) !== false && count($r)) {
 		$name = $r[0]->name;

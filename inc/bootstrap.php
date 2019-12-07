@@ -124,10 +124,7 @@ function format_time_since($time)
 function get_page()
 {
 	if (isset($_GET['page'])) {
-		$page = (int)($_GET['page']);
-		$page++;
-		$page--;
-		return max($page, 1);
+		return max(intval($_GET['page']), 1);
 	}
 	return 1;
 }

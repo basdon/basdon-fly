@@ -17,10 +17,7 @@ if (!isset($loggeduser)) {
 } else if ($action == 'fal') {
 	$clearkey = md5($__sesid . $SECRET1);
 	if (isset($_GET['cleartime'], $_GET['confirm']) && $clearkey === $_GET['confirm']) {
-		$t = $_GET['cleartime'];
-		$t++;
-		$t--;
-		$t = (int) $t;
+		$t = intval($_GET['cleartime']);
 		if ($t > $loggeduser->falnw) {
 			++$db_querycount;
 			$db->query('UPDATE usr SET falnw='.$t.',falng='.$t.' WHERE i='.$loggeduser->i);
