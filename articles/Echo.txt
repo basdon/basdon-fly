@@ -62,11 +62,9 @@ byte 5: hi byte of player id as WORD (0 when IRC to game)
 byte 6: length of the nickname (must be less than 50)
 byte 7: length of the message (must be less than 145)
 byte 8 - 7+[byte6]: nickname
-byte 8+[byte6]: zero terminator for nickname
-byte 9+[byte6] - 8+[byte6]+[byte7]: message
-byte 9+[byte6]+[byte7]: zero terminator for message
+byte 8+[byte6] - 7+[byte6]+[byte7]: message
 
-total len: 10+[byte6]+[byte7]
+total len: 8+[byte6]+[byte7]
 </pre>
 
 {@h4(id=p11) Packet 11: Action}
@@ -95,9 +93,8 @@ byte 5: hi byte of player id as WORD (0 when IRC to game)
 byte 6: reason (see below)
 byte 7: length of the nickname (must be less than 25)
 byte 8 - 7+[byte6]: nickname
-byte 8+[byte6]: zero terminator for nickname
 
-total len: 9+[byte6]
+total len: 8+[byte6]
 </pre>
 
 Reasons:
