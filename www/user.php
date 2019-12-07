@@ -18,11 +18,16 @@ if (isset($_GET['id'])) {
 	$stmt = $db->prepare('SELECT i,name FROM usr WHERE name=? LIMIT 1');
 	$stmt->bindValue(1, $_GET['name']);
 	if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
-		$id = $r[0]->i;
 		$name = $r[0]->name;
+		// don't show guest accounts when searching by name
+		if ($name[0] == '@') {
+			$name = '';
+			goto skip;
+		}
+		$id = $r[0]->i;
 		$paginationbaseurl = 'user.php?name='.$name;
 	}
-}
+} skip:
 ++$db_querycount;
 
 $__script = '_user';
