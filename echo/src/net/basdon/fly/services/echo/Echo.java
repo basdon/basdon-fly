@@ -173,10 +173,10 @@ throws InterruptedIOException
 	{
 		byte nicklen;
 		int msglen;
-		if (length > 11 &&
+		if (length > 9 &&
 			(nicklen = buf[6]) > 0 && nicklen < 50 &&
 			(msglen = buf[7] & 0xFF) > 0 && msglen < 144 &&
-			10 + nicklen + msglen == length)
+			8 + nicklen + msglen == length)
 		{
 			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
 			StringBuilder sb = new StringBuilder(225);
@@ -187,7 +187,7 @@ throws InterruptedIOException
 				sb.append(':');
 			}
 			sb.append(' ');
-			sb.append(new String(buf, 9 + nicklen, msglen, StandardCharsets.US_ASCII));
+			sb.append(new String(buf, 8 + nicklen, msglen, StandardCharsets.US_ASCII));
 			if (buf[3] == PACK_ACTION) {
 				this.anna.sync_exec(() -> {
 					this.anna.action(this.channel, chars(sb));
@@ -220,9 +220,9 @@ throws InterruptedIOException
 	}
 	case PACK_PLAYER_CONNECTION:
 		byte nicklen;
-		if (length > 9 &&
+		if (length > 8 &&
 			(nicklen = buf[7]) > 0 && nicklen < 50 &&
-			9 + nicklen == length)
+			8 + nicklen == length)
 		{
 			int reason = buf[6];
 			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
@@ -291,7 +291,7 @@ void send_chat_or_action_to_game(boolean isaction, char prefix, char[] nickname,
 		nicklen++;
 	}
 	int msglen = Math.min(message.length, 144);
-	byte[] msg = new byte[10 + nicklen + msglen];
+	byte[] msg = new byte[8 + nicklen + msglen];
 	msg[0] = 'F';
 	msg[1] = 'L';
 	msg[2] = 'Y';
@@ -308,12 +308,9 @@ void send_chat_or_action_to_game(boolean isaction, char prefix, char[] nickname,
 	for (int i = 0; i < nicklen; i++, j++) {
 		msg[j] = (byte) nickname[i];
 	}
-	msg[j] = 0;
-	j++;
 	for (int i = 0; i < msglen; i++, j++) {
 		msg[j] = (byte) message[i];
 	}
-	msg[j] = 0;
 	this.send(msg, msg.length);
 }
 
@@ -330,7 +327,7 @@ void send_player_connection(ChannelUser user, byte reason)
 	if (user.prefix != 0) {
 		nicklen++;
 	}
-	byte[] msg = new byte[9 + nicklen];
+	byte[] msg = new byte[8 + nicklen];
 	msg[0] = 'F';
 	msg[1] = 'L';
 	msg[2] = 'Y';
@@ -347,7 +344,6 @@ void send_player_connection(ChannelUser user, byte reason)
 	for (int i = 0; i < nicklen; i++, j++) {
 		msg[j] = (byte) user.nick[i];
 	}
-	msg[j] = 0;
 	this.send(msg, msg.length);
 }
 
