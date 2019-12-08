@@ -13,8 +13,30 @@ $GROUP_MEMBER = 4;
 $GROUP_ADMIN = 268435456;
 $GROUP_OWNER = 1073741824;
 
+$GROUPS_ALL = 2147483647;
+
+function group_is_banned($group)
+{
+	global $GROUP_BANNED;
+	return $group & $GROUP_BANNED;
+}
+
+function group_is_admin($group)
+{
+	global $GROUP_ADMIN;
+	return $group >= $GROUP_ADMIN;
+}
+
+function group_is_owner($group)
+{
+	global $GROUP_OWNER;
+	return $group >= $GROUP_OWNER;
+}
+
 $__clientip = $_SERVER['REMOTE_ADDR'];
 
+$usergroups = $GROUP_GUEST;
+$userid = -1;
 if (isset($_COOKIE[$COOKIENAME]) && strlen($__sesid = $_COOKIE[$COOKIENAME]) == 32) {
 	++$db_querycount;
 	$s = $db->prepare('SELECT stay,u.i,u.name,u.groups,lastfal,falnw,falng FROM webses w JOIN usr u ON w.usr=u.i WHERE id=?');
@@ -27,6 +49,9 @@ if (isset($_COOKIE[$COOKIENAME]) && strlen($__sesid = $_COOKIE[$COOKIENAME]) == 
 		setcookie($COOKIENAME, $__sesid, $expire, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
 		++$db_querycount;
 		$db->query('UPDATE webses SET lastupdate=UNIX_TIMESTAMP() WHERE id=\''.$__sesid.'\'');
+		$userid = $loggeduser->i;
+		$usergroups = $loggeduser->groups;
+		$HAARP = $loggeduser->logoutkey; // maybe this should he something different?
 	} else {
 		setcookie($COOKIENAME, '', 0, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
 	}
@@ -59,6 +84,11 @@ function simple_pagination($urlWithParam, $currentPageFromOne, $totalItems, $ite
 	}
 	$str .= '</p>';
 	return $str;
+}
+
+function format_datetime($time)
+{
+	return date('j M Y H:i', $time) . ' (GMT' . date('O') . ')';
 }
 
 function format_duration_short($time)

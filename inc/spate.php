@@ -281,7 +281,13 @@ function makeinput($args)
 {
 	$args = explode(' ', $args);
 	$type = $args[0];
+	if ($type == 'HAARP') {
+		return '<input type="hidden" name="HAARP" value="<?=$HAARP~>" />';
+	}
 	$name = $args[1];
+	if ($type == 'area') {
+		return '<textarea name="'.$name.'"><?php form_value(\''.$name.'\'); ~></textarea>';
+	}
 	if ($type == 'submit') {
 		$name = '_form';
 	}

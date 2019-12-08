@@ -70,8 +70,8 @@ try{
 				<li><strong>Destination:</strong> <a href="airport.php?code={@unsafe $r->tocode}">{@unsafe $r->toname} ({@unsafe $r->tocode})</a> {@unsafe $r->togate}</li>
 				<li><strong>Point-to-point distance:</strong> {@unsafe $r->distance}m</li>
 				<li><strong>Actual flown distance:</strong> {@unsafe $r->adistance}m</li>
-				<li><strong>Flight start:</strong> {@unsafe date('j M Y H:i', $r->tstart)} (GMT{@unsafe date('O')})</li>
-				<li><strong>Flight end:</strong> {@if $r->state != 1}{@unsafe date('j M Y H:i', $r->tlastupdate)} (GMT{@unsafe date('O')}){@endif}</li>
+				<li><strong>Flight start:</strong> {@unsafe format_datetime($r->tstart)}</li>
+				<li><strong>Flight end:</strong> {@if $r->state != 1}{@unsafe format_datetime($r->tlastupdate)}{@endif}</li>
 				<li><strong>Flight duration:</strong> {@if $r->state != 1}{@unsafe sprintf('%02d:%02d', floor(($diff=$r->tlastupdate-$r->tstart)/60), $diff%60)}{@endif}</li>
 				<li><strong>Aircraft:</strong> {@unsafe aircraft_name($r->vehmodel)} (owned by: {@unsafe aircraftowner($r->ownername)})</li>
 				<li><strong>Flight type:</strong> {@unsafe fmt_mission_type($r->missiontype)}</li>

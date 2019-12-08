@@ -15,3 +15,10 @@ function form_input($name)
 		echo ' value="' . htmlentities($_POST[$name], ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE) . '"';
 	}
 }
+
+function form_value($name)
+{
+	if (isset($_POST['_form'], $_POST[$name])) {
+		echo htmlentities($_POST[$name], ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE);
+	}
+}
