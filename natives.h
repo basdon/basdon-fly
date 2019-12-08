@@ -68,6 +68,7 @@ extern AMX_NATIVE n_ResetPlayerMoney_;
 extern AMX_NATIVE n_SHA256_PassHash;
 extern AMX_NATIVE n_SendClientMessage;
 extern AMX_NATIVE n_SendClientMessageToAll;
+extern AMX_NATIVE n_SendDeathMessage;
 extern AMX_NATIVE n_SendRconCommand;
 extern AMX_NATIVE n_SetCameraBehindPlayer;
 extern AMX_NATIVE n_SetGameModeText;
@@ -356,6 +357,10 @@ extern cell tmpfloat;
 #define NC_SendClientMessageToAll(COLOR,BUF) \
 	(NC_PARS_(2)nc_params[1]=COLOR,nc_params[2]=BUF,\
 	n_SendClientMessageToAll(amx,nc_params))
+
+#define NC_SendDeathMessage(KILLER,KILLEE,REASON) (NC_PARS_(3)\
+	nc_params[1]=KILLER,nc_params[2]=KILLEE,nc_params[3]=REASON,\
+	n_SendDeathMessage(amx,nc_params))
 
 #define NC_SendRconCommand(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
 	n_SendRconCommand(amx,nc_params))

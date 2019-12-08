@@ -4,6 +4,7 @@
 #include "common.h"
 #include "class.h"
 #include "dialog.h"
+#include "game_sa.h"
 #include "login.h"
 #include "money.h"
 #include "playerdata.h"
@@ -267,6 +268,12 @@ void login_login_player(int playerid, int status)
 	}
 	players[playercount++] = playerid;
 alreadyin:
+
+	NC_PARS(3);
+	nc_params[1] = INVALID_PLAYER_ID;
+	nc_params[2] = playerid;
+	nc_params[3] = WEAPON_CONNECT;
+	NC(n_SendDeathMessage);
 
 	if (status == LOGGED_GUEST) {
 		money_set(playerid, MONEY_DEFAULT_AMOUNT);

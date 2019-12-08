@@ -79,6 +79,7 @@ AMX_NATIVE n_RemovePlayerMapIcon;
 AMX_NATIVE n_SHA256_PassHash;
 AMX_NATIVE n_SendClientMessage;
 AMX_NATIVE n_SendClientMessageToAll;
+AMX_NATIVE n_SendDeathMessage;
 AMX_NATIVE n_SendRconCommand;
 AMX_NATIVE n_SetCameraBehindPlayer;
 AMX_NATIVE n_SetGameModeText;
@@ -222,6 +223,7 @@ int natives_find()
 		N(SHA256_PassHash),
 		N(SendClientMessage),
 		N(SendClientMessageToAll),
+		N(SendDeathMessage),
 		N(SendRconCommand),
 		N(SetCameraBehindPlayer),
 		N(SetGameModeText),

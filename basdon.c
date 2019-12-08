@@ -330,14 +330,16 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 {
-	const int playerid = PARAM(1)/*, killerdid = PARAM(2)*/;
-	/*const int reason = PARAM(3);*/
+	const int playerid = PARAM(1), killerid = PARAM(2);
+	const int reason = PARAM(3);
 
 	if (!ISPLAYING(playerid)) {
 		return 0;
 	}
 
 	spawned[playerid] = 0;
+
+	NC_SendDeathMessage(killerid, playerid, reason);
 
 	missions_on_player_death(playerid);
 	spawn_prespawn(playerid);
@@ -352,6 +354,14 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 {
 	const int playerid = PARAM(1), reason = PARAM(2);
 	int i;
+
+	if (ISPLAYING(playerid)) {
+		NC_PARS(3);
+		nc_params[1] = INVALID_PLAYER_ID;
+		nc_params[2] = playerid;
+		nc_params[3] = WEAPON_DISCONNECT;
+		NC(n_SendDeathMessage);
+	}
 
 	airport_on_player_disconnect(playerid);
 	chpw_on_player_disconnect(playerid);
