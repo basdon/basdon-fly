@@ -16,6 +16,12 @@ $GROUP_OWNER = 1073741824;
 $GROUPS_ALL = 2147483647;
 $GROUPS_ADMIN = $GROUPS_ALL & ~($GROUP_ADMIN - 1);
 
+function group_is_user_notbanned($group)
+{
+	global $GROUP_MEMBER, $GROUP_BANNED;
+	return $group >= $GROUP_MEMBER && !($group & $GROUP_BANNED);
+}
+
 function group_is_banned($group)
 {
 	global $GROUP_BANNED;
