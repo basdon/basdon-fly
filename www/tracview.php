@@ -1,7 +1,7 @@
 <?php
 include('../inc/bootstrap.php');
 include('../inc/form.php');
-include('../templates/trac_constants.php');
+include('../inc/trac_constants.php');
 
 $id = intval($_GET['id']);
 

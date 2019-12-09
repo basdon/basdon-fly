@@ -1,13 +1,13 @@
 <?php
 include('../inc/bootstrap.php');
-include('../templates/trac_constants.php');
+include('../inc/trac_constants.php');
 
 if (!isset($loggeduser)) {
 	$__script = '_unauthorized';
 	$ret = 'tracnew.php';
 } else {
 
-	if (isset($_POST['summary'], $_POST['description'], $_POST['_form'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
+	if (isset($_POST['summary'], $_POST['description'], $_POST['_form'], $_POST['visibility'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
 		$summary = $_POST['summary'];
 		if (empty($summary)) {
 			$__rawmsgs[] = 'Cannot submit without a summary.';
@@ -26,9 +26,9 @@ if (!isset($loggeduser)) {
 
 		$status = 0;
 		$severity = 0;
-		$visibility = $GROUPS_ALL;
-		if (group_is_admin($usergroups) && isset($_POST['severity'], $_POST['visibility'])) {
-			$visibility = max($GROUP_OWNER, intval($_POST['visibility'])); // never allow less than owner privs
+		$visibility = max($GROUP_OWNER, intval($_POST['visibility'])); // never allow less than owner privs
+
+		if (group_is_admin($usergroups) && isset($_POST['severity'])) {
 			if (array_key_exists(intval($_POST['severity']), $trac_severities)) {
 				$severity = intval($_POST['severity']);
 			}

@@ -30,10 +30,9 @@
 			{@input HAARP}
 			<table class="trac">
 				<tr><td>Summary</td><td>{@input text summary maxlength="80"}</td></tr>
+				<tr><td>Visibility</td><td>{@input combo visibility $trac_visibilities}</td></tr>
 				{@if group_is_admin($usergroups)}
-					{@render trac_constants.php}
 					<tr><td>Impact</td><td>{@input combo severity $trac_severities_raw}</td></tr>
-					<tr><td>Visibility</td><td>{@input combo visibility $trac_visibilities}</td></tr>
 				{@endif}
 				<tr><td>Description</td><td>{@input area description maxlength="4096"}</td></tr>
 				<tr><td></td><td>{@input submit Submit}</td></tr>

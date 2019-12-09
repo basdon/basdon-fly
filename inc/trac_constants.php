@@ -32,4 +32,3 @@ $trac_visibilities = array(
 	$GROUPS_ADMIN => 'admins',
 	$GROUP_OWNER => 'owner',
 );
-?>
