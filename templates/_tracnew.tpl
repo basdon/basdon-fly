@@ -12,7 +12,7 @@
 			background: #c8c8e8;
 			font-weight: bold;
 		}
-		table.trac input:not([type=submit]), table.trac textarea, table.trac td:last-child {
+		table.trac input:not([type=submit]), table.trac textarea, table.trac select, table.trac td:last-child {
 			width: 100%;
 		}
 		textarea {
@@ -30,6 +30,11 @@
 			{@input HAARP}
 			<table class="trac">
 				<tr><td>Summary</td><td>{@input text summary maxlength="80"}</td></tr>
+				{@if group_is_admin($usergroups)}
+					{@render trac_constants.php}
+					<tr><td>Impact</td><td>{@input combo severity $trac_severities_raw}</td></tr>
+					<tr><td>Visibility</td><td>{@input combo visibility $trac_visibilities}</td></tr>
+				{@endif}
 				<tr><td>Description</td><td>{@input area description maxlength="4096"}</td></tr>
 				<tr><td></td><td>{@input submit Submit}</td></tr>
 			</table>

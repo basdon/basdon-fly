@@ -1,7 +1,7 @@
 <?php
 include('../inc/bootstrap.php');
+include('../templates/trac_constants.php');
 
-include('../inc/trac_constants.php');
 $id = intval($_GET['id']);
 $trac_summary = '[unknown ticket]';
 ++$db_querycount;
@@ -12,8 +12,8 @@ if ($trac && ($trac = $trac->fetchAll()) && count($trac)) {
 	$trac_summary = $trac->summary;
 
 	$trac_visibility = $trac->visibility;
-	if ($trac_visibility == $GROUPS_ALL) {
-		$trac_visibility = 'public';
+	if (array_key_exists($trac->visibility, $trac_visibilities)) {
+		$trac_visibility = $trac_visibilities[$trac->visibility];
 	}
 
 	$trac_status = $trac->status;

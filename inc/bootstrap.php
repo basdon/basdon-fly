@@ -14,6 +14,7 @@ $GROUP_ADMIN = 268435456;
 $GROUP_OWNER = 1073741824;
 
 $GROUPS_ALL = 2147483647;
+$GROUPS_ADMIN = $GROUPS_ALL & ~($GROUP_ADMIN - 1);
 
 function group_is_banned($group)
 {

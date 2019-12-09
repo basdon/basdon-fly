@@ -293,6 +293,9 @@ function makeinput($args)
 		$result .= '><?php form_value(\''.$name.'\'); ~></textarea>';
 		return $result;
 	}
+	if ($type == 'combo') {
+		return '<select name="'.$name.'"><?php form_combo(\''.$name.'\','.$args[2].'); ~></select>';
+	}
 	if ($type == 'submit') {
 		$name = '_form';
 	}
