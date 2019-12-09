@@ -5,7 +5,7 @@ include('../templates/trac_constants.php');
 
 $id = intval($_GET['id']);
 
-if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comment'])) {
+if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comment'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
 	++$db_querycount;
 	$res = $db->query('UPDATE tract SET updated=UNIX_TIMESTAMP() WHERE id='.$id);
 	if ($res !== false && $res->rowCount()) {
@@ -15,7 +15,7 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 		$stmt->execute();
 		unset($_POST['_form']);
 	}
-} else if (group_is_admin($usergroups) && isset($_POST['_form'], $_POST['summary'], $_POST['severity'], $_POST['visibility'])) {
+} else if (group_is_admin($usergroups) && isset($_POST['_form'], $_POST['summary'], $_POST['severity'], $_POST['visibility'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
 	++$db_querycount;
 	$old = $db->query('SELECT summary,severity,visibility,status FROM tract WHERE id='.$id);
 	if ($old && ($old = $old->fetchAll()) && count($old)) {
@@ -25,6 +25,10 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 		if ($_POST['summary'] != $old->summary) {
 			$fields[] = 'summary=?';
 			$values[] = $_POST['summary'];
+			if (empty($_POST['summary'])) {
+				$__rawmsgs[] = 'Cannot set summary to empty';
+				goto reject;
+			}
 		}
 		if ($_POST['severity'] != $old->severity) {
 			$fields[] = 'severity=?';
@@ -51,7 +55,7 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 	} else {
 		$__rawmsgs[] = 'Unknown ticket!';
 	}
-}
+} reject:
 
 $trac_summary = '[unknown ticket]';
 ++$db_querycount;

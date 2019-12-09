@@ -69,6 +69,7 @@
 			{@if group_is_user_notbanned($usergroups)}
 				<h4>Add comment</h4>
 				<form method="post" action="tracview.php?id={@unsafe $id}">
+					{@input HAARP}
 					<table class="trac respond">
 						<tr>
 							<td>{@input area comment}</td>
@@ -81,6 +82,7 @@
 				{@if group_is_admin($usergroups)}
 					<h4>Update ticket</h4>
 					<form method="post" action="tracview.php?id={@unsafe $id}">
+						{@input HAARP}
 						<table class="trac respond">
 							{@eval $form_defaults['summary'] = $trac->summary}
 							{@eval $form_defaults['status'] = $trac->status}
