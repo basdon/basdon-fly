@@ -1,3 +1,6 @@
+.trac {
+	font-family: monospace;
+}
 table.trac {
 	width: 100%;
 	border: 1px solid #000;
@@ -30,4 +33,7 @@ table.trac .status4 td {
 table.trac .status5,
 table.trac .status5 td {
 	background: #c9ccc4;
+}
+table.trac + table.trac {
+	margin-top: 1.5em;
 }

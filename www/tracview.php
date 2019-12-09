@@ -5,12 +5,17 @@ include('../templates/trac_constants.php');
 
 $id = intval($_GET['id']);
 
-if (isset($_POST['_form'], $_POST['comment'])) {
+if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comment'])) {
 	++$db_querycount;
-	// TODO comments
-}
-
-if (group_is_admin($usergroups) && isset($_POST['_form'], $_POST['summary'], $_POST['severity'], $_POST['visibility'])) {
+	$res = $db->query('UPDATE tract SET updated=UNIX_TIMESTAMP() WHERE id='.$id);
+	if ($res !== false && $res->rowCount()) {
+		$stmt = $db->prepare('INSERT INTO tracc(parent,usr,ip,stamp,type,comment) VALUES('.$id.','.$loggeduser->i.',?,UNIX_TIMESTAMP(),0,?)');
+		$stmt->bindValue(1, $__clientip);
+		$stmt->bindValue(2, $_POST['comment']);
+		$stmt->execute();
+		unset($_POST['_form']);
+	}
+} else if (group_is_admin($usergroups) && isset($_POST['_form'], $_POST['summary'], $_POST['severity'], $_POST['visibility'])) {
 	++$db_querycount;
 	$old = $db->query('SELECT summary,severity,visibility,status FROM tract WHERE id='.$id);
 	if ($old && ($old = $old->fetchAll()) && count($old)) {
@@ -37,7 +42,7 @@ if (group_is_admin($usergroups) && isset($_POST['_form'], $_POST['summary'], $_P
 		}
 		if (count($fields)) {
 			++$db_querycount;
-			$stmt = $db->prepare('UPDATE tract SET '.implode($fields, ',').' WHERE id='.$id);
+			$stmt = $db->prepare('UPDATE tract SET updated=UNIX_TIMESTAMP(),'.implode($fields, ',').' WHERE id='.$id);
 			for ($i = 0; $i < count($values); $i++) {
 				$stmt->bindValue($i + 1, $values[$i]);
 			}
@@ -63,6 +68,8 @@ if ($trac && ($trac = $trac->fetchAll()) && count($trac)) {
 
 	$trac_status = $trac->status;
 	$trac_impact = $trac->severity;
+
+	$comments = $db->query('SELECT _u.name,_u.i,id,usr,ip,stamp,type,comment FROM tracc JOIN usr _u ON tracc.usr=_u.i WHERE parent='.$id);
 } else {
 	unset($trac);
 }

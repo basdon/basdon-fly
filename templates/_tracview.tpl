@@ -45,7 +45,27 @@
 					<td colspan="6">{$trac->description}</td>
 				</tr>
 			</table>
-			<h4>Comments</h4>
+			{@eval $idx = 1}
+			{@foreach $comments as $c}
+				<table id="tracc{@unsafe $c->id}" class="trac">
+					<tr>
+						<td class="label">
+							{@unsafe linkuser($c)} {@unsafe format_datetime($c->stamp)}
+							<span style="float:right;"><a href="tracview.php?id={@unsafe $id}#tracc{@unsafe $c->id}">#{@unsafe $idx}</a></span>
+							{@eval $idx++}
+						</td>
+					</tr>
+					<tr>
+						<td>
+							{@if $c->type == 1}
+								{@unsafe $c->comment}
+							{@else}
+								{$c->comment}
+							{@endif}
+						</td>
+					</tr>
+				</table>
+			{@endforeach}
 			{@if group_is_user_notbanned($usergroups)}
 				<h4>Add comment</h4>
 				<form method="post" action="tracview.php?id={@unsafe $id}">
