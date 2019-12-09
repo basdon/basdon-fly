@@ -34,6 +34,12 @@ table.trac .status5,
 table.trac .status5 td {
 	background: #c9ccc4;
 }
+table.trac .severity6, table.trac .severity7, table.trac .severity8 {
+	font-weight: bold;
+}
+table.trac .severity8 {
+	color: #f00;
+}
 table.trac + table.trac {
 	margin-top: 1.5em;
 }

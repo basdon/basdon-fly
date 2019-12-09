@@ -31,7 +31,7 @@
 				{@foreach $tracthreads as $t}
 					<tr class="status{@unsafe $t->status}">
 						<td>{@unsafe format_time_since($t->updated)}</td>
-						<td>{@unsafe $trac_severities[$t->severity]}</td>
+						<td class="severity{@unsafe $t->severity}">{@unsafe $trac_severities[$t->severity]}</td>
 						<td>{@unsafe $trac_statuses[$t->status]}</td>
 						<td style="text-align:left;"><a href="tracview.php?id={@unsafe $t->id}">{$t->summary}</a></td>
 					</tr>

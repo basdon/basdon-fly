@@ -125,6 +125,11 @@ function spate_generate($template_dir, $template)
 				$j += 3;
 				$suffix = '~>';
 				goto directive_parse_conditionbody__start;
+			case "@nl2br":
+				$result .= '<?=nl2br(htmlspecialchars(';
+				$j += 26;
+				$suffix = ',ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE))~>';
+				goto directive_parse_conditionbody__start;
 			case "@rem":
 				$pos = strpos($in, '@}', $i);
 				if ($pos !== false) {

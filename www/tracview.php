@@ -22,6 +22,8 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 		$old = $old[0];
 		$fields = [];
 		$values = [];
+		$changes = [];
+
 		if ($_POST['summary'] != $old->summary) {
 			$fields[] = 'summary=?';
 			$values[] = $_POST['summary'];
@@ -29,27 +31,36 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 				$__rawmsgs[] = 'Cannot set summary to empty';
 				goto reject;
 			}
+			$changes[] = 'summary: "'.$old->summary.'" => "'.$_POST['summary'].'"';
 		}
-		if ($_POST['severity'] != $old->severity) {
-			$fields[] = 'severity=?';
-			$values[] = $_POST['severity'];
-		}
-		if ($_POST['visibility'] != $old->visibility) {
-			$fields[] = 'visibility=?';
-			$values[] = $_POST['visibility'];
-		}
-		if (group_is_owner($usergroups)) {
-			if ($_POST['status'] != $old->status) {
-				$fields[] = 'status=?';
-				$values[] = $_POST['status'];
+
+		function check_transition($prop, $map)
+		{
+			global $changes, $fields, $values, $old;
+			if ($_POST[$prop] != $old->$prop && array_key_exists($_POST[$prop], $map)) {
+				$fields[] = $prop.'=?';
+				$values[] = $_POST[$prop];
+				$changes[] = $prop.': <span class="'.$prop.$old->$prop.'">'.$map[$old->$prop].'</span> => <span class="'.$prop.$_POST[$prop].'">'.$map[$_POST[$prop]].'</span>';
 			}
 		}
+
+		check_transition('severity', $trac_severities);
+		check_transition('visibility', $trac_visibilities);
+		if (group_is_owner($usergroups)) {
+			check_transition('status', $trac_statuses);
+		}
+
 		if (count($fields)) {
 			++$db_querycount;
 			$stmt = $db->prepare('UPDATE tract SET updated=UNIX_TIMESTAMP(),'.implode($fields, ',').' WHERE id='.$id);
 			for ($i = 0; $i < count($values); $i++) {
 				$stmt->bindValue($i + 1, $values[$i]);
 			}
+			$stmt->execute();
+			++$db_querycount;
+			$stmt = $db->prepare('INSERT INTO tracc(parent,usr,ip,stamp,type,comment) VALUES('.$id.','.$loggeduser->i.',?,UNIX_TIMESTAMP(),1,?)');
+			$stmt->bindValue(1, $__clientip);
+			$stmt->bindValue(2, implode($changes, '<br/>'));
 			$stmt->execute();
 		}
 	} else {
@@ -69,9 +80,6 @@ if ($trac && ($trac = $trac->fetchAll()) && count($trac)) {
 	if (array_key_exists($trac->visibility, $trac_visibilities)) {
 		$trac_visibility = $trac_visibilities[$trac->visibility];
 	}
-
-	$trac_status = $trac->status;
-	$trac_severity = $trac->severity;
 
 	$comments = $db->query('SELECT _u.name,_u.i,id,usr,ip,stamp,type,comment FROM tracc JOIN usr _u ON tracc.usr=_u.i WHERE parent='.$id);
 } else {

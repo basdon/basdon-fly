@@ -32,15 +32,15 @@
 					<td class="label">Summary</td><td colspan="3">{$trac->summary}</td>
 				</tr>
 				<tr>
-					<td class="label">Status</td><td class="status{@unsafe $trac->status}">{@unsafe $trac_statuses[$trac_status]}</td>
+					<td class="label">Status</td><td class="status{@unsafe $trac->status}">{@unsafe $trac_statuses[$trac->status]}</td>
 					<td class="label">Reporter</td><td>{@unsafe linkuser($trac)}</td>
 				</tr>
 				<tr>
-					<td class="label">Impact</td><td>{@unsafe $trac_severities[$trac_severity]}</td>
+					<td class="label">Impact</td><td class="severity{@unsafe $trac->severity}">{@unsafe $trac_severities[$trac->severity]}</td>
 					<td class="label">Reported</td><td>{@unsafe format_datetime($trac->stamp)}</td>
 				</tr>
 				<tr>
-					<td class="label">Visibility</td><td>{@unsafe $trac_visibility}</td>
+					<td class="label">Visibility</td><td class="visibility{@unsafe $trac->visibility}">{@unsafe $trac_visibility}</td>
 					<td class="label">Updated</td><td>{@unsafe format_datetime($trac->updated)}</td>
 				</tr>
 				<tr>
@@ -66,7 +66,7 @@
 								{@if $c->type == 1}
 									{@unsafe $c->comment}
 								{@else}
-									{$c->comment}
+									{@nl2br $c->comment}
 								{@endif}
 							</p>
 						</td>
@@ -99,7 +99,7 @@
 							{@if group_is_owner($usergroups)}
 								<tr><td class="label">Status</td><td>{@input combo status $trac_statuses}</td></tr>
 							{@endif}
-							<tr><td class="label">Impact</td><td>{@input combo severity $trac_severities_raw}</td></tr>
+							<tr><td class="label">Impact</td><td>{@input combo severity $trac_severities}</td></tr>
 							<tr><td class="label">Visibility</td><td>{@input combo visibility $trac_visibilities}</td></tr>
 							<tr>
 								<td></td><td style="text-align:center">{@input submit Update}</td>
