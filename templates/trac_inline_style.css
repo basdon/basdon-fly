@@ -1,0 +1,33 @@
+table.trac {
+	width: 100%;
+	border: 1px solid #000;
+}
+table.trac td {
+	padding: .1em .5em;
+	background: #eee;
+	vertical-align: top;
+}
+table.trac .status0,
+table.trac .status0 td {
+	background: #fcbdbd;
+}
+table.trac .status1,
+table.trac .status1 td {
+	background: #e3b7eb;
+}
+table.trac .status2,
+table.trac .status2 td {
+	background: #ffcd85;
+}
+table.trac .status3,
+table.trac .status3 td {
+	background: #c2dfff;
+}
+table.trac .status4,
+table.trac .status4 td {
+	background: #d2f5b0;
+}
+table.trac .status5,
+table.trac .status5 td {
+	background: #c9ccc4;
+}

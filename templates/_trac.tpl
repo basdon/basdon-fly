@@ -4,14 +4,12 @@
 	<title>tracker :: basdon.net aviation server</title>
 	{@render defaulthead.tpl}
 	<style>
-		table.trac {
-			width: 100%;
-		}
+		{@render trac_inline_style.css}
 		table.trac th {
 			background: #c8c8e8;
 		}
 		table.trac td {
-			padding: .1em .5em;
+			text-align: center;
 		}
 	</style>
 </head>
@@ -31,16 +29,25 @@
 			</thead>
 			<tbody>
 				{@foreach $tracthreads as $t}
-					<tr>
+					<tr class="status{@unsafe $t->status}">
 						<td>{@unsafe format_time_since($t->updated)}</td>
-						<td>{$t->severity}</td>
-						<td class="status{@unsafe $t->status}">{$t->status}</td>
-						<td><a href="tracview.php?id={@unsafe $t->id}">{$t->summary}</a></td>
-					<tr>
+						<td>{@unsafe $trac_severities[$t->severity]}</td>
+						<td>{@unsafe $trac_statuses[$t->status]}</td>
+						<td style="text-align:left;"><a href="tracview.php?id={@unsafe $t->id}">{$t->summary}</a></td>
+					</tr>
 				{@endforeach}
 			</tbody>
 		</table>
 		{@unsafe $pagination}
+		<table class="trac">
+			<tbody>
+				<tr>
+					{@foreach $trac_statuses as $n => $s}
+						<td class="status{@unsafe $n}" style="width:{@unsafe 100/count($trac_statuses)}%">{@unsafe $s}</td>
+					{@endforeach}
+				</tr>
+			</tbody>
+		</table>
 	</div>
 	{@render defaultfooter.tpl}
 </body>

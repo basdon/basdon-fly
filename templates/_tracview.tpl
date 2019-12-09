@@ -4,14 +4,7 @@
 	<title>{$trac_summary} :: basdon.net aviation server</title>
 	{@render defaulthead.tpl}
 	<style>
-		table.trac {
-			width: 100%;
-		}
-		table.trac td {
-			padding: .1em .5em;
-			background: #eee;
-			vertical-align: top;
-		}
+		{@render trac_inline_style.css}
 		table.trac td.label {
 			background: #c8c8e8;
 			font-weight: bold;
@@ -30,8 +23,8 @@
 					<td class="label">Summary</td><td colspan="5">{$trac->summary}</td>
 				</tr>
 				<tr>
-					<td class="label">Status</td><td class="status{@unsafe $trac->status}">{@unsafe $trac_status}</td>
-					<td class="label">Impact</td><td>{@unsafe $trac_impact}</td>
+					<td class="label">Status</td><td class="status{@unsafe $trac->status}">{@unsafe $trac_statuses[$trac_status]}</td>
+					<td class="label">Impact</td><td>{@unsafe $trac_severities[$trac_impact]}</td>
 					<td class="label">Reported</td><td>{@unsafe format_datetime($trac->stamp)}</td>
 				</tr>
 				<tr>

@@ -1,6 +1,7 @@
 <?php
 include('../inc/bootstrap.php');
 
+include('../inc/trac_constants.php');
 $id = intval($_GET['id']);
 $trac_summary = '[unknown ticket]';
 ++$db_querycount;

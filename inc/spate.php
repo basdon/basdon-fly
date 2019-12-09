@@ -286,7 +286,12 @@ function makeinput($args)
 	}
 	$name = $args[1];
 	if ($type == 'area') {
-		return '<textarea name="'.$name.'"><?php form_value(\''.$name.'\'); ~></textarea>';
+		$result = '<textarea name="'.$name.'"';
+		for ($i = 2; $i < count($args); $i++) {
+			$result .= ' ' . $args[$i];
+		}
+		$result .= '><?php form_value(\''.$name.'\'); ~></textarea>';
+		return $result;
 	}
 	if ($type == 'submit') {
 		$name = '_form';
@@ -299,6 +304,9 @@ function makeinput($args)
 		$result .= '<?php form_input(\''.$name.'\') ~>';
 	} else if ($type == 'submit') {
 		$result .= ' value="' . $args[1] . '"';
+	}
+	for ($i = 2; $i < count($args); $i++) {
+		$result .= ' ' . $args[$i];
 	}
 	return $result . '/>';
 }

@@ -1,5 +1,6 @@
 <?php
 include('../inc/bootstrap.php');
+include('../inc/trac_constants.php');
 
 $page = get_page();
 $db_querycount += 2;
