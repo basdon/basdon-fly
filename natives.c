@@ -130,6 +130,7 @@ AMX_NATIVE n_cache_get_row_count;
 AMX_NATIVE n_cache_get_row_float;
 AMX_NATIVE n_cache_get_row_int;
 AMX_NATIVE n_cache_insert_id;
+AMX_NATIVE n_gpci;
 AMX_NATIVE n_mysql_connect;
 AMX_NATIVE n_mysql_close;
 AMX_NATIVE n_mysql_errno;
@@ -274,6 +275,7 @@ int natives_find()
 		N(cache_get_row_float),
 		N(cache_get_row_int),
 		N(cache_insert_id),
+		N(gpci),
 		N(mysql_connect),
 		N(mysql_close),
 		N(mysql_errno),

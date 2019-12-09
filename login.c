@@ -269,6 +269,18 @@ void login_login_player(int playerid, int status)
 	players[playercount++] = playerid;
 alreadyin:
 
+	if (userid[playerid] > 0) {
+		NC_gpci(playerid, buf64a, 64);
+		ctoai(cbuf64);
+		csprintf(buf4096,
+			"INSERT INTO gpci(u,v,c,last) "
+			"VALUES(%d,'%s',1,UNIX_TIMESTAMP()) "
+			"ON DUPLICATE KEY UPDATE c=c+1,last=UNIX_TIMESTAMP()",
+			userid[playerid],
+			cbuf64);
+		NC_mysql_tquery_nocb(buf4096a);
+	}
+
 	NC_PARS(3);
 	nc_params[1] = INVALID_PLAYER_ID;
 	nc_params[2] = playerid;
