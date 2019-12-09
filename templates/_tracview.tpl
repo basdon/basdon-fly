@@ -15,6 +15,9 @@
 		textarea {
 			height: 8em;
 		}
+		table.trac p {
+			margin: .5em 0;
+		}
 	</style>
 </head>
 <body>
@@ -26,23 +29,25 @@
 			<h2 id="main">Tracker: {$trac->summary}</h2>
 			<table id="main" class="trac">
 				<tr>
-					<td class="label">Summary</td><td colspan="5">{$trac->summary}</td>
+					<td class="label">Summary</td><td colspan="3">{$trac->summary}</td>
 				</tr>
 				<tr>
 					<td class="label">Status</td><td class="status{@unsafe $trac->status}">{@unsafe $trac_statuses[$trac_status]}</td>
+					<td class="label">Reporter</td><td>{@unsafe linkuser($trac)}</td>
+				</tr>
+				<tr>
 					<td class="label">Impact</td><td>{@unsafe $trac_severities[$trac_severity]}</td>
 					<td class="label">Reported</td><td>{@unsafe format_datetime($trac->stamp)}</td>
 				</tr>
 				<tr>
-					<td class="label">Reporter</td><td>{@unsafe linkuser($trac)}</td>
 					<td class="label">Visibility</td><td>{@unsafe $trac_visibility}</td>
 					<td class="label">Updated</td><td>{@unsafe format_datetime($trac->updated)}</td>
 				</tr>
 				<tr>
-					<td class="label" colspan="6">Description</td>
+					<td class="label" colspan="4">Description</td>
 				</tr>
 				<tr>
-					<td colspan="6">{$trac->description}</td>
+					<td colspan="4"><p>{$trac->description}</p></td>
 				</tr>
 			</table>
 			{@eval $idx = 1}
@@ -57,11 +62,13 @@
 					</tr>
 					<tr>
 						<td>
-							{@if $c->type == 1}
-								{@unsafe $c->comment}
-							{@else}
-								{$c->comment}
-							{@endif}
+							<p>
+								{@if $c->type == 1}
+									{@unsafe $c->comment}
+								{@else}
+									{$c->comment}
+								{@endif}
+							</p>
 						</td>
 					</tr>
 				</table>
