@@ -30,7 +30,7 @@
 				</tr>
 				<tr>
 					<td class="label">Status</td><td class="status{@unsafe $trac->status}">{@unsafe $trac_statuses[$trac_status]}</td>
-					<td class="label">Impact</td><td>{@unsafe $trac_severities[$trac_impact]}</td>
+					<td class="label">Impact</td><td>{@unsafe $trac_severities[$trac_severity]}</td>
 					<td class="label">Reported</td><td>{@unsafe format_datetime($trac->stamp)}</td>
 				</tr>
 				<tr>
@@ -82,6 +82,10 @@
 					<h4>Update ticket</h4>
 					<form method="post" action="tracview.php?id={@unsafe $id}">
 						<table class="trac respond">
+							{@eval $form_defaults['summary'] = $trac->summary}
+							{@eval $form_defaults['status'] = $trac->status}
+							{@eval $form_defaults['severity'] = $trac->severity}
+							{@eval $form_defaults['visibility'] = $trac->visibility}
 							<tr><td class="label">Summary</td><td>{@input text summary maxlength="80"}</td></tr>
 							{@if group_is_owner($usergroups)}
 								<tr><td class="label">Status</td><td>{@input combo status $trac_statuses}</td></tr>

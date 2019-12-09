@@ -67,7 +67,7 @@ if ($trac && ($trac = $trac->fetchAll()) && count($trac)) {
 	}
 
 	$trac_status = $trac->status;
-	$trac_impact = $trac->severity;
+	$trac_severity = $trac->severity;
 
 	$comments = $db->query('SELECT _u.name,_u.i,id,usr,ip,stamp,type,comment FROM tracc JOIN usr _u ON tracc.usr=_u.i WHERE parent='.$id);
 } else {
