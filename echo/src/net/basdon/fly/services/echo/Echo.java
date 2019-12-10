@@ -30,8 +30,10 @@ private static final char
 	PACK_PONG = 6,
 	PACK_CHAT = 10,
 	PACK_ACTION = 11,
-	PACK_FLIGHT_MESSAGE = 12,
+	PACK_GENERIC_MESSAGE = 12,
 	PACK_PLAYER_CONNECTION = 30;
+private static final char
+	PACK12_FLIGHT_MESSAGE = 0;
 private static final InetAddress ADDR_OUT;
 
 public static final byte
@@ -204,23 +206,30 @@ throws InterruptedIOException
 		}
 		break;
 	}
-	case PACK_FLIGHT_MESSAGE:
+	case PACK_GENERIC_MESSAGE:
 	{
 		int msglen;
-		if (length > 5 && 5 + (msglen = buf[4] & 0xFF) == length) {
-			char[] msg = new char[4 + msglen];
-			msg[0] = Constants.CTRL_COLOR;
-			msg[1] = '0';
-			msg[2] = '7'; // '0' + Constants.COL_ORANGE
-			msg[3] = 'Z'; // prevent nickalerts
-			for (int i = 4, j = 5; i < msg.length; i++, j++) {
-				msg[i] = (char) buf[j];
+		if (length > 7 &&
+			(msglen = (buf[5] & 0xFF) | ((buf[6] << 8) & 0xFF00)) <= 450 &&
+			7 + msglen == length)
+		{
+			switch(buf[4]) {
+			case PACK12_FLIGHT_MESSAGE:
+				char[] msg = new char[4 + msglen];
+				msg[0] = Constants.CTRL_COLOR;
+				msg[1] = '0';
+				msg[2] = '7'; // '0' + Constants.COL_ORANGE
+				msg[3] = 'Z'; // prevent nickalerts
+				for (int i = 4, j = 7; i < msg.length; i++, j++) {
+					msg[i] = (char) buf[j];
+				}
+				this.anna.sync_exec(() -> {
+					this.ignore_self = true;
+					this.anna.privmsg(this.channel, msg);
+					this.ignore_self = false;
+				});
+				break;
 			}
-			this.anna.sync_exec(() -> {
-				this.ignore_self = true;
-				this.anna.privmsg(this.channel, msg);
-				this.ignore_self = false;
-			});
 			return;
 		}
 		break;
