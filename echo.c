@@ -88,13 +88,17 @@ void echo_on_flight_finished(char *text)
 
 	if (socket_out != SOCKET_INVALID_SOCKET) {
 		textlen = strlen(text);
-		if (textlen > 144) {
-			textlen = 144;
+		if (textlen > 450) {
+			textlen = 450;
 		}
+#if 0x0C != PACK_GENERIC_MESSAGE
+#error generic message packet should be 12
+#endif
 		buf144[0] = 0x0C594C46;
-		cbuf144[4] = textlen;
-		memcpy(cbuf144 + 5, text, textlen);
-		NC_ssocket_send(socket_out, buf144a, 5 + textlen);
+		cbuf144[4] = PACK12_FLIGHT_MESSAGE;
+		*((short*) (cbuf144 + 5)) = (short) textlen;
+		memcpy(cbuf144 + 7, text, textlen);
+		NC_ssocket_send(socket_out, buf144a, 7 + textlen);
 	}
 }
 
