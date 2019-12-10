@@ -47,7 +47,7 @@
 					<td class="label" colspan="4">Description</td>
 				</tr>
 				<tr>
-					<td colspan="4"><p>{$trac->description}</p></td>
+					<td colspan="4"><p>{@nl2br $trac->description}</p></td>
 				</tr>
 			</table>
 			{@eval $idx = 1}
