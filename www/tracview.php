@@ -14,6 +14,11 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 		$stmt->bindValue(2, $_POST['comment']);
 		$stmt->execute();
 		unset($_POST['_form']);
+
+		include('../inc/echo.php');
+		$gamemsg = 'TRAC: '.$loggeduser->name.' commented on ticket #'.$id;
+		$ircmsg = $gamemsg.' -> '.$BASEPATH.'/tracview.php?id='.$id;
+		echo_send_message_irc_game(1, $ircmsg, $gamemsg);
 	}
 } else if (group_is_admin($usergroups) && isset($_POST['_form'], $_POST['summary'], $_POST['severity'], $_POST['visibility'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
 	++$db_querycount;
@@ -62,6 +67,11 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 			$stmt->bindValue(1, $__clientip);
 			$stmt->bindValue(2, implode($changes, '<br/>'));
 			$stmt->execute();
+
+			include('../inc/echo.php');
+			$gamemsg = 'TRAC: '.$loggeduser->name.' updated ticket #'.$id;
+			$ircmsg = $gamemsg.' -> '.$BASEPATH.'/tracview.php?id='.$id;
+			echo_send_message_irc_game(1, $ircmsg, $gamemsg);
 		}
 	} else {
 		$__rawmsgs[] = 'Unknown ticket!';

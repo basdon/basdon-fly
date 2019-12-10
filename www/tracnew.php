@@ -13,6 +13,10 @@ if (!isset($loggeduser)) {
 			$__rawmsgs[] = 'Cannot submit without a summary.';
 			goto reject;
 		}
+		if (strlen($summary) > 80) {
+			$__rawmsgs[] = 'Summary too long.';
+			goto reject;
+		}
 		++$db_querycount;
 		$stmt = $db->prepare('SELECT id FROM tract WHERE op=? AND summary=? LIMIT 1');
 		$stmt->bindValue(1, $loggeduser->i);
@@ -48,7 +52,18 @@ if (!isset($loggeduser)) {
 		$stmt->bindValue(7, $summary);
 		$stmt->bindValue(8, $_POST['description']);
 		if ($stmt->execute()) {
-			header('Location: tracview.php?id=' . $db->lastInsertId());
+			$id = $db->lastInsertId();
+
+			include('../inc/echo.php');
+			$asciisum = mb_convert_encoding($summary, 'ASCII');
+			$gamemsg = 'TRAC: '.$loggeduser->name.' created ticket #'.$id;
+			if ($visibility == $GROUPS_ALL) {
+				$gamemsg .= ': ' . $asciisum;
+			}
+			$ircmsg = $gamemsg.' -> '.$BASEPATH.'/tracview.php?id='.$id;
+			echo_send_message_irc_game(1, $ircmsg, $gamemsg);
+
+			header('Location: tracview.php?id=' . $id);
 			die('redirecting');
 		}
 		$__rawmsgs[] = 'Failed to create a ticket. <a href="contact.php">Contact us.</a>';
