@@ -18,7 +18,7 @@
 	{@render defaultheader.tpl}
 	<div class="singlebody">
 		<h2 id="main">Tracker</h2>
-		<p>This is the place where bugs and todo's are tracked.</p>
+		<p>This is the place where bugs and todo's are tracked. Currently this tracks {@unsafe $totalrows} tickets, whereof {@unsafe $unresolvedcount} unresolved.</p>
 		<p>Everyone can make a bug report: <a href="tracnew.php">report a bug</a>. <span style="background:#f00">TODO </span>To make a suggestion, head over to the message board.</p>
 		{@unsafe $pagination = simple_pagination('trac.php?page=', $page, $totalrows, 100)}
 		<table class="trac">
