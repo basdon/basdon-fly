@@ -72,15 +72,24 @@ total len: 8+[byte6]+[byte7]
 Basically a copy of the {@#=p10 Chat} packet, but for an action ({@code /me}
 command).
 
-{@h4(id=p12) Packet 12: Flight message}
+{@h4(id=p12) Packet 12: Generic message}
 
-Sent from the game when a flight has been finished.
+Packet with a type and a message. See types below.
 
 <pre>
-byte 4: length of the message
-byte 5 - 4+[byte4]: message
+byte 4: message type
+byte 5: lo byte of length of the message (max 450)
+byte 6: hi byte of length of the message (max 450)
+byte 7 - 6+[byte5/6]: message
 
-total len: 5+[byte4]
+total len: 7+[byte5/6]
+</pre>
+
+Types:
+
+<pre>
+0: flight message, sent from game to irc when a player finishes a flight
+1: trac, sent from web to game and irc when a trac ticket/comment was made
 </pre>
 
 {@h4(id=p30) Packet 30: Player connection}
