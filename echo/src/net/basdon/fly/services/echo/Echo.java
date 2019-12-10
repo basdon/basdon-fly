@@ -64,6 +64,7 @@ private final long[] last_ping_stamps = new long[10];
 private int last_ping_idx;
 private long my_hello_sent_time;
 
+public boolean ignore_self;
 public DatagramSocket insocket;
 public DatagramSocket outsocket;
 public int packets_received, bytes_received, invalid_packet_count;
@@ -163,7 +164,7 @@ throws InterruptedIOException
 				return;
 			}
 		}
-		msg("pong (unknown ms)");
+		msg("pong (unknown ms: payload mismatch)");
 		return;
 	case PACK_BYE:
 		msg("game bridge is down");
@@ -190,10 +191,14 @@ throws InterruptedIOException
 			sb.append(new String(buf, 8 + nicklen, msglen, StandardCharsets.US_ASCII));
 			if (buf[3] == PACK_ACTION) {
 				this.anna.sync_exec(() -> {
+					this.ignore_self = true;
 					this.anna.action(this.channel, chars(sb));
+					this.ignore_self = false;
 				});
 			} else {
+				this.ignore_self = true;
 				msg(sb.toString());
+				this.ignore_self = false;
 			}
 			return;
 		}
@@ -212,7 +217,9 @@ throws InterruptedIOException
 				msg[i] = (char) buf[j];
 			}
 			this.anna.sync_exec(() -> {
+				this.ignore_self = true;
 				this.anna.privmsg(this.channel, msg);
+				this.ignore_self = false;
 			});
 			return;
 		}
@@ -246,7 +253,9 @@ throws InterruptedIOException
 				case CONN_REASON_GAME_KICK: sb.append(" (kicked)"); break;
 				}
 			}
+			this.ignore_self = true;
 			msg(sb.toString());
+			this.ignore_self = false;
 			return;
 		}
 		break;
@@ -282,15 +291,18 @@ void msg(String message)
  * @param prefix prefix of user, or {@code 0}
  * @param nickname irc user nick name
  * @param message message
+ * @param off offset in message
+ * @param len length of message
  */
 public
-void send_chat_or_action_to_game(boolean isaction, char prefix, char[] nickname, char[] message)
+void send_chat_or_action_to_game(boolean isaction, char prefix, char[] nickname,
+                                 char[] message, int off, int len)
 {
 	byte nicklen = (byte) Math.min(nickname.length, 49);
 	if (prefix != 0) {
 		nicklen++;
 	}
-	int msglen = Math.min(message.length, 144);
+	int msglen = Math.min(len, 144);
 	byte[] msg = new byte[8 + nicklen + msglen];
 	msg[0] = 'F';
 	msg[1] = 'L';
@@ -309,7 +321,7 @@ void send_chat_or_action_to_game(boolean isaction, char prefix, char[] nickname,
 		msg[j] = (byte) nickname[i];
 	}
 	for (int i = 0; i < msglen; i++, j++) {
-		msg[j] = (byte) message[i];
+		msg[j] = (byte) message[i + off];
 	}
 	this.send(msg, msg.length);
 }

@@ -108,8 +108,13 @@ void on_disable()
 @Override
 public
 boolean on_command(User user, char[] target, char[] replytarget,
-                   char[] message, char[] cmd, char[] params)
+                   char[] msg, char[] cmd, char[] params)
 {
+	if (this.echo != null && strcmp(this.outtarget, target)) {
+		ChannelUser cu = anna.find_user(target, user.nick);
+		char prefix = cu == null ? 0 : cu.prefix;
+		this.echo.send_chat_or_action_to_game(false, prefix, user.nick, msg, 0, msg.length);
+	}
 	if (strcmp(this.outtarget, target)) {
 		if (strcmp(cmd, 'e','c','h','o')) {
 			if (this.echo != null) {
@@ -117,6 +122,7 @@ boolean on_command(User user, char[] target, char[] replytarget,
 			} else {
 				this.anna.privmsg(target, "echo is not running".toCharArray());
 			}
+			return true;
 		}
 		if (strcmp(cmd, 'e','c','h','o','-','p','i','n','g')) {
 			if (this.echo != null) {
@@ -138,12 +144,12 @@ void on_nickchange(User user, char[] oldnick, char[] newnick)
 
 @Override
 public
-void on_action(User user, char[] target, char[] replytarget, char[] action)
+void on_action(User user, char[] target, char[] replytarget, char[] act)
 {
 	if (this.echo != null && user != null && strcmp(this.outtarget, target)) {
 		ChannelUser cu = anna.find_user(target, user.nick);
 		char prefix = cu == null ? 0 : cu.prefix;
-		this.echo.send_chat_or_action_to_game(true, prefix, user.nick, action);
+		this.echo.send_chat_or_action_to_game(true, prefix, user.nick, act, 0, act.length);
 	}
 }
 
@@ -197,12 +203,34 @@ void send_player_connection(User user, byte reason)
 
 @Override
 public
-void on_message(User user, char[] target, char[] replytarget, char[] message)
+void on_message(User user, char[] target, char[] replytarget, char[] msg)
 {
 	if (this.echo != null && user != null && strcmp(this.outtarget, target)) {
 		ChannelUser cu = anna.find_user(target, user.nick);
 		char prefix = cu == null ? 0 : cu.prefix;
-		this.echo.send_chat_or_action_to_game(false, prefix, user.nick, message);
+		this.echo.send_chat_or_action_to_game(false, prefix, user.nick, msg, 0, msg.length);
+	}
+}
+
+@Override
+public void on_selfmessage(char[] target, char[] text, int offset, int len)
+{
+	if (this.echo != null && !this.echo.ignore_self) {
+		User user = anna.get_anna_user();
+		ChannelUser cu = anna.find_user(target, user.nick);
+		char prefix = cu == null ? 0 : cu.prefix;
+		this.echo.send_chat_or_action_to_game(false, prefix, user.nick, text, offset, len);
+	}
+}
+
+@Override
+public void on_selfaction(char[] target, char[] text)
+{
+	if (this.echo != null && !this.echo.ignore_self) {
+		User user = anna.get_anna_user();
+		ChannelUser cu = anna.find_user(target, user.nick);
+		char prefix = cu == null ? 0 : cu.prefix;
+		this.echo.send_chat_or_action_to_game(true, prefix, user.nick, text, 0, text.length);
 	}
 }
 }
