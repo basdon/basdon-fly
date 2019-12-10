@@ -134,7 +134,7 @@ Currently only replaces % characters to # characters.
 Also splits up message when it's too long.
 */
 static
-void echo_sendclientmessage_buf4096_filtered()
+void echo_sendclientmessage_buf4096_filtered(int color)
 {
 	int len;
 	cell tmp;
@@ -160,7 +160,7 @@ void echo_sendclientmessage_buf4096_filtered()
 		b++;
 		len++;
 	}
-	NC_SendClientMessageToAll(COL_IRC, addr);
+	NC_SendClientMessageToAll(color, addr);
 }
 
 static const char *BRIDGE_UP = "IRC bridge is up";
@@ -236,7 +236,21 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			}
 			*(b++) = ' ';
 			atoc(b, data + 8 + nicklen, msglen + 1);
-			echo_sendclientmessage_buf4096_filtered();
+			echo_sendclientmessage_buf4096_filtered(COL_IRC);
+			break;
+		}
+		case PACK_GENERIC_MESSAGE:
+		{
+			short msglen;
+
+			if (len < 8 ||
+				(msglen = *((short*) (data + 5))) > 450 ||
+				7 + msglen != len)
+			{
+				break;
+			}
+			atoc(buf4096, data + 7, msglen + 1);
+			echo_sendclientmessage_buf4096_filtered(COL_INFO);
 			break;
 		}
 		case PACK_PLAYER_CONNECTION:
@@ -274,7 +288,7 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			memcpy(b, data + 8, nicklen);
 			b[nicklen] = 0;
 			atoci(buf4096, (b - cbuf4096) + nicklen);
-			echo_sendclientmessage_buf4096_filtered();
+			echo_sendclientmessage_buf4096_filtered(COL_IRC);
 			break;
 		}
 		}
