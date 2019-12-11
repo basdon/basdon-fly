@@ -3,10 +3,6 @@
 <head>
 	<title>{@if $id == -1}user not found{@else}profile of {$name} ({@unsafe $id}){@endif} :: basdon aviation server</title>
 	{@render defaulthead.tpl}
-	<style>
-		#flights td{text-align:center}
-		#flights td:nth-child(5){text-align:right}
-	</style>
 </head>
 <body>
 	{@render skip.tpl}

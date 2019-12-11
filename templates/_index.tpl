@@ -4,16 +4,6 @@
 	<title>home :: basdon.net aviation server</title>
 	{@render defaulthead.tpl}
 	<style>
-	@media (max-width: 800px) {
-		.no800 {
-			display: none;
-		}
-	}
-	@media (max-width: 600px) {
-		.no600 {
-			display: none;
-		}
-	}
 	h3 {
 		margin-bottom: 0;
 		text-align: center;
@@ -73,12 +63,12 @@
 		<table border="0" width="100%" class="center">
 			<thead>
 				<tr>
-					<th>No</th>
+					<th>#</th>
 					<th class="no800">Time since start</th>
 					<th>Pilot</th>
 					<th>Aircraft</th>
-					<th>Departure</th>
-					<th>Arrival</th>
+					<th>From</th>
+					<th>To</th>
 					<th class="no600">Status</th>
 				</tr>
 			</thead>
@@ -105,12 +95,12 @@
 		<table border="0" width="100%" class="center">
 			<thead>
 				<tr>
-					<th>No</th>
+					<th>#</th>
 					<th class="no600">Date</th>
 					<th>Pilot</th>
 					<th>Aircraft</th>
-					<th>Departure</th>
-					<th>Arrival</th>
+					<th>From</th>
+					<th>To</th>
 					<th class="no800">Distance</th>
 					<th class="no600">Status</th>
 				</tr>
