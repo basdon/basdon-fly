@@ -4,14 +4,15 @@
 	<title>home :: basdon.net aviation server</title>
 	{@render defaulthead.tpl}
 	<style>
-	.col {
-		width: 48%;
-	}
-	.left {
-		float: left;
-	}
 	@media (max-width: 800px) {
-		float: none;
+		.no800 {
+			display: none;
+		}
+	}
+	@media (max-width: 600px) {
+		.no600 {
+			display: none;
+		}
 	}
 	h3 {
 		margin-bottom: 0;
@@ -73,12 +74,12 @@
 			<thead>
 				<tr>
 					<th>No</th>
-					<th>Time since start</th>
+					<th class="no800">Time since start</th>
 					<th>Pilot</th>
 					<th>Aircraft</th>
 					<th>Departure</th>
 					<th>Arrival</th>
-					<th>Status</th>
+					<th class="no600">Status</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -86,12 +87,12 @@
 					{@foreach $activeflights as $f}
 						<tr>
 							<td><a href="flight.php?id={@unsafe $f->id}">#{@unsafe $f->id}</a></td>
-							<td>{@unsafe format_duration_short(time() - $f->tstart)}</td>
+							<td class="no800">{@unsafe format_duration_short(time() - $f->tstart)}</td>
 							<td>{@unsafe linkuser($f)}</td>
 							<td>{@unsafe aircraft_name($f->vehmodel)}</td>
 							<td><a href="airport.php?code={@unsafe $f->f}">{@unsafe $f->f}</a></td>
 							<td><a href="airport.php?code={@unsafe $f->t}">{@unsafe $f->t}</a></td>
-							<td class="flight-state flight-state-{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
+							<td class="no600 flight-state flight-state-{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
 						</tr>
 					{@endforeach}
 				{@else}
@@ -105,13 +106,13 @@
 			<thead>
 				<tr>
 					<th>No</th>
-					<th>Date</th>
+					<th class="no600">Date</th>
 					<th>Pilot</th>
 					<th>Aircraft</th>
 					<th>Departure</th>
 					<th>Arrival</th>
-					<th>Distance</th>
-					<th>Status</th>
+					<th class="no800">Distance</th>
+					<th class="no600">Status</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -119,13 +120,13 @@
 					{@foreach $lastflights as $f}
 						<tr>
 							<td><a href="flight.php?id={@unsafe $f->id}">#{@unsafe $f->id}</a></td>
-							<td>{@unsafe date('j M H:i', $f->tlastupdate)}</td>
+							<td class="no600">{@unsafe date('j M H:i', $f->tlastupdate)}</td>
 							<td>{@unsafe linkuser($f)}</td>
 							<td>{@unsafe aircraft_name($f->vehmodel)}</td>
 							<td><a href="airport.php?code={@unsafe $f->f}">{@unsafe $f->f}</a></td>
 							<td><a href="airport.php?code={@unsafe $f->t}">{@unsafe $f->t}</a></td>
-							<td>{@if $f->state != 1}{@unsafe round($f->adistance)}m{@endif}</td>
-							<td class="flight-state flight-state-{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
+							<td class="no800">{@if $f->state != 1}{@unsafe round($f->adistance)}m{@endif}</td>
+							<td class="no600 flight-state flight-state-{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
 						</tr>
 					{@endforeach}
 				{@else}

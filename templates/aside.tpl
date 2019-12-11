@@ -1,7 +1,6 @@
 <aside>
 	<div>
 		<h5>Players (last 48h)</h5>
-		<img src="{@unsafe $STATICPATH}/gen/playergraph.png" />
 		{@try}
 			{@eval ++$db_querycount}
 			{@eval $players = []}
