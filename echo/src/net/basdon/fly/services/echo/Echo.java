@@ -228,8 +228,8 @@ throws InterruptedIOException
 			case PACK12_TRAC_MESSAGE:
 				msg = new char[3 + msglen];
 				msg[0] = Constants.CTRL_COLOR;
-				msg[1] = '1';
-				msg[2] = '2'; // Constants.COL_LIGHTBLUE;
+				msg[1] = '0';
+				msg[2] = '5'; // '0' + Constants.BROWN;
 				i = 3;
 				break;
 			default:
