@@ -250,7 +250,7 @@ void echo_on_receive(cell socket_handle, cell data_a,
 				break;
 			}
 			atoc(buf4096, data + 7, msglen + 1);
-			echo_sendclientmessage_buf4096_filtered(COL_INFO);
+			echo_sendclientmessage_buf4096_filtered(COL_INFO_BROWN);
 			break;
 		}
 		case PACK_PLAYER_CONNECTION:
