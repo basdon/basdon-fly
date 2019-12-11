@@ -222,4 +222,7 @@ p.msg.warning {
 p.msg.success {
 	border: 1px solid #060;
 	background: #bfb;
- }
+}
+.center {
+	text-align: center;
+}
