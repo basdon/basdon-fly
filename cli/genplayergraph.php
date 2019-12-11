@@ -3,7 +3,7 @@
 require '../inc/conf.php';
 require '../inc/db.php';
 
-$imgw = 220;
+$imgw = 480;
 $imgh = 80;
 
 $d = isset($_GET['d']);
@@ -19,17 +19,21 @@ $color_text = imagecolorallocate($im, 0, 0, 0);
 $max = 0;
 $val = 0;
 $rightvalue = 0;
-$te = time() - 60;
-$ts = $te - 3600 * 48;
+$time_end = time() - 60;
+$time_start = $time_end - 3600 * 24;
 $values = [];
 try {
-	foreach ($db->query("(SELECT s AS stamp,-1 AS t FROM ses WHERE e>$ts)
-			UNION (SELECT e AS stamp,1 AS t FROM ses WHERE e>$ts) ORDER BY stamp DESC") as $r)
+	// result of query is list of timestamps with either -1 or 1
+	// 1 at the end of the session, -1 at the start of the session
+	// since the graph is made from right to left, values are summed to get the playercount at any time
+	// (last 60 seconds are not shown on the graph, because session end times update every 30s)
+	foreach ($db->query("(SELECT s AS stamp,-1 AS t FROM ses WHERE e>$time_start)
+			UNION (SELECT e AS stamp,1 AS t FROM ses WHERE e>$time_start) ORDER BY stamp DESC") as $r)
 	{
 		$val += $r->t;
 		$max = max($max, $val);
 		$r->value = $val;
-		if ($r->stamp < $te) {
+		if ($r->stamp < $time_end) {
 			$values[] = $r;
 		} else {
 			$rightvalue = $val;
@@ -49,14 +53,14 @@ $inpeak = false;
 $maxy = $imgh - 12;
 if ($max > 0) {
 	$o = new stdclass();
-	$o->stamp = $te;
+	$o->stamp = $time_end;
 	$o->value = $rightvalue;
 	array_unshift($values, $o);
 	$value = $rightvalue;
 	$idx = 0;
 	$lasty = -1;
 	for ($x = $imgw - 1; $x >= 0; $x--) {
-		$t = $ts + ($te - $ts) * ($x + 1) / $imgw;
+		$t = $time_start + ($time_end - $time_start) * ($x + 1) / $imgw;
 		$newvalue = 0;
 		$thisvalue = $value;
 		while ($idx < count($values) - 1 && $values[$idx + 1]->stamp >= $t) {
@@ -106,7 +110,7 @@ if (count($peakranges)) {
 	if ($x > $imgw / 2) {
 		$x -= imagefontwidth(2) * strlen($txt);
 	}
-	imagestring($im, 2, $x, -2, $txt, $color_text);
+	imagestring($im, 2, $x, $y + 2, $txt, $color_text);
 }
 
 $lastupdate = date('j M H:i O', time());
