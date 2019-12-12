@@ -90,6 +90,10 @@ Types:
 <pre>
 0: flight message, sent from game to irc when a player finishes a flight
 1: trac, sent from web to game and irc when a trac ticket/comment was made
+2: reserved
+3: IRC mode change message, sent from irc to game
+4: IRC topic change message, sent from irc to game
+5: IRC nick change message, sent from irc to game
 </pre>
 
 {@h4(id=p30) Packet 30: Player connection}
