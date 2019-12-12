@@ -273,8 +273,8 @@ alreadyin:
 		NC_gpci(playerid, buf64a, 64);
 		ctoai(cbuf64);
 		csprintf(buf4096,
-			"INSERT INTO gpci(u,v,c,last) "
-			"VALUES(%d,'%s',1,UNIX_TIMESTAMP()) "
+			"INSERT INTO gpci(u,v,c,first,last) "
+			"VALUES(%d,'%s',1,UNIX_TIMESTAMP(),UNIX_TIMESTAMP()) "
 			"ON DUPLICATE KEY UPDATE c=c+1,last=UNIX_TIMESTAMP()",
 			userid[playerid],
 			cbuf64);
