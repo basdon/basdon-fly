@@ -18,7 +18,7 @@
 		border-top: 0;
 		border-collapse: collapse;
 	}
-	table th {
+	table th, table tr.header td {
 		background: #8484f9;
 	}
 	td, th {
@@ -27,8 +27,11 @@
 	td + td {
 		border-left: 1px solid #000;
 	}
-	thead tr {
+	thead tr, table tr.header {
 		border-bottom: 1px solid #000;
+	}
+	tr + tr.header {
+		border-top: 1px solid #000;
 	}
 	</style>
 </head>
@@ -45,16 +48,43 @@
 			Start your flight and have fun!
 		</p>
 
-		<h3>Online players</h3>
-		<div class="fr49">
-			<img style="width:100%;max-width:480px;" src="{@unsafe $STATICPATH}/gen/playergraph.png" />
-		</div>
-		<div class="fl49">
-			{@foreach $onlineplayers as $p}
-				{@unsafe linkuser($p)}&nbsp;({@unsafe $p->score})
-			{@endforeach}
-		</div>
-		<div class="clear"></div>
+		<h3>Players</h3>
+		<table border="0" width="100%" class="center">
+			<tr class="header"><td>Online over last 24h</td></tr>
+			<tr><td style="padding:0"><img style="width:100%;max-width:480px;" src="{@unsafe $STATICPATH}/gen/playergraph.png" /></td></tr>
+			<tr></tr>
+			<tr class="header"><td>Online now</td></tr>
+			<tr>
+				<td>
+					{@if count($onlineplayers)}
+						{@foreach $onlineplayers as $p}
+							{@unsafe linkuser($p)}&nbsp;({@unsafe $p->score})&#32;
+						{@endforeach}
+					{@else}
+						None
+					{@endif}
+				</td>
+			</tr>
+			<tr class="header"><td>Online last 48h</td></tr>
+			<tr>
+				<td>
+					{@if count($last48)}
+						{@foreach $last48 as $p}
+							{@unsafe linkuser($p)}&nbsp;({@unsafe $p->score})&#32;
+						{@endforeach}
+					{@else}
+						None
+					{@endif}
+				</td>
+			</tr>
+			<tr class="header"><td>Member stats</td></tr>
+			<tr><td>
+				Members: {@unsafe $membercount->c} &bull; Guest sessions: {@unsafe $guestcount->c} &bull; Latest: {@unsafe linkuser($latestmember)}
+				{@if $combinedstats != null}
+					<br/>Combined online time: {@unsafe round($combinedstats->o)}h &bull; Combined flight time: {@unsafe round($combinedstats->f)}h &bull; Combined distance flown: {@unsafe round($combinedstats->d,1)}km
+				{@endif}
+			</td></tr>
+		</table>
 
 		{@render flightstatuses.php}
 		{@render aircraftnames.php}
