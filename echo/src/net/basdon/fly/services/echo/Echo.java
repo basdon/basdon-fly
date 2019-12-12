@@ -22,7 +22,7 @@ import static net.basdon.anna.api.Util.*;
 public class Echo extends Thread
 {
 private static final int PORT_IN = 7767, PORT_OUT = 7768;
-private static final char
+private static final byte
 	PACK_HELLO = 2,
 	PACK_IMTHERE = 3,
 	PACK_BYE = 4,
@@ -32,9 +32,12 @@ private static final char
 	PACK_ACTION = 11,
 	PACK_GENERIC_MESSAGE = 12,
 	PACK_PLAYER_CONNECTION = 30;
-private static final char
+public static final byte
 	PACK12_FLIGHT_MESSAGE = 0,
-	PACK12_TRAC_MESSAGE = 1;
+	PACK12_TRAC_MESSAGE = 1,
+	PACK12_IRC_MODE = 3,
+	PACK12_IRC_TOPIC = 4,
+	PACK12_IRC_NICK = 5;
 private static final InetAddress ADDR_OUT;
 
 public static final byte
@@ -412,6 +415,27 @@ void send_hello()
 {
 	byte[] msg = { 'F', 'L', 'Y', PACK_HELLO, 7, 3, 3, 1 };
 	this.my_hello_sent_time = System.currentTimeMillis();
+	this.send(msg, msg.length);
+}
+
+public
+void send_generic_message(char[] message, byte type)
+{
+	int len = message.length;
+	if (len > 450) {
+		len = 450;
+	}
+	byte[] msg = new byte[7 + len];
+	msg[0] = 'F';
+	msg[1] = 'L';
+	msg[2] = 'Y';
+	msg[3] = PACK_GENERIC_MESSAGE;
+	msg[4] = type;
+	msg[5] = (byte) (len & 0xFF);
+	msg[6] = (byte) ((len >> 8) & 0xFF);
+	for (int i = 0; i < len; i++) {
+		msg[7 + i] = (byte) message[i];
+	}
 	this.send(msg, msg.length);
 }
 }

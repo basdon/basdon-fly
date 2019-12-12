@@ -137,9 +137,65 @@ boolean on_command(User user, char[] target, char[] replytarget,
 }
 
 @Override
+public void on_topic(User user, char[] channel, char[] topic)
+{
+	if (this.echo != null && strcmp(channel, this.outtarget) &&
+		this.anna.find_channel(channel) != null)
+	{
+		StringBuilder s = new StringBuilder(144);
+		s.append("IRC: * ");
+		if (user != null) {
+			s.append(user.nick);
+			s.append(" changes channel topic to: ");
+		} else {
+			s.append("channel topic was changed to: ");
+		}
+		s.append(topic);
+		this.echo.send_generic_message(chars(s), Echo.PACK12_IRC_TOPIC);
+	}
+}
+
+@Override
+public void on_channelmodechange(Channel chan, User user, int changec, char[] signs,
+                                 char[] modes, char[] types, char[][] params, ChannelUser[] users)
+{
+	if (this.echo != null && strcmp(chan.name, this.outtarget)) {
+		StringBuilder s = new StringBuilder(144);
+		s.append("IRC: * ");
+		if (user != null) {
+			s.append(user.nick);
+			s.append(" sets mode ");
+		} else {
+			s.append("mode ");
+		}
+		char sign = 0;
+		for (int i = 0; i < changec; i++) {
+			if (sign != signs[i]) {
+				s.append(sign = signs[i]);
+			}
+			s.append(modes[i]);
+		}
+		for (int i = 0; i < changec; i++) {
+			if (params[i] != null) {
+				s.append(' ').append(params[i]);
+			}
+		}
+		this.echo.send_generic_message(chars(s), Echo.PACK12_IRC_MODE);
+	}
+}
+
+@Override
 public
 void on_nickchange(User user, char[] oldnick, char[] newnick)
 {
+	if (this.echo != null && this.anna.find_user(this.outtarget, newnick) != null) {
+		StringBuilder s = new StringBuilder(144);
+		s.append("IRC: * ");
+		s.append(oldnick);
+		s.append(" is now known as ");
+		s.append(newnick);
+		this.echo.send_generic_message(chars(s), Echo.PACK12_IRC_NICK);
+	}
 }
 
 @Override
