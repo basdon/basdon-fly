@@ -33,7 +33,7 @@
 						<td>{@unsafe format_time_since($t->updated)}</td>
 						<td class="severity{@unsafe $t->severity}">{@unsafe $trac_severities[$t->severity]}</td>
 						<td>{@unsafe $trac_statuses[$t->status]}</td>
-						<td style="text-align:left;"><a href="tracview.php?id={@unsafe $t->id}">{$t->summary}</a></td>
+						<td style="text-align:left;"><a href="tracview.php?id={@unsafe $t->id}#u{@unsafe $t->updated}">{$t->summary}</a></td>
 					</tr>
 				{@endforeach}
 			</tbody>
