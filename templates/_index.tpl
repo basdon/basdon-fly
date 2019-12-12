@@ -148,6 +148,8 @@
 			</tbody>
 		</table>
 
+		<p class="center"><a href="flights.php">All flights</a></p>
+
 		<h3>Member stats</h3>
 		<table border="0" width="100%" class="center">
 			<thead>
@@ -163,8 +165,6 @@
 				</td></tr>
 			</tbody>
 		</table>
-
-		<p class="center"><a href="flights.php">All flights</a></p>
 	</div>
 	{@render defaultfooter.tpl}
 </body>
