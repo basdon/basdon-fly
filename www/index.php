@@ -35,7 +35,7 @@ $last48 = $db->query("
 $guestcount = $db->query('SELECT COUNT(s.i) c FROM ses s JOIN usr u ON s.i=u.i WHERE u.groups&'.$GROUP_GUEST);
 $membercount = $db->query('SELECT COUNT(i) c FROM usr WHERE groups&'.$GROUP_GUEST.'=0');
 $latestmember = $db->query('SELECT name,i FROM usr WHERE groups&'.$GROUP_GUEST.'=0 ORDER BY i DESC LIMIT 1');
-$combinedstats = $db->query('SELECT SUM(onlinetime/3600) o,SUM(flighttime/3600) f,SUM(distance) d FROM usr');
+$combinedstats = $db->query('SELECT SUM(onlinetime/3600) o,SUM(flighttime/3600) f,SUM(distance) d,SUM(cash) c FROM usr');
 
 if ($onlineplayers !== false && ($onlineplayers = $onlineplayers->fetchAll()) !== false) {
 	$onlineplayers = $onlineplayers;
