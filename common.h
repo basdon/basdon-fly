@@ -140,13 +140,15 @@ void ctoai(char *dstsrc);
 #define COL_SUCC 0x2cc36bff
 #define COL_INFO_GENERIC 0xffffffff
 #define COL_INFO_LIGHT 0x33ccffff
-#define COL_INF_BROWN 0xcc9966ff
+#define COL_INFO_BROWN 0xcc9966ff
 #define COL_PRIVMSG 0xffff00ff
 #define COL_PRIVMSG_HINT 0xafafafff
 #define COL_MISSION 0xff9900ff
 #define COL_JOIN 0x1b8ae4ff
 #define COL_QUIT 0x1674Bcff
 #define COL_METAR COL_INFO_LIGHT
+#define COL_IRC_MODE 0x00ffffff
+#define COL_IRC_ACTION 0xff00ffff
 
 #define VEL_MAX (0.66742320819112627986348122866894f)
 #define VEL_TO_KPH (VEL_MAX * 270.0f)

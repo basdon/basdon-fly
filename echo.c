@@ -206,7 +206,7 @@ void echo_on_receive(cell socket_handle, cell data_a,
 		case PACK_ACTION:
 		{
 			short msglen;
-			int nicklen;
+			int nicklen, col;
 			cell *b;
 
 			if (len < 10 ||
@@ -226,8 +226,10 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			if (data[3] == PACK_ACTION) {
 				*(b++) = '*';
 				*(b++) = ' ';
+				col = COL_IRC_ACTION;
 			} else {
 				*(b++) = '<';
+				col = COL_IRC;
 			}
 			atoc(b, data + 8, nicklen + 1);
 			b += nicklen;
@@ -236,12 +238,13 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			}
 			*(b++) = ' ';
 			atoc(b, data + 8 + nicklen, msglen + 1);
-			echo_sendclientmessage_buf4096_filtered(COL_IRC);
+			echo_sendclientmessage_buf4096_filtered(col);
 			break;
 		}
 		case PACK_GENERIC_MESSAGE:
 		{
 			short msglen;
+			int col;
 
 			if (len < 8 ||
 				(msglen = *((short*) (data + 5))) > 450 ||
@@ -250,7 +253,21 @@ void echo_on_receive(cell socket_handle, cell data_a,
 				break;
 			}
 			atoc(buf4096, data + 7, msglen + 1);
-			echo_sendclientmessage_buf4096_filtered(COL_INFO_BROWN);
+			switch (data[4]) {
+			case PACK12_TRAC_MESSAGE:
+				col = COL_INFO_BROWN;
+				break;
+			case PACK12_IRC_MODE:
+			case PACK12_IRC_TOPIC:
+				col = COL_IRC_MODE;
+				break;
+			case PACK12_IRC_NICK:
+				col = COL_IRC_ACTION;
+				break;
+			default:
+				return;
+			}
+			echo_sendclientmessage_buf4096_filtered(col);
 			break;
 		}
 		case PACK_PLAYER_CONNECTION:
