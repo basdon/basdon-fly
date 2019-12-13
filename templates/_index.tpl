@@ -51,7 +51,7 @@
 				<tr><th>Online over last 24h</th></tr>
 			</thead>
 			<tbody>
-				<tr><td style="padding:0"><img style="width:100%;max-width:480px;" src="{@unsafe $STATICPATH}/gen/playergraph.png" /></td></tr>
+				<tr><td style="padding:0"><img style="width:100%;border-bottom:1px solid #000" src="{@unsafe $STATICPATH}/gen/playergraph.png" /></td></tr>
 				<tr><td><strong>Online now</strong></td></tr>
 				<tr>
 					<td>

@@ -3,8 +3,8 @@
 require '../inc/conf.php';
 require '../inc/db.php';
 
-$imgw = 480;
-$imgh = 80;
+$imgw = 950;
+$imgh = 100;
 
 $d = isset($_GET['d']);
 
@@ -58,7 +58,7 @@ if ($max > 0) {
 	array_unshift($values, $o);
 	$value = $rightvalue;
 	$idx = 0;
-	$lasty = -1;
+	$vals = [];
 	for ($x = $imgw - 1; $x >= 0; $x--) {
 		$t = $time_start + ($time_end - $time_start) * ($x + 1) / $imgw;
 		$newvalue = 0;
@@ -83,12 +83,54 @@ if ($max > 0) {
 			$inpeak = false;
 		}
 		$ytop = $imgh - $maxy * $thisvalue;
-		imageline($im, $x, $imgh, $x, $ytop / $max, $color_fill);
-		imagesetpixel($im, $x, $ytop, $color_outline);
-		if ($lasty != -1 && $lasty != $ytop) {
-			imageline($im, $x + 1, $lasty, $x + 1, $ytop, $color_outline);
+		$vals[] = $ytop;
+	}
+
+	$changed = true;
+	for ($j = 0; $j < 5 && $changed; $j++) {
+		$changed = false;
+		for ($i = 0; $i < count($vals) - 1; $i++) {
+			$v = $vals[$i];
+			$left = $vals[$i + 1];
+			if (abs($left - $v) > 3) {
+				$vals[$i] = ($left + $v) / 2;
+				$changed = true;
+			}
 		}
-		$lasty = $ytop;
+	}
+
+	foreach ($vals as &$v) {
+		$v = (int) $v;
+	}
+
+	$x = $imgw - 1;
+	imageline($im, $x, $imgh, $x, $vals[0], $color_fill);
+	imagesetpixel($im, $x, $vals[0], $color_outline);
+	$lastv = $vals[0];
+	for ($i = 1; $i < count($vals); $i++) {
+		$x = $imgw - 1 - $i;
+		$v = $vals[$i];
+		imageline($im, $x, $imgh, $x, $v + 1, $color_fill);
+		if ($v == $lastv) {
+			imagesetpixel($im, $x, $v, $color_outline);
+			if ($i > 1) {
+				$rr = $vals[$i - 2];
+				if ($rr < $lastv) {
+					imagesetpixel($im, $x + 1, $v, $color_fill);
+				} else if ($rr > $lastv) {
+					imagesetpixel($im, $x + 1, $v, $bg);
+				}
+			}
+		} else if ($v < $lastv) {
+			for ($z = $lastv - 1; $z >= $v; $z--) {
+				imagesetpixel($im, $x, $z, $color_outline);
+			}
+		} else {
+			for ($z = $lastv + 1; $z <= $v; $z++) {
+				imagesetpixel($im, $x, $z, $color_outline);
+			}
+		}
+		$lastv = $v;
 	}
 } else {
 	$txt = 'no players last 48h :(';
