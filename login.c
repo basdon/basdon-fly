@@ -890,7 +890,7 @@ void login_on_player_disconnect(int playerid, int reason)
 
 	if (userid[playerid] != -1) {
 		csprintf(buf4096,
-			"UPDATE usr SET score=%d,cash=%d,distance=%d,"
+			"UPDATE usr SET score=%d,cash=%d,distance=%f,"
 			"flighttime=%d,prefs=%d "
 			"WHERE i=%d",
 			NC_GetPlayerScore(playerid),
