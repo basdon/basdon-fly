@@ -71,7 +71,7 @@ void playtime_update_player_last_seen(int playerid, int isdisconnecting)
 		"WHERE i=%d",
 		isdisconnecting ? 0 : 30,
 		playtime_to_add,
-		userid);
+		userid[playerid]);
 	NC_mysql_tquery_nocb(buf4096a);
 
 	if (sessionid[playerid] == -1) {
