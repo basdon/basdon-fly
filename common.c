@@ -266,8 +266,21 @@ void common_mysql_escape_string(char *data, char *dest, int maxlen)
 	dest[maxlen - 1] = 0;
 }
 
+#ifdef PRINTQUERIES
+void DEBUG_NC_mysql_tquery_nocb(cell cella)
+{
+	char dst[1000];
+	ctoa(dst, (cell*) ((int) &fakeamx_data + (int) cella), 1000);
+	logprintf("%s", dst);
+	NC_mysql_tquery_nocb_(cella);
+}
+#endif
+
 void common_mysql_tquery(char *query, cb_t callback, void *data)
 {
+#ifdef PRINTQUERIES
+	logprintf("%s", query);
+#endif
 	atoc(buf4096, query, 2000);
 	common_common_varargs_cb_call(1 /*handle*/, buf4096a, callback, data);
 	NC(n_mysql_tquery);
