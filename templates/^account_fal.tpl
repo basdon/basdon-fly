@@ -1,4 +1,4 @@
-<h2>Failed logins</h2>
+<h2 id="main">Failed logins</h2>
 {@if isset($falcleared)}
 	<p class="msg success">Unseen failed logins cleared.</p>
 {@endif}

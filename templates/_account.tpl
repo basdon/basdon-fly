@@ -8,13 +8,12 @@
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
 	<div class="singlebody">
-		<h2 id="main">My account</h2>
 		{@if isset($loggeduser)}
-			<ul>
-				<li><?php acclink('Public profile', 'publicprofile'); ?></li>
-				<li><?php acclink('Failed logins', 'fal'); ?></li>
-			</ul>
+			<hr/>
+			<p><?php acclink('Public profile', 'publicprofile'); ?> &bull; <?php acclink('Failed logins', 'fal'); ?></li></p>
+			<hr/>
 		{@endif}
+		{@rem every subview needs the #main element! @}
 		{@mayrequire ^account_notloggedin}
 		{@mayrequire ^account_publicprofile}
 		{@mayrequire ^account_fal}

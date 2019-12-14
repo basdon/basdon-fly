@@ -1,6 +1,6 @@
 {@rem needed variables: $name (user name) $id (user id) $paginationbaseurl (pagination base url, like user.php?id=xxx) @}
 
-<h2>Profile of {$name} ({@unsafe $id})</h2>
+<h2 id="main">Profile of {$name} ({@unsafe $id})</h2>
 {@try}
 	{@eval ++$db_querycount}
 	{@eval $r = $db->query('SELECT registertime,lastseengame,score,onlinetime,playtime,flighttime,distance,cash FROM usr WHERE i=' . $id . ' LIMIT 1')}
