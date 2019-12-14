@@ -52,3 +52,9 @@ tr.fsh {
 	background: #eee;
 	padding: 1em;
 }
+dt {
+	font-weight: bold;
+}
+dd {
+	margin-bottom: .5em;
+}

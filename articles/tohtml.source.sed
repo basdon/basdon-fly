@@ -66,6 +66,9 @@ s_{@clear}_<div class="clear"></div>_
 	#SIMPLETAG blockquote
 	#SIMPLETAG sup
 	#SIMPLETAG sub
+	#SIMPLETAG dl
+	#SIMPLETAG dt
+	#SIMPLETAG dd
 
 	/{@b / {
 		H
