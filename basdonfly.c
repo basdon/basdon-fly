@@ -99,6 +99,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 		count = 0;
 
 #ifdef LOG_SLOW_TICKS
+#error replace this with time/time.h stuff instead of native call
 		newtickcount = NC_tickcount();
 		if (tickcount && newtickcount - tickcount > 120) {
 			logprintf("slow 20 ticks %d", newtickcount - tickcount);
