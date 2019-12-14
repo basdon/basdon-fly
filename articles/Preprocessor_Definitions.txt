@@ -12,10 +12,9 @@
     So far only bcrypt has been seen requiring a correct number, so those
     those functions ignore this flag.}
   {@dt PRECOMPILED_TIME}
-  {@dd uses {@code time/basdon-fly-time.lib} instead of compiling 
-    {@code time/time.c}, reducing dependencies on OS specifics}
-  {@dt PRINTQUERIES}
-  {@dd prints all queries being done to the console and logfile}
+  {@dd uses {@code time/basdon-fly-time.lib}/{@code time/basdon-fly-time.a}
+    instead of compiling {@code time/time.c}, reducing dependencies on OS
+    specifics}
   {@dt PRINTQUERIES}
   {@dd prints all queries being done to the console and logfile}
   {@dt TEST_AIRPORT_LOADING}
