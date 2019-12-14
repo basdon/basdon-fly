@@ -47,24 +47,10 @@ footer p {
 	line-height: 1.1em;
 	font-size: x-small;
 }
-div#main,.mainright {
-	float: right;
-	width: calc(100% - 250px);
-	border-left: 10px solid #444;
-}
-aside {
-	float: left;
-	width: 220px;
-	border-right: 10px solid #444;
-	margin-right: -10px;
-}
-div#main,.mainright,div.singlebody {
-	padding: 10px;
-	padding-top: 0px;
-}
 div.singlebody {
-	max-width: calc(1000px - 20px);
+	padding: 10px;
 	padding-top: 1px;
+	max-width: calc(1000px - 20px);
 }
 .fr49 {
 	float: right;
@@ -75,9 +61,6 @@ div.singlebody {
 	width: 49%;
 }
 @media (max-width: 800px) {
-	div#main,div.mainright {
-		width: calc(100% - 20px);
-	}
 	header #ip {
 		float: none;
 		text-align: left;
@@ -87,30 +70,10 @@ div.singlebody {
 		display: block;
 		text-align: right;
 	}
-	aside {
-		border-top: 5px dashed #000;
-		border-right: 0;
-		padding: 10px;
-		width: auto;
-	}
-	aside div {
-		padding-right: 1ex;
-		float: left;
-		width: 220px;
-	}
 	.fr49, .fl49 {
 		float: none;
 		width: 100%;
 	}
-}
-aside table, aside p {
-	font-size: .8em;
-}
-aside p {
-	text-align: center;
-}
-aside table td + td {
-	text-align: right;
 }
 h2, h3, h4, h5, h6 {
 	border-bottom: 1px solid #000;
@@ -129,10 +92,6 @@ h5 {
 }
 h6 {
 	font-size: .8em;
-}
-aside h4, aside h5, aside h6 {
-	margin-bottom: 0;
-	text-align: center;
 }
 #skip {
 	position: absolute;
