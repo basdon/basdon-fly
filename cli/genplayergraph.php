@@ -86,15 +86,24 @@ if ($max > 0) {
 		$vals[] = $ytop;
 	}
 
+	// TODO? this is slightly biased towards the left (because it goes left to right)
 	$changed = true;
 	for ($j = 0; $j < 5 && $changed; $j++) {
 		$changed = false;
 		for ($i = 0; $i < count($vals) - 1; $i++) {
 			$v = $vals[$i];
 			$left = $vals[$i + 1];
-			if (abs($left - $v) > 3) {
-				$vals[$i] = ($left + $v) / 2;
+			$nv = $v;
+			if ($left - $v < -20) {
+				$nv = $vals[$i] = ceil(($left + $v) / 2);
 				$changed = true;
+			}
+			if ($i > 0) {
+				$right = $vals[$i - 1];
+				if ($right - $v < -20) {
+					$vals[$i] = ceil(($right + $v) / 2);
+					$changed = true;
+				}
 			}
 		}
 	}
