@@ -12,7 +12,7 @@ $cat->subs = [];
 $cats[null] = $cat;
 
 ++$db_querycount;
-foreach ($db->query('SELECT id,parent,name,color FROM artcat ORDER BY parent ASC') as $cat) {
+foreach ($db->query('SELECT id,parent,name,color FROM artcat ORDER BY parent ASC,name ASC') as $cat) {
 	$cat->articles = [];
 	$cat->subs = [];
 	if ($cat->parent == null) {
