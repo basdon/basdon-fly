@@ -54,8 +54,9 @@ if (isset($_COOKIE[$COOKIENAME]) && strlen($__sesid = $_COOKIE[$COOKIENAME]) == 
 		$loggeduser->hasfailedlogins = $loggeduser->falnw < $loggeduser->lastfal;
 		$expire = $loggeduser->stay ? (time() + 30 * 24 * 3600) : 0;
 		setcookie($COOKIENAME, $__sesid, $expire, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
-		++$db_querycount;
+		$db_querycount += 2;
 		$db->query('UPDATE webses SET lastupdate=UNIX_TIMESTAMP() WHERE id=\''.$__sesid.'\'');
+		$db->query('UPDATE usr SET lastseenweb=UNIX_TIMESTAMP() WHERE i='.$loggeduser->i);
 		$userid = $loggeduser->i;
 		$usergroups = $loggeduser->groups;
 		$HAARP = $loggeduser->logoutkey; // maybe this should he something different?
