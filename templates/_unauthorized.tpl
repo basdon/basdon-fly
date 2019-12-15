@@ -9,7 +9,11 @@
 	{@render defaultheader.tpl}
 	<div class="singlebody">
 		<h2 id="main">Unauthorized</h2>
-		<p class="msg error">You need to <a href="login.php?ret={@urlencode $ret}">log in</a> to see this page</p>
+		{@if isset($loggeduser)}
+			<p class="msg error">You don't have acces to this page</p>
+		{@else}
+			<p class="msg error">You need to <a href="login.php?ret={@urlencode $ret}">log in</a> to see this page</p>
+		{@endif}
 	</div>
 	{@render defaultfooter.tpl}
 </body>

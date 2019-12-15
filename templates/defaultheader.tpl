@@ -3,6 +3,9 @@
 		<small>
 			{@if isset($loggeduser)}
 				Welcome, {$loggeduser->name}&#32;
+				{@if group_is_admin($loggeduser->groups)}
+					<a href="admin.php">[Admin]</a>&#32;
+				{@endif}
 				<a href="account.php">[My account]</a>&#32;
 				{@if $loggeduser->hasfailedlogins}
 					<a href="account.php?action=fal"><strong>[New failed logins]</strong></a>&#32;
