@@ -486,14 +486,14 @@ extern cell tmpfloat;
 	(NC_PARS_(3)nc_params[1]=1,nc_params[2]=BUF,nc_params[3]=1,\
 	n_mysql_query(amx,nc_params))
 
-#define NC_mysql_tquery_nocb_(BUF) (NC_PARS_(4)nc_params[1]=1,\
+#define _NC_mysql_tquery_nocb(BUF) (NC_PARS_(4)nc_params[1]=1,\
 	nc_params[2]=BUF,nc_params[3]=nc_params[4]=emptystringa,\
 	n_mysql_tquery(amx,nc_params))
 
 #ifdef PRINTQUERIES
 #define NC_mysql_tquery_nocb(BUF) DEBUG_NC_mysql_tquery_nocb(BUF)
 #else
-#define NC_mysql_tquery_nocb(BUF) NC_mysql_tquery_nocb_(BUF)
+#define NC_mysql_tquery_nocb(BUF) _NC_mysql_tquery_nocb(BUF)
 #endif
 
 #define NC_random(MAX) (NC_PARS_(1)nc_params[1]=MAX,\

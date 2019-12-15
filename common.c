@@ -272,7 +272,7 @@ void DEBUG_NC_mysql_tquery_nocb(cell cella)
 	char dst[1000];
 	ctoa(dst, (cell*) ((int) &fakeamx_data + (int) cella), 1000);
 	logprintf("%s", dst);
-	NC_mysql_tquery_nocb_(cella);
+	_NC_mysql_tquery_nocb(cella);
 }
 #endif
 
