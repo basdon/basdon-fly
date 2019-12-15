@@ -16,6 +16,9 @@ $GROUP_OWNER = 1073741824;
 $GROUPS_ALL = 2147483647;
 $GROUPS_ADMIN = $GROUPS_ALL & ~($GROUP_ADMIN - 1);
 
+// TODO: move this to conf.php?
+$datetimeformat = 'j M Y H:i';
+
 function group_is_user_notbanned($group)
 {
 	global $GROUP_MEMBER, $GROUP_BANNED;
@@ -96,7 +99,8 @@ function simple_pagination($urlWithParam, $currentPageFromOne, $totalItems, $ite
 
 function format_datetime($time)
 {
-	return date('j M Y H:i', $time) . ' (GMT' . date('O') . ')';
+	global $datetimeformat;
+	return date($datetimeformat, $time) . ' (GMT' . date('O') . ')';
 }
 
 function format_duration_short($time)
