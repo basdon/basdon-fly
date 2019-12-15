@@ -172,6 +172,10 @@ function spate_generate($template_dir, $template)
 				$j += 11;
 				$suffix = ';~>';
 				goto directive_parse_conditionbody__start;
+			case "@for":
+				$result .= '<?php for(';
+				$j += 10;
+				goto directive_parse_conditionbody__start;
 			case "@foreach":
 				$result .= '<?php foreach(';
 				$j += 14;
@@ -210,6 +214,7 @@ function spate_generate($template_dir, $template)
 				$j += 13;
 				goto directive_parse_conditionbody__start;
 			case "@endtry":
+			case "@endfor":
 			case "@endforeach":
 			case "@endwhile":
 			case "@endif":

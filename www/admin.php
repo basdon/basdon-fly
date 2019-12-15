@@ -14,14 +14,9 @@ $healthchecks = $db->query('SELECT
 	(SELECT COUNT(i) FROM usr WHERE flighttime>playtime) flighttime,
 	(SELECT COUNT(i) FROM usr WHERE distance>10000000) distance')->fetchAll()[0];
 
-function acclink($name, $target)
-{
-	global $action, $BASEPATH;
-	if ($action == $target) {
-		echo '<strong>'.$name.'</strong>';
-	} else {
-		echo '<a href="account.php?action='.$target.'">'.$name.'</a>';
-	}
-}
+$db_querycount += 3;
+$heartbeat = $db->query('SELECT tstart,tlast FROM heartbeat WHERE tlast>UNIX_TIMESTAMP()-35 ORDER BY tlast DESC LIMIT 1')->fetchAll();
+$lastheartbeat = $db->query('SELECT MAX(tlast) tlast FROM heartbeat')->fetchAll();
+$lastsessions = $db->query('SELECT tstart,tlast,cleanexit FROM heartbeat ORDER BY id DESC LIMIT 5')->fetchAll();
 
 include('../inc/output.php');
