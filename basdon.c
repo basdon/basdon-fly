@@ -332,10 +332,22 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 {
 	const int playerid = PARAM(1), killerid = PARAM(2);
 	const int reason = PARAM(3);
+	int killeruid;
 
 	if (!ISPLAYING(playerid)) {
 		return 0;
 	}
+
+	killeruid = killerid == INVALID_PLAYER_ID ? -1 : userid[killerid];
+	csprintf(buf4096,
+		"INSERT INTO deathlog(stamp,killee,killer,reason) "
+		"VALUES(UNIX_TIMESTAMP(),IF(%d<1,NULL,%d),IF(%d<1,NULL,%d),%d)",
+		userid[playerid],
+		userid[playerid],
+		killeruid,
+		killeruid,
+		reason);
+	NC_mysql_tquery_nocb(buf4096a);
 
 	spawned[playerid] = 0;
 
