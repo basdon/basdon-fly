@@ -7,15 +7,15 @@ all: .templates .aerodromecharts .apfactsheets .articles
 	cd templates && make
 
 .aerodromecharts:
-	rm static/gen/aerodrome_*
+	rm -f static/gen/aerodrome_*
 	cd cli && php genaerodromechart.php
 
 .apfactsheets:
-	rm articles/apfactsheets/*
+	rm -f articles/apfactsheets/*
 	cd cli && php genapfactsheet.php
 
 .articles:
 	cd cli && php genarticlemapping.php
-	rm articles/gen/*
+	rm -f articles/gen/*
 	cd articles && make
 
