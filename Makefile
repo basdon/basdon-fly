@@ -15,7 +15,7 @@ all: .templates .aerodromecharts .apfactsheets .articles
 	cd cli && php genapfactsheet.php
 
 .articles:
-	cd cli && php genarticlemapping.php
 	rm -f articles/gen/*
+	cd cli && php genarticlemapping.php
 	cd articles && make
 
