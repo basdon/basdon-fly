@@ -142,7 +142,7 @@ if ($max > 0) {
 		$lastv = $v;
 	}
 } else {
-	$txt = 'no players last 48h :(';
+	$txt = 'no players last 24h :(';
 	imagestring($im, 2, ($imgw - imagefontwidth(2) * strlen($txt)) / 2, 2, $txt, $color_text);
 }
 
