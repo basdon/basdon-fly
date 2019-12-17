@@ -39,8 +39,10 @@
 			</ul></td>
 			<td><ul>
 				{@li {@article Area_69}}
+				{@li {@article Caligulas_Palace}}
 				{@li {@article Las_Venturas_Airport}}
 				{@li {@article Los_Santos_Airport}}
+				{@li {@article Los_Santos_Inlet_Field}}
 				{@li {@article San_Fierro_Airport}}
 				{@li {@article Verdant_Meadows}}
 			</ul></td>

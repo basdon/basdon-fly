@@ -1,0 +1,17 @@
+<div class="articleright">
+	<?php $AP_FACTSHEET_IMG='lsif.jpg'; include('../articles/apfactsheets/LSIF.html') ?>
+</div>
+
+LSIF
+
+{@clear}
+
+{@h3 Service points}
+
+NONE
+
+{@h3 Aerodrome Chart}
+{@simg=gen/aerodrome_LSIF.png;LSIF aerodrome chart;LSIF aerodrome chart}
+
+{@clear}
+

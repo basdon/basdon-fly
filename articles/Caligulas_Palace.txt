@@ -1,0 +1,17 @@
+<div class="articleright">
+	<?php $AP_FACTSHEET_IMG='cali.jpg'; include('../articles/apfactsheets/CALI.html') ?>
+</div>
+
+CALI
+
+{@clear}
+
+{@h3 Service points}
+
+NONE
+
+{@h3 Aerodrome Chart}
+{@simg=gen/aerodrome_CALI.png;CALI aerodrome chart;CALI aerodrome chart}
+
+{@clear}
+
