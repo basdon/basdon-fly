@@ -202,6 +202,15 @@ s_{@clear}_<div class="clear"></div>_
 		b nexttag
 	}
 
+	/{@articlecategory / {
+		H
+		g
+		s/\(.*\)\n.*$/\1\n<\/a>/
+		x
+		s/.*\n\(.*\){@articlecategory \([^}]*\)/\1<?php echo map_article_cat('\2'); ?>/
+		b nexttag
+	}
+
 	/{@article / {
 		H
 		g

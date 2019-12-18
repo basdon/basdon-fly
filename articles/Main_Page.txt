@@ -24,8 +24,8 @@
 <table width="100%">
 	<thead>
 		<tr>
-			<th>{@ia=article.php?category=Basics Basics}</th>
-			<th>{@ia=article.php?category=Airports Airports}</th>
+			<th>{@articlecategory Basics}</th>
+			<th>{@articlecategory Airports}</th>
 		</tr>
 	</thead>
 	<tbody>
