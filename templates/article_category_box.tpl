@@ -30,7 +30,7 @@
 	<tbody>
 		{@if count($cat->articles)}
 			<tr>
-				<td></td>
+				<td{@if count($cat->subs)} style="background:#{@unsafe $cat->color}"{@endif}></td>
 				<td>{@eval $articles = $cat->articles}{@render article_category_box_articles.tpl}</td>
 			</tr>
 		{@endif}
