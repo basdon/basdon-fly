@@ -23,7 +23,6 @@
 	<thead>
 		<tr>
 			<th colspan="2" style="background:#{@unsafe $cat->color}">
-				{@eval $gt=''}
 				Category: <a href="article.php?category={@urlencode $cat->name}">{@unsafe $cat->name}</a>
 			</th>
 		</tr>
