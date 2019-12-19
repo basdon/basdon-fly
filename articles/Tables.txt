@@ -1,0 +1,302 @@
+
+Collation {@code utf8mb4} should be used for all non-samp stuff.
+
+<pre>
+usr -- users
+  i - id
+  name - name
+  pw - pw
+  registertime - registertime
+  lastseenweb - last seen on web (default 0)
+  lastseengame - last seen in game
+  onlinetime - total online time (seconds) (default 0)
+  playtime - actual playtime (seconds) (default 0)
+  groups - group(s)
+  flighttime - flight time (seconds) (default 0)
+  distance - total distance flown, km (float) (default 0)
+  score - score (default 0)
+  cash - money (default 15000)
+  prefs - preferences (see sharedsymbols)
+  lastfal - last failed login (default 0)
+  falng - failedloginsnotifygame, last time failed logins were shown ingame (default 0)
+  falnw - failedloginsnotifyweb, last time failed logins were shown ingame (default 0)
+</pre>
+
+<pre>
+ses -- sessions
+  i - id
+  u - uid (usr.i)
+  s - starttime
+  e - endtime
+  ip - ip
+</pre>
+
+<pre>
+fal -- failed logins
+  u - uid (usr.i) (NULL for when user gets deleted, SET NULL)
+  stamp - timestamp
+  ip - ip
+  isweb - int (0: samp, 1: website)
+</pre>
+
+<pre>
+apt -- airports
+  i - id (from 0, cannot contain holes)
+  c - code (char4)
+  e - enabled
+  n - name (char24)
+  b - beacon (char4)
+  x - beacon x
+  y - beacon y
+  z - beacon z
+  flags - see sharedsymbols.h (int) (default 1)
+</pre>
+
+<pre>
+rnw -- runways
+  a - airport (apt.i)
+  i - runway id (matches on end to the other)
+  s - specifier (as in L/C/R/H(helipad)/nothing)
+  h - heading
+  x - x
+  y - y
+  z - z
+  w - runway width
+  n - navigation types (VOR(2) | ILS(6))
+  type - runway type (see sharedsymbols.h) (default 1)
+  surf - runway surface (see sharedsymbols.h)
+</pre>
+
+<pre>
+msp -- mission points
+  i - id
+  a - airport (apt.i)
+  x - x
+  y - y
+  z - z
+  t - type of mission (mission-types.txt)
+  name - name of point (varchar MAX_MSP_NAME(9))
+  o - outbound flights (default 0)
+  p - inbound flights (default 0)
+</pre>
+
+<pre>
+flg -- flights
+  id - id
+  player - player (usr.i) (or NULL)
+  vehicle - vehicle (veh.i)
+  missiontype -
+  fapt - (apt.i)
+  tapt - (apt.i)
+  fmsp - (msp.i)
+  tmsp - (msp.i)
+  distance - checkpoint-to-checkpoint distance, m (float)
+  adistance - actually travelled distance, m (float) (default 0)
+  state - status, see flight-statuses.txt (default 1)
+  tstart -
+  tlastupdate -
+  tload - (default 0)
+  tunload - (default 0)
+  satisfaction - passenger satisfaction (default 100)
+  ptax - airport tax (default 0)
+  pweatherbonus - (default 0)
+  psatisfaction - satisfaction bonus (default 0)
+  pdistance - distance pay (default 0)
+  paymp - distance pay multiplier (default 0)
+  pdamage - damage penalty (default 0)
+  pcheat - cheating penalty (default 0)
+  pbonus - extra bonus (default 0)
+  ptotal - total pay (default 0)
+  fuel - fuel used (float) (default 0)
+  damage - total damage taken (default 0)
+</pre>
+
+<pre>
+wth -- weathers
+  w - weather id
+  l - last weather id
+  t - timestamp
+</pre>
+
+<pre>
+veh -- vehicles
+  i - id
+  m - model
+  ownerplayer - owner (usr.i) or NULL if not owned by a player (default NULL)
+  e - enabled (default 1)
+  ap - related airport (apt.i) (default NULL)
+  x - x
+  y - y
+  z - z
+  r - rotation
+  col1 - color 1
+  col2 - color 2
+  inusedate - timestamp of existence
+  odo - odo, km (float) (default 0)
+</pre>
+
+<pre>
+acl -- anticheat etc log
+  t - timestamp
+  u - userid (usr.i) (or NULL)
+  l - logged in status (0-2, see login.pwn)
+  type - type of event, see sharedsymbols.h (default 0)
+  e - log content (varchar, 144)
+</pre>
+
+<pre>
+art -- site articles
+  id -
+  cat - article category (artcat.id) or NULL (default NULL)
+  name - url name (varchar, 64)
+  title - actual title (varchar, 64)
+  pageviews - (default 0)
+</pre>
+
+<pre>
+artcat -- site articles categories
+  id -
+  parent - parent category (artcat.id) or NULL (default NULL)
+  name - (char, 16)
+  color - (char, 6)
+</pre>
+
+<pre>
+artalt -- alternative art names
+  art - article id (art.id)
+  alt - alternative url name (varchar, 64)
+</pre>
+
+<pre>
+cmdlog -- commands log
+  id - rowid
+  player - player (usr.i) or NULL (default NULL)
+  loggedstatus - one of LOGGED_NO(0) LOGGED_IN(1) LOGGED_GUEST(2)
+  stamp - timestamp
+  cmd - command (varchar 128)
+</pre>
+
+<pre>
+svp -- servicepoints
+  id - rowid
+  apt - belonging airport (apt.id) or NULL
+  x -
+  y -
+  z -
+</pre>
+
+<pre>
+repairlog --
+  id - rowid
+  stamp - timestamp
+  vehicle - (veh.i)
+  player - (usr.i)
+  svp - (svp.id)
+  paid -
+  damage - repaired damage points
+</pre>
+
+<pre>
+refuellog --
+  id - rowid
+  stamp - timestamp
+  vehicle - (veh.i)
+  player - (usr.i)
+  svp - (svp.id)
+  paid -
+  fuel - (float)
+</pre>
+
+<pre>
+heartbeat --
+  id - rowid
+  tstart - boot time
+  tlast - last update
+  cleanexit - if session was ended nicely
+</pre>
+
+<pre>
+webses -- website sessions
+  id - (char, 32)
+  usr - (usr.i)
+  stamp - session start
+  lastupdate - last update
+  stay - stay logged in (0/1)
+  ip - (char, 45)
+</pre>
+
+<pre>
+map -- maps
+  id - rowid
+  ap - linked airport (apt.id) (default NULL)
+  name - name of the map (varchar 24)
+  filename - filename of the map (name.map) (varchar 24)
+  midx - center x position
+  midy - center y position
+  radi - stream in radius (float)
+  rado - stream out radius (float)
+</pre>
+
+<pre>
+spw -- spawns
+  id - rowid
+  ap - linked airport (apt.i)
+  class - class types that can spawn here (bitfield)
+  sx - x coord
+  sy - y coord
+  sz - z coord
+  sr - z-angle
+</pre>
+
+<pre>
+kck -- kicks
+  id - rowid
+  usr - (usr.i) NULL
+  ip - (varchar, 45)
+  stamp - timestamp
+  issuer - (usr.i) NULL
+  reason - (varchar, 144) NULL
+</pre>
+
+<pre>
+gpci -- gpci values
+  u - (usr.i)          v primkey
+  v - value (char, 40) ^ primkey
+  c - count
+  first - stamp of first use
+  last - stamp of last use
+</pre>
+
+<pre>
+tract -- tracker tickets
+  id - rowid
+  op - (usr.i)
+  stamp - timestamp
+  updated - timestamp
+  status - int (default 0)
+  severity - int (default 0)
+  visibility - int (default 2147483647)
+  summary - (varchar utf8mb4, 80)
+  description - (varchar utf8mb4, 4096)
+</pre>
+
+<pre>
+tracc -- tracker comments
+  id - rowid
+  parent - (tract.id)
+  usr - (usr.i)
+  ip - (varchar, 45)
+  stamp - timestamp
+  type - (0 normal 1 raw)
+  comment - (varchar utf8mb4, 4096)
+</pre>
+
+<pre>
+deathlog -- death log
+  id - rowid
+  stamp - timestamp
+  killee - (usr.i) NULL
+  killer - (usr.i) NULL
+  reason - int
+</pre>
+
