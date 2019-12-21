@@ -14,11 +14,12 @@
 
 #pragma pack(push,1)
 struct OBJECT {
-	int model;
+	cell model;
 	float x, y, z, rx, ry, rz, drawdistance;
 };
 struct REMOVEDOBJECT {
-	float model, x, y, z, radius;
+	cell model;
+	float x, y, z, radius;
 };
 #pragma pack(pop)
 
@@ -294,7 +295,7 @@ void maps_on_player_connect(int playerid)
 	struct REMOVEDOBJECT *r = removedobjects + numremovedobjects;
 
 	while (r-- != removedobjects) {
-		nc_params[0] = 6;
+		NC_PARS(6);
 		nc_params[1] = playerid;
 		memcpy(nc_params + 2, r, sizeof(cell) * 5);
 		NC(n_RemoveBuildingForPlayer);
