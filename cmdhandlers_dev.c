@@ -111,7 +111,7 @@ int cmd_dev_testparpl(CMDPARAMS)
 	return 1;
 }
 
-static int devplatformobj = -1;
+static int devplatformobj = INVALID_OBJECT_ID;
 
 /**
 Creates a haystack object at the player's position.
@@ -123,22 +123,21 @@ int cmd_dev_platform(CMDPARAMS)
 {
 	struct vec3 ppos;
 
-	if (devplatformobj != -1) {
+	if (devplatformobj != INVALID_OBJECT_ID) {
 		NC_DestroyObject(devplatformobj);
 	}
 	common_GetPlayerPos(playerid, &ppos);
-	NC_PARS(9);
-	nc_params[0] = 3374;
-	nc_paramf[1] = ppos.x;
-	nc_paramf[2] = ppos.y;
-	nc_paramf[3] = ppos.z;
-	nc_params[4] = nc_params[5] = nc_params[6] = 0;
-	nc_params[7] = 0x43960000;
+	NC_PARS(8);
+	nc_params[1] = 3374;
+	nc_paramf[2] = ppos.x;
+	nc_paramf[3] = ppos.y;
+	nc_paramf[4] = ppos.z;
+	nc_params[5] = nc_params[6] = nc_params[7] = 0;
+	nc_params[8] = 0x43960000;
 	devplatformobj = NC(n_CreateObject);
-	nc_paramf[2] += 4.0f;
+	nc_paramf[4] += 4.0f;
 	NC_PARS(4);
 	nc_params[1] = playerid;
-	nc_params[4] = *buf144;
 	NC(n_SetPlayerPos_);
 	return 1;
 }
