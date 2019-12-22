@@ -20,11 +20,19 @@
 		<p><a href="trac.php">Tracker</a> &gt; Change log</p>
 		<h2 id="main">Change log</h2>
 
-		<h3>Tickets ready for next version</h3>
-		<ul>
+		{@if group_is_owner($usergroups)}
+			<p><a href="tracversion.php?releaseconfirm">[Owner: release]</a></p>
+			{@if isset($_GET['releaseconfirm'])}
+				<p><a href="tracversion.php?dorelease&rel={@unsafe time()}">[Owner: yes, really do release]</a></p>
+			{@endif}
+		{@endif}
+
+		{@if !isset($selectedrelease)}
+			<h3>Tickets ready for next release</h3>
 			{@eval $list = $readytickets}
 			{@render tracversionticketlist.tpl}
-		</ul>
+			{@unsafe $pagination = simple_pagination('tracversion.php?page=', $page, $releasecount, 10)}
+		{@endif}
 
 		{@foreach $releaseids as $release}
 			<h3>{@unsafe trac_releasetime($release)}</h3>
@@ -32,8 +40,9 @@
 			{@render tracversionticketlist.tpl}
 		{@endforeach}
 
-		{@unsafe $pagination = simple_pagination('tracversion.php?page=', $page, $releasecount, 10)}
-		{@unsafe $pagination}
+		{@if isset($pagination)}
+			{@unsafe $pagination}
+		{@endif}
 	</div>
 	{@render defaultfooter.tpl}
 </body>

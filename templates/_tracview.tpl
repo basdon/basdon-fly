@@ -90,7 +90,7 @@
 					</table>
 				</form>
 				{@if group_is_admin($usergroups)}
-					<h4>Update ticket</h4>
+					<h4>Admin: Update ticket</h4>
 					<form method="post" action="tracview.php?id={@unsafe $id}">
 						{@input HAARP}
 						<table class="trac respond">
@@ -100,7 +100,7 @@
 							{@eval $form_defaults['visibility'] = $trac->visibility}
 							<tr><td class="label">Summary</td><td>{@input text summary maxlength="80"}</td></tr>
 							{@if group_is_owner($usergroups)}
-								<tr><td class="label">Status</td><td>{@input combo status $trac_statuses}</td></tr>
+								<tr><td class="label">Owner: status</td><td>{@input combo status $trac_statuses}</td></tr>
 							{@endif}
 							<tr><td class="label">Impact</td><td>{@input combo severity $trac_severities}</td></tr>
 							<tr><td class="label">Visibility</td><td>{@input combo visibility $trac_visibilities}</td></tr>

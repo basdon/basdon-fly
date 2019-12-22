@@ -44,6 +44,8 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 			$changes[] = 'summary: "'.$old->summary.'" => "'.$_POST['summary'].'"';
 		}
 
+		// THESE MUST BE IN SYNC WITH tracversion.php WHEN MAKING A RELEASE!
+
 		function check_transition($prop, $map)
 		{
 			global $changes, $fields, $values, $old;
