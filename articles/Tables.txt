@@ -273,7 +273,7 @@ tract -- tracker tickets
   op - (usr.i)
   stamp - timestamp
   updated - timestamp
-  status - int (default 0)
+  state - int (default 0)
   severity - int (default 0)
   visibility - int (default 2147483647)
   released - int (default NULL) when resolution for this ticket got released

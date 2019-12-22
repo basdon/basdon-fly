@@ -28,7 +28,7 @@ if (!isset($loggeduser)) {
 
 		$t = time();
 
-		$status = 0;
+		$state = 0;
 		$severity = 0;
 		$visibility = max($GROUP_OWNER, intval($_POST['visibility'])); // never allow less than owner privs
 
@@ -37,16 +37,16 @@ if (!isset($loggeduser)) {
 				$severity = intval($_POST['severity']);
 			}
 			if (group_is_owner($usergroups)) {
-				$status = 2; // if owner creates, it's instantly acknowledged
+				$state = 2; // if owner creates, it's instantly acknowledged
 			}
 		}
 
 		++$db_querycount;
-		$stmt = $db->prepare('INSERT INTO tract(op,stamp,updated,status,severity,visibility,summary,description) VALUES(?,?,?,?,?,?,?,?)');
+		$stmt = $db->prepare('INSERT INTO tract(op,stamp,updated,state,severity,visibility,summary,description) VALUES(?,?,?,?,?,?,?,?)');
 		$stmt->bindValue(1, $loggeduser->i);
 		$stmt->bindValue(2, $t);
 		$stmt->bindValue(3, $t);
-		$stmt->bindValue(4, $status);
+		$stmt->bindValue(4, $state);
 		$stmt->bindValue(5, $severity);
 		$stmt->bindValue(6, $visibility);
 		$stmt->bindValue(7, $summary);

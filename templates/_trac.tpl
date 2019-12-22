@@ -35,11 +35,11 @@
 			</thead>
 			<tbody>
 				{@foreach $tracthreads as $t}
-					<tr class="status{@unsafe $t->status}">
+					<tr class="state{@unsafe $t->state}">
 						<td>{@unsafe format_time_since($t->updated)}</td>
 						<td>{@if $t->released != null}<a href="tracversion.php?rel={@unsafe $t->release}">{@unsafe trac_version($t->released)}</a>{@else}-{@endif}</td>
 						<td class="severity{@unsafe $t->severity}">{@unsafe $trac_severities[$t->severity]}</td>
-						<td>{@unsafe $trac_statuses[$t->status]}</td>
+						<td>{@unsafe $trac_states[$t->state]}</td>
 						<td style="text-align:left;"><a href="tracview.php?id={@unsafe $t->id}#u{@unsafe $t->updated}">{$t->summary}</a></td>
 					</tr>
 				{@endforeach}
@@ -49,8 +49,8 @@
 		<table class="trac">
 			<tbody>
 				<tr>
-					{@foreach $trac_statuses as $n => $s}
-						<td class="status{@unsafe $n}" style="width:{@unsafe 100/count($trac_statuses)}%">{@unsafe $s}</td>
+					{@foreach $trac_states as $n => $s}
+						<td class="state{@unsafe $n}" style="width:{@unsafe 100/count($trac_states)}%">{@unsafe $s}</td>
 					{@endforeach}
 				</tr>
 			</tbody>

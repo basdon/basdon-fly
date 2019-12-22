@@ -27,7 +27,7 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 	}
 } else if (group_is_admin($usergroups) && isset($_POST['_form'], $_POST['summary'], $_POST['severity'], $_POST['visibility'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
 	++$db_querycount;
-	$old = $db->query('SELECT summary,severity,visibility,status FROM tract WHERE id='.$id);
+	$old = $db->query('SELECT summary,severity,visibility,state FROM tract WHERE id='.$id);
 	if ($old && ($old = $old->fetchAll()) && count($old)) {
 		$old = $old[0];
 		$fields = [];
@@ -46,20 +46,20 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 
 		// THESE MUST BE IN SYNC WITH tracversion.php WHEN MAKING A RELEASE!
 
-		function check_transition($prop, $map)
+		function check_transition($name, $prop, $map)
 		{
 			global $changes, $fields, $values, $old;
 			if ($_POST[$prop] != $old->$prop && array_key_exists($_POST[$prop], $map)) {
 				$fields[] = $prop.'=?';
 				$values[] = $_POST[$prop];
-				$changes[] = $prop.': <span class="'.$prop.$old->$prop.'">'.$map[$old->$prop].'</span> => <span class="'.$prop.$_POST[$prop].'">'.$map[$_POST[$prop]].'</span>';
+				$changes[] = $name.': <span class="'.$prop.$old->$prop.'">'.$map[$old->$prop].'</span> => <span class="'.$prop.$_POST[$prop].'">'.$map[$_POST[$prop]].'</span>';
 			}
 		}
 
-		check_transition('severity', $trac_severities);
-		check_transition('visibility', $trac_visibilities);
+		check_transition('impact', 'severity', $trac_severities);
+		check_transition('visibility', 'visibility', $trac_visibilities);
 		if (group_is_owner($usergroups)) {
-			check_transition('status', $trac_statuses);
+			check_transition('status', 'state', $trac_states);
 		}
 
 		if (count($fields)) {
@@ -88,7 +88,7 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 $trac_summary = '[unknown ticket]';
 $trac_released = null;
 ++$db_querycount;
-$trac = $db->query('SELECT _u.name,_u.i,stamp,updated,released,status,severity,visibility,summary,description FROM tract JOIN usr _u ON _u.i=tract.op WHERE visibility&'.$usergroups.' AND id='.$id);
+$trac = $db->query('SELECT _u.name,_u.i,stamp,updated,released,state,severity,visibility,summary,description FROM tract JOIN usr _u ON _u.i=tract.op WHERE visibility&'.$usergroups.' AND id='.$id);
 if ($trac && ($trac = $trac->fetchAll()) && count($trac)) {
 	$trac = $trac[0];
 

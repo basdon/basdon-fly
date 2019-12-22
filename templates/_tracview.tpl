@@ -32,7 +32,7 @@
 					<td class="label">Summary</td><td colspan="3">{$trac->summary}</td>
 				</tr>
 				<tr>
-					<td class="label">Status</td><td class="status{@unsafe $trac->status}">{@unsafe $trac_statuses[$trac->status]}</td>
+					<td class="label">Status</td><td class="state{@unsafe $trac->state}">{@unsafe $trac_states[$trac->state]}</td>
 					<td class="label">Reporter</td><td>{@unsafe linkuser($trac)}</td>
 				</tr>
 				<tr>
@@ -95,12 +95,12 @@
 						{@input HAARP}
 						<table class="trac respond">
 							{@eval $form_defaults['summary'] = $trac->summary}
-							{@eval $form_defaults['status'] = $trac->status}
+							{@eval $form_defaults['state'] = $trac->state}
 							{@eval $form_defaults['severity'] = $trac->severity}
 							{@eval $form_defaults['visibility'] = $trac->visibility}
 							<tr><td class="label">Summary</td><td>{@input text summary maxlength="80"}</td></tr>
 							{@if group_is_owner($usergroups)}
-								<tr><td class="label">Owner: status</td><td>{@input combo status $trac_statuses}</td></tr>
+								<tr><td class="label">Owner: status</td><td>{@input combo state $trac_states}</td></tr>
 							{@endif}
 							<tr><td class="label">Impact</td><td>{@input combo severity $trac_severities}</td></tr>
 							<tr><td class="label">Visibility</td><td>{@input combo visibility $trac_visibilities}</td></tr>

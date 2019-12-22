@@ -13,7 +13,7 @@ if (group_is_owner($usergroups) && isset($_GET['rel'], $_GET['dorelease'])) {
 		$__msgs[] = 'Duplicate release!';
 		goto skiprelease;
 	}
-	if (!$db->query('SELECT COUNT(id) c FROM tract WHERE status=3')->fetchAll()[0]->c) {
+	if (!$db->query('SELECT COUNT(id) c FROM tract WHERE state=3')->fetchAll()[0]->c) {
 		$__msgs[] = 'No tickets!';
 		goto skiprelease;
 	}
@@ -21,9 +21,9 @@ if (group_is_owner($usergroups) && isset($_GET['rel'], $_GET['dorelease'])) {
 	// THIS MUST BE IN SYNC WITH tracview.php WHEN UPDATING!
 
 	++$db_querycount;
-	$tickets = $db->query('SELECT id FROM tract WHERE status=3')->fetchAll();
+	$tickets = $db->query('SELECT id FROM tract WHERE state=3')->fetchAll();
 
-	$stmt = $db->prepare('UPDATE tract SET updated='.$rel.',released='.$rel.',status=4 WHERE id=?');
+	$stmt = $db->prepare('UPDATE tract SET updated='.$rel.',released='.$rel.',state=4 WHERE id=?');
 	foreach ($tickets as $t) {
 		++$db_querycount;
 		$stmt->bindValue(1, $t->id);
@@ -32,7 +32,7 @@ if (group_is_owner($usergroups) && isset($_GET['rel'], $_GET['dorelease'])) {
 
 	$stmt = $db->prepare('INSERT INTO tracc(parent,usr,ip,stamp,type,comment) VALUES(?,'.$loggeduser->i.',?,'.$rel.',1,?)');
 	$stmt->bindValue(2, $__clientip);
-	$stmt->bindValue(3, 'status: <span class="status3">'.$trac_statuses[3].'</span> => <span class="status4">'.$trac_statuses[4].'</span>');
+	$stmt->bindValue(3, 'status: <span class="state3">'.$trac_states[3].'</span> => <span class="state4">'.$trac_states[4].'</span>');
 	foreach ($tickets as $t) {
 		++$db_querycount;
 		$stmt->bindValue(1, $t->id);
@@ -68,7 +68,7 @@ if (count($releaseids)) {
 	}
 }
 
-$readytickets = $db->query('SELECT id,severity,updated,summary FROM tract WHERE status=3 AND (visibility&'.$usergroups.' OR op='.$userid.') ORDER BY severity DESC')->fetchAll();
+$readytickets = $db->query('SELECT id,severity,updated,summary FROM tract WHERE state=3 AND (visibility&'.$usergroups.' OR op='.$userid.') ORDER BY severity DESC')->fetchAll();
 
 $__script = '_tracversion';
 include('../inc/output.php');

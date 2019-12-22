@@ -1,5 +1,5 @@
 <?php
-$trac_statuses = array(
+$trac_states = array(
 	0 => 'new',
 	1 => 'feedback',
 	2 => 'acknowledged',
