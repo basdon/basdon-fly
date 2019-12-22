@@ -18,19 +18,21 @@
 	{@render defaultheader.tpl}
 	<div class="singlebody">
 		<h2 id="main">Tracker</h2>
-		<p>This is the place where bugs and todo's are tracked. Currently this tracks {@unsafe $totalrows} tickets, whereof {@unsafe $unresolvedcount} unresolved.</p>
+		<p>This is the place where bugs and todo's are tracked. Currently this tracks <strong>{@unsafe $totalrows}</strong> tickets, whereof <strong>{@unsafe $unresolvedcount}</strong> unresolved.</p>
 		<p>Everyone can make a bug report: <a href="tracnew.php">report a bug</a>. <span style="background:#f00">TODO </span>To make a suggestion, head over to the message board.</p>
+		<p><a href="tracversion.php">[Change log]</a></p>
 		{@unsafe $pagination = simple_pagination('trac.php?page=', $page, $totalrows, 100)}
 		<table class="trac">
 			<thead>
 				<tr>
-					<th>Last update</th><th>Impact</th><th>Status</th><th>Summary</th>
+					<th>Last update</th><th>Released</th><th>Impact</th><th>Status</th><th>Summary</th>
 				</tr>
 			</thead>
 			<tbody>
 				{@foreach $tracthreads as $t}
 					<tr class="status{@unsafe $t->status}">
 						<td>{@unsafe format_time_since($t->updated)}</td>
+						<td>{@if $t->released != null}<a href="tracversion.php?rel={@unsafe $t->release}">{@unsafe trac_version($t->released)}</a>{@else}-{@endif}</td>
 						<td class="severity{@unsafe $t->severity}">{@unsafe $trac_severities[$t->severity]}</td>
 						<td>{@unsafe $trac_statuses[$t->status]}</td>
 						<td style="text-align:left;"><a href="tracview.php?id={@unsafe $t->id}#u{@unsafe $t->updated}">{$t->summary}</a></td>

@@ -24,7 +24,7 @@
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
 	<div class="singlebody">
-		<p><a href="trac.php">Tracker</a> &gt; {$trac_summary}</p>
+		<p><a href="trac.php">Tracker</a> {@if $trac_released != null}&gt; <a href="tracversion.php?rel={@unsafe $trac_released}">Release {@unsafe $trac_released_display}</a> {@endif}&gt; {$trac_summary}</p>
 		{@if isset($trac)}
 			<h2 id="main">Tracker: {$trac->summary}</h2>
 			<table id="main" class="trac">
@@ -42,6 +42,9 @@
 				<tr>
 					<td class="label">Visibility</td><td class="visibility{@unsafe $trac->visibility}">{@unsafe $trac_visibility}</td>
 					<td class="label">Updated</td><td>{@unsafe format_datetime($trac->updated)}</td>
+				</tr>
+				<tr>
+					<td class="label">Released</td><td colspan="3">{@if $trac_released != null}<a href="tracversion.php?rel={@unsafe $trac_released}">{@unsafe $trac_released_display}</a>{@else}-{@endif}</td>
 				</tr>
 				<tr>
 					<td class="label" colspan="4">Description</td>

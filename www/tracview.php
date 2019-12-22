@@ -3,6 +3,11 @@ include('../inc/bootstrap.php');
 include('../inc/form.php');
 include('../inc/trac_constants.php');
 
+function trac_releasetime($t)
+{
+	return date('YmdHis', $t);
+}
+
 $id = intval($_GET['id']);
 
 if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comment'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
@@ -79,12 +84,15 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 } reject:
 
 $trac_summary = '[unknown ticket]';
+$trac_released = null;
 ++$db_querycount;
-$trac = $db->query('SELECT _u.name,_u.i,stamp,updated,status,severity,visibility,summary,description FROM tract JOIN usr _u ON _u.i=tract.op WHERE visibility&'.$usergroups.' AND id='.$id);
+$trac = $db->query('SELECT _u.name,_u.i,stamp,updated,released,status,severity,visibility,summary,description FROM tract JOIN usr _u ON _u.i=tract.op WHERE visibility&'.$usergroups.' AND id='.$id);
 if ($trac && ($trac = $trac->fetchAll()) && count($trac)) {
 	$trac = $trac[0];
 
 	$trac_summary = $trac->summary;
+	$trac_released = $trac->released;
+	$trac_released_display = trac_releasetime($trac_released);
 
 	$trac_visibility = $trac->visibility;
 	if (array_key_exists($trac->visibility, $trac_visibilities)) {

@@ -276,6 +276,7 @@ tract -- tracker tickets
   status - int (default 0)
   severity - int (default 0)
   visibility - int (default 2147483647)
+  released - int (default NULL) when resolution for this ticket got released
   summary - (varchar utf8mb4, 80)
   description - (varchar utf8mb4, 4096)
 </pre>
