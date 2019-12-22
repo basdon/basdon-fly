@@ -33,11 +33,11 @@ if (!isset($loggeduser)) {
 		$visibility = max($GROUP_OWNER, intval($_POST['visibility'])); // never allow less than owner privs
 
 		if (group_is_admin($usergroups) && isset($_POST['severity'])) {
-			if (array_key_exists(intval($_POST['severity']), $trac_severities)) {
+			if (array_key_exists($_POST['severity'], $trac_severities)) {
 				$severity = intval($_POST['severity']);
 			}
-			if (group_is_owner($usergroups)) {
-				$state = 2; // if owner creates, it's instantly acknowledged
+			if (group_is_owner($usergroups) && isset($_POST['state']) && array_key_exists($_POST['state'], $trac_states)) {
+				$state = intval($_POST['state']);
 			}
 		}
 
