@@ -45,20 +45,26 @@ if (group_is_owner($usergroups) && isset($_GET['rel'], $_GET['dorelease'])) {
 	echo_send_message_irc_game(1, $ircmsg, $gamemsg);
 } skiprelease:
 
-$page = get_page();
-$db_querycount += 2;
-$releasecount = $db->query('SELECT COUNT(DISTINCT released) c FROM tract')->fetchAll()[0]->c; // NULL is not included in this count
-$releases = $db->query('SELECT DISTINCT released FROM tract ORDER BY released DESC LIMIT 10 OFFSET '.(($page - 1) * 10))->fetchAll();
-
 $releaseids = [];
 $mapping = [];
-foreach ($releases as $r) {
-	if ($r->released != null) {
-		$releaseids[] = $r->released;
-		$mapping[$r->released] = [];
+if (isset($_GET['rel'])) {
+	$selectedrelease = intval($_GET['rel']);
+	$releaseids[] = $selectedrelease;
+} else {
+	$page = get_page();
+	$db_querycount += 2;
+	$releasecount = $db->query('SELECT COUNT(DISTINCT released) c FROM tract')->fetchAll()[0]->c; // NULL is not included in this count
+	$releases = $db->query('SELECT DISTINCT released FROM tract ORDER BY released DESC LIMIT 10 OFFSET '.(($page - 1) * 10))->fetchAll();
+
+	foreach ($releases as $r) {
+		if ($r->released != null) {
+			$releaseids[] = $r->released;
+			$mapping[$r->released] = [];
+		}
 	}
+
+	$readytickets = $db->query('SELECT id,severity,updated,summary FROM tract WHERE state=3 AND (visibility&'.$usergroups.' OR op='.$userid.') ORDER BY severity DESC')->fetchAll();
 }
-// TODO: only use release from given rel GET param when present
 
 if (count($releaseids)) {
 	++$db_querycount;
@@ -67,8 +73,6 @@ if (count($releaseids)) {
 		$mapping[$r->released][] = $r;
 	}
 }
-
-$readytickets = $db->query('SELECT id,severity,updated,summary FROM tract WHERE state=3 AND (visibility&'.$usergroups.' OR op='.$userid.') ORDER BY severity DESC')->fetchAll();
 
 $__script = '_tracversion';
 include('../inc/output.php');
