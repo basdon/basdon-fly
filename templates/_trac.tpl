@@ -30,14 +30,13 @@
 		<table class="trac">
 			<thead>
 				<tr>
-					<th>Last update</th><th>Released</th><th>Impact</th><th>Status</th><th>Summary</th>
+					<th>Last update</th><th>Impact</th><th>Status</th><th>Summary</th>
 				</tr>
 			</thead>
 			<tbody>
 				{@foreach $tracthreads as $t}
 					<tr class="state{@unsafe $t->state}">
 						<td>{@unsafe format_time_since($t->updated)}</td>
-						<td>{@if $t->released != null}<a href="tracversion.php?rel={@unsafe $t->release}">{@unsafe trac_version($t->released)}</a>{@else}-{@endif}</td>
 						<td class="severity{@unsafe $t->severity}">{@unsafe $trac_severities[$t->severity]}</td>
 						<td>{@unsafe $trac_states[$t->state]}</td>
 						<td style="text-align:left;"><a href="tracview.php?id={@unsafe $t->id}#u{@unsafe $t->updated}">{$t->summary}</a></td>
