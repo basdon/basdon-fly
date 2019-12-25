@@ -2,7 +2,7 @@ Flighttracker is a service that collects flight mission data and writes it to
 {@article=Flight_File_Format Flight} files. This service is implemented as an
 {@a=https://github.com/yugecin/anna Anna^} mod.
 
-Flighttracker listens on port {@code 7755}.
+Flighttracker listens on port {@code 7766}.
 
 {@h3 Packet spec}
 
