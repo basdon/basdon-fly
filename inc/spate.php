@@ -32,7 +32,7 @@ function spate_generate($template_dir, $template)
 
 	$m = strlen($in);
 	$i = -1;
-	$result = '';
+	$result = ' '; // keep this space or newer versions of php will make it an array *shrug*
 	$j = -1;
 
 	$dostring = false;
