@@ -519,13 +519,14 @@ void login_cb_load_account_data(void *data)
 	score = (*f = 0, NC(n_cache_get_field_i));
 	money_set(playerid, (*f = 1, NC(n_cache_get_field_i)));
 	playerodoKM[playerid] = (*f = 2, NCF(n_cache_get_field_f));
-	score = (*f = 3, NC(n_cache_get_field_i));
-	prefs[playerid] = (*f = 4, NC(n_cache_get_field_i));
-	falng = (*f = 5, NC(n_cache_get_field_i));
-	lastfal = (*f = 6, NC(n_cache_get_field_i));
-	pdata[playerid]->groups = (*f = 7, NC(n_cache_get_field_i));
+	score_flight_time[playerid] = (*f = 3, NC(n_cache_get_field_i));
+	score_play_time[playerid] = (*f = 4, NC(n_cache_get_field_i));
+	prefs[playerid] = (*f = 5, NC(n_cache_get_field_i));
+	falng = (*f = 6, NC(n_cache_get_field_i));
+	lastfal = (*f = 7, NC(n_cache_get_field_i));
+	pdata[playerid]->groups = (*f = 8, NC(n_cache_get_field_i));
 
-	NC_SetPlayerScore(playerid, score);
+	score_update_score(playerid);
 
 	csprintf(buf4096,
             "UPDATE usr SET lastseengame=UNIX_TIMESTAMP() WHERE i=%d LIMIT 1",
@@ -589,7 +590,7 @@ void login_cb_verify_password(void *data)
 		B144("~b~Loading account...");
 		NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
 		sprintf(cbuf4096_,
-			"SELECT score,cash,distance,flighttime,prefs,"
+			"SELECT score,cash,distance,flighttime,playtime,prefs,"
 			"falng,lastfal,groups "
 			"FROM usr "
 			"WHERE i=%d",

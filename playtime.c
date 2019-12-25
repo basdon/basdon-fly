@@ -6,6 +6,7 @@
 #include "login.h"
 #include "playerdata.h"
 #include "playtime.h"
+#include "score.h"
 #include "timer.h"
 #include "time/time.h"
 #include <string.h>
@@ -59,6 +60,9 @@ void playtime_update_player_last_seen(int playerid, int isdisconnecting)
 			playtime_to_add, isafk[playerid], isdisconnecting);
 		playtime_to_add = 5;
 	}
+
+	score_play_time[playerid] += playtime_to_add;
+	score_update_score(playerid);
 
 	if (userid[playerid] == -1) {
 		return;
