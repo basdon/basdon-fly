@@ -105,7 +105,7 @@ function format_datetime($time)
 
 function format_duration_short($time)
 {
-	if ($time < 2) {
+	if ($time == 1) {
 		return '1 second';
 	}
 	if ($time < 60) {
