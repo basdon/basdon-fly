@@ -140,8 +140,8 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	unsigned long t;
 	FILE *mysqldat;
 	char mysqlcreds[255], *m;
-	char usrlen, dblen, pwlen, mysqllen;
-	int errno;
+	char usrlen, dblen, pwlen;
+	int errno, mysqllen;
 
 	t = time_timestamp();
 
