@@ -20,8 +20,12 @@
 		{@if isset($selectedrelease)}
 			<p><a href="trac.php">Tracker</a> &gt; <a href="tracversion.php">Change log</a> &gt; Release {@unsafe trac_releasetime($selectedrelease)}</p>
 			<h2 id="main">Change log for release {@unsafe trac_releasetime($selectedrelease)}</h2>
-			{@eval $list = $mapping[$selectedrelease]}
-			{@render tracversionticketlist.tpl}
+			{@if array_key_exists($selectedrelease, $mapping)}
+				{@eval $list = $mapping[$selectedrelease]}
+				{@render tracversionticketlist.tpl}
+			{@else}
+				<p>This version does not exist!</p>
+			{@endif}
 		{@else}
 			<p><a href="trac.php">Tracker</a> &gt; Change log</p>
 			<h2 id="main">Change log</h2>
