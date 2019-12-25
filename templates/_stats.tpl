@@ -9,6 +9,7 @@
 	{@render defaultheader.tpl}
 	<div class="singlebody">
 		<h2 id="main">Stats</h2>
+		<p>This page needs more content :)</p>
 		<h3>Weather</h3>
 		<table>
 			<thead>
