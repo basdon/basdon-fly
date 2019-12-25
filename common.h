@@ -174,8 +174,12 @@ void ctoai(char *dstsrc);
 /*in cells*/
 #define STACK_HEAP_SIZE 1024
 
-struct FAKEAMX_DATA {
-	cell emptystring;
+struct FAKEAMX {
+	char _cod[4256];
+	union {
+		char _dat;
+		cell emptystring;
+	};
 	cell underscorestring[2];
 	union {
 		cell ascell[32];
@@ -208,35 +212,36 @@ struct FAKEAMX_DATA {
 	} a4096;
 	cell _stackheap[STACK_HEAP_SIZE];
 };
-#define basea ((int) &fakeamx_data)
-#define emptystringa ((int) &fakeamx_data.emptystring - basea)
-#define underscorestringa ((int) &fakeamx_data.underscorestring - basea)
-#define buf32a ((int) &fakeamx_data.a32 - basea)
-#define buf32_1a ((int) &fakeamx_data.a32_1 - basea)
-#define buf64a ((int) &fakeamx_data.a64 - basea)
-#define buf144a ((int) &fakeamx_data.a144 - basea)
-#define buf4096a ((int) &fakeamx_data.a4096 - basea)
-#define buf32 (fakeamx_data.a32.ascell)
-#define buf32_1 (fakeamx_data.a32_1.ascell)
-#define buf64 (fakeamx_data.a64.ascell)
-#define buf144 (fakeamx_data.a144.ascell)
-#define buf4096 (fakeamx_data.a4096.ascell)
-#define cbuf32 fakeamx_data.a32.aschr
-#define cbuf32_1 fakeamx_data.a32_1.aschr
-#define cbuf64 fakeamx_data.a64.aschr
-#define cbuf144 fakeamx_data.a144.aschr
-#define cbuf4096 fakeamx_data.a4096.aschr
-#define cbuf4096_ fakeamx_data.a4096.splitted.last4096
-#define fbuf32 fakeamx_data.a32.asflt
-#define fbuf32_1 fakeamx_data.a32_1.asflt
-#define fbuf64 fakeamx_data.a64.asflt
-#define fbuf144 fakeamx_data.a144.asflt
-#define fbuf4096 fakeamx_data.a4096.asflt
+
+#define basea ((int) &fakeamx._dat)
+#define emptystringa ((int) &fakeamx.emptystring - basea)
+#define underscorestringa ((int) &fakeamx.underscorestring - basea)
+#define buf32a ((int) &fakeamx.a32 - basea)
+#define buf32_1a ((int) &fakeamx.a32_1 - basea)
+#define buf64a ((int) &fakeamx.a64 - basea)
+#define buf144a ((int) &fakeamx.a144 - basea)
+#define buf4096a ((int) &fakeamx.a4096 - basea)
+#define buf32 (fakeamx.a32.ascell)
+#define buf32_1 (fakeamx.a32_1.ascell)
+#define buf64 (fakeamx.a64.ascell)
+#define buf144 (fakeamx.a144.ascell)
+#define buf4096 (fakeamx.a4096.ascell)
+#define cbuf32 fakeamx.a32.aschr
+#define cbuf32_1 fakeamx.a32_1.aschr
+#define cbuf64 fakeamx.a64.aschr
+#define cbuf144 fakeamx.a144.aschr
+#define cbuf4096 fakeamx.a4096.aschr
+#define cbuf4096_ fakeamx.a4096.splitted.last4096
+#define fbuf32 fakeamx.a32.asflt
+#define fbuf32_1 fakeamx.a32_1.asflt
+#define fbuf64 fakeamx.a64.asflt
+#define fbuf144 fakeamx.a144.asflt
+#define fbuf4096 fakeamx.a4096.asflt
 
 /*amx*/
 extern AMX *amx;
 /*amx data segment*/
-extern struct FAKEAMX_DATA fakeamx_data;
+extern struct FAKEAMX fakeamx;
 /**
 Connection count per player id. Incremented every time playerid connects.
 

@@ -53,7 +53,7 @@ int _cc[MAX_PLAYERS];
 #endif /*PRECOMPILED_TIME*/
 
 AMX *amx;
-struct FAKEAMX_DATA fakeamx_data;
+struct FAKEAMX fakeamx;
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {
@@ -157,9 +157,9 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 	/*only the gamemode should reference B_OnGameModeInit*/
 	if (amx_FindNative(a, "B_OnGameModeInit", &tmp) == AMX_ERR_NONE) {
 		amx = a;
-		fakeamx_data.emptystring = 0;
-		fakeamx_data.underscorestring[0] = '_';
-		fakeamx_data.underscorestring[1] = 0;
+		fakeamx.emptystring = 0;
+		fakeamx.underscorestring[0] = '_';
+		fakeamx.underscorestring[1] = 0;
 
 		/*relocate the data segment*/
 		hdr = (AMX_HEADER*) amx->base;
@@ -180,21 +180,35 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 		}
 		/*copy content of stack/heap to our data segment (this is most
 		likely empty, but better safe than sorry)*/
-		memcpy(fakeamx_data._stackheap,
+		memcpy(fakeamx._stackheap,
 			amx->base + hdr->hea,
 			STACK_HEAP_SIZE * sizeof(cell));
 		/*finally do the relocation*/
-		amx->data = (unsigned char*) &fakeamx_data;
+		amx->data = (unsigned char*) &fakeamx._dat;
 		/*adjust pointers since the data segment grew*/
-		tmp = (char*) &fakeamx_data._stackheap - (char*) &fakeamx_data;
+		tmp = (char*) &fakeamx._stackheap - (char*) &fakeamx._dat;
 		amx->frm += tmp;
 		amx->hea += tmp;
 		amx->hlw += tmp;
 		amx->stk += tmp;
 		amx->stp += tmp;
+		/*linux binary seems to have assertions enabled, so the code
+		segment also needs to be relocated, yippie*/
+		/*(it might be enough to just change the cod value to make the
+		assertion `amx->cip >= 4 && amx->cip < (hdr->dat - hdr->cod)`
+		pass, but just copy it as a whole for now)*/
+		tmp = hdr->dat - hdr->cod;
 		/*samp core doesn't seem to use amx_SetString or amx_GetString
 		so the data offset needs to be adjusted*/
-		hdr->dat = (int) &fakeamx_data - (int) hdr;
+		hdr->dat = (int) &fakeamx._dat - (int) hdr;
+		if (tmp > sizeof(fakeamx._cod)) {
+			logprintf("ERR: too small code segment! "
+				"(missing %d bytes)",
+				tmp - sizeof(fakeamx._cod));
+			return 0;
+		}
+		memcpy(fakeamx._cod, amx->base + hdr->cod, tmp);
+		hdr->cod = (int) &fakeamx._cod - (int) hdr;
 
 		/*this will only work if this is the last plugin being loaded,
 		if it's not there should be another one in OnGameModeInit!*/
