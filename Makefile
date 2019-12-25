@@ -4,6 +4,7 @@
 all: .templates .aerodromecharts .apfactsheets .articles
 
 .templates:
+	rm -f gen/*
 	cd templates && make
 
 .aerodromecharts:
