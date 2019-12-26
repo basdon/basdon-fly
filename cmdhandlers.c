@@ -268,7 +268,7 @@ The /tickrate command to print the server's current tick rate.
 static
 int cmd_tickrate(CMDPARAMS)
 {
-	csprintf(buf32, "%d", NC_GetServerTickRate());
+	csprintf(buf32, "%d", (int) NC_GetServerTickRate());
 	NC_SendClientMessage(playerid, -1, buf32a);
 	return 1;
 }

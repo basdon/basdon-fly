@@ -10,6 +10,7 @@
 #include "timer.h"
 #include "vehicles.h"
 #include "zones.h"
+#include <string.h>
 
 /* Natives ending in _ means that they have
 custom code and shouldn't be used directly.*/

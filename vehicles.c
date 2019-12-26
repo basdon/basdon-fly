@@ -203,8 +203,7 @@ void veh_init()
 
 int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh)
 {
-	return veh &&
-		userid[playerid] == veh->owneruserid ||
+	return (veh && userid[playerid] == veh->owneruserid) ||
 		GROUPS_ISADMIN(pdata[playerid]->groups);
 }
 
@@ -793,7 +792,7 @@ void veh_owner_label_destroy(int vehicleid, int playerid)
 	struct dbvehicle *veh;
 	short *labelid;
 
-	veh = veh = gamevehicles[vehicleid].dbvehicle;
+	veh = gamevehicles[vehicleid].dbvehicle;
 	if (veh != NULL && veh->owneruserid != 0)
 	{
 		labelid = &labelids[playerid][vehicleid];

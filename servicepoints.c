@@ -209,7 +209,7 @@ int svp_cmd_refuel(CMDPARAMS)
 			INVALID_PLAYER_ID)
 	{
 		csprintf(buf144,
-			INFO"Player %s[%s] refueled your vehicle!",
+			INFO"Player %s[%d] refueled your vehicle!",
 			pdata[playerid]->name,
 			playerid);
 		NC_SendClientMessage(driverid, COL_INFO, buf144a);
@@ -302,7 +302,7 @@ int svp_cmd_repair(CMDPARAMS)
 			INVALID_PLAYER_ID)
 	{
 		csprintf(buf144,
-			INFO"Player %s[%s] repaired your vehicle!",
+			INFO"Player %s[%d] repaired your vehicle!",
 			pdata[playerid]->name,
 			playerid);
 		NC_SendClientMessage(driverid, COL_INFO, buf144a);

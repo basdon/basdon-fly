@@ -140,7 +140,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	unsigned long t;
 	FILE *mysqldat;
 	char mysqlcreds[1000], *m;
-	int errno, usrlen, dblen, pwlen, mysqllen;
+	int mysql_errno, usrlen, dblen, pwlen, mysqllen;
 
 	t = time_timestamp();
 
@@ -188,9 +188,8 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 		logprintf("no db connection error");
 		goto exit;
 	}
-	errno = NC_mysql_errno();
-	if (errno) {
-		logprintf("db errno %d", errno);
+	if ((mysql_errno = NC_mysql_errno())) {
+		logprintf("db errno %d", mysql_errno);
 exit:
 		buf32[0] = 'e'; buf32[1] = 'x'; buf32[2] = 'i'; buf32[3] = 't';
 		buf32[4] = 0;
@@ -199,7 +198,7 @@ exit:
 		return 1;
 
 	}
-	//mysql_set_charset "Windows-1252"
+	/*mysql_set_charset "Windows-1252"*/
 
 	airports_init();
 	class_init();

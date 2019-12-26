@@ -58,7 +58,7 @@ int maps_load_from_file(struct MAP *map)
 	struct OBJECT *obj;
 	struct REMOVEDOBJECT *remobj;
 
-	sprintf_s(filename, sizeof(filename), MAP_FILENAMEFORMAT, map->name);
+	sprintf(filename, MAP_FILENAMEFORMAT, map->name);
 	if (!(filehandle = fopen(filename, "rb"))) {
 		logprintf("failed to open map %s", filename);
 		return 0;
