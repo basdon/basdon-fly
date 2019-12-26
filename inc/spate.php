@@ -32,7 +32,7 @@ function spate_generate($template_dir, $template)
 
 	$m = strlen($in);
 	$i = -1;
-	$result = ' '; // keep this space or newer versions of php will make it an array *shrug*
+	$result = '';
 	$j = -1;
 
 	$dostring = false;
@@ -268,6 +268,9 @@ directive_parse_conditionbody:
 			goto directive_parse_conditionbody;
 		}
 
+		if ($j == -1) {
+			$result = ' '; // otherwise the statements below might make $result an array in some php versions --'
+		}
 		if ($wasescape) $result[++$j] = '\\';
 		$result[++$j] = $c;
 next:
