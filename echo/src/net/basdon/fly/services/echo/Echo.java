@@ -193,7 +193,12 @@ throws InterruptedIOException
 				sb.append(':');
 			}
 			sb.append(' ');
-			sb.append(new String(buf, 8 + nicklen, msglen, StandardCharsets.US_ASCII));
+			for (int i = 8 + nicklen, j = 0; j < msglen; j++, i++) {
+				char c = (char) buf[i];
+				if (c >= ' ') {
+					sb.append(c);
+				}
+			}
 			if (buf[3] == PACK_ACTION) {
 				this.anna.sync_exec(() -> {
 					this.ignore_self = true;
@@ -236,12 +241,17 @@ throws InterruptedIOException
 			default:
 				return;
 			}
-			for (int j = 7; i < msg.length; i++, j++) {
-				msg[i] = (char) buf[j];
+			for (int j = 7; i < msg.length; j++) {
+				char c = (char) buf[j];
+				if (c >= ' ') {
+					msg[i] = c;
+					i++;
+				}
 			}
+			final int I = i;
 			this.anna.sync_exec(() -> {
 				this.ignore_self = true;
-				this.anna.privmsg(this.channel, msg);
+				this.anna.privmsg(this.channel, msg, 0, I);
 				this.ignore_self = false;
 			});
 			return;
