@@ -172,7 +172,7 @@ if (!$d) header('Content-Type: image/png');
 ob_start();
 imagepng($im);
 file_put_contents('../static/gen/playergraph.png', ob_get_contents());
-ob_end_flush();
+ob_end_clean();
 
 imagedestroy($im);
 
