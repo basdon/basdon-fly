@@ -143,7 +143,7 @@
 						</tr>
 					{@endforeach}
 				{@else}
-					<tr><td colspan="7">None</td></tr>
+					<tr><td colspan="8">None</td></tr>
 				{@endif}
 			</tbody>
 		</table>
