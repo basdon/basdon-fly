@@ -139,9 +139,8 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 {
 	unsigned long t;
 	FILE *mysqldat;
-	char mysqlcreds[255], *m;
-	char usrlen, dblen, pwlen;
-	int errno, mysqllen;
+	char mysqlcreds[1000], *m;
+	int errno, usrlen, dblen, pwlen, mysqllen;
 
 	t = time_timestamp();
 
@@ -151,11 +150,11 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 		logprintf("cannot read mysql.dat");
 		goto exit;
 	}
-	mysqllen = fread(mysqlcreds, 1, 255, mysqldat);
+	mysqllen = fread(mysqlcreds, 1, 1000, mysqldat);
 	fclose(mysqldat);
-	usrlen = mysqlcreds[0];
-	dblen = mysqlcreds[4];
-	pwlen = mysqlcreds[8];
+	usrlen = *((int*) &mysqlcreds);
+	dblen = *(((int*) &mysqlcreds) + 1);
+	pwlen = *(((int*) &mysqlcreds) + 2);
 	if (mysqllen != 12 + usrlen + dblen + pwlen) {
 		logprintf("invalid mysql.dat format");
 		goto exit;
