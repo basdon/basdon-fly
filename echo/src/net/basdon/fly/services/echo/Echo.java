@@ -187,7 +187,6 @@ throws InterruptedIOException
 		{
 			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
 			StringBuilder sb = new StringBuilder(225);
-			sb.append('Z'); // prevent nickalerts
 			sb.append(new String(buf, 8, nicklen, StandardCharsets.US_ASCII));
 			sb.append('(').append(pid).append(')');
 			if (buf[3] != PACK_ACTION) {
@@ -225,8 +224,7 @@ throws InterruptedIOException
 				msg[0] = Constants.CTRL_COLOR;
 				msg[1] = '0';
 				msg[2] = '7'; // '0' + Constants.COL_ORANGE
-				msg[3] = 'Z'; // prevent nickalerts
-				i = 4;
+				i = 3;
 				break;
 			case PACK12_TRAC_MESSAGE:
 				msg = new char[3 + msglen];
@@ -261,11 +259,10 @@ throws InterruptedIOException
 			StringBuilder sb = new StringBuilder(225);
 			sb.append(CTRL_COLOR).append(SCOL_GREY);
 			if (reason == -1) {
-				sb.append("--> ");
+				sb.append("-> ");
 			} else {
-				sb.append("<-- ");
+				sb.append("<- ");
 			}
-			sb.append('Z'); // prevent nickalerts
 			sb.append(new String(buf, 8, nicklen, StandardCharsets.US_ASCII));
 			sb.append('(').append(pid).append(')').append(' ');
 			if (reason == CONN_REASON_GAME_CONNECTED) {
