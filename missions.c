@@ -1491,7 +1491,7 @@ void missions_update_satisfaction(int pid, int vid, struct quat *vrot)
 		qz = vrot->qz;
 		qw = vrot->qw;
 		/* pitch */
-		tmp = fabsf(100.0f * 2.0f * (qy * qz - qw * qx)) - pitchlimit;
+		tmp = fabs(100.0f * 2.0f * (qy * qz - qw * qx)) - pitchlimit;
 		if (tmp > 0.0) {
 			miss->passenger_satisfaction -= (int) (tmp / 2.0f);
 			if (miss->passenger_satisfaction < 0) {
@@ -1499,7 +1499,7 @@ void missions_update_satisfaction(int pid, int vid, struct quat *vrot)
 			}
 		}
 		/* roll */
-		tmp = fabsf(100.0f * 2.0f * (qx * qz + qw * qy)) - rolllimit;
+		tmp = fabs(100.0f * 2.0f * (qx * qz + qw * qy)) - rolllimit;
 		if (tmp > 0.0) {
 			miss->passenger_satisfaction -= (int) (tmp / 2.0f);
 			if (miss->passenger_satisfaction < 0) {
