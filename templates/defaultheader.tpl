@@ -8,7 +8,7 @@
 				{@endif}
 				<a href="account.php">[My account]</a>&#32;
 				{@if $loggeduser->hasfailedlogins}
-					<a href="account.php?action=fal"><strong>[New failed logins]</strong></a>&#32;
+					<a href="account.php?action=fal#u{@unsafe $loggeduser->lastfal}"><strong>[New failed logins]</strong></a>&#32;
 				{@endif}
 				<a href="logout.php?k={@unsafe $loggeduser->logoutkey}">[Log out]</a>
 			{@else}
