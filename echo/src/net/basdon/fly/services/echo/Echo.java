@@ -225,7 +225,7 @@ throws InterruptedIOException
 			int i;
 			switch(buf[4]) {
 			case PACK12_FLIGHT_MESSAGE:
-				msg = new char[4 + msglen];
+				msg = new char[3 + msglen];
 				msg[0] = Constants.CTRL_COLOR;
 				msg[1] = '0';
 				msg[2] = '7'; // '0' + Constants.COL_ORANGE
