@@ -63,7 +63,7 @@ if (!isset($loggeduser)) {
 			$ircmsg = $gamemsg.' -> '.$BASEPATH.'/tracview.php?id='.$id;
 			echo_send_message_irc_game(1, $ircmsg, $gamemsg);
 
-			header('Location: tracview.php?id=' . $id);
+			header('Location: tracview.php?id=' . $id . '#u' .$t);
 			die('redirecting');
 		}
 		$__rawmsgs[] = 'Failed to create a ticket. <a href="contact.php">Contact us.</a>';

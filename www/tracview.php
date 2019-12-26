@@ -11,19 +11,25 @@ function trac_releasetime($t)
 $id = intval($_GET['id']);
 
 if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comment'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
+	$t = time();
 	++$db_querycount;
-	$res = $db->query('UPDATE tract SET updated=UNIX_TIMESTAMP() WHERE id='.$id);
+	$res = $db->query('UPDATE tract SET updated='.$t.' WHERE id='.$id);
 	if ($res !== false && $res->rowCount()) {
-		$stmt = $db->prepare('INSERT INTO tracc(parent,usr,ip,stamp,type,comment) VALUES('.$id.','.$loggeduser->i.',?,UNIX_TIMESTAMP(),0,?)');
+		$stmt = $db->prepare('INSERT INTO tracc(parent,usr,ip,stamp,type,comment) VALUES('.$id.','.$loggeduser->i.',?,'.$t.',0,?)');
 		$stmt->bindValue(1, $__clientip);
 		$stmt->bindValue(2, $_POST['comment']);
 		$stmt->execute();
 		unset($_POST['_form']);
 
+		// redirecting is kinda unnecessary, but marks the link as visited...
+		header('Location: tracview.php?id='.$id.'#u'.$t);
+
 		include('../inc/echo.php');
 		$gamemsg = 'TRAC: '.$loggeduser->name.' commented on ticket #'.$id;
 		$ircmsg = $gamemsg.' -> '.$BASEPATH.'/tracview.php?id='.$id;
 		echo_send_message_irc_game(1, $ircmsg, $gamemsg);
+
+		die('redirecting');
 	}
 } else if (group_is_admin($usergroups) && isset($_POST['_form'], $_POST['summary'], $_POST['severity'], $_POST['visibility'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
 	++$db_querycount;
@@ -63,22 +69,28 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 		}
 
 		if (count($fields)) {
+			$t = time();
 			++$db_querycount;
-			$stmt = $db->prepare('UPDATE tract SET updated=UNIX_TIMESTAMP(),'.implode($fields, ',').' WHERE id='.$id);
+			$stmt = $db->prepare('UPDATE tract SET updated='.$t.','.implode($fields, ',').' WHERE id='.$id);
 			for ($i = 0; $i < count($values); $i++) {
 				$stmt->bindValue($i + 1, $values[$i]);
 			}
 			$stmt->execute();
 			++$db_querycount;
-			$stmt = $db->prepare('INSERT INTO tracc(parent,usr,ip,stamp,type,comment) VALUES('.$id.','.$loggeduser->i.',?,UNIX_TIMESTAMP(),1,?)');
+			$stmt = $db->prepare('INSERT INTO tracc(parent,usr,ip,stamp,type,comment) VALUES('.$id.','.$loggeduser->i.',?,'.$t.',1,?)');
 			$stmt->bindValue(1, $__clientip);
 			$stmt->bindValue(2, implode($changes, '<br/>'));
 			$stmt->execute();
+
+			// redirecting is kinda unnecessary, but marks the link as visited...
+			header('Location: tracview.php?id='.$id.'#u'.$t);
 
 			include('../inc/echo.php');
 			$gamemsg = 'TRAC: '.$loggeduser->name.' updated ticket #'.$id;
 			$ircmsg = $gamemsg.' -> '.$BASEPATH.'/tracview.php?id='.$id;
 			echo_send_message_irc_game(1, $ircmsg, $gamemsg);
+
+			die('redirected');
 		}
 	} else {
 		$__rawmsgs[] = 'Unknown ticket!';
