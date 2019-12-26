@@ -22,6 +22,7 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 		unset($_POST['_form']);
 
 		// redirecting is kinda unnecessary, but marks the link as visited...
+		// (it will also prevent resubmitting)
 		header('Location: tracview.php?id='.$id.'#u'.$t);
 
 		include('../inc/echo.php');
