@@ -9,5 +9,5 @@ fi
 export PLUGINTYPE=so
 export GCC=gcc
 
-make build && cp out/basdonfly.so ../plugins/basdonfly.so
+make build # && cp out/basdonfly.so ../plugins/basdonfly.so
 
