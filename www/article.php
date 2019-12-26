@@ -101,6 +101,7 @@ $article_id = -1;
 $article_title = 'Article not found';
 $article_redirected_from = null;
 
+$categories = [];
 ++$db_querycount;
 $stmt = $db->prepare('SELECT id,name,title,pageviews,cat FROM art WHERE name=? LIMIT 1');
 $stmt->bindValue(1, $article_name);
