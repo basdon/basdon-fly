@@ -636,7 +636,7 @@ void timecyc_tick()
 			time_m = 0;
 			weather.current = weather.upcoming;
 			weather.upcoming = weather.locked;
-			if (time_h++ >= 24) {
+			if (++time_h >= 24) {
 				time_h = 0;
 			}
 			/*timer1m*/
