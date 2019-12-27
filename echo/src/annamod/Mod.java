@@ -3,12 +3,14 @@
 package annamod;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import net.basdon.anna.api.*;
 import net.basdon.anna.api.IAnna.Output;
 import net.basdon.fly.services.echo.Echo;
 
+import static java.lang.System.arraycopy;
 import static net.basdon.anna.api.Util.*;
 import static net.basdon.fly.services.echo.Echo.*;
 
@@ -26,6 +28,7 @@ static
 private IAnna anna;
 private Echo echo;
 private char[] outtarget;
+private ArrayList<char[]> people_without_permission = new ArrayList<>();
 
 @Override
 public
@@ -110,10 +113,13 @@ public
 boolean on_command(User user, char[] target, char[] replytarget,
                    char[] msg, char[] cmd, char[] params)
 {
-	if (this.echo != null && strcmp(this.outtarget, target)) {
-		ChannelUser cu = anna.find_user(target, user.nick);
-		char prefix = cu == null ? 0 : cu.prefix;
-		this.echo.send_chat_or_action_to_game(false, prefix, user.nick, msg, 0, msg.length);
+	ChannelUser cu;
+	if (this.echo != null && strcmp(this.outtarget, target) &&
+			(cu = this.anna.find_user(target, user.nick)) != null &&
+			has_user_mode_or_higher(cu, this.anna.get_user_channel_modes(), 'v'))
+	{
+		this.echo.send_chat_or_action_to_game(
+			false, cu.prefix, user.nick, msg, 0, msg.length);
 	}
 	if (strcmp(this.outtarget, target)) {
 		if (strcmp(cmd, 'e','c','h','o')) {
@@ -181,6 +187,22 @@ public void on_channelmodechange(Channel chan, User user, int changec, char[] si
 			}
 		}
 		this.echo.send_generic_message(chars(s), Echo.PACK12_IRC_MODE);
+
+		// Reset no permission message when user gets a new mode (so the message will show
+		// again when the mode has been revoked). Note that the mode itself is not checked,
+		// but sending a message too much won't harm.
+		if (users.length > 0) {
+			for (int i = 0; i < types.length; i++) {
+				if (types[i] == 'u' && signs[i] == '+') {
+					for (char[] nick : this.people_without_permission) {
+						if (strcmp(nick, users[i].nick)) {
+							this.people_without_permission.remove(nick);
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -200,12 +222,17 @@ void on_nickchange(User user, char[] oldnick, char[] newnick)
 
 @Override
 public
-void on_action(User user, char[] target, char[] replytarget, char[] act)
+void on_action(User user, char[] target, char[] replytarget, char[] action)
 {
 	if (this.echo != null && user != null && strcmp(this.outtarget, target)) {
 		ChannelUser cu = anna.find_user(target, user.nick);
-		char prefix = cu == null ? 0 : cu.prefix;
-		this.echo.send_chat_or_action_to_game(true, prefix, user.nick, act, 0, act.length);
+		if (cu != null &&
+			has_user_mode_or_higher(cu, this.anna.get_user_channel_modes(), 'v'))
+		{
+			this.echo.send_chat_or_action_to_game(
+				true, cu.prefix, user.nick,
+				action, 0, action.length);
+		}
 	}
 }
 
@@ -261,10 +288,30 @@ void send_player_connection(User user, byte reason)
 public
 void on_message(User user, char[] target, char[] replytarget, char[] msg)
 {
-	if (this.echo != null && user != null && strcmp(this.outtarget, target)) {
-		ChannelUser cu = anna.find_user(target, user.nick);
-		char prefix = cu == null ? 0 : cu.prefix;
-		this.echo.send_chat_or_action_to_game(false, prefix, user.nick, msg, 0, msg.length);
+	ChannelUser cu;
+	if (this.echo != null && user != null && strcmp(this.outtarget, target) &&
+		(cu = this.anna.find_user(target, user.nick)) != null)
+	{
+		if (has_user_mode_or_higher(cu, this.anna.get_user_channel_modes(), 'v')) {
+			this.echo.send_chat_or_action_to_game(
+				false, cu.prefix, user.nick, msg, 0, msg.length);
+		} else {
+			for (char[] peep : this.people_without_permission) {
+				if (strcmp(peep, user.nick)) {
+					return;
+				}
+			}
+			this.people_without_permission.add(user.nick);
+
+			String noticemsg =
+				" :your message won't be relayed in-game unless you "
+				+ "have a +v channel mode";
+			char[] notice = new char[7 + user.nick.length + 73];
+			set(notice, 0, 'N','O','T','I','C','E',' ');
+			arraycopy(user.nick, 0, notice, 7, user.nick.length);
+			arraycopy(noticemsg.toCharArray(), 0, notice, 7 + user.nick.length, 73);
+			this.anna.send_raw(notice, 0, notice.length);
+		}
 	}
 }
 
