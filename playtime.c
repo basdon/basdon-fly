@@ -6,8 +6,10 @@
 #include "login.h"
 #include "playerdata.h"
 #include "playtime.h"
+#include "prefs.h"
 #include "score.h"
 #include "timer.h"
+#include "vehicles.h"
 #include "time/time.h"
 #include <string.h>
 
@@ -27,9 +29,13 @@ playtime, one would do time_timestamp - value.
 static int uncommitted_playtime[MAX_PLAYERS];
 
 /**
-Updates a player's last seen (usr and ses) and total/actual time value in db
+Updates some player data/stats values in db
 
-This function first checks if the player has a valid userid and sessionid
+Updates last seen (usr and session when on a valid session) and total/actual
+time value in db, along with other player stats (score, cash, ..).
+
+This function first checks if the player has a valid userid. Also checks for a
+valid session id before updating session values.
 
 When isdisconnect is 0, 30 gets added to player's total time (inaccurate),
 otherwise player's totaltime is set to sum of session times (accurate).
@@ -71,10 +77,16 @@ void playtime_update_player_last_seen(int playerid, int isdisconnecting)
 	csprintf(buf4096,
 		"UPDATE usr "
 		"SET lastseengame=UNIX_TIMESTAMP(),onlinetime=onlinetime+%d,"
-		"playtime=playtime+%d "
+		"playtime=playtime+%d,"
+		"score=%d,cash=%d,distance=%f,flighttime=%d,prefs=%d "
 		"WHERE i=%d",
 		isdisconnecting ? 0 : 30,
 		playtime_to_add,
+		score_update_score(playerid),
+		money_get(playerid),
+		playerodoKM[playerid],
+		score_flight_time[playerid],
+		prefs[playerid],
 		userid[playerid]);
 	NC_mysql_tquery_nocb(buf4096a);
 

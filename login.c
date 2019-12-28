@@ -889,19 +889,6 @@ void login_on_player_disconnect(int playerid, int reason)
 {
 	char *b;
 
-	if (userid[playerid] != -1) {
-		csprintf(buf4096,
-			"UPDATE usr SET score=%d,cash=%d,distance=%f,"
-			"flighttime=%d,prefs=%d "
-			"WHERE i=%d",
-			NC_GetPlayerScore(playerid),
-			money_get(playerid),
-			playerodoKM[playerid],
-			score_flight_time[playerid],
-			prefs[playerid],
-			userid[playerid]);
-		NC_mysql_tquery_nocb(buf4096a);
-	}
 	if (loggedstatus[playerid]) {
 		b = cbuf64;
 		b += sprintf(b,
