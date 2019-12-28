@@ -5,7 +5,7 @@
 #include "basdon.h"
 #include "login.h"
 #include "playerdata.h"
-#include "playtime.h"
+#include "playerstats.h"
 #include "prefs.h"
 #include "score.h"
 #include "timer.h"
@@ -44,7 +44,7 @@ otherwise player's totaltime is set to sum of session times (accurate).
 @param isdisconnecting is this call made from OnPlayerDisconnect?
 */
 static
-void playtime_update_player_last_seen(int playerid, int isdisconnecting)
+void playerstats_commit_to_db(int playerid, int isdisconnecting)
 {
 	unsigned long now;
 	int temp_ms, playtime_to_add;
@@ -114,21 +114,21 @@ void playtime_update_player_last_seen(int playerid, int isdisconnecting)
 }
 
 static
-int playtime_update_players_seen(void *data)
+int playerstats_update_all(void *data)
 {
 	int n = playercount;
 	while (n--) {
-		playtime_update_player_last_seen(players[n], 0);
+		playerstats_commit_to_db(players[n], 0);
 	}
 	return LAST_SEEN_TIMER_VALUE;
 }
 
-void playtime_init()
+void playerstats_init()
 {
-	timer_set(LAST_SEEN_TIMER_VALUE, playtime_update_players_seen, NULL);
+	timer_set(LAST_SEEN_TIMER_VALUE, playerstats_update_all, NULL);
 }
 
-void playtime_check_for_afk()
+void playerstats_check_for_afk()
 {
 	unsigned long now = time_timestamp();
 	unsigned long asecondago = now - 1100;
@@ -146,7 +146,7 @@ void playtime_check_for_afk()
 	}
 }
 
-void playtime_on_player_connect(int playerid)
+void playerstats_on_player_connect(int playerid)
 {
 	/*not changing lastupdate because player will be marked afk anyways*/
 	/*player is afk because they're going into class selection*/
@@ -155,12 +155,12 @@ void playtime_on_player_connect(int playerid)
 	uncommitted_playtime[playerid] = 0;
 }
 
-void playtime_on_player_disconnect(int playerid)
+void playerstats_on_player_disconnect(int playerid)
 {
-	playtime_update_player_last_seen(playerid, 1);
+	playerstats_commit_to_db(playerid, 1);
 }
 
-void playtime_on_player_update(int playerid)
+void playerstats_on_player_update(int playerid)
 {
 	unsigned long now = time_timestamp();
 

@@ -19,7 +19,7 @@
 #include "objects.h"
 #include "panel.h"
 #include "playerdata.h"
-#include "playtime.h"
+#include "playerstats.h"
 #include "pm.h"
 #include "prefs.h"
 #include "protips.h"
@@ -114,7 +114,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 		dev_missions_update_closest_point();
 #endif /*DEV*/
 		panel_timed_update();
-		playtime_check_for_afk();
+		playerstats_check_for_afk();
 
 		timecyc_tick();
 	}

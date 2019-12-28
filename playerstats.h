@@ -13,11 +13,11 @@ Value holding timestamp of last update per player.
 */
 extern unsigned long lastupdate[MAX_PLAYERS];
 
-void playtime_init();
+void playerstats_init();
 /**
 Must be called from timer100
 */
-void playtime_check_for_afk();
-void playtime_on_player_connect(int playerid);
-void playtime_on_player_disconnect(int playerid);
-void playtime_on_player_update(int playerid);
+void playerstats_check_for_afk();
+void playerstats_on_player_connect(int playerid);
+void playerstats_on_player_disconnect(int playerid);
+void playerstats_on_player_update(int playerid);

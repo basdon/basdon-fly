@@ -208,7 +208,7 @@ exit:
 	missions_init();
 	objs_on_gamemode_init();
 	panel_on_gamemode_init();
-	playtime_init();
+	playerstats_init();
 	protips_init();
 	spawn_init(); /*MUST run after airports_init*/
 	svp_init();
@@ -311,7 +311,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	money_set(playerid, 0);
 	objs_on_player_connect(playerid);
 	panel_on_player_connect(playerid);
-	playtime_on_player_connect(playerid);
+	playerstats_on_player_connect(playerid);
 	pm_on_player_connect(playerid);
 	prefs_on_player_connect(playerid);
 	score_on_player_connect(playerid);
@@ -380,7 +380,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	maps_on_player_disconnect(playerid);
 	missions_on_player_disconnect(playerid);
 	panel_remove_panel_player(playerid);
-	playtime_on_player_disconnect(playerid);
+	playerstats_on_player_disconnect(playerid);
 	pm_on_player_disconnect(playerid);
 	veh_on_player_disconnect(playerid);
 
@@ -542,7 +542,7 @@ cell AMX_NATIVE_CALL B_OnPlayerUpdate(AMX *amx, cell *params)
 		}
 		return 0;
 	}
-	playtime_on_player_update(playerid);
+	playerstats_on_player_update(playerid);
 	timecyc_on_player_update(playerid);
 	return 1;
 }

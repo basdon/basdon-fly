@@ -284,11 +284,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\playtime.c"
+				RelativePath="..\playerstats.c"
 				>
 			</File>
 			<File
-				RelativePath="..\playtime.h"
+				RelativePath="..\playerstats.h"
 				>
 			</File>
 			<File
