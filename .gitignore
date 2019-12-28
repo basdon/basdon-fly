@@ -1,6 +1,6 @@
 /out/
-/vc2005/
-/vs2013/
+/vc2005/*
+!/vc2005/basdonfly.vcproj
 /time/*
 !/time/*.c
 !/time/*.h

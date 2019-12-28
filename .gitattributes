@@ -1,3 +1,4 @@
 * eol=lf
+vc2005/basdonfly.vcproj eol=crlf
 *.pwn linguist-language=PAWN
 vendor/* linguist-vendored
