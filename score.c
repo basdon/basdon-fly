@@ -15,11 +15,12 @@ void score_on_player_connect(int playerid)
 
 int score_update_score(int playerid)
 {
-	int score;
+	int ft, pt, score;
 
-	score =
-		score_flight_time[playerid] / 60
-		+ score_play_time[playerid] / 60 / 5;
+	ft = score_flight_time[playerid];
+	pt = score_play_time[playerid];
+
+	score = (ft + (pt - ft) / 5) / 60;
 	NC_SetPlayerScore(playerid, score);
 	return score;
 }
