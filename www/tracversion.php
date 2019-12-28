@@ -30,9 +30,11 @@ if (group_is_owner($usergroups) && isset($_GET['rel'], $_GET['dorelease'])) {
 		$stmt->execute();
 	}
 
+	$comment = 'status: <span class="state3">'.$trac_states[3].'</span> => <span class="state4">'.$trac_states[4].'</span>';
+	$comment .= '<br/>release: <a href="tracversion.php?rel='.$rel.'">'.trac_releasetime($rel).'</a>';
 	$stmt = $db->prepare('INSERT INTO tracc(parent,usr,ip,stamp,type,comment) VALUES(?,'.$loggeduser->i.',?,'.$rel.',1,?)');
 	$stmt->bindValue(2, $__clientip);
-	$stmt->bindValue(3, 'status: <span class="state3">'.$trac_states[3].'</span> => <span class="state4">'.$trac_states[4].'</span>');
+	$stmt->bindValue(3, $comment);
 	foreach ($tickets as $t) {
 		++$db_querycount;
 		$stmt->bindValue(1, $t->id);
