@@ -7,7 +7,7 @@
 #define CLASS_AID 8
 #define CLASS_TRUCKER 16
 
-#define NUMCLASSES 5
+#define NUMCLASSES /*5*/ 4
 
 #define SPAWN_WEAPON_1 WEAPON_CAMERA
 #define SPAWN_AMMO_1 3036

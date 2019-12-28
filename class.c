@@ -20,7 +20,7 @@ const int CLASSMAPPING[] = {
 	CLASS_RESCUE,
 	CLASS_ARMY,
 	CLASS_AID,
-	CLASS_TRUCKER,
+	/*CLASS_TRUCKER,*/
 };
 
 const int CLASS_SKINS[] = {
@@ -28,7 +28,7 @@ const int CLASS_SKINS[] = {
 	275,
 	287,
 	287,
-	133,
+	/*133,*/
 };
 
 static const char *CLASS_NAMES[] = {
@@ -36,7 +36,7 @@ static const char *CLASS_NAMES[] = {
 	"~b~~h~~h~Rescue worker",
 	"~g~~h~Army",
 	"~r~~h~~h~Aid worker",
-	"~y~Trucker",
+	/*"~y~Trucker",*/
 };
 
 static const int CLASS_COLORS[] = {
@@ -44,7 +44,7 @@ static const int CLASS_COLORS[] = {
 	0x7087ffff,
 	0x519c42ff,
 	0xff3740ff,
-	0xe2c063ff,
+	/*0xe2c063ff,*/
 };
 
 int classid[MAX_PLAYERS];
