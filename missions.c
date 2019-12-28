@@ -1035,7 +1035,7 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 
 	paymp = missions_get_vehicle_paymp(miss->veh->model);
 	ptax = -calculate_airport_tax(miss->endpoint->ap, miss->missiontype);
-	pdistance = 500 + (int) (miss->distance * 1.135f);
+	pdistance = 500 + (int) (miss->distance * 1.935f);
 	pdistance = (int) (pdistance * paymp);
 	if (miss->missiontype & PASSENGER_MISSIONTYPES) {
 		if (miss->passenger_satisfaction == 100) {
