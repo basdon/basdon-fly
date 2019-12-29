@@ -192,20 +192,24 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 		amx->hlw += tmp;
 		amx->stk += tmp;
 		amx->stp += tmp;
+		/*samp core doesn't seem to use amx_SetString or amx_GetString
+		so the data offset needs to be adjusted*/
 		/*linux binary seems to have assertions enabled, so the code
 		segment also needs to be relocated, yippie*/
 		/*(it might be enough to just change the cod value to make the
 		assertion `amx->cip >= 4 && amx->cip < (hdr->dat - hdr->cod)`
 		pass, but just copy it as a whole for now)*/
 		tmp = hdr->dat - hdr->cod;
-		/*samp core doesn't seem to use amx_SetString or amx_GetString
-		so the data offset needs to be adjusted*/
 		hdr->dat = (int) &fakeamx._dat - (int) hdr;
 		if (tmp > sizeof(fakeamx._cod)) {
 			logprintf("ERR: too small code segment! "
 				"(missing %d bytes)",
 				tmp - sizeof(fakeamx._cod));
 			return 0;
+		} else if (sizeof(fakeamx._cod) > tmp) {
+			logprintf("INFO: large code segment "
+				"(excess %d bytes)",
+				sizeof(fakeamx._cod) - tmp);
 		}
 		memcpy(fakeamx._cod, amx->base + hdr->cod, tmp);
 		hdr->cod = (int) &fakeamx._cod - (int) hdr;
