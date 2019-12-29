@@ -7,7 +7,7 @@
 #include "game_sa.h"
 #include "heartbeat.h"
 #include "missions.h"
-#include "playtime.h"
+#include "playerstats.h"
 #include "timecyc.h"
 #include "timer.h"
 #include "vehicles.h"

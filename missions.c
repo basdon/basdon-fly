@@ -15,7 +15,7 @@
 #include "nav.h"
 #include "panel.h"
 #include "playerdata.h"
-#include "playtime.h"
+#include "playerstats.h"
 #include "prefs.h"
 #include "timer.h"
 #include "vehicles.h"
