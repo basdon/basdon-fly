@@ -223,8 +223,8 @@ int cmd_spray(CMDPARAMS)
 			NC_SendClientMessage(playerid, COL_WARN, buf144a);
 			return 1;
 		}
-		col1 = nc_params + 1;
-		col2 = nc_params + 2;
+		col1 = nc_params + 2;
+		col2 = nc_params + 3;
 		if (cmd_get_int_param(cmdtext, &parseidx, col1)) {
 			if (!cmd_get_int_param(cmdtext, &parseidx, col2)) {
 				goto rand2nd;
@@ -234,7 +234,8 @@ int cmd_spray(CMDPARAMS)
 rand2nd:
 			*col2 = NC_random(256);
 		}
-		NC_PARS(2);
+		NC_PARS(3);
+		nc_params[1] = vehicleid;
 		NC(n_ChangeVehicleColor);
 		if (veh != NULL) {
 			veh->col1 = (unsigned char) *col1;
