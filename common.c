@@ -173,7 +173,7 @@ int common_GetVehiclePosRot(int vehicleid, struct vec4 *pos)
 	pos->coords.y = *fbuf64;
 	pos->coords.z = *fbuf144;
 	NC_PARS(2);
-	res = NC(n_GetVehiclePos);
+	res = NC(n_GetVehicleZAngle);
 	pos->r = *fbuf32;
 	return res;
 }
