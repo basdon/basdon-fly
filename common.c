@@ -2,6 +2,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "missions.h"
 #include <string.h>
 
 char kick_update_delay[MAX_PLAYERS];
@@ -208,6 +209,7 @@ int common_GetVehicleVelocity(int vehicleid, struct vec3 *vel)
 
 void common_on_vehicle_respawn_or_destroy(int vehicleid, struct dbvehicle *veh)
 {
+	missions_on_vehicle_destroyed_or_respawned(veh);
 	nav_reset_for_vehicle(vehicleid);
 }
 

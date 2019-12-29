@@ -135,6 +135,10 @@ void missions_on_player_disconnect(int playerid);
 */
 int missions_on_player_enter_race_checkpoint(int playerid);
 /**
+Call when a vehicle is destroyed or respawned.
+*/
+void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh);
+/**
 Call when the vehicle was refueled.
 */
 void missions_on_vehicle_refueled(int vehicleid, float refuelamount);

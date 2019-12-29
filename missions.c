@@ -643,6 +643,28 @@ void missions_end_unfinished(struct MISSION *mission, int playerid, int reason)
 	missions_cleanup(mission, playerid);
 }
 
+void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh)
+{
+	struct MISSION *mission;
+	int i, playerid;
+
+	for (i = 0; i < playercount; i++) {
+		playerid = players[i];
+		mission = activemission[playerid];
+		if (mission != NULL && mission->veh == veh) {
+			B144(WARN" Your mission vehicle has been destroyed, "
+				"your mission has been aborted and you have "
+				"been fined $"EQ(MISSION_CANCEL_FINE)".");
+			NC_SendClientMessage(playerid, COL_WARN, buf144a);
+			NC_DisablePlayerRaceCheckpoint(playerid);
+			money_take(playerid, MISSION_CANCEL_FINE);
+			missions_end_unfinished(mission,
+				playerid, MISSION_STATE_ABANDONED);
+			return;
+		}
+	}
+}
+
 void missions_on_player_connect(int playerid)
 {
 	NC_PARS(4);
@@ -1402,7 +1424,7 @@ int missions_cmd_cancelmission(CMDPARAMS)
 		} else {
 			NC_DisablePlayerRaceCheckpoint(playerid);
 		}
-		money_take(playerid, 5000);
+		money_take(playerid, MISSION_CANCEL_FINE);
 		missions_end_unfinished(mission,
 			playerid, MISSION_STATE_DECLINED);
 	} else {
