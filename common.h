@@ -110,8 +110,8 @@ void ctoai(char *dstsrc);
 #define DEG_TO_RAD (M_PI / 180.0f)
 
 #define CLAMP(X,L,U) ((X < L) ? L : ((X > U) ? U : X))
-#define Q(X) #X
-#define EQ(X) Q(X)
+#define Q_USE_EQ_INSTEAD(X) #X
+#define EQ(X) Q_USE_EQ_INSTEAD(X)
 
 #define MK_PLAYER_CC(PLAYERID) \
 	((_cc[PLAYERID] & 0x003FFFFF) | (PLAYERID << 22))

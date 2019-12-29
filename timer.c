@@ -35,7 +35,7 @@ void timer_set(int interval, timer_cb cb, void *data)
 #endif /*DEV*/
 
 	if (numtimers >= MAX_TIMERS - 1) {
-		logprintf("ERR: timer limit "Q(MAX_TIMERS)" reached");
+		logprintf("ERR: timer limit "EQ(MAX_TIMERS)" reached");
 		return;
 	}
 
