@@ -100,7 +100,9 @@ AMX_NATIVE n_SetPlayerWeather;
 AMX_NATIVE n_SetSpawnInfo;
 AMX_NATIVE n_SetVehicleHealth;
 AMX_NATIVE n_SetVehicleParamsEx;
+AMX_NATIVE n_SetVehiclePos;
 AMX_NATIVE n_SetVehicleToRespawn;
+AMX_NATIVE n_SetVehicleZAngle;
 AMX_NATIVE n_ShowPlayerDialog_;
 AMX_NATIVE n_SpawnPlayer_;
 AMX_NATIVE n_TextDrawAlignment;
@@ -245,7 +247,9 @@ int natives_find()
 		N(SetSpawnInfo),
 		N(SetVehicleHealth),
 		N(SetVehicleParamsEx),
+		N(SetVehiclePos),
 		N(SetVehicleToRespawn),
+		N(SetVehicleZAngle),
 		N_(ShowPlayerDialog),
 		N_(SpawnPlayer),
 		N(TogglePlayerClock),

@@ -162,6 +162,7 @@ void veh_init()
 		veh->col2 = (unsigned char) (*fld = 8, NC(n_cache_get_field_i));
 		veh->odoKM = (*fld = 9, NCF(n_cache_get_field_f));
 		veh->spawnedvehicleid = 0;
+		veh->fuel = model_fuel_capacity(veh->model);
 		if (veh->owneruserid) {
 			NC_PARS(3);
 			nc_params[3] = buf32a;
@@ -180,21 +181,20 @@ void veh_init()
 
 			NC_PARS(9);
 			nc_params[1] = veh->model;
-			nc_paramf[2] = veh->pos.coords.x;
-			nc_paramf[3] = veh->pos.coords.y;
-			nc_paramf[4] = veh->pos.coords.z;
+			nc_paramf[2] = nc_paramf[3] = nc_paramf[4] = FLOAT_PINF;
 			nc_paramf[5] = veh->pos.r;
-			nc_params[6] = veh->col1;
-			nc_params[7] = veh->col2;
+			nc_params[6] = nc_params[7] = 126;
 			nc_params[8] = VEHICLE_RESPAWN_DELAY;
 			nc_params[9] = 0; /*addsiren*/
 			vehicleid = NC(n_AddStaticVehicleEx);
 			if (vehicleid != INVALID_VEHICLE_ID) {
 				veh->spawnedvehicleid = vehicleid;
 				gamevehicles[vehicleid].dbvehicle = veh;
+				NC_PARS(1);
+				nc_params[1] = vehicleid;
+				NC(n_SetVehicleToRespawn);
 			}
 		}
-		veh->fuel = model_fuel_capacity(veh->model);
 		veh++;
 		numdbvehicles++;
 	}
@@ -321,6 +321,30 @@ void veh_dispose()
         dbvehicles = NULL;
 }
 
+int veh_create(struct dbvehicle *veh)
+{
+	int vehicleid;
+
+	NC_PARS(9);
+	nc_params[1] = veh->model;
+	nc_paramf[2] = nc_paramf[3] = nc_paramf[4] = FLOAT_PINF;
+	nc_paramf[5] = veh->pos.r;
+	nc_params[6] = nc_params[7] = 126;
+	nc_params[8] = VEHICLE_RESPAWN_DELAY;
+	nc_params[9] = 0; /*addsiren*/
+	vehicleid = NC(n_CreateVehicle_);
+	if (vehicleid != INVALID_VEHICLE_ID) {
+		gamevehicles[vehicleid].dbvehicle = veh;
+		gamevehicles[vehicleid].reincarnation++;
+		gamevehicles[vehicleid].need_recreation = 0;
+		veh->spawnedvehicleid = vehicleid;
+		NC_PARS(1);
+		nc_params[1] = vehicleid;
+		NC(n_SetVehicleToRespawn);
+	}
+	return vehicleid;
+}
+
 /**
 Prevent player from entering or being in vehicle and send them a message.
 
@@ -397,23 +421,7 @@ void veh_spawn_player_vehicles(int playerid)
 	n = numdbvehicles;
 	while (n--) {
 		if (veh->owneruserid == userid[playerid]) {
-			NC_PARS(9);
-			nc_params[1] = veh->model;
-			nc_paramf[2] = veh->pos.coords.x;
-			nc_paramf[3] = veh->pos.coords.y;
-			nc_paramf[4] = veh->pos.coords.z;
-			nc_paramf[5] = veh->pos.r;
-			nc_params[6] = veh->col1;
-			nc_params[7] = veh->col2;
-			nc_params[8] = VEHICLE_RESPAWN_DELAY;
-			nc_params[9] = 0; /*addsiren*/
-			vehicleid = NC(n_CreateVehicle_);
-			if (vehicleid != INVALID_VEHICLE_ID) {
-				gamevehicles[vehicleid].dbvehicle = veh;
-				gamevehicles[vehicleid].reincarnation++;
-				gamevehicles[vehicleid].need_recreation = 0;
-				veh->spawnedvehicleid = vehicleid;
-			}
+			veh_create(veh);
 		}
 		veh++;
 	}
@@ -671,28 +679,6 @@ void veh_timed_1s_update()
 	}
 }
 
-int veh_CreateVehicle(int model, struct vec4 pos, unsigned char col1,
-	unsigned char col2, int respawn_delay, int addsiren)
-{
-	int vehicleid;
-
-	NC_PARS(9);
-	nc_params[1] = model;
-	nc_paramf[2] = pos.coords.x;
-	nc_paramf[3] = pos.coords.y;
-	nc_paramf[4] = pos.coords.z;
-	nc_paramf[5] = pos.r;
-	nc_params[6] = col1;
-	nc_params[7] = col2;
-	nc_params[8] = respawn_delay;
-	nc_params[9] = addsiren;
-	vehicleid = NC(n_CreateVehicle_);
-	gamevehicles[vehicleid].dbvehicle = NULL;
-	gamevehicles[vehicleid].reincarnation++;
-	gamevehicles[vehicleid].need_recreation = 0;
-	return vehicleid;
-}
-
 int veh_DestroyVehicle(int vehicleid)
 {
 	if (gamevehicles[vehicleid].dbvehicle) {
@@ -706,47 +692,14 @@ int veh_DestroyVehicle(int vehicleid)
 	so no need to destroy labels here*/
 }
 
-/**
-Creates a vehicle from a dbvehicle struct.
-Makes sure references from vehicleid to db vehicle are updated.
-*/
-static
-int veh_create_from_dbvehicle(struct dbvehicle *veh)
+void veh_on_vehicle_spawn(struct dbvehicle *veh)
 {
-	int vehicleid = veh_CreateVehicle(
-		veh->model, veh->pos, veh->col1, veh->col2,
-		VEHICLE_RESPAWN_DELAY, 0);
-	veh->spawnedvehicleid = vehicleid;
-	gamevehicles[vehicleid].dbvehicle = veh;
-	return vehicleid;
-}
-
-int veh_on_vehicle_spawn(int vehicleid)
-{
-	struct dbvehicle *veh;
 	float min_fuel;
 
-	veh = gamevehicles[vehicleid].dbvehicle;
-
-	if (veh) {
-		if (gamevehicles[vehicleid].need_recreation) {
-			veh_DestroyVehicle(vehicleid);
-			vehicleid = veh_create_from_dbvehicle(veh);
-			if (vehicleid == INVALID_VEHICLE_ID) {
-				/*expect things to crash*/
-				logprintf("ERR: veh_OnVehicleSpawn: failed "
-					  "to recreate vehicle");
-			}
-		}
-		min_fuel = model_fuel_capacity(veh->model) * .25f;
-		if (veh->fuel < min_fuel) {
-			veh->fuel = min_fuel;
-		}
+	min_fuel = model_fuel_capacity(veh->model) * .25f;
+	if (veh->fuel < min_fuel) {
+		veh->fuel = min_fuel;
 	}
-	/*this might've been already increased (due to recreate)
-	but it doesn't matter, it just needs to change*/
-	gamevehicles[vehicleid].reincarnation++;
-	return vehicleid;
 }
 
 /**

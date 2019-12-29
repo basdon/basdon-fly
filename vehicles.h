@@ -36,8 +36,8 @@ struct vehicle {
 	/**
 	Flag denoting if this vehicle needs to be recreated. This should be
 	checked whenever the vehicle is respawned (see OnVehicleSpawn).
-	Recreation is needed when some vehicle properties change, like spawn
-	position or colors.
+	Recreation is needed when the spawn rotation changed, because that can't
+	be set when there is no passenger...
 	*/
 	char need_recreation;
 };
@@ -71,6 +71,16 @@ OnGameModeExit.
 */
 int veh_commit_next_vehicle_odo_to_db();
 /**
+Create a vehicle from given dbvehicle.
+
+Will create the vehicle with bogus position and colors, then respawns the
+vehicle. The rotation is instantly correct because that can't be changed
+afterwards.
+
+@return vehicle id (might be INVALID_VEHICLE_ID)
+*/
+int veh_create(struct dbvehicle *veh);
+/**
 Free memory
 */
 void veh_dispose();
@@ -92,13 +102,6 @@ be NULL when this functions returns 0.
 */
 int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh);
 float model_fuel_capacity(short modelid);
-/**
-Creates a vehicle (see CreateVehicle doc).
-
-@remarks Resets values of gamevehicles struct reflecting the created vehicle.
-*/
-int veh_CreateVehicle(int model, struct vec4 pos, unsigned char col1,
-	unsigned char col2, int respawn_delay, int addsiren);
 int veh_DestroyVehicle(int vehicleid);
 void veh_on_player_connect(int playerid);
 void veh_on_player_disconnect(int playerid);
@@ -119,7 +122,7 @@ this won't trigger a OnPlayerStateChange.
 */
 void veh_on_player_now_driving(int playerid, int vehicleid);
 void veh_on_player_state_change(int, int, int);
-int veh_on_vehicle_spawn(int vehicleid);
+void veh_on_vehicle_spawn(struct dbvehicle *veh);
 void veh_on_vehicle_stream_in(int vehicleid, int forplayerid);
 void veh_on_vehicle_stream_out(int vehicleid, int forplayerid);
 /**

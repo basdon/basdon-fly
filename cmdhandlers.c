@@ -152,6 +152,7 @@ int cmd_park(CMDPARAMS)
 {
 	struct dbvehicle *veh;
 	int vehicleid;
+	float lastrot;
 
 	vehicleid = NC_GetPlayerVehicleID(playerid);
 	if (vehicleid) {
@@ -162,6 +163,7 @@ int cmd_park(CMDPARAMS)
 			NC_SendClientMessage(playerid, COL_WARN, buf144a);
 			return 1;
 		}
+		lastrot = veh->pos.r;
 		common_GetVehiclePosRot(vehicleid, &veh->pos);
 		if (356.0f < veh->pos.r || veh->pos.r < 4.0f) {
 			veh->pos.r = 0.0f;
@@ -172,7 +174,9 @@ int cmd_park(CMDPARAMS)
 		} else if (266.0f < veh->pos.r && veh->pos.r < 274.0f) {
 			veh->pos.r = 270.0f;
 		}
-		gamevehicles[vehicleid].need_recreation = 1;
+		if (fabs(lastrot - veh->pos.r) > 3.0f) {
+			gamevehicles[vehicleid].need_recreation = 1;
+		}
 		csprintf(buf144,
 			"UPDATE veh SET x=%f,y=%f,z=%f,r=%f WHERE i=%d",
 			veh->pos.coords.x,
@@ -250,7 +254,6 @@ rand2nd:
 		if (veh != NULL) {
 			veh->col1 = (unsigned char) *col1;
 			veh->col2 = (unsigned char) *col2;
-			gamevehicles[vehicleid].need_recreation = 1;
 			csprintf(buf144,
 				"UPDATE veh SET col1=%d,col2=%d WHERE i=%d",
 				veh->col1,
