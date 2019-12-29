@@ -4,6 +4,7 @@
 #include "common.h"
 #include "basdon.h"
 #include "login.h"
+#include "money.h"
 #include "playerdata.h"
 #include "playerstats.h"
 #include "prefs.h"
