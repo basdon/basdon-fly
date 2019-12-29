@@ -89,6 +89,12 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 	case DIALOG_GUESTREGISTER_CONFIRMPASS:
 		guestreg_dlg_register_confirmpass(pid, res, PARAM(5), ia);
 		goto ret;
+	case DIALOG_VEHINFO_VEHINFO:
+		admin_dlg_vehinfo_response(pid, res, listitem);
+		goto ret;
+	case DIALOG_VEHINFO_ASSIGNAP:
+		admin_dlg_vehinfo_assign_response(pid, res, listitem);
+		goto ret;
 	}
 
 ret:

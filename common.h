@@ -119,6 +119,10 @@ void ctoai(char *dstsrc);
 #define PLAYER_CC_GETID(VALUE) (((unsigned int) VALUE >> 22) & 0x3FF)
 #define PLAYER_CC_CHECK(VALUE,PLAYERID) \
 	(_cc[PLAYERID] == ((unsigned int) VALUE & 0x003FFFFF))
+#define PLAYER_CC_GET_CHECK_RETURN(VALUE,PLAYERID) \
+	PLAYERID=PLAYER_CC_GETID(VALUE);\
+	if(!PLAYER_CC_CHECK(VALUE,PLAYERID))return;
+
 
 #define ECOL_INFO "{3498db}"
 #define ECOL_WARN "{e84c3d}"

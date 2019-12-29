@@ -7,6 +7,9 @@
 struct dbvehicle {
 	int id;
 	short model;
+	/**
+	userid of the player that owns this vehicle, or 0 if public
+	*/
 	int owneruserid;
 	struct vec4 pos;
 	unsigned char col1, col2;
