@@ -10,6 +10,23 @@
 #include "vehicles.h"
 
 /*-------------------------------------------*/
+/*//respawn*/
+
+/**
+Respawns the vehicle the player is in.
+*/
+int cmd_admin_respawn(CMDPARAMS)
+{
+	int vehicleid;
+
+	vehicleid = NC_GetPlayerVehicleID(playerid);
+	if (vehicleid) {
+		NC_SetVehicleToRespawn(vehicleid);
+	}
+	return 1;
+}
+
+/*-------------------------------------------*/
 /*//vehinfo*/
 
 static

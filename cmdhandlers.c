@@ -7,21 +7,6 @@ for the IN_CMD macro to only compile this
 when we're inside cmd.c*/
 #ifdef IN_CMD
 
-/**
-Respawns the vehicle the player is in.
-*/
-static
-int cmd_admin_respawn(CMDPARAMS)
-{
-	int vehicleid;
-
-	vehicleid = NC_GetPlayerVehicleID(playerid);
-	if (vehicleid) {
-		NC_SetVehicleToRespawn(vehicleid);
-	}
-	return 1;
-}
-
 static
 int cmd_at400(CMDPARAMS)
 {
