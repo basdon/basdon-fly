@@ -626,7 +626,14 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 	nc_paramf[4] = veh->pos.coords.z;
 	NC(n_SetVehiclePos);
 
-	nav_reset_for_vehicle(vehicleid);
+	/*     WARNING
+	if you're looking for a place to clean up stuff,
+	check common_on_vehicle_respawn_or_destroyed
+	since OnVehicleSpawn might destroy and recreate a vehicle, in which
+	case code will not reach this point for the vehicle you're expecting
+	since the vehicle has been destroyed.*/
+
+	common_on_vehicle_respawn_or_destroy(vehicleid, veh);
 	veh_on_vehicle_spawn(veh);
 
 	return 1;

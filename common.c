@@ -206,6 +206,11 @@ int common_GetVehicleVelocity(int vehicleid, struct vec3 *vel)
 	return res;
 }
 
+void common_on_vehicle_respawn_or_destroy(int vehicleid, struct dbvehicle *veh)
+{
+	nav_reset_for_vehicle(vehicleid);
+}
+
 int common_SetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p)
 {
 	NC_PARS(8);

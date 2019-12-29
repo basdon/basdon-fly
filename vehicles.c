@@ -681,8 +681,12 @@ void veh_timed_1s_update()
 
 int veh_DestroyVehicle(int vehicleid)
 {
-	if (gamevehicles[vehicleid].dbvehicle) {
-		gamevehicles[vehicleid].dbvehicle->spawnedvehicleid = 0;
+	struct dbvehicle *veh;
+
+	veh = gamevehicles[vehicleid].dbvehicle;
+	common_on_vehicle_respawn_or_destroy(vehicleid, veh);
+	if (veh != NULL) {
+		veh->spawnedvehicleid = 0;
 		gamevehicles[vehicleid].dbvehicle = NULL;
 	}
 	NC_PARS(1);

@@ -362,6 +362,16 @@ Will use buf32, buf64, buf144.
 */
 int common_GetVehicleVelocity(int vehicleid, struct vec3 *vel);
 /**
+Callback-like for DestroyVehicle and OnVehicleSpawn (without recreation) events.
+
+In the case of OnVehicleSpawn WITH recreation, DestroyVehicle is used, which
+also calls this function.
+
+In the case of DestroyVehicle, this function is
+called _before_ dbvehicle <-> gamevehicle links are cleared.
+*/
+void common_on_vehicle_respawn_or_destroy(int vehicleid, struct dbvehicle *veh);
+/**
 Sets vehicle params of given vehicle into given VEHICLEPARAMS struct.
 
 Uses buf32.
