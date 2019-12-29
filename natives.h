@@ -38,6 +38,7 @@ extern AMX_NATIVE n_GetVehicleHealth_;
 extern AMX_NATIVE n_GetVehicleModel;
 extern AMX_NATIVE n_GetVehicleParamsEx;
 extern AMX_NATIVE n_GetVehiclePos;
+extern AMX_NATIVE n_GetVehiclePoolSize;
 extern AMX_NATIVE n_GetVehicleRotationQuat;
 extern AMX_NATIVE n_GetVehicleVelocity;
 extern AMX_NATIVE n_GetVehicleZAngle;
@@ -280,6 +281,9 @@ extern cell tmpfloat;
 #define NC_GetVehicleZAngle(VEHICLEID,FR) \
 	(NC_PARS_(2)nc_params[1]=VEHICLEID,nc_params[2]=FR,\
 	n_GetVehicleZAngle(amx,nc_params))
+
+#define NC_GetVehiclePoolSize() (NC_PARS_(0)\
+	n_GetVehiclePoolSize(amx,nc_params))
 
 #define NC_GivePlayerWeapon(PLAYERID,WEAPONID,AMMO) (NC_PARS_(3)\
 	nc_params[1]=PLAYERID,nc_params[2]=WEAPONID,nc_params[3]=AMMO,\

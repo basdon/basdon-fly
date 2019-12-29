@@ -94,6 +94,14 @@ float common_dist_sq(struct vec3 a, struct vec3 b)
 	return dx * dx + dy * dy + dz * dz;
 }
 
+float common_xy_dist_sq(struct vec3 a, struct vec3 b)
+{
+	float dx, dy, dz;
+	dx = a.x - b.x;
+	dy = a.y - b.y;
+	return dx * dx + dy * dy;
+}
+
 void common_set_vehicle_engine(int vehicleid, int enginestatus)
 {
 	struct VEHICLEPARAMS params;

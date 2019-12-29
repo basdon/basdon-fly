@@ -50,6 +50,7 @@ AMX_NATIVE n_GetVehicleHealth_;
 AMX_NATIVE n_GetVehicleModel;
 AMX_NATIVE n_GetVehicleParamsEx;
 AMX_NATIVE n_GetVehiclePos;
+AMX_NATIVE n_GetVehiclePoolSize;
 AMX_NATIVE n_GetVehicleRotationQuat;
 AMX_NATIVE n_GetVehicleVelocity;
 AMX_NATIVE n_GetVehicleZAngle;
@@ -199,6 +200,7 @@ int natives_find()
 		N(GetVehicleRotationQuat),
 		N(GetVehicleParamsEx),
 		N(GetVehiclePos),
+		N(GetVehiclePoolSize),
 		N(GetVehicleVelocity),
 		N(GetVehicleZAngle),
 		N_(GivePlayerMoney),

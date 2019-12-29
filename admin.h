@@ -10,6 +10,10 @@ The //respawn cmd respawns the vehicle the player is in.
 */
 int cmd_admin_respawn(CMDPARAMS);
 /**
+The //rr commands respawns all unoccupied vehicles in a close range.
+*/
+int cmd_admin_rr(CMDPARAMS);
+/**
 The //vehinfo cmd shows vehicle info
 
 Also allows editing enabled state and linked airport.

@@ -179,7 +179,7 @@ void ctoai(char *dstsrc);
 #define STACK_HEAP_SIZE 1024
 
 struct FAKEAMX {
-	char _cod[4328];
+	char _cod[4352];
 	union {
 		char _dat;
 		cell emptystring;
@@ -306,9 +306,13 @@ Attempt to crash the player.
 */
 void common_crash_player(int playerid);
 /**
-@return squared distance between given points
+@return squared xyz distance between given points
 */
 float common_dist_sq(struct vec3 a, struct vec3 b);
+/**
+@return squared xy distance between given points
+*/
+float common_xy_dist_sq(struct vec3 a, struct vec3 b);
 /**
 Sets the state of the engine for given vehicle id.
 */

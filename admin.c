@@ -12,9 +12,6 @@
 /*-------------------------------------------*/
 /*//respawn*/
 
-/**
-Respawns the vehicle the player is in.
-*/
 int cmd_admin_respawn(CMDPARAMS)
 {
 	int vehicleid;
@@ -22,6 +19,46 @@ int cmd_admin_respawn(CMDPARAMS)
 	vehicleid = NC_GetPlayerVehicleID(playerid);
 	if (vehicleid) {
 		NC_SetVehicleToRespawn(vehicleid);
+	}
+	return 1;
+}
+
+/*-------------------------------------------*/
+/*//rr*/
+
+int cmd_admin_rr(CMDPARAMS)
+{
+	static const float RR_SQ = 150.0f * 150.0f;
+
+	struct vec3 ppos, oppos;
+	int i, vehicleid;
+	/*MAX_PLAYERS because there can be as much occupied vehicles
+	as there are players*/
+	int occupied_vehicles[MAX_PLAYERS];
+	int numov = 0;
+
+	common_GetPlayerPos(playerid, &ppos);
+	for (i = 0; i < playercount; i++) {
+		vehicleid = NC_GetPlayerVehicleID(players[i]);
+		if (vehicleid) {
+			common_GetPlayerPos(players[i], &oppos);
+			if (common_xy_dist_sq(ppos, oppos) < RR_SQ) {
+				occupied_vehicles[numov++] = vehicleid;
+			}
+		}
+	}
+	for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
+		for (i = 0; i < numov; i++) {
+			if (vehicleid == occupied_vehicles[i]) {
+				goto skip_occupied;
+			}
+		}
+		common_GetVehiclePos(vehicleid, &oppos);
+		if (common_xy_dist_sq(ppos, oppos) < RR_SQ) {
+			NC_SetVehicleToRespawn(vehicleid);
+		}
+skip_occupied:
+		;
 	}
 	return 1;
 }
