@@ -186,29 +186,50 @@ The /v cmd to spawn a dev vehicle.
 static
 int cmd_dev_v(CMDPARAMS)
 {
-	int modelid;
-	if (!cmd_get_int_param(cmdtext, &parseidx, &modelid)) {
-		B144(WARN"Syntax: /v <modelid>");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
-	} else {
-		if (devvehicle != INVALID_VEHICLE_ID) {
-			NC_PARS(1);
-			nc_params[1] = devvehicle;
-			NC(n_DestroyVehicle_);
+	int modelid = -1;
+	if (!cmd_get_int_param(cmdtext, &parseidx, &modelid) ||
+		modelid < 400 || 400 + VEHICLE_MODEL_TOTAL <= modelid)
+	{
+		if (modelid == -1 &&
+			cmd_get_str_param(cmdtext, &parseidx, cbuf144))
+		{
+			for (modelid = 0;
+				modelid < VEHICLE_MODEL_TOTAL;
+				modelid++)
+			{
+				if (!strcmp(vehmodelnames[modelid], cbuf144)) {
+					modelid += 400;
+					goto gotid;
+				}
+			}
 		}
-		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
-		NC_GetPlayerFacingAngle(playerid, buf32_1a);
-		NC_PARS(9);
-		nc_params[1] = modelid;
-		nc_params[2] = *buf32;
-		nc_params[3] = *buf64;
-		nc_params[4] = *buf144;
-		nc_params[5] = *buf32_1;
-		nc_params[6] = nc_params[7] = nc_params[8] = 126;
-		nc_params[9] = 0;
-		devvehicle = NC(n_CreateVehicle_);
-		natives_PutPlayerInVehicle(playerid, devvehicle, 0);
+		B144(WARN"Syntax: /v <modelid|modelname>");
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		return 1;
 	}
+gotid:
+	if (devvehicle != INVALID_VEHICLE_ID) {
+		NC_PARS(1);
+		nc_params[1] = devvehicle;
+		NC(n_DestroyVehicle_);
+	}
+	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
+	NC_GetPlayerFacingAngle(playerid, buf32_1a);
+	NC_PARS(9);
+	nc_params[1] = modelid;
+	nc_params[2] = *buf32;
+	nc_params[3] = *buf64;
+	nc_params[4] = *buf144;
+	nc_params[5] = *buf32_1;
+	nc_params[6] = nc_params[7] = nc_params[8] = 126;
+	nc_params[9] = 0;
+	devvehicle = NC(n_CreateVehicle_);
+	natives_PutPlayerInVehicle(playerid, devvehicle, 0);
+	csprintf(buf144, "%d - %s - %s",
+		modelid,
+		vehmodelnames[modelid - 400],
+		vehnames[modelid - 400]);
+	NC_SendClientMessage(playerid, -1, buf144a);
 	return 1;
 }
 

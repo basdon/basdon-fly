@@ -1,8 +1,6 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define MODEL_TOTAL (611-400)
-
 #define PLANE 0x1
 #define HELI 0x2
 
@@ -303,10 +301,11 @@
 #define MODEL_BOXBURG (609)
 #define MODEL_FARMTR1 (610)
 #define MODEL_UTILTR1 (611)
-#define MODEL_TOTAL (611-400)
+#define VEHICLE_MODEL_TOTAL (611-400)
 
 extern char *vehnames[];
-extern unsigned int vehicleflags[MODEL_TOTAL];
+extern char *vehmodelnames[];
+extern unsigned int vehicleflags[VEHICLE_MODEL_TOTAL];
 
 /**
 Check if the given vehicle model is an air vehicle (plane or helicopter).

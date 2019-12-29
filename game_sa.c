@@ -5,7 +5,7 @@
 #include "game_sa.h"
 #include <string.h>
 
-unsigned int vehicleflags[MODEL_TOTAL];
+unsigned int vehicleflags[VEHICLE_MODEL_TOTAL];
 
 void game_sa_init()
 {
