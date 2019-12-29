@@ -61,10 +61,6 @@ Last health value that was shown to a player.
 */
 static short ptxtcache_hp[MAX_PLAYERS];
 /**
-Last vehicle id the player was in as driver.
-*/
-static int lastvehicle[MAX_PLAYERS];
-/**
 Last vehicle position for player (when driver), for ODO purposes.
 
 To be inited in veh_on_player_now_driving and updated on ODO update.
@@ -75,6 +71,7 @@ Last timestamp when a player had some sort of control activity.
 */
 static unsigned long lastcontrolactivity[MAX_PLAYERS];
 
+int lastvehicle[MAX_PLAYERS];
 /**
 Each player's total ODO value (m).
 

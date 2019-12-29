@@ -44,6 +44,10 @@ struct vehicle {
 
 extern struct vehicle gamevehicles[MAX_VEHICLES];
 /**
+Last vehicle id the player was in as driver.
+*/
+extern int lastvehicle[MAX_PLAYERS];
+/**
 TODO: decide where this goes
 */
 extern float playerodoKM[MAX_PLAYERS];

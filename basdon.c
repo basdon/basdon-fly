@@ -504,6 +504,7 @@ cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 	const int playerid = PARAM(1);
 	const int newstate = PARAM(2), oldstate = PARAM(3);
 
+	missions_on_player_state_changed(playerid, oldstate, newstate);
 	panel_on_player_state_change(playerid, oldstate, newstate);
 	veh_on_player_state_change(playerid, oldstate, newstate);
 	return 1;
@@ -645,6 +646,7 @@ cell AMX_NATIVE_CALL B_OnVehicleStreamIn(AMX *amx, cell *params)
 {
 	const int vehicleid = PARAM(1), forplayerid = PARAM(2);
 
+	missions_on_vehicle_stream_in(vehicleid, forplayerid);
 	veh_on_vehicle_stream_in(vehicleid, forplayerid);
 	return 1;
 }

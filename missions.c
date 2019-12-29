@@ -2,6 +2,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "a_samp.h"
 #include "airport.h"
 #include "anticheat.h"
 #include "cmd.h"
@@ -1325,6 +1326,54 @@ int missions_on_player_enter_race_checkpoint(int playerid)
 reterr:
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	return 1;
+}
+
+void missions_on_player_state_changed(int playerid, int from, int to)
+{
+	struct MISSION *mission;
+	struct VEHICLEPARAMS vpars;
+
+	if (from == PLAYER_STATE_DRIVER &&
+		(mission = activemission[playerid]) != NULL &&
+		mission->vehicleid == lastvehicle[playerid])
+	{
+		NC_PARS(4);
+		nc_params[1] = lastvehicle[playerid];
+		nc_params[2] = playerid;
+		nc_params[3] = 1;
+		nc_params[4] = 0;
+		NC(n_SetVehicleParamsForPlayer);
+		B144(WARN" Get back in your vehicle!");
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	} else if (to == PLAYER_STATE_DRIVER &&
+		(mission = activemission[playerid]) != NULL &&
+		mission->vehicleid == NC_GetPlayerVehicleID(playerid))
+	{
+		/*SA:MP wiki: Vehicles must be respawned for the 'objective' to
+		be removed. This can be circumvented somewhat using
+		Get/SetVehicleParamsEx which do not require the vehicle to be
+		respawned.*/
+		common_GetVehicleParamsEx(mission->vehicleid, &vpars);
+		/*probably not needed since the global object is not set,
+		but just in case*/
+		vpars.objective = 0;
+		common_SetVehicleParamsEx(mission->vehicleid, &vpars);
+	}
+}
+
+void missions_on_vehicle_stream_in(int vehicleid, int forplayerid)
+{
+	struct MISSION *mission;
+
+	mission = activemission[forplayerid];
+	if (mission != NULL && mission->vehicleid == vehicleid) {
+		NC_PARS(4);
+		nc_params[1] = vehicleid;
+		nc_params[2] = forplayerid;
+		nc_params[3] = 1;
+		nc_params[4] = 0;
+		NC(n_SetVehicleParamsForPlayer);
+	}
 }
 
 void missions_on_weather_changed(int weather)

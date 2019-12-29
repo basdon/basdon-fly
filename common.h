@@ -45,7 +45,7 @@ struct VEHICLEPARAMS {
 	int doors;
 	int bonnet;
 	int boot;
-	int objectite;
+	int objective;
 };
 EXPECT_SIZE(struct VEHICLEPARAMS, 7 * sizeof(cell));
 
@@ -179,7 +179,7 @@ void ctoai(char *dstsrc);
 #define STACK_HEAP_SIZE 1024
 
 struct FAKEAMX {
-	char _cod[4304];
+	char _cod[4328];
 	union {
 		char _dat;
 		cell emptystring;

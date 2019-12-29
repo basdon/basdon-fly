@@ -88,6 +88,7 @@ extern AMX_NATIVE n_SetPlayerWeather;
 extern AMX_NATIVE n_SetSpawnInfo;
 extern AMX_NATIVE n_SetVehicleHealth;
 extern AMX_NATIVE n_SetVehicleParamsEx;
+extern AMX_NATIVE n_SetVehicleParamsForPlayer;
 extern AMX_NATIVE n_SetVehiclePos;
 extern AMX_NATIVE n_SetVehicleToRespawn;
 extern AMX_NATIVE n_SetVehicleZAngle;
