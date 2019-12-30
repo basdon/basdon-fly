@@ -1,0 +1,2 @@
+UPDATE spw SET sx=1462.1062, sy=-2410.1614, sz=13.5547, sr=120.0 WHERE id=6;
+UPDATE spw SET sx=1887.1521, sy=-2562.9197, sz=13.5469, sr=130.0 WHERE id=4;
