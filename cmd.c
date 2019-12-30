@@ -14,6 +14,7 @@
 #include "prefs.h"
 #include "protips.h"
 #include "nav.h"
+#include "math.h"
 #include "missions.h"
 #include "money.h"
 #include "servicepoints.h"

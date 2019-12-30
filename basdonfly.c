@@ -2,6 +2,7 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #include "common.h"
+#include "admin.h"
 #include "airport.h"
 #include "anticheat.h"
 #include "class.h"

@@ -407,7 +407,7 @@ void veh_on_player_enter_vehicle(int playerid, int vehicleid, int ispassenger)
 
 void veh_spawn_player_vehicles(int playerid)
 {
-	int vehicleid, n;
+	int n;
 	struct dbvehicle *veh;
 
 	if (userid[playerid] < 1) {

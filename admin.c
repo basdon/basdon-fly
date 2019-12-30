@@ -109,7 +109,6 @@ void admin_cb_vehicleinfo(void *data)
 {
 	struct dbvehicle *veh;
 	int cc, playerid;
-	char enabled[10], airport[MAX_AIRPORT_NAME + 1];
 
 	cc = ((struct CB_VEHICLEINFO*) data)->player_cc;
 	veh = ((struct CB_VEHICLEINFO*) data)->veh;

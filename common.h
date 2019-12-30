@@ -15,6 +15,9 @@
 #define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
 #define EXPECT_SIZE(S,SIZE) STATIC_ASSERT(sizeof(S)==(SIZE))
 
+/*prototype for commonly used struct*/
+struct dbvehicle;
+
 struct vec3 {
 	float x, y, z;
 };

@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "missions.h"
+#include "nav.h"
 #include <string.h>
 
 char kick_update_delay[MAX_PLAYERS];
@@ -96,7 +97,7 @@ float common_dist_sq(struct vec3 a, struct vec3 b)
 
 float common_xy_dist_sq(struct vec3 a, struct vec3 b)
 {
-	float dx, dy, dz;
+	float dx, dy;
 	dx = a.x - b.x;
 	dy = a.y - b.y;
 	return dx * dx + dy * dy;
