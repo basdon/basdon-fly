@@ -10,6 +10,30 @@
 #include "vehicles.h"
 
 /*-------------------------------------------*/
+/*//getcar*/
+
+int cmd_admin_getcar(CMDPARAMS)
+{
+	struct vec4 ppos;
+	int vehicleid;
+
+	if (!cmd_get_int_param(cmdtext, &parseidx, &vehicleid)) {
+		B144(WARN" Syntax: //getcar <vehicleid>");
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	} else {
+		common_GetPlayerPosRot(playerid, &ppos);
+		if (common_SetVehiclePos(vehicleid, &ppos.coords)) {
+			natives_PutPlayerInVehicle(playerid, vehicleid, 0);
+			NC_SetVehicleZAngle(vehicleid, ppos.r);
+		} else {
+			B144(WARN" Invalid vehicleid");
+			NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		}
+	}
+	return 1;
+}
+
+/*-------------------------------------------*/
 /*//respawn*/
 
 int cmd_admin_respawn(CMDPARAMS)

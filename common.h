@@ -333,6 +333,12 @@ Will use buf32, buf64, buf144.
 */
 int common_GetPlayerPos(int playerid, struct vec3 *pos);
 /**
+Get a player's position and rotation directly into a vec4 struct.
+
+Will use buf32, buf64, buf144.
+*/
+int common_GetPlayerPosRot(int playerid, struct vec4 *pos);
+/**
 Convenience method for GetVehicleDamageStatus.
 
 Uses buf32.
@@ -384,6 +390,12 @@ Sets vehicle params of given vehicle into given VEHICLEPARAMS struct.
 Uses buf32.
 */
 int common_SetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p);
+/**
+Convenience method to set a vehicle's pos to given vec3 struct.
+
+Uses buf32 buf64 buf144.
+*/
+int common_SetVehiclePos(int vehicleid, struct vec3 *pos);
 /**
 Convenience method for UpdateVehicleDamageStatus.
 

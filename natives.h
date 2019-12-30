@@ -426,6 +426,10 @@ extern cell tmpfloat;
 	(NC_PARS_(1)nc_params[1]=VEHICLEID,\
 	n_SetVehicleToRespawn(amx,nc_params))
 
+#define NC_SetVehicleZAngle(VEHICLEID,FROT) \
+	(NC_PARS_(2)nc_params[1]=VEHICLEID,nc_paramf[2]=FROT,\
+	n_SetVehicleZAngle(amx,nc_params))
+
 #define NC_ShowPlayerDialog __USE__dialog_ShowPlayerDialog__
 
 #define NC_SpawnPlayer __USE__natives_SpawnPlayer__

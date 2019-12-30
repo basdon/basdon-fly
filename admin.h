@@ -10,6 +10,10 @@ Dialog response handler for base //vehinfo dialog
 */
 void admin_dlg_vehinfo_response(int pid, int res, int listitem);
 /**
+The //getcar cmd teleports a vehicle to the player's location.
+*/
+int cmd_admin_getcar(CMDPARAMS);
+/**
 The //respawn cmd respawns the vehicle the player is in.
 */
 int cmd_admin_respawn(CMDPARAMS);

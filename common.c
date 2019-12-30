@@ -135,6 +135,19 @@ int common_GetPlayerPos(int playerid, struct vec3 *pos)
 	return res;
 }
 
+int common_GetPlayerPosRot(int playerid, struct vec4 *pos)
+{
+	int res;
+	res = NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
+	pos->coords.x = *fbuf32;
+	pos->coords.y = *fbuf64;
+	pos->coords.z = *fbuf144;
+	NC_PARS(2);
+	res &= NC(n_GetPlayerFacingAngle);
+	pos->r = *fbuf32;
+	return res;
+}
+
 int common_GetVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d)
 {
 	int res;
@@ -229,6 +242,14 @@ int common_SetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p)
 	nc_params[1] = vehicleid;
 	memcpy(nc_params + 2, p, sizeof(struct VEHICLEPARAMS));
 	return NC(n_SetVehicleParamsEx);
+}
+
+int common_SetVehiclePos(int vehicleid, struct vec3 *pos)
+{
+	NC_PARS(4);
+	nc_params[1] = vehicleid;
+	memcpy(nc_params + 2, pos, sizeof(struct vec3));
+	return NC(n_SetVehiclePos);
 }
 
 int common_UpdateVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d)

@@ -184,6 +184,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/vhpninf", GROUPS_ALL, cmd_dev_vhpninf },
 	{ 0, "/vhppinf", GROUPS_ALL, cmd_dev_vhppinf },
 #endif /*DEV*/
+	{ 0, "//getcar", GROUPS_ADMIN, cmd_admin_getcar },
 	{ 0, "//respawn", GROUPS_ADMIN, cmd_admin_respawn },
 	{ 0, "//rr", GROUPS_ADMIN, cmd_admin_rr },
 	{ 0, "//vehinfo", GROUP_OWNER, cmd_admin_vehinfo },
