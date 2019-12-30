@@ -378,7 +378,7 @@ void svp_update_mapicons(int playerid, float x, float y)
 			nc_paramf[5] = svp->pos.z;
 			nc_params[6] = SERVICE_MAP_ICON_TYPE,
 			nc_params[7] = 0;
-			nc_params[8] = MAPICON_GLOBAL;
+			nc_params[8] = MAPICON_LOCAL;
 			NC(n_SetPlayerMapIcon);
 			B144((char*) SVP_TXT);
 			NC_PARS(10);
