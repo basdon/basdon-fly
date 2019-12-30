@@ -370,14 +370,15 @@ void svp_update_mapicons(int playerid, float x, float y)
 				break;
 			}
 			sp = psvps + selectedpsvp;
-			NC_PARS(7);
+			NC_PARS(8);
 			nc_params[1] = playerid;
 			nc_params[2] = selectedpsvp;
 			nc_paramf[3] = svp->pos.x;
 			nc_paramf[4] = svp->pos.y;
 			nc_paramf[5] = svp->pos.z;
 			nc_params[6] = SERVICE_MAP_ICON_TYPE,
-			nc_params[7] = MAPICON_GLOBAL;
+			nc_params[7] = 0;
+			nc_params[8] = MAPICON_GLOBAL;
 			NC(n_SetPlayerMapIcon);
 			B144((char*) SVP_TXT);
 			NC_PARS(10);
