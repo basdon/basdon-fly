@@ -301,11 +301,18 @@
 #define MODEL_BOXBURG (609)
 #define MODEL_FARMTR1 (610)
 #define MODEL_UTILTR1 (611)
-#define VEHICLE_MODEL_TOTAL (611-400)
+#define VEHICLE_MODEL_TOTAL (611-400+1)
+
+struct CARCOLDATA {
+	char amount;
+	short position;
+};
 
 extern char *vehnames[];
 extern char *vehmodelnames[];
 extern unsigned int vehicleflags[VEHICLE_MODEL_TOTAL];
+extern struct CARCOLDATA carcoldata[VEHICLE_MODEL_TOTAL];
+extern char carcols[1912];
 
 /**
 Check if the given vehicle model is an air vehicle (plane or helicopter).
@@ -319,5 +326,14 @@ int game_is_heli(int model);
 Check if the given vehicle model is a plane.
 */
 int game_is_plane(int model);
+/**
+Gives a random 'normal' random vehicle colors combination for given model.
+
+Data is from game's carcols.dat.
+
+@param col1 ptr to int or NULL if primary color is not needed
+@param col2 ptr to int or NULL if secondary color is not needed
+*/
+void game_random_carcol(int model, int *col1, int *col2);
 void game_sa_init();
 

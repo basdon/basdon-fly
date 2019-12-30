@@ -50,3 +50,24 @@ int game_is_plane(int model)
 {
 	return model && (vehicleflags[model - 400] & PLANE);
 }
+
+void game_random_carcol(int model, int *col1, int *col2)
+{
+	char amount;
+	short position;
+
+	model -= 400;
+	if (0 <= model && model < VEHICLE_MODEL_TOTAL) {
+		amount = carcoldata[model].amount;
+		position = carcoldata[model].position;
+		if (amount > 1) {
+			position += NC_random(amount) * 2;
+		}
+		if (col1 != NULL) {
+			*col1 = carcols[position];
+		}
+		if (col2 != NULL) {
+			*col2 = carcols[position + 1];
+		}
+	}
+}

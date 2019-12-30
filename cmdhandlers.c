@@ -209,11 +209,18 @@ int cmd_respawn(CMDPARAMS)
 	return 1;
 }
 
+/**
+The /spray [col1] [col2] command allows a player to spray their vehicle.
+
+One or both colors may be omitted to get a fully random color. A 'normal'
+random color combination is chosen when both colors are set to -1. These colors
+are the colors as defined by the game itself.
+*/
 static
 int cmd_spray(CMDPARAMS)
 {
 	struct dbvehicle *veh;
-	int vehicleid, *col1, *col2;
+	int vehicleid, *col1, *col2, *a, *b;
 
 	vehicleid = NC_GetPlayerVehicleID(playerid);
 	if (vehicleid) {
@@ -223,16 +230,26 @@ int cmd_spray(CMDPARAMS)
 			NC_SendClientMessage(playerid, COL_WARN, buf144a);
 			return 1;
 		}
+		a = b = NULL;
 		col1 = nc_params + 2;
 		col2 = nc_params + 3;
 		if (cmd_get_int_param(cmdtext, &parseidx, col1)) {
+			if (*col1 == -1) {
+				a = col1;
+			}
 			if (!cmd_get_int_param(cmdtext, &parseidx, col2)) {
 				goto rand2nd;
+			}
+			if (*col2 == -1) {
+				b = col2;
 			}
 		} else {
 			*col1 = NC_random(256);
 rand2nd:
 			*col2 = NC_random(256);
+		}
+		if (a != NULL || b != NULL) {
+			game_random_carcol(NC_GetVehicleModel(vehicleid), a, b);
 		}
 		NC_PARS(3);
 		nc_params[1] = vehicleid;
