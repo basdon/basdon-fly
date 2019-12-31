@@ -75,7 +75,7 @@ int cmd_dev_jetpack(CMDPARAMS)
 }
 
 /**
-The /*m <amount> command to give or take money.
+The SLASH*m <amount> command to give or take money.
 */
 static
 int cmd_dev_STARm(CMDPARAMS)
