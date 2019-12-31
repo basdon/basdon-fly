@@ -46,7 +46,7 @@ unsigned long time_timestamp()
 
 	gettimeofday(&tv, NULL);
 	value = (unsigned long) (tv.tv_sec * 1000L);
-	value + (unsigned long) (tv.tv_usec / 1000L);
+	value += (unsigned long) (tv.tv_usec / 1000L);
 	return value - initial_value;
 #endif
 }
