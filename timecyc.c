@@ -181,7 +181,7 @@ DE | 18, 18, 18, 17, 17, 17, 17, 17, 17, 17, 19, 19, 19, 17
 
 #define NEXT_WEATHER_POSSIBILITIES (35)
 
-static const unsigned char weather_mapping[NEXT_WEATHER_POSSIBILITIES] = {
+static const char weather_mapping[NEXT_WEATHER_POSSIBILITIES] = {
 	/* 9x clear */
 	WEATHER_LA_EXTRASUNNY, /* VD  800 */
 	WEATHER_LA_EXTRASUNNYSMOG, /* VD  800 */
@@ -243,7 +243,7 @@ static const char
 	WTH_DESC_THICK_FOG[] = "thick fog",
 	WTH_DESC_SANDSTORMS[] = "sandstorms";
 
-static const unsigned char *weather_descriptions[WEATHERS] = {
+static const char *weather_descriptions[WEATHERS] = {
 	WTH_DESC_CLEAR,
 	WTH_DESC_LIGHT_CLOUDS,
 	WTH_DESC_CLEAR,
@@ -282,7 +282,7 @@ static const char scales[] = "very high\0moderate\0very low";
 #define SCALE_VERYLOW scales + 19
 #define SCALE_LOW scales + 24
 
-static const unsigned char *weather_visibilities[WEATHERS] = {
+static const char *weather_visibilities[WEATHERS] = {
 	/*    0 -  454 very low */
 	/*  455 -  650 low */
 	/*  651 -  700 moderate */
@@ -311,7 +311,7 @@ static const unsigned char *weather_visibilities[WEATHERS] = {
 	SCALE_VERYLOW,
 };
 
-static const unsigned char *weather_waves[WEATHERS] = {
+static const char *weather_waves[WEATHERS] = {
 	/*   0 - 0.3 low */
 	/* 0.4 - 0.6 moderate */
 	/* 0.7 - 1.0 high */
