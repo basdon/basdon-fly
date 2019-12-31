@@ -5,7 +5,10 @@
 #include <windows.h>
 #include <stdio.h>
 #else
+/*__USE_BSD for usleep*/
+#define __USE_BSD
 #include <unistd.h>
+#undef __USE_BSD
 #include <sys/time.h>
 #endif
 
