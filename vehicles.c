@@ -97,27 +97,47 @@ void veh_dbtable_grow_if_needed(int free_space_needed)
 	}
 }
 
-struct dbvehicle *veh_create_new_dbvehicle(int modelid, struct vec4 *pos)
+static
+void veh_cb_on_new_vehicle_inserted(void *data)
+{
+	((struct dbvehicle*) data)->id = NC_cache_insert_id();
+}
+
+struct dbvehicle *veh_create_new_dbvehicle(int model, struct vec4 *pos)
 {
 	struct dbvehicle *veh;
 	int col1, col2;
 
-	game_random_carcol(modelid, &col1, &col2);
-	veh_dbtable_grow_if_needed(1);
+	game_random_carcol(model, &col1, &col2);
 	veh = malloc(sizeof(struct dbvehicle));
-	veh->id = -1; /*TODO*/
-	veh->model = modelid;
+	veh->id = 0;
+	veh->model = model;
 	veh->col1 = (char) col1;
 	veh->col2 = (char) col2;
 	memcpy(&veh->pos, pos, sizeof(struct vec4));
-	veh->fuel = model_fuel_capacity((short) modelid);
+	veh->fuel = model_fuel_capacity((short) model);
 	veh->owneruserid = 0;
 	veh->ownerstring = NULL;
 	veh->ownerstringowneroffset = 0;
 	veh->spawnedvehicleid = 0;
 	veh->odoKM = 0.0f;
 	veh->needsodoupdate = 0;
+
+	veh_dbtable_grow_if_needed(1);
 	dbvehicles[numdbvehicles++] = veh;
+
+	sprintf(cbuf4096_,
+		"INSERT INTO veh(m,x,y,z,r,col1,col2,inusedate) "
+		"VALUES(%d,%f,%f,%f,%f,%d,%d,UNIX_TIMESTAMP())",
+		model,
+		pos->coords.x,
+		pos->coords.y,
+		pos->coords.z,
+		pos->r,
+		col1,
+		col2);
+	common_mysql_tquery(cbuf4096_, veh_cb_on_new_vehicle_inserted, veh);
+
 	return veh;
 }
 

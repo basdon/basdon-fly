@@ -61,7 +61,7 @@ Creates a new vehicle and commits it to db.
 
 Think twice before doing this.
 */
-struct dbvehicle *veh_create_new_dbvehicle(int modelid, struct vec4 *pos);
+struct dbvehicle *veh_create_new_dbvehicle(int model, struct vec4 *pos);
 /**
 Should be called in OnPlayerConnect.
 */
