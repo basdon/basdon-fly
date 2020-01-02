@@ -57,6 +57,12 @@ Should be called in OnGameModeInit.
 */
 void veh_create_global_textdraws();
 /**
+Creates a new vehicle and commits it to db.
+
+Think twice before doing this.
+*/
+struct dbvehicle *veh_create_new_dbvehicle(int modelid, struct vec4 *pos);
+/**
 Should be called in OnPlayerConnect.
 */
 void veh_create_player_textdraws(int playerid);

@@ -97,6 +97,30 @@ void veh_dbtable_grow_if_needed(int free_space_needed)
 	}
 }
 
+struct dbvehicle *veh_create_new_dbvehicle(int modelid, struct vec4 *pos)
+{
+	struct dbvehicle *veh;
+	int col1, col2;
+
+	game_random_carcol(modelid, &col1, &col2);
+	veh_dbtable_grow_if_needed(1);
+	veh = malloc(sizeof(struct dbvehicle));
+	veh->id = -1; /*TODO*/
+	veh->model = modelid;
+	veh->col1 = (char) col1;
+	veh->col2 = (char) col2;
+	memcpy(&veh->pos, pos, sizeof(struct vec4));
+	veh->fuel = model_fuel_capacity((short) modelid);
+	veh->owneruserid = 0;
+	veh->ownerstring = NULL;
+	veh->ownerstringowneroffset = 0;
+	veh->spawnedvehicleid = 0;
+	veh->odoKM = 0.0f;
+	veh->needsodoupdate = 0;
+	dbvehicles[numdbvehicles++] = veh;
+	return veh;
+}
+
 void veh_on_player_connect(int playerid)
 {
 	short *labelid = &labelids[playerid][0];
@@ -332,6 +356,7 @@ int veh_create(struct dbvehicle *veh)
 		gamevehicles[vehicleid].reincarnation++;
 		gamevehicles[vehicleid].need_recreation = 0;
 		veh->spawnedvehicleid = vehicleid;
+		
 		NC_PARS(1);
 		nc_params[1] = vehicleid;
 		NC(n_SetVehicleToRespawn);
