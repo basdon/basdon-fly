@@ -31,7 +31,7 @@ struct vehnode {
 Linked list of vehicles that need an ODO update in db.
 */
 static struct vehnode *vehstoupdate;
-static struct dbvehicle *dbvehicles;
+static struct dbvehicle **dbvehicles;
 int numdbvehicles, dbvehiclealloc;
 struct vehicle gamevehicles[MAX_VEHICLES];
 short labelids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB+ of mapping, errrr */
@@ -84,20 +84,16 @@ float playerodoKM[MAX_PLAYERS];
 Enlarges the vehicle database table pointed to by dbvehicles by 100.
 */
 static
-void veh_dbtable_grow()
+void veh_dbtable_grow_if_needed(int free_space_needed)
 {
-	struct dbvehicle *nw;
-	int i;
+	int i, vehicleid;
 
-	dbvehiclealloc += 100;
-	dbvehicles = realloc(dbvehicles,
-		sizeof(struct dbvehicle) * dbvehiclealloc);
-	nw = dbvehicles;
-	for (i = 0; i < numdbvehicles; i++) {
-		if (nw->spawnedvehicleid) {
-			gamevehicles[nw->spawnedvehicleid].dbvehicle = nw;
+	if (numdbvehicles + free_space_needed > dbvehiclealloc) {
+		dbvehiclealloc += 100;
+		dbvehicles = realloc(dbvehicles, sizeof(int*) * dbvehiclealloc);
+		for (i = numdbvehicles; i < dbvehiclealloc; i++) {
+			dbvehicles[i] = NULL;
 		}
-		nw++;
 	}
 }
 
@@ -143,9 +139,9 @@ void veh_init()
 		dbvehiclealloc = 100;
 	}
 	numdbvehicles = 0;
-	dbvehicles = malloc(sizeof(struct dbvehicle) * dbvehiclealloc);
-	veh = dbvehicles;
+	dbvehicles = malloc(sizeof(int*) * dbvehiclealloc);
 	while (rowcount--) {
+		dbvehicles[rowcount] = veh = malloc(sizeof(struct dbvehicle));
 		nc_params[1] = rowcount;
 		NC_PARS(2);
 		veh->id = (*fld = 0, NC(n_cache_get_field_i));
@@ -305,14 +301,15 @@ void veh_consume_fuel(int playerid, int vehicleid, int throttle,
 
 void veh_dispose()
 {
-	struct dbvehicle *veh = dbvehicles;
+	struct dbvehicle *veh;
 
 	while (dbvehiclealloc--) {
+		veh = dbvehicles[dbvehiclealloc];
 		if (veh->ownerstring != NULL) {
 			free(veh->ownerstring);
 			veh->ownerstring = NULL;
 		}
-		veh++;
+		free(veh);
 	}
 	free(dbvehicles);
         dbvehicles = NULL;
@@ -373,15 +370,14 @@ void veh_on_player_disconnect(int playerid)
 	int n, vehicleid, driver;
 
 	if (userid[playerid] > 0) {
-		veh = dbvehicles;
 		n = numdbvehicles;
 		while (n--) {
+			veh = dbvehicles[n];
 			if (veh->owneruserid == userid[playerid] &&
 				veh->spawnedvehicleid)
 			{
 				veh_DestroyVehicle(veh->spawnedvehicleid);
 			}
-			veh++;
 		}
 	}
 
@@ -414,13 +410,12 @@ void veh_spawn_player_vehicles(int playerid)
 		return;
 	}
 
-	veh = dbvehicles;
 	n = numdbvehicles;
 	while (n--) {
+		veh = dbvehicles[n];
 		if (veh->owneruserid == userid[playerid]) {
 			veh_create(veh);
 		}
-		veh++;
 	}
 }
 
