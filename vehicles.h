@@ -60,6 +60,10 @@ void veh_create_global_textdraws();
 Creates a new vehicle and commits it to db.
 
 Think twice before doing this.
+
+Vehicle will be created and returned right away but the insert query will be
+still running, so it is in some way possible that the vehicle will actually not
+persist, although there won't be any feedback on this.
 */
 struct dbvehicle *veh_create_new_dbvehicle(int model, struct vec4 *pos);
 /**
