@@ -6,5 +6,5 @@
 #define sqrt(X) sqrtf(X)
 #define cos(X) cosf(X)
 #define sin(X) sinf(X)
-#define atan2(Y,X) atan2f(Y,X)
+#define atan2(Y,X) atan2f(X,Y) /*x and y are swapped for atan2f*/
 #endif /*_MSC_VER*/
