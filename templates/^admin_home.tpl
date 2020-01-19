@@ -12,7 +12,7 @@
 		{@if empty($heartbeat)}
 			<strong class="indicator">OFFLINE</strong>
 		{@else}
-			{@unsafe format_duration_short(time() - $heartbeat[0]->tstart)}&#32;
+			{@unsafe format_duration_short_days(time() - $heartbeat[0]->tstart)}&#32;
 			({@unsafe format_datetime($heartbeat[0]->tstart)})
 			{@if time() - $heartbeat[0]->tstart > 86400 * 20}
 				&#32;<span style="color:#ea0">restart suggested</span>
