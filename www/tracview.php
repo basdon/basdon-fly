@@ -53,20 +53,25 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 
 		// THESE MUST BE IN SYNC WITH tracversion.php WHEN MAKING A RELEASE!
 
-		function check_transition($name, $prop, $map)
+		function check_transition($name, $prop, $map, &$outvar)
 		{
 			global $changes, $fields, $values, $old;
 			if ($_POST[$prop] != $old->$prop && array_key_exists($_POST[$prop], $map)) {
 				$fields[] = $prop.'=?';
 				$values[] = $_POST[$prop];
 				$changes[] = $name.': <span class="'.$prop.$old->$prop.'">'.$map[$old->$prop].'</span> => <span class="'.$prop.$_POST[$prop].'">'.$map[$_POST[$prop]].'</span>';
+				$outvar = $_POST[$prop];
 			}
 		}
 
-		check_transition('impact', 'severity', $trac_severities);
-		check_transition('visibility', 'visibility', $trac_visibilities);
+		$visibility = $old->visibility;
+		$status = $old->status;
+		$impact = $old->severity;
+
+		check_transition('impact', 'severity', $trac_severities, $impact);
+		check_transition('visibility', 'visibility', $trac_visibilities, $visibility);
 		if (group_is_owner($usergroups)) {
-			check_transition('status', 'state', $trac_states);
+			check_transition('status', 'state', $trac_states, $status);
 		}
 
 		if (count($fields)) {
@@ -88,7 +93,10 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 
 			include('../inc/echo.php');
 			$gamemsg = 'TRAC: '.$loggeduser->name.' updated ticket #'.$id;
-			$ircmsg = $gamemsg.' -> '.$BASEPATH.'/tracview.php?id='.$id;
+			if ($visibility == $GROUPS_ALL) {
+				$gamemsg .= ': ' . mb_convert_encoding($POST['summary'], 'ASCII');
+			}
+			$ircmsg = $gamemsg . ' -> '.$BASEPATH.'/tracview.php?id='.$id;
 			echo_send_message_irc_game(1, $ircmsg, $gamemsg);
 
 			die('redirected');

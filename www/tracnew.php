@@ -55,10 +55,9 @@ if (!isset($loggeduser)) {
 			$id = $db->lastInsertId();
 
 			include('../inc/echo.php');
-			$asciisum = mb_convert_encoding($summary, 'ASCII');
 			$gamemsg = 'TRAC: '.$loggeduser->name.' created ticket #'.$id;
 			if ($visibility == $GROUPS_ALL) {
-				$gamemsg .= ': ' . $asciisum;
+				$gamemsg .= ': ' . mb_convert_encoding($summary, 'ASCII');
 			}
 			$ircmsg = $gamemsg.' -> '.$BASEPATH.'/tracview.php?id='.$id;
 			echo_send_message_irc_game(1, $ircmsg, $gamemsg);
