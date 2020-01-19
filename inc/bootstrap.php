@@ -123,6 +123,19 @@ function format_duration_short($time)
 	return round($time / 3600, 0) . ' hours';
 }
 
+function format_duration_short_days($time)
+{
+	if ($time < 86400) {
+		return format_duration_short($time);
+	}
+	$d = floor($time / 86400);
+	$s = "$d day";
+	if ($d != 1) {
+		$s .= 's';
+	}
+	return $s . ' ' . format_duration_short($time - $d * 86400);
+}
+
 function format_time_since($time)
 {
 	$tdiff = time() - $time;

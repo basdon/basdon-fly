@@ -8,7 +8,7 @@
 <h3>Heartbeat</h3>
 <ul>
 	<li>Server uptime: {@if empty($heartbeat)}<strong class="indicator">OFFLINE</strong>{@else}{@unsafe format_duration_short(time() - $heartbeat[0]->tstart)} ({@unsafe format_datetime($heartbeat[0]->tstart)}){@endif}</li>
-	<li>Last heartbeat: {@if empty($lastheartbeat)}<strong class="indicator">NONE?</strong>{@else}{@unsafe format_duration_short(time() - $lastheartbeat[0]->tlast)} ago{@endif}</li>
+	<li>Last heartbeat: {@if empty($lastheartbeat)}<strong class="indicator">NONE?</strong>{@else}{@unsafe format_duration_short_days(time() - $lastheartbeat[0]->tlast)} ago{@endif}</li>
 </ul>
 <h4>Last sessions</h4>
 <table class="default center">
@@ -18,13 +18,13 @@
 			{@eval $s = $lastsessions[$i]}
 			{@if $i > 0}
 			<tr>
-				<td colspan="4"><strong>offline for {@unsafe format_duration_short($lastsessions[$i - 1]->tstart - $s->tlast)}</strong></td>
+				<td colspan="4"><strong>offline for {@unsafe format_duration_short_days($lastsessions[$i - 1]->tstart - $s->tlast)}</strong></td>
 			</tr>
 			{@endif}
 			<tr>
 				<td>{@unsafe format_datetime($s->tstart)}</td>
 				<td>{@unsafe format_datetime($s->tlast)}</td>
-				<td>{@unsafe format_duration_short($s->tlast - $s->tstart)}</td>
+				<td>{@unsafe format_duration_short_days($s->tlast - $s->tstart)}</td>
 				<td>{@unsafe $s->cleanexit}</td>
 			</tr>
 		{@endfor}
