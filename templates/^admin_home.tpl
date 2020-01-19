@@ -7,7 +7,18 @@
 </ul>
 <h3>Heartbeat</h3>
 <ul>
-	<li>Server uptime: {@if empty($heartbeat)}<strong class="indicator">OFFLINE</strong>{@else}{@unsafe format_duration_short(time() - $heartbeat[0]->tstart)} ({@unsafe format_datetime($heartbeat[0]->tstart)}){@endif}</li>
+	<li>
+		Server uptime:&#32;
+		{@if empty($heartbeat)}
+			<strong class="indicator">OFFLINE</strong>
+		{@else}
+			{@unsafe format_duration_short(time() - $heartbeat[0]->tstart)}&#32;
+			({@unsafe format_datetime($heartbeat[0]->tstart)})
+			{@if time() - $heartbeat[0]->tstart > 86400 * 20}
+				&#32;<span style="color:#ea0">restart suggested</span>
+			{@endif}
+		{@endif}
+	</li>
 	<li>Last heartbeat: {@if empty($lastheartbeat)}<strong class="indicator">NONE?</strong>{@else}{@unsafe format_duration_short_days(time() - $lastheartbeat[0]->tlast)} ago{@endif}</li>
 </ul>
 <h4>Last sessions</h4>
