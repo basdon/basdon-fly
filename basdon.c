@@ -239,6 +239,45 @@ exit:
 	return 1;
 }
 
+static
+int set_minconnectiontime(void *data)
+{
+	minconnectiontime = (int) data;
+	csprintf(buf144, "minconnectiontime %d", minconnectiontime);
+	NC_SendRconCommand(buf144a);
+	return 0; /*no-repeat*/
+}
+
+/* native B_OnIncomingConnection(playerid, ip_address[], port) */
+static
+cell AMX_NATIVE_CALL B_OnIncomingConnection(AMX *amx, cell *params)
+{
+	int i, playerid;
+
+	joinpressure += JOINPRESSURE_INC;
+	if (joinpressure > JOINPRESSURE_MAX && !minconnectiontime) {
+		set_minconnectiontime(
+			(void*) JOINPRESSURE_SLOWMODE_MINCONNECTIONTIME);
+		timer_set(JOINPRESSURE_SLOWMODE_LEN, set_minconnectiontime, 0);
+		csprintf(buf144,
+			WARN"too many joins; throttling incoming connections "
+			"next %dms to one per %dms",
+			JOINPRESSURE_SLOWMODE_LEN,
+			JOINPRESSURE_SLOWMODE_MINCONNECTIONTIME);
+		NC_PARS(3);
+		nc_params[2] = COL_WARN;
+		nc_params[3] = buf144a;
+		for (i = 0; i < playercount; i++) {
+			playerid = players[i];
+			if (GROUPS_ISADMIN(pdata[playerid]->groups)) {
+				nc_params[1] = playerid;
+				NC(n_SendClientMessage);
+			}
+		}
+	}
+	return 1;
+}
+
 /* native B_OnPlayerCommandText(playerid, cmdtext[]) */
 static
 cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)

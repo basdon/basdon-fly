@@ -44,7 +44,16 @@ EXPECT_SIZE(int, 4);
 EXPECT_SIZE(cell, 4);
 EXPECT_SIZE(float, 4);
 
+#define SLEEP (5)
+#define JOINPRESSURE_INC (SLEEP * 200)
+#define JOINPRESSURE_DEC (SLEEP)
+#define JOINPRESSURE_MAX (JOINPRESSURE_INC * 4)
+#define JOINPRESSURE_SLOWMODE_LEN (25000)
+#define JOINPRESSURE_SLOWMODE_MINCONNECTIONTIME (1200)
+
 int _cc[MAX_PLAYERS];
+int joinpressure = 0;
+int minconnectiontime = 0;
 
 #define IN_BASDONFLY
 #include "basdon.c"
@@ -96,6 +105,10 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 
 	timer_tick();
 
+	if (joinpressure > 0) {
+		joinpressure -= JOINPRESSURE_DEC;
+	}
+
 	if (count++ >= 19) {
 		count = 0;
 
@@ -129,6 +142,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnDialogResponse),
 	REGISTERNATIVE(B_OnGameModeExit),
 	REGISTERNATIVE(B_OnGameModeInit),
+	REGISTERNATIVE(B_OnIncomingConnection),
 	REGISTERNATIVE(B_OnPlayerCommandText),
 	REGISTERNATIVE(B_OnPlayerConnect),
 	REGISTERNATIVE(B_OnPlayerDeath),
@@ -228,8 +242,11 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 
 		B144("sleep");
 		tmp = NC_GetConsoleVarAsInt(buf144a);
-		if (tmp != 5) {
-			logprintf("ERR: sleep value %d should be 5", tmp);
+		if (tmp != SLEEP) {
+			logprintf(
+				"ERR: sleep value %d should be %d",
+				tmp,
+				SLEEP);
 			return 0;
 		}
 
