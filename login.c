@@ -614,6 +614,7 @@ void login_cb_member_user_created(void *data)
 
 	pdata[playerid]->groups = GROUP_MEMBER;
 	userid[playerid] = NC_cache_insert_id();
+	money_set(playerid, MONEY_DEFAULT_AMOUNT);
 	if (userid[playerid] == -1) {
 		common_hide_gametext_for_player(playerid);
 		B144(WARN"An error occured while registering.");
