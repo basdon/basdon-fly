@@ -18,7 +18,7 @@
 	{@render defaultheader.tpl}
 	<div class="singlebody">
 		<hr/>
-		<p><?php adminlink('Home', 'home'); ?> &bull; <?php adminlink('Anticheat log', 'acl'); ?></li></p>
+		<p><?php adminlink('Home', 'home'); ?> &bull; <?php adminlink('Anticheat log', 'acl'); ?></p>
 		<hr/>
 		{@rem every subview needs the #main element! @}
 		{@mayrequire ^admin_home}
