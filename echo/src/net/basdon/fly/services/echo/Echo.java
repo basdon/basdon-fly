@@ -268,7 +268,7 @@ throws InterruptedIOException
 			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
 			StringBuilder sb = new StringBuilder(225);
 			sb.append(CTRL_COLOR).append(SCOL_GREY);
-			if (reason == -1) {
+			if (reason == CONN_REASON_GAME_CONNECTED) {
 				sb.append("-> ");
 			} else {
 				sb.append("<- ");
