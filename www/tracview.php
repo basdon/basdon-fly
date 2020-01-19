@@ -94,7 +94,7 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 			include('../inc/echo.php');
 			$gamemsg = 'TRAC: '.$loggeduser->name.' updated ticket #'.$id;
 			if ($visibility == $GROUPS_ALL) {
-				$gamemsg .= ': ' . mb_convert_encoding($POST['summary'], 'ASCII');
+				$gamemsg .= ': ' . mb_convert_encoding($_POST['summary'], 'ASCII');
 			}
 			$ircmsg = $gamemsg . ' -> '.$BASEPATH.'/tracview.php?id='.$id;
 			echo_send_message_irc_game(1, $ircmsg, $gamemsg);
