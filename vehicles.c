@@ -86,7 +86,7 @@ Enlarges the vehicle database table pointed to by dbvehicles by 100.
 static
 void veh_dbtable_grow_if_needed(int free_space_needed)
 {
-	int i, vehicleid;
+	int i;
 
 	if (numdbvehicles + free_space_needed > dbvehiclealloc) {
 		dbvehiclealloc += 100;

@@ -8,6 +8,7 @@
 #include "dialog.h"
 #include "game_sa.h"
 #include "vehicles.h"
+#include <string.h>
 
 /*-------------------------------------------*/
 /*//getcar*/
