@@ -64,7 +64,7 @@
 						</td>
 					</tr>
 					<tr>
-						<td>
+						<td{@if $c->type == 1} style="background:#fff1d4"{@endif}>
 							<p>
 								{@if $c->type == 1}
 									{@unsafe $c->comment}
