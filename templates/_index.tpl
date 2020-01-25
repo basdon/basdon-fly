@@ -7,7 +7,7 @@
 	h3 {
 		margin-bottom: 0;
 		text-align: center;
-		background: #8484f9;
+		background: #99f;
 		border-bottom: 0;
 		border: 1px solid #000;
 		border-bottom: 0;
@@ -19,7 +19,7 @@
 		border-collapse: collapse;
 	}
 	table th {
-		background: #8484f9;
+		background: #99f;
 	}
 	td, th {
 		padding: .2em .5em;
