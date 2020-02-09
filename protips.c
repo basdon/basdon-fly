@@ -17,7 +17,7 @@ static const char *protips[] = {
 #error need MISSION_CANCE_FINE
 #endif
 	"Pro Tip: Use /w(ork) to start a random mission. /s(top) to cancel "
-		"your mission ($"EQ(MISSION_CANCEL_FINE)" fine).",
+		"your mission ($"EQ(MISSION_CANCEL_FINE)" fee).",
 	"Pro Tip: Use /nearest to get a list of all airports, sorted by "
 		"proximity!",
 	"Pro Tip: Enable navigation with /adf [beacon] or "
