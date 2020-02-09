@@ -21,6 +21,7 @@
 #define AC_FLOOD 5
 #define AC_VEH_HP_MISSION_INCREASE 6
 #define AC_MISSION_TOOFAST 7
+#define AC_DIALOG_SMELLY_INPUT 8
 
 /**
 Decreate flood count for all players.

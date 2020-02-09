@@ -32,7 +32,8 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 {
 	const int pid = PARAM(1), dialogid = PARAM(2);
 	const int res = PARAM(3), listitem = PARAM(4);
-	char inputtext[128];
+	unsigned char inputtext[128], dirtyinputtext[128], c;
+	int is_inputtext_dirty, i, j;
 	cell *ia;
 
 	if (anticheat_flood(pid, AC_FLOOD_AMOUNT_DIALOG) ||
@@ -47,7 +48,39 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 	}
 
 	amx_GetAddr(amx, PARAM(5), &ia);
-	ctoa(inputtext, ia, sizeof(inputtext));
+	/*sanitize input if dialog is not one of the password dialogs*/
+	if (*ia == 0) {
+		inputtext[0] = 0;
+	} else if (dialogid == DIALOG_LOGIN_LOGIN_OR_NAMECHANGE ||
+		dialogid == DIALOG_CHANGEPASS_PREVPASS ||
+		dialogid == DIALOG_CHANGEPASS_NEWPASS ||
+		dialogid == DIALOG_CHANGEPASS_CONFIRMPASS ||
+		dialogid == DIALOG_GUESTREGISTER_FIRSTPASS ||
+		dialogid == DIALOG_GUESTREGISTER_CONFIRMPASS)
+	{
+		ctoa(inputtext, ia, sizeof(inputtext));
+	} else {
+		ctoa(dirtyinputtext, ia, sizeof(dirtyinputtext));
+		is_inputtext_dirty = 0;
+		for (i = 0, j = 0; i < sizeof(dirtyinputtext); i++) {
+			c = dirtyinputtext[i];
+			if (c == '%') {
+				is_inputtext_dirty = 1;
+			} else if (c < ' ' && c != 0) {
+				is_inputtext_dirty = 1;
+				dirtyinputtext[i] = '~';
+			} else {
+				inputtext[j++] = c;
+				if (!c) {
+					break;
+				}
+			}
+		}
+		if (is_inputtext_dirty) {
+			anticheat_log(pid, AC_DIALOG_SMELLY_INPUT,
+				dirtyinputtext);
+		}
+	}
 
 	switch (dialogid) {
 	case DIALOG_SPAWN_SELECTION:
