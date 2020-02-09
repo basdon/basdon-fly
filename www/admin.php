@@ -51,6 +51,7 @@ if ($action == 'home') {
 		5 => 'flood',
 		6 => 'work veh hp increase',
 		7 => 'work too fast',
+		8 => 'weird dialog input',
 	];
 
 	function type($t)
