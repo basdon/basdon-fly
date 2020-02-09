@@ -135,4 +135,11 @@ void spawn_on_player_spawn(int playerid)
 			spawn_list_text[klass],
 			"Spawn", "Cancel", -1);
 	}
+
+	if (NC_GetPlayerScore(playerid) < 10) {
+		B144("* Use /reclass to change to a different class.");
+		NC_SendClientMessage(playerid, COL_INFO_LIGHT, buf144a);
+		B144("* Use /respawn to go to a different spawn place.");
+		NC_SendClientMessage(playerid, COL_INFO_LIGHT, buf144a);
+	}
 }
