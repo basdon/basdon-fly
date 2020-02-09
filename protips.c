@@ -37,6 +37,8 @@ static const char *protips[] = {
 	"Pro Tip: Lost? Use /respawn to respawn.",
 	"Pro Tip: Always try to land on the back wheels.",
 	"Pro Tip: Use /reclass to change into a different class.",
+	"Pro Tip: All flights while on a mission are recorded, you can watch "
+		"them on the website!",
 };
 static const int numprotips = sizeof(protips)/sizeof(protips[0]);
 
