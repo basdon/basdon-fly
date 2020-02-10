@@ -5,6 +5,7 @@
 #include "class.h"
 #include "dialog.h"
 #include "game_sa.h"
+#include "kneeboard.h"
 #include "login.h"
 #include "money.h"
 #include "playerdata.h"
@@ -293,6 +294,8 @@ alreadyin:
 		veh_spawn_player_vehicles(playerid);
 	}
 	class_on_player_request_class(playerid, -1);
+
+	kneeboard_create_player_text(playerid);
 }
 
 /**

@@ -7,6 +7,8 @@ for the IN_BASDONFLY macro to only compile this
 when we're inside basdonfly.c*/
 #ifdef IN_BASDONFLY
 
+#include "kneeboard.h"
+
 char playeronlineflag[MAX_PLAYERS];
 short players[MAX_PLAYERS];
 int playercount;
@@ -242,6 +244,7 @@ exit:
 	airports_init();
 	class_init();
 	heartbeat_create_session();
+	kneeboard_create_global_text();
 	maps_load_from_db();
 	missions_create_tracker_socket();
 	missions_init();

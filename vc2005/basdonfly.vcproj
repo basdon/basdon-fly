@@ -220,6 +220,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\kneeboard.c"
+				>
+			</File>
+			<File
+				RelativePath="..\kneeboard.h"
+				>
+			</File>
+			<File
 				RelativePath="..\login.c"
 				>
 			</File>

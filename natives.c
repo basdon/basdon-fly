@@ -63,6 +63,7 @@ AMX_NATIVE n_MoveObject;
 AMX_NATIVE n_PlayerPlaySound;
 AMX_NATIVE n_PlayerTextDrawAlignment;
 AMX_NATIVE n_PlayerTextDrawBackgroundColor;
+AMX_NATIVE n_PlayerTextDrawBoxColor;
 AMX_NATIVE n_PlayerTextDrawColor;
 AMX_NATIVE n_PlayerTextDrawDestroy;
 AMX_NATIVE n_PlayerTextDrawFont;
@@ -73,6 +74,7 @@ AMX_NATIVE n_PlayerTextDrawSetProportional;
 AMX_NATIVE n_PlayerTextDrawSetShadow;
 AMX_NATIVE n_PlayerTextDrawSetString;
 AMX_NATIVE n_PlayerTextDrawShow;
+AMX_NATIVE n_PlayerTextDrawUseBox;
 AMX_NATIVE n_PutPlayerInVehicle_;
 AMX_NATIVE n_RemoveBuildingForPlayer;
 AMX_NATIVE n_ResetPlayerMoney_;
@@ -212,6 +214,7 @@ int natives_find()
 		N(PlayerPlaySound),
 		N(PlayerTextDrawAlignment),
 		N(PlayerTextDrawBackgroundColor),
+		N(PlayerTextDrawBoxColor),
 		N(PlayerTextDrawColor),
 		N(PlayerTextDrawDestroy),
 		N(PlayerTextDrawFont),
@@ -222,6 +225,7 @@ int natives_find()
 		N(PlayerTextDrawSetShadow),
 		N(PlayerTextDrawSetString),
 		N(PlayerTextDrawShow),
+		N(PlayerTextDrawUseBox),
 		N_(PutPlayerInVehicle),
 		N(RemoveBuildingForPlayer),
 		N(RemovePlayerMapIcon),
