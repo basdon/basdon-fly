@@ -68,6 +68,7 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 			c = dirtyinputtext[i];
 			if (c == '%') {
 				is_inputtext_dirty = 1;
+				inputtext[j++] = '#';
 			} else if (c < ' ' && c != 0) {
 				is_inputtext_dirty = 1;
 				dirtyinputtext[i] = '~';
