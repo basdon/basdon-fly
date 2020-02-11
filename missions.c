@@ -9,6 +9,7 @@
 #include "dialog.h"
 #include "echo.h"
 #include "game_sa.h"
+#include "kneeboard.h"
 #include "login.h"
 #include "math.h"
 #include "missions.h"
@@ -624,6 +625,10 @@ void missions_cleanup(struct MISSION *mission, int playerid)
 
 	free(mission);
 	activemission[playerid] = NULL;
+
+	/*this might not be needed if mission was finished normally and player
+	uses the auto work setting, but that's just a minor optimization*/
+	kneeboard_reset_show(playerid);
 }
 
 /**
@@ -781,6 +786,17 @@ void missions_start_flight(int playerid, struct MISSION *mission)
 		"WHERE id=%d",
 	        mission->id);
 	NC_mysql_tquery_nocb(buf144a);
+
+	// kneeboard
+	NC_PARS(3);
+	nc_params[1] = playerid;
+	nc_params[2] = kneeboard_ptxt_info[playerid];
+	nc_params[3] = buf4096a;
+	csprintf(buf4096,
+		"~w~Flight from %s to ~r~%s~w~.",
+		mission->startpoint->ap->name,
+		mission->endpoint->ap->name);
+	NC(n_PlayerTextDrawSetString);
 }
 
 /**
@@ -833,7 +849,7 @@ static const char
 		"before starting work!";
 
 /**
-Starts a mission for giving player that is in given vehicle.
+Starts a mission for given player that is in given vehicle.
 */
 static
 void missions_start_mission(int playerid)
@@ -989,6 +1005,18 @@ unknownvehicle:
 			mission->veh->model,
 			mission->startpoint->ap);
 	}
+
+	// kneeboard
+	NC_PARS(3);
+	nc_params[1] = playerid;
+	nc_params[2] = kneeboard_ptxt_info[playerid];
+	nc_params[3] = buf4096a;
+	csprintf(buf4096,
+		"~w~Flight from ~r~%s~w~ to %s.",
+		mission->startpoint->ap->name,
+		mission->endpoint->ap->name);
+	NC(n_PlayerTextDrawSetString);
+
 	return;
 err:
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
