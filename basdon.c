@@ -245,7 +245,6 @@ exit:
 	airports_init();
 	class_init();
 	heartbeat_create_session();
-	kneeboard_create_global_text();
 	maps_load_from_db();
 	missions_create_tracker_socket();
 	missions_init();
@@ -437,6 +436,17 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 	spawn_prespawn(playerid);
 	timecyc_on_player_death(playerid);
 	zones_hide_text(playerid);
+
+	// kneeboard
+	NC_PARS(2);
+	nc_params[1] = playerid;
+	nc_params[2] = kneeboard_ptxt_header[playerid];
+	NC(n_TextDrawHideForPlayer);
+	nc_params[2] = kneeboard_ptxt_info[playerid];
+	NC(n_PlayerTextDrawHide);
+	nc_params[2] = kneeboard_ptxt_distance[playerid];
+	NC(n_PlayerTextDrawHide);
+
 	return 1;
 }
 
@@ -565,11 +575,13 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 	spawned[playerid] = 1;
 
 	common_GetPlayerPos(playerid, &pos);
+	kneeboard_reset_show(playerid);
 	maps_stream_for_player(playerid, pos);
 	money_on_player_spawn(playerid);
 	spawn_on_player_spawn(playerid);
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	zones_on_player_spawn(playerid, pos);
+
 	return 1;
 }
 

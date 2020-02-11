@@ -74,6 +74,7 @@ AMX_NATIVE n_PlayerTextDrawSetProportional;
 AMX_NATIVE n_PlayerTextDrawSetShadow;
 AMX_NATIVE n_PlayerTextDrawSetString;
 AMX_NATIVE n_PlayerTextDrawShow;
+AMX_NATIVE n_PlayerTextDrawTextSize;
 AMX_NATIVE n_PlayerTextDrawUseBox;
 AMX_NATIVE n_PutPlayerInVehicle_;
 AMX_NATIVE n_RemoveBuildingForPlayer;
@@ -225,6 +226,7 @@ int natives_find()
 		N(PlayerTextDrawSetShadow),
 		N(PlayerTextDrawSetString),
 		N(PlayerTextDrawShow),
+		N(PlayerTextDrawTextSize),
 		N(PlayerTextDrawUseBox),
 		N_(PutPlayerInVehicle),
 		N(RemoveBuildingForPlayer),

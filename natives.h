@@ -62,6 +62,7 @@ extern AMX_NATIVE n_PlayerTextDrawSetProportional;
 extern AMX_NATIVE n_PlayerTextDrawSetShadow;
 extern AMX_NATIVE n_PlayerTextDrawSetString;
 extern AMX_NATIVE n_PlayerTextDrawShow;
+extern AMX_NATIVE n_PlayerTextDrawTextSize;
 extern AMX_NATIVE n_PlayerTextDrawUseBox;
 extern AMX_NATIVE n_PutPlayerInVehicle_;
 extern AMX_NATIVE n_RemoveBuildingForPlayer;
