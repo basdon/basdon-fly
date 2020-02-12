@@ -318,7 +318,7 @@ void on_message(User user, char[] target, char[] replytarget, char[] msg)
 @Override
 public void on_selfmessage(char[] target, char[] text, int offset, int len)
 {
-	if (this.echo != null && !this.echo.ignore_self) {
+	if (this.echo != null && !this.echo.ignore_self && strcmp(this.outtarget, target)) {
 		User user = anna.get_anna_user();
 		ChannelUser cu = anna.find_user(target, user.nick);
 		char prefix = cu == null ? 0 : cu.prefix;
