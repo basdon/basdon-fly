@@ -1614,3 +1614,24 @@ void missions_update_satisfaction(int pid, int vid, struct quat *vrot)
 		}
 	}
 }
+
+int missions_get_distance_to_next_cp(int playerid, struct vec3 *frompos)
+{
+	struct MISSION *miss;
+	struct vec3 cp;
+
+	if ((miss = activemission[playerid]) == NULL) {
+		return -1;
+	}
+
+	if (miss->stage < MISSION_STAGE_FLIGHT) {
+		cp = miss->startpoint->pos;
+	} else {
+		cp = miss->endpoint->pos;
+	}
+
+	cp.x -= frompos->x;
+	cp.y -= frompos->y;
+	cp.z -= frompos->z;
+	return (int) sqrt(common_vectorsize_sq(cp));
+}

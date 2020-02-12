@@ -25,3 +25,9 @@ void kneeboard_create_player_text(int playerid);
 Resets and shows the kneeboard for given player.
 */
 void kneeboard_reset_show(int playerid);
+/**
+Updates the distance indicator in the kneeboard for given player.
+
+Should be called by the panel.
+*/
+void kneeboard_update_distance(int playerid, struct vec3 *playerpos);

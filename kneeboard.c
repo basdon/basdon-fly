@@ -3,11 +3,14 @@
 
 #include "common.h"
 #include "kneeboard.h"
+#include "missions.h"
 #include <string.h>
 
 int kneeboard_ptxt_header[MAX_PLAYERS];
 int kneeboard_ptxt_distance[MAX_PLAYERS];
 int kneeboard_ptxt_info[MAX_PLAYERS];
+
+static int last_distance[MAX_PLAYERS];
 
 void kneeboard_create_player_text(int playerid)
 {
@@ -81,7 +84,7 @@ void kneeboard_reset_show(int playerid)
 	B144("~w~Not on a job, type ~y~/w~w~ to start working.");
 	NC(n_PlayerTextDrawSetString);
 	nc_params[2] = kneeboard_ptxt_distance[playerid];
-	B144("~n~~n~~n~~n~~n~~n~~n~");
+	B144("~n~~n~~n~~n~~n~");
 	NC(n_PlayerTextDrawSetString);
 	NC_PARS(2);
 	nc_params[2] = kneeboard_ptxt_info[playerid];
@@ -90,4 +93,37 @@ void kneeboard_reset_show(int playerid)
 	NC(n_PlayerTextDrawShow);
 	nc_params[2] = kneeboard_ptxt_header[playerid];
 	NC(n_PlayerTextDrawShow);
+}
+
+void kneeboard_update_distance(int playerid, struct vec3 *playerpos)
+{
+	int dist;
+
+	dist = missions_get_distance_to_next_cp(playerid, playerpos);
+	if (dist != -1) {
+		if (dist > 1000) {
+			dist /= 100;
+			dist *= 100;
+		}
+		if (dist != last_distance[playerid]) {
+			last_distance[playerid] = dist;
+			NC_PARS(3);
+			nc_params[1] = playerid;
+			nc_params[2] = kneeboard_ptxt_distance[playerid];
+			nc_params[3] = buf4096a;
+			if (dist < 1000) {
+				csprintf(buf4096,
+					"~n~~n~~n~~n~~n~"
+					"~w~Distance: %dm~n~",
+					dist);
+			} else {
+				csprintf(buf4096,
+					"~n~~n~~n~~n~~n~"
+					"~w~Distance: %.1fKm~n~",
+					(float) dist / 1000.0f);
+
+			}
+			NC(n_PlayerTextDrawSetString);
+		}
+	}
 }

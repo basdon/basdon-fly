@@ -5,6 +5,7 @@
 #include "a_samp.h"
 #include "airport.h"
 #include "game_sa.h"
+#include "kneeboard.h"
 #include "panel.h"
 #include "math.h"
 #include "nav.h"
@@ -326,6 +327,7 @@ void panel_timed_update()
 		vehicleid = NC_GetPlayerVehicleID(playerid);
 
 		common_GetVehiclePos(vehicleid, &vpos);
+		kneeboard_update_distance(playerid, &vpos);
 		panel_update_altitude(playerid, (int) vpos.z);
 
 		NC_GetVehicleZAngle(vehicleid, buf144a);

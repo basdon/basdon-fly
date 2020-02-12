@@ -120,6 +120,10 @@ Free missionpoints from airport data.
 */
 void missions_freepoints();
 /**
+Gets distance in meters for player to next mission cp, -1 if not on a mission.
+*/
+int missions_get_distance_to_next_cp(int playerid, struct vec3 *frompos);
+/**
 Loads mission points and inits variables.
 */
 void missions_init();
