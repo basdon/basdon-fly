@@ -441,7 +441,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 	NC_PARS(2);
 	nc_params[1] = playerid;
 	nc_params[2] = kneeboard_ptxt_header[playerid];
-	NC(n_TextDrawHideForPlayer);
+	NC(n_PlayerTextDrawHide);
 	nc_params[2] = kneeboard_ptxt_info[playerid];
 	NC(n_PlayerTextDrawHide);
 	nc_params[2] = kneeboard_ptxt_distance[playerid];
