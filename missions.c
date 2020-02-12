@@ -787,7 +787,7 @@ void missions_start_flight(int playerid, struct MISSION *mission)
 	        mission->id);
 	NC_mysql_tquery_nocb(buf144a);
 
-	// kneeboard
+	/*kneeboard*/
 	NC_PARS(3);
 	nc_params[1] = playerid;
 	nc_params[2] = kneeboard_ptxt_info[playerid];
@@ -1006,7 +1006,7 @@ unknownvehicle:
 			mission->startpoint->ap);
 	}
 
-	// kneeboard
+	/*kneeboard*/
 	NC_PARS(3);
 	nc_params[1] = playerid;
 	nc_params[2] = kneeboard_ptxt_info[playerid];

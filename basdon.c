@@ -34,7 +34,7 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 {
 	const int pid = PARAM(1), dialogid = PARAM(2);
 	const int res = PARAM(3), listitem = PARAM(4);
-	unsigned char inputtext[128], dirtyinputtext[128], c;
+	char inputtext[128], dirtyinputtext[128], c;
 	int is_inputtext_dirty, i, j;
 	cell *ia;
 
@@ -437,7 +437,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 	timecyc_on_player_death(playerid);
 	zones_hide_text(playerid);
 
-	// kneeboard
+	/*kneeboard*/
 	NC_PARS(2);
 	nc_params[1] = playerid;
 	nc_params[2] = kneeboard_ptxt_header[playerid];
