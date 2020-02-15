@@ -587,7 +587,8 @@ void nav_calc_ils_values(
 {
 	float xdev = 5.0f + dist * (90.0f - 5.0f) / 1500.0f;
 	float zdev = 2.0f + dist * (100.0f - 2.0f) / 1250.0f;
-	float ztarget = targetz + dist * 0.2f;
+	/*TODO: why negative dist?*/
+	float ztarget = targetz + -dist * 0.2f;
 	int tmp;
 
 	if (z < ztarget - zdev - ILS_GREYZONE ||
