@@ -190,7 +190,8 @@ repairlog --
   id - rowid
   stamp - timestamp
   vehicle - (veh.i)
-  player - (usr.i)
+  driver - (usr.i) NULL
+  invokr - (usr.i)
   svp - (svp.id)
   paid -
   damage - repaired damage points
@@ -201,7 +202,8 @@ refuellog --
   id - rowid
   stamp - timestamp
   vehicle - (veh.i)
-  player - (usr.i)
+  driver - (usr.i) NULL
+  invokr - (usr.i)
   svp - (svp.id)
   paid -
   fuel - (float)
