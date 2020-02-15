@@ -5,9 +5,9 @@
 #include "a_samp.h"
 #include "airport.h"
 #include "game_sa.h"
-#include "math.h"
 #include "nav.h"
 #include "panel.h"
+#include <math.h>
 #include <string.h>
 
 /*SOUND_ROULETTE_ADD_CASH*/
@@ -634,10 +634,10 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 		n->dist = (n->dist / 100) * 100;
 	}
 	n->alt = (int) (pos->z - beacon->z);
-	crs = -atan2(dy, dx);
+	crs = (float) -atan2(dy, dx);
 	if (n->vor != NULL ) {
 		vorangle = crs + M_PI2 - n->vor->headingr;
-		horizontaldeviation = dist * cos(vorangle);
+		horizontaldeviation = dist * (float) cos(vorangle);
 		n->vorvalue = (int) horizontaldeviation;
 		crs = heading - n->vor->heading;
 	} else {
@@ -647,7 +647,9 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 	if (n->vor == NULL || !n->ils) {
 		n->ilsx = 0;
 		n->ilsz = INVALID_ILS_VALUE;
-	} else if (dist > ILS_MAX_DIST || (dist *= sin(vorangle)) <= 0.0f) {
+	} else if (dist > ILS_MAX_DIST ||
+		(dist *= (float) sin(vorangle)) <= 0.0f)
+	{
 		n->ilsx = INVALID_ILS_VALUE;
 		n->ilsz = 0;
 	} else {

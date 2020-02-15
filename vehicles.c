@@ -6,7 +6,6 @@
 #include "anticheat.h"
 #include "game_sa.h"
 #include "login.h"
-#include "math.h"
 #include "missions.h"
 #include "playerdata.h"
 #include "playerstats.h"
@@ -14,6 +13,7 @@
 #include "servicepoints.h"
 #include "vehicles.h"
 #include "time/time.h"
+#include <math.h>
 #include <string.h>
 
 #define FUEL_WARNING_SOUND 3200 /*air horn*/

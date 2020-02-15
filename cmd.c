@@ -14,13 +14,13 @@
 #include "prefs.h"
 #include "protips.h"
 #include "nav.h"
-#include "math.h"
 #include "missions.h"
 #include "money.h"
 #include "servicepoints.h"
 #include "timecyc.h"
 #include "vehicles.h"
 #include "zones.h"
+#include <math.h>
 #include <string.h>
 
 int cmd_get_int_param(const char *cmdtext, int *parseidx, int *value)

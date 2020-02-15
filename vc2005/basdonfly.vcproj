@@ -244,10 +244,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\math.h"
-				>
-			</File>
-			<File
 				RelativePath="..\missions.c"
 				>
 			</File>

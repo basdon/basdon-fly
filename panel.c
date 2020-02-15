@@ -7,8 +7,8 @@
 #include "game_sa.h"
 #include "kneeboard.h"
 #include "panel.h"
-#include "math.h"
 #include "nav.h"
+#include <math.h>
 #include <string.h>
 
 /*

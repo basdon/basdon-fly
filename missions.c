@@ -11,7 +11,6 @@
 #include "game_sa.h"
 #include "kneeboard.h"
 #include "login.h"
-#include "math.h"
 #include "missions.h"
 #include "money.h"
 #include "nav.h"
@@ -21,6 +20,7 @@
 #include "prefs.h"
 #include "timer.h"
 #include "vehicles.h"
+#include <math.h>
 #include <string.h>
 #include <time.h>
 
