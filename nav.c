@@ -636,7 +636,7 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 	n->alt = (int) (pos->z - beacon->z);
 	crs = (float) -atan2(dy, dx);
 	if (n->vor != NULL ) {
-		vorangle = crs + M_PI2 - n->vor->headingr;
+		vorangle = crs - n->vor->headingr;
 		horizontaldeviation = dist * (float) cos(vorangle);
 		n->vorvalue = (int) horizontaldeviation;
 		crs = heading - n->vor->heading;
