@@ -111,6 +111,7 @@ int svp_cmd_refuel(CMDPARAMS)
 	struct dbvehicle *veh;
 	struct vec3 vpos;
 	int vehicleid, driverid, budget, svpid, msgcol, cost, refuelpct;
+	int driveruserid;
 	float capacity, refuelamount;
 	char *msg, buf1[10];
 
@@ -187,13 +188,32 @@ int svp_cmd_refuel(CMDPARAMS)
 		100.0f * veh->fuel / capacity);
 	NC_SendClientMessage(playerid, COL_INFO, buf144a);
 
+	if (NC_GetPlayerVehicleSeat(playerid) != 0) {
+		driverid = common_find_player_in_vehicle_seat(vehicleid, 0);
+		if (driverid == INVALID_PLAYER_ID) {
+			driveruserid = -1;
+		} else {
+			driveruserid = userid[driverid];
+			csprintf(buf144,
+				INFO"Player %s[%d] refueled your vehicle!",
+				pdata[playerid]->name,
+				playerid);
+			NC_SendClientMessage(driverid, COL_INFO, buf144a);
+		}
+	} else {
+		driverid = playerid;
+		driveruserid = userid[driverid];
+	}
+
 	if (veh && userid[playerid] > 0) {
 		csprintf(buf4096,
 			"INSERT INTO refuellog"
-			"(stamp,vehicle,player,svp,paid,fuel) "
+			"(stamp,vehicle,driver,invokr,svp,paid,fuel) "
 			"VALUES "
-			"(UNIX_TIMESTAMP(),%d,%d,%d,%d,%.4f)",
+			"(UNIX_TIMESTAMP(),%d,IF(%d<1,NULL,%d),%d,%d,%d,%.4f)",
 			veh->id,
+			driveruserid,
+			driveruserid,
 			userid[playerid],
 			svpid,
 			cost,
@@ -202,18 +222,6 @@ int svp_cmd_refuel(CMDPARAMS)
 	}
 
 	missions_on_vehicle_refueled(vehicleid, refuelamount);
-
-	/*inform driver that a passenger refueled the vehicle*/
-	if (NC_GetPlayerVehicleSeat(playerid) != 0 &&
-		(driverid = common_find_player_in_vehicle_seat(vehicleid, 0)) !=
-			INVALID_PLAYER_ID)
-	{
-		csprintf(buf144,
-			INFO"Player %s[%d] refueled your vehicle!",
-			pdata[playerid]->name,
-			playerid);
-		NC_SendClientMessage(driverid, COL_INFO, buf144a);
-	}
 	return 1;
 retmsg:
 	B144(msg);
@@ -225,7 +233,7 @@ int svp_cmd_repair(CMDPARAMS)
 {
 	struct dbvehicle *veh;
 	struct vec3 vpos;
-	int vehicleid, driverid, budget, svpid, msgcol, cost;
+	int vehicleid, driverid, driveruserid, budget, svpid, msgcol, cost;
 	float hp, fixamount;
 	char *msg;
 
@@ -280,13 +288,33 @@ int svp_cmd_repair(CMDPARAMS)
 	nc_paramf[2] = hp;
 	NC(n_SetVehicleHealth);
 
+	if (NC_GetPlayerVehicleSeat(playerid) != 0) {
+		driverid = common_find_player_in_vehicle_seat(vehicleid, 0);
+		if (driverid == INVALID_PLAYER_ID) {
+			driveruserid = -1;
+		} else {
+			driveruserid = userid[driverid];
+			csprintf(buf144,
+				INFO"Player %s[%d] repaired your vehicle!",
+				pdata[playerid]->name,
+				playerid);
+			NC_SendClientMessage(driverid, COL_INFO, buf144a);
+		}
+	} else {
+		driverid = playerid;
+		driveruserid = userid[driverid];
+	}
+
 	if (veh && userid[playerid] > 0) {
 		csprintf(buf4096,
 			"INSERT INTO "
-			"repairlog(stamp,vehicle,player,svp,paid,damage) "
+			"repairlog"
+			"(stamp,vehicle,driver,invokr,svp,paid,damage) "
 			"VALUES "
-			"(UNIX_TIMESTAMP(),%d,%d,%d,%d,%d)",
+			"(UNIX_TIMESTAMP(),%d,IF(%d<1,NULL,%d),%d,%d,%d,%d)",
 			veh->id,
+			driveruserid,
+			driveruserid,
 			userid[playerid],
 			svpid,
 			cost,
@@ -295,18 +323,6 @@ int svp_cmd_repair(CMDPARAMS)
 	}
 
 	missions_on_vehicle_repaired(vehicleid, fixamount, hp);
-
-	/*inform driver that a passenger refueled the vehicle*/
-	if (NC_GetPlayerVehicleSeat(playerid) != 0 &&
-		(driverid = common_find_player_in_vehicle_seat(vehicleid, 0)) !=
-			INVALID_PLAYER_ID)
-	{
-		csprintf(buf144,
-			INFO"Player %s[%d] repaired your vehicle!",
-			pdata[playerid]->name,
-			playerid);
-		NC_SendClientMessage(driverid, COL_INFO, buf144a);
-	}
 	return 1;
 retmsg:
 	B144(msg);
