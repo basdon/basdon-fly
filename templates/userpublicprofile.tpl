@@ -43,12 +43,12 @@
 		<ul>
 			{@render fmt_money.php}
 			{@eval ++$db_querycount}
-			{@eval $rp = $db->query('SELECT SUM(paid) s FROM refuellog WHERE player='.$id)}
+			{@eval $rp = $db->query('SELECT SUM(paid) s FROM refuellog WHERE invokr='.$id)}
 			{@if $rp !== false && ($rp = $rp->fetchAll()) !== false && count($rp)}
 				<li><strong>Refuel budget:</strong> {@unsafe fmt_money(-$rp[0]->s)}</li>
 			{@endif}
 			{@eval ++$db_querycount}
-			{@eval $rp = $db->query('SELECT SUM(paid) s FROM repairlog WHERE player='.$id)}
+			{@eval $rp = $db->query('SELECT SUM(paid) s FROM repairlog WHERE invokr='.$id)}
 			{@if $rp !== false && ($rp = $rp->fetchAll()) !== false && count($rp)}
 				<li><strong>Repair budget:</strong> {@unsafe fmt_money(-$rp[0]->s)}</li>
 			{@endif}
