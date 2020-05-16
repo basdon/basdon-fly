@@ -270,6 +270,11 @@ void login_login_player(int playerid, int status)
 	players[playercount++] = playerid;
 alreadyin:
 
+	if (pwdata[playerid]) {
+		free(pwdata[playerid]);
+		pwdata[playerid] = NULL;
+	}
+
 	if (userid[playerid] > 0) {
 		NC_gpci(playerid, buf64a, 64);
 		ctoai(cbuf64);

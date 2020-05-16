@@ -42,7 +42,7 @@
 #define MISSION_TYPE_CARGO_M 16
 /*andro*/
 #define MISSION_TYPE_CARGO_L 32
-/*(news,police) maverick, raindance, leviatha, sparrow*/
+/*(news,police) maverick, raindance, leviathan, sparrow*/
 #define MISSION_TYPE_HELI 64
 /*cargobob*/
 #define MISSION_TYPE_HELI_CARGO 128

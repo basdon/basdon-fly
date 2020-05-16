@@ -231,6 +231,10 @@ void chpw_cb_new_password_hashed(void *data)
 
 int chpw_cmd_changepassword(CMDPARAMS)
 {
+	if (pwdata[playerid]) {
+		return 1;
+	}
+
 	chpw_show_dialog(playerid, 0, 0);
 
 	/*load current password while user is filling in dialog*/
@@ -328,7 +332,7 @@ void chpw_dlg_previous_password(int playerid, int response,
 
 		if (pwdata[playerid] == NULL) {
 			/*means the password hasn't loaded yet,
-			save actuall password so password load can check.*/
+			save actual password so password load can check.*/
 			/*TODO: I don't like this temp storing of
 			plain pw (but is is unpacked though)*/
 			/*129 size since it's straight from inputtext*/
