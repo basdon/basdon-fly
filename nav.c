@@ -125,7 +125,7 @@ int nav_check_can_do_cmd(int playerid, int navtype, int *vehicleid)
 	vehiclemodel = NC_GetVehicleModel(*vehicleid);
 	if (navtype == NAV_ADF) {
 		if (!game_is_air_vehicle(vehiclemodel)) {
-			csprintf(buf144, NO_NAV, "ADF");
+			csprintf(buf144, NO_NAV, "n ADF");
 			goto sendmsgfail;
 		}
 	} else if (!game_is_plane(vehiclemodel)) {
@@ -587,7 +587,6 @@ void nav_calc_ils_values(
 {
 	float xdev = 5.0f + dist * (90.0f - 5.0f) / 1500.0f;
 	float zdev = 2.0f + dist * (100.0f - 2.0f) / 1250.0f;
-	/*TODO: why negative dist?*/
 	float ztarget = targetz + -dist * 0.2f;
 	int tmp;
 
@@ -625,9 +624,7 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 		return;
 	}
 
-	heading = 360.0f - heading;
-
-	dx = pos->x - beacon->x;
+	dx = beacon->x - pos->x;
 	dy = beacon->y - pos->y;
 	dist = sqrt(dx * dx + dy * dy);
 	n->dist = (int) dist;
@@ -635,15 +632,20 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 		n->dist = (n->dist / 100) * 100;
 	}
 	n->alt = (int) (pos->z - beacon->z);
-	crs = (float) -atan2(dy, dx);
 	if (n->vor != NULL ) {
+		crs = (float) -atan2(dy, dx);
 		vorangle = crs - n->vor->headingr;
+		crs = (360.0f - heading) - n->vor->heading;
 		horizontaldeviation = dist * (float) cos(vorangle);
 		n->vorvalue = (int) horizontaldeviation;
-		crs = heading - n->vor->heading;
 	} else {
+		crs = (float) atan2(dy, dx) * 180.0f / M_PI;
+		heading += 90.0f;
+		if (heading > 360.0f) {
+			heading -= 360.0f;
+		}
+		crs = heading - crs;
 		n->vorvalue = INVALID_VOR_VALUE;
-		crs = heading - (crs * 180.0f / M_PI);
 	}
 	if (n->vor == NULL || !n->ils) {
 		n->ilsx = 0;
@@ -654,7 +656,7 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 		n->ilsx = INVALID_ILS_VALUE;
 		n->ilsz = 0;
 	} else {
-		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, beacon->z, pos->z,
+		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, pos->z, beacon->z,
 			horizontaldeviation);
 	}
 	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);

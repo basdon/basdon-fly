@@ -137,7 +137,7 @@ void ctoai(char *dstsrc);
 
 #define WARN "! "
 #define INFO "* "
-#define SUCC "+ "
+#define SUCC "" /*the + might confuse people*/
 
 #define COL_SAMP_GREEN 0x88aa62ff /*as in username error message*/
 #define COL_SAMP_GREY 0xa9c4e4ff /*as in 'Connected to..'*/
