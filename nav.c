@@ -54,7 +54,7 @@ static struct playercache {
 /*extra offset where ILS values are out of range, but ILS is still shown*/
 #define ILS_GREYZONE (80.0f)
 /*amount of horizontal/vertical X tokens*/
-#define ILS_SIZE 8
+#define ILS_SIZE 9
 
 void nav_init()
 {
@@ -346,16 +346,16 @@ void nav_update_textdraws(
 			"~w~X~n~"
 			"~w~X~n~"
 			"~w~X~n~"
-			"~r~__ "
+			"~r~_ "
 			"~w~X ~w~X ~w~X ~w~X ~w~X ~w~X ~w~X ~w~X ~w~X"
-			" ~r~__~n~"
+			" ~r~_~n~"
 			"~w~X~n~"
 			"~w~X~n~"
 			"~w~X~n~"
 			"~w~X~n~"
-			"~r~__";
+			"~r~_";
 	static const unsigned char
-		ILS_X_OFFSETS[] = { 8, 15, 22, 29, 62, 95, 102, 109, 116 };
+		ILS_Z_OFFSETS[] = { 8, 15, 22, 29, 61, 93, 100, 107, 114 };
 
 	struct NAVDATA *n = nav[vehicleid];
 	float vorbarx, vorbarlettersizex;
@@ -402,20 +402,18 @@ void nav_update_textdraws(
 		} else if (-ILS_SIZE <= n->ilsx &&  n->ilsx < ILS_SIZE * 2) {
 			B144((char*) ILS_X);
 			if (n->ilsx < 0) {
-				buf144[38] = '-';
-				buf144[39] = '0' + (-n->ilsx);
+				buf144[38] = '0' + (-n->ilsx);
 			} else if (n->ilsx >= ILS_SIZE) {
-				buf144[89] = '0' + (n->ilsx - ILS_SIZE + 1);
+				buf144[88] = '0' + (n->ilsx - ILS_SIZE + 1);
 			} else {
-				buf144[42 + 5 * n->ilsx] = 'r';
+				buf144[41 + 5 * n->ilsx] = 'r';
 			}
 			if (n->ilsz < 0) {
 				buf144[3] = '0' + (-n->ilsz);
 			} else if (n->ilsz >= ILS_SIZE) {
-				buf144[125] = '-';
-				buf144[126] = '0' + (n->ilsz - ILS_SIZE + 1);
+				buf144[123] = '0' + (n->ilsz - ILS_SIZE + 1);
 			} else {
-				buf144[ILS_X_OFFSETS[n->ilsz]] = 'r';
+				buf144[ILS_Z_OFFSETS[n->ilsz]] = 'r';
 			}
 doils:
 			NC_PARS(3);
@@ -587,7 +585,7 @@ void nav_calc_ils_values(
 {
 	float xdev = 5.0f + dist * (90.0f - 5.0f) / 1500.0f;
 	float zdev = 2.0f + dist * (100.0f - 2.0f) / 1250.0f;
-	float ztarget = targetz + -dist * 0.2f;
+	float ztarget = targetz + dist * 0.2f;
 	int tmp;
 
 	if (z < ztarget - zdev - ILS_GREYZONE ||
@@ -633,10 +631,9 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 	}
 	n->alt = (int) (pos->z - beacon->z);
 	if (n->vor != NULL ) {
-		crs = (float) -atan2(dy, dx);
-		vorangle = crs - n->vor->headingr;
 		crs = (360.0f - heading) - n->vor->heading;
-		horizontaldeviation = dist * -(float) cos(vorangle);
+		vorangle = (float) atan2(dy, dx) - n->vor->headingr;
+		horizontaldeviation = dist * (float) sin(vorangle);
 		n->vorvalue = (int) horizontaldeviation;
 	} else {
 		crs = (float) atan2(dy, dx) * 180.0f / M_PI;
@@ -651,7 +648,7 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 		n->ilsx = 0;
 		n->ilsz = INVALID_ILS_VALUE;
 	} else if (dist > ILS_MAX_DIST ||
-		(dist *= (float) sin(vorangle)) <= 0.0f)
+		(dist *= (float) cos(vorangle)) <= 0.0f)
 	{
 		n->ilsx = INVALID_ILS_VALUE;
 		n->ilsz = 0;

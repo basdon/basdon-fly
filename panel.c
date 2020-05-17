@@ -878,6 +878,8 @@ void panel_on_player_connect(int playerid)
 	NC(n_PlayerTextDrawFont);
 	nc_params[3] = 1;
 	NC(n_PlayerTextDrawSetOutline);
+	nc_params[3] = 0;
+	NC(n_PlayerTextDrawSetProportional);
 }
 
 void panel_on_gamemode_init()

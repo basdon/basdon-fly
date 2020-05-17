@@ -127,7 +127,7 @@ noairports:
 			rnw->nav = (*field = 4, NC(n_cache_get_field_i));
 			rnw->type = (*field = 5, NC(n_cache_get_field_i));
 			rnw->heading = (*field = 6, NCF(n_cache_get_field_f));
-			rnw->headingr = rnw->heading * DEG_TO_RAD;
+			rnw->headingr = (360.0f - rnw->heading + 90.0f) * DEG_TO_RAD;
 			NC_PARS(3);
 			*field = 7; NC(n_cache_get_field_s);
 			sprintf(rnw->id, "%02.0f", rnw->heading / 10.0f);
