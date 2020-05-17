@@ -150,6 +150,7 @@ To be called every second.
 */
 void veh_timed_1s_update();
 void veh_timed_panel_update();
+void veh_timed_speedo_update();
 /**
 Updates vehicle and player odo.
 

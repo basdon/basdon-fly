@@ -37,11 +37,15 @@ struct vehicle gamevehicles[MAX_VEHICLES];
 short labelids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB+ of mapping, errrr */
 
 /**
+Holds player textdraw id of the vehicle panel speedo.
+*/
+static int ptxt_speedo[MAX_PLAYERS];
+/**
 Holds global textdraw id of the vehicle panel background.
 */
 static int txt_bg;
 /**
-Holds player textdraw id of the vehicle panel text, -1 if not created.
+holds player textdraw id of the vehicle panel text, -1 if not created.
 */
 static int ptxt_txt[MAX_PLAYERS];
 /**
@@ -943,9 +947,12 @@ void veh_update_panel_for_player(int playerid)
 void veh_on_player_state_change(int playerid, int from, int to)
 {
 	struct dbvehicle *veh;
-	int vehicleid, n, p;
+	int vehicleid, n, p, lastvehicleid;
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
+		vehicleid = NC_GetPlayerVehicleID(playerid);
+		veh = gamevehicles[vehicleid].dbvehicle;
+
 		buf144[0] = '_';
 		buf144[1] = 0;
 		NC_PARS(4);
@@ -962,6 +969,11 @@ void veh_on_player_state_change(int playerid, int from, int to)
 		nc_params[2] = ptxt_txt[playerid];
 		NC(n_PlayerTextDrawShow);
 
+		if (veh != NULL && !game_is_air_vehicle(veh->model)) {
+			nc_params[2] = ptxt_speedo[playerid];
+			NC(n_PlayerTextDrawShow);
+		}
+
 		ptxtcache_fl[playerid] = -1;
 		ptxtcache_hp[playerid] = -1;
 
@@ -972,6 +984,8 @@ void veh_on_player_state_change(int playerid, int from, int to)
 		nc_params[2] = txt_bg;
 		NC(n_TextDrawHideForPlayer);
 		nc_params[2] = ptxt_txt[playerid];
+		NC(n_PlayerTextDrawHide);
+		nc_params[2] = ptxt_speedo[playerid];
 		NC(n_PlayerTextDrawHide);
 		nc_params[2] = ptxt_fl[playerid];
 		NC(n_PlayerTextDrawDestroy);
@@ -986,7 +1000,6 @@ void veh_on_player_state_change(int playerid, int from, int to)
 	}
 
 	if (to == PLAYER_STATE_DRIVER) {
-		vehicleid = NC_GetPlayerVehicleID(playerid);
 		veh_on_player_now_driving(playerid, vehicleid);
 
 		NC_PARS(2);
@@ -1001,17 +1014,17 @@ void veh_on_player_state_change(int playerid, int from, int to)
 	}
 
 	if (from == PLAYER_STATE_DRIVER &&
-		(vehicleid = lastvehicle[playerid]) &&
-		common_find_vehicle_driver(vehicleid) == INVALID_PLAYER_ID &&
-		veh_needs_owner_label(veh = gamevehicles[vehicleid].dbvehicle))
+		(lastvehicleid = lastvehicle[playerid]) &&
+		common_find_vehicle_driver(lastvehicleid) == INVALID_PLAYER_ID &&
+		veh_needs_owner_label(veh = gamevehicles[lastvehicleid].dbvehicle))
 	{
 		NC_PARS(2);
-		nc_params[1] = vehicleid;
+		nc_params[1] = lastvehicleid;
 		n = playercount;
 		while (n--) {
 			nc_params[2] = p = players[n];
 			if (NC(n_IsVehicleStreamedIn)) {
-				veh_owner_label_create(veh, vehicleid, p);
+				veh_owner_label_create(veh, lastvehicleid, p);
 			}
 		}
 	}
@@ -1028,6 +1041,34 @@ void veh_timed_panel_update()
 	}
 }
 
+void veh_timed_speedo_update()
+{
+	struct dbvehicle *veh;
+	float x, y, z;
+	int n, playerid, vehicleid;
+
+	n = playercount;
+	while (n--) {
+		if (spawned[playerid = players[n]] &&
+			(vehicleid = NC_GetPlayerVehicleID(playerid)) &&
+			(veh = gamevehicles[vehicleid].dbvehicle) &&
+			!game_is_air_vehicle(veh->model))
+		{
+			NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
+			x = *fbuf32;
+			y = *fbuf64;
+			z = *fbuf144;
+			sprintf(cbuf64, "%.0f", VEL_TO_KPH * (float) sqrt(x * x + y * y + z * z));
+			B144(cbuf64);
+			NC_PARS(3);
+			nc_params[1] = playerid;
+			nc_params[2] = ptxt_speedo[playerid];
+			nc_params[3] = buf144a;
+			NC(n_PlayerTextDrawSetString);
+		}
+	}
+}
+
 void veh_create_player_textdraws(int playerid)
 {
 	ptxt_fl[playerid] = ptxt_hp[playerid] = -1;
@@ -1040,11 +1081,19 @@ void veh_create_player_textdraws(int playerid)
 	nc_params[4] = buf144a;
 	B144("ODO 00000000~n~_FL i-------i~n~_HP i-------i");
 	ptxt_txt[playerid] = NC(n_CreatePlayerTextDraw);
+	nc_paramf[2] = 615.0f;
+	nc_paramf[3] = 380.0f;
+	B144("0");
+	ptxt_speedo[playerid] = NC(n_CreatePlayerTextDraw);
 
 	/*letter sizes*/
 	nc_params[2] = ptxt_txt[playerid];
 	nc_paramf[3] = 0.25f;
 	nc_paramf[4] = 1.0f;
+	NC(n_PlayerTextDrawLetterSize);
+	nc_params[2] = ptxt_speedo[playerid];
+	nc_paramf[3] = 0.5f;
+	nc_paramf[4] = 1.5f;
 	NC(n_PlayerTextDrawLetterSize);
 
 	NC_PARS(3);
@@ -1058,6 +1107,17 @@ void veh_create_player_textdraws(int playerid)
 	NC(n_PlayerTextDrawSetShadow);
 	nc_params[3] = 2;
 	NC(n_PlayerTextDrawFont);
+
+	nc_params[2] = ptxt_speedo[playerid];
+	nc_params[3] = -1;
+	NC(n_PlayerTextDrawColor);
+	nc_params[3] = 0,
+	NC(n_PlayerTextDrawSetShadow);
+	nc_params[3] = 1,
+	NC(n_PlayerTextDrawSetOutline);
+	nc_params[3] = 3;
+	NC(n_PlayerTextDrawFont);
+	NC(n_PlayerTextDrawAlignment);
 }
 
 void veh_create_global_textdraws()

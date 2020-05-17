@@ -128,6 +128,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 		dev_missions_update_closest_point();
 #endif /*DEV*/
 		panel_timed_update();
+		veh_timed_speedo_update();
 		playerstats_check_for_afk();
 
 		timecyc_tick();
