@@ -92,7 +92,9 @@ int maps_load_from_file(struct MAP *map)
 				}
 			}
 			/* as per spec */
-			remobj->model = -remobj->model;
+			if (remobj->model != -1) {
+				remobj->model = -remobj->model;
+			}
 			remobj++;
 			numremovedobjects++;
 		}
