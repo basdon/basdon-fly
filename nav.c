@@ -88,6 +88,8 @@ void nav_enable(int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 	if (np == NULL) {
 		nav[vehicleid] = np = malloc(sizeof(struct NAVDATA));
 		np->alt = np->crs = np->dist = 0;
+	} else if (np->ils) {
+		panel_hide_ils_for_passengers(vehicleid);
 	}
 	np->beacon = adf;
 	np->vor = vor;
