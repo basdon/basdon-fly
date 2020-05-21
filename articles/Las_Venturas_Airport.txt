@@ -2,13 +2,23 @@
 	<?php $AP_FACTSHEET_IMG='salv.jpg'; include('../articles/apfactsheets/SALV.html') ?>
 </div>
 
-LAV
+Las Venturas Airport is an airport in the middle of Las Venturas, only a few
+minutes away from The Strip. The airport is surrounded by the Blackfield Stadium
+to the west, Redsands West to the north, the Harry Gold Parkway highway and The
+Strip to the east and the LVA Freight Depot to the south.
 
-{@clear}
+If you're flying through LVA, try to get a night
+flight. All the glitter and neon of Las Venturas makes lading or taking off
+there an amazing experience.
 
 {@h3 Service points}
 
-NONE
+There is one service point at Las Venturas Airport, located in the north part.
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=salv_sp.jpg;LVA service point;LVA service point}
+  <small>The sole LVA service point</small>
+}
 
 {@h3 Aerodrome Chart}
 {@simg=gen/aerodrome_SALV.png;SALV aerodrome chart;SALV aerodrome chart}

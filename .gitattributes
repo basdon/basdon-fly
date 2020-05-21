@@ -1,3 +1,4 @@
 * eol=lf
 *.tpl linguist-language=HTML
 *.png binary
+*.jpg binary
