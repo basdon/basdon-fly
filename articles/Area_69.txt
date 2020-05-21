@@ -2,13 +2,22 @@
 	<?php $AP_FACTSHEET_IMG='xxxx.jpg'; include('../articles/apfactsheets/XXXX.html') ?>
 </div>
 
-SASF
+Area 69 is a top secret government area located in the deserts of Bone County.
+It has a small runway at the eastern side, housing some
+{@article=List_of_aircraft#Hydra Hydra}s and
+{@article=List_of_aircraft#Cargobob Cargobob}s.
 
-{@clear}
+There are four SAM sites at the facility.
 
 {@h3 Service points}
 
-NONE
+There is one service point, towards the east of the runway.
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=xxxx_sp.jpg;\
+  Area 69 service point;Area 69 service point}
+  <small>Area 69 service point</small>
+}
 
 {@h3 Aerodrome Chart}
 {@simg=gen/aerodrome_XXXX.png;XXXX aerodrome chart;XXXX aerodrome chart}

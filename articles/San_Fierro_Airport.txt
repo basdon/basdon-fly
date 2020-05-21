@@ -2,13 +2,30 @@
 	<?php $AP_FACTSHEET_IMG='sasf.jpg'; include('../articles/apfactsheets/SASF.html') ?>
 </div>
 
-SASF
+Easter Bay International Airport, better known as San Fierro Airport, is the
+airport connecting San Fierro the the rest of San Andreas. It is the biggest of
+the three main San Andreas airports, with a long runway that extends into the
+waters of Easter Bay.
 
-{@clear}
+Many of the skyscrapers and of course the Garver Bridge and Kincaid Bridge can
+be seen during takeoff and landing. Underneath the tarmac, there is a huge
+underground parking place.
 
 {@h3 Service points}
 
-NONE
+San Fierro airport has two service points available. One is in the east, near
+the aircraft spawn spot. The other one is in the west, close to the private jet
+gates.
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=sasf_sp_east.jpg;East service point;East service point}
+  <small>East service point</small>
+}
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=sasf_sp_west.jpg;West service point;West service point}
+  <small>West service point</small>
+}
 
 {@h3 Aerodrome Chart}
 {@simg=gen/aerodrome_SASF.png;SASF aerodrome chart;SASF aerodrome chart}
