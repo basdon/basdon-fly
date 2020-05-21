@@ -45,6 +45,7 @@
 				{@li {@article Los_Santos_Airport}}
 				{@li {@article Los_Santos_Inlet_Field}}
 				{@li {@article San_Fierro_Airport}}
+				{@li {@article San_Fierro_Carrier}}
 				{@li {@article Verdant_Meadows}}
 			</ul></td>
 		</tr>

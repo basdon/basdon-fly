@@ -1,0 +1,32 @@
+<div class="articleright">
+	<?php $AP_FACTSHEET_IMG='sfca.jpg'; include('../articles/apfactsheets/SFCA.html') ?>
+</div>
+
+San Fierro Carrier is the 'airport' name of the naval amphibious assault ship
+docked in the Easter Basin Naval Station of San Fierro. The ship is not actually
+an aircraft carrier, but the locals name it as such since it can accommodate a
+small number of {@article=List_of_aircraft#Hydra Hydra}s and
+{@article=List_of_aircraft#Cargobob Cargobob}s.
+
+Aside from the flight deck at the surface, there are two more decks inside.
+Each of those decks provide storage area and house military hardware. The lower
+deck provides access to open waters through the back gate of the carrier. There
+is some space to dock a few small boats.
+
+Two aircraft lifts are present, one at the back and one at the side near the
+back. They connect the flight deck and the middle deck, so that aircrafts can
+be stored in the middle deck.
+
+There are also two inactive SAM sites.
+
+{@h3 Service points}
+
+The ship has no service points. Aircrafts in need for repair usually go to
+{@article Area_69}, but there are also some service points at
+{@article San_Fierro_Airport} for very urgent situations.
+
+{@h3 Aerodrome Chart}
+{@simg=gen/aerodrome_SFCA.png;SFCA aerodrome chart;SFCA aerodrome chart}
+
+{@clear}
+
