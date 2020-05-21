@@ -161,11 +161,13 @@
 					{@if $combinedstats != null}
 						{@render fmt_money.php}
 						<br/>Combined online time: {@unsafe round($combinedstats->o)}h &bull; Combined flight time: {@unsafe round($combinedstats->f)}h &bull; Combined distance flown: {@unsafe round($combinedstats->d,1)}km<br/>
-						Total flights: {@unsafe $flightcount->c} &bull; Total cash: {@unsafe fmt_money($combinedstats->c)}
+						Total flights: {@unsafe $flightcount->c} &bull; Total cash: {@unsafe fmt_money($combinedstats->c)}<br/>
 					{@endif}
 				</td></tr>
 			</tbody>
 		</table>
+
+		<p class="center"><a href="stats.php">More stats</a></p>
 	</div>
 	{@render defaultfooter.tpl}
 </body>
