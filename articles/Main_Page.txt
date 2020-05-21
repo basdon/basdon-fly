@@ -36,6 +36,7 @@
 				{@li {@article Keys}}
 				{@li {@article List_of_aircraft}}
 				{@li {@article Service_points}}
+				{@li {@article Score}}
 			</ul></td>
 			<td><ul>
 				{@li {@article Area_69}}
