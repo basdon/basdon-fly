@@ -2,13 +2,14 @@
 	<?php $AP_FACTSHEET_IMG='lsif.jpg'; include('../articles/apfactsheets/LSIF.html') ?>
 </div>
 
-LSIF
-
-{@clear}
+Los Santos Inlet Field is a small airfield located in the Los Santos Inlet area.
+It is almost soley used by recreational pilots. Since it's only a grass field,
+almost all the traffic is made of {@article=List_of_aircraft#Dodo Dodo}s.
 
 {@h3 Service points}
 
-NONE
+LSIF is a small airfield that doesn't have any service points. The closest
+service point is probably located at {@article Los_Santos_Airport}.
 
 {@h3 Aerodrome Chart}
 {@simg=gen/aerodrome_LSIF.png;LSIF aerodrome chart;LSIF aerodrome chart}
