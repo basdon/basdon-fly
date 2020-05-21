@@ -58,3 +58,9 @@ dt {
 dd {
 	margin-bottom: .5em;
 }
+.article .small {
+	font-size: small;
+}
+.article .s {
+	text-decoration: line-through;
+}
