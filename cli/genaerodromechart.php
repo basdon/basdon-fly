@@ -111,7 +111,7 @@ $PI4 = pi() / 4;
 $sqrt2 = sqrt(2);
 
 $im = imagecreate($imgw, $imgh);
-$color_white = $bg = imagecolorallocate($im, 255, 255, 255);
+$color_white = $bg = imagecolorallocate($im, 244, 244, 244);
 $color_black = imagecolorallocate($im, 0, 0, 0);
 if ($apt->flags & 1 /*APT_FLAG_TOWERED*/) {
 	$color_rnw = imagecolorallocate($im, 12, 136, 192);
