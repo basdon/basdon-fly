@@ -64,7 +64,7 @@ try{
 		<div class="fl49">
 			<h3>Overview</h3>
 			<ul>
-				<li><strong>Status:</strong> <span class="flight-state-{@unsafe $r->state}" style="padding:.1em .4em">{@unsafe fmt_flight_status($r->state, $r->tload)}</span></li>
+				<li><strong>Status:</strong> <span class="flight-state-{@unsafe $r->state}" style="padding:.1em .4em;border-radius:3px">{@unsafe fmt_flight_status($r->state, $r->tload)}</span></li>
 				<li><strong>Pilot:</strong> {@unsafe linkuser($r)}</li>
 				<li><strong>Origin:</strong> <a href="airport.php?code={@unsafe $r->fromcode}">{@unsafe $r->fromname} ({@unsafe $r->fromcode})</a> {@unsafe $r->fromgate}</li>
 				<li><strong>Destination:</strong> <a href="airport.php?code={@unsafe $r->tocode}">{@unsafe $r->toname} ({@unsafe $r->tocode})</a> {@unsafe $r->togate}</li>
