@@ -11,6 +11,10 @@ If you're flying through LVA, try to get a night
 flight. All the glitter and neon of Las Venturas makes lading or taking off
 there an amazing experience.
 
+{@h3 Vehicle spawns}
+
+<?php readfile('../articles/apfactsheets/SALV_vehs.html') ?>
+
 {@h3 Service points}
 
 There is one service point at Las Venturas Airport, located in the north part.

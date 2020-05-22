@@ -13,6 +13,10 @@ There are two long runways at LSA, which are connected to each other in a
 U-shape. All runways have full navigation capabilities. There is only a single
 helipad at LSA.
 
+{@h3 Vehicle spawns}
+
+<?php readfile('../articles/apfactsheets/SALS_vehs.html') ?>
+
 {@h3 Service points}
 
 Los Santos airport has two service points available, one in the east and one in

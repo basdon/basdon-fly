@@ -14,6 +14,7 @@ all: .templates .aerodromecharts .apfactsheets .articles
 .apfactsheets:
 	rm -f articles/apfactsheets/*
 	cd cli && php genapfactsheet.php
+	cd cli && php genapvehiclelist.php
 
 .articles:
 	rm -f articles/gen/*

@@ -11,6 +11,10 @@ Many of the skyscrapers and of course the Garver Bridge and Kincaid Bridge can
 be seen during takeoff and landing. Underneath the tarmac, there is a huge
 underground parking place.
 
+{@h3 Vehicle spawns}
+
+<?php readfile('../articles/apfactsheets/SASF_vehs.html') ?>
+
 {@h3 Service points}
 
 San Fierro airport has two service points available. One is in the east, near

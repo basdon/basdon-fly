@@ -15,6 +15,10 @@ potentially forming obstructions for an aircraft's wings.
 Being abandoned, there are no service points to be found. The runway also
 doesn't have any navigational aids, however, there is a working beacon present.
 
+{@h3 Vehicle spawns}
+
+<?php readfile('../articles/apfactsheets/SAVM_vehs.html') ?>
+
 {@h3 Aerodrome Chart}
 {@simg=gen/aerodrome_SAVM.png;SAVM aerodrome chart;SAVM aerodrome chart}
 
