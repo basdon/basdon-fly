@@ -58,12 +58,11 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 		$stmt->bindValue(1, $r->i);
 		$stmt->bindValue(2, $__clientip);
 		$stmt->execute();
-		$loginerr = 'Password incorrect';
 		unset($r);
 		unset($_POST['pwd']);
-	} else {
-		$loginerr = 'User not found';
 	}
+	// No, I'm not going to counter timing attacks. The member list is public anyways.
+	$attemptedlogin = 1;
 } skiplogin:
 
 $__script = '_login';

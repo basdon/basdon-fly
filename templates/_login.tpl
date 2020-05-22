@@ -38,8 +38,8 @@
 				<p>You're already logged in! <a href="logout.php?k={@unsafe $loggeduser->logoutkey}">Logout</a></p>
 			{@else}
 				<h2 id="main">Login</h2>
-				{@if isset($loginerr)}
-					<p class="msg error">{$loginerr}</p>
+				{@if isset($attemptedlogin)}
+					<p class="msg error">Invalid credentials</p>
 				{@endif}
 				<form method="post" action="login.php{@if isset($_GET['ret'])}?ret={@unsafe urlencode($_GET['ret'])}{@endif}">
 					<label><span>Nickname:</span>{@input text usr autofocus="autofocus"}</label><br/>
