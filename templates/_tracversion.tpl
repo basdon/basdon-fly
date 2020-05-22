@@ -26,6 +26,7 @@
 			{@else}
 				<p>This version does not exist!</p>
 			{@endif}
+			<p><small>GitHub release: <a href="https://github.com/basdon/fly-plugin/releases/tag/{@unsafe trac_releasetime($selectedrelease)}">fly-plugin@{@unsafe trac_releasetime($selectedrelease)}</a> (may or may not exist)</small></p>
 		{@else}
 			<p><a href="trac.php">Tracker</a> &gt; Change log</p>
 			<h2 id="main">Change log</h2>
