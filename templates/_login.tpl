@@ -42,7 +42,7 @@
 					<p class="msg error">{$loginerr}</p>
 				{@endif}
 				<form method="post" action="login.php{@if isset($_GET['ret'])}?ret={@unsafe urlencode($_GET['ret'])}{@endif}">
-					<label><span>Nickname:</span>{@input text usr}</label><br/>
+					<label><span>Nickname:</span>{@input text usr autofocus="autofocus"}</label><br/>
 					<label><span>Password:</span>{@input password pwd}</label><br/>
 					<label><span>Accept cookies (required):</span>{@input checkbox yummie checked}</label><br/>
 					<label><span>Stay logged in:</span>{@input checkbox stay}</label>
