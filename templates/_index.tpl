@@ -13,22 +13,8 @@
 		border-bottom: 0;
 		font-size: 1.3em;
 	}
-	table {
-		border: 1px solid #000;
+	table.new {
 		border-top: 0;
-		border-collapse: collapse;
-	}
-	table th {
-		background: #99f;
-	}
-	td, th {
-		padding: .2em .5em;
-	}
-	td + td {
-		border-left: 1px solid #000;
-	}
-	thead tr {
-		border-bottom: 1px solid #000;
 	}
 	</style>
 </head>
@@ -46,7 +32,7 @@
 		</p>
 
 		<h3>Players</h3>
-		<table border="0" width="100%" class="center">
+		<table border="0" width="100%" class="new center">
 			<thead>
 				<tr><th>Online over last 24h</th></tr>
 			</thead>
@@ -83,7 +69,7 @@
 		{@render aircraftnames.php}
 
 		<h3>Active flights</h3>
-		<table border="0" width="100%" class="center">
+		<table border="0" width="100%" class="new highlight-row center">
 			<thead>
 				<tr>
 					<th>#</th>
@@ -115,7 +101,7 @@
 		</table>
 
 		<h3>Last 10 finished flights</h3>
-		<table border="0" width="100%" class="center">
+		<table border="0" width="100%" class="new highlight-row center">
 			<thead>
 				<tr>
 					<th>#</th>
@@ -151,7 +137,7 @@
 		<p class="center"><a href="flights.php">All flights</a></p>
 
 		<h3>Member stats</h3>
-		<table border="0" width="100%" class="center">
+		<table border="0" width="100%" class="new center">
 			<thead>
 				<tr><th>All time</th></tr>
 			</thead>

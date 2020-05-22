@@ -129,6 +129,25 @@ table.default tr:nth-child(odd) {
 table.default tr:hover {
 	background: #f3f3f3;
 }
+table.new {
+	border: 1px solid #000;
+	border-collapse: collapse;
+}
+table.new th {
+	background: #99f;
+}
+table.new td, table.new th {
+	padding: .2em .5em;
+}
+table.new td + td {
+	border-left: 1px solid #000;
+}
+table.new thead tr {
+	border-bottom: 1px solid #000;
+}
+table.highlight-row tr:hover {
+	background: #f0f0f0;
+}
 .clear {
 	clear: both;
 }

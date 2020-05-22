@@ -64,9 +64,9 @@
 			<p>Longest in-game session: {@if $lenh > 0}{@unsafe $lenh}h, {@endif}{@unsafe $lenm}m set on {@unsafe date('l jS \of F, Y', $ls[0]->s)}.</p>
 		{@endif}
 
-		<table>
+		<table class="new center">
 			<thead>
-				<tr><th>Latest sessions</th><th>Duration</th></tr>
+				<tr><th>Session start time</th><th>Session duration</th></tr>
 			</thead>
 			<tbody>
 				{@eval $ls = $db->query('SELECT s,e FROM ses WHERE u='.$id.' ORDER BY i DESC LIMIT 5')}
