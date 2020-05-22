@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php readfile('../articles/apfactsheets/XXXX.html') ?>
+  <?php readfile('../articles/apfactsheets/XXXX.html') ?>
 </div>
 
 Area 69 is a top secret government area located in the deserts of Bone County.
@@ -14,8 +14,8 @@ There are four SAM sites at the facility.
 There is one service point, towards the east of the runway.
 
 {@infobox
-  {@aimg(style="width:100%;max-width:250px")=xxxx_sp.jpg;\
-  Area 69 service point;Area 69 service point}
+  {@aimg(style="width:100%;max-width:250px")=\
+    xxxx_sp.jpg;Area 69 service point;Area 69 service point}
   <small>Area 69 service point</small>
 }
 

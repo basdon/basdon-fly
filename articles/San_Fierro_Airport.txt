@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php readfile('../articles/apfactsheets/SASF.html') ?>
+  <?php readfile('../articles/apfactsheets/SASF.html') ?>
 </div>
 
 Easter Bay International Airport, better known as San Fierro Airport, is the
@@ -18,12 +18,14 @@ the aircraft spawn spot. The other one is in the west, close to the private jet
 gates.
 
 {@infobox
-  {@aimg(style="width:100%;max-width:250px")=sasf_sp_east.jpg;East service point;East service point}
+  {@aimg(style="width:100%;max-width:250px")=\
+    sasf_sp_east.jpg;East service point;East service point}
   <small>East service point</small>
 }
 
 {@infobox
-  {@aimg(style="width:100%;max-width:250px")=sasf_sp_west.jpg;West service point;West service point}
+  {@aimg(style="width:100%;max-width:250px")=\
+    sasf_sp_west.jpg;West service point;West service point}
   <small>West service point</small>
 }
 

@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php readfile('../articles/apfactsheets/SFCA.html') ?>
+  <?php readfile('../articles/apfactsheets/SFCA.html') ?>
 </div>
 
 San Fierro Carrier is the 'airport' name of the naval amphibious assault ship
