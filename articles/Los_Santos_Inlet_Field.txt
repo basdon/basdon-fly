@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php $AP_FACTSHEET_IMG='lsif.jpg'; include('../articles/apfactsheets/LSIF.html') ?>
+	<?php include('../articles/apfactsheets/LSIF.html') ?>
 </div>
 
 Los Santos Inlet Field is a small airfield located in the Los Santos Inlet area.

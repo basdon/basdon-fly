@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php $AP_FACTSHEET_IMG='salv.jpg'; include('../articles/apfactsheets/SALV.html') ?>
+	<?php include('../articles/apfactsheets/SALV.html') ?>
 </div>
 
 Las Venturas Airport is an airport in the middle of Las Venturas, only a few

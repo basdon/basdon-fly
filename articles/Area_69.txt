@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php $AP_FACTSHEET_IMG='xxxx.jpg'; include('../articles/apfactsheets/XXXX.html') ?>
+	<?php include('../articles/apfactsheets/XXXX.html') ?>
 </div>
 
 Area 69 is a top secret government area located in the deserts of Bone County.

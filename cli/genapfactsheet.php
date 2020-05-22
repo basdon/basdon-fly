@@ -80,7 +80,7 @@ $nav = [];
 echo '<table style="width:220px;font-size:90%">';
 echo '<tbody>';
 echo '<tr class="fsh"><td colspan="3">' . $apt->n . '</td></tr>';
-echo '<?php if (isset($AP_FACTSHEET_IMG)):?><tr><td colspan="3" style="padding:0"><img src="<?=$STATICPATH?>/articles/<?=$AP_FACTSHEET_IMG?>" style="width:100%"/></td></tr><?php endif;?>';
+echo '<tr><td colspan="3" style="padding:0"><img src="<?=$STATICPATH?>/articles/' . strtolower($apt->c) . '.jpg" style="width:100%"/></td></tr>';
 echo '<tr><td colspan="3" style="font-weight:bold;text-align:center">Airport Code: ' . $apt->c . '</td></tr>';
 echo '<tr class="fsh"><td colspan="3">Summary</td></tr>';
 echo '<tr><td colspan="2"><strong>Type</strong></td><td>' . $types[$type] . '</td></tr>';
