@@ -184,7 +184,7 @@ int nav_cmd_adf(CMDPARAMS)
 	ap = airports;
 	len = numairports;
 	while (len--) {
-		if (strcmp(beacon, ap->beacon) == 0) {
+		if (strcmp(beacon, ap->code) == 0) {
 			nav_enable(vehicleid, &ap->pos, NULL);
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_SET);
 			return 1;
@@ -253,7 +253,7 @@ havebeacon:
 	ap = airports;
 	len = numairports;
 	while (len--) {
-		if (strcmp(beacon, ap->beacon) == 0) {
+		if (strcmp(beacon, ap->code) == 0) {
 			goto haveairport;
 		}
 		ap++;

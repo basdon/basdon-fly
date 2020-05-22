@@ -987,10 +987,10 @@ unknownvehicle:
 	csprintf(buf144,
 		"Flight from %s (%s) %s to %s (%s) %s",
 		mission->startpoint->ap->name,
-		mission->startpoint->ap->beacon,
+		mission->startpoint->ap->code,
 		mission->startpoint->name,
 		mission->endpoint->ap->name,
-		mission->endpoint->ap->beacon,
+		mission->endpoint->ap->code,
 		mission->endpoint->name);
 	NC_SendClientMessage(playerid, COL_MISSION, buf144a);
 
@@ -1107,9 +1107,9 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 		pdata[playerid]->name,
 	        miss->id,
 		miss->startpoint->ap->name,
-	        miss->startpoint->ap->beacon,
+	        miss->startpoint->ap->code,
 	        miss->endpoint->ap->name,
-	        miss->endpoint->ap->beacon,
+	        miss->endpoint->ap->code,
 	        duration_h,
 	        duration_m);
 	echo_on_flight_finished(cbuf4096);

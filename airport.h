@@ -30,7 +30,6 @@ struct AIRPORT {
 	struct vec3 pos;
 	char code[4 + 1];
 	char enabled;
-	char beacon[4 + 1];
 	char name[MAX_AIRPORT_NAME + 1];
 	int missiontypes;
 	int flags;

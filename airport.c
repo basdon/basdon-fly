@@ -52,7 +52,7 @@ void airports_init()
 
 	/*load airports*/
 	atoc(buf144,
-		"SELECT c,n,b,e,x,y,z,flags "
+		"SELECT c,n,e,x,y,z,flags "
 		"FROM apt ORDER BY i ASC", 144);
 	cacheid = NC_mysql_query(buf144a);
 	rowcount = NC_cache_get_row_count();
@@ -75,14 +75,12 @@ void airports_init()
 		ctoa(ap->code, buf144, sizeof(ap->code));
 		*field = 1; NC(n_cache_get_field_s);
 		ctoa(ap->name, buf144, sizeof(ap->name));
-		*field = 2; NC(n_cache_get_field_s);
-		ctoa(ap->beacon, buf144, sizeof(ap->beacon));
 		NC_PARS(2);
-		ap->enabled = (char) (*field = 3, NC(n_cache_get_field_i));
-		ap->pos.x = (*field = 4, NCF(n_cache_get_field_f));
-		ap->pos.y = (*field = 5, NCF(n_cache_get_field_f));
-		ap->pos.z = (*field = 6, NCF(n_cache_get_field_f));
-		ap->flags = (*field = 7, NC(n_cache_get_field_i));
+		ap->enabled = (char) (*field = 2, NC(n_cache_get_field_i));
+		ap->pos.x = (*field = 3, NCF(n_cache_get_field_f));
+		ap->pos.y = (*field = 4, NCF(n_cache_get_field_f));
+		ap->pos.z = (*field = 5, NCF(n_cache_get_field_f));
+		ap->flags = (*field = 6, NC(n_cache_get_field_i));
 	}
 noairports:
 	NC_cache_delete(cacheid);
@@ -144,8 +142,7 @@ norunways:
 	ap = airports;
 	i = numairports;
 	while (i--) {
-		printf("airport %d: %s code %s beacon %s\n", ap->id, ap->name,
-			ap->code, ap->beacon);
+		printf("airport %d: %s code %s\n", ap->id, ap->name, ap->code);
 		printf(" runwaycount: %d\n", ap->runwaysend - ap->runways);
 		rnw = ap->runways;
 		while (rnw != ap->runwaysend) {
@@ -247,7 +244,7 @@ int airport_cmd_beacons(CMDPARAMS)
 
 	while (count-- > 0) {
 		if (ap->enabled) {
-			b += sprintf(b, " %s", ap->beacon);
+			b += sprintf(b, " %s", ap->code);
 		}
 		ap++;
 	}
@@ -297,7 +294,6 @@ void airport_list_dialog_response(int playerid, int response, int idx)
 
 	b = info;
 	b += sprintf(b, "\nElevation:\t%.0f FT", ap->pos.z);
-	b += sprintf(b, "\nBeacon:\t%s", ap->beacon);
 	rnw = ap->runways;
 	while (rnw != ap->runwaysend) {
 		if (rnw->type == RUNWAY_TYPE_HELIPAD) {
