@@ -13,7 +13,7 @@
 			<a href="article.php">Articles</a>
 			{@foreach $categories as $c}
 				&#32;&gt;&#32;
-				<a href="article.php?category={@urlencode $c->name}">{@unsafe $c->name}</a>
+				<a href="article.php?category={@urlencode $c->name}">Category: {@unsafe $c->name}</a>
 			{@endforeach}
 		</p>
 		<h2 id="main">Category: {@unsafe $cat->name}</h2>
