@@ -19,7 +19,7 @@ if ($apcode == null) {
 	exit();
 }
 
-$apt = $db->query('SELECT i,c,n,b,x,y,z FROM apt WHERE c=\''.$apcode.'\'')->fetchAll()[0];
+$apt = $db->query('SELECT i,c,n,x,y,z FROM apt WHERE c=\''.$apcode.'\'')->fetchAll()[0];
 $apid = $apt->i;
 
 $runway_ends = [];
@@ -95,10 +95,10 @@ if (count($runways)) {
 		$rnw0 = rnw($r[0]->h, $r[0]->s);
 		$rnw1 = rnw($r[1]->h, $r[1]->s);
 		if ($r[0]->n & 2) {
-			$nav[] = $rnw0 . (($r[0]->n & 4) ? ' (y)' : ' (n)');
+			$nav[] = $rnw0 . (($r[0]->n & 4) ? ' <strong>+ILS</strong>' : '');
 		}
 		if ($r[1]->n & 2) {
-			$nav[] = $rnw1 . (($r[1]->n & 4) ? ' (y)' : ' (n)');
+			$nav[] = $rnw1 . (($r[1]->n & 4) ? ' <strong>+ILS</strong>' : '');
 		}
 		echo '<tr style="text-align:center"><td>';
 		echo $rnw0 . '/' . $rnw1;
@@ -123,11 +123,11 @@ if (count($helipads)) {
 	}
 }
 echo '<tr class="fsh"><td colspan="3">Navigation</td></tr>';
-echo '<tr><td colspan="2"><strong>NDB</strong></td><td>' . $apt->b . '</td></tr>';
+echo '<tr><td><strong>NDB</strong></td><td colspan="2">' . $apt->c . '</td></tr>';
 if (count($nav)) {
-	echo '<tr><td colspan="2" valign="top"><strong>VOR (+ILS?)</strong></td><td>';
+	echo '<tr><td valign="top"><strong>VOR</strong></td><td colspan="2">';
 	foreach ($nav as $n) {
-		echo $apt->b . $n . '<br/>';
+		echo $apt->c . $n . '<br/>';
 	}
 	echo '</td></tr>';
 }

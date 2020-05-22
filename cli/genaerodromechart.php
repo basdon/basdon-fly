@@ -36,7 +36,7 @@ $maxy = -100000;
 $minx = 100000;
 $miny = 100000;
 
-$apt = $db->query('SELECT i,c,n,b,x,y,z,flags FROM apt WHERE c=\''.$apcode.'\'')->fetchAll()[0];
+$apt = $db->query('SELECT i,c,n,x,y,z,flags FROM apt WHERE c=\''.$apcode.'\'')->fetchAll()[0];
 $apid = $apt->i;
 
 $runway_ends = [];
@@ -266,7 +266,7 @@ for ($i = 6; $i < $NDBSIZE; $i += 2) {
 	}
 }
 $off = $NDBSIZE * sqrt(2) / 2 + 7;
-bordered_text($x - $off, $y - $off, $apt->b, $color_ndb_a);
+bordered_text($x - $off, $y - $off, $apt->c, $color_ndb_a);
 
 $mspsize = 6;
 $vehsize = 3;
