@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php include('../articles/apfactsheets/SASF.html') ?>
+	<?php readfile('../articles/apfactsheets/SASF.html') ?>
 </div>
 
 Easter Bay International Airport, better known as San Fierro Airport, is the

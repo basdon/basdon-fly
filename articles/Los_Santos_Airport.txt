@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php include('../articles/apfactsheets/SALS.html') ?>
+	<?php readfile('../articles/apfactsheets/SALS.html') ?>
 </div>
 
 Los Santos Airport was originally built as the airport for the National Guard of

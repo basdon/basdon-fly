@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php include('../articles/apfactsheets/CALI.html') ?>
+	<?php readfile('../articles/apfactsheets/CALI.html') ?>
 </div>
 
 Caligula's Palace Airport is a small runway on top of one of the buildings of

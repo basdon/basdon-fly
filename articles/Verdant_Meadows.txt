@@ -1,5 +1,5 @@
 <div class="articleright">
-	<?php include('../articles/apfactsheets/SAVM.html') ?>
+	<?php readfile('../articles/apfactsheets/SAVM.html') ?>
 </div>
 
 Verdant Meadows, also known as Verdant Meadows Aircraft Graveyard, is an
