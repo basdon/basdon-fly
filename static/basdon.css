@@ -129,6 +129,18 @@ table.default tr:nth-child(odd) {
 table.default tr:hover {
 	background: #f3f3f3;
 }
+h3.newtableheader {
+	margin-bottom: 0;
+	text-align: center;
+	background: #99f;
+	border-bottom: 0;
+	border: 1px solid #000;
+	border-bottom: 0;
+	font-size: 1.3em;
+}
+h3.newtableheader + table.new {
+	border-top: 0;
+}
 table.new {
 	border: 1px solid #000;
 	border-collapse: collapse;
