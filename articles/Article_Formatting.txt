@@ -6,8 +6,8 @@
   }
   {@li {@code &#x7B;@code inline code\}}}
   {@li {@code &#x7B;@clear\}} clear floating}
-  {@li {@code &#x7B;@h1 stuff\}} (h1 is already used by article title)}
-  {@li {@code &#x7B;@h2 stuff\}}}
+  {@li {@code &#x7B;@h1 stuff\}} (h1 is already used by page header)}
+  {@li {@code &#x7B;@h2 stuff\}} (h2 is already used by article title)}
   {@li {@code &#x7B;@h3 stuff\}}}
   {@li {@code &#x7B;@h4 stuff\}}}
   {@li {@code &#x7B;@h5 stuff\}}}
