@@ -19,5 +19,6 @@ all: .templates .aerodromecharts .apfactsheets .articles
 .articles:
 	rm -f articles/gen/*
 	cd cli && php genarticlemapping.php
+	cd cli && php ensureairportcodearticlelinking.php
 	cd articles && make
 
