@@ -41,7 +41,7 @@ if (($r = $db->query('SELECT i,c,n,flags FROM apt WHERE c=\'' . $code . '\' LIMI
 		$stat_repair_spending = $r[0]->spending;
 		$stat_dmg_repaired = $r[0]->dmg;
 	}
-	$__script = 'airport_article_dyn_stats';
+	$__script = '^airport_article_dyn_stats';
 	include('../inc/output.php');
 } else {
 	echo '<p>failed to get info for airport ' . $code . '</p>';
