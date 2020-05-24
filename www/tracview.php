@@ -65,13 +65,13 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 		}
 
 		$visibility = $old->visibility;
-		$status = $old->status;
+		$state = $old->state;
 		$impact = $old->severity;
 
 		check_transition('impact', 'severity', $trac_severities, $impact);
 		check_transition('visibility', 'visibility', $trac_visibilities, $visibility);
 		if (group_is_owner($usergroups)) {
-			check_transition('status', 'state', $trac_states, $status);
+			check_transition('status', 'state', $trac_states, $state);
 		}
 
 		if (count($fields)) {
