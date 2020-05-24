@@ -39,26 +39,26 @@
   {@li {@code &#x7B;@em italic\}} {@em italic}}
   {@li {@code &#x7B;@small small\}} {@small small}}
   {@li {@code &#x7B;@s strikethrough\}} {@s strikethrough}}
-  {@li {@code &#x7B;@ia=location internal link\} link to webroot/location}
-  {@li {@code &#x7B;@nfa=httpwhatever external nofollow link\}}
-  {@li {@code &#x7B;@a=httpwhatever external link\}}
-  {@li {@code &#x7B;@#=anchor anchor link\}}
-  {@li {@code &#x7B;@articlecategory Category_Name\}}
-  {@li {@code &#x7B;@article Article_Name\}}
-  {@li {@code &#x7B;@article=Article_Name custom text\}}
-  {@li {@code &#x7B;@img=absolutesrc;alt;title;caption\}}
-  {@li {@code &#x7B;@img(style="whatever" data-whatever="whatever")=absolutesrc;alt;title;caption\}}
-  {@li {@code &#x7B;@img=absolutesrc;alt;title\}}
-  {@li {@code &#x7B;@img(style="whatever" data-whatever="whatever")=absolutesrc;alt;title\}}
+  {@li {@code &#x7B;@ia=location internal link\} link to webroot/location}}
+  {@li {@code &#x7B;@nfa=httpwhatever external nofollow link\}}}
+  {@li {@code &#x7B;@a=httpwhatever external link\}}}
+  {@li {@code &#x7B;@#=anchor anchor link\}}}
+  {@li {@code &#x7B;@articlecategory Category_Name\}}}
+  {@li {@code &#x7B;@article Article_Name\}}}
+  {@li {@code &#x7B;@article=Article_Name custom text\}}}
+  {@li {@code &#x7B;@img=absolutesrc;alt;title;caption\}}}
+  {@li {@code &#x7B;@img(style="whatever" data-whatever="whatever")=absolutesrc;alt;title;caption\}}}
+  {@li {@code &#x7B;@img=absolutesrc;alt;title\}}}
+  {@li {@code &#x7B;@img(style="whatever" data-whatever="whatever")=absolutesrc;alt;title\}}}
   {@li {@code &#x7B;@aimg=relativestaticarticlessrc;alt;title;caption\}}
 	{@aimg=servicepoint.png;service point;service point;service point}
   }
-  {@li {@code &#x7B;@aimg(style="whatever" data-whatever="whatever")=relativestaticarticlessrc;alt;title;caption\}}
+  {@li {@code &#x7B;@aimg(style="whatever" data-whatever="whatever")=relativestaticarticlessrc;alt;title;caption\}}}
   {@li {@code &#x7B;@aimg=relativestaticarticlessrc;alt;title\}}
 	{@aimg=servicepoint.png;service point;service point}
   }
-  {@li {@code &#x7B;@aimg(style="whatever" data-whatever="whatever")=relativestaticarticlessrc;alt;title\}}
-  {@li {@code &#x7B;@simg=relativestaticsrc;alt;title;caption\}}
+  {@li {@code &#x7B;@aimg(style="whatever" data-whatever="whatever")=relativestaticarticlessrc;alt;title\}}}
+  {@li {@code &#x7B;@simg=relativestaticsrc;alt;title;caption\}}}
   {@li {@code &#x7B;@infobox infobox\}}
 	{@infobox info box, usually used for images}
 	<pre>
@@ -75,7 +75,7 @@
   {@li {@code &#x7B;@infoboxright infoboxright\}}
 	{@infoboxright info box, usually used for images}
   }
-  {@li escape {@code &#x7B;@} tags with {@code &amp;#x7B;@}
+  {@li escape {@code &#x7B;@} tags with {@code &amp;#x7B;@}}
   {@li escape end tags with {@code \\}}}
 }
 
