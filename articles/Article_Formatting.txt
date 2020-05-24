@@ -77,5 +77,6 @@
   }
   {@li escape {@code &#x7B;@} tags with {@code &amp;#x7B;@}}
   {@li escape end tags with {@code \\}}}
+  {@li {@code &#x7B;@rem a reminder (comment) @\}}}
 }
 
