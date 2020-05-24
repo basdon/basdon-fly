@@ -25,8 +25,8 @@
 					<td>{@unsafe date($flightlist_date_format, $f->tlastupdate)}</td>
 					{@if $flightlist_show_user}<td>{@unsafe linkuser($f)}</td>{@endif}
 					<td class="no600">{@unsafe aircraft_name($f->vehmodel)}</td>
-					<td><a href="locations.php?code={@unsafe $f->f}">{@unsafe $f->f}</a></td>
-					<td><a href="locations.php?code={@unsafe $f->t}">{@unsafe $f->t}</a></td>
+					<td><a href="article.php?title={@unsafe $f->f}">{@unsafe $f->f}</a></td>
+					<td><a href="article.php?title={@unsafe $f->t}">{@unsafe $f->t}</a></td>
 					<td class="no800 right">{@if $f->state != 1}{@unsafe round($f->adistance)}m{@endif}</td>
 					<td class="flight-state flight-state-{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
 				</tr>

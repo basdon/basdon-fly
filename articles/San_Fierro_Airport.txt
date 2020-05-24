@@ -33,6 +33,9 @@ gates.
   <small>West service point</small>
 }
 
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php $code='SASF'; include('../articles/airport-dyn-stats.php') ?>
+
 {@h3 Aerodrome Chart}
 {@simg=gen/aerodrome_SASF.png;SASF aerodrome chart;SASF aerodrome chart}
 

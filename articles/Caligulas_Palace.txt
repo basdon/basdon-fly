@@ -27,6 +27,9 @@ Since CALI is just a runway on top of a building, there are no service points
 available. The closest one is probably to be found at
 {@article Las_Venturas_Airport}.
 
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php $code='CALI'; include('../articles/airport-dyn-stats.php') ?>
+
 {@h3 Aerodrome Chart}
 {@simg=gen/aerodrome_CALI.png;CALI aerodrome chart;CALI aerodrome chart}
 

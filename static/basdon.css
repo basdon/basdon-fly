@@ -129,7 +129,7 @@ table.default tr:nth-child(odd) {
 table.default tr:hover {
 	background: #f3f3f3;
 }
-h3.newtableheader {
+.newtableheader {
 	margin-bottom: 0;
 	text-align: center;
 	background: #99f;
@@ -138,7 +138,7 @@ h3.newtableheader {
 	border-bottom: 0;
 	font-size: 1.3em;
 }
-h3.newtableheader + table.new {
+.newtableheader + table.new {
 	border-top: 0;
 }
 table.new {

@@ -12,12 +12,17 @@ Despite having a long and wide runway (the widest of all mainland airports!),
 landing a big plane can be difficult as there are hangars at both sides,
 potentially forming obstructions for an aircraft's wings.
 
-Being abandoned, there are no service points to be found. The runway also
-doesn't have any navigational aids, however, there is a working beacon present.
-
 {@h3 Vehicle spawns}
 
 <?php readfile('../articles/apfactsheets/SAVM_vehs.html') ?>
+
+{@h3 Service points}
+
+Being abandoned, there are no service points to be found. The runway also
+doesn't have any navigational aids, however, there is a working beacon present.
+
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php $code='SAVM'; include('../articles/airport-dyn-stats.php') ?>
 
 {@h3 Aerodrome Chart}
 {@simg=gen/aerodrome_SAVM.png;SAVM aerodrome chart;SAVM aerodrome chart}

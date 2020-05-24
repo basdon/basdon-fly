@@ -66,8 +66,8 @@ try{
 			<ul>
 				<li><strong>Status:</strong> <span class="flight-state-{@unsafe $r->state}" style="padding:.1em .4em;border-radius:3px">{@unsafe fmt_flight_status($r->state, $r->tload)}</span></li>
 				<li><strong>Pilot:</strong> {@unsafe linkuser($r)}</li>
-				<li><strong>Origin:</strong> <a href="locations.php?code={@unsafe $r->fromcode}">{@unsafe $r->fromname} ({@unsafe $r->fromcode})</a> {@unsafe $r->fromgate}</li>
-				<li><strong>Destination:</strong> <a href="locations.php?code={@unsafe $r->tocode}">{@unsafe $r->toname} ({@unsafe $r->tocode})</a> {@unsafe $r->togate}</li>
+				<li><strong>Origin:</strong> <a href="article.php?title={@unsafe $r->fromcode}">{@unsafe $r->fromname} ({@unsafe $r->fromcode})</a> {@unsafe $r->fromgate}</li>
+				<li><strong>Destination:</strong> <a href="article.php?title={@unsafe $r->tocode}">{@unsafe $r->toname} ({@unsafe $r->tocode})</a> {@unsafe $r->togate}</li>
 				<li><strong>Point-to-point distance:</strong> {@unsafe $r->distance}m</li>
 				<li><strong>Actual flown distance:</strong> {@unsafe $r->adistance}m</li>
 				<li><strong>Flight start:</strong> {@unsafe format_datetime($r->tstart)}</li>

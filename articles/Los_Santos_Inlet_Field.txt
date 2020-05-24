@@ -15,6 +15,9 @@ almost all the traffic is made of {@article=List_of_aircraft#Dodo Dodo}s.
 LSIF is a small airfield that doesn't have any service points. The closest
 service point is probably located at {@article Los_Santos_Airport}.
 
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php $code='LSIF'; include('../articles/airport-dyn-stats.php') ?>
+
 {@h3 Aerodrome Chart}
 {@simg=gen/aerodrome_LSIF.png;LSIF aerodrome chart;LSIF aerodrome chart}
 

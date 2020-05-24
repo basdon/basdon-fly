@@ -23,6 +23,9 @@ There is one service point, towards the east of the runway.
   <small>Area 69 service point</small>
 }
 
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php $code='BASE'; include('../articles/airport-dyn-stats.php') ?>
+
 {@h3 Aerodrome Chart}
 {@simg=gen/aerodrome_BASE.png;BASE aerodrome chart;BASE aerodrome chart}
 

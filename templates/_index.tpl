@@ -75,8 +75,8 @@
 							<td class="no800">{@unsafe format_duration_short(time() - $f->tstart)}</td>
 							<td>{@unsafe linkuser($f)}</td>
 							<td>{@unsafe aircraft_name($f->vehmodel)}</td>
-							<td><a href="locations.php?code={@unsafe $f->f}">{@unsafe $f->f}</a></td>
-							<td><a href="locations.php?code={@unsafe $f->t}">{@unsafe $f->t}</a></td>
+							<td><a href="article.php?title={@unsafe $f->f}">{@unsafe $f->f}</a></td>
+							<td><a href="article.php?title={@unsafe $f->t}">{@unsafe $f->t}</a></td>
 							<td class="no600 flight-state flight-state-{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
 						</tr>
 					{@endforeach}
@@ -108,8 +108,8 @@
 							<td class="no600">{@unsafe date('j M H:i', $f->tlastupdate)}</td>
 							<td>{@unsafe linkuser($f)}</td>
 							<td>{@unsafe aircraft_name($f->vehmodel)}</td>
-							<td><a href="locations.php?code={@unsafe $f->f}">{@unsafe $f->f}</a></td>
-							<td><a href="locations.php?code={@unsafe $f->t}">{@unsafe $f->t}</a></td>
+							<td><a href="article.php?title={@unsafe $f->f}">{@unsafe $f->f}</a></td>
+							<td><a href="article.php?title={@unsafe $f->t}">{@unsafe $f->t}</a></td>
 							<td class="no800">{@if $f->state != 1}{@unsafe round($f->adistance)}m{@endif}</td>
 							<td class="no600 flight-state flight-state-{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
 						</tr>

@@ -29,6 +29,9 @@ The ship has no service points. Aircrafts in need for repair usually go to
 {@article Area_69}, but there are also some service points at
 {@article San_Fierro_Airport} for very urgent situations.
 
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php $code='SFCA'; include('../articles/airport-dyn-stats.php') ?>
+
 {@h3 Aerodrome Chart}
 {@simg=gen/aerodrome_SFCA.png;SFCA aerodrome chart;SFCA aerodrome chart}
 

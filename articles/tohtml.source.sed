@@ -41,6 +41,7 @@
 
 s/^\s\+//
 s/\s\+$//
+s/{@rem .*@}//g
 
 s/\\}/~ESCAPEDENDTAG~/g
 
