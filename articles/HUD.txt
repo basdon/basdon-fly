@@ -1,0 +1,124 @@
+{@ul
+  {@li {@#=Panel Panel}}
+  {@li {@#=GPS GPS}}
+  {@li {@#=Passenger_Satisfaction Passenger satisfaction}}
+  {@li {@#=Kneeboard Kneeboard}}
+  {@li {@#=Meters Fuel/Health/ODO}}
+  {@li {@#=Speedo Speedometer}}
+}
+
+{@h3(id="Panel") Panel}
+
+The 'panel' is a simple name for the box of information that shows up when
+inside an aircraft. It's placed at the bottom of the screen.
+
+At the left side of the panel, there is an airspeed indicator. The actual value
+is the big number in the vertical center, which shows the speed in knots. The
+other numbers are just part of the indicator, trying to make it look like a
+rotating system of numbers.
+
+At the right side of the panel, there is an altitude indicator and a vertical
+speed indicator. The altitude indicator is built in the same way as the
+airspeed indicator. The vertical speed indicator is a small vertical bar with
+a triangle indicator. When the indicator is above the center, the aircraft is
+gaining altitude. When the indicator is beneath the center, the aircraft is
+descending.
+
+The heading bar is located at the bottom of the panel. The bigger, white
+number is the current heading. The numbers to the side represent the heading
+the aircraft would be going when turning to that direction.
+
+At the top of the panel, there are are indicators used for
+{@articlecategory Navigation}. They don't display anything unless navigation
+commands are used.
+
+{@infobox
+  {@aimg=hud_panel.png;a wide box with lots of numbers indicating speed, \
+    altitude, heading, vertical air speed, navigation stuff;panel}
+  {@small The aircraft panel}
+}
+
+{@h3(id="GPS") GPS}
+
+Above the radar at the bottom left of the screen, your current location is
+shown. This is referred to as the GPS. The bottom text displays the region you
+are in. If you are in a specific part (zone) of a region, it will show above
+the region text.
+
+The following image was taking in the Las Venturas region, near the zone around
+The Visage.
+
+{@infobox
+  {@aimg=hud_gps.png;two texts above each other;GPS text}
+  {@small GPS text}
+}
+
+{@h3(id="Passenger_Satisfaction") Passenger satisfaction}
+
+When doing a mission (see {@article Missions}) that involves transporting one or
+more passengers, the current {@article Passenger_Satisfaction} value will be
+shown underneath the radar, at the bottom left of the screen.
+
+{@infobox
+  {@aimg=hud_satisfaction.png;Satisfaction text with percentage;\
+    passenger satisfaction}
+  {@small Passenger satisfaction text}
+}
+
+{@h3(id="Kneeboard") Kneeboard}
+
+The kneeboard is a small box to the right of the screen, showing information
+about the current mission. When not on a mission, it tells how to start a
+mission. When on a mission, it shows the origin and destination, with the next
+step highlighted in red. At the end it shows the distance towards the location
+to go towards.
+
+{@infobox
+  {@aimg=hud_kneeboard_a.png;a box with title 'Kneeboard', showing the text \
+    'Not on a job, type /w to start working.';Kneeboard when not on a mission}
+  {@small Kneeboard when<br/>not on a mission}
+}
+
+{@infobox
+  {@aimg=hud_kneeboard_b.png;a box with title 'Kneeboard', showing the text \
+    'Flight from Los Santos Airport to Las Venturas Airport. Distance: 233m' \
+    The 'Los Santos Airport' part is highlighted in red.;Kneeboard when not \
+    loaded yet}
+  {@small Kneeboard when not<br/>loaded yet}
+}
+
+{@infobox
+  {@aimg=hud_kneeboard_c.png;a box with title 'Kneeboard', showing the text \
+    'Flight from Los Santos Airport to Las Venturas Airport. Distance: 4.0Km \
+    The 'Las Venturas Airport' part is highlighted in red;Kneeboard when going \
+    towards the destination}
+  {@small Kneeboard when<br/>going towards destination}
+}
+
+{@h3(id="Meters") Fuel/Health/ODO}
+
+When in a vehicle, a small box shows at the bottom right of the screen. Inside
+the box, there's text showing the ODO, fuel level and health (points) of the
+vehicle.
+
+The ODO is the total distance that the vehicle has traveled, in Km. The
+fuel level and health indicators are horizontal bars, where the rightmost point
+means 100%. The leftmost point on the fuel bar means there's no fuel left, on
+the health bar it means that the vehicle is on fire and will explode.
+
+{@infobox
+  {@aimg=hud_meters.png;\
+    text ODO with a number, FL and HP  with a horizontal bar;ODO/FL/HP meters}
+  {@small Meters}
+}
+
+{@h3(id="Speedo") Speedometer}
+
+When in a non-aircraft vehicle, a small speedometer text appears right above the
+meters box at the bottom right of the screen. It simply shows how fast the
+vehicle is going, in Km/h.
+
+{@infobox
+  {@aimg=hud_speedo.png;a number text;speedometer text}
+  {@small The non-airvehicle speedometer}
+}

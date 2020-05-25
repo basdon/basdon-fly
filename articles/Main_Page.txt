@@ -37,6 +37,7 @@
 				{@li {@article List_of_aircraft}}
 				{@li {@article Service_points}}
 				{@li {@article Score}}
+				{@li {@article HUD}}
 			</ul></td>
 			<td><ul>
 				{@li {@article Area_69}}
