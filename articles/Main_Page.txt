@@ -7,7 +7,7 @@
 
 </div>
 <style>
-.article thead tr{
+.article th{
 	text-align:center;
 	background:#ffa500
 \}
@@ -22,18 +22,16 @@
 \}
 </style>
 <table width="100%">
-	<thead>
+	<tbody>
 		<tr>
 			<th>{@articlecategory Basics}</th>
 			<th>{@articlecategory Airports}</th>
 		</tr>
-	</thead>
-	<tbody>
 		<tr valign="top">
 			<td><ul>
-				{@li {@article Fuel}}
 				{@li {@article How_To_Join}}
 				{@li {@article Keys}}
+				{@li {@article Fuel}}
 				{@li {@article List_of_aircraft}}
 				{@li {@article Service_points}}
 				{@li {@article Score}}
@@ -48,6 +46,21 @@
 				{@li {@article San_Fierro_Airport}}
 				{@li {@article San_Fierro_Carrier}}
 				{@li {@article Verdant_Meadows}}
+			</ul></td>
+		</tr>
+		<tr>
+			<th>{@articlecategory Missions}</th>
+			<th>{@articlecategory Navigation}</th>
+		</tr>
+		<tr valign="top">
+			<td><ul>
+				{@li {@article Missions}}
+				{@li {@article Passenger_Satisfaction}}
+			</ul></td>
+			<td><ul>
+				{@li {@article ADF}}
+				{@li {@article VOR}}
+				{@li {@article ILS}}
 			</ul></td>
 		</tr>
 	</tbody>
