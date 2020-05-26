@@ -1,0 +1,32 @@
+{@stub}
+
+Missions can be started with {@code /mission} or {@code /m} or {@code /w} (w for
+work). All missions are recorded all will be shown on
+{@ia=flights.php the flights page}. Mission details can be seen, along with a
+map that shows the route that was taken and graphs with speed and altitude and
+more.
+
+The type of mission depends on the class and aircraft type.
+
+{@h3 Passenger missions}
+
+Passenger missions are given in most aircraft types, when spawed as the Pilot
+class.
+
+Passenger missions utilize the {@article Passenger_Satisfaction} system.
+
+{@h3 Cargo missions}
+
+Cargo missions are given for the {@article=List_of_aircraft#Beagle Beagle},
+{@article=List_of_aircraft#Nevada Nevada} and
+{@article=List_of_aircraft#Andromada Andromada} aircraft types.
+
+{@h3 Rescue missions}
+
+For rescue missions, one must be spawned as the rescue worked class. These
+missions can only be done in a {@article=List_of_aircraft#Raindance Raindance}.
+
+{@h3 Military missions}
+
+The Army class must be chosen to do military missions. Military helicoper
+missions (with a {@article=List_of_aircraft#Cargobob Cargobob})

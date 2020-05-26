@@ -48,6 +48,7 @@ s/\\}/~ESCAPEDENDTAG~/g
 :moretags
 
 s_{@clear}_<div class="clear"></div>_
+s_{@stub}_<p class="msg warning">This article is a stub.</p>_
 
 /^[^}]*{@/ {
 
