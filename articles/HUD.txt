@@ -120,5 +120,5 @@ vehicle is going, in Km/h.
 
 {@infobox
   {@aimg=hud_speedo.png;a number text;speedometer text}
-  {@small The non-airvehicle speedometer}
+  {@small The non-airvehicle<br/>speedometer}
 }
