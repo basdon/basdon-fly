@@ -12,7 +12,8 @@
 .article table.artcat {
 	width: 100%;
 	border: 1px solid #ccc;
-	cell-spacing: 2px;
+	border-spacing: 2px;
+	margin-top: 1em;
 }
 .article table.artcat th,
 .article table.artcat td {
