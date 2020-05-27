@@ -1,0 +1,33 @@
+The Automatic Direction Finder, or ADF, helps finding the direction towards a
+specific beacon. It tells the direction between the beacon and the aircraft,
+the difference in altitude and the difference in current aircraft course and
+course towards the beacon.
+
+{@h3 Usage}
+
+<pre>
+/adf &lt;beacon&gt;
+</pre>
+
+{@code &lt;beacon&gt;} is the code of the NDB beacon to use. See
+{@article List_Of_Beacons} for a list of all the available beacons.
+
+To disable the navigation, simply type {@code /adf} again.
+
+{@h3 Panel}
+
+When ADF is engaged, values will be shown in the navigation top part of the
+panel.
+
+{@infobox
+  {@aimg=adf.png;a wide box with lots of numbers indicating speed, \
+    altitude, heading, vertical air speed, navigation stuff;panel}
+  {@small The aircraft panel with ADF navigation engaged}
+}
+
+The number next to {@code DIS} shows the distance between the aircraft and the
+beacon. {@code ALT} displays the difference in altitude. A positive number means
+the aircraft is at a higher altitude than the beacon, a negative number means
+the aircraft is at a lower altitude than the beacon. {@code CRS} shows the
+difference in the aircraft's course and the course towards the beacon. A
+{@code CRS} value of 0 means the aircraft is going directly towards the beacon.
