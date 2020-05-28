@@ -25,9 +25,21 @@ panel.
   {@small The aircraft panel with ADF navigation engaged}
 }
 
-The number next to {@code DIS} shows the distance between the aircraft and the
-beacon. {@code ALT} displays the difference in altitude. A positive number means
-the aircraft is at a higher altitude than the beacon, a negative number means
-the aircraft is at a lower altitude than the beacon. {@code CRS} shows the
-difference in the aircraft's course and the course towards the beacon. A
-{@code CRS} value of 0 means the aircraft is going directly towards the beacon.
+Indicators and their meanings:
+
+{@dl
+  {@dt DIS}
+  {@dd
+    Horizontal distance between the aircraft and the beacon.
+  }
+  {@dt ALT}
+  {@dd
+    Difference in altitude. A positive number indicates the aircraft is at a
+    higher altitude than the beacon, a negative number indicated the opposite.
+  }
+  {@dt CRS}
+  {@dd
+    Difference in the aircraft's course and the course towards the beacon. If
+    this is 0, it means the aircraft is going directly towards the beacon.
+  }
+}
