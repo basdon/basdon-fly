@@ -43,3 +43,25 @@ Indicators and their meanings:
     this is 0, it means the aircraft is going directly towards the beacon.
   }
 }
+
+{@h4 CRS examples}
+
+In the first image, the aircraft has a heading of 03 or 30&deg;. The course
+towards the beacon is 09, or 90&deg. In this case, the {@code CRS} indicator
+will show a value of {@code 60}.
+
+In the second image, the aircraft still has a heading of 03, or 30&deg;. This
+time the course towards the beacon is 33, or 330&deg;. Here, the {@code CRS}
+indicator will show {@code -60}.
+
+{@infobox
+  {@aimg=adf1.png;a compass, heading 03 on top, with a SALV beacon to the\
+    top-right;CRS example 1}
+  {@small CRS example 1}
+}
+
+{@infobox
+  {@aimg=adf2.png;a compass, heading 03 on top, with a SALV beacon to the\
+    top-left;CRS example 2}
+  {@small CRS example 2}
+}
