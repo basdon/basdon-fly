@@ -128,7 +128,7 @@ noairports:
 			rnw->headingr = (360.0f - rnw->heading + 90.0f) * DEG_TO_RAD;
 			NC_PARS(3);
 			*field = 7; NC(n_cache_get_field_s);
-			sprintf(rnw->id, "%02.0f", rnw->heading / 10.0f);
+			sprintf(rnw->id, "%02.0f", (float) ceil(rnw->heading / 10.0f));
 			rnw->id[2] = (char) buf32[0];
 			rnw->id[3] = 0;
 			rnw++;
