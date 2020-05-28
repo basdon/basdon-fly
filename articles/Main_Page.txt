@@ -58,6 +58,7 @@
 				{@li {@article Passenger_Satisfaction}}
 			</ul></td>
 			<td><ul>
+				{@li {@article List_Of_Beacons}}
 				{@li {@article ADF}}
 				{@li {@article VOR}}
 				{@li {@article ILS}}

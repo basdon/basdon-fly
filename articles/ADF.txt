@@ -1,7 +1,8 @@
 The Automatic Direction Finder, or ADF, helps finding the direction towards a
 specific beacon. It tells the direction between the beacon and the aircraft,
 the difference in altitude and the difference in current aircraft course and
-course towards the beacon.
+course towards the beacon. For a list of beacons, see
+{@article List_Of_Beacons}.
 
 {@h3 Usage}
 
