@@ -237,6 +237,10 @@ int nav_cmd_vor(CMDPARAMS)
 			goto havebeacon;
 		}
 		if (++len >= 5) {
+			if (combinedparameter) {
+				*bp = 0;
+				goto havebeacon;
+			}
 			goto unkbeacon;
 		}
 		if (*bp < 'A' || 'Z' < *bp) {
