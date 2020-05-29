@@ -8,10 +8,18 @@ course towards the beacon. For a list of beacons, see
 
 <pre>
 /adf &lt;beacon&gt;
+
+examples:
+
+/adf salv
+/adf SALS
 </pre>
 
+Beacons and specifiers can be in uppercase or lowercase or even mixed.
+
 {@code &lt;beacon&gt;} is the code of the NDB beacon to use. See
-{@article List_Of_Beacons} for a list of all the available beacons.
+{@article List_Of_Beacons} for a list of all the available beacons. When ingame,
+the {@b /nearest} and {@b /beacons} commands can be used.
 
 To disable the navigation, simply type {@code /adf} again.
 

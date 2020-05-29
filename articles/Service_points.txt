@@ -12,9 +12,9 @@ title="Service point marker"/>. Beware: because of SA-MP limits, a service point
 map icon does not show unless you are close to it. If you are close enough,
 there will also be a floating text label.
 
-To repair your vehicle, use the command {@code /repair} or {@code /fix}.
+To repair your vehicle, use the command {@b /repair} or {@b /fix}.
 
-To refuel your vehicle, use the command {@code /refuel}. You can only refuel
+To refuel your vehicle, use the command {@b /refuel}. You can only refuel
 when the engine is turned off (see {@article Keys} on how to turn your
 engine off).
 
