@@ -1,0 +1,84 @@
+The Instrument Landing System, or ILS, helps with landing by guiding an aircraft
+onto a runway. Unlike {@article VOR}, ILS offers both in horizontal and vertical
+guidance.
+
+{@h3 Usage}
+
+<pre>
+/ils
+</pre>
+
+ILS will only work when {@article VOR} is already engaged.
+
+{@h3 HUD}
+
+When in ILS range, several X symbols will be shown in a + formation. On both the
+horizontal and vertical axis, one X will be red, indicating the position of the
+optimal guideslope.
+
+If the red X on the horizontal axis is to the right, the aircraft is too far
+left. If the red X on the vertical axis is below the center, the aircraft is too
+high. When the value is out of range, a number will be shown to give an idea of
+how much out of position the aircraft is.
+
+The goal is to keep both red Xs in the center, because that means the aircraft
+is right on the optimal glideslope.
+
+{@infobox
+  {@aimg=ils.png;a dodo heading for a runway ahead, on the screen there are 9 \
+    Xs next to each other and 9 Xs above each other, both series having the \
+    middle X in common.;ILS indicator}
+  {@small ILS hud}
+}
+
+In the image above, the optimal glideslope slightly below and to the right, so
+the plane is a bit too high and slightly off the centerline.
+
+When the aircraft is out of the ILS range, a 'No signal' text will show.
+
+{@infobox
+  {@aimg=ilsno.png;red text saying 'NO ILS SIGNAL';no ILS signal}
+  {@small Out of ILS range}
+}
+
+{@h3 Examples}
+
+When the aircraft is nicely in the middle, both horizontally and vertically, the
+ILS indicator will show the middle X in red.
+
+{@infobox
+  {@aimg=ils1.png;a top and side view of aircraft going towards a runway, with \
+    the ILS indicator at the right;ILS example 1}
+  {@small ILS example 1}
+}
+
+When the aircraft is slightly to the left of the centerline, the red X on the
+horizontal line is slightly towards the right because that's where the ideal
+position is.
+
+{@infobox
+  {@aimg=ils2.png;a top and side view of aircraft going towards a runway, with \
+    the ILS indicator at the right;ILS example 2}
+  {@small ILS example 2}
+}
+
+When the aircraft is far to the right, there will be no red X on the horizontal
+axis for the horizontal deviation, but a number giving a slight indication how
+far off the positioning is. Note that there IS still a red X on the horizontal
+axis, but this is the indicator for the vertical axis, showing that the aircraft
+is nicely in the middle of the vertical glidescope.
+
+{@infobox
+  {@aimg=ils3.png;a top and side view of aircraft going towards a runway, with \
+    the ILS indicator at the right;ILS example 3}
+  {@small ILS example 3}
+}
+
+When the aircraft is completely out of range of the ILS signal, the indicator
+will show 'No ILS signal'.
+
+{@infobox
+  {@aimg=ils4.png;a top and side view of aircraft going towards a runway, with \
+    the ILS indicator at the right;ILS example 4}
+  {@small ILS example 4}
+}
