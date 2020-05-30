@@ -31,8 +31,8 @@ is right on the optimal glideslope.
   {@small ILS hud}
 }
 
-In the image above, the optimal glideslope slightly below and to the right, so
-the plane is a bit too high and slightly off the centerline.
+In the image above, the optimal glideslope is slightly below and to the right,
+so the plane is a bit too high and slightly off the centerline.
 
 When the aircraft is out of the ILS range, a 'No signal' text will show.
 
