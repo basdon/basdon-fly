@@ -167,8 +167,12 @@ s_{@stub}_<p class="msg warning">This article is a stub.</p>_
 		s_{@img(\([^)]*\))=\([^;]*\);\([^;]*\);\(.*\)}_<p class="img"><img src="\2" alt="\3" title="\4" \1/></p>_
 		b nexttag
 	}
-	/{@plainsimg=[^;]*;[^;]*;.*}/ {
-		s_{@plainsimg=\([^;]*\);\([^;]*\);\(.*\)}_<img src="<?=$STATICPATH?>/\1" alt="\2" title="\3"/>_
+	/{@plainsimg=[^;]*;[^;]*;[^}]*}/ {
+		s_{@plainsimg=\([^;]*\);\([^;]*\);\([^}]*\)}_<img src="<?=$STATICPATH?>/\1" alt="\2" title="\3"/>_
+		b nexttag
+	}
+	/{@plainsimg=[^;]*;[^}]*}/ {
+		s_{@plainsimg=\([^;]*\);\([^}]*\)}_<img src="<?=$STATICPATH?>/\1" alt="\2" title="\2"/>_
 		b nexttag
 	}
 

@@ -59,7 +59,8 @@
   }
   {@li {@code &#x7B;@aimg(style="whatever" data-whatever="whatever")=relativestaticarticlessrc;alt;title\}}}
   {@li {@code &#x7B;@simg=relativestaticsrc;alt;title;caption\}}}
-  {@li {@code &#x7B;@plainsimg=relativestaticsrc;alt;title;caption\} plain image relative to static path}}
+  {@li {@code &#x7B;@plainsimg=relativestaticsrc;alt;title\} plain image relative to static path}}
+  {@li {@code &#x7B;@plainsimg=relativestaticsrc;altntitle\} plain image relative to static path}}
   {@li {@code &#x7B;@infobox infobox\}}
 	{@infobox info box, usually used for images}
 	<pre>

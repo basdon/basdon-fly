@@ -42,12 +42,27 @@
 	padding:.5em;
 	width:100%
 \}
+.article .smallthumbs{
+	padding: 0.5em
+\}
+.article .smallthumbs a{
+	display:inline-block;
+	padding: .5em;
+	margin: .5em;
+	text-align:center;
+	border:1px solid #161A21;
+	background:#FAEBD7
+\}
+.article .smallthumbs a img{
+	width:100px;
+	border:1px solid #000;
+\}
 </style>
 <table width="100%">
 	<tbody>
 		<tr>
-			<th>{@articlecategory Basics}</th>
-			<th>{@articlecategory Airports}</th>
+			<th width="25%">{@articlecategory Basics}</th>
+			<th width="75%">{@articlecategory Airports}</th>
 		</tr>
 		<tr valign="top">
 			<td><ul>
@@ -59,16 +74,16 @@
 				{@li {@article Score}}
 				{@li {@article HUD}}
 			</ul></td>
-			<td><ul>
-				{@li {@article Area_69}}
-				{@li {@article Caligulas_Palace}}
-				{@li {@article Las_Venturas_Airport}}
-				{@li {@article Los_Santos_Airport}}
-				{@li {@article Los_Santos_Inlet_Field}}
-				{@li {@article San_Fierro_Airport}}
-				{@li {@article San_Fierro_Carrier}}
-				{@li {@article Verdant_Meadows}}
-			</ul></td>
+			<td class="smallthumbs">
+				{@article=Area_69 {@plainsimg=articles/base.jpg;BASE}<br/>Area_69}
+				{@article=Caligulas_Palace {@plainsimg=articles/cali.jpg;CALI}<br/>Caligula's Palace}
+				{@article=Las_Venturas_Airport {@plainsimg=articles/salv.jpg;SALV}<br/>Las Venturas Airport}
+				{@article=Los_Santos_Airport {@plainsimg=articles/sals.jpg;SALS}<br/>Los Santos Airfield}
+				{@article=Los_Santos_Inlet_Field {@plainsimg=articles/lsif.jpg;LSIF}<br/>Los Santos Inlet Field}
+				{@article=San_Fierro_Airport {@plainsimg=articles/sasf.jpg;SASF}<br/>San Fierro Airport}
+				{@article=San_Fierro_Carrier {@plainsimg=articles/sfca.jpg;SFCA}<br/>San Fierro Carrier}
+				{@article=Verdant_Meadows {@plainsimg=articles/savm.jpg;SAVM}<br/>Verdant Meadows}
+			</td>
 		</tr>
 		<tr>
 			<th>{@articlecategory Missions}</th>
