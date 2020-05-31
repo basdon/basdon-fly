@@ -20,6 +20,28 @@
 .article th,.article td{
 	border:0
 \}
+.article div {
+	margin:1em
+\}
+.article table.box{
+	width:100%;
+	border:1px solid #161A21;
+	border-collapse:collapse
+\}
+.article table.box img{
+	border:1px solid #000;
+	vertical-align:middle
+\}
+.article table.box tr{
+	background:#FAEBD7
+\}
+.article table.box td{
+	padding:.3em
+\}
+.article table.box td+td{
+	padding:.5em;
+	width:100%
+\}
 </style>
 <table width="100%">
 	<tbody>
@@ -57,12 +79,48 @@
 				{@li {@article Missions}}
 				{@li {@article Passenger_Satisfaction}}
 			</ul></td>
-			<td><ul>
-				{@li {@article List_Of_Beacons}}
-				{@li {@article ADF}}
-				{@li {@article VOR}}
-				{@li {@article ILS}}
-			</ul></td>
+			<td>
+			<div>
+				<table class="box">
+					<tr>
+						<td>{@article=List_Of_Beacons {@plainsimg=articles/cat_nav_beacons.png;Beacons;Beacons}}</td>
+						<td valign="center">
+							<p>{@article List_Of_Beacons}<br/>Every beacon for all your navigation needs.</p>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<table class="box">
+					<tr>
+						<td>{@article=ADF {@plainsimg=articles/cat_nav_adf.png;ADF;ADF}}</td>
+						<td valign="center">
+							<p>{@article ADF}<br/>Find your way towards a beacon.</p>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<table class="box">
+					<tr>
+						<td>{@article=VOR {@plainsimg=articles/cat_nav_vor.png;VOR;VOR}}</td>
+						<td valign="center">
+							<p>{@article VOR}<br/>Line up perfectly with a runway.</p>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<table class="box">
+					<tr>
+						<td>{@article=ILS {@plainsimg=articles/cat_nav_ils.png;ILS;ILS}}</td>
+						<td valign="center">
+							<p>{@article ILS}<br/>Optimize your descend into landing through any weather.</p>
+						</td>
+					</tr>
+				</table>
+			</div>
+			</td>
 		</tr>
 	</tbody>
 </table>
