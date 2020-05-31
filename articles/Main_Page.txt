@@ -45,7 +45,7 @@
 .article .smallthumbs{
 	padding: 0.5em
 \}
-.article .smallthumbs a{
+.article .smallthumbs div{
 	display:inline-block;
 	padding: .5em;
 	margin: .5em;
@@ -53,7 +53,7 @@
 	border:1px solid #161A21;
 	background:#FAEBD7
 \}
-.article .smallthumbs a img{
+.article .smallthumbs img{
 	width:100px;
 	border:1px solid #000;
 \}
@@ -75,14 +75,38 @@
 				{@li {@article HUD}}
 			</ul></td>
 			<td class="smallthumbs">
-				{@article=Area_69 {@plainsimg=articles/base.jpg;BASE}<br/>Area_69}
-				{@article=Caligulas_Palace {@plainsimg=articles/cali.jpg;CALI}<br/>Caligula's Palace}
-				{@article=Las_Venturas_Airport {@plainsimg=articles/salv.jpg;SALV}<br/>Las Venturas Airport}
-				{@article=Los_Santos_Airport {@plainsimg=articles/sals.jpg;SALS}<br/>Los Santos Airport}
-				{@article=Los_Santos_Inlet_Field {@plainsimg=articles/lsif.jpg;LSIF}<br/>Los Santos Inlet Field}
-				{@article=San_Fierro_Airport {@plainsimg=articles/sasf.jpg;SASF}<br/>San Fierro Airport}
-				{@article=San_Fierro_Carrier {@plainsimg=articles/sfca.jpg;SFCA}<br/>San Fierro Carrier}
-				{@article=Verdant_Meadows {@plainsimg=articles/savm.jpg;SAVM}<br/>Verdant Meadows}
+				<div>
+					{@article=Area_69 {@plainsimg=articles/base.jpg;BASE}<br/>
+					{@article Area_69}
+				</div>
+				<div>
+					{@article=Caligulas_Palace {@plainsimg=articles/cali.jpg;CALI}<br/>
+					{@article Caligulas_Palace}
+				</div>
+				<div>
+					{@article=Las_Venturas_Airport {@plainsimg=articles/salv.jpg;SALV}<br/>
+					{@article Las_Venturas_Airport}
+				</div>
+				<div>
+					{@article=Los_Santos_Airport {@plainsimg=articles/sals.jpg;SALS}<br/>
+					{@article Los_Santos_Airport}
+				</div>
+				<div>
+					{@article=Los_Santos_Inlet_Field {@plainsimg=articles/lsif.jpg;LSIF}<br/>
+					{@article Los_Santos_Inlet_Field}
+				</div>
+				<div>
+					{@article=San_Fierro_Airport {@plainsimg=articles/sasf.jpg;SASF}<br/>
+					{@article San_Fierro_Airport}
+				</div>
+				<div>
+					{@article=San_Fierro_Carrier {@plainsimg=articles/sfca.jpg;SFCA}<br/>
+					{@article San_Fierro_Carrier}
+				</div>
+				<div>
+					{@article=Verdant_Meadows {@plainsimg=articles/savm.jpg;SAVM}<br/>
+					{@article Verdant_Meadows}
+				</div>
 			</td>
 		</tr>
 		<tr>
