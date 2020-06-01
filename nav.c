@@ -603,7 +603,7 @@ void nav_calc_ils_values(
 		*ilsz = 0;
 		return;
 	}
-	tmp = (int) (-ILS_SIZE * (z - ztarget) / (zdev * 2.0f)) + ILS_SIZE / 2;
+	tmp = (int) (ILS_SIZE * (z - ztarget) / (zdev * 2.0f)) + ILS_SIZE / 2;
 	*ilsz = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2);
 	tmp = (int) (-ILS_SIZE * dx / (xdev * 2.0f)) + ILS_SIZE / 2;
 	*ilsx = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2);
