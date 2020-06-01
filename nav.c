@@ -365,6 +365,7 @@ void nav_update_textdraws(
 
 	struct NAVDATA *n = nav[vehicleid];
 	float vorbarx, vorbarlettersizex;
+	int ils_new_cache_value;
 
 	if (n == NULL) {
 		return;
@@ -399,8 +400,8 @@ void nav_update_textdraws(
 		NC(n_PlayerTextDrawSetString);
 	}
 
-	if (n->ils &&
-		((n->ilsx << 8) | (n->ilsz)) != pcache[playerid].ils)
+	ils_new_cache_value = ((unsigned char) n->ilsx << 8) | (unsigned char) n->ilsz;
+	if (n->ils && pcache[playerid].ils != ils_new_cache_value)
 	{
 		if (n->ilsx == INVALID_ILS_VALUE) {
 			B144("~r~~h~no ILS signal");
@@ -426,7 +427,7 @@ void nav_update_textdraws(
 		nc_params[2] = ptxt_ils_base[playerid];
 		nc_params[3] = buf144a;
 		NC(n_PlayerTextDrawSetString);
-		pcache[playerid].ils = (n->ilsx << 8) | (n->ilsz);
+		pcache[playerid].ils = ils_new_cache_value;
 	}
 
 	if (n->vorvalue != INVALID_VOR_VALUE) {
