@@ -45,7 +45,6 @@ apt -- airports
   c - code (char4)
   e - enabled
   n - name (char24)
-  b - beacon (char4)
   x - beacon x
   y - beacon y
   z - beacon z
@@ -303,3 +302,53 @@ deathlog -- death log
   reason - int
 </pre>
 
+<pre>
+modelstats -- flighttime/odo per player per model
+  usr - (usr.i)
+  t417 - int 0
+  o417 - float 0
+  t425
+  o425
+  t447
+  o447
+  t460
+  o460
+  t464
+  o464
+  t465
+  o465
+  t469
+  o469
+  t476
+  o476
+  t487
+  o487
+  t488
+  o488
+  t497
+  o497
+  t501
+  o501
+  t511
+  o511
+  t512
+  o512
+  t513
+  o513
+  t519
+  o519
+  t520
+  o520
+  t548
+  o548
+  t553
+  o553
+  t563
+  o563
+  t577
+  o577
+  t592
+  o592
+  t593
+  o593
+</pre>
