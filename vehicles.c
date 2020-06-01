@@ -170,10 +170,10 @@ void veh_on_player_connect(int playerid)
 	player_model_stats_loaded[playerid] = 0;
 }
 
+STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
 static
 void veh_cb_load_user_model_stats(void *data)
 {
-	STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
 	struct PLAYERMODELSTATS *stats;
 	int playerid;
 	int i;
@@ -206,9 +206,9 @@ void veh_cb_load_user_model_stats(void *data)
 	}
 }
 
+STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
 void veh_load_user_model_stats(int playerid)
 {
-	STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
 	void *player_cc;
 
 	player_cc = V_MK_PLAYER_CC(playerid);
@@ -221,10 +221,9 @@ void veh_load_user_model_stats(int playerid)
 	common_mysql_tquery(cbuf4096_, veh_cb_load_user_model_stats, player_cc);
 }
 
+STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
 void veh_save_user_model_stats(int playerid)
 {
-	STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
-
 	/*prevent overwriting data while it hasn't been loaded yet*/
 	if (!player_model_stats_loaded[playerid]) {
 		return;
