@@ -3,7 +3,7 @@ SOURCES := $(wildcard *.c)
 OBJECTS := $(patsubst %.c, out/%.o, $(SOURCES))
 HEADERS := $(wildcard *.h)
 
-FLAGS=-Wall -m32 -std=c89
+FLAGS=-Wall -m32 -std=c89 -Wunused-local-typedefs
 
 build: $(OBJECTS) out/amxplugin.o
 	$(GCC) $(FLAGS) -shared -o out/basdonfly.$(PLUGINTYPE) out/amxplugin.o $(OBJECTS)
