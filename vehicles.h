@@ -140,6 +140,7 @@ void veh_on_player_state_change(int, int, int);
 void veh_on_vehicle_spawn(struct dbvehicle *veh);
 void veh_on_vehicle_stream_in(int vehicleid, int forplayerid);
 void veh_on_vehicle_stream_out(int vehicleid, int forplayerid);
+void veh_save_user_model_stats(int playerid);
 /**
 To be called after a player logs in.
 */
