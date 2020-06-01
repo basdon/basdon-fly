@@ -428,11 +428,8 @@ void panel_reset_nav(int playerid)
 			NC(n_PlayerTextDrawDestroy);
 			ptxt_vor[playerid] = -1;
 		}
-		if (ptxt_ils[playerid] != -1) {
-			nc_params[2] = ptxt_ils[playerid];
-			NC(n_PlayerTextDrawHide);
-			ptxt_ils[playerid] = -1;
-		}
+		nc_params[2] = ptxt_ils[playerid];
+		NC(n_PlayerTextDrawHide);
 		nc_params[2] = txt_vorbar;
 		NC(n_TextDrawHideForPlayer);
 	}
