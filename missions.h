@@ -90,7 +90,7 @@ void dev_missions_update_closest_point();
 /**
 Add mission distance. Has no effect when player is not on a mission.
 */
-void missions_add_distance(int playerid, float distance_in_m);
+void missions_player_traveled_distance_in_vehicle(int playerid, int vehicleid, float distance_in_m);
 /**
 Callback for the query that inserts a new mission on mission creation.
 */

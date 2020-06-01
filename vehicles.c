@@ -591,36 +591,34 @@ void veh_update_odo(int playerid, int vehicleid, struct vec3 pos)
 	dx = lastvpos[playerid].x - pos.x;
 	dy = lastvpos[playerid].y - pos.y;
 	dz = lastvpos[playerid].z - pos.z;
-	distanceM = sqrt(dx * dx + dy * dy + dz * dz);
+	distanceM = (float) sqrt(dx * dx + dy * dy + dz * dz);
 	lastvpos[playerid] = pos;
-	if (distanceM != distanceM || distanceM == 0.0f) {
+	veh = gamevehicles[vehicleid].dbvehicle;
+	if (veh == NULL || distanceM != distanceM || distanceM == 0.0f) {
 		return;
 	}
 	distanceKM = distanceM / 1000.0f;
 
-	/*TODO: should this only check mission vehicle?*/
-	/*this also adds while not loaded yet, this is correct*/
-	missions_add_distance(playerid, distanceM);
+	missions_player_traveled_distance_in_vehicle(playerid, vehicleid, distanceM);
 	playerodoKM[playerid] += distanceKM;
 
-	if ((veh = gamevehicles[vehicleid].dbvehicle) != NULL) {
-		veh->odoKM += distanceKM;
-		if (!veh->needsodoupdate) {
-			veh->needsodoupdate = 1;
-			if (vehstoupdate == NULL) {
-				vehstoupdate = malloc(sizeof(struct vehnode));
-				vehstoupdate->veh = veh;
-				vehstoupdate->next = NULL;
-			} else {
-				vuq = vehstoupdate;
-				while (vuq->next != NULL) {
-					vuq = vuq->next;
-				}
-				vuq->next = malloc(sizeof(struct vehnode));
+	veh->odoKM += distanceKM;
+
+	if (!veh->needsodoupdate) {
+		veh->needsodoupdate = 1;
+		if (vehstoupdate == NULL) {
+			vehstoupdate = malloc(sizeof(struct vehnode));
+			vehstoupdate->veh = veh;
+			vehstoupdate->next = NULL;
+		} else {
+			vuq = vehstoupdate;
+			while (vuq->next != NULL) {
 				vuq = vuq->next;
-				vuq->veh = veh;
-				vuq->next = NULL;
 			}
+			vuq->next = malloc(sizeof(struct vehnode));
+			vuq = vuq->next;
+			vuq->veh = veh;
+			vuq->next = NULL;
 		}
 	}
 }

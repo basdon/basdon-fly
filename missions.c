@@ -165,9 +165,11 @@ void missions_init()
 	NC_mysql_tquery_nocb(buf144a);
 }
 
-void missions_add_distance(int playerid, float distance_in_m)
+void missions_player_traveled_distance_in_vehicle(int playerid, int vehicleid, float distance_in_m)
 {
-	if (activemission[playerid] != NULL) {
+	/*The state of the mission is not being checked. Being on a mission and in the mission
+	vehicle is enough reason to add the traveled distance to the total distance*/
+	if (activemission[playerid] != NULL && activemission[playerid]->vehicleid == vehicleid) {
 		activemission[playerid]->actualdistanceM += distance_in_m;
 	}
 }
