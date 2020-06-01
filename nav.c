@@ -404,8 +404,7 @@ void nav_update_textdraws(
 	{
 		if (n->ilsx == INVALID_ILS_VALUE) {
 			B144("~r~~h~no ILS signal");
-			goto doils;
-		} else if (-ILS_SIZE <= n->ilsx &&  n->ilsx < ILS_SIZE * 2) {
+		} else {
 			B144((char*) ILS_X);
 			if (n->ilsx < 0) {
 				buf144[38] = '0' + (-n->ilsx);
@@ -421,13 +420,12 @@ void nav_update_textdraws(
 			} else {
 				buf144[ILS_Z_OFFSETS[n->ilsz]] = 'r';
 			}
-doils:
-			NC_PARS(3);
-			nc_params[1] = playerid;
-			nc_params[2] = ptxt_ils_base[playerid];
-			nc_params[3] = buf144a;
-			NC(n_PlayerTextDrawSetString);
 		}
+		NC_PARS(3);
+		nc_params[1] = playerid;
+		nc_params[2] = ptxt_ils_base[playerid];
+		nc_params[3] = buf144a;
+		NC(n_PlayerTextDrawSetString);
 		pcache[playerid].ils = (n->ilsx << 8) | (n->ilsz);
 	}
 
@@ -592,21 +590,20 @@ void nav_calc_ils_values(
 	float xdev = 5.0f + dist * (90.0f - 5.0f) / 1500.0f;
 	float zdev = 2.0f + dist * (100.0f - 2.0f) / 1250.0f;
 	float ztarget = targetz + dist * 0.2f;
+	float dz = z - ztarget;
 	int tmp;
 
-	if (z < ztarget - zdev - ILS_GREYZONE ||
-		z > ztarget + zdev + ILS_GREYZONE ||
-		dx < -xdev - ILS_GREYZONE ||
-		dx > xdev + ILS_GREYZONE)
+	if (dz < -zdev - ILS_GREYZONE || dz > zdev + ILS_GREYZONE ||
+		dx < -xdev - ILS_GREYZONE || dx > xdev + ILS_GREYZONE)
 	{
 		*ilsx = INVALID_ILS_VALUE;
 		*ilsz = 0;
 		return;
 	}
-	tmp = (int) (ILS_SIZE * (z - ztarget) / (zdev * 2.0f)) + ILS_SIZE / 2;
-	*ilsz = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2);
+	tmp = (int) (ILS_SIZE * dz / (zdev * 2.0f)) + ILS_SIZE / 2;
+	*ilsz = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2 - 1);
 	tmp = (int) (-ILS_SIZE * dx / (xdev * 2.0f)) + ILS_SIZE / 2;
-	*ilsx = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2);
+	*ilsx = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2 - 1);
 }
 
 void nav_update(int vehicleid, struct vec3 *pos, float heading)
