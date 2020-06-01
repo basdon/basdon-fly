@@ -120,6 +120,7 @@ int playerstats_update_all(void *data)
 	int n = playercount;
 	while (n--) {
 		playerstats_commit_to_db(players[n], 0);
+		veh_save_user_model_stats(players[n]);
 	}
 	return LAST_SEEN_TIMER_VALUE;
 }

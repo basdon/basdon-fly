@@ -117,6 +117,7 @@ be NULL when this functions returns 0.
 int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh);
 float model_fuel_capacity(short modelid);
 int veh_DestroyVehicle(int vehicleid);
+void veh_load_user_model_stats(int playerid);
 void veh_on_player_connect(int playerid);
 void veh_on_player_disconnect(int playerid);
 /**
@@ -151,11 +152,3 @@ To be called every second.
 void veh_timed_1s_update();
 void veh_timed_panel_update();
 void veh_timed_speedo_update();
-/**
-Updates vehicle and player odo.
-
-Given player must be driver of given vehicle.
-
-@param pos the position of the given vehicle
-*/
-void veh_update_odo(int playerid, int vehicleid, struct vec3 pos);

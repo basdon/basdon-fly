@@ -27,6 +27,16 @@ struct vehnode {
 	struct vehnode *next;
 };
 
+struct PLAYERMODELSTATS {
+	int flighttime;
+	float odoKM;
+};
+
+STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
+static struct PLAYERMODELSTATS player_model_stats[MAX_PLAYERS][NUM_AIRCRAFT_MODELS];
+static char player_model_stats_has_row[MAX_PLAYERS];
+static char player_model_stats_loaded[MAX_PLAYERS];
+
 /**
 Linked list of vehicles that need an ODO update in db.
 */
@@ -78,11 +88,8 @@ static unsigned long lastcontrolactivity[MAX_PLAYERS];
 int lastvehicle[MAX_PLAYERS];
 /**
 Each player's total ODO value (m).
-
-TODO: move this somewhere else.
 */
 float playerodoKM[MAX_PLAYERS];
-
 
 /**
 Enlarges the vehicle database table pointed to by dbvehicles by 100.
@@ -157,6 +164,187 @@ void veh_on_player_connect(int playerid)
 
 	lastvehicle[playerid] = 0;
 	playerodoKM[playerid] = 0.0f;
+
+	memset(player_model_stats[playerid], 0, sizeof(player_model_stats[playerid]));
+	player_model_stats_has_row[playerid] = 0;
+	player_model_stats_loaded[playerid] = 0;
+}
+
+static
+void veh_cb_load_user_model_stats(void *data)
+{
+	STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
+	struct PLAYERMODELSTATS *stats;
+	int playerid;
+	int i;
+
+	playerid = PLAYER_CC_GETID(data);
+	if (!PLAYER_CC_CHECK(data, playerid)) {
+		return;
+	}
+
+	player_model_stats_loaded[playerid] = 1;
+	if (!NC_cache_get_row_count()) {
+		return;
+	}
+
+	player_model_stats_has_row[playerid] = 1;
+	NC_PARS(2);
+	stats = player_model_stats[playerid];
+	for (i = 0; i < NUM_AIRCRAFT_MODELS; i++) {
+		/*doing += to make sure not to lose any progress so far
+		(maybe this query takes ages, who knows),
+		values have been set to 0 on connect anyways*/
+		/*TODO: row gets set to -1 when not set on each call? investigate*/
+		nc_params[1] = 0; /*row*/
+		nc_params[2] = i * 2; /*col*/
+		stats->flighttime += NC(n_cache_get_field_i);
+		nc_params[1] = 0; /*row*/
+		nc_params[2] = i * 2 + 1; /*col*/
+		stats->odoKM += NCF(n_cache_get_field_f);
+		stats++;
+	}
+}
+
+void veh_load_user_model_stats(int playerid)
+{
+	STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
+	void *player_cc;
+
+	player_cc = V_MK_PLAYER_CC(playerid);
+	sprintf(cbuf4096_,
+		"SELECT t417,o417,t425,o425,t447,o447,t460,o460,t464,o464,t465,o465,t469,o469,t476,"
+		"o476,t487,o487,t488,o488,t497,o497,t501,o501,t511,o511,t512,o512,t513,o513,t519,o519,"
+		"t520,o520,t548,o548,t553,o553,t563,o563,t577,o577,t592,o592,t593,o593 "
+		"FROM modelstats WHERE usr=%d",
+		userid[playerid]);
+	common_mysql_tquery(cbuf4096_, veh_cb_load_user_model_stats, player_cc);
+}
+
+void veh_save_user_model_stats(int playerid)
+{
+	STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
+
+	/*prevent overwriting data while it hasn't been loaded yet*/
+	if (!player_model_stats_loaded[playerid]) {
+		return;
+	}
+
+	if (player_model_stats_has_row[playerid]) {
+		csprintf(buf4096,
+			"UPDATE modelstats SET t417=%d,o417=%f,t425=%d,o425=%f,t447=%d,o447=%f,t460=%d,o460=%f,"
+			"t464=%d,o464=%f,t465=%d,o465=%f,t469=%d,o469=%f,t476=%d,o476=%f,t487=%d,o487=%f,"
+			"t488=%d,o488=%f,t497=%d,o497=%f,t501=%d,o501=%f,t511=%d,o511=%f,t512=%d,o512=%f,"
+			"t513=%d,o513=%f,t519=%d,o519=%f,t520=%d,o520=%f,t548=%d,o548=%f,t553=%d,o553=%f,"
+			"t563=%d,o563=%f,t577=%d,o577=%f,t592=%d,o592=%f,t593=%d,o593=%f WHERE usr=%d",
+			player_model_stats[playerid][0].flighttime,
+			player_model_stats[playerid][0].odoKM,
+			player_model_stats[playerid][1].flighttime,
+			player_model_stats[playerid][1].odoKM,
+			player_model_stats[playerid][2].flighttime,
+			player_model_stats[playerid][2].odoKM,
+			player_model_stats[playerid][3].flighttime,
+			player_model_stats[playerid][3].odoKM,
+			player_model_stats[playerid][4].flighttime,
+			player_model_stats[playerid][4].odoKM,
+			player_model_stats[playerid][5].flighttime,
+			player_model_stats[playerid][5].odoKM,
+			player_model_stats[playerid][6].flighttime,
+			player_model_stats[playerid][6].odoKM,
+			player_model_stats[playerid][7].flighttime,
+			player_model_stats[playerid][7].odoKM,
+			player_model_stats[playerid][8].flighttime,
+			player_model_stats[playerid][8].odoKM,
+			player_model_stats[playerid][9].flighttime,
+			player_model_stats[playerid][9].odoKM,
+			player_model_stats[playerid][10].flighttime,
+			player_model_stats[playerid][10].odoKM,
+			player_model_stats[playerid][11].flighttime,
+			player_model_stats[playerid][11].odoKM,
+			player_model_stats[playerid][12].flighttime,
+			player_model_stats[playerid][12].odoKM,
+			player_model_stats[playerid][13].flighttime,
+			player_model_stats[playerid][13].odoKM,
+			player_model_stats[playerid][14].flighttime,
+			player_model_stats[playerid][14].odoKM,
+			player_model_stats[playerid][15].flighttime,
+			player_model_stats[playerid][15].odoKM,
+			player_model_stats[playerid][16].flighttime,
+			player_model_stats[playerid][16].odoKM,
+			player_model_stats[playerid][17].flighttime,
+			player_model_stats[playerid][17].odoKM,
+			player_model_stats[playerid][18].flighttime,
+			player_model_stats[playerid][18].odoKM,
+			player_model_stats[playerid][19].flighttime,
+			player_model_stats[playerid][19].odoKM,
+			player_model_stats[playerid][20].flighttime,
+			player_model_stats[playerid][20].odoKM,
+			player_model_stats[playerid][21].flighttime,
+			player_model_stats[playerid][21].odoKM,
+			player_model_stats[playerid][22].flighttime,
+			player_model_stats[playerid][22].odoKM,
+			userid[playerid]);
+		NC_mysql_tquery_nocb(buf4096a);
+		return;
+	}
+
+	player_model_stats_has_row[playerid] = 1;
+	/*yes I wrote this. I'd like to do some asm optimizations but I still have to figure out
+	how to do inline asm with gcc. I just want to memcpy into the stack...*/
+	csprintf(buf4096,
+		"INSERT INTO modelstats(usr,t417,o417,t425,o425,t447,o447,t460,o460,t464,o464,t465,o465,t469,"
+		"o469,t476,o476,t487,o487,t488,o488,t497,o497,t501,o501,t511,o511,t512,o512,t513,o513,"
+		"t519,o519,t520,o520,t548,o548,t553,o553,t563,o563,t577,o577,t592,o592,t593,o593) "
+		"VALUES(%d,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,"
+		"%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f,%d,%f)",
+		userid[playerid],
+		player_model_stats[playerid][0].flighttime,
+		player_model_stats[playerid][0].odoKM,
+		player_model_stats[playerid][1].flighttime,
+		player_model_stats[playerid][1].odoKM,
+		player_model_stats[playerid][2].flighttime,
+		player_model_stats[playerid][2].odoKM,
+		player_model_stats[playerid][3].flighttime,
+		player_model_stats[playerid][3].odoKM,
+		player_model_stats[playerid][4].flighttime,
+		player_model_stats[playerid][4].odoKM,
+		player_model_stats[playerid][5].flighttime,
+		player_model_stats[playerid][5].odoKM,
+		player_model_stats[playerid][6].flighttime,
+		player_model_stats[playerid][6].odoKM,
+		player_model_stats[playerid][7].flighttime,
+		player_model_stats[playerid][7].odoKM,
+		player_model_stats[playerid][8].flighttime,
+		player_model_stats[playerid][8].odoKM,
+		player_model_stats[playerid][9].flighttime,
+		player_model_stats[playerid][9].odoKM,
+		player_model_stats[playerid][10].flighttime,
+		player_model_stats[playerid][10].odoKM,
+		player_model_stats[playerid][11].flighttime,
+		player_model_stats[playerid][11].odoKM,
+		player_model_stats[playerid][12].flighttime,
+		player_model_stats[playerid][12].odoKM,
+		player_model_stats[playerid][13].flighttime,
+		player_model_stats[playerid][13].odoKM,
+		player_model_stats[playerid][14].flighttime,
+		player_model_stats[playerid][14].odoKM,
+		player_model_stats[playerid][15].flighttime,
+		player_model_stats[playerid][15].odoKM,
+		player_model_stats[playerid][16].flighttime,
+		player_model_stats[playerid][16].odoKM,
+		player_model_stats[playerid][17].flighttime,
+		player_model_stats[playerid][17].odoKM,
+		player_model_stats[playerid][18].flighttime,
+		player_model_stats[playerid][18].odoKM,
+		player_model_stats[playerid][19].flighttime,
+		player_model_stats[playerid][19].odoKM,
+		player_model_stats[playerid][20].flighttime,
+		player_model_stats[playerid][20].odoKM,
+		player_model_stats[playerid][21].flighttime,
+		player_model_stats[playerid][21].odoKM,
+		player_model_stats[playerid][22].flighttime,
+		player_model_stats[playerid][22].odoKM);
+	NC_mysql_tquery_nocb(buf4096a);
 }
 
 void veh_init()
@@ -438,6 +626,8 @@ void veh_on_player_disconnect(int playerid)
 			NC_SetVehicleToRespawn(vehicleid);
 		}
 	}
+
+	veh_save_user_model_stats(playerid);
 }
 
 void veh_on_player_enter_vehicle(int playerid, int vehicleid, int ispassenger)
@@ -582,7 +772,15 @@ int veh_GetPlayerVehicle(int playerid, int *reinc, struct dbvehicle **veh)
 	return vehicleid;
 }
 
-void veh_update_odo(int playerid, int vehicleid, struct vec3 pos)
+/**
+Updates vehicle and player odo.
+
+Given player must be driver of given vehicle.
+
+@param pos the position of the given vehicle
+*/
+static
+void veh_update_odo(int playerid, int vehicleid, struct vec3 pos, struct PLAYERMODELSTATS *model_stats)
 {
 	struct vehnode *vuq;
 	struct dbvehicle *veh;
@@ -600,9 +798,10 @@ void veh_update_odo(int playerid, int vehicleid, struct vec3 pos)
 	distanceKM = distanceM / 1000.0f;
 
 	missions_player_traveled_distance_in_vehicle(playerid, vehicleid, distanceM);
-	playerodoKM[playerid] += distanceKM;
 
+	playerodoKM[playerid] += distanceKM;
 	veh->odoKM += distanceKM;
+	model_stats->odoKM += distanceKM;
 
 	if (!veh->needsodoupdate) {
 		veh->needsodoupdate = 1;
@@ -660,6 +859,8 @@ void veh_timed_1s_update()
 	int playerid, vehicleid, vehiclemodel, n = playercount;
 	unsigned long timestamp = time_timestamp();
 	unsigned long ctrla = timestamp - 30000;
+	struct PLAYERMODELSTATS *model_stats;
+	int aircraftindex;
 
 	while (n--) {
 		playerid = players[n];
@@ -693,7 +894,6 @@ void veh_timed_1s_update()
 
 		if (vehicleid == lastvehicle[playerid]) {
 			common_GetVehiclePos(vehicleid, &vpos);
-			veh_update_odo(playerid, vehicleid, vpos);
 
 			common_GetVehicleParamsEx(vehicleid, &vparams);
 
@@ -703,16 +903,27 @@ void veh_timed_1s_update()
 					pkeys.keys & KEY_SPRINT, &vparams, v);
 			}
 
+			model_stats = NULL;
 			if (game_is_air_vehicle(vehiclemodel)) {
 				veh_timed_1s_update_a(
 					playerid, vehicleid, &vpos, &vparams);
+
+				if (aircraftmodelindex[vehiclemodel] != -1) {
+					aircraftindex = aircraftmodelindex[vehiclemodel];
+					model_stats = player_model_stats[playerid] + aircraftindex;
+				}
 
 				if (vparams.engine && !isafk[playerid] &&
 					lastcontrolactivity[playerid] > ctrla)
 				{
 					score_flight_time[playerid]++;
+					if (model_stats != NULL) {
+						model_stats->flighttime++;
+					}
 				}
 			}
+
+			veh_update_odo(playerid, vehicleid, vpos, model_stats);
 		}
 
 	}

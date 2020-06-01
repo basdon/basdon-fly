@@ -270,6 +270,8 @@ void login_login_player(int playerid, int status)
 	players[playercount++] = playerid;
 alreadyin:
 
+	veh_load_user_model_stats(playerid);
+
 	if (pwdata[playerid]) {
 		free(pwdata[playerid]);
 		pwdata[playerid] = NULL;
@@ -558,7 +560,6 @@ void login_cb_load_account_data(void *data)
 				"Check the website for more details.",
 			"Ok", "",
 			TRANSACTION_LOGIN);
-
 	}
 }
 

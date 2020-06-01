@@ -6,6 +6,7 @@
 #include <string.h>
 
 unsigned int vehicleflags[VEHICLE_MODEL_TOTAL];
+char aircraftmodelindex[VEHICLE_MODEL_TOTAL];
 
 void game_sa_init()
 {
@@ -34,6 +35,30 @@ void game_sa_init()
 	SETFLAGS(MODEL_AT400, PLANE);
 	SETFLAGS(MODEL_ANDROM, PLANE);
 	SETFLAGS(MODEL_DODO, PLANE);
+	memset(aircraftmodelindex, -1, sizeof(aircraftmodelindex));
+	aircraftmodelindex[MODEL_LEVIATHN] = 0;
+	aircraftmodelindex[MODEL_HUNTER] = 1;
+	aircraftmodelindex[MODEL_SEASPAR] = 2;
+	aircraftmodelindex[MODEL_SKIMMER] = 3;
+	aircraftmodelindex[MODEL_RCBARON] = 4;
+	aircraftmodelindex[MODEL_RCRAIDER] = 5;
+	aircraftmodelindex[MODEL_SPARROW] = 6;
+	aircraftmodelindex[MODEL_RUSTLER] = 7;
+	aircraftmodelindex[MODEL_MAVERICK] = 8;
+	aircraftmodelindex[MODEL_VCNMAV] = 9;
+	aircraftmodelindex[MODEL_POLMAV] = 10;
+	aircraftmodelindex[MODEL_RCGOBLIN] = 11;
+	aircraftmodelindex[MODEL_BEAGLE] = 12;
+	aircraftmodelindex[MODEL_CROPDUST] = 13;
+	aircraftmodelindex[MODEL_STUNT] = 14;
+	aircraftmodelindex[MODEL_SHAMAL] = 15;
+	aircraftmodelindex[MODEL_HYDRA] = 16;
+	aircraftmodelindex[MODEL_CARGOBOB] = 17;
+	aircraftmodelindex[MODEL_NEVADA] = 18;
+	aircraftmodelindex[MODEL_RAINDANC] = 19;
+	aircraftmodelindex[MODEL_AT400] = 20;
+	aircraftmodelindex[MODEL_ANDROM] = 21;
+	aircraftmodelindex[MODEL_DODO] = 22;
 }
 
 int game_is_air_vehicle(int model)

@@ -303,11 +303,17 @@
 #define MODEL_UTILTR1 (611)
 #define VEHICLE_MODEL_TOTAL (611-400+1)
 
+#define NUM_AIRCRAFT_MODELS 23
+
 struct CARCOLDATA {
 	char amount;
 	short position;
 };
 
+/**
+Some mapping, every air vehicle has a unique value 0-22, -1 for others
+*/
+extern char aircraftmodelindex[VEHICLE_MODEL_TOTAL];
 extern char *vehnames[];
 extern char *vehmodelnames[];
 extern unsigned int vehicleflags[VEHICLE_MODEL_TOTAL];
