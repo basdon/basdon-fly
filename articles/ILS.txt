@@ -1,5 +1,5 @@
 The Instrument Landing System, or ILS, helps with landing by guiding an aircraft
-onto a runway. Unlike {@article VOR}, ILS offers both in horizontal and vertical
+onto a runway. Unlike {@article VOR}, ILS offers both horizontal and vertical
 guidance.
 
 {@h3 Usage}
@@ -53,8 +53,9 @@ ILS indicator will show the middle X in red.
 }
 
 When the aircraft is slightly to the left of the centerline, the red X on the
-horizontal line is slightly towards the right because that's where the ideal
-position is.
+horizontal axis is slightly towards the right because that's where the ideal
+position is. The same applies to the vertical axis, the red X will be slightly
+above the center when the aircraft is slightly too low.
 
 {@infobox
   {@aimg=ils2.png;a top and side view of aircraft going towards a runway, with \
@@ -68,14 +69,18 @@ far off the positioning is. Note that there IS still a red X on the horizontal
 axis, but this is the indicator for the vertical axis, showing that the aircraft
 is nicely in the middle of the vertical glidescope.
 
+The same applies for the vertical axis, a number will show at the top or bottom
+if the aircraft's height is very far from the ideal height.
+
 {@infobox
   {@aimg=ils3.png;a top and side view of aircraft going towards a runway, with \
     the ILS indicator at the right;ILS example 3}
   {@small ILS example 3}
 }
 
-When the aircraft is completely out of range of the ILS signal, the indicator
-will show 'No ILS signal'.
+When the aircraft is completely out of range of the ILS signal, either
+horizontally or vertically, the indicator will hide and a {@em No ILS signal}
+text will appear.
 
 {@infobox
   {@aimg=ils4.png;a top and side view of aircraft going towards a runway, with \
