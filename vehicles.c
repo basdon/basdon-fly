@@ -704,7 +704,6 @@ void veh_start_or_stop_engine(int playerid, int vehicleid)
 
 void veh_on_player_key_state_change(int playerid, int oldkeys, int newkeys)
 {
-
 	int vehicleid;
 
 	/*not checking vehicle... for now*/
@@ -719,18 +718,15 @@ void veh_on_player_key_state_change(int playerid, int oldkeys, int newkeys)
 	return;
 }
 
-void veh_on_player_now_driving(int playerid, int vehicleid)
+void veh_on_player_now_driving(int playerid, int vehicleid, struct dbvehicle *veh)
 {
-	struct dbvehicle *veh;
 	int reqenginestate;
 
 	lastvehicle[playerid] = vehicleid;
 	common_GetVehiclePos(vehicleid, &lastvpos[playerid]);
 
 	lastcontrolactivity[playerid] = time_timestamp();
-	reqenginestate =
-		(veh = gamevehicles[vehicleid].dbvehicle) == NULL ||
-		veh->fuel > 0.0f;
+	reqenginestate = veh == NULL || veh->fuel > 0.0f;
 	common_set_vehicle_engine(vehicleid, reqenginestate);
 	if (!reqenginestate) {
 		B144(WARN"This vehicle is out of fuel!");
@@ -1155,11 +1151,16 @@ void veh_update_panel_for_player(int playerid)
 void veh_on_player_state_change(int playerid, int from, int to)
 {
 	struct dbvehicle *veh;
-	int vehicleid, n, p, lastvehicleid;
+	int vehicleid, vehiclemodel, n, p, lastvehicleid;
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
 		vehicleid = NC_GetPlayerVehicleID(playerid);
 		veh = gamevehicles[vehicleid].dbvehicle;
+		if (veh != NULL) {
+			vehiclemodel = veh->model;
+		} else {
+			vehiclemodel = NC_GetVehicleModel(vehicleid);
+		}
 
 		buf144[0] = '_';
 		buf144[1] = 0;
@@ -1186,29 +1187,35 @@ void veh_on_player_state_change(int playerid, int from, int to)
 		ptxtcache_hp[playerid] = -1;
 
 		veh_update_panel_for_player(playerid);
-	} else if (ptxt_fl[playerid] != -1 /*if panel active*/) {
-		NC_PARS(2);
-		nc_params[1] = playerid;
-		nc_params[2] = txt_bg;
-		NC(n_TextDrawHideForPlayer);
-		nc_params[2] = ptxt_txt[playerid];
-		NC(n_PlayerTextDrawHide);
-		nc_params[2] = ptxt_speedo[playerid];
-		NC(n_PlayerTextDrawHide);
-		nc_params[2] = ptxt_fl[playerid];
-		NC(n_PlayerTextDrawDestroy);
-		nc_params[2] = ptxt_hp[playerid];
-		NC(n_PlayerTextDrawDestroy);
+	} else {
+		vehicleid = -1;
+		veh = NULL;
+		vehiclemodel = 400;
 
-		ptxt_fl[playerid] = -1;
-		ptxt_hp[playerid] = -1;
+		if (ptxt_fl[playerid] != -1 /*if panel active*/) {
+			NC_PARS(2);
+			nc_params[1] = playerid;
+			nc_params[2] = txt_bg;
+			NC(n_TextDrawHideForPlayer);
+			nc_params[2] = ptxt_txt[playerid];
+			NC(n_PlayerTextDrawHide);
+			nc_params[2] = ptxt_speedo[playerid];
+			NC(n_PlayerTextDrawHide);
+			nc_params[2] = ptxt_fl[playerid];
+			NC(n_PlayerTextDrawDestroy);
+			nc_params[2] = ptxt_hp[playerid];
+			NC(n_PlayerTextDrawDestroy);
 
-		ptxtcache_fl[playerid] = -1;
-		ptxtcache_hp[playerid] = -1;
+			ptxt_fl[playerid] = -1;
+			ptxt_hp[playerid] = -1;
+
+			ptxtcache_fl[playerid] = -1;
+			ptxtcache_hp[playerid] = -1;
+		}
 	}
 
 	if (to == PLAYER_STATE_DRIVER) {
-		veh_on_player_now_driving(playerid, vehicleid);
+		veh_on_player_now_driving(playerid, vehicleid, veh);
 
 		NC_PARS(2);
 		nc_params[1] = vehicleid;
@@ -1219,12 +1226,15 @@ void veh_on_player_state_change(int playerid, int from, int to)
 				veh_owner_label_destroy(vehicleid, players[n]);
 			}
 		}
+
+		csprintf(buf144, "~g~%s", vehnames[vehiclemodel - 400]);
+		NC_GameTextForPlayer(playerid, buf144a, 2000, 1);
 	}
 
 	if (from == PLAYER_STATE_DRIVER &&
 		(lastvehicleid = lastvehicle[playerid]) &&
 		common_find_vehicle_driver(lastvehicleid) == INVALID_PLAYER_ID &&
-		veh_needs_owner_label(veh = gamevehicles[lastvehicleid].dbvehicle))
+		veh_needs_owner_label(veh))
 	{
 		NC_PARS(2);
 		nc_params[1] = lastvehicleid;

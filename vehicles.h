@@ -135,7 +135,7 @@ To be called from OnPlayerStateChange with new state being driver, or when
 calling PutPlayerInVehicle when the player was already a driver (because
 this won't trigger a OnPlayerStateChange.
 */
-void veh_on_player_now_driving(int playerid, int vehicleid);
+void veh_on_player_now_driving(int playerid, int vehicleid, struct dbvehicle *veh);
 void veh_on_player_state_change(int, int, int);
 void veh_on_vehicle_spawn(struct dbvehicle *veh);
 void veh_on_vehicle_stream_in(int vehicleid, int forplayerid);

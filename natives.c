@@ -429,7 +429,7 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 
 	common_GetVehiclePos(vehicleid, &pos);
 	maps_stream_for_player(playerid, pos);
-	veh_on_player_now_driving(playerid, vehicleid);
+	veh_on_player_now_driving(playerid, vehicleid, gamevehicles[vehicleid].dbvehicle);
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	zones_update(playerid, pos);
 
