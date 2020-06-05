@@ -100,6 +100,10 @@ function spate_generate($template_dir, $template)
 				$c = $in[++$i];
 			} while ($c != ' ' && $c != '}');
 			switch ($directive) {
+			case "@globe":
+				$result .= '<img src="<?=$STATICPATH?>/moin-www.png" alt="globe icon" title="external link"/>';
+				$j += 81;
+				goto next;
 			case "@pre":
 				$dopre = true;
 				$preindent = $indent;
