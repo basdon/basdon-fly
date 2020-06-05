@@ -4,11 +4,12 @@ require '../inc/conf.php';
 require '../inc/db.php';
 
 
-$apts = $db->query('SELECT i,c FROM apt')->fetchAll();
+$apts = $db->query('SELECT i,c,n FROM apt ORDER BY c ASC')->fetchAll();
 
 ob_start();
 echo '<table class="beaconlist">';
 echo '<tr>';
+echo '<th>Place</th>';
 echo '<th>Beacon</th>';
 echo '<th>End 1</th>';
 echo '<th>Code</th>';
@@ -19,7 +20,7 @@ echo '<th>Nav</th>';
 echo '</tr>';
 nextap:
 
-$apt = array_pop($apts);
+$apt = array_shift($apts);
 if ($apt == null) {
 	echo '</table>';
 	file_put_contents('../articles/gen/beaconlist.html', ob_get_contents());
@@ -55,6 +56,15 @@ ils
 
 foreach ($runways as $k => $r) {
 	echo '<tr>';
+	echo '<td>';
+	if ($k == 0) {
+		echo '<a href="article.php?title=';
+		echo $beacon;
+		echo '">';
+		echo $apt->n;
+		echo '</a>';
+	}
+	echo '</td>';
 	echo '<td>';
 	if ($k == 0) {
 		echo '<a href="article.php?title=';
