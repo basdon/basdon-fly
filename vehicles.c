@@ -796,7 +796,9 @@ void veh_update_odo(int playerid, int vehicleid, struct vec3 pos, struct PLAYERM
 
 	playerodoKM[playerid] += distanceKM;
 	veh->odoKM += distanceKM;
-	model_stats->odoKM += distanceKM;
+	if (model_stats) {
+		model_stats->odoKM += distanceKM;
+	}
 
 	if (!veh->needsodoupdate) {
 		veh->needsodoupdate = 1;
