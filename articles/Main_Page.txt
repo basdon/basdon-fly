@@ -76,35 +76,35 @@
 			</ul></td>
 			<td class="smallthumbs">
 				<div>
-					{@article=Area_69 {@plainsimg=articles/base.jpg;BASE}<br/>
+					{@article=Area_69 {@plainsimg=articles/base.jpg;BASE}}<br/>
 					{@article Area_69}
 				</div>
 				<div>
-					{@article=Caligulas_Palace {@plainsimg=articles/cali.jpg;CALI}<br/>
+					{@article=Caligulas_Palace {@plainsimg=articles/cali.jpg;CALI}}<br/>
 					{@article Caligulas_Palace}
 				</div>
 				<div>
-					{@article=Las_Venturas_Airport {@plainsimg=articles/salv.jpg;SALV}<br/>
+					{@article=Las_Venturas_Airport {@plainsimg=articles/salv.jpg;SALV}}<br/>
 					{@article Las_Venturas_Airport}
 				</div>
 				<div>
-					{@article=Los_Santos_Airport {@plainsimg=articles/sals.jpg;SALS}<br/>
+					{@article=Los_Santos_Airport {@plainsimg=articles/sals.jpg;SALS}}<br/>
 					{@article Los_Santos_Airport}
 				</div>
 				<div>
-					{@article=Los_Santos_Inlet_Field {@plainsimg=articles/lsif.jpg;LSIF}<br/>
+					{@article=Los_Santos_Inlet_Field {@plainsimg=articles/lsif.jpg;LSIF}}<br/>
 					{@article Los_Santos_Inlet_Field}
 				</div>
 				<div>
-					{@article=San_Fierro_Airport {@plainsimg=articles/sasf.jpg;SASF}<br/>
+					{@article=San_Fierro_Airport {@plainsimg=articles/sasf.jpg;SASF}}<br/>
 					{@article San_Fierro_Airport}
 				</div>
 				<div>
-					{@article=San_Fierro_Carrier {@plainsimg=articles/sfca.jpg;SFCA}<br/>
+					{@article=San_Fierro_Carrier {@plainsimg=articles/sfca.jpg;SFCA}}<br/>
 					{@article San_Fierro_Carrier}
 				</div>
 				<div>
-					{@article=Verdant_Meadows {@plainsimg=articles/savm.jpg;SAVM}<br/>
+					{@article=Verdant_Meadows {@plainsimg=articles/savm.jpg;SAVM}}<br/>
 					{@article Verdant_Meadows}
 				</div>
 			</td>
