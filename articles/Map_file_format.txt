@@ -8,12 +8,77 @@ byte 0-3: spec version
 The rest is dependent on the spec version:
 
 {@ul
-  {@li {@#=v1 Version 1}}
+  {@li {@#=v2 Version 0x0250414D (version 2)}}
+  {@li {@#=old Old versions}
+    {@ul
+      {@li {@#=v1 Version 1}}
+    }
+  }
 }
 
-{@h3(id="v1") Version 1}
+{@h3(id="v2") Version 0x0250414D (version 2)}
 
-Version 1 supports remove building and can hold up to 900 objects.
+v2 introduced magic number {@code 0x0250414D ("MAP")} because we're cool kids now.
+The fourth byte is the actual version number.
+
+Per-object draw distance in v1 was never used, so now it's global.
+Stream in/out radius was added, because it should be stored together with the
+map instead of in a db. No more "negative model number equals a removed building
+annoyances".
+
+Gang zones were added.
+
+<pre>
+byte 4-7: number of removed buildings [A]
+byte 8-11: number of objects [B]
+byte 12-15: number of gangzones [C]
+byte 16-19: stream in radius (FLOAT)
+byte 20-23: stream out radius (FLOAT)
+byte 24-27: object drawdistance (FLOAT)
+-----------
+size 28 bytes
+
+> removed building, section repeated [A] times:
+byte 0-3: model (DWORD)
+byte 4-7: x (FLOAT)
+byte 8-11: y (FLOAT)
+byte 12-15: z (FLOAT)
+byte 16-19: radius (FLOAT)
+-----------
+size 20 bytes
+
+> objects, section repeated [B] times:
+byte 0-3: model (DWORD)
+byte 4-7: x (FLOAT)
+byte 8-11: y (FLOAT)
+byte 12-15: z (FLOAT)
+byte 16-19: rx (FLOAT)
+byte 20-23: ry (FLOAT)
+byte 24-27: rz (FLOAT)
+-----------
+size 28 bytes
+
+> gangzones, section repeated [C] times:
+byte 0-3: west/minx (FLOAT)
+byte 4-7: south/miny (FLOAT)
+byte 8-11: east/maxx (FLOAT)
+byte 12-15: north/maxy (FLOAT)
+byte 16-19: color (DWORD)
+-----------
+size 20 bytes
+
+total file size:
+28 + 20 * num_removed_buildings + 28 * num_objects + 20 * num_gangzones
+</pre>
+
+{@h3(id="old") Old versions}
+
+{@h4(id="v1") Version 1}
+
+{@ul
+  {@li remove buildings}
+  {@li per-object drawdistance}
+}
 
 <pre>
 byte 4-7: number of removed buildings
@@ -25,6 +90,8 @@ byte 8-11: number of objects
 		byte 8-11: y (FLOAT)
 		byte 12-15: z (FLOAT)
 		byte 16-19: radius (FLOAT)
+		-----------
+		size 16 (+4 model)
 	(when model is a positive number: object):
 		byte 4-7: x (FLOAT)
 		byte 8-11: y (FLOAT)
@@ -33,5 +100,6 @@ byte 8-11: number of objects
 		byte 20-23: ry (FLOAT)
 		byte 24-27: rz (FLOAT)
 		byte 28-31: drawdistance (FLOAT)
+		-----------
+		size 28 (+4 model)
 </pre>
-
