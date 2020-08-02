@@ -82,7 +82,7 @@ if ($max > 0) {
 		} else {
 			$inpeak = false;
 		}
-		$ytop = $imgh - $maxy * $thisvalue;
+		$ytop = $imgh - $maxy * ($thisvalue / $max);
 		$vals[] = $ytop;
 	}
 
@@ -155,7 +155,7 @@ if (count($peakranges)) {
 		}
 	}
 	$x = $longest->min + ($longest->max - $longest->min) / 2;
-	$y = $imgh - $maxy * $max;
+	$y = $imgh - $maxy;
 	imagefilledrectangle($im, $x - 2, $y - 2, $x + 2, $y + 2, $color_peak);
 	$txt = "peak: " . $max;
 	if ($x > $imgw / 2) {
