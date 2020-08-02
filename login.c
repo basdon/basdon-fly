@@ -527,6 +527,8 @@ void login_cb_load_account_data(void *data)
 	NC_PARS(2);
 	nc_params[1] = 0;
 	money_set(playerid, (*f = 0, NC(n_cache_get_field_i)));
+	/* MONEY_SET CHANGES NC_PARAMS[1]! */
+	nc_params[1] = 0;
 	playerodoKM[playerid] = (*f = 1, NCF(n_cache_get_field_f));
 	score_flight_time[playerid] = (*f = 2, NC(n_cache_get_field_i));
 	score_play_time[playerid] = (*f = 3, NC(n_cache_get_field_i));
