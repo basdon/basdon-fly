@@ -129,13 +129,12 @@ void zones_update(int playerid, struct vec3 pos)
 	int lzid = lastzoneid[playerid];
 	char buf[144];
 
-	if (lastzoneindex[playerid] >= 0 &&
-		zones_is_in_zone(pos, zones + lastzoneindex[playerid]))
-	{
+	if (lastzoneindex[playerid] >= 0 && zones_is_in_zone(pos, zones + lastzoneindex[playerid])) {
 		return;
 	}
 
 	lastzoneindex[playerid] = -1;
+	lastzoneid[playerid] = -1;
 	r = regions;
 	rmax = regions + regioncount;
 
@@ -150,19 +149,16 @@ void zones_update(int playerid, struct vec3 pos)
 					goto gotcha;
 				}
 			}
-			lastzoneid[playerid] = -1;
 			goto gotcha;
 		}
 		r++;
 	}
 
-	lastregionid[playerid] =
-		ZONE_NONE_NW + ((pos.y < 0.0f) << 1) + (pos.x > 0.0f);
+	lastregionid[playerid] = ZONE_NONE_NW + ((pos.y < 0.0f) << 1) + (pos.x > 0.0f);
 gotcha:
 	if (lrid != lastregionid[playerid] || lzid != lastzoneid[playerid]) {
 		if (lastzoneid[playerid] != -1) {
-			sprintf(buf, "%s~n~%s", zonenames[lastzoneid[playerid]],
-				zonenames[lastregionid[playerid]]);
+			sprintf(buf, "%s~n~%s", zonenames[lastzoneid[playerid]], zonenames[lastregionid[playerid]]);
 		} else {
 			/*regionid should _always_ be valid*/
 			buf[0] = buf[2] = '~';
@@ -170,8 +166,7 @@ gotcha:
 			strcpy(buf + 3, zonenames[lastregionid[playerid]]);
 		}
 		atoc(buf144, buf, 144);
-		NC_PlayerTextDrawSetString(playerid, ptextid[playerid],
-			buf144a);
+		NC_PlayerTextDrawSetString(playerid, ptextid[playerid], buf144a);
 	}
 }
 
