@@ -6,41 +6,69 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAP_FILENAMEFORMAT "scriptfiles/maps/%s.map"
+#define MAX_MAPS (20)
 #define MAP_MAX_FILENAME (24) /*see db col*/
 /*define to print msg to console each time map streams in/out*/
-/*#define MAPS_LOG_STREAMING*/
+#define MAPS_LOG_STREAMING
 #define MAX_REMOVED_OBJECTS 1000
 
 #pragma pack(push,1)
-struct OBJECT {
-	cell model;
-	float x, y, z, rx, ry, rz, drawdistance;
+struct MAPFILEHEADER {
+	int spec_version;
+	int num_removes;
+	int num_objects;
+	int num_gang_zones;
+	float stream_in_radius;
+	float stream_out_radius;
+	float draw_radius;
 };
+struct MAPFILEOBJECT {
+	int model;
+	float x, y, z, rx, ry, rz;
+};
+struct OBJECT {
+	struct MAPFILEOBJECT map_file_object;
+	float drawdistance;
+};
+EXPECT_SIZE(struct OBJECT, sizeof(cell) * 8);
 struct REMOVEDOBJECT {
-	cell model;
+	int model;
 	float x, y, z, radius;
+};
+struct GANG_ZONE {
+	float min_x;
+	float max_y;
+	float max_x;
+	float min_y;
+	int colorABGR;
 };
 #pragma pack(pop)
 
 struct MAP {
 	int id;
-	float x, y;
-	float radius_in_sq, radius_out_sq;
+	float middle_x, middle_y;
+	float stream_in_radius_sq, stream_out_radius_sq;
+	/*TODO: for fun we can add a command to change the draw distance at runtime*/
 	char name[64];
-	int numobjects;
+	/*unallocated when num_objects is 0*/
 	struct OBJECT *objects;
+	int num_objects;
+	/*unallocated when num_gang_zones is 0*/
+	struct GANG_ZONE *gang_zones;
+	int num_gang_zones;
 	/* 1 streamed in, 0 streamed out */
-	char streamstatus[MAX_PLAYERS];
+	char stream_status_for_player[MAX_PLAYERS];
 };
 
-static int nummaps;
-static struct MAP *maps;
-/*maps object id to a map id*/
-/*using MAX_OBJECTS+1 because object ideas start at 1*/
-static int object_map_id[MAX_PLAYERS][MAX_OBJECTS+1];
-static struct REMOVEDOBJECT removedobjects[MAX_REMOVED_OBJECTS];
-static int numremovedobjects = 0;
+static struct MAP maps[MAX_MAPS];
+static int num_maps;
+/*maps a player's object id to a map id*/
+/*using MAX_OBJECTS+1 because object ids start at 1 (not that we will ever hit 1000 objects but still)*/
+static int player_objectid_to_mapid[MAX_PLAYERS][MAX_OBJECTS + 1];
+
+/*doing size +1 to prevent an overrun when reading map files*/
+static struct REMOVEDOBJECT removed_objects[MAX_REMOVED_OBJECTS + 1];
+static int num_removed_objects = 0;
 
 /**
 Load a map from file as specified in given map.
@@ -48,231 +76,237 @@ Load a map from file as specified in given map.
 @return 1 on success
 */
 static
-int maps_load_from_file(struct MAP *map)
+int maps_load_from_file(int mapidx)
 {
-	const float forceddrawdistance = 1000.0f;
-	FILE *filehandle;
+	FILE *fs;
 	char filename[22 + MAP_MAX_FILENAME];
-	int specversion;
-	int numobjects, numrem;
-	struct OBJECT *obj;
-	struct REMOVEDOBJECT *remobj;
+	int i;
+	struct MAPFILEHEADER header;
+	struct OBJECT *object;
+	struct GANG_ZONE *gang_zone;
+	float middle_x, middle_y;
+	int total_element_count_for_middle;
 
-	sprintf(filename, MAP_FILENAMEFORMAT, map->name);
-	if (!(filehandle = fopen(filename, "rb"))) {
+	sprintf(filename, "scriptfiles/maps/%s.map", maps[mapidx].name);
+	if (!(fs = fopen(filename, "rb"))) {
 		logprintf("failed to open map %s", filename);
 		return 0;
 	}
 
-	if (fread(&specversion, sizeof(int), 1, filehandle) != 1) {
+	if (!fread(&header, sizeof(header), 1, fs)) {
 		goto corrupted;
 	}
 
-	if (specversion != 1) {
-		logprintf("unknown map spec v%d for %s", specversion, filename);
+	if (header.spec_version != 0x0250414D) {
+		logprintf("unknown map spec %p in %s", header.spec_version, filename);
 		goto exitzero;
 	}
-	if (fread(&numrem, sizeof(int), 1, filehandle) != 1 ||
-		fread(&numobjects, sizeof(int), 1, filehandle) != 1 ||
-		numobjects < 0 || 900 < numobjects ||
-		numrem < 0 || 100 < numrem)
-	{
-		goto corrupted;
-	}
-	if (numrem + numremovedobjects < MAX_REMOVED_OBJECTS) {
-		remobj = removedobjects + numremovedobjects;
-		while (numrem--) {
-			if (fread(remobj, sizeof(struct REMOVEDOBJECT), 1,
-				filehandle) != 1)
-			{
-				if (feof(filehandle)) {
-					goto allread;
-				} else {
-					goto corrupted;
-				}
-			}
-			/* as per spec */
-			if (remobj->model != -1) {
-				remobj->model = -remobj->model;
-			}
-			remobj++;
-			numremovedobjects++;
+
+	maps[mapidx].stream_in_radius_sq = header.stream_in_radius * header.stream_in_radius;
+	maps[mapidx].stream_out_radius_sq = header.stream_out_radius * header.stream_out_radius;
+
+	/*could check num_objects num_removes num_zones*/
+
+	for (i = header.num_removes; i > 0; i--) {
+		if (!fread(&removed_objects[num_removed_objects], sizeof(struct REMOVEDOBJECT), 1, fs)) {
+			goto corrupted;
 		}
-	} else {
-		logprintf("ERR: MAX_REMOVED_OBJECTS limit hit!");
+		if (num_removed_objects == MAX_REMOVED_OBJECTS) {
+			logprintf("ERR/ MAX_REMOVED_OBJECTS limit hit!");
+		} else {
+			num_removed_objects++;
+		}
 	}
-	if (numobjects == 0) {
-		obj = map->objects = NULL;
-		goto allread;
-	}
-	obj = map->objects = malloc(sizeof(struct OBJECT) * numobjects);
-	do {
-		if (fread(obj, sizeof(struct OBJECT), 1, filehandle) != 1) {
-			if (feof(filehandle)) {
-				goto allread;
-			} else {
-				free(map->objects);
+
+	total_element_count_for_middle = 0;
+	middle_x = middle_y = 0.0f;
+
+	maps[mapidx].num_objects = header.num_objects;
+	if (header.num_objects) {
+		maps[mapidx].objects = object = malloc(sizeof(struct OBJECT) * header.num_objects);
+		for (i = header.num_objects; i > 0; i--) {
+			if (!fread(object, sizeof(struct MAPFILEOBJECT), 1, fs)) {
+				free(maps[mapidx].objects);
+				/*no need to null because the map will be discarded as a whole*/
 				goto corrupted;
 			}
+			total_element_count_for_middle++;
+			middle_x += object->map_file_object.x;
+			middle_y += object->map_file_object.y;
+			object->drawdistance = header.draw_radius;
+			object++;
 		}
-		/*TODO: this forceddrawdistance thing*/
-		obj->drawdistance = forceddrawdistance;
-		obj++;
-	} while (obj - map->objects < 900);
-allread:
-	map->numobjects = obj - map->objects;
+	}
 
-	fclose(filehandle);
+	maps[mapidx].num_gang_zones = header.num_gang_zones;
+	if (header.num_gang_zones) {
+		maps[mapidx].gang_zones = gang_zone = malloc(sizeof(struct GANG_ZONE) * header.num_gang_zones);
+		for (i = header.num_gang_zones; i > 0; i--) {
+			if (!fread(gang_zone, sizeof(struct GANG_ZONE), 1, fs)) {
+				goto corrupted;
+			}
+			total_element_count_for_middle += 2;
+			middle_x += gang_zone->min_x;
+			middle_x += gang_zone->max_x;
+			middle_y += gang_zone->min_y;
+			middle_y += gang_zone->max_y;
+			gang_zone++;
+		}
+	}
+
+	if (total_element_count_for_middle > 0) {
+		middle_x /= total_element_count_for_middle;
+		middle_y /= total_element_count_for_middle;
+	}
+	maps[mapidx].middle_x = middle_x;
+	maps[mapidx].middle_y = middle_y;
+
+	fclose(fs);
 	return 1;
 corrupted:
 	logprintf("corrupted map %s", filename);
 exitzero:
-	fclose(filehandle);
+	fclose(fs);
 	return 0;
 }
 
 void maps_load_from_db()
 {
 	char q[] =
-		"SELECT filename,id,midx,midy,radi,rado FROM map "
+		"SELECT filename,id FROM map "
 		"LEFT JOIN apt ON map.ap=apt.i "
 		"WHERE apt.e=1 OR apt.e IS NULL";
-	int cacheid, rowcount, *f = nc_params + 2;
-	struct MAP *map, *m;
-	const struct MAP *end;
-
-	if (sizeof(struct OBJECT) != sizeof(cell) * 8) {
-		logprintf("ERR: struct OBJECT invalid size");
-		nummaps = 0;
-		return;
-	}
+	int cacheid, rowcount;
+	int i;
 
 	atoc(buf4096, q, sizeof(q));
 	cacheid = NC_mysql_query(buf4096a);
 	rowcount = NC_cache_get_row_count();
-	nummaps = rowcount;
-	if (rowcount) {
-		maps = malloc(nummaps * sizeof(struct MAP));
+	if (rowcount > MAX_MAPS) {
+		logprintf("can't load all maps! missing %d slots", rowcount - MAX_MAPS);
+		rowcount = MAX_MAPS;
+	}
+	num_maps = 0;
+	for (i = 0; i < rowcount; i++) {
 		nc_params[3] = buf32a;
 		while (rowcount--) {
-			map = maps + rowcount;
 			NC_PARS(3);
 			nc_params[1] = rowcount;
-			*f = 0; NC(n_cache_get_field_s);
-			ctoa(map->name, buf32, sizeof(map->name));
-			if (!maps_load_from_file(map)) {
-				map->id = -1;
-				continue;
+			nc_params[2] = 0;
+			NC(n_cache_get_field_s);
+			ctoa(maps[num_maps].name, buf32, sizeof(maps[rowcount].name));
+			if (maps_load_from_file(num_maps)) {
+				NC_PARS(2);
+				nc_params[2] = 1;
+				maps[num_maps].id = NC(n_cache_get_field_i);
+				num_maps++;
 			}
-			NC_PARS(2);
-			map->id = (*f = 1, NC(n_cache_get_field_i));
-			map->x = (*f = 2, NCF(n_cache_get_field_f));
-			map->y = (*f = 3, NCF(n_cache_get_field_f));
-			map->radius_in_sq = (*f = 4, NCF(n_cache_get_field_f));
-			map->radius_out_sq = (*f = 5, NCF(n_cache_get_field_f));
-			map->radius_in_sq *= map->radius_in_sq;
-			map->radius_out_sq *= map->radius_out_sq;
 		}
 	}
 	NC_cache_delete(cacheid);
+}
 
-	/*remove gaps caused by maps that failed to load*/
-	end = maps + nummaps;
-	map = m = maps;
-	while (map < end) {
-		if (map->id == -1) {
-			nummaps--;
-		} else {
-			if (map != m) {
-				memcpy(m, map, sizeof(struct MAP));
+/**
+Creates all objects/gangzones in given map for the given player.
+*/
+static
+void maps_stream_in_for_player(int playerid, int mapidx)
+{
+	struct OBJECT *obj, *objects_end;
+	int *objectid_to_mapid;
+	int mapid;
+	int objectid;
+
+#ifdef MAPS_LOG_STREAMING
+	logprintf("map %s streamed in for %d", maps[mapidx].name, playerid);
+#endif
+
+	maps[mapidx].stream_status_for_player[playerid] = 1;
+	mapid = maps[mapidx].id;
+
+	if (maps[mapidx].num_objects) {
+		obj = maps[mapidx].objects;
+		objects_end = obj + maps[mapidx].num_objects;
+		objectid_to_mapid = player_objectid_to_mapid[playerid];
+		NC_PARS(9);
+		nc_params[1] = playerid;
+		while (obj != objects_end) {
+			memcpy(nc_params + 2, obj, sizeof(cell) * 8);
+			objectid = NC(n_CreatePlayerObject);
+			if (objectid == INVALID_OBJECT_ID) {
+				logprintf("obj limit hit while streaming map %s", maps[mapidx].name);
+				break;
 			}
-			m++;
+			objectid_to_mapid[objectid] = mapid;
+			obj++;
 		}
-		map++;
 	}
+
+	/*TODO zones*/
 }
 
 /**
-Creates all objects in given map for the given player.
+Deletes all the objects/gangzones from given map for the given player.
 */
 static
-void maps_stream_in_for_player(int playerid, struct MAP *map)
+void maps_stream_out_for_player(int playerid, int mapidx)
 {
-	const int mapid = map->id;
-	int *player_object_map_id = object_map_id[playerid], objectid;
-	struct OBJECT *obj = map->objects, *end = obj + map->numobjects;
+	struct OBJECT *object;
+	struct OBJECT *end;
+	int *objectid_to_mapid;
+	int mapid;
+	int objectid;
 
-	NC_PARS(9);
-	nc_params[1] = playerid;
-	while (obj != end) {
-		memcpy(nc_params + 2, obj, sizeof(cell) * 8);
-		objectid = NC(n_CreatePlayerObject);
-		if (objectid == INVALID_OBJECT_ID) {
-			logprintf(
-				"obj limit hit while streaming map %s",
-				map->name);
-			break;
+#ifdef MAPS_LOG_STREAMING
+	logprintf("map %s streamed out for %d", maps[mapidx].name, playerid);
+#endif
+
+	maps[mapidx].stream_status_for_player[playerid] = 0;
+	mapid = maps[mapidx].id;
+
+	if (maps[mapidx].num_objects) {
+		objectid_to_mapid = player_objectid_to_mapid[playerid];
+		for (objectid = 0; objectid < MAX_OBJECTS; objectid++) {
+			if (objectid_to_mapid[objectid] == mapid) {
+				nc_params[2] = objectid; NC(n_DestroyPlayerObject);
+			}
 		}
-		player_object_map_id[objectid] = mapid;
-		obj++;
 	}
-}
 
-/**
-Deletes all the objects from given map for the given player.
-*/
-static
-void maps_stream_out_for_player(int playerid, struct MAP *map)
-{
-	const int mapid = map->id;
-	int *start = object_map_id[playerid], *player_object_map_id = start;
-	const int *end = object_map_id[playerid] + MAX_OBJECTS + 1;
-
-	NC_PARS(2);
-	nc_params[1] = playerid;
-	while (player_object_map_id != end) {
-		if (*player_object_map_id == mapid) {
-			nc_params[2] = player_object_map_id - start;
-			NC(n_DestroyPlayerObject);
-			*player_object_map_id = -1;
-		}
-		player_object_map_id++;
-	}
+	/*TODO: gangzones*/
 }
 
 void maps_stream_for_player(int playerid, struct vec3 pos)
 {
-	float dx, dy, dist;
-	struct MAP *map = maps + nummaps;
+	float dx, dy, distance;
+	int mapidx;
 
-	while (map-- != maps) {
-		dx = map->x - pos.x;
-		dy = map->y - pos.y;
-		dist = dx * dx + dy * dy;
-		if (map->streamstatus[playerid]) {
-			if (dist > map->radius_out_sq) {
-				map->streamstatus[playerid] = 0;
-				maps_stream_out_for_player(playerid, map);
-#ifdef MAPS_LOG_STREAMING
-				logprintf("map %s streamed out for %d",
-					map->name,
-					playerid);
-#endif
+	/*check everything to stream out first, only then stream in*/
+
+	for (mapidx = 0; mapidx < num_maps; mapidx++) {
+		if (maps[mapidx].stream_status_for_player[playerid]) {
+			dx = maps[mapidx].middle_x - pos.x;
+			dy = maps[mapidx].middle_y - pos.y;
+			distance = dx * dx + dy * dy;
+			if (distance > maps[mapidx].stream_out_radius_sq) {
+				maps_stream_out_for_player(playerid, mapidx);
 			}
-		} else  {
-			if (dist < map->radius_in_sq) {
-				map->streamstatus[playerid] = 1;
-				maps_stream_in_for_player(playerid, map);
-#ifdef MAPS_LOG_STREAMING
-				logprintf("map %s streamed in for %d",
-					map->name,
-					playerid);
-#endif
+		}
+	}
+
+	for (mapidx = 0; mapidx < num_maps; mapidx++) {
+		if (!maps[mapidx].stream_status_for_player[playerid]) {
+			dx = maps[mapidx].middle_x - pos.x;
+			dy = maps[mapidx].middle_y - pos.y;
+			distance = dx * dx + dy * dy;
+			if (distance < maps[mapidx].stream_in_radius_sq) {
+				maps_stream_in_for_player(playerid, mapidx);
 			}
 		}
 	}
 }
 
+/*TODO recheck this*/
 void maps_process_tick()
 {
 	static int currentplayeridx = 0;
@@ -294,20 +328,21 @@ void maps_process_tick()
 
 void maps_on_player_connect(int playerid)
 {
-	struct REMOVEDOBJECT *r = removedobjects + numremovedobjects;
+	int i;
 
-	while (r-- != removedobjects) {
-		NC_PARS(6);
-		nc_params[1] = playerid;
-		memcpy(nc_params + 2, r, sizeof(cell) * 5);
+	NC_PARS(6);
+	nc_params[1] = playerid;
+	for (i = num_removed_objects; i > 0; i--) {
+		memcpy(nc_params + 2, &removed_objects[i], sizeof(cell) * 5);
 		NC(n_RemoveBuildingForPlayer);
 	}
 }
 
 void maps_on_player_disconnect(int playerid)
 {
-	struct MAP *map = maps + nummaps;
-	while (map-- != maps) {
-		map->streamstatus[playerid] = 0;
+	int mapidx;
+
+	for (mapidx = num_maps; mapidx > 0; mapidx--) {
+		maps[mapidx].stream_status_for_player[playerid] = 0;
 	}
 }
