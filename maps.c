@@ -10,6 +10,8 @@
 #define MAP_MAX_FILENAME (24) /*see db col*/
 /*define to print msg to console each time map streams in/out*/
 #define MAPS_LOG_STREAMING
+/*define to show total amount of maps/objects/removes/zones at boot*/
+#define MAPS_PRINT_STATS
 #define MAX_REMOVED_OBJECTS 1000
 
 #pragma pack(push,1)
@@ -35,6 +37,7 @@ struct REMOVEDOBJECT {
 	int model;
 	float x, y, z, radius;
 };
+EXPECT_SIZE(struct REMOVEDOBJECT, sizeof(cell) * 5);
 struct GANG_ZONE {
 	float min_x;
 	float max_y;
@@ -170,6 +173,25 @@ exitzero:
 	return 0;
 }
 
+#ifdef MAPS_PRINT_STATS
+static
+void maps_print_stats()
+{
+	int mapidx;
+	int total_objects, total_gang_zones;
+
+	total_objects = total_gang_zones = 0;
+	for (mapidx = 0; mapidx < num_maps; mapidx++) {
+		total_objects += maps[mapidx].num_objects;
+		total_gang_zones += maps[mapidx].num_gang_zones;
+	}
+	printf("%d maps\n", num_maps);
+	printf("  %d objects\n", total_objects);
+	printf("  %d removes\n", num_removed_objects);
+	printf("  %d gang zones\n", total_gang_zones);
+}
+#endif
+
 void maps_load_from_db()
 {
 	char q[] =
@@ -204,6 +226,10 @@ void maps_load_from_db()
 		}
 	}
 	NC_cache_delete(cacheid);
+
+#ifdef MAPS_PRINT_STATS
+	maps_print_stats();
+#endif
 }
 
 /**
@@ -332,8 +358,9 @@ void maps_on_player_connect(int playerid)
 
 	NC_PARS(6);
 	nc_params[1] = playerid;
-	for (i = num_removed_objects; i > 0; i--) {
-		memcpy(nc_params + 2, &removed_objects[i], sizeof(cell) * 5);
+	for (i = num_removed_objects; i >= 0;) {
+		i--;
+		memcpy(nc_params + 2, &removed_objects[i], sizeof(struct REMOVEDOBJECT));
 		NC(n_RemoveBuildingForPlayer);
 	}
 }
