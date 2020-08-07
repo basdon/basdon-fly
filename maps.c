@@ -52,7 +52,7 @@ struct MAP {
 	float middle_x, middle_y;
 	float stream_in_radius_sq, stream_out_radius_sq;
 	/*TODO: for fun we can add a command to change the draw distance at runtime*/
-	char name[64];
+	char name[MAP_MAX_FILENAME];
 	/*unallocated when num_objects is 0*/
 	struct OBJECT *objects;
 	int num_objects;
@@ -277,8 +277,6 @@ Deletes all the objects/gangzones from given map for the given player.
 static
 void maps_stream_out_for_player(int playerid, int mapidx)
 {
-	struct OBJECT *object;
-	struct OBJECT *end;
 	int *objectid_to_mapid;
 	int mapid;
 	int objectid;
@@ -291,6 +289,7 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 	mapid = maps[mapidx].id;
 
 	if (maps[mapidx].num_objects) {
+		nc_params[1] = playerid;
 		objectid_to_mapid = player_objectid_to_mapid[playerid];
 		for (objectid = 0; objectid < MAX_OBJECTS; objectid++) {
 			if (objectid_to_mapid[objectid] == mapid) {
