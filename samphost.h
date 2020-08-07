@@ -1,0 +1,1 @@
+float* samphost_GetPtrStreamDistance();

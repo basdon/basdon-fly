@@ -8,6 +8,21 @@ when we're inside cmd.c*/
 #ifdef IN_CMD
 
 static
+int cmd_admin_streamdistance(CMDPARAMS)
+{
+	int newdistance;
+	float *stream_distance;
+
+	stream_distance = samphost_GetPtrStreamDistance();
+	if (cmd_get_int_param(cmdtext, &parseidx, &newdistance)) {
+		*stream_distance = (float) newdistance;
+	}
+	csprintf(buf144, "stream_distance=%.0f", *stream_distance);
+	NC_SendClientMessage(playerid, -1, buf144a);
+	return 1;
+}
+
+static
 int cmd_at400(CMDPARAMS)
 {
 	struct vec3 playerpos, vehiclepos;

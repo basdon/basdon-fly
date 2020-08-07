@@ -102,5 +102,5 @@ void objs_on_gamemode_init()
 
 void objs_on_player_connect(int playerid)
 {
-	// TODO remove this
+	/*TODO remove this*/
 }
