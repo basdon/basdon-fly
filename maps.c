@@ -14,6 +14,9 @@
 #define MAPS_PRINT_STATS
 #define MAX_REMOVED_OBJECTS 1000
 
+/*max amount of objects the mapsystem may use*/
+#define MAX_MAPSYSTEM_OBJECTS (900)
+
 #pragma pack(1)
 struct MAPFILEHEADER {
 	int spec_version;
@@ -38,6 +41,7 @@ struct REMOVEDOBJECT {
 	float x, y, z, radius;
 };
 EXPECT_SIZE(struct REMOVEDOBJECT, sizeof(cell) * 5);
+EXPECT_SIZE(struct REMOVEDOBJECT, sizeof(struct RPCDATA_RemoveBuilding));
 struct MAP_FILE_GANG_ZONE {
 	float min_x;
 	float max_y;
@@ -80,15 +84,20 @@ static int num_maps;
 static struct REMOVEDOBJECT removed_objects[MAX_REMOVED_OBJECTS + 1];
 static int num_removed_objects = 0;
 
-/*maps a player's object id to a map id*/
-/*using MAX_OBJECTS+1 because object ids start at 1 (not that we will ever hit 1000 objects but still)*/
-static short player_objectid_to_mapidx[MAX_PLAYERS][MAX_OBJECTS + 1];
+/*maps a player's object id to a map idx*/
+static short player_objectid_to_mapidx[MAX_PLAYERS][MAX_MAPSYSTEM_OBJECTS];
 
 /*maps a player's gang zone id to map idx*/
 /*this is (at time of writing) the only system that uses gang zones,
 so no checks are being done on a global scale if a gang zone is being used*/
 static short player_gangzoneid_to_mapidx[MAX_PLAYERS][MAX_GANG_ZONES];
 
+static struct BitStream bs_maps_remove_building;
+static struct RPCDATA_RemoveBuilding rpcdata_RemoveBuilding;
+static struct BitStream bs_maps_create_object;
+static struct RPCDATA_CreateObject rpcdata_CreateObject;
+static struct BitStream bs_maps_destroy_object;
+static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 static struct BitStream bs_maps_show_gang_zone;
 static struct RPCDATA_ShowGangZone rpcdata_ShowGangZone;
 
@@ -116,6 +125,7 @@ int maps_load_from_file(int mapidx)
 		return 0;
 	}
 
+	/*read header*/
 	if (!fread(&header, sizeof(header), 1, fs)) {
 		goto corrupted;
 	}
@@ -128,8 +138,9 @@ int maps_load_from_file(int mapidx)
 	maps[mapidx].stream_in_radius_sq = header.stream_in_radius * header.stream_in_radius;
 	maps[mapidx].stream_out_radius_sq = header.stream_out_radius * header.stream_out_radius;
 
-	/*could check num_objects num_removes num_zones*/
+	/*TODO? could check if num_objects num_removes num_zones go over their limits*/
 
+	/*read removed objects*/
 	for (i = header.num_removes; i > 0; i--) {
 		if (!fread(&removed_objects[num_removed_objects], sizeof(struct REMOVEDOBJECT), 1, fs)) {
 			goto corrupted;
@@ -144,6 +155,7 @@ int maps_load_from_file(int mapidx)
 	total_element_count_for_middle = 0;
 	middle_x = middle_y = 0.0f;
 
+	/*read objects*/
 	maps[mapidx].num_objects = header.num_objects;
 	if (header.num_objects) {
 		maps[mapidx].objects = object = malloc(sizeof(struct OBJECT) * header.num_objects);
@@ -161,10 +173,12 @@ int maps_load_from_file(int mapidx)
 		}
 	}
 
+	/*read gangzones*/
 	maps[mapidx].num_gang_zones = header.num_gang_zones;
 	if (header.num_gang_zones) {
 		maps[mapidx].gang_zones = gang_zone = malloc(sizeof(struct GANG_ZONE) * header.num_gang_zones);
 		for (i = header.num_gang_zones; i > 0; i--) {
+			/*can not directly read into struct because the order of coordinates differ*/
 			if (!fread(&map_file_gang_zone, sizeof(map_file_gang_zone), 1, fs)) {
 				free(maps[mapidx].gang_zones);
 				if (header.num_objects) {
@@ -187,6 +201,7 @@ int maps_load_from_file(int mapidx)
 		}
 	}
 
+	/*determine center*/
 	if (total_element_count_for_middle > 0) {
 		middle_x /= total_element_count_for_middle;
 		middle_y /= total_element_count_for_middle;
@@ -267,6 +282,28 @@ void maps_init()
 {
 	maps_load_from_db();
 
+	bs_maps_remove_building.numberOfBitsUsed = sizeof(rpcdata_RemoveBuilding) * 8;
+	bs_maps_remove_building.numberOfBitsAllocated = sizeof(rpcdata_RemoveBuilding) * 8;
+	bs_maps_remove_building.readOffset = 0;
+	bs_maps_remove_building.ptrData = &rpcdata_RemoveBuilding;
+	bs_maps_remove_building.copyData = 1;
+
+	rpcdata_CreateObject.no_camera_col = 0;
+	rpcdata_CreateObject.attached_object = -1;
+	rpcdata_CreateObject.attached_vehicle = -1;
+
+	bs_maps_create_object.numberOfBitsUsed = sizeof(rpcdata_CreateObject) * 8;
+	bs_maps_create_object.numberOfBitsAllocated = sizeof(rpcdata_CreateObject) * 8;
+	bs_maps_create_object.readOffset = 0;
+	bs_maps_create_object.ptrData = &rpcdata_CreateObject;
+	bs_maps_create_object.copyData = 1;
+
+	bs_maps_destroy_object.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
+	bs_maps_destroy_object.numberOfBitsAllocated = sizeof(rpcdata_DestroyObject) * 8;
+	bs_maps_destroy_object.readOffset = 0;
+	bs_maps_destroy_object.ptrData = &rpcdata_DestroyObject;
+	bs_maps_destroy_object.copyData = 1;
+
 	bs_maps_show_gang_zone.numberOfBitsUsed = sizeof(rpcdata_ShowGangZone) * 8;
 	bs_maps_show_gang_zone.numberOfBitsAllocated = sizeof(rpcdata_ShowGangZone) * 8;
 	bs_maps_show_gang_zone.readOffset = 0;
@@ -283,9 +320,7 @@ void maps_stream_in_for_player(int playerid, int mapidx)
 	struct OBJECT *obj, *objects_end;
 	short *objectid_to_mapidx;
 	short *gangzoneid_to_mapidx;
-	int objectid;
 	int gang_zone_idx;
-	int zoneid;
 
 #ifdef MAPS_LOG_STREAMING
 	logprintf("map %s streamed in for %d", maps[mapidx].name, playerid);
@@ -293,37 +328,42 @@ void maps_stream_in_for_player(int playerid, int mapidx)
 
 	maps[mapidx].stream_status_for_player[playerid] = 1;
 
+	/*objects*/
 	if (maps[mapidx].num_objects) {
 		obj = maps[mapidx].objects;
 		objects_end = obj + maps[mapidx].num_objects;
 		objectid_to_mapidx = player_objectid_to_mapidx[playerid];
-		NC_PARS(9);
-		nc_params[1] = playerid;
+		rpcdata_CreateObject.objectid = 0; /*TODO: samp starts at objectid 1, should we also do that?*/
 		while (obj != objects_end) {
-			memcpy(nc_params + 2, obj, sizeof(cell) * 8);
-			objectid = NC(n_CreatePlayerObject);
-			if (objectid == INVALID_OBJECT_ID) {
-				logprintf("obj limit hit while streaming map %s", maps[mapidx].name);
-				break;
+			while (objectid_to_mapidx[rpcdata_CreateObject.objectid] != -1) {
+				rpcdata_CreateObject.objectid++;
+				if (rpcdata_CreateObject.objectid >= MAX_MAPSYSTEM_OBJECTS) {
+					logprintf("object limit hit while streaming map %s", maps[mapidx].name);
+					goto skip_objects;
+				}
 			}
-			objectid_to_mapidx[objectid] = mapidx;
+			memcpy(&rpcdata_CreateObject.modelid, obj, sizeof(struct OBJECT));
+			objectid_to_mapidx[rpcdata_CreateObject.objectid] = mapidx;
 			obj++;
+			/*TODO: what's the 2 for? possibly priority*/
+			SAMP_SendRPCToPlayer(RPC_CreateObject, &bs_maps_create_object, playerid, 2);
 		}
 	}
+skip_objects:
+	;
 
-	zoneid = 0;
+	/*gang zones*/
+	rpcdata_ShowGangZone.zoneid = 0;
 	gangzoneid_to_mapidx = player_gangzoneid_to_mapidx[playerid];
-	for (gang_zone_idx = maps[mapidx].num_gang_zones; gang_zone_idx > 0;) {
-		while (gangzoneid_to_mapidx[zoneid] != -1) {
-			zoneid++;
-			if (zoneid >= MAX_GANG_ZONES) {
+	for (gang_zone_idx = 0; gang_zone_idx < maps[mapidx].num_gang_zones; gang_zone_idx++) {
+		while (gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] != -1) {
+			rpcdata_ShowGangZone.zoneid++;
+			if (rpcdata_ShowGangZone.zoneid >= MAX_GANG_ZONES) {
 				logprintf("gang zone limit hit while streaming map %s", maps[mapidx].name);
 				goto skip_gang_zones;
 			}
 		}
-		gang_zone_idx--;
-		gangzoneid_to_mapidx[zoneid] = mapidx;
-		rpcdata_ShowGangZone.zoneid = zoneid;
+		gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] = mapidx;
 		memcpy(&rpcdata_ShowGangZone.min_x, &maps[mapidx].gang_zones[gang_zone_idx], sizeof(struct GANG_ZONE));
 		/*TODO: what's the 2 for? possibly priority*/
 		SAMP_SendRPCToPlayer(RPC_ShowGangZone, &bs_maps_show_gang_zone, playerid, 2);
@@ -340,8 +380,6 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 {
 	short *objectid_to_mapidx;
 	short *gangzoneid_to_mapidx;
-	int objectid;
-	int zoneid;
 
 #ifdef MAPS_LOG_STREAMING
 	logprintf("map %s streamed out for %d", maps[mapidx].name, playerid);
@@ -349,23 +387,23 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 
 	maps[mapidx].stream_status_for_player[playerid] = 0;
 
-	if (maps[mapidx].num_objects) {
-		nc_params[1] = playerid;
-		objectid_to_mapidx = player_objectid_to_mapidx[playerid];
-		for (objectid = 0; objectid < MAX_OBJECTS; objectid++) {
-			if (objectid_to_mapidx[objectid] == mapidx) {
-				nc_params[2] = objectid; NC(n_DestroyPlayerObject);
-			}
+	/*objects*/
+	objectid_to_mapidx = player_objectid_to_mapidx[playerid];
+	for (rpcdata_DestroyObject.objectid = 0; rpcdata_DestroyObject.objectid < MAX_OBJECTS; rpcdata_DestroyObject.objectid++) {
+		if (objectid_to_mapidx[rpcdata_DestroyObject.objectid] == mapidx) {
+			objectid_to_mapidx[rpcdata_DestroyObject.objectid] = -1;
+			/*TODO: what's the 2 for? possibly priority*/
+			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bs_maps_destroy_object, playerid, 2);
 		}
 	}
 
+	/*gang zones*/
 	gangzoneid_to_mapidx = player_gangzoneid_to_mapidx[playerid];
-	for (zoneid = 0; zoneid < MAX_GANG_ZONES; zoneid++) {
-		if (gangzoneid_to_mapidx[zoneid] == mapidx) {
-			rpcdata_ShowGangZone.zoneid = zoneid;
+	for (rpcdata_ShowGangZone.zoneid = 0; rpcdata_ShowGangZone.zoneid < MAX_GANG_ZONES; rpcdata_ShowGangZone.zoneid++) {
+		if (gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] == mapidx) {
+			gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] = -1;
 			/*TODO: what's the 2 for? possibly priority*/
 			SAMP_SendRPCToPlayer(RPC_HideGangZone, &bs_maps_show_gang_zone, playerid, 2);
-			gangzoneid_to_mapidx[zoneid] = -1;
 		}
 	}
 }
@@ -424,14 +462,13 @@ void maps_on_player_connect(int playerid)
 {
 	int i;
 
-	NC_PARS(6);
-	nc_params[1] = playerid;
 	for (i = num_removed_objects; i >= 0;) {
 		i--;
-		memcpy(nc_params + 2, &removed_objects[i], sizeof(struct REMOVEDOBJECT));
-		NC(n_RemoveBuildingForPlayer);
+		memcpy(&rpcdata_RemoveBuilding, &removed_objects[i], sizeof(struct REMOVEDOBJECT));
+		SAMP_SendRPCToPlayer(RPC_HideGangZone, &bs_maps_show_gang_zone, playerid, 2);
 	}
 
+	memset(player_objectid_to_mapidx[playerid], -1, sizeof(player_objectid_to_mapidx[playerid]));
 	memset(player_gangzoneid_to_mapidx[playerid], -1, sizeof(player_gangzoneid_to_mapidx[playerid]));
 }
 

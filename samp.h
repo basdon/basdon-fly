@@ -32,6 +32,43 @@ struct RPCDATA_SendDeathMessage {
 	char weapon;
 };
 EXPECT_SIZE(struct RPCDATA_SendDeathMessage, 2 + 2 + 1);
+
+struct RPCDATA_CreateObject {
+	short objectid;
+	int modelid;
+	float x;
+	float y;
+	float z;
+	float rotx;
+	float roty;
+	float rotz;
+	float drawdistance;
+	char no_camera_col;
+	short attached_object;
+	short attached_vehicle;
+	float attach_offset_x;
+	float attach_offset_y;
+	float attach_offset_z;
+	float attach_rotation_x;
+	float attach_rotation_y;
+	float attach_rotation_z;
+	char sync_rotation;
+};
+EXPECT_SIZE(struct RPCDATA_CreateObject, 2 + 4 + 24 + 4 + 1 + 2 + 2 + 24 + 1);
+
+struct RPCDATA_DestroyObject {
+	short objectid;
+};
+EXPECT_SIZE(struct RPCDATA_DestroyObject, 2);
+
+struct RPCDATA_RemoveBuilding {
+	int model;
+	float x;
+	float y;
+	float z;
+	float radius;
+};
+EXPECT_SIZE(struct RPCDATA_RemoveBuilding, 4 + 12 + 4);
 #pragma pack()
 
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,unk) \
@@ -39,5 +76,8 @@ EXPECT_SIZE(struct RPCDATA_SendDeathMessage, 2 + 2 + 1);
 
 #define RPC_ShowGangZone 0x81587A1 /*ptr to 0x6C(108)*/
 #define RPC_HideGangZone 0x8163BA7 /*ptr to 0x78(120)*/
+#define RPC_CreateObject 0x815A7F8 /*ptr to 0x2C(44)*/
+#define RPC_DestroyObject 0x815ACC6 /*ptr to 0x2F(47)*/
+#define RPC_RemoveBuilding 0x815CD7E /*ptr to 0x2B(43)*/
 
 extern int samp_pNetGame;
