@@ -1,10 +1,7 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
 /**
-Loads all maps that are enabled in the db and loads the maps from their file.
+Initialize mapping system. Loads maps from db and reads their files.
 */
-void maps_load_from_db();
+void maps_init();
 void maps_on_player_connect(int playerid);
 void maps_on_player_disconnect(int playerid);
 /*

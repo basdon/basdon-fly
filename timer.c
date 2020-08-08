@@ -27,7 +27,7 @@ void timer_set(int interval, timer_cb cb, void *data)
 {
 	struct TIMER *timer;
 
-#if DEV
+#ifdef DEV
 	if (!time_is_inited()) {
 		logprintf("ERR: don't call timer_set before time is inited!");
 		return;

@@ -11,10 +11,12 @@
 #include "vendor/SDK/amx/amx.h"
 #include "vendor/SDK/plugincommon.h"
 #include "sharedsymbols.h"
-#include "samphost.h"
 
 #define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
 #define EXPECT_SIZE(S,SIZE) STATIC_ASSERT(sizeof(S)==(SIZE))
+
+#include "samp.h"
+#include "samphost.h"
 
 /*prototype for commonly used struct*/
 struct dbvehicle;

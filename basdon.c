@@ -184,6 +184,8 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	char mysqlcreds[1000], *m;
 	int mysql_errno, usrlen, dblen, pwlen, mysqllen;
 
+	samp_pNetGame = *(int*)0x81CA4BC;
+
 	t = time_timestamp();
 
 	memset(spawned, 0, sizeof(spawned));
@@ -245,7 +247,7 @@ exit:
 	airports_init();
 	class_init();
 	heartbeat_create_session();
-	maps_load_from_db();
+	maps_init();
 	missions_create_tracker_socket();
 	missions_init();
 	objs_on_gamemode_init();

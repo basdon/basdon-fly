@@ -38,6 +38,8 @@
 #define INVALID_OBJECT_ID (0xFFFF)
 #endif
 
+#define MAX_GANG_ZONES (1024)
+
 #define LIMIT_DIALOG_CAPTION (64)
 #define LIMIT_DIALOG_INFO (4096)
 /* button len limit is not defined, using 32 */
