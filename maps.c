@@ -82,12 +82,12 @@ static int num_removed_objects = 0;
 
 /*maps a player's object id to a map id*/
 /*using MAX_OBJECTS+1 because object ids start at 1 (not that we will ever hit 1000 objects but still)*/
-static int player_objectid_to_mapid[MAX_PLAYERS][MAX_OBJECTS + 1];
+static short player_objectid_to_mapidx[MAX_PLAYERS][MAX_OBJECTS + 1];
 
 /*maps a player's gang zone id to map idx*/
 /*this is (at time of writing) the only system that uses gang zones,
 so no checks are being done on a global scale if a gang zone is being used*/
-static int player_gangzoneid_to_mapidx[MAX_PLAYERS][MAX_GANG_ZONES];
+static short player_gangzoneid_to_mapidx[MAX_PLAYERS][MAX_GANG_ZONES];
 
 static struct BitStream bs_maps_show_gang_zone;
 static struct RPCDATA_ShowGangZone rpcdata_ShowGangZone;
@@ -281,9 +281,8 @@ static
 void maps_stream_in_for_player(int playerid, int mapidx)
 {
 	struct OBJECT *obj, *objects_end;
-	int *objectid_to_mapid;
-	int *gangzoneid_to_mapidx;
-	int mapid;
+	short *objectid_to_mapidx;
+	short *gangzoneid_to_mapidx;
 	int objectid;
 	int gang_zone_idx;
 	int zoneid;
@@ -293,12 +292,11 @@ void maps_stream_in_for_player(int playerid, int mapidx)
 #endif
 
 	maps[mapidx].stream_status_for_player[playerid] = 1;
-	mapid = maps[mapidx].id;
 
 	if (maps[mapidx].num_objects) {
 		obj = maps[mapidx].objects;
 		objects_end = obj + maps[mapidx].num_objects;
-		objectid_to_mapid = player_objectid_to_mapid[playerid];
+		objectid_to_mapidx = player_objectid_to_mapidx[playerid];
 		NC_PARS(9);
 		nc_params[1] = playerid;
 		while (obj != objects_end) {
@@ -308,7 +306,7 @@ void maps_stream_in_for_player(int playerid, int mapidx)
 				logprintf("obj limit hit while streaming map %s", maps[mapidx].name);
 				break;
 			}
-			objectid_to_mapid[objectid] = mapid;
+			objectid_to_mapidx[objectid] = mapidx;
 			obj++;
 		}
 	}
@@ -340,9 +338,8 @@ Deletes all the objects/gangzones from given map for the given player.
 static
 void maps_stream_out_for_player(int playerid, int mapidx)
 {
-	int *objectid_to_mapid;
-	int *gangzoneid_to_mapidx;
-	int mapid;
+	short *objectid_to_mapidx;
+	short *gangzoneid_to_mapidx;
 	int objectid;
 	int zoneid;
 
@@ -351,13 +348,12 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 #endif
 
 	maps[mapidx].stream_status_for_player[playerid] = 0;
-	mapid = maps[mapidx].id;
 
 	if (maps[mapidx].num_objects) {
 		nc_params[1] = playerid;
-		objectid_to_mapid = player_objectid_to_mapid[playerid];
+		objectid_to_mapidx = player_objectid_to_mapidx[playerid];
 		for (objectid = 0; objectid < MAX_OBJECTS; objectid++) {
-			if (objectid_to_mapid[objectid] == mapid) {
+			if (objectid_to_mapidx[objectid] == mapidx) {
 				nc_params[2] = objectid; NC(n_DestroyPlayerObject);
 			}
 		}
