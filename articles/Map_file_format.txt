@@ -63,7 +63,7 @@ byte 0-3: west/minx (FLOAT)
 byte 4-7: south/miny (FLOAT)
 byte 8-11: east/maxx (FLOAT)
 byte 12-15: north/maxy (FLOAT)
-byte 16-19: color (DWORD)
+byte 16-19: colorABGR (DWORD)
 -----------
 size 20 bytes
 
