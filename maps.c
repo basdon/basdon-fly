@@ -42,15 +42,8 @@ struct REMOVEDOBJECT {
 };
 EXPECT_SIZE(struct REMOVEDOBJECT, sizeof(cell) * 5);
 EXPECT_SIZE(struct REMOVEDOBJECT, sizeof(struct RPCDATA_RemoveBuilding));
-struct MAP_FILE_GANG_ZONE {
-	float min_x;
-	float max_y;
-	float max_x;
-	float min_y;
-	int colorABGR;
-};
-EXPECT_SIZE(struct MAP_FILE_GANG_ZONE, 5 * 4);
 /*this has to be synced with the SetGangZone RPC data*/
+/*the map file format gang zone is made to be in sync*/
 struct GANG_ZONE {
 	float min_x;
 	float min_y;
@@ -114,7 +107,6 @@ int maps_load_from_file(int mapidx)
 	int i;
 	struct MAPFILEHEADER header;
 	struct OBJECT *object;
-	struct MAP_FILE_GANG_ZONE map_file_gang_zone;
 	struct GANG_ZONE *gang_zone;
 	float middle_x, middle_y;
 	int total_element_count_for_middle;
@@ -179,7 +171,7 @@ int maps_load_from_file(int mapidx)
 		maps[mapidx].gang_zones = gang_zone = malloc(sizeof(struct GANG_ZONE) * header.num_gang_zones);
 		for (i = header.num_gang_zones; i > 0; i--) {
 			/*can not directly read into struct because the order of coordinates differ*/
-			if (!fread(&map_file_gang_zone, sizeof(map_file_gang_zone), 1, fs)) {
+			if (!fread(gang_zone, sizeof(struct GANG_ZONE), 1, fs)) {
 				free(maps[mapidx].gang_zones);
 				if (header.num_objects) {
 					free(maps[mapidx].objects);
@@ -188,15 +180,15 @@ int maps_load_from_file(int mapidx)
 				goto corrupted;
 			}
 			total_element_count_for_middle += 2;
-			middle_x += map_file_gang_zone.min_x;
-			middle_x += map_file_gang_zone.max_x;
-			middle_y += map_file_gang_zone.min_y;
-			middle_y += map_file_gang_zone.max_y;
-			gang_zone->min_x = map_file_gang_zone.min_x;
-			gang_zone->min_y = map_file_gang_zone.min_y;
-			gang_zone->max_x = map_file_gang_zone.max_x;
-			gang_zone->max_y = map_file_gang_zone.max_y;
-			gang_zone->colorABGR = map_file_gang_zone.colorABGR;
+			middle_x += gang_zone->min_x;
+			middle_x += gang_zone->max_x;
+			middle_y += gang_zone->min_y;
+			middle_y += gang_zone->max_y;
+			printf("minx %f miny %f maxx %f maxy %f\n",
+			gang_zone->min_x,
+			gang_zone->min_y,
+			gang_zone->max_x,
+			gang_zone->max_y);
 			gang_zone++;
 		}
 	}
@@ -403,7 +395,8 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 		if (gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] == mapidx) {
 			gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] = -1;
 			/*TODO: what's the 2 for? possibly priority*/
-			SAMP_SendRPCToPlayer(RPC_HideGangZone, &bs_maps_show_gang_zone, playerid, 2);
+			/*there's no real need to hide the gang zone, just mark it as available and be done*/
+			/*SAMP_SendRPCToPlayer(RPC_HideGangZone, &bs_maps_show_gang_zone, playerid, 2);*/
 		}
 	}
 }
@@ -465,7 +458,7 @@ void maps_on_player_connect(int playerid)
 	for (i = num_removed_objects; i >= 0;) {
 		i--;
 		memcpy(&rpcdata_RemoveBuilding, &removed_objects[i], sizeof(struct REMOVEDOBJECT));
-		SAMP_SendRPCToPlayer(RPC_HideGangZone, &bs_maps_show_gang_zone, playerid, 2);
+		SAMP_SendRPCToPlayer(RPC_RemoveBuilding, &bs_maps_remove_building, playerid, 2);
 	}
 
 	memset(player_objectid_to_mapidx[playerid], -1, sizeof(player_objectid_to_mapidx[playerid]));
