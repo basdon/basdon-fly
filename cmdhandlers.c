@@ -23,6 +23,66 @@ int cmd_admin_streamdistance(CMDPARAMS)
 }
 
 static
+int cmd_admin_goto(CMDPARAMS)
+{
+	int oldparseidx;
+	int targetplayerid;
+	int x, y, z;
+	struct vec4 pos;
+
+	oldparseidx = parseidx;
+	if (cmd_get_int_param(cmdtext, &parseidx, &x) &&
+		cmd_get_int_param(cmdtext, &parseidx, &y) &&
+		cmd_get_int_param(cmdtext, &parseidx, &z))
+	{
+		/*TODO: tp with vehicle?*/
+		/*TODO: accept interior id as param*/
+		/*TODO: common_tp_player seems to bug out?*/
+		/*
+		pos.coords.x = (float) x;
+		pos.coords.y = (float) y;
+		pos.coords.z = (float) z;
+		common_tp_player(playerid, pos);
+		*/
+
+		NC_PARS(4);
+		nc_params[1] = playerid;
+		nc_paramf[2] = (float) x;
+		nc_paramf[3] = (float) y;
+		nc_paramf[4] = (float) z;
+		return NC(n_SetPlayerPos_);
+		return 1;
+	}
+	parseidx = oldparseidx;
+
+	if (cmd_get_player_param(cmdtext, &parseidx, &targetplayerid)) {
+		if (targetplayerid == INVALID_PLAYER_ID) {
+			B144(WARN"Target player is offline");
+			NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		} else {
+			common_GetPlayerPos(targetplayerid, &pos.coords);
+			/*TODO: tp with vehicle?*/
+			/*TODO: same interior*/
+			pos.coords.x += 0.3f;
+			pos.coords.y += 0.3f;
+			/*TODO: common_tp_player seems to bug out?*/
+			/*common_tp_player(playerid, pos);*/
+			NC_PARS(4);
+			nc_params[1] = playerid;
+			nc_paramf[2] = pos.coords.x;
+			nc_paramf[3] = pos.coords.y;
+			nc_paramf[4] = pos.coords.z;
+			return NC(n_SetPlayerPos_);
+		}
+	} else {
+		B144(WARN"Syntax: //goto (<x> <y> <z>|<playerid/name>)");
+		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	}
+
+	return 1;
+}
+
+static
 int cmd_at400(CMDPARAMS)
 {
 	struct vec3 playerpos, vehiclepos;
