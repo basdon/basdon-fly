@@ -9,20 +9,53 @@ byte 1-3: 'F', 'L', 'Y'
 The rest is dependent on the spec version:
 
 {@ul
-  {@li {@#=v1 Version 1}}
-  {@li {@#=v2 Version 2}}
-  {@li {@#=v3 Version 3}}
+  {@li {@#=v4 Version 4}}
+  {@li {@#=old Old versions}
+    {@ul
+      {@li {@#=v3 Version 3}}
+      {@li {@#=v2 Version 2}}
+      {@li {@#=v1 Version 1}}
+    }
+  }
 }
 
-{@h3(id="v1") Version 1}
+{@h3(id="v4") Version 4}
 
-Discontinued, existing files upgraded to v2.
+<pre>
+byte 4-7: mission id (DWORD)
+byte 8-11: vehicle fuel capacity (FLOAT)
+byte 12-13: vehicle model id (WORD)
+byte 14: player name length
+byte 15-39: player name + 0 padding
+-----------
+size 40 bytes
 
-{@h3(id="v2") Version 2}
+> data, repeated x times
+byte 0-3: timestamp (DWORD)
+byte 4: flags (right to left: bit 1: paused? bit 2: engine on?)
+byte 5: passenger satisfaction (BYTE)
+byte 6-7: aircraft speed, knots (WORD)
+byte 8-9: aircraft altitude (WORD)
+byte 10-11: health (WORD)
+byte 12-15: fuel level (FLOAT)
+byte 16-19: x pos (FLOAT)
+byte 20-23: y pos (FLOAT)
+byte 24-25: bank in degrees * 10 (WORD)
+byte 26-27: pitch in degrees * 10 (WORD)
+-----------
+size 28 bytes
+</pre>
 
-Discontinued, existing files upgraded to v3.
+if there was an issue with a mission start packet:
+{@ul
+  {@li vehicle fuel capacity may be {@code 0}}
+  {@li vehicle model id may be {@code 0}}
+  {@li player name will be {@code ?}}
+}
 
-{@h3(id="v3") Version 3}
+{@h3(id="old") Old versions}
+
+{@h4(id="v3") Version 3}
 
 <pre>
 byte 4-7: mission id (DWORD)
@@ -50,6 +83,14 @@ if there was an issue with a mission start packet:
   {@li vehicle model id may be {@code 0}}
   {@li player name will be {@code ?}}
 }
+
+{@h4(id="v2") Version 2}
+
+Discontinued, existing files upgraded to v3.
+
+{@h4(id="v1") Version 1}
+
+Discontinued, existing files upgraded to v2.
 
 {@h3 See also}
 

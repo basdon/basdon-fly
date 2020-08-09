@@ -6,8 +6,16 @@ function flightmap(staticpath, id)
 {
 	var loadmap = function(ab, errcb)
 	{
+		var v4 = false;
+		var chunksize = 24;
 		var dv = new DataView(req.response);
-		if (dv.getInt32(0, 1) != 0x594C4603 || dv.getInt32(4, 1) != id) {
+		if (dv.getInt32(0, 1) == 0x594C4604) {
+			v4 = true;
+			chunksize = 28;
+		} else if (dv.getInt32(0, 1) != 0x594C4603) {
+			return errcb('incorrect version');
+		}
+		if (dv.getInt32(4, 1) != id) {
 			return errcb('incorrect version or wrong flight id');
 		}
 		var len = req.response.byteLength;
@@ -22,17 +30,17 @@ function flightmap(staticpath, id)
 		map.onerror = function()
 		{
 			var dp = (len - 40);
-			if (dp % 24) {
-				return errcb('extra bytes: ' + (dp % 24));
+			if (dp % chunksize) {
+				return errcb('extra bytes: ' + (dp % chunksize));
 			}
-			dp /= 24;
+			dp /= chunksize;
 			var events = '';
 			var engine = 2, paused = 0, lastfuel, lasthp;
 			var mintim = 0, maxtim = 0, minspd, maxspd, minalt, maxalt, minsat, maxsat, minhp, maxhp, maxfuel;
 			var tim = [], spd = [], alt = [], sat = [], hp = [], pos = [], fuel = [], flags = [];
 			var pausetime, timeoffset = 0;
 			for (var i = 0; i < dp; i++) {
-				var t, dv = new DataView(req.response, 40 + i * 24);
+				var t, dv = new DataView(req.response, 40 + i * chunksize);
 				tim.push((maxtim = dv.getInt32(0, 1)) - timeoffset);
 				if (!mintim) {
 					mintim = maxtim;

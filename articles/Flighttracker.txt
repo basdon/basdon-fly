@@ -43,7 +43,9 @@ byte 14-15: health (WORD)
 byte 16-19: fuel level (FLOAT)
 byte 20-23: x pos (FLOAT)
 byte 24-27: y pos (FLOAT)
-= length 28
+byte 28-29: bank in degrees * 10 (WORD)
+byte 30-31: pitch in degrees * 10 (WORD)
+= length 32
 </pre>
 
 Flags (right to left):
