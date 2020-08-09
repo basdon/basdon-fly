@@ -161,7 +161,7 @@ Sends flight tracker message.
 */
 void missions_send_tracker_data(
 	int playerid, int vehicleid, float hp,
-	struct vec3 *vpos, struct vec3 *vvel, int engine);
+	struct vec3 *vpos, struct vec3 *vvel, int engine, float pich, float roll);
 /**
 Gets mission stage for given player, one of MISSION_STAGE_ constants.
 */

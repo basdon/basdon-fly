@@ -1436,11 +1436,11 @@ void missions_on_weather_changed(int weather)
 
 void missions_send_tracker_data(
 	int playerid, int vehicleid, float hp,
-	struct vec3 *vpos, struct vec3 *vvel, int engine)
+	struct vec3 *vpos, struct vec3 *vvel, int engine, float pitch, float roll)
 {
 	struct MISSION *mission;
 	unsigned char flags;
-	short spd, alt, hpv;
+	short spd, alt, hpv, pitch10, roll10;
 
 	if ((mission = activemission[playerid]) == NULL ||
 		mission->veh->spawnedvehicleid != vehicleid ||
@@ -1456,8 +1456,9 @@ void missions_send_tracker_data(
 
 	hpv = (short) hp;
 	alt = (short) vpos->z;
-	spd = (short) (VEL_TO_KTS * sqrt(
-		vvel->x * vvel->x + vvel->y * vvel->y + vvel->z * vvel->z));
+	spd = (short) (VEL_TO_KTS * sqrt(vvel->x * vvel->x + vvel->y * vvel->y + vvel->z * vvel->z));
+	pitch10 = (short) (pitch * 10.0f);
+	roll10 = (short) (roll * 10.0f);
 
 	/* flight tracker packet 2 */
 	buf32[0] = 0x02594C46;
@@ -1466,11 +1467,15 @@ void missions_send_tracker_data(
 	cbuf32[9] = (char) mission->passenger_satisfaction;
 	memcpy(cbuf32 + 10, &spd, 2);
 	memcpy(cbuf32 + 12, &alt, 2);
+	memcpy(cbuf32 + 12, &pitch10, 2);
+	memcpy(cbuf32 + 12, &roll10, 2);
 	memcpy(cbuf32 + 14, &hpv, 2);
 	memcpy(cbuf32 + 16, &mission->veh->fuel, 4);
 	memcpy(cbuf32 + 20, &vpos->x, 4);
 	memcpy(cbuf32 + 24, &vpos->y, 4);
-	NC_ssocket_send(tracker, buf32a, 28);
+	memcpy(cbuf32 + 28, &pitch10, 2);
+	memcpy(cbuf32 + 30, &roll10, 2);
+	NC_ssocket_send(tracker, buf32a, 32);
 }
 
 int missions_cmd_automission(CMDPARAMS)
@@ -1583,10 +1588,11 @@ void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
 	{
 		if (game_is_heli(miss->veh->model)) {
 			pitchlimit = 50.0f;
+			rolllimit = 40.0f;
 		} else {
-			pitchlimit = 21.5f;
+			pitchlimit = 20.0f;
+			rolllimit = 36.0f;
 		}
-		rolllimit = 40.0f;
 		last_satisfaction = miss->passenger_satisfaction;
 
 		if (pitch < 0.0f) {
