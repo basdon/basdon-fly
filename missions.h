@@ -172,4 +172,4 @@ Updates satisfaction for player mission.
 No effect when player is not on a (passenger) mission or when passed vehicle
 is not the mission vehicle.
 */
-void missions_update_satisfaction(int pid, int vid, struct quat *vrot);
+void missions_update_satisfaction(int pid, int vid, float pitch, float roll);

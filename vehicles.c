@@ -832,18 +832,49 @@ void veh_timed_1s_update_a(
 	struct vec3 vvel;
 	struct quat vrot;
 	float hp;
+	float pitch, roll;
+	float x, y, z;
+
+/*
+// thanks https://mathworks.com/help/aeroblks/quaternionrotation.html
+new Float:v1 = 0.0; // +right -left
+new Float:v2 = 0.0; // +front -back
+new Float:v3 = 0.0; // +up    -down
+GetVehicleRotationQuat(id, q0, q1, q2, q3);
+new Float:tox = v1 * (1 - 2 * q2 * q2 - 2 * q3 * q3) + v2 * 2 *(q1 * q2 + q0 * q3) + v3 * 2 * (q1 * q3 + q0 * q2);
+new Float:toy = v1 * 2 * (q1 * q2 - q0 * q3) + v2 * (1 - 2 * q1 * q1 - 2 * q3 * q3) + v3 * 2 * (q2 * q3 + q0 * q1);
+new Float:toz = v1 * 2 * (q1 * q3 + q0 * q2) + v2 * 2 * (q2 * q3 - q0 * q1) + v3 * (1 - 2 * q1 * q1 - 2 * q2 * q2);
+*/
+	common_GetVehicleRotationQuat(vehicleid, &vrot);
+	x = 2.0f * (vrot.qx * vrot.qy + vrot.qw * vrot.qz); /*+front tox*/
+	y = (1.0f - 2.0f * vrot.qx * vrot.qx - 2.0f * vrot.qz * vrot.qz); /*+front toy*/
+	z = 2.0f * (vrot.qy * vrot.qz - vrot.qw * vrot.qx); /*+front toz*/
+	pitch = atan2(z, (float) sqrt(x * x + y * y));
+	x = -1.0f + 2.0f * vrot.qy * vrot.qy + 2.0f * vrot.qz * vrot.qz; /*+left tox*/
+	y = 2.0f * (vrot.qw * vrot.qz - vrot.qx * vrot.qy); /*+left toy*/
+	z = -2.0f * (vrot.qx * vrot.qz + vrot.qw * vrot.qy); /*+left toz*/
+	roll = atan2(z, (float) sqrt(x * x + y * y));
+
+	if ((1.0f - 2.0f * vrot.qx * vrot.qx - 2 * vrot.qy * vrot.qy) < 0.0f) { /*+up toz*/
+		/*plane is inverted, adjust roll*/
+		if (roll < 0.0f) {
+			roll = -M_PI - roll;
+		} else {
+			roll = M_PI - roll;
+		}
+	}
+
+	pitch *= 180.0f / M_PI;
+	roll *= 180.0f / M_PI;
 
 	if (!isafk[playerid]) {
-		common_GetVehicleRotationQuat(vehicleid, &vrot);
-		missions_update_satisfaction(playerid, vehicleid, &vrot);
+		missions_update_satisfaction(playerid, vehicleid, pitch, roll);
 	}
 
 	if (missions_get_stage(playerid) == MISSION_STAGE_FLIGHT) {
 		hp = anticheat_GetVehicleHealth(vehicleid);
 		common_GetVehicleVelocity(vehicleid, &vvel);
-		missions_send_tracker_data(
-			playerid, vehicleid, hp,
-			vpos, &vvel, vparams->engine);
+		missions_send_tracker_data(playerid, vehicleid, hp, vpos, &vvel, vparams->engine);
 	}
 }
 
@@ -902,8 +933,7 @@ void veh_timed_1s_update()
 
 			model_stats = NULL;
 			if (game_is_air_vehicle(vehiclemodel)) {
-				veh_timed_1s_update_a(
-					playerid, vehicleid, &vpos, &vparams);
+				veh_timed_1s_update_a(playerid, vehicleid, &vpos, &vparams);
 
 				if (aircraftmodelindex[vehiclemodel] != -1) {
 					aircraftindex = aircraftmodelindex[vehiclemodel];

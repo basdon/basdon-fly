@@ -1569,50 +1569,49 @@ void missions_on_vehicle_repaired(int vehicleid, float fixamount, float newhp)
 	}
 }
 
-void missions_update_satisfaction(int pid, int vid, struct quat *vrot)
+void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
 {
 	struct MISSION *miss;
 	int last_satisfaction;
-	float qw, qx, qy, qz, pitchlimit, rolllimit, tmp;
+	float pitchlimit, rolllimit;
 
 	if ((miss = activemission[pid]) != NULL &&
 		miss->missiontype & PASSENGER_MISSIONTYPES &&
 		miss->stage == MISSION_STAGE_FLIGHT &&
-		miss->veh->spawnedvehicleid == vid)
+		miss->veh->spawnedvehicleid == vid &&
+		miss->passenger_satisfaction != 0)
 	{
 		if (game_is_heli(miss->veh->model)) {
-			pitchlimit = rolllimit = 57.0f;
+			pitchlimit = 50.0f;
 		} else {
-			pitchlimit = 46.0f;
-			rolllimit = 61.0f;
+			pitchlimit = 21.5f;
 		}
+		rolllimit = 40.0f;
 		last_satisfaction = miss->passenger_satisfaction;
-		qx = vrot->qx;
-		qy = vrot->qy;
-		qz = vrot->qz;
-		qw = vrot->qw;
-		/* pitch */
-		tmp = fabs(100.0f * 2.0f * (qy * qz - qw * qx)) - pitchlimit;
-		if (tmp > 0.0) {
-			miss->passenger_satisfaction -= (int) (tmp / 2.0f);
+
+		if (pitch < 0.0f) {
+			pitch = -pitch;
+		}
+		if (pitch > pitchlimit) {
+			miss->passenger_satisfaction -= (int) ((pitch - pitchlimit) / 2.0f);
 			if (miss->passenger_satisfaction < 0) {
 				miss->passenger_satisfaction = 0;
 			}
 		}
-		/* roll */
-		tmp = fabs(100.0f * 2.0f * (qx * qz + qw * qy)) - rolllimit;
-		if (tmp > 0.0) {
-			miss->passenger_satisfaction -= (int) (tmp / 2.0f);
+
+		if (roll < 0.0f) {
+			roll = -roll;
+		}
+		if (roll > rolllimit) {
+			miss->passenger_satisfaction -= (int) ((roll - rolllimit) / 2.0f);
 			if (miss->passenger_satisfaction < 0) {
 				miss->passenger_satisfaction = 0;
 			}
 		}
+
 		if (last_satisfaction != miss->passenger_satisfaction) {
-			csprintf(buf32,
-				SATISFACTION_TEXT_FORMAT,
-				miss->passenger_satisfaction);
-			NC_PlayerTextDrawSetString(
-				pid, ptxt_satisfaction[pid], buf32a);
+			csprintf(buf32, SATISFACTION_TEXT_FORMAT, miss->passenger_satisfaction);
+			NC_PlayerTextDrawSetString(pid, ptxt_satisfaction[pid], buf32a);
 		}
 	}
 }
