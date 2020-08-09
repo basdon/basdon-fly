@@ -191,6 +191,11 @@ struct REGION {
 #define ZONE_NONE_SW 171
 #define ZONE_NONE_SE 172
 #define ZONE_INVALID 173
+#define ZONE_OCTA 174
+#define ZONE_OCTA_AIRPORT 175
+#define ZONE_OCTA_RESIDENTIAL 176
+#define ZONE_OCTA_MOUNTAIN 177
+#define ZONE_OCTA_BEACH 178
 
 /* see info.zon and american.gxt */
 char *zonenames[] = {
@@ -368,6 +373,11 @@ char *zonenames[] = {
 	"San Andreas (SW)",
 	"San Andreas (SE)",
 	"INVALID ZONE",
+	"Octavia Island",
+	"Airport",
+	"Downtown",
+	"Mountain",
+	"Beach",
 };
 
 struct REGION regions[] = {
@@ -381,6 +391,7 @@ R(-1213.91f, 596.349f, -242.99f, -480.539f, 1659.68f, 900.0f, ZONE_ROBAD),
 R(-1213.91f, -768.027f, -242.99f, 2997.06f, 596.349f, 900.0f, ZONE_RED),
 R(-1213.91f, -2892.97f, -242.99f, 44.6147f, -768.027f, 900.0f, ZONE_FLINTC),
 R(-2997.47f, -2892.97f, -242.99f, -1213.91f, -1115.58f, 900.0f, ZONE_WHET),
+R(11740.0f, 5875.0f, -242.99f, 13718.0f, 7471.5f, 900.0f, ZONE_OCTA),
 #undef R
 };
 
@@ -784,6 +795,20 @@ struct ZONE zones[] = {
 { -2178.69f, -2189.91f, -47.916f, -2030.12f, -1771.66f, 576.08f, ZONE_MTCHI },
 { -1632.83f, -2263.44f, 0.0f, -1601.33f, -2231.79f, 200.0f, ZONE_SHACA },
 /* end WHET region zones */
+/* start OCTA region zones */
+{ 12955.6768f, 6255.6094f, 0.0f, 13374.9365f, 7089.7993f, 200.0f, ZONE_OCTA_AIRPORT },
+{ 12867.0859f, 6754.1587f, 0.0f, 12955.6768f, 7089.7993f, 200.0f, ZONE_OCTA_AIRPORT },
+{ 12494.5635f, 6255.6094f, 0.0f, 12955.6768f, 6430.0532f, 200.0f, ZONE_OCTA_AIRPORT },
+{ 12886.6074f, 6430.0532f, 0.0f, 12955.6768f, 6641.6362f, 200.0f, ZONE_OCTA_AIRPORT },
+{ 12835.2139f, 6641.6362f, 0.0f, 12919.4531f, 6754.1587f, 200.0f, ZONE_OCTA_RESIDENTIAL },
+{ 12615.1553f, 6582.3755f, 0.0f, 12835.1816f, 6753.7251f, 200.0f, ZONE_OCTA_RESIDENTIAL },
+{ 12515.4824f, 6582.3755f, 0.0f, 12615.1553f, 6753.7251f, 200.0f, ZONE_OCTA_RESIDENTIAL },
+{ 12425.3369f, 6561.1528f, 0.0f, 12515.4824f, 6697.5884f, 200.0f, ZONE_OCTA_RESIDENTIAL },
+{ 12417.8926f, 6697.5884f, 0.0f, 12615.1553f, 6926.7129f, 200.0f, ZONE_OCTA_MOUNTAIN },
+{ 12292.7236f, 6486.2881f, 0.0f, 12425.3369f, 6697.5884f, 200.0f, ZONE_OCTA_BEACH },
+{ 12425.3369f, 6486.2881f, 0.0f, 12544.3184f, 6561.1528f, 200.0f, ZONE_OCTA_BEACH },
+{ 12515.4824f, 6536.6035f, 0.0f, 12886.6074f, 6582.3755f, 200.0f, ZONE_OCTA_BEACH },
+/* end OCTA region zones */
 };
 
 int regioncount = sizeof(regions)/sizeof(regions[0]);
