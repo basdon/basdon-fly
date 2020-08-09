@@ -84,6 +84,23 @@ struct RPCDATA_MoveObject {
 	float to_rz;
 };
 EXPECT_SIZE(struct RPCDATA_MoveObject, 2 + 12 + 12 + 4 + 12);
+
+struct RPCDATA_HideActor {
+	short actorid;
+};
+EXPECT_SIZE(struct RPCDATA_HideActor, 2);
+
+struct RPCDATA_ShowActor {
+	short actorid;
+	int modelid;
+	float x;
+	float y;
+	float z;
+	float angle;
+	float health;
+	char invulnerable;
+};
+EXPECT_SIZE(struct RPCDATA_ShowActor, 2 + 4 + 12 + 4 + 4 + 1);
 #pragma pack()
 
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,unk) \
@@ -95,5 +112,7 @@ EXPECT_SIZE(struct RPCDATA_MoveObject, 2 + 12 + 12 + 4 + 12);
 #define RPC_DestroyObject 0x815ACC6 /*ptr to 0x2F(47)*/
 #define RPC_RemoveBuilding 0x815CD7E /*ptr to 0x2B(43)*/
 #define RPC_MoveObject 0x8158B64 /*ptr to 0x64(99)*/
+#define RPC_HideActor 0x8157CCB /*ptr to 0xAC(172)*/
+#define RPC_ShowActor 0x8157CC9 /*ptr to 0xAB(171)*/
 
 extern int samp_pNetGame;

@@ -21,6 +21,8 @@
 (unless the code changed to not use objectid 0)*/
 #define MAX_MAPSYSTEM_OBJECTS (900)
 #define ROTATING_RADAR_OBJECT_ID (999)
+/*Octavia's actor id*/
+#define OCTA_ACTORID 999
 
 #pragma pack(1)
 struct MAPFILEHEADER {
@@ -95,6 +97,12 @@ static short player_objectid_to_mapidx[MAX_PLAYERS][MAX_MAPSYSTEM_OBJECTS];
 so no checks are being done on a global scale if a gang zone is being used*/
 static short player_gangzoneid_to_mapidx[MAX_PLAYERS][MAX_GANG_ZONES];
 
+/*the mapidx of octavia island map where the actor should be made*/
+static int octavia_island_actor_mapidx;
+
+static struct RPCDATA_ShowActor rpcdata_show_actor;
+static struct RPCDATA_HideActor rpcdata_hide_actor;
+static struct BitStream bitstream_freeform;
 static struct BitStream bs_maps_remove_building;
 static struct RPCDATA_RemoveBuilding rpcdata_RemoveBuilding;
 static struct BitStream bs_maps_create_object;
@@ -290,6 +298,9 @@ void maps_load_from_db()
 			NC(n_cache_get_field_s);
 			ctoa(maps[num_maps].name, buf32, sizeof(maps[rowcount].name));
 			if (maps_load_from_file(num_maps)) {
+				if (!strcmp("octa_lod", maps[num_maps].name)) {
+					octavia_island_actor_mapidx = num_maps;
+				}
 				NC_PARS(2);
 				nc_params[2] = 1;
 				maps[num_maps].id = NC(n_cache_get_field_i);
@@ -346,6 +357,7 @@ int maps_timer_rotate_radar(void *data)
 
 void maps_init()
 {
+	octavia_island_actor_mapidx = -1;
 	maps_load_from_db();
 
 	bs_maps_remove_building.numberOfBitsUsed = sizeof(rpcdata_RemoveBuilding) * 8;
@@ -381,6 +393,20 @@ void maps_init()
 	bs_maps_move_object.readOffset = 0;
 	bs_maps_move_object.ptrData = &rpcdata_MoveObject;
 	bs_maps_move_object.copyData = 1;
+
+	bitstream_freeform.readOffset = 0;
+	bitstream_freeform.copyData = 1;
+
+	rpcdata_show_actor.actorid = OCTA_ACTORID;
+	rpcdata_show_actor.modelid = 141;
+	rpcdata_show_actor.x = 12332.3926f;
+	rpcdata_show_actor.y = 6521.1636f;
+	rpcdata_show_actor.z = 7.0225f;
+	rpcdata_show_actor.angle = 0.0f;
+	rpcdata_show_actor.health = 255.0f;
+	rpcdata_show_actor.invulnerable = 1;
+
+	rpcdata_hide_actor.actorid = OCTA_ACTORID;
 
 	timer_set(2000, maps_timer_rotate_radar, NULL);
 }
@@ -455,6 +481,14 @@ skip_objects:
 	}
 skip_gang_zones:
 	;
+
+	/*Octavia actor*/
+	if (mapidx == octavia_island_actor_mapidx) {
+		bitstream_freeform.numberOfBitsUsed = sizeof(rpcdata_show_actor) * 8;
+		bitstream_freeform.numberOfBitsAllocated = sizeof(rpcdata_show_actor) * 8;
+		bitstream_freeform.ptrData = &rpcdata_show_actor;
+		SAMP_SendRPCToPlayer(RPC_ShowActor, &bitstream_freeform, playerid, 2);
+	}
 }
 
 /**
@@ -498,6 +532,14 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 			/*there's no real need to hide the gang zone, just mark it as available and be done*/
 			/*SAMP_SendRPCToPlayer(RPC_HideGangZone, &bs_maps_show_gang_zone, playerid, 2);*/
 		}
+	}
+
+	/*Octavia actor*/
+	if (mapidx == octavia_island_actor_mapidx) {
+		bitstream_freeform.numberOfBitsUsed = sizeof(rpcdata_hide_actor) * 8;
+		bitstream_freeform.numberOfBitsAllocated = sizeof(rpcdata_hide_actor) * 8;
+		bitstream_freeform.ptrData = &rpcdata_hide_actor;
+		SAMP_SendRPCToPlayer(RPC_HideActor, &bitstream_freeform, playerid, 2);
 	}
 }
 
