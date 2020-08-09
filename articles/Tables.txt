@@ -16,7 +16,7 @@ usr -- users
   distance - total distance flown, km (float) (default 0)
   score - score (default 0)
   cash - money (default 15000)
-  prefs - preferences (see sharedsymbols)
+  prefs - preferences (see prefs.h)
   lastfal - last failed login (default 0)
   falng - failedloginsnotifygame, last time failed logins were shown ingame (default 0)
   falnw - failedloginsnotifyweb, last time failed logins were shown ingame (default 0)
@@ -48,7 +48,7 @@ apt -- airports
   x - beacon x
   y - beacon y
   z - beacon z
-  flags - see sharedsymbols.h (int) (default 1)
+  flags - see airport.h (int) (default 1)
 </pre>
 
 <pre>
@@ -62,8 +62,8 @@ rnw -- runways
   z - z
   w - runway width
   n - navigation types (VOR(2) | ILS(6))
-  type - runway type (see sharedsymbols.h) (default 1)
-  surf - runway surface (see sharedsymbols.h)
+  type - runway type (see airport.h) (default 1)
+  surf - runway surface (see airport.h)
 </pre>
 
 <pre>
@@ -139,7 +139,7 @@ acl -- anticheat etc log
   t - timestamp
   u - userid (usr.i) (or NULL)
   l - logged in status (0-2, see login.pwn)
-  type - type of event, see sharedsymbols.h (default 0)
+  type - type of event, see anticheat.h (default 0)
   e - log content (varchar, 144)
 </pre>
 
