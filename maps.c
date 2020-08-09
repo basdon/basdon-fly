@@ -6,9 +6,10 @@
 #include "timer.h"
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
-#define MAX_MAPS (20)
-#define MAP_MAX_FILENAME (24) /*see db col*/
+#define MAX_MAPS (50)
+#define MAP_MAX_FILENAME (34) /*see db col*/
 /*define to print msg to console each time map streams in/out*/
 #define MAPS_LOG_STREAMING
 /*define to show total amount of maps/objects/removes/zones at boot*/
@@ -121,6 +122,7 @@ int maps_load_from_file(int mapidx)
 	struct GANG_ZONE *gang_zone;
 	float middle_x, middle_y;
 	int total_element_count_for_middle;
+	float radar_angle, radar_offset_x, radar_offset_y;
 
 	sprintf(filename, "scriptfiles/maps/%s.map", maps[mapidx].name);
 	if (!(fs = fopen(filename, "rb"))) {
@@ -175,17 +177,27 @@ int maps_load_from_file(int mapidx)
 			object->drawdistance = header.draw_radius;
 
 			/*automatically create object for the rotating radar if the base is found*/
-			/*TODO these offsets are only for when the z-rotation is 180.0f*/
-			if (object->map_file_object.model == 7981 && !map_radar_object_for_map[mapidx]) {
-				map_radar_object_for_map[mapidx] = malloc(sizeof(struct OBJECT));
-				map_radar_object_for_map[mapidx]->map_file_object.model = 1682;
-				map_radar_object_for_map[mapidx]->map_file_object.x = object->map_file_object.x - 4.7f;
-				map_radar_object_for_map[mapidx]->map_file_object.y = object->map_file_object.y + 0.2f;
-				map_radar_object_for_map[mapidx]->map_file_object.z = object->map_file_object.z + 11.4f;
-				map_radar_object_for_map[mapidx]->map_file_object.rx = 0.0f;
-				map_radar_object_for_map[mapidx]->map_file_object.ry = 0.0f;
-				map_radar_object_for_map[mapidx]->map_file_object.rz = 0.0f;
-				map_radar_object_for_map[mapidx]->drawdistance = header.draw_radius;
+			if (!map_radar_object_for_map[mapidx]) {
+				if (object->map_file_object.model == 7981/*smallradar02_lvS*/) {
+					radar_angle = object->map_file_object.rz * M_PI / 180.0f;
+					radar_offset_x = 4.4148f * (float) cos(radar_angle);
+					radar_offset_y = 4.4148f * (float) sin(radar_angle);
+					goto addradar;
+				} else if (object->map_file_object.model == 10810/*ap_smallradar1_SFSe*/) {
+					radar_angle = object->map_file_object.rz * M_PI / 180.0f;
+					radar_offset_x = -4.2038f * (float) cos(radar_angle) - 1.2057f * (float) sin(radar_angle);
+					radar_offset_y = -4.2038f * (float) sin(radar_angle) + 1.2057f * (float) cos(radar_angle);
+addradar:
+					map_radar_object_for_map[mapidx] = malloc(sizeof(struct OBJECT));
+					map_radar_object_for_map[mapidx]->map_file_object.model = 1682;
+					map_radar_object_for_map[mapidx]->map_file_object.x = object->map_file_object.x + radar_offset_x;
+					map_radar_object_for_map[mapidx]->map_file_object.y = object->map_file_object.y + radar_offset_y;
+					map_radar_object_for_map[mapidx]->map_file_object.z = object->map_file_object.z + 11.4f;
+					map_radar_object_for_map[mapidx]->map_file_object.rx = 0.0f;
+					map_radar_object_for_map[mapidx]->map_file_object.ry = 0.0f;
+					map_radar_object_for_map[mapidx]->map_file_object.rz = 0.0f;
+					map_radar_object_for_map[mapidx]->drawdistance = header.draw_radius;
+				}
 			}
 
 			object++;
