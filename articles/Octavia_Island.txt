@@ -1,0 +1,24 @@
+{@stub}
+
+<div class="articleright">
+  <?php readfile('../articles/apfactsheets/OCTA.html') ?>
+</div>
+
+OCTA
+
+is the first island added to basdon
+
+{@h3 Vehicle spawns}
+
+<?php readfile('../articles/apfactsheets/OCTA_vehs.html') ?>
+
+{@h3 Service points}
+
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php $code='OCTA'; include('../articles/airport-dyn-stats.php') ?>
+
+{@h3 Aerodrome Chart}
+{@simg=gen/aerodrome_OCTA.png;OCTA aerodrome chart;OCTA aerodrome chart}
+
+{@clear}
+

@@ -107,6 +107,10 @@
 					{@article=Verdant_Meadows {@plainsimg=articles/savm.jpg;SAVM}}<br/>
 					{@article Verdant_Meadows}
 				</div>
+				<div>
+					{@article=Octavia_Island {@plainsimg=articles/octa.jpg;OCTA}}<br/>
+					{@article Octavia_Island}
+				</div>
 			</td>
 		</tr>
 		<tr>
