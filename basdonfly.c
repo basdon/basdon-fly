@@ -17,7 +17,6 @@
 #include "missions.h"
 #include "money.h"
 #include "nav.h"
-#include "objects.h"
 #include "panel.h"
 #include "playerdata.h"
 #include "playerstats.h"

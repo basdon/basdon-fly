@@ -250,7 +250,6 @@ exit:
 	maps_init();
 	missions_create_tracker_socket();
 	missions_init();
-	objs_on_gamemode_init();
 	panel_on_gamemode_init();
 	playerstats_init();
 	protips_init();
@@ -392,7 +391,6 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	maps_on_player_connect(playerid);
 	missions_on_player_connect(playerid);
 	money_set(playerid, 0);
-	objs_on_player_connect(playerid);
 	panel_on_player_connect(playerid);
 	playerstats_on_player_connect(playerid);
 	pm_on_player_connect(playerid);
