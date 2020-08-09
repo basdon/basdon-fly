@@ -573,6 +573,29 @@ void maps_stream_for_player(int playerid, struct vec3 pos)
 	}
 }
 
+int maps_calculate_objects_to_create_for_player_at_position(int playerid, struct vec3 pos)
+{
+	float dx, dy, distance;
+	int mapidx;
+	int amount_of_objects;
+
+	/*not checking amount of objects to destroy atm*/
+
+	amount_of_objects = 0;
+	for (mapidx = 0; mapidx < num_maps; mapidx++) {
+		if (!maps[mapidx].stream_status_for_player[playerid]) {
+			dx = maps[mapidx].middle_x - pos.x;
+			dy = maps[mapidx].middle_y - pos.y;
+			distance = dx * dx + dy * dy;
+			if (distance < maps[mapidx].stream_in_radius_sq) {
+				amount_of_objects += maps[mapidx].num_objects;
+			}
+		}
+	}
+
+	return amount_of_objects;
+}
+
 /*TODO recheck this*/
 void maps_process_tick()
 {

@@ -22,3 +22,7 @@ void maps_process_tick();
 Stream maps for given player.
 */
 void maps_stream_for_player(int playerid, struct vec3 pos);
+/**
+@return amount of objects that would be created when the player would be teleported to given pos
+*/
+int maps_calculate_objects_to_create_for_player_at_position(int playerid, struct vec3 pos);

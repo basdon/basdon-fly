@@ -467,7 +467,17 @@ int natives_SetPlayerName(int playerid, char *name)
 
 int natives_SetPlayerPos(int playerid, struct vec3 pos)
 {
+	/*TODO? Technically the amount of _models_ and not _objects_ determines how long
+	it will take to load, because the models are loaded in a blocking way.
+	Because of that, a map with 100 objects but all different models might block less
+	than a 1000 object map with 1 model, but the check below is pure object count.*/
+	if (maps_calculate_objects_to_create_for_player_at_position(playerid, pos) > 200) {
+		B144("Loading objects...");
+		NC_GameTextForPlayer(playerid, buf144a, 0x80000, 5);
+	}
 	maps_stream_for_player(playerid, pos);
+	B144("_");
+	NC_GameTextForPlayer(playerid, buf144a, 0, 5);
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	zones_update(playerid, pos);
 
