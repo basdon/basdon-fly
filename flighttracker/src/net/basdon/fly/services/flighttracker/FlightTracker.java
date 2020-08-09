@@ -204,7 +204,7 @@ throws InterruptedIOException
 boolean handleMissionData(int length)
 throws InterruptedIOException
 {
-	if (length != 28) {
+	if (length != 32) {
 		packet_wrong_length_count++;
 		return false;
 	}
@@ -218,7 +218,7 @@ throws InterruptedIOException
 		os.write((time >> 8) & 0xFF);
 		os.write((time >> 16) & 0xFF);
 		os.write((time >> 24) & 0xFF);
-		os.write(buf, 8, 20);
+		os.write(buf, 8, 24);
 		os.flush();
 		return true;
 	} catch (InterruptedIOException e) {
@@ -280,7 +280,7 @@ throws InterruptedIOException
 			return null;
 		}
 		try {
-			os.write(3);
+			os.write(4);
 			os.write('F');
 			os.write('L');
 			os.write('Y');
