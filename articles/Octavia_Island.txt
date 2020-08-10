@@ -18,7 +18,8 @@ is the first island added to basdon
 <?php $code='OCTA'; include('../articles/airport-dyn-stats.php') ?>
 
 {@h3 Aerodrome Chart}
-{@simg=gen/aerodrome_OCTA.png;OCTA aerodrome chart;OCTA aerodrome chart}
+
+<?php readfile('../articles/aerodromecharts/OCTA.html') ?>
 
 {@clear}
 

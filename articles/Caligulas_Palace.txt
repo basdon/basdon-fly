@@ -31,7 +31,8 @@ available. The closest one is probably to be found at
 <?php $code='CALI'; include('../articles/airport-dyn-stats.php') ?>
 
 {@h3 Aerodrome Chart}
-{@simg=gen/aerodrome_CALI.png;CALI aerodrome chart;CALI aerodrome chart}
+
+<?php readfile('../articles/aerodromecharts/CALI.html') ?>
 
 {@clear}
 

@@ -38,7 +38,8 @@ the west.
 <?php $code='SALS'; include('../articles/airport-dyn-stats.php') ?>
 
 {@h3 Aerodrome Chart}
-{@simg=gen/aerodrome_SALS.png;SALS aerodrome chart;SALS aerodrome chart}
+
+<?php readfile('../articles/aerodromecharts/SALS.html') ?>
 
 {@clear}
 

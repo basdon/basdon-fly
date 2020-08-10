@@ -19,7 +19,8 @@ service point is probably located at {@article Los_Santos_Airport}.
 <?php $code='LSIF'; include('../articles/airport-dyn-stats.php') ?>
 
 {@h3 Aerodrome Chart}
-{@simg=gen/aerodrome_LSIF.png;LSIF aerodrome chart;LSIF aerodrome chart}
+
+<?php readfile('../articles/aerodromecharts/LSIF.html') ?>
 
 {@clear}
 

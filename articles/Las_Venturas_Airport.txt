@@ -29,7 +29,8 @@ There is one service point at Las Venturas Airport, located in the north part.
 <?php $code='SALV'; include('../articles/airport-dyn-stats.php') ?>
 
 {@h3 Aerodrome Chart}
-{@simg=gen/aerodrome_SALV.png;SALV aerodrome chart;SALV aerodrome chart}
+
+<?php readfile('../articles/aerodromecharts/SALV.html') ?>
 
 {@clear}
 

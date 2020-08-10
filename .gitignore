@@ -2,9 +2,8 @@
 /**/gen/**
 !/**/gen/
 !/**/gen/.gitkeep
-/articles/apfactsheets/**
-!/articles/apfactsheets/
-!/articles/apfactsheets/.gitkeep
+/articles/apfactsheets/*.html
+/articles/aerodromecharts/*.html
 /inc/conf.php
 /static/fdr/*.flight
 /articles/tohtml.sed

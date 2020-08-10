@@ -27,7 +27,8 @@ There is one service point, towards the east of the runway.
 <?php $code='BASE'; include('../articles/airport-dyn-stats.php') ?>
 
 {@h3 Aerodrome Chart}
-{@simg=gen/aerodrome_BASE.png;BASE aerodrome chart;BASE aerodrome chart}
+
+<?php readfile('../articles/aerodromecharts/BASE.html') ?>
 
 {@clear}
 

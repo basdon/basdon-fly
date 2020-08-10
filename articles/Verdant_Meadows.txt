@@ -25,7 +25,8 @@ doesn't have any navigational aids, however, there is a working beacon present.
 <?php $code='SAVM'; include('../articles/airport-dyn-stats.php') ?>
 
 {@h3 Aerodrome Chart}
-{@simg=gen/aerodrome_SAVM.png;SAVM aerodrome chart;SAVM aerodrome chart}
+
+<?php readfile('../articles/aerodromecharts/SAVM.html') ?>
 
 {@clear}
 

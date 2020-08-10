@@ -33,7 +33,8 @@ The ship has no service points. Aircrafts in need for repair usually go to
 <?php $code='SFCA'; include('../articles/airport-dyn-stats.php') ?>
 
 {@h3 Aerodrome Chart}
-{@simg=gen/aerodrome_SFCA.png;SFCA aerodrome chart;SFCA aerodrome chart}
+
+<?php readfile('../articles/aerodromecharts/SFCA.html') ?>
 
 {@clear}
 

@@ -37,7 +37,8 @@ gates.
 <?php $code='SASF'; include('../articles/airport-dyn-stats.php') ?>
 
 {@h3 Aerodrome Chart}
-{@simg=gen/aerodrome_SASF.png;SASF aerodrome chart;SASF aerodrome chart}
+
+<?php readfile('../articles/aerodromecharts/SASF.html') ?>
 
 {@clear}
 
