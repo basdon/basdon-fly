@@ -1,7 +1,7 @@
 {@render aircraftnames.php}
 {@render fmt_money.php}
 
-<h3> Miscellaneous stats</h3>
+<h3>Miscellaneous stats</h3>
 
 <ul>
 	<li><strong>Mission flights:</strong> {@unsafe $stat_num_inbound} inbound + {@unsafe $stat_num_outbound} outbound (={@unsafe $stat_num_inbound + $stat_num_outbound})</li>
@@ -22,7 +22,7 @@
 {@rem TODO too much margin in between here (but only when page is wide enough, it's okay when it's not wide and under each other @}
 
 <div class="fl49">
-	<h4 class="newtableheader">Last 5 inbound flights</h3>
+	<h4 class="newtableheader">Last 5 inbound flights</h4>
 	<table class="new center" width="100%">
 		<thead>
 			<tr><th>Flight</th><th>Date</th><th>Aircraft</th><th>From</th><th>To</th></tr>
@@ -45,7 +45,7 @@
 	</table>
 </div>
 <div class="fr49">
-	<h4 class="newtableheader">Last 5 outbound flights</h3>
+	<h4 class="newtableheader">Last 5 outbound flights</h4>
 	<table class="new center" width="100%">
 		<thead>
 			<tr><th>Flight</th><th>Date</th><th>Aircraft</th><th>From</th><th>To</th></tr>
