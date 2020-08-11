@@ -1,5 +1,7 @@
+<?php $code = 'SFCA'; ?>
+
 <div class="articleright">
-  <?php readfile('../articles/apfactsheets/SFCA.html') ?>
+  <?php readfile('../articles/apfactsheets/'.$code.'.html') ?>
 </div>
 
 San Fierro Carrier is the 'airport' name of the naval amphibious assault ship
@@ -21,7 +23,7 @@ There are also two inactive SAM sites.
 
 {@h3 Vehicle spawns}
 
-<?php readfile('../articles/apfactsheets/SFCA_vehs.html') ?>
+<?php readfile('../articles/apfactsheets/'.$code.'_vehs.html') ?>
 
 {@h3 Service points}
 
@@ -29,12 +31,12 @@ The ship has no service points. Aircrafts in need for repair usually go to
 {@article Area_69}, but there are also some service points at
 {@article San_Fierro_Airport} for very urgent situations.
 
-{@rem no clear, the dyn-stats template clears (before the flights part) @}
-<?php $code='SFCA'; include('../articles/airport-dyn-stats.php') ?>
+{@rem island map is either empty, or it contains the h3 header @}
+<?php readfile('../articles/islandmaps/'.$code.'.html') ?>
 
 {@h3 Aerodrome Chart}
 
-<?php readfile('../articles/aerodromecharts/SFCA.html') ?>
+<?php readfile('../articles/aerodromecharts/'.$code.'.html') ?>
 
-{@clear}
-
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php include('../articles/airport-dyn-stats.php') ?>

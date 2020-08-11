@@ -1,19 +1,6 @@
 {@render aircraftnames.php}
 {@render fmt_money.php}
 
-<h3>Miscellaneous stats</h3>
-
-<ul>
-	<li><strong>Mission flights:</strong> {@unsafe $stat_num_inbound} inbound + {@unsafe $stat_num_outbound} outbound (={@unsafe $stat_num_inbound + $stat_num_outbound})</li>
-	{@rem using round() for int values as well, because they can be NULL when no svps at airport (yukkie) @}
-	<li><strong>Service points refuels:</strong> {@unsafe $stat_refuels}</li>
-	<li><strong>Service points refuel spending:</strong> {@unsafe fmt_money(-$stat_refuel_spending)}</li>
-	<li><strong>Service points fuel loaded:</strong> {@unsafe round($stat_fuel_loaded, 1)}L</li>
-	<li><strong>Service points repairs:</strong> {@unsafe $stat_repairs}</li>
-	<li><strong>Service points repair spending:</strong> {@unsafe fmt_money(-$stat_repair_spending)}</li>
-	<li><strong>Service points damage repaired:</strong> {@unsafe round($stat_dmg_repaired, 0)}</li>
-</ul>
-
 {@rem clear since this is rendered in an article, and the factsheet might still be floated right @}
 <div class="clear"></div>
 
@@ -69,3 +56,17 @@
 </div>
 
 <div class="clear"></div>
+
+
+<h3>Miscellaneous stats</h3>
+
+<ul>
+	<li><strong>Mission flights:</strong> {@unsafe $stat_num_inbound} inbound + {@unsafe $stat_num_outbound} outbound (={@unsafe $stat_num_inbound + $stat_num_outbound})</li>
+	{@rem using round() for int values as well, because they can be NULL when no svps at airport (yukkie) @}
+	<li><strong>Service points refuels:</strong> {@unsafe $stat_refuels}</li>
+	<li><strong>Service points refuel spending:</strong> {@unsafe fmt_money(-$stat_refuel_spending)}</li>
+	<li><strong>Service points fuel loaded:</strong> {@unsafe round($stat_fuel_loaded, 1)}L</li>
+	<li><strong>Service points repairs:</strong> {@unsafe $stat_repairs}</li>
+	<li><strong>Service points repair spending:</strong> {@unsafe fmt_money(-$stat_repair_spending)}</li>
+	<li><strong>Service points damage repaired:</strong> {@unsafe round($stat_dmg_repaired, 0)}</li>
+</ul>

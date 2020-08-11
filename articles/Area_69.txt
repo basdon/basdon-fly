@@ -1,5 +1,7 @@
+<?php $code = 'BASE'; ?>
+
 <div class="articleright">
-  <?php readfile('../articles/apfactsheets/BASE.html') ?>
+  <?php readfile('../articles/apfactsheets/'.$code.'.html') ?>
 </div>
 
 Area 69 is a top secret government area located in the deserts of Bone County.
@@ -11,7 +13,7 @@ There are four SAM sites at the facility.
 
 {@h3 Vehicle spawns}
 
-<?php readfile('../articles/apfactsheets/BASE_vehs.html') ?>
+<?php readfile('../articles/apfactsheets/'.$code.'_vehs.html') ?>
 
 {@h3 Service points}
 
@@ -23,12 +25,12 @@ There is one service point, towards the east of the runway.
   <small>Area 69 service point</small>
 }
 
-{@rem no clear, the dyn-stats template clears (before the flights part) @}
-<?php $code='BASE'; include('../articles/airport-dyn-stats.php') ?>
+{@rem island map is either empty, or it contains the h3 header @}
+<?php readfile('../articles/islandmaps/'.$code.'.html') ?>
 
 {@h3 Aerodrome Chart}
 
-<?php readfile('../articles/aerodromecharts/BASE.html') ?>
+<?php readfile('../articles/aerodromecharts/'.$code.'.html') ?>
 
-{@clear}
-
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php include('../articles/airport-dyn-stats.php') ?>

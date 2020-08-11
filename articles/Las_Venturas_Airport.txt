@@ -1,5 +1,7 @@
+<?php $code = 'SALV'; ?>
+
 <div class="articleright">
-  <?php readfile('../articles/apfactsheets/SALV.html') ?>
+  <?php readfile('../articles/apfactsheets/'.$code.'.html') ?>
 </div>
 
 Las Venturas Airport is an airport in the middle of Las Venturas, only a few
@@ -13,7 +15,7 @@ there an amazing experience.
 
 {@h3 Vehicle spawns}
 
-<?php readfile('../articles/apfactsheets/SALV_vehs.html') ?>
+<?php readfile('../articles/apfactsheets/'.$code.'_vehs.html') ?>
 
 {@h3 Service points}
 
@@ -25,12 +27,12 @@ There is one service point at Las Venturas Airport, located in the north part.
   <small>The sole LVA service point</small>
 }
 
-{@rem no clear, the dyn-stats template clears (before the flights part) @}
-<?php $code='SALV'; include('../articles/airport-dyn-stats.php') ?>
+{@rem island map is either empty, or it contains the h3 header @}
+<?php readfile('../articles/islandmaps/'.$code.'.html') ?>
 
 {@h3 Aerodrome Chart}
 
-<?php readfile('../articles/aerodromecharts/SALV.html') ?>
+<?php readfile('../articles/aerodromecharts/'.$code.'.html') ?>
 
-{@clear}
-
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php include('../articles/airport-dyn-stats.php') ?>

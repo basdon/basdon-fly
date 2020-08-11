@@ -1,5 +1,7 @@
+<?php $code = 'CALI'; ?>
+
 <div class="articleright">
-  <?php readfile('../articles/apfactsheets/CALI.html') ?>
+  <?php readfile('../articles/apfactsheets/'.$code.'.html') ?>
 </div>
 
 Caligula's Palace Airport is a small runway on top of one of the buildings of
@@ -19,7 +21,7 @@ their helicopters.
 
 {@h3 Vehicle spawns}
 
-<?php readfile('../articles/apfactsheets/CALI_vehs.html') ?>
+<?php readfile('../articles/apfactsheets/'.$code.'_vehs.html') ?>
 
 {@h3 Service points}
 
@@ -27,12 +29,12 @@ Since CALI is just a runway on top of a building, there are no service points
 available. The closest one is probably to be found at
 {@article Las_Venturas_Airport}.
 
-{@rem no clear, the dyn-stats template clears (before the flights part) @}
-<?php $code='CALI'; include('../articles/airport-dyn-stats.php') ?>
+{@rem island map is either empty, or it contains the h3 header @}
+<?php readfile('../articles/islandmaps/'.$code.'.html') ?>
 
 {@h3 Aerodrome Chart}
 
-<?php readfile('../articles/aerodromecharts/CALI.html') ?>
+<?php readfile('../articles/aerodromecharts/'.$code.'.html') ?>
 
-{@clear}
-
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php include('../articles/airport-dyn-stats.php') ?>

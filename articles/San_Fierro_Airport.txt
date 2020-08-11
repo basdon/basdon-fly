@@ -1,5 +1,7 @@
+<?php $code = 'SASF'; ?>
+
 <div class="articleright">
-  <?php readfile('../articles/apfactsheets/SASF.html') ?>
+  <?php readfile('../articles/apfactsheets/'.$code.'.html') ?>
 </div>
 
 Easter Bay International Airport, better known as San Fierro Airport, is the
@@ -13,7 +15,7 @@ underground parking place.
 
 {@h3 Vehicle spawns}
 
-<?php readfile('../articles/apfactsheets/SASF_vehs.html') ?>
+<?php readfile('../articles/apfactsheets/'.$code.'_vehs.html') ?>
 
 {@h3 Service points}
 
@@ -33,12 +35,12 @@ gates.
   <small>West service point</small>
 }
 
-{@rem no clear, the dyn-stats template clears (before the flights part) @}
-<?php $code='SASF'; include('../articles/airport-dyn-stats.php') ?>
+{@rem island map is either empty, or it contains the h3 header @}
+<?php readfile('../articles/islandmaps/'.$code.'.html') ?>
 
 {@h3 Aerodrome Chart}
 
-<?php readfile('../articles/aerodromecharts/SASF.html') ?>
+<?php readfile('../articles/aerodromecharts/'.$code.'.html') ?>
 
-{@clear}
-
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php include('../articles/airport-dyn-stats.php') ?>

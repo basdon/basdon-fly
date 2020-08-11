@@ -1,5 +1,7 @@
+<?php $code='OCTA'; ?>
+
 <div class="articleright">
-  <?php readfile('../articles/apfactsheets/OCTA.html') ?>
+  <?php readfile('../articles/apfactsheets/'.$code.'.html') ?>
 </div>
 
 Octavia Island is an island to the north east of Las Venturas. The airport at
@@ -23,7 +25,7 @@ she used to own in the aforementioned server.
 
 {@h3 Vehicle spawns}
 
-<?php readfile('../articles/apfactsheets/OCTA_vehs.html') ?>
+<?php readfile('../articles/apfactsheets/'.$code.'_vehs.html') ?>
 
 {@h3 Service points}
 
@@ -44,12 +46,15 @@ refuel, but the local residents were not amused.
   <small>Gas station service point</small>
 }
 
-{@rem no clear, the dyn-stats template clears (before the flights part) @}
-<?php $code='OCTA'; include('../articles/airport-dyn-stats.php') ?>
+{@rem island map is either empty, or it contains the h3 header @}
+<?php readfile('../articles/islandmaps/'.$code.'.html') ?>
 
 {@h3 Aerodrome Chart}
 
-<?php readfile('../articles/aerodromecharts/OCTA.html') ?>
+<?php readfile('../articles/aerodromecharts/'.$code.'.html') ?>
+
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php include('../articles/airport-dyn-stats.php') ?>
 
 {@h3 Gallery}
 
@@ -67,6 +72,3 @@ refuel, but the local residents were not amused.
 {@agalleryimg octa_resi3.jpg;Residential area}
 {@agalleryimg octa_resi4.jpg;Residential area}
 {@agalleryimg octa_minimap.png;Minimap}
-
-{@clear}
-
