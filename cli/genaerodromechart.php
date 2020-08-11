@@ -303,10 +303,6 @@ foreach ($servicepoints as $svp) {
 	imagesetpixel($im, $x + 5, $y + 9, $color_black);
 }
 
-if (isset($_GET['web'])) {
-	if (!isset($_GET['d'])) header('Content-Type: image/png');
-}
-
 ob_start();
 imagepng($im);
 imagedestroy($im);

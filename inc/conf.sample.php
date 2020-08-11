@@ -17,6 +17,10 @@ $CSS_SUFFIX = 'css';
 // uncomment to use minified css files
 //$CSS_SUFFIX = 'm.css'
 
+// uncomment and point to the directory where server .map files are located (no trailing slash)
+// used for island maps and maybe other things
+//$conf_maps_dir = '';
+
 // set to true to reparse templates on every page load
 // don't enable this in production
 $__REPARSE__ = false;

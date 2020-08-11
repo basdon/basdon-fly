@@ -1,7 +1,7 @@
 
-.PHONY: .templates .aerodromcharts .apfactsheets .articles all
+.PHONY: .templates .aerodromcharts .apfactsheets .articles .islandmaps all
 
-all: .templates .aerodromecharts .apfactsheets .articles
+all: .templates .aerodromecharts .apfactsheets .articles .islandmaps
 
 .templates:
 	rm -f gen/*
@@ -23,3 +23,7 @@ all: .templates .aerodromecharts .apfactsheets .articles
 	cd cli && php ensureairportcodearticlelinking.php
 	cd articles && make
 
+.islandmaps:
+	rm -f articles/islandmaps/*
+	rm -f static/gen/islandmap*
+	cd cli && php genislandmaps.php
