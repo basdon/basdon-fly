@@ -7,14 +7,14 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div class="singlebody">
+	<div><div>
 		{@if $id == -1}
 			<h2 id="main">User not found</h2>
 			<p>Note that profiles of guest accounts can only be found by using their user account id.</p>
 		{@else}
 			{@render userpublicprofile.tpl}
 		{@endif}
-	</div>
+	</div></div>
 	{@render defaultfooter.tpl}
 </body>
 </html>

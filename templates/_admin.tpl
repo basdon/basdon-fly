@@ -16,7 +16,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div class="singlebody">
+	<div><div>
 		<hr/>
 		<p><?php adminlink('Home', 'home'); ?> &bull; <?php adminlink('Anticheat log', 'acl'); ?></p>
 		<hr/>
@@ -24,7 +24,7 @@
 		{@mayrequire ^admin_home}
 		{@mayrequire ^admin_acl}
 		<?php include('../gen/^admin_' . $action . '.php'); ?>
-	</div>
+	</div></div>
 	{@render defaultfooter.tpl}
 </body>
 </html>

@@ -7,7 +7,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div class="singlebody">
+	<div><div>
 		<hr/>
 		<p><?php acclink('Public profile', 'publicprofile'); ?> &bull; <?php acclink('Failed logins', 'fal'); ?></li></p>
 		<hr/>
@@ -16,7 +16,7 @@
 		{@mayrequire ^account_publicprofile}
 		{@mayrequire ^account_fal}
 		<?php include('../gen/^account_' . $action . '.php'); ?>
-	</div>
+	</div></div>
 	{@render defaultfooter.tpl}
 </body>
 </html>

@@ -7,14 +7,17 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div class="singlebody">
-
+	<div><div>
 		<h2 id="main">Welcome!</h2>
 		<p>
 			basdon.net aviation server is a server for <a href="https://www.sa-mp.com/">San Andreas Multiplayer (SA-MP)</a>{@globe}, 
 			a multiplayer modification for the game <a href="http://www.rockstargames.com/sanandreas/">Grand Theft Auto: San Andreas</a>{@globe}. 
 			The main activity is to grab a plane or helicopter and enjoy flying around, either freely or by accepting missions towards various destinations. 
 			Start your flight and have fun!
+		</p>
+		<h2>Server Info</h2>
+		<p>
+			Join by adding <a href="samp://basdon.net:7777">basdon.net:7777</a> to your list of servers and clicking 'connect' (<a href="article.php?title=How_To_Join">How to join</a>). Our server is running using the latest official release: 0.3.7.
 		</p>
 
 		<h3 class="newtableheader">Players</h3>
@@ -140,7 +143,7 @@
 		</table>
 
 		<p class="center"><a href="stats.php">More stats</a></p>
-	</div>
+	</div></div>
 	{@render defaultfooter.tpl}
 </body>
 </html>

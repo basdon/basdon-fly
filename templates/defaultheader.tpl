@@ -1,5 +1,5 @@
-<div>
-	<header>
+<header>
+	<div>
 		<small>
 			{@if isset($loggeduser)}
 				Welcome, {$loggeduser->name}&#32;
@@ -16,10 +16,13 @@
 			{@endif}
 		</small>
 		<h1>basdon.net aviation server <span style="font-size:.7em;color:#e22">alpha</span></h1>
+	</div>
+	<img src="{@unsafe $STATICPATH}/hpan.png" style="width:100%" alt="header panorama img"/>
+	<div>
 		<p id="ip">IP: <a href="samp://basdon.net:7777">basdon.net:7777</a> (<a href="article.php?title=How_To_Join">How to join</a>)</p>
 		<p><a href="index.php">Home</a> <!--:: <a href="news.php">News</a>--> :: <a href="flights.php">Flights</a> <!--:: <a href="map.php">Live Map</a>--> :: <a href="article.php">Articles</a> :: <a href="trac.php">Tracker</a> <!--:: <a href="bbs.php">Message Board</a>--> :: <a href="stats.php">Stats</a></p>
-	</header>
-</div>
+	</div>
+</header>
 {@foreach $__msgs as $msg}
 	<p class="msg">{$msg}</p>
 {@endforeach}

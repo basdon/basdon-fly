@@ -7,7 +7,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div class="singlebody">
+	<div><div>
 		<h2 id="main">Flights</h2>
 		{@eval $page = get_page()}
 		{@try}
@@ -38,7 +38,7 @@
 		{@catch PDOException $e}
 			<p>Failed to get flight list.</p>
 		{@endtry}
-	</div>
+	</div></div>
 	{@render defaultfooter.tpl}
 </body>
 </html>

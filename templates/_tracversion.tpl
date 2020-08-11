@@ -5,10 +5,10 @@
 	{@render defaulthead.tpl}
 	<style>
 		{@render trac_inline_style.css}
-		.singlebody ul {
+		body>div ul {
 			margin: 0;
 		}
-		.singlebody h3 {
+		body>div h3 {
 			margin-bottom: .5em;
 		}
 	</style>
@@ -16,7 +16,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div class="singlebody">
+	<div><div>
 		{@if isset($selectedrelease)}
 			<p><a href="trac.php">Tracker</a> &gt; <a href="tracversion.php">Change log</a> &gt; Release {@unsafe trac_releasetime($selectedrelease)}</p>
 			<h2 id="main">Change log for release {@unsafe trac_releasetime($selectedrelease)}</h2>
@@ -51,7 +51,7 @@
 
 			{@unsafe $pagination}
 		{@endif}
-	</div>
+	</div></div>
 	{@render defaultfooter.tpl}
 </body>
 </html>

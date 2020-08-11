@@ -1,29 +1,30 @@
 body {
-	background: #444;
+	padding:0;
+	margin:0;
+	background: #CCC;
 	font-family: 'Tahoma', sans-serif;
 }
-body > div {
-	background: #fff;
-	max-width: 1000px;
-	margin: 0 auto;
+body>div,body>header,body>footer{
+	background:#fff;
+	max-width:1000px;
+	margin:0 auto;
 }
-body > p.msg {
-	max-width: 1000px;
-	background: #faa;
-	margin: 0 auto;
-	padding: .2em 0;
-	text-align: center;
-	border-bottom: 10px solid #444;
+body>div>div{
+	padding:.1px 10px;
 }
-hr {
-	height: 1px;
+body>header,body>footer{
+	color:#fff;
+	background:#333;
 }
-header {
-	border-bottom: 10px solid #444;
-	padding: 10px;
+header a:link,header a:visited,
+footer a:link,footer a:visited{
+	color:#fff;
 }
 header h1 {
-	margin: .1em 0;
+	margin:0;
+}
+header>div,footer>div{
+	padding:5px 10px;
 }
 header p {
 	text-align: right;
@@ -40,17 +41,21 @@ header small, footer small {
 	text-align: right;
 }
 footer {
-	border-top: 10px solid #444;
-	padding: 10px;
 }
 footer p {
 	line-height: 1.1em;
 	font-size: x-small;
 }
-div.singlebody {
-	padding: 10px;
-	padding-top: 1px;
-	max-width: calc(1000px - 20px);
+body > p.msg {
+	max-width: 1000px;
+	background: #faa;
+	margin: 0 auto;
+	padding: .2em 0;
+	text-align: center;
+	border-bottom:1px solid #a88;
+}
+hr {
+	height: 1px;
 }
 .fr49 {
 	float: right;
@@ -75,6 +80,11 @@ div.singlebody {
 		width: 100%;
 	}
 }
+@media(max-width:600px){
+	header h1{
+		font-size:1.3em;
+	}
+}
 h2, h3, h4, h5, h6 {
 	border-bottom: 1px solid #000;
 }
@@ -92,6 +102,9 @@ h5 {
 }
 h6 {
 	font-size: .8em;
+}
+h2+div,h3+div,h4+div,h5+div{
+	margin-bottom:0;
 }
 #skip {
 	position: absolute;
@@ -113,22 +126,6 @@ img.missing {
 	image-rendering: -webkit-pixelated;
 	image-rendering: pixelated;
 }
-table.default {
-	border-spacing: 0;
-}
-table.default td {
-	border-bottom: 1px solid #ccc;
-	padding: .1em .5em;
-}
-table.default th {
-	border-bottom: 1px solid #000;
-}
-table.default tr:nth-child(odd) {
-	background: #f8f8f8;
-}
-table.default tr:hover {
-	background: #f3f3f3;
-}
 .newtableheader {
 	margin-bottom: 0;
 	text-align: center;
@@ -140,10 +137,12 @@ table.default tr:hover {
 }
 .newtableheader + table.new {
 	border-top: 0;
+	margin-top:0;
 }
 table.new {
 	border: 1px solid #000;
 	border-collapse: collapse;
+	margin:1em 0;
 }
 table.new th {
 	background: #99f;

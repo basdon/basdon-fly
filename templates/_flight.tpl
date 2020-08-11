@@ -37,7 +37,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div class="singlebody">
+	<div><div>
 		<p><a href="flights.php{@if $returnpage != -1}?page={@unsafe $returnpage}{@endif}">Flights</a> &gt; Flight #{@unsafe $id}</p>
 		<h2 id="main">Flight #{@unsafe $id} details</h2>
 <?php 
@@ -168,7 +168,7 @@ try{
 		</div>
 		<script src="{@unsafe $STATICPATH}/flightmap.js"></script>
 		<script>UTCoffset={@unsafe date('Z')};flightmap('{@unsafe $STATICPATH}', {@unsafe $id})</script>
-	</div>
+	</div></div>
 	{@render defaultfooter.tpl}
 </body>
 </html>

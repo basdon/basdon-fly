@@ -23,7 +23,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div class="singlebody">
+	<div><div>
 		<p><a href="trac.php">Tracker</a> &gt; New ticket</p>
 		<h2 id="main">New tracker ticket</h2>
 		<form method="post" action="tracnew.php">
@@ -43,7 +43,7 @@
 				<tr><td></td><td>{@input submit Submit}</td></tr>
 			</table>
 		</form>
-	</div>
+	</div></div>
 	{@render defaultfooter.tpl}
 </body>
 </html>

@@ -4,6 +4,7 @@
 table.trac {
 	width: 100%;
 	border: 1px solid #000;
+	margin:1em 0;
 }
 table.trac td {
 	padding: .1em .5em;

@@ -32,7 +32,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div class="singlebody">
+	<div><div>
 		<div id="login">
 			{@if isset($loggeduser)}
 				<p>You're already logged in! <a href="logout.php?k={@unsafe $loggeduser->logoutkey}">Logout</a></p>
@@ -55,7 +55,7 @@
 				</p>
 			{@endif}
 		</div>
-	</div>
+	</div></div>
 	{@render defaultfooter.tpl}
 </body>
 </html>

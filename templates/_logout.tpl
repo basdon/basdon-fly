@@ -7,7 +7,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div class="singlebody">
+	<div><div>
 		<p style="text-align:center;margin: 2em 0">
 			{@if isset($loggeduser)}
 				Something went wrong, please try again: <a href="logout.php?k={@unsafe $loggeduser->logoutkey}">logout</a>
@@ -15,7 +15,7 @@
 				You're not logged in! <a href="login.php">Login</a>
 			{@endif}
 		</p>
-	</div>
+	</div></div>
 	{@render defaultfooter.tpl}
 </body>
 </html>
