@@ -129,12 +129,6 @@ try{
 			{@endif}
 		</div>
 		<div class="clear"></div>
-<?php 
-	}
-} catch (PDOException $e) {
-?>
-		<p style="color:red;">Failed to load flight info!</p>
-<?php } ?>
 		<h3>Flight map/info</h3>
 		<noscript><p>Enable JavaScript to see the detailed flight map/info.</p></noscript>
 		<div id="rmmsg">Loading...</div>
@@ -168,6 +162,12 @@ try{
 		</div>
 		<script src="{@unsafe $STATICPATH}/flightmap.js"></script>
 		<script>UTCoffset={@unsafe date('Z')};flightmap('{@unsafe $STATICPATH}', {@unsafe $id})</script>
+<?php 
+	}
+} catch (PDOException $e) {
+?>
+		<p style="color:red;">Failed to load flight info!</p>
+<?php } ?>
 	</div></div>
 	{@render defaultfooter.tpl}
 </body>
