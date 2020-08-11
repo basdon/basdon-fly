@@ -144,6 +144,10 @@ s_{@stub}_<p class="msg warning">This article is a stub.</p>_
 		b nexttag
 	}
 
+	/{@agalleryimg/ {
+		s_{@agalleryimg \([^;]*\);\(.*\)}_<img class="gallery" src="<?=$STATICPATH?>/articles/\1" title="\2" alt="\2"/>_
+		b nexttag
+	}
 	s_{@aimg(\([^)]*\))=\([^;]*\);\([^;]*\);\([^;]*\);\(.*\)}_{@img(\1)=<?=$STATICPATH?>/articles/\2;\3;\4;\5}_
 	s_{@aimg=\([^;]*\);\([^;]*\);\([^;]*\);\(.*\)}_{@img=<?=$STATICPATH?>/articles/\1;\2;\3;\4}_
 	s_{@simg=\([^;]*\);\([^;]*\);\([^;]*\);\(.*\)}_{@img=<?=$STATICPATH?>/\1;\2;\3;\4}_

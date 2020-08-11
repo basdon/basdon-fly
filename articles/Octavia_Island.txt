@@ -1,12 +1,25 @@
-{@stub}
-
 <div class="articleright">
   <?php readfile('../articles/apfactsheets/OCTA.html') ?>
 </div>
 
-OCTA
+Octavia Island is an island to the north east of Las Venturas. The airport at
+the island has two long runways, bordered by a long beach. The residential areas
+consist of a few housing blocks. There is a big mountain at the north-west of
+the island.
 
-is the first island added to basdon
+The airport has a few parking spots for big airplanes, such as Andromadas or
+AT-400s.
+
+This island was made and named as a memorial for Octavia_Scratch, a former
+player of The Pilot's Life server (another aviation server for SA:MP), who sadly
+passed away. An NPC with her usual skin can be found at the lighthouse, which
+she used to own in the aforementioned server.
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=\
+    octa_octa.jpg;lighthouse;lighthouse}
+  <small>Octavia at her lighthouse</small>
+}
 
 {@h3 Vehicle spawns}
 
@@ -14,12 +27,46 @@ is the first island added to basdon
 
 {@h3 Service points}
 
+There are two airports at Octavia Island, however, only one is at the airport.
+The other service point is a gas station, which can not be used for aircrafts.
+Some pilots have parked their helicopter on top of the gas station and tried to
+refuel, but the local residents were not amused.
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=\
+    octa_sp_ap.jpg;Airport service point;Airport service point}
+  <small>Airport service point</small>
+}
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=\
+    octa_sp_gas.jpg;Gas station service point;Gas station service point}
+  <small>Gas station service point</small>
+}
+
 {@rem no clear, the dyn-stats template clears (before the flights part) @}
 <?php $code='OCTA'; include('../articles/airport-dyn-stats.php') ?>
 
 {@h3 Aerodrome Chart}
 
 <?php readfile('../articles/aerodromecharts/OCTA.html') ?>
+
+{@h3 Gallery}
+
+{@agalleryimg octa_rnw09.png;Runway 09}
+{@agalleryimg octa_rnw36.png;Runway 36}
+{@agalleryimg octa_ap.png;Airport}
+{@agalleryimg octa_dawn1.png;Octavia Island by dawn}
+{@agalleryimg octa_dawn2.png;Octavia Island by dawn}
+{@agalleryimg octa_beach.jpg;Beach}
+{@agalleryimg octa_cargo.png;Cargo area}
+{@agalleryimg octa_gates.png;Airport gates}
+{@agalleryimg octa_lighthouse.png;Beach lighthouse}
+{@agalleryimg octa_resi1.png;Residential area}
+{@agalleryimg octa_resi2.png;Residential area}
+{@agalleryimg octa_resi3.jpg;Residential area}
+{@agalleryimg octa_resi4.jpg;Residential area}
+{@agalleryimg octa_minimap.png;Minimap}
 
 {@clear}
 
