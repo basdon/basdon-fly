@@ -230,12 +230,7 @@ webses -- website sessions
 map -- maps
   id - rowid
   ap - linked airport (apt.id) (default NULL)
-  name - name of the map (varchar 24)
-  filename - filename of the map (name.map) (varchar 24)
-  midx - center x position
-  midy - center y position
-  radi - stream in radius (float)
-  rado - stream out radius (float)
+  filename - filename of the map (without .map extension) (varchar 24)
 </pre>
 
 <pre>
