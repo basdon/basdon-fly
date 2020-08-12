@@ -3,10 +3,8 @@
 require '../inc/conf.php';
 require '../inc/db.php';
 
-$imgw = 950;
+$imgw = 978;
 $imgh = 100;
-
-$d = isset($_GET['d']);
 
 $im = imagecreate($imgw, $imgh);
 
@@ -15,12 +13,14 @@ $color_fill = imagecolorallocate($im, 0xeb, 0xeb, 0x68);
 $color_outline = imagecolorallocate($im, 0xA8, 0xA8, 0x4B);
 $color_peak = imagecolorallocate($im, 0x69, 0x7F, 0xEA);
 $color_text = imagecolorallocate($im, 0, 0, 0);
+$color_hour_guide = imagecolorallocate($im, 0x80, 0x80, 0x80);
 
-$max = 0;
+$max_num_players = 0;
 $val = 0;
 $rightvalue = 0;
 $time_end = time() - 60;
 $time_start = $time_end - 3600 * 24;
+// when changing the total time, adjust the vertical hour indicator bars thingies
 $values = [];
 try {
 	// result of query is list of timestamps with either -1 or 1
@@ -31,7 +31,7 @@ try {
 			UNION (SELECT e AS stamp,1 AS t FROM ses WHERE e>$time_start) ORDER BY stamp DESC") as $r)
 	{
 		$val += $r->t;
-		$max = max($max, $val);
+		$max_num_players = max($max_num_players, $val);
 		$r->value = $val;
 		if ($r->stamp < $time_end) {
 			$values[] = $r;
@@ -50,8 +50,9 @@ $values[] = $o;
 
 $peakranges = [];
 $inpeak = false;
-$maxy = $imgh - 12;
-if ($max > 0) {
+$maxy = $imgh - fontheight(2) - 1;
+if ($max_num_players > 0) {
+	/*basically put a value for every x of the graph*/
 	$o = new stdclass();
 	$o->stamp = $time_end;
 	$o->value = $rightvalue;
@@ -69,7 +70,7 @@ if ($max > 0) {
 			$newvalue = max($newvalue, $value);
 			$thisvalue = $newvalue;
 		}
-		if ($thisvalue == $max) {
+		if ($thisvalue == $max_num_players) {
 			if ($inpeak) {
 				$peakranges[0]->min = $x;
 			} else {
@@ -82,10 +83,11 @@ if ($max > 0) {
 		} else {
 			$inpeak = false;
 		}
-		$ytop = $imgh - $maxy * ($thisvalue / $max);
+		$ytop = $imgh - $maxy * ($thisvalue / $max_num_players);
 		$vals[] = $ytop;
 	}
 
+	/*smoothen out the values, give them a slope*/
 	// TODO? this is slightly biased towards the left (because it goes left to right)
 	$changed = true;
 	for ($j = 0; $j < 5 && $changed; $j++) {
@@ -108,10 +110,12 @@ if ($max > 0) {
 		}
 	}
 
+	/*I guess*/
 	foreach ($vals as &$v) {
 		$v = (int) $v;
 	}
 
+	/*draw it!*/
 	$x = $imgw - 1;
 	imageline($im, $x, $imgh, $x, $vals[0], $color_fill);
 	imagesetpixel($im, $x, $vals[0], $color_outline);
@@ -142,10 +146,23 @@ if ($max > 0) {
 		$lastv = $v;
 	}
 } else {
-	$txt = 'no players last 24h :(';
-	imagestring($im, 2, ($imgw - imagefontwidth(2) * strlen($txt)) / 2, 2, $txt, $color_text);
 }
 
+/*hour 'axis' guidelines*/
+$hour_guide_time_offset = 3600 - ($time_end % 3600); /*align them on the hour*/
+$hour_guide_time = $time_end - $hour_guide_time_offset;
+$x = $imgw - 1 + $hour_guide_time_offset * $imgw / 24 / 3600;
+$xincrement = $imgw / 24; /*one per hour*/
+for ($i = 0; $i < 25 /*25 because we do one extra at the right*/; $i++) {
+	imageline($im, $x, 0, $x, imagefontheight(2), $color_hour_guide);
+	$textx = $x - imagefontwidth(2) * 1.5 - $xincrement / 2;
+	$texty = 0;
+	imagestring($im, 2, $textx, $texty, date('H', $hour_guide_time) . 'h', $color_hour_guide);
+	$hour_guide_time -= 3600;
+	$x -= $xincrement;
+}
+
+/*show peak square and text, if there were any players*/
 if (count($peakranges)) {
 	$longest = $peakranges[0];
 	foreach ($peakranges as $p) {
@@ -157,22 +174,36 @@ if (count($peakranges)) {
 	$x = $longest->min + ($longest->max - $longest->min) / 2;
 	$y = $imgh - $maxy;
 	imagefilledrectangle($im, $x - 2, $y - 2, $x + 2, $y + 2, $color_peak);
-	$txt = "peak: " . $max;
+	$txt = "peak: " . $max_num_players;
 	if ($x > $imgw / 2) {
 		$x -= imagefontwidth(2) * strlen($txt);
 	}
 	imagestring($im, 2, $x, $y + 2, $txt, $color_text);
 }
 
-$lastupdate = date('j M H:i O', time());
-imagestring($im, 2, ($imgw - imagefontwidth(2) * strlen($lastupdate)) / 2, $imgh - imagefontheight(2), $lastupdate, $color_text);
+$text = date('j M H:i O', time());
+$textx = ($imgw - imagefontwidth(2) * strlen($text)) / 2;
+$texty = $imgh - imagefontheight(2);
+imagestring($im, 2, $textx, $texty, $text, $color_text);
+if ($max_num_players == 0) {
+	$text = 'no players last 24h :(';
+	$textx = ($imgw - imagefontwidth(2) * strlen($text)) / 2;
+	$texty -= imagefontheight(2) - 2;
+	imagestring($im, 2, $textx, $texty, $text, $color_text);
+}
 
-if (!$d) header('Content-Type: image/png');
+if (isset($_SERVER['REMOTE_ADDR']) && !isset($_GET['d'])) {
+	header('Content-Type: image/png');
+}
 
 ob_start();
 imagepng($im);
 file_put_contents('../static/gen/playergraph.png', ob_get_contents());
-ob_end_clean();
+if (isset($_SERVER['REMOTE_ADDR'])) {
+	ob_end_flush();
+} else {
+	ob_end_clean();
+}
 
 imagedestroy($im);
 
