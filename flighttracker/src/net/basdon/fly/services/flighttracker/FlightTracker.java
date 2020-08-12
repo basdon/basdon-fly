@@ -280,7 +280,7 @@ throws InterruptedIOException
 			return null;
 		}
 		try {
-			os.write(4);
+			os.write(5);
 			os.write('F');
 			os.write('L');
 			os.write('Y');
