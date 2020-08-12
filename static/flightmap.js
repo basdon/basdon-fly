@@ -6,20 +6,20 @@ function flightmap(staticpath, id)
 {
 	var loadmap = function(ab, errcb)
 	{
-		var v4 = false;
-		var chunksize = 24;
 		var dv = new DataView(req.response);
-		if (dv.getInt32(0, 1) == 0x594C4604) {
-			v4 = true;
-			chunksize = 28;
-		} else if (dv.getInt32(0, 1) != 0x594C4603) {
+		var version = dv.getInt32(0, 1);
+		if ((version & 0xFFFFFF00) != 0x594C4600 || (version = (version & 0xFF)) < 3 || 5 < version) {
 			return errcb('incorrect version');
 		}
 		if (dv.getInt32(4, 1) != id) {
 			return errcb('incorrect version or wrong flight id');
 		}
+		var chunksize = 24;
+		if (version > 3) {
+			chunksize = 28;
+		}
 		var len = req.response.byteLength;
-		if (len < 96) {
+		if (len < 40 + chunksize * 2) {
 			return errcb('no data');
 		}
 		var fuelcap = dv.getFloat32(8, 1);
@@ -75,7 +75,8 @@ function flightmap(staticpath, id)
 				spd.push(t = dv.getInt16(6, 1));
 				if (!minspd || t < minspd) minspd = t;
 				if (!maxspd || t > maxspd) maxspd = t;
-				alt.push(t = dv.getInt16(8, 1));
+				/*altitude has bogus data (it's same as pitch10) for flight map version 4*/
+				alt.push(version == 4 ? 0 : (t = dv.getInt16(8, 1)));
 				if (!minalt || t < minalt) minalt = t;
 				if (!maxalt || t > maxalt) maxalt = t;
 				hp.push(t = dv.getInt16(10, 1));

@@ -131,7 +131,7 @@ try{
 		<div class="clear"></div>
 		<h3>Flight map/info</h3>
 		<noscript><p>Enable JavaScript to see the detailed flight map/info.</p></noscript>
-		<div id="rmmsg">Loading...</div>
+		<div id="rmmsg"><p>Loading...</p></div>
 		<div id="rm">
 			<div id="rmm">
 				<h4>Map</h4>
@@ -160,7 +160,7 @@ try{
 			</div>
 			<div class="clear"></div>
 		</div>
-		<script src="{@unsafe $STATICPATH}/flightmap.js"></script>
+		<script src="{@unsafe $STATICPATH}/flightmap.js?v5v2"></script>
 		<script>UTCoffset={@unsafe date('Z')};flightmap('{@unsafe $STATICPATH}', {@unsafe $id})</script>
 <?php 
 	}
