@@ -151,8 +151,8 @@ if ($max_num_players > 0) {
 }
 
 /*hour 'axis' guidelines*/
+$hour_guide_time = $time_end;
 $hour_guide_time_offset = 3600 - ($time_end % 3600); /*align them on the hour*/
-$hour_guide_time = $time_end - $hour_guide_time_offset;
 $x = $imgw - 1 + $hour_guide_time_offset * $imgw / 24 / 3600;
 $xincrement = $imgw / 24; /*one per hour*/
 for ($i = 0; $i < 25 /*25 because we do one extra at the right*/; $i++) {
