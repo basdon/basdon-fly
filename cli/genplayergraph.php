@@ -50,7 +50,7 @@ $values[] = $o;
 
 $peakranges = [];
 $inpeak = false;
-$maxy = $imgh - fontheight(2) - 1;
+$maxy = $imgh - imagefontheight(2) - 3;
 if ($max_num_players > 0) {
 	/*basically put a value for every x of the graph*/
 	$o = new stdclass();
