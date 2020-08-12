@@ -27,8 +27,10 @@ try {
 	// 1 at the end of the session, -1 at the start of the session
 	// since the graph is made from right to left, values are summed to get the playercount at any time
 	// (last 60 seconds are not shown on the graph, because session end times update every 30s)
-	foreach ($db->query("(SELECT s AS stamp,-1 AS t FROM ses WHERE e>$time_start)
-			UNION (SELECT e AS stamp,1 AS t FROM ses WHERE e>$time_start) ORDER BY stamp DESC") as $r)
+	// It looks like results are squashed (ie when there are 4 players online, it only gives one row
+	// instead of 4 rows with the e,1 values, why?), also selecting i seems to counter this.
+	foreach ($db->query("(SELECT i,s AS stamp,-1 AS t FROM ses WHERE e>$time_start)
+			UNION (SELECT i,e AS stamp,1 AS t FROM ses WHERE e>$time_start) ORDER BY stamp DESC") as $r)
 	{
 		$val += $r->t;
 		$max_num_players = max($max_num_players, $val);
