@@ -1467,8 +1467,6 @@ void missions_send_tracker_data(
 	cbuf32[9] = (char) mission->passenger_satisfaction;
 	memcpy(cbuf32 + 10, &spd, 2);
 	memcpy(cbuf32 + 12, &alt, 2);
-	memcpy(cbuf32 + 12, &pitch10, 2);
-	memcpy(cbuf32 + 12, &roll10, 2);
 	memcpy(cbuf32 + 14, &hpv, 2);
 	memcpy(cbuf32 + 16, &mission->veh->fuel, 4);
 	memcpy(cbuf32 + 20, &vpos->x, 4);
