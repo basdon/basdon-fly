@@ -15,9 +15,16 @@
 			The main activity is to grab a plane or helicopter and enjoy flying around, either freely or by accepting missions towards various destinations. 
 			Start your flight and have fun!
 		</p>
+
 		<h2>Server Info</h2>
 		<p>
 			Join by adding <a href="samp://basdon.net:7777">basdon.net:7777</a> to your list of servers and clicking 'connect' (<a href="article.php?title=How_To_Join">How to join</a>). Our server is running using the latest official release: 0.3.7.
+		</p>
+		<p>
+			Our IRC channels are #basdon (for general talk) and #basdon.echo (with relayed server chat) on the irc.tl network: <a href="irc://chat.irc.tl">chat.irc.tl</a>{@globe}. Chatlogs can be found at <a href="https://static.basdon.net/chatlogs">https://static.basdon.net/chatlogs</a>.
+		</p>
+		<p>
+			<p>We also have a Discord server, invite link: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}.
 		</p>
 
 		<h3 class="newtableheader">Players</h3>
