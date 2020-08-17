@@ -204,17 +204,17 @@ int zones_cmd_loc(CMDPARAMS)
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 		return 1;
 	}
-	common_GetPlayerPos(playerid, &pos);
-	zones_update(playerid, pos);
+	common_GetPlayerPos(target, &pos);
+	zones_update(target, pos);
 
 	b = buf;
 	b += sprintf(buf, "%s(%d) is located in ",
-		pdata[playerid]->name, playerid);
-	if (lastzoneid[playerid] >= 0) {
-		b += sprintf(b, "%s, ", zonenames[lastzoneid[playerid]]);
+		pdata[target]->name, target);
+	if (lastzoneid[target] >= 0) {
+		b += sprintf(b, "%s, ", zonenames[lastzoneid[target]]);
 	}
-	b += sprintf(b, "%s ", zonenames[lastregionid[playerid]]);
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	b += sprintf(b, "%s ", zonenames[lastregionid[target]]);
+	vehicleid = NC_GetPlayerVehicleID(target);
 	if (vehicleid) {
 		model = NC_GetVehicleModel(vehicleid);
 		NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
