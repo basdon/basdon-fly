@@ -1,16 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "a_samp.h"
-#include "airport.h"
-#include "game_sa.h"
-#include "kneeboard.h"
-#include "panel.h"
-#include "nav.h"
-#include <math.h>
-#include <string.h>
-
 /*
 value vs small vs large:
 +---------+

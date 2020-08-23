@@ -1,15 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "changepassword.h"
-#include "dialog.h"
-#include "login.h"
-#include "playerdata.h"
-#include <string.h>
-
-static const char *REGISTER_CAPTION = "Register";
-
 struct REGISTERDATA {
 	char newname[MAX_PLAYER_NAME];
 	char oldname[MAX_PLAYER_NAME];
@@ -255,6 +243,10 @@ void guestreg_cb_password_hashed(void *data)
 	}
 }
 
+/**
+The /register command allows guests to register their account.
+*/
+static
 int guestreg_cmd_register(CMDPARAMS)
 {
 	if (sessionid[playerid] == -1 || userid[playerid] == -1) {

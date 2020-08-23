@@ -1,12 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-/*This file is directly included in cmd.c,
-but also added as a source file in VC2005. Check
-for the IN_CMD macro to only compile this
-when we're inside cmd.c*/
-#ifdef IN_CMD
-
 /**
 Toggles constantly showing the closest mission checkpoint for every player.
 */
@@ -328,5 +319,3 @@ int cmd_dev_vhppinf(CMDPARAMS)
 	NC_SetVehicleHealth(vehicleid, FLOAT_PINF);
 	return 1;
 }
-
-#endif /*IN_CMD*/

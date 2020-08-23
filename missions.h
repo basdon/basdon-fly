@@ -95,24 +95,6 @@ void missions_player_traveled_distance_in_vehicle(int playerid, int vehicleid, f
 Callback for the query that inserts a new mission on mission creation.
 */
 void missions_cb_create(void* data);
-/**
-The /automission cmd, toggles automatically starting new mission on finish.
-
-Aliases: /autow
-*/
-int missions_cmd_automission(CMDPARAMS);
-/**
-The /cancelmission cmd, stops current mission for the player, for a fee.
-
-Aliases: /s
-*/
-int missions_cmd_cancelmission(CMDPARAMS);
-/**
-The /mission cmd, starts a new mission
-
-Aliases: /w /m
-*/
-int missions_cmd_mission(CMDPARAMS);
 void missions_create_tracker_socket();
 void missions_destroy_tracker_socket();
 /**

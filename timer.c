@@ -1,11 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "timer.h"
-#include "time/time.h"
-#include <string.h>
-
 /*arbitrary value*/
 #define MAX_TIMERS (500)
 

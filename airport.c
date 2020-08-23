@@ -1,15 +1,5 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "airport.h"
-#include "dialog.h"
-#include "nav.h"
-#include <math.h>
-#include <string.h>
-
-struct AIRPORT *airports = NULL;
-int numairports = 0;
+static struct AIRPORT *airports = NULL;
+static int numairports = 0;
 
 /**
 Map of airports corresponding to nearest airports from /nearest cmd.
@@ -20,6 +10,10 @@ Amount of airports in the nearest_airports_map array.
 */
 static short nearest_airports_map_size[MAX_PLAYERS];
 
+/**
+Clears all data and frees all allocated memory.
+*/
+static
 void airports_destroy()
 {
 	struct AIRPORT *ap = airports;
@@ -33,6 +27,10 @@ void airports_destroy()
 	airports = NULL;
 }
 
+/**
+Loads airports and runways (and init other things).
+*/
+static
 void airports_init()
 {
 	int cacheid, rowcount, lastap, i, *field = nc_params + 2;
@@ -173,6 +171,13 @@ int sortaprefs(const void *_a, const void *_b)
 	return (int) (10.0f * (b->distance - a->distance));
 }
 
+/**
+The /nearest command, shows a list dialog with airports.
+
+Airports are sorted by distance from player. Choosing an airport shows an
+additional dialog with information about the selected airport.
+*/
+static
 int airport_cmd_nearest(CMDPARAMS)
 {
 	static const char *NONE = WARN"No airports!";
@@ -236,42 +241,11 @@ int airport_cmd_nearest(CMDPARAMS)
 	return 1;
 }
 
-int airport_cmd_beacons(CMDPARAMS)
-{
-	char buf[4096], *b = buf;
-	struct AIRPORT *ap = airports;
-	int count = numairports;
-
-	while (count-- > 0) {
-		if (ap->enabled) {
-			b += sprintf(b, " %s", ap->code);
-		}
-		ap++;
-	}
-	if (b == buf) {
-		strcpy(buf, " None!");
-	}
-	dialog_ShowPlayerDialog(
-		playerid,
-		DIALOG_DUMMY,
-		DIALOG_STYLE_MSGBOX,
-		"Beacons",
-		buf + 1,
-		"Close",
-		NULL,
-		-1);
-	return 1;
-}
-
-void airport_on_player_disconnect(int playerid)
-{
-	if (nearest_airports_map[playerid] != NULL) {
-		free(nearest_airports_map[playerid]);
-		nearest_airports_map[playerid] = NULL;
-	}
-}
-
-void airport_list_dialog_response(int playerid, int response, int idx)
+/**
+Call when getting a response from DIALOG_AIRPORT_NEAREST, to show info dialog.
+*/
+static
+void airport_nearest_dialog_response(int playerid, int response, int idx)
 {
 	struct AIRPORT *ap;
 	struct RUNWAY *rnw;
@@ -325,4 +299,47 @@ void airport_list_dialog_response(int playerid, int response, int idx)
 freereturn:
 	free(nearest_airports_map[playerid]);
 	nearest_airports_map[playerid] = NULL;
+}
+
+/**
+The /beacons command, shows a dialog with list of all airport beacons.
+*/
+static
+int airport_cmd_beacons(CMDPARAMS)
+{
+	char buf[4096], *b = buf;
+	struct AIRPORT *ap = airports;
+	int count = numairports;
+
+	while (count-- > 0) {
+		if (ap->enabled) {
+			b += sprintf(b, " %s", ap->code);
+		}
+		ap++;
+	}
+	if (b == buf) {
+		strcpy(buf, " None!");
+	}
+	dialog_ShowPlayerDialog(
+		playerid,
+		DIALOG_DUMMY,
+		DIALOG_STYLE_MSGBOX,
+		"Beacons",
+		buf + 1,
+		"Close",
+		NULL,
+		-1);
+	return 1;
+}
+
+/**
+Cleanup stored stuff for player when they disconnect.
+*/
+static
+void airport_on_player_disconnect(int playerid)
+{
+	if (nearest_airports_map[playerid] != NULL) {
+		free(nearest_airports_map[playerid]);
+		nearest_airports_map[playerid] = NULL;
+	}
 }

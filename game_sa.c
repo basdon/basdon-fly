@@ -1,10 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "game_sa.h"
-#include <string.h>
-
 unsigned int vehicleflags[VEHICLE_MODEL_TOTAL];
 char aircraftmodelindex[VEHICLE_MODEL_TOTAL];
 

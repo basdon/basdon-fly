@@ -1,18 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "a_samp.h"
-#include "common.h"
-#include "game_sa.h"
-#include "playerdata.h"
-#include "playerstats.h"
-#include "zones.h"
-#include <string.h>
-#include <math.h>
-
-#define IN_ZONES
-#include "zones_data.c"
-
 static int lastzoneid[MAX_PLAYERS];
 static int lastregionid[MAX_PLAYERS];
 static int lastzoneindex[MAX_PLAYERS];
@@ -22,6 +7,7 @@ Holds player text draw id for each player.
 */
 static int ptextid[MAX_PLAYERS];
 
+static
 void zones_init()
 {
 	struct REGION *r = regions, *rmax = regions + regioncount;
@@ -76,6 +62,7 @@ int zones_is_in_zone(struct vec3 pos, struct ZONE *zone)
 		zone->z1 <= pos.z && pos.z <= zone->z2;
 }
 
+static
 void zones_on_player_connect(int playerid)
 {
 	lastzoneindex[playerid] = lastzoneid[playerid] = -1;
@@ -109,17 +96,12 @@ void zones_on_player_connect(int playerid)
 	NC(n_PlayerTextDrawColor);
 }
 
-void zones_on_player_spawn(int playerid, struct vec3 pos)
-{
-	NC_PlayerTextDrawShow(playerid, ptextid[playerid]);
-	zones_update(playerid, pos);
-}
+/**
+Check if a single player their zone has changed, and update it if needed.
 
-void zones_hide_text(int playerid)
-{
-	NC_PlayerTextDrawHide(playerid, ptextid[playerid]);
-}
-
+Should also be called when OnPlayerSetPos is called.
+*/
+static
 void zones_update(int playerid, struct vec3 pos)
 {
 	struct REGION *r = regions, *rmax = regions + regioncount;
@@ -170,6 +152,10 @@ gotcha:
 	}
 }
 
+/**
+Update player zone for all players, should be called periodically.
+*/
+static
 void zones_update_for_all()
 {
 	int idx, playerid;
@@ -185,6 +171,7 @@ void zones_update_for_all()
 	}
 }
 
+static
 int zones_cmd_loc(CMDPARAMS)
 {
 	static const char *CMD_SYN = WARN"Syntax: /loc [id/part of name]";
@@ -232,4 +219,25 @@ int zones_cmd_loc(CMDPARAMS)
 	atoc(buf144, buf, 144);
 	NC_SendClientMessage(playerid, COL_INFO_GENERIC, buf144a);
 	return 1;
+}
+
+/**
+Shows and updates zone textdraw for player, to be called from OnPlayerSpawn.
+*/
+static
+void zones_on_player_spawn(int playerid, struct vec3 pos)
+{
+	NC_PlayerTextDrawShow(playerid, ptextid[playerid]);
+	zones_update(playerid, pos);
+}
+
+/**
+Hides the zone textdraw.
+
+Call in OnPlayerDeath
+*/
+static
+void zones_hide_text(int playerid)
+{
+	NC_PlayerTextDrawHide(playerid, ptextid[playerid]);
 }

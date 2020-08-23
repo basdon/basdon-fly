@@ -1,14 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-/*This file is directly included in basdonfly.c,
-but also added as a source file in VC2005. Check
-for the IN_BASDONFLY macro to only compile this
-when we're inside basdonfly.c*/
-#ifdef IN_BASDONFLY
-
-#include "kneeboard.h"
-
 char playeronlineflag[MAX_PLAYERS];
 short players[MAX_PLAYERS];
 int playercount;
@@ -93,7 +82,7 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 		prefs_on_dialog_response(pid, res, listitem);
 		goto ret;
 	case DIALOG_AIRPORT_NEAREST:
-		airport_list_dialog_response(pid, res, listitem);
+		airport_nearest_dialog_response(pid, res, listitem);
 		goto ret;
 	case DIALOG_REGISTER_FIRSTPASS:
 		login_dlg_register_firstpass(pid, res, PARAM(5));
@@ -748,16 +737,3 @@ cell AMX_NATIVE_CALL B_OnVehicleStreamOut(AMX *amx, cell *params)
 	veh_on_vehicle_stream_out(vehicleid, forplayerid);
 	return 1;
 }
-
-void OnPlayerNowAfk(int playerid)
-{
-	panel_remove_panel_player(playerid);
-}
-
-void OnPlayerWasAfk(int playerid)
-{
-	panel_on_player_was_afk(playerid);
-	timecyc_on_player_was_afk(playerid);
-}
-
-#endif /*IN_BASDONFLY*/

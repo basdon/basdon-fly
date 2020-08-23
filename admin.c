@@ -1,18 +1,7 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "admin.h"
-#include "airport.h"
-#include "cmd.h"
-#include "dialog.h"
-#include "game_sa.h"
-#include "vehicles.h"
-#include <string.h>
-
-/*-------------------------------------------*/
-/*//getcar*/
-
+/**
+The //getcar cmd teleports a vehicle to the player's location.
+*/
+static
 int cmd_admin_getcar(CMDPARAMS)
 {
 	struct vec4 ppos;
@@ -34,9 +23,10 @@ int cmd_admin_getcar(CMDPARAMS)
 	return 1;
 }
 
-/*-------------------------------------------*/
-/*//respawn*/
-
+/**
+The //respawn cmd respawns the vehicle the player is in.
+*/
+static
 int cmd_admin_respawn(CMDPARAMS)
 {
 	int vehicleid;
@@ -48,9 +38,14 @@ int cmd_admin_respawn(CMDPARAMS)
 	return 1;
 }
 
-/*-------------------------------------------*/
-/*//cmd_admin_makeanewpermanentpublicvehiclehere*/
+/**
+The //makeanewpermanentpublicvehiclehere creates a new public vehicle.
 
+It's that long because creating vehicles is no joke and there should be
+sufficient self-reflection time while typing the command to be sure that
+the user really wants to create a new permanent public vehicle.
+*/
+static
 int cmd_admin_makeanewpermanentpublicvehiclehere(CMDPARAMS)
 {
 	struct dbvehicle *veh;
@@ -88,9 +83,10 @@ gotid:
 	return 1;
 }
 
-/*-------------------------------------------*/
-/*//rr*/
-
+/**
+The //rr commands respawns all unoccupied vehicles in a close range.
+*/
+static
 int cmd_admin_rr(CMDPARAMS)
 {
 	static const float RR_SQ = 150.0f * 150.0f;
@@ -127,9 +123,6 @@ skip_occupied:
 	}
 	return 1;
 }
-
-/*-------------------------------------------*/
-/*//vehinfo*/
 
 static
 void admin_show_vehinfo(playerid, veh, enabled, airport)
@@ -267,6 +260,12 @@ void admin_dlg_vehinfo_assign_response(int pid, int res, int listitem)
 	admin_vehinfo_show(pid);
 }
 
+/**
+The //vehinfo cmd shows vehicle info
+
+Also allows editing enabled state and linked airport.
+*/
+static
 int cmd_admin_vehinfo(CMDPARAMS)
 {
 	admin_vehinfo_show(playerid);

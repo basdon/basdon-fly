@@ -1,12 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "changepassword.h"
-#include "dialog.h"
-#include "login.h"
-#include <string.h>
-
 struct NEWPWDATA {
 	char bcrypt[PW_HASH_LENGTH];
 	cell sha256[PW_HASH_LENGTH];
@@ -117,7 +108,7 @@ void chpw_cb_current_password_loaded(void *data)
 
 	/*if dialog is dismissed, transaction will be set to aborted,
 	so check for that case and clear if necessary*/
-	ta = dialog_current_transaction(playerid);
+	ta = dialog_transaction[playerid];
 	if (ta == TRANSACTION_CHANGEPASS_ABORTED) {
 		dialog_end_transaction(playerid, ta);
 		return;
@@ -229,6 +220,12 @@ void chpw_cb_new_password_hashed(void *data)
 	}
 }
 
+/**
+The /changepassword command allows one to change their password.
+
+Must only be available to registered users.
+*/
+static
 int chpw_cmd_changepassword(CMDPARAMS)
 {
 	if (pwdata[playerid]) {

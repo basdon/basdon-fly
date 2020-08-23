@@ -10,16 +10,6 @@ Load servicepoints from the db.
 */
 void svp_init();
 /**
-Servicepoint /refuel command.
-*/
-int svp_cmd_refuel(CMDPARAMS);
-/**
-Servicepoint /repair command.
-
-Aliases: /fix
-*/
-int svp_cmd_repair(CMDPARAMS);
-/**
 Reset servicepoint map icon streaming for new player.
 */
 void svp_on_player_connect(int playerid);

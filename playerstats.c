@@ -1,19 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "basdon.h"
-#include "login.h"
-#include "money.h"
-#include "playerdata.h"
-#include "playerstats.h"
-#include "prefs.h"
-#include "score.h"
-#include "timer.h"
-#include "vehicles.h"
-#include "time/time.h"
-#include <string.h>
-
 #define LAST_SEEN_TIMER_VALUE 30000
 
 char isafk[MAX_PLAYERS];
@@ -133,17 +117,18 @@ void playerstats_init()
 void playerstats_check_for_afk()
 {
 	unsigned long now = time_timestamp();
-	unsigned long asecondago = now - 1100;
+	unsigned long asecondago = now - 2000;
 	int n, playerid;
 
 	n = playercount;
 	while (n--) {
 		playerid = players[n];
 		if (!isafk[playerid] && lastupdate[playerid] < asecondago) {
+			/*player now afk*/
 			isafk[playerid] = 1;
-			OnPlayerNowAfk(playerid);
-			uncommitted_playtime[playerid] =
-				now - uncommitted_playtime[playerid];
+			uncommitted_playtime[playerid] = now - uncommitted_playtime[playerid];
+
+			panel_remove_panel_player(playerid);
 		}
 	}
 }
@@ -167,10 +152,12 @@ void playerstats_on_player_update(int playerid)
 	unsigned long now = time_timestamp();
 
 	if (isafk[playerid]) {
+		/*player back from afk*/
 		isafk[playerid] = 0;
-		OnPlayerWasAfk(playerid);
-		uncommitted_playtime[playerid] =
-			now - uncommitted_playtime[playerid];
+		uncommitted_playtime[playerid] = now - uncommitted_playtime[playerid];
+
+		panel_on_player_was_afk(playerid);
+		timecyc_on_player_was_afk(playerid);
 	}
 	lastupdate[playerid] = now;
 }

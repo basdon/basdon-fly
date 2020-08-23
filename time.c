@@ -5,14 +5,15 @@
 #include <windows.h>
 #include <stdio.h>
 #else
-/*__USE_BSD for usleep*/
+/*__USE_BSD for usleep (server)*/
 #define __USE_BSD
+/*__USE_BSD for usleep (desktop)*/
+#define __USE_MISC
 #include <unistd.h>
 #undef __USE_BSD
+#undef __USE_MISC
 #include <sys/time.h>
 #endif
-
-#include "time.h"
 
 /**
 Timestamp value when time_init was called.
@@ -23,22 +24,10 @@ Timestamp value last time time_elapsed_millis was called.
 */
 static unsigned long last_value;
 
-void time_init()
-{
-	if (!initial_value) {
-#if ISWIN
-		timeBeginPeriod(1);
-#endif
-		initial_value = time_timestamp();
-		last_value = 0;
-	}
-}
-
-int time_is_inited()
-{
-	return initial_value;
-}
-
+/**
+Get amount of elapsed milliseconds since time_init was called.
+*/
+static
 unsigned long time_timestamp()
 {
 #if ISWIN
@@ -54,6 +43,33 @@ unsigned long time_timestamp()
 #endif
 }
 
+/**
+Inits time, must be called before using other time functions.
+*/
+static
+void time_init()
+{
+	if (!initial_value) {
+#if ISWIN
+		timeBeginPeriod(1);
+#endif
+		initial_value = time_timestamp();
+		last_value = 0;
+	}
+}
+
+/**
+Check if time_init has been called already.
+*/
+int time_is_inited()
+{
+	return initial_value;
+}
+
+/**
+Get amount of elapsed milliseconds since last call.
+*/
+static
 int time_elapsed_millis()
 {
 	unsigned long now;
@@ -65,6 +81,10 @@ int time_elapsed_millis()
 	return diff;
 }
 
+/**
+Sleep.
+*/
+static
 void time_sleep(int millis)
 {
 #if ISWIN

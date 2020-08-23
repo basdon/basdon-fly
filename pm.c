@@ -1,12 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "playerdata.h"
-#include "pm.h"
-#include "prefs.h"
-#include <string.h>
-
 #define LAST_PMTARGET_NOBODY -1
 #define LAST_PMTARGET_INVALID -2
 
@@ -15,11 +6,19 @@ The last pm target for each player, the player id that is used when doing /r.
 */
 static int lastpmtarget[MAX_PLAYERS];
 
+/**
+Resets the last pm target for given player.
+*/
+static
 void pm_on_player_connect(int playerid)
 {
 	lastpmtarget[playerid] = -1;
 }
 
+/**
+Change every player that has given player as pm target to invalid target id.
+*/
+static
 void pm_on_player_disconnect(int playerid)
 {
 	int pid, n = playercount;
@@ -70,6 +69,12 @@ errmsg:
 	return;
 }
 
+/**
+The /pm cmd. /cmd <id|playername> <message>
+
+Sends a pm to given player.
+*/
+static
 int pm_cmd_pm(CMDPARAMS)
 {
 	static const char
@@ -98,6 +103,12 @@ errmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	return 1;
 }
 
+/**
+The /r cmd. /r <message>
+
+Sends a reply pm to the player that last sent a pm to the invoker.
+*/
+static
 int pm_cmd_r(CMDPARAMS)
 {
 	static const char

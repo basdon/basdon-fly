@@ -1,12 +1,4 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "dialog.h"
-#include "prefs.h"
-#include <string.h>
-
-int prefs[MAX_PLAYERS];
+static int prefs[MAX_PLAYERS];
 
 /**
 Appends a row for a preference to show in the preferences dialog.
@@ -60,11 +52,13 @@ void prefs_show_dialog(int playerid)
 		-1);
 }
 
+static
 void prefs_on_player_connect(int playerid)
 {
 	prefs[playerid] = DEFAULTPREFS;
 }
 
+static
 void prefs_on_dialog_response(int playerid, int response, int idx)
 {
 	/*must be same order the calls to prefs_append_pref in
@@ -75,6 +69,12 @@ void prefs_on_dialog_response(int playerid, int response, int idx)
 	}
 }
 
+/**
+The /preferences command.
+
+Shows a dialog with preferences which the player can modify.
+*/
+static
 int prefs_cmd_preferences(CMDPARAMS)
 {
 	prefs_show_dialog(playerid);

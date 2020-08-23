@@ -1,159 +1,9 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "a_samp.h"
-#include "admin.h"
-#include "airport.h"
-#include "changepassword.h"
-#include "echo.h"
-#include "game_sa.h"
-#include "guestregister.h"
-#include "playerdata.h"
-#include "pm.h"
-#include "prefs.h"
-#include "protips.h"
-#include "nav.h"
-#include "missions.h"
-#include "money.h"
-#include "servicepoints.h"
-#include "timecyc.h"
-#include "vehicles.h"
-#include "zones.h"
-#include <math.h>
-#include <string.h>
-
-int cmd_get_int_param(const char *cmdtext, int *parseidx, int *value)
-{
-	char *pc = (char*) cmdtext + *parseidx;
-	int val = 0, sign = 1;
-
-	/*not using atoi since parseidx needs to be updated*/
-	while (*pc == ' ') {
-		pc++;
-	}
-	if (*pc == '+') {
-		pc++;
-	} else if (*pc == '-') {
-		sign = -1;
-		pc++;
-	}
-
-nextchar:
-	if (*pc < '0' || '9' < *pc) {
-		return 0;
-	}
-	val = val * 10 + *pc - '0';
-	pc++;
-	if (*pc == 0 || *pc == ' ') {
-		*parseidx = pc - cmdtext;
-		*value = sign * val;
-		return 1;
-	}
-	goto nextchar;
-}
-
-int cmd_get_player_param(const char *cmdtext, int *parseidx, int *playerid)
-{
-	char name[MAX_PLAYER_NAME + 1], val;
-	char *pc = (char*) cmdtext + *parseidx;
-	char *n = name, *nend = name + sizeof(name);
-	int maybe_id = 0, isnumeric = 1, i;
-
-	while (*pc == ' ') {
-		pc++;
-	}
-
-nextchar:
-	if (n == nend) {
-		/*longer than allowed player name length*/
-		return 0;
-	}
-	val = *pc++;
-	if (val <= ' ') {
-		if (n == name) {
-			/*zero length*/
-			return 0;
-		}
-		*n = 0; /*add zero term to name buffer*/
-		goto gotvalue;
-	}
-	*n++ = val;
-	if (isnumeric && '0' <= val && val <= '9') {
-		if ((maybe_id = maybe_id * 10 + val - '0') >= MAX_PLAYERS) {
-			isnumeric = 0;
-		}
-		goto nextchar;
-	}
-	isnumeric = 0;
-	if ('A' <= val && val <= 'Z') {
-		/*adjust capitals*/
-		*(n - 1) = val | 0x20;
-		goto nextchar;
-	}
-	/*give up on invalid player name characters*/
-	if ((val < 'a' || 'z' < val) && (val < '0' || '9' < val) &&
-		val != '[' && val != ']' && val != '(' &&
-		val != ')' && val != '$' && val != '@' &&
-		val != '.' && val != '_' && val != '=')
-	{
-		return 0;
-	}
-	goto nextchar;
-
-gotvalue:
-	*parseidx = pc - cmdtext;
-	*playerid = INVALID_PLAYER_ID;
-	if (isnumeric) {
-		if (IsPlayerConnected(maybe_id)) {
-			*playerid = maybe_id;
-		}
-		return 1;
-	}
-
-	for (i = 0; i < MAX_PLAYERS; i++) {
-		if (IsPlayerConnected(i) &&
-			strstr(pdata[i]->normname, name) != NULL)
-		{
-			*playerid = i;
-			return 1;
-		}
-	}
-	return 1;
-}
-
-int cmd_get_str_param(const char* cmdtext, int *parseidx, char *buf)
-{
-	char *pc = (char*) cmdtext + *parseidx;
-	char *b = buf;
-
-	while (*pc == ' ') {
-		pc++;
-	}
-	while ((*b = *pc) > ' ') {
-		b++;
-		pc++;
-	}
-	if (b - buf > 0) {
-		*b = 0;
-		*parseidx = pc - cmdtext;
-		return 1;
-	}
-	return 0;
-}
-
 struct COMMAND {
 	int hash;
 	const char *cmd;
 	const int groups;
 	int (*handler)(const int, const char*, int);
 };
-
-#define IN_CMD
-#include "cmdhandlers.c"
-#ifdef DEV
-#include "cmdhandlers_dev.c"
-#endif /*DEV*/
 
 /* see sharedsymbols.h for GROUPS_ definitions */
 /* command must prefixed by forward slash and be lower case */
@@ -271,14 +121,16 @@ nextchar:
 		}
 		goto nextchar;
 	}
-	if ('A' <= cmdtext[pos] && cmdtext[pos] <= 'Z' &&
-		(cmdtext[pos] | 0x20) == cmd[pos])
-	{
+	if ('A' <= cmdtext[pos] && cmdtext[pos] <= 'Z' && (cmdtext[pos] | 0x20) == cmd[pos]) {
 		goto nextchar;
 	}
 	return 0;
 }
 
+/*
+Precalcs all command hashes.
+*/
+static
 void cmd_init()
 {
 	struct COMMAND *c = cmds;
@@ -292,6 +144,7 @@ void cmd_init()
 /*
 Checks incoming command and calls handler if one found and group matched.
 */
+static
 int cmd_check(const int playerid, const char *cmdtext)
 {
 	struct COMMAND *c = cmds;
@@ -300,14 +153,10 @@ int cmd_check(const int playerid, const char *cmdtext)
 	hash = cmd_hash(cmdtext);
 
 	while (c != cmds_end) {
-		if (hash == c->hash &&
-			(pdata[playerid]->groups & c->groups) &&
-			cmd_is(cmdtext, c->cmd, &parseidx))
-		{
+		if (hash == c->hash && (pdata[playerid]->groups & c->groups) && cmd_is(cmdtext, c->cmd, &parseidx)) {
 			return c->handler(playerid, cmdtext, parseidx);
 		}
 		c++;
 	}
 	return 0;
 }
-

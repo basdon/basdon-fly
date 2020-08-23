@@ -1,11 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "echo.h"
-#include "playerdata.h"
-#include <string.h>
-
 #define ECHO_PORT_OUT 7767
 #define ECHO_PORT_IN 7768
 

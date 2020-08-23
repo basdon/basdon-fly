@@ -1,41 +1,13 @@
+#define VERSION "0.1"
 
-/* vim: set filetype=c ts=8 noexpandtab: */
+#include "vendor/SDK/amxplugin.c" /*includes plugincommon.h*/
 
-#include "common.h"
-#include "admin.h"
-#include "airport.h"
-#include "anticheat.h"
-#include "class.h"
-#include "changepassword.h"
-#include "dialog.h"
-#include "echo.h"
-#include "game_sa.h"
-#include "guestregister.h"
-#include "heartbeat.h"
-#include "login.h"
-#include "maps.h"
-#include "missions.h"
-#include "money.h"
-#include "nav.h"
-#include "panel.h"
-#include "playerdata.h"
-#include "playerstats.h"
-#include "pm.h"
-#include "prefs.h"
-#include "protips.h"
-#include "servicepoints.h"
-#include "score.h"
-#include "spawn.h"
-#include "timecyc.h"
-#include "timer.h"
-#include "vehicles.h"
-#include "zones.h"
-#include "time/time.h"
-#include <stdio.h>
-#include <string.h>
+#define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
+#define EXPECT_SIZE(S,SIZE) STATIC_ASSERT(sizeof(S)==(SIZE))
 
-logprintf_t logprintf;
-extern void *pAMXFunctions;
+typedef void (*cb_t)(void* data);
+typedef void (*logprintf_t)(char* format, ...);
+static logprintf_t logprintf;
 
 EXPECT_SIZE(char, 1);
 EXPECT_SIZE(short, 2);
@@ -50,19 +22,198 @@ EXPECT_SIZE(float, 4);
 #define JOINPRESSURE_SLOWMODE_LEN (25000)
 #define JOINPRESSURE_SLOWMODE_MINCONNECTIONTIME (1200)
 
-int _cc[MAX_PLAYERS];
-int joinpressure = 0;
-int minconnectiontime = 0;
+struct vec3 {
+	float x, y, z;
+};
+EXPECT_SIZE(struct vec3, 3 * sizeof(cell));
 
-#define IN_BASDONFLY
-#include "basdon.c"
+struct vec4 {
+	struct vec3 coords;
+	float r;
+};
+EXPECT_SIZE(struct vec4, 4 * sizeof(cell));
 
-#ifndef PRECOMPILED_TIME
-#include "time/time.c"
-#endif /*PRECOMPILED_TIME*/
+struct quat {
+	float qx, qy, qz, qw;
+};
+EXPECT_SIZE(struct quat, 4 * sizeof(cell));
 
-AMX *amx;
-struct FAKEAMX fakeamx;
+#include "a_samp.h"
+#include "samp.h"
+
+/*airportstuff*/
+
+#define MAX_AIRPORT_NAME (24)
+
+#define APT_FLAG_TOWERED (0x1)
+
+#define RUNWAY_SURFACE_ASPHALT (1)
+#define RUNWAY_SURFACE_DIRT (2)
+#define RUNWAY_SURFACE_CONCRETE (3)
+#define RUNWAY_SURFACE_GRASS (4)
+#define RUNWAY_SURFACE_WATER (5)
+
+#define RUNWAY_TYPE_RUNWAY (1)
+#define RUNWAY_TYPE_HELIPAD (2)
+
+struct RUNWAY {
+	char id[4];
+	float heading, headingr;
+	struct vec3 pos;
+	int nav;
+	/**
+	Should be one of the RUNWAY_TYPE_ constants.
+	*/
+	int type;
+};
+
+struct AIRPORT {
+	int id;
+	struct vec3 pos;
+	char code[4 + 1];
+	char enabled;
+	char name[MAX_AIRPORT_NAME + 1];
+	int missiontypes;
+	int flags;
+	struct RUNWAY *runways, *runwaysend;
+	struct MISSIONPOINT *missionpoints;
+	int num_missionpts;
+};
+
+/*dialogstuff*/
+
+/*can be used when no response is needed*/
+#define DIALOG_DUMMY 127
+/*max dialog is 32767*/
+#define DIALOG_SPAWN_SELECTION 1001
+#define DIALOG_PREFERENCES 1002
+#define DIALOG_AIRPORT_NEAREST 1003
+#define DIALOG_REGISTER_FIRSTPASS 1004
+#define DIALOG_LOGIN_LOGIN_OR_NAMECHANGE 1005
+#define DIALOG_REGISTER_CONFIRMPASS 1006
+#define DIALOG_LOGIN_NAMECHANGE 1007
+#define DIALOG_CHANGEPASS_PREVPASS 1008
+#define DIALOG_CHANGEPASS_NEWPASS 1009
+#define DIALOG_CHANGEPASS_CONFIRMPASS 1010
+#define DIALOG_GUESTREGISTER_CHANGENAME 1011
+#define DIALOG_GUESTREGISTER_FIRSTPASS 1012
+#define DIALOG_GUESTREGISTER_CONFIRMPASS 1013
+#define DIALOG_VEHINFO_VEHINFO 1014
+#define DIALOG_VEHINFO_ASSIGNAP 1015
+
+/*don't use an id that is used in a dialog id (unless they relate), use 32768+*/
+/*max transaction id is int max*/
+#define TRANSACTION_NONE 0
+#define TRANSACTION_OVERRIDE 1
+#define TRANSACTION_MISSION_OVERVIEW 100000
+#define TRANSACTION_LOGIN 100001
+#define TRANSACTION_CHANGEPASS 100002
+#define TRANSACTION_CHANGEPASS_ABORTED 100003
+#define TRANSACTION_GUESTREGISTER 100004
+
+/*prefs*/
+
+#define PREF_ENABLE_PM 1
+#define PREF_SHOW_MISSION_MSGS 2
+#define PREF_CONSTANT_WORK 4
+#define PREF_WORK_AUTONAV 8
+
+#define DEFAULTPREFS (PREF_ENABLE_PM | PREF_SHOW_MISSION_MSGS | PREF_WORK_AUTONAV)
+
+/*randomstuff*/
+
+/**
+Connection count per player id. Incremented every time playerid connects.
+
+Used to check if a player is still valid between long-running tasks.
+*/
+static int _cc[MAX_PLAYERS];
+static int joinpressure = 0;
+static int minconnectiontime = 0;
+
+/**
+amx
+*/
+static AMX *amx;
+/**
+amx data segment
+*/
+static struct FAKEAMX fakeamx;
+
+#include "samphost.h"
+#include "common.h"
+#include "admin.h"
+#include "anticheat.h"
+#include "class.h"
+#include "changepassword.h"
+#include "echo.h"
+#include "game_sa.h"
+#include "guestregister.h"
+#include "login.h"
+#include "maps.h"
+#include "missions.h"
+#include "nav.h"
+#include "panel.h"
+#include "playerdata.h"
+#include "playerstats.h"
+#include "servicepoints.h"
+#include "spawn.h"
+#include "timecyc.h"
+#include "timer.h"
+#include "vehicles.h"
+#include "kneeboard.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+static void zones_update(int playerid, struct vec3 pos);
+
+#include "cmd_utils.c"
+#include "natives.c"
+#include "time.c"
+#include "money.c"
+#include "common.c"
+#include "dialog.c"
+#include "prefs.c"
+#include "airport.c"
+#include "protips.c"
+
+#include "score.c"
+#include "admin.c"
+#include "zones_data.c"
+#include "zones.c"
+#include "anticheat.c"
+#include "changepassword.c"
+#include "class.c"
+#include "cmdhandlers.c"
+#ifdef DEV
+#include "cmdhandlers_dev.c"
+#endif /*DEV*/
+#include "echo.c"
+#include "game_sa.c"
+#include "game_sa_data.c"
+#include "login.c"
+#include "guestregister.c"
+#include "heartbeat.c"
+#include "kneeboard.c"
+#include "maps.c"
+#include "missions.c"
+#include "nav.c"
+#include "panel.c"
+#include "playerdata.c"
+#include "playerstats.c"
+#include "pm.c"
+#include "samp.c"
+#include "servicepoints.c"
+#include "spawn.c"
+#include "timecyc.c"
+#include "timer.c"
+#include "vehicles.c"
+
+#include "cmd.c"
+#include "basdonfly_callbacks.c"
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {

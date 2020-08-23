@@ -1,8 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "game_sa.h"
-
 char *vehnames[] = {
 	"Landstalker",
 	"Bravura",

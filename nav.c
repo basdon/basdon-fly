@@ -1,15 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "a_samp.h"
-#include "airport.h"
-#include "game_sa.h"
-#include "nav.h"
-#include "panel.h"
-#include <math.h>
-#include <string.h>
-
 /*SOUND_ROULETTE_ADD_CASH*/
 #define SOUND_NAV_SET 1083
 /*SOUND_ROULETTE_REMOVE_CASH*/
@@ -144,6 +132,14 @@ sendmsgfail:	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 
 static const char *UNK_BEACON = WARN"Unknown beacon - see /beacons or /nearest";
 
+/**
+The /adf cmd.
+
+Syntax: /adf [beacon]
+Example: /adf ls
+When no beacon, disable nav
+*/
+static
 int nav_cmd_adf(CMDPARAMS)
 {
 	static const char
@@ -197,6 +193,16 @@ unkbeacon:
 	return 1;
 }
 
+/**
+The /vor cmd.
+
+Syntax: /vor [beacon][runway]
+Example: /vor ls09l
+Optional whitespace between beacon and runway
+When no beacon, disable nav
+When no or invalid runway, print a list of valid runways
+*/
+static
 int nav_cmd_vor(CMDPARAMS)
 {
 	static const char
@@ -306,6 +312,13 @@ sendwarnmsg:
 	return 1;
 }
 
+/**
+The /ils command
+
+Syntax: /ils
+Only toggles ils when VOR is already active and the runway has ILS capabilities.
+*/
+static
 int nav_cmd_ils(CMDPARAMS)
 {
 	static const char

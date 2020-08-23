@@ -1,16 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-/*vehicle panel does calls to GetVehicleHealth, so that checks vhh already*/
-
-#include "common.h"
-#include "anticheat.h"
-#include "login.h"
-#include "vehicles.h"
-#include <math.h>
-#include <string.h>
-#include "playerdata.h"
-
 struct INFRACTIONDATA {
 	/**
 	One of AC_ constants.

@@ -1,18 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "a_samp.h"
-#include "anticheat.h"
-#include "cmd.h"
-#include "login.h"
-#include "missions.h"
-#include "money.h"
-#include "playerdata.h"
-#include "servicepoints.h"
-#include "vehicles.h"
-#include <string.h>
-
 #define SERVICE_MAP_DISTANCE 350.0f
 #define SERVICE_MAP_DISTANCE_SQ (SERVICE_MAP_DISTANCE * SERVICE_MAP_DISTANCE)
 #define SERVICE_MAP_ICON_TYPE 38 /*S sweet icon*/
@@ -105,6 +90,10 @@ void svp_init()
 	NC_cache_delete(cacheid);
 }
 
+/**
+Servicepoint /refuel command.
+*/
+static
 int svp_cmd_refuel(CMDPARAMS)
 {
 	struct VEHICLEPARAMS vparams;
@@ -229,6 +218,12 @@ retmsg:
 	return 1;
 }
 
+/**
+Servicepoint /repair command.
+
+Aliases: /fix
+*/
+static
 int svp_cmd_repair(CMDPARAMS)
 {
 	struct dbvehicle *veh;

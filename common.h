@@ -1,41 +1,8 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define _CRT_SECURE_NO_DEPRECATE
-
-#define VERSION "0.1"
-
-#include <stdlib.h>
-#include <stdio.h>
-
-#include "vendor/SDK/amx/amx.h"
-#include "vendor/SDK/plugincommon.h"
-#include "sharedsymbols.h"
-
-#define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
-#define EXPECT_SIZE(S,SIZE) STATIC_ASSERT(sizeof(S)==(SIZE))
-
-#include "samp.h"
-#include "samphost.h"
-
 /*prototype for commonly used struct*/
 struct dbvehicle;
-
-struct vec3 {
-	float x, y, z;
-};
-EXPECT_SIZE(struct vec3, 3 * sizeof(cell));
-
-struct vec4 {
-	struct vec3 coords;
-	float r;
-};
-EXPECT_SIZE(struct vec4, 4 * sizeof(cell));
-
-struct quat {
-	float qx, qy, qz, qw;
-};
-EXPECT_SIZE(struct quat, 4 * sizeof(cell));
 
 struct PLAYERKEYS {
 	int keys;
@@ -62,16 +29,6 @@ struct VEHICLEDAMAGE {
 	unsigned int tires;
 };
 EXPECT_SIZE(struct VEHICLEDAMAGE, 4 * sizeof(cell));
-
-/*include cmd here because lots of headers files need it*/
-#include "cmd.h"
-#include "natives.h"
-
-typedef void (*cb_t)(void* data);
-
-typedef void (*logprintf_t)(char* format, ...);
-
-extern logprintf_t logprintf;
 
 /**
 Convert char string to cell string.
@@ -248,16 +205,6 @@ struct FAKEAMX {
 #define fbuf144 fakeamx.a144.asflt
 #define fbuf4096 fakeamx.a4096.asflt
 
-/*amx*/
-extern AMX *amx;
-/*amx data segment*/
-extern struct FAKEAMX fakeamx;
-/**
-Connection count per player id. Incremented every time playerid connects.
-
-Used to check if a player is still valid between long-running tasks.
-*/
-extern int _cc[MAX_PLAYERS];
 
 /**
 element at index playerid is either 0 or 1

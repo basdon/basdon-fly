@@ -1,13 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "maps.h"
-#include "timer.h"
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-
 #define MAX_MAPS (50)
 #define MAP_MAX_FILENAME (34) /*see db col*/
 /*define to print msg to console each time map streams in/out*/

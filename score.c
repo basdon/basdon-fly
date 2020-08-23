@@ -1,18 +1,14 @@
+static int score_flight_time[MAX_PLAYERS];
+static int score_play_time[MAX_PLAYERS];
 
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "score.h"
-
-int score_flight_time[MAX_PLAYERS];
-int score_play_time[MAX_PLAYERS];
-
+static
 void score_on_player_connect(int playerid)
 {
 	score_flight_time[playerid] = 0;
 	score_play_time[playerid] = 0;
 }
 
+static
 int score_update_score(int playerid)
 {
 	int ft, pt, score;

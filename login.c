@@ -1,20 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "class.h"
-#include "dialog.h"
-#include "game_sa.h"
-#include "kneeboard.h"
-#include "login.h"
-#include "money.h"
-#include "playerdata.h"
-#include "prefs.h"
-#include "score.h"
-#include "vehicles.h"
-#include <string.h>
-#include <time.h>
-
 #define MAX_ALLOWED_FAILED_LOGINS_IN_30_MINUTES 10
 #define MAX_LOGIN_ATTEMPTS_IN_ONE_SESSION 4
 

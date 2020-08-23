@@ -1,11 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "login.h"
-#include "playerdata.h"
-#include <string.h>
-
 struct playerdata *pdata[MAX_PLAYERS];
 
 void pdata_init()

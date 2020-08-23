@@ -1,15 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "a_samp.h"
-#include "game_sa.h"
-#include "common.h"
-#include "airport.h"
-#include "class.h"
-#include "dialog.h"
-#include "spawn.h"
-#include <string.h>
-
 /**
 Amount of spawns per class index.
 */

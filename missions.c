@@ -1,29 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "a_samp.h"
-#include "airport.h"
-#include "anticheat.h"
-#include "cmd.h"
-#include "dialog.h"
-#include "echo.h"
-#include "game_sa.h"
-#include "kneeboard.h"
-#include "login.h"
-#include "missions.h"
-#include "money.h"
-#include "nav.h"
-#include "panel.h"
-#include "playerdata.h"
-#include "playerstats.h"
-#include "prefs.h"
-#include "timer.h"
-#include "vehicles.h"
-#include <math.h>
-#include <string.h>
-#include <time.h>
-
 #define TRACKER_PORT 7766
 
 #define MAX_UNLOAD_SPEED_KNOTS (35.0f)
@@ -1476,6 +1450,12 @@ void missions_send_tracker_data(
 	NC_ssocket_send(tracker, buf32a, 32);
 }
 
+/**
+The /automission cmd, toggles automatically starting new mission on finish.
+
+Aliases: /autow
+*/
+static
 int missions_cmd_automission(CMDPARAMS)
 {
 	static const char
@@ -1491,6 +1471,12 @@ int missions_cmd_automission(CMDPARAMS)
 	return 1;
 }
 
+/**
+The /cancelmission cmd, stops current mission for the player, for a fee.
+
+Aliases: /s
+*/
+static
 int missions_cmd_cancelmission(CMDPARAMS)
 {
 	static const char *NOMISSION = WARN"You're not on an active mission.";
@@ -1520,6 +1506,12 @@ const static char
 	*ALREADYWORKING = WARN"You're already working! Use /s to stop "
 		"your current work first ($"EQ(MISSION_CANCEL_FINE)" fee).";
 
+/**
+The /mission cmd, starts a new mission
+
+Aliases: /w /m
+*/
+static
 int missions_cmd_mission(CMDPARAMS)
 {
 	if (activemission[playerid] != NULL) {

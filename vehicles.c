@@ -1,21 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "a_samp.h"
-#include "anticheat.h"
-#include "game_sa.h"
-#include "login.h"
-#include "missions.h"
-#include "playerdata.h"
-#include "playerstats.h"
-#include "score.h"
-#include "servicepoints.h"
-#include "vehicles.h"
-#include "time/time.h"
-#include <math.h>
-#include <string.h>
-
 #define FUEL_WARNING_SOUND 3200 /*air horn*/
 
 #define MAX_ENGINE_CUTOFF_KPH (3.0f)

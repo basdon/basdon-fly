@@ -1,13 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "a_samp.h"
-#include "class.h"
-#include "game_sa.h"
-#include "login.h"
-#include "zones.h"
-
 #define VINEWOOD_CAM_POS_X 1496.7052f
 #define VINEWOOD_CAM_POS_Y -883.7934f
 #define VINEWOOD_CAM_POS_Z 59.9061f

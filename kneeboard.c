@@ -1,11 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "kneeboard.h"
-#include "missions.h"
-#include <string.h>
-
 int kneeboard_ptxt_header[MAX_PLAYERS];
 int kneeboard_ptxt_distance[MAX_PLAYERS];
 int kneeboard_ptxt_info[MAX_PLAYERS];

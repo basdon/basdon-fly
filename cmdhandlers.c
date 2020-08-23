@@ -1,12 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-/*This file is directly included in cmd.c,
-but also added as a source file in VC2005. Check
-for the IN_CMD macro to only compile this
-when we're inside cmd.c*/
-#ifdef IN_CMD
-
 static
 int cmd_admin_streamdistance(CMDPARAMS)
 {
@@ -339,5 +330,3 @@ int cmd_tickrate(CMDPARAMS)
 	NC_SendClientMessage(playerid, -1, buf32a);
 	return 1;
 }
-
-#endif /*IN_CMD*/

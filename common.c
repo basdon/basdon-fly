@@ -1,14 +1,4 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "airport.h" /*required for nav*/
-#include "missions.h"
-#include "nav.h"
-#include <string.h>
-
 char kick_update_delay[MAX_PLAYERS];
-
 
 void atoc(cell *dst, char *src, int max)
 {

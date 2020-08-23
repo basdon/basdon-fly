@@ -1,20 +1,3 @@
-
-/* vim: set filetype=c ts=8 noexpandtab: */
-
-#include "common.h"
-#include "anticheat.h"
-#include "cmd.h"
-#include "game_sa.h"
-#include "heartbeat.h"
-#include "missions.h"
-#include "playerstats.h"
-#include "timecyc.h"
-#include "timer.h"
-#include "vehicles.h"
-#include "zones.h"
-#include "time/time.h"
-#include <string.h>
-
 /*
 
 viewdistance can be /2 by night
@@ -449,6 +432,12 @@ int timecyc_next_weather(void *unused)
 	return WEATHER_TIMER_INTERVAL + NC_random(WEATHER_TIMER_DEVIATION);
 }
 
+/**
+The /metar command shows information about the current weather.
+
+Alias /weather.
+*/
+static
 int timecyc_cmd_metar(CMDPARAMS)
 {
 	if (weather.upcoming != weather.current) {
@@ -460,7 +449,7 @@ int timecyc_cmd_metar(CMDPARAMS)
 	return 1;
 }
 
-void timecyc_init(AMX *amx)
+void timecyc_init()
 {
 	time_h = 7;
 	time_m = 59;
@@ -664,6 +653,10 @@ timer30s:
 }
 
 #ifdef DEV
+/**
+Dev /fweather <weather> command to force weather now.
+*/
+static
 int timecyc_cmd_dev_fweather(CMDPARAMS)
 {
 	int w;
@@ -680,6 +673,10 @@ int timecyc_cmd_dev_fweather(CMDPARAMS)
 	return 1;
 }
 
+/**
+Dev /timecyc to see current timecyc data.
+*/
+static
 int timecyc_cmd_dev_timecyc(CMDPARAMS)
 {
 	csprintf(buf144,
@@ -695,6 +692,10 @@ int timecyc_cmd_dev_timecyc(CMDPARAMS)
 	return 1;
 }
 
+/**
+Dev /tweather <weather> command to change weather to given id, with transition.
+*/
+static
 int timecyc_cmd_dev_tweather(CMDPARAMS)
 {
 	int w;
@@ -710,6 +711,10 @@ int timecyc_cmd_dev_tweather(CMDPARAMS)
 	return 1;
 }
 
+/**
+Sets the time of the world.
+*/
+static
 int cmd_dev_timex(CMDPARAMS)
 {
 	int h, m;
@@ -727,6 +732,10 @@ int cmd_dev_timex(CMDPARAMS)
 	return 1;
 }
 
+/**
+Dev /nweather to change the weather, as if it's called by the timer.
+*/
+static
 int timecyc_cmd_dev_nweather(CMDPARAMS)
 {
 	B144("changing weather");

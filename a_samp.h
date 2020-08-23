@@ -1,5 +1,25 @@
+#define MAX_PLAYERS (50)
+#define MAX_PLAYER_NAME (24)
+#define INVALID_PLAYER_ID (0xFFFF)
+#define MAX_VEHICLES (2000)
+#define INVALID_VEHICLE_ID ((short) 0xFFFF)
+#define INVALID_3DTEXT_ID ((short) 0xFFFF)
+#define MAX_OBJECTS (1000)
+#define INVALID_OBJECT_ID (0xFFFF)
 
-/* vim: set filetype=c ts=8 noexpandtab: */
+#define MAX_GANG_ZONES (1024)
+
+#define LIMIT_DIALOG_CAPTION (64)
+#define LIMIT_DIALOG_INFO (4096)
+/* button len limit is not defined, using 32 */
+#define LIMIT_DIALOG_BUTTON (32)
+
+#define DIALOG_STYLE_MSGBOX 0
+#define DIALOG_STYLE_INPUT 1
+#define DIALOG_STYLE_LIST 2
+#define DIALOG_STYLE_PASSWORD 3
+#define DIALOG_STYLE_TABLIST 4
+#define DIALOG_STYLE_TABLIST_HEADERS 5
 
 #define TD_ALIGNMENT_LEFT 1
 #define TD_ALIGNMENT_CENTER 2

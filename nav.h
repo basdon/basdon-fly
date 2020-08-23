@@ -7,31 +7,6 @@
 #define NAV_ILS 4
 
 /**
-The /adf cmd.
-
-Syntax: /adf [beacon]
-Example: /adf ls
-When no beacon, disable nav
-*/
-int nav_cmd_adf(CMDPARAMS);
-/**
-The /ils command
-
-Syntax: /ils
-Only toggles ils when VOR is already active and the runway has ILS capabilities.
-*/
-int nav_cmd_ils(CMDPARAMS);
-/**
-The /vor cmd.
-
-Syntax: /vor [beacon][runway]
-Example: /vor ls09l
-Optional whitespace between beacon and runway
-When no beacon, disable nav
-When no or invalid runway, print a list of valid runways
-*/
-int nav_cmd_vor(CMDPARAMS);
-/**
 Disables navigation for given vehicle.
 
 Ensures the VOR textdraws are hidden.
