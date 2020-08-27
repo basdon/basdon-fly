@@ -6,16 +6,11 @@
 #define MAPS_PRINT_STATS
 #define MAX_REMOVED_OBJECTS 1000
 
-/*max amount of objects the mapsystem may use*/
-/*these are also the ids, so mapsystem uses ids 0-899
-(unless the code changed to not use objectid 0)*/
-#define MAX_MAPSYSTEM_OBJECTS (900)
-#define ROTATING_RADAR_OBJECT_ID (999)
 /*Octavia's actor id*/
 #define OCTA_ACTORID 999
 
 #pragma pack(1)
-struct MAPFILEHEADER {
+struct MAP_FILE_HEADER {
 	int spec_version;
 	int num_removes;
 	int num_objects;
@@ -85,6 +80,7 @@ static short player_objectid_to_mapidx[MAX_PLAYERS][MAX_MAPSYSTEM_OBJECTS];
 /*maps a player's gang zone id to map idx*/
 /*this is (at time of writing) the only system that uses gang zones,
 so no checks are being done on a global scale if a gang zone is being used*/
+/*-1 when unused, -2 when marked for deletion*/
 static short player_gangzoneid_to_mapidx[MAX_PLAYERS][MAX_GANG_ZONES];
 
 /*the mapidx of octavia island map where the actor should be made*/
@@ -92,7 +88,6 @@ static int octavia_island_actor_mapidx;
 
 static struct RPCDATA_ShowActor rpcdata_show_actor;
 static struct RPCDATA_HideActor rpcdata_hide_actor;
-static struct BitStream bitstream_freeform;
 static struct BitStream bs_maps_remove_building;
 static struct RPCDATA_RemoveBuilding rpcdata_RemoveBuilding;
 static struct BitStream bs_maps_create_object;
@@ -115,7 +110,7 @@ int maps_load_from_file(int mapidx)
 	FILE *fs;
 	char filename[22 + MAP_MAX_FILENAME];
 	int i;
-	struct MAPFILEHEADER header;
+	struct MAP_FILE_HEADER header;
 	struct OBJECT *object;
 	struct GANG_ZONE *gang_zone;
 	float middle_x, middle_y;
@@ -384,9 +379,6 @@ void maps_init()
 	bs_maps_move_object.ptrData = &rpcdata_MoveObject;
 	bs_maps_move_object.copyData = 1;
 
-	bitstream_freeform.readOffset = 0;
-	bitstream_freeform.copyData = 1;
-
 	rpcdata_show_actor.actorid = OCTA_ACTORID;
 	rpcdata_show_actor.modelid = 141;
 	rpcdata_show_actor.x = 12332.3926f;
@@ -425,7 +417,7 @@ void maps_stream_in_for_player(int playerid, int mapidx)
 		objectid_to_mapidx = player_objectid_to_mapidx[playerid];
 		rpcdata_CreateObject.objectid = 0; /*TODO: samp starts at objectid 1, should we also do that?*/
 		while (obj != objects_end) {
-			while (objectid_to_mapidx[rpcdata_CreateObject.objectid] != -1) {
+			while (objectid_to_mapidx[rpcdata_CreateObject.objectid] >= 0) {
 				rpcdata_CreateObject.objectid++;
 				if (rpcdata_CreateObject.objectid >= MAX_MAPSYSTEM_OBJECTS) {
 					logprintf("object limit hit while streaming map %s", maps[mapidx].name);
@@ -457,7 +449,7 @@ skip_objects:
 	rpcdata_ShowGangZone.zoneid = 0;
 	gangzoneid_to_mapidx = player_gangzoneid_to_mapidx[playerid];
 	for (gang_zone_idx = 0; gang_zone_idx < maps[mapidx].num_gang_zones; gang_zone_idx++) {
-		while (gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] != -1) {
+		while (gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] >= 0) {
 			rpcdata_ShowGangZone.zoneid++;
 			if (rpcdata_ShowGangZone.zoneid >= MAX_GANG_ZONES) {
 				logprintf("gang zone limit hit while streaming map %s", maps[mapidx].name);
@@ -500,9 +492,7 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 	objectid_to_mapidx = player_objectid_to_mapidx[playerid];
 	for (rpcdata_DestroyObject.objectid = 0; rpcdata_DestroyObject.objectid < MAX_OBJECTS; rpcdata_DestroyObject.objectid++) {
 		if (objectid_to_mapidx[rpcdata_DestroyObject.objectid] == mapidx) {
-			objectid_to_mapidx[rpcdata_DestroyObject.objectid] = -1;
-			/*TODO: what's the 2 for? possibly priority*/
-			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bs_maps_destroy_object, playerid, 2);
+			objectid_to_mapidx[rpcdata_DestroyObject.objectid] = -2;
 		}
 	}
 
@@ -518,7 +508,6 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 	for (rpcdata_ShowGangZone.zoneid = 0; rpcdata_ShowGangZone.zoneid < MAX_GANG_ZONES; rpcdata_ShowGangZone.zoneid++) {
 		if (gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] == mapidx) {
 			gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] = -1;
-			/*TODO: what's the 2 for? possibly priority*/
 			/*there's no real need to hide the gang zone, just mark it as available and be done*/
 			/*SAMP_SendRPCToPlayer(RPC_HideGangZone, &bs_maps_show_gang_zone, playerid, 2);*/
 		}
@@ -533,12 +522,29 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 	}
 }
 
+static
+void maps_destroy_stale_objects_for_player(int playerid)
+{
+	int objectid;
+
+	for (objectid = 0; objectid < MAX_MAPSYSTEM_OBJECTS; objectid++) {
+		if (player_objectid_to_mapidx[playerid][objectid] == -2) {
+			player_objectid_to_mapidx[playerid][objectid] = -1;
+			rpcdata_DestroyObject.objectid = objectid;
+			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bs_maps_destroy_object, playerid, 2);
+		}
+	}
+}
+
 void maps_stream_for_player(int playerid, struct vec3 pos)
 {
 	float dx, dy, distance;
 	int mapidx;
+	int did_stream_out;
 
 	/*check everything to stream out first, only then stream in*/
+
+	did_stream_out = 0;
 
 	for (mapidx = 0; mapidx < num_maps; mapidx++) {
 		if (maps[mapidx].stream_status_for_player[playerid]) {
@@ -547,6 +553,7 @@ void maps_stream_for_player(int playerid, struct vec3 pos)
 			distance = dx * dx + dy * dy;
 			if (distance > maps[mapidx].stream_out_radius_sq) {
 				maps_stream_out_for_player(playerid, mapidx);
+				did_stream_out = 1;
 			}
 		}
 	}
@@ -560,6 +567,10 @@ void maps_stream_for_player(int playerid, struct vec3 pos)
 				maps_stream_in_for_player(playerid, mapidx);
 			}
 		}
+	}
+
+	if (did_stream_out) {
+		maps_destroy_stale_objects_for_player(playerid);
 	}
 }
 
