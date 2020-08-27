@@ -133,6 +133,7 @@ static struct FAKEAMX fakeamx;
 #include "vehicles.h"
 #include "kneeboard.h"
 #include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -140,6 +141,7 @@ static struct FAKEAMX fakeamx;
 
 static void zones_update(int playerid, struct vec3 pos);
 
+#include "textdraws.c"
 #include "cmd_utils.c"
 #include "natives.c"
 #include "time.c"
@@ -194,6 +196,9 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
+
+	bitstream_freeform.readOffset = 0;
+	bitstream_freeform.copyData = 1;
 
 	cmd_init();
 	game_sa_init();

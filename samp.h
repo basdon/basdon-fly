@@ -101,6 +101,46 @@ struct RPCDATA_ShowActor {
 	char invulnerable;
 };
 EXPECT_SIZE(struct RPCDATA_ShowActor, 2 + 4 + 12 + 4 + 4 + 1);
+
+struct RPCDATA_ShowTextDraw {
+	short textdrawid;
+	char flags;
+	float font_width;
+	float font_height;
+	int font_color;
+	float box_width;
+	float box_height;
+	int box_color;
+	char shadow_size;
+	char outline_size;
+	int background_color;
+	char font;
+	char selectable;
+	float x;
+	float y;
+	short preview_model;
+	float preview_rot_x;
+	float preview_rot_y;
+	float preview_rot_z;
+	float preview_zoom;
+	short preview_color_1;
+	short preview_color_2;
+	short text_length;
+	char text[1]; /*actually arbitrary size*/
+};
+EXPECT_SIZE(struct RPCDATA_ShowTextDraw, 2 + 1 + 8 + 4 + 8 + 4 + 1 + 1 + 4 + 1 + 1 + 8 + 2 + 12 + 4 + 4 + 2 + 1);
+
+struct RPCDATA_HideTextDraw {
+	short textdrawid;
+};
+EXPECT_SIZE(struct RPCDATA_HideTextDraw, 2);
+
+static struct BitStream bitstream_freeform;
+static union {
+	char byte[16];
+	short word[8];
+	int dword[4];
+} rpcdata_freeform;
 #pragma pack()
 
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,unk) \
@@ -114,5 +154,7 @@ EXPECT_SIZE(struct RPCDATA_ShowActor, 2 + 4 + 12 + 4 + 4 + 1);
 #define RPC_MoveObject 0x8158B64 /*ptr to 0x64(99)*/
 #define RPC_HideActor 0x8157CCB /*ptr to 0xAC(172)*/
 #define RPC_ShowActor 0x8157CC9 /*ptr to 0xAB(171)*/
+#define RPC_ShowTextDraw 0x815AA74 /*ptr to 0x86(134)*/
+#define RPC_HideTextDraw 0x815AA72 /*ptr to 0x87(135)*/
 
 extern int samp_pNetGame;
