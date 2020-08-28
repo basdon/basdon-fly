@@ -44,8 +44,6 @@ static struct COMMAND cmds[] = {
 	{ 0, "//vehinfo", GROUP_OWNER, cmd_admin_vehinfo },
 	{ 0, "/adf", GROUPS_ALL, nav_cmd_adf },
 	{ 0, "/at400", GROUPS_ALL, cmd_at400 },
-	{ 0, "/automission", GROUPS_ALL, missions_cmd_automission },
-	{ 0, "/autow", GROUPS_ALL, missions_cmd_automission },
 	{ 0, "/beacons", GROUPS_ALL, airport_cmd_beacons },
 	{ 0, "/camera", GROUPS_ALL, cmd_camera },
 	{ 0, "/cancelwork", GROUPS_ALL, missions_cmd_cancelmission },

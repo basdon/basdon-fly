@@ -1,4 +1,16 @@
-;float* samphost_GetPtrStreamDistance();*/
+extern hook_OnDriverSync
+
+;void DriverSyncHook();
+global DriverSyncHook:function
+DriverSyncHook:
+	push dword [esi+0Ch] ; BitStream::ptrData
+	push eax
+	call hook_OnDriverSync
+	add esp, 08h
+	mov eax, 080AEC5Fh
+	jmp eax
+
+;float* samphost_GetPtrStreamDistance();
 global samphost_GetPtrStreamDistance:function
 samphost_GetPtrStreamDistance:
 	push aStreamDistance

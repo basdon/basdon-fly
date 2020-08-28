@@ -8,6 +8,7 @@ const static char *SATISFACTION_TEXT_FORMAT = "Passenger~n~Satisfaction: %d%%";
 const static char *LOADING = "~p~Loading...";
 const static char *UNLOADING = "~p~Unloading...";
 
+/*TODO: make this something that's not a linked list*/
 struct MISSIONPOINT {
 	unsigned short id;
 	struct vec3 pos;
@@ -20,7 +21,6 @@ struct MISSIONPOINT {
 
 struct MISSION {
 	int id;
-	int stage;
 	int missiontype;
 	struct MISSIONPOINT *startpoint, *endpoint;
 	float distance, actualdistanceM;
@@ -43,6 +43,16 @@ struct MISSION {
 	short weatherbonus;
 };
 
+/**
+The selected option in the job help screen, should be 0-2.
+*/
+static char mission_help_option[MAX_PLAYERS];
+/**
+See {@code MISSION_STAGE} definitions.
+
+When non-zero, associated {@link activemission} must not be NULL!
+*/
+static char mission_stage[MAX_PLAYERS];
 static struct MISSION *activemission[MAX_PLAYERS];
 /*whether one flightdata data packet with afk flag has been sent already*/
 static char tracker_afk_packet_sent[MAX_PLAYERS];
@@ -54,6 +64,57 @@ static int tracker;
 Player textdraw handles for passenger satisfaction indicator.
 */
 static int ptxt_satisfaction[MAX_PLAYERS];
+
+static struct TEXTDRAW td_jobhelp_keyhelp = { "keyhelp", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_header = { "header", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_optsbg = { "optsbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_text = { "text", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_greenbtnbg = { "greenbtnbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_bluebtnbg = { "bluebtnbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_redbtnbg = { "redbtnbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_optselbg = { "optselbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_enexgreen = { "enexgreen", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_txtgreen = { "txtgreen", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_actiongreen = { "actiongreen", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_enexblue = { "enexblue", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_txtblue = { "txtblue", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_actionblue = { "actionblue", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_enexred = { "enexred", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_txtred = { "txtred", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_actionred = { "actionred", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+
+static
+void missions_help_hide(int playerid)
+{
+	textdraws_hide(playerid, 17,
+		&td_jobhelp_keyhelp, &td_jobhelp_header, &td_jobhelp_optsbg,
+		&td_jobhelp_text, &td_jobhelp_greenbtnbg, &td_jobhelp_bluebtnbg,
+		&td_jobhelp_redbtnbg, &td_jobhelp_enexgreen, &td_jobhelp_txtgreen,
+		&td_jobhelp_actiongreen, &td_jobhelp_enexblue, &td_jobhelp_txtblue,
+		&td_jobhelp_actionblue, &td_jobhelp_enexred, &td_jobhelp_txtred,
+		&td_jobhelp_actionred, &td_jobhelp_optselbg);
+}
+static
+void missions_help_show(int playerid)
+{
+	textdraws_show(playerid, 16,
+		&td_jobhelp_keyhelp, &td_jobhelp_header, &td_jobhelp_optsbg,
+		&td_jobhelp_text, &td_jobhelp_greenbtnbg, &td_jobhelp_bluebtnbg,
+		&td_jobhelp_redbtnbg, &td_jobhelp_enexgreen, &td_jobhelp_txtgreen,
+		&td_jobhelp_actiongreen, &td_jobhelp_enexblue, &td_jobhelp_txtblue,
+		&td_jobhelp_actionblue, &td_jobhelp_enexred, &td_jobhelp_txtred,
+		&td_jobhelp_actionred);
+}
+
+static
+void missions_help_update_selection(playerid)
+{
+	float optdif;
+
+	optdif = td_jobhelp_bluebtnbg.rpcdata->y - td_jobhelp_greenbtnbg.rpcdata->y;
+	td_jobhelp_optselbg.rpcdata->y = td_jobhelp_greenbtnbg.rpcdata->y + mission_help_option[playerid] * optdif;
+	textdraws_show(playerid, 1, &td_jobhelp_optselbg);
+}
 
 int missions_is_player_on_mission(int playerid)
 {
@@ -81,15 +142,69 @@ void missions_destroy_tracker_socket()
 	}
 }
 
+static
+void missions_freepoints()
+{
+	int i = numairports;
+	struct AIRPORT *ap = airports;
+	struct MISSIONPOINT *msp, *tmp;
+
+	while (i--) {
+		msp = ap->missionpoints;
+		while (msp != NULL) {
+			tmp = msp->next;
+			free(msp);
+			msp = tmp;
+		}
+		ap++;
+	}
+}
+
+static
+void missions_dispose()
+{
+	missions_freepoints();
+
+	free(td_jobhelp_keyhelp.rpcdata);
+	free(td_jobhelp_header.rpcdata);
+	free(td_jobhelp_optsbg.rpcdata);
+	free(td_jobhelp_text.rpcdata);
+	free(td_jobhelp_greenbtnbg.rpcdata);
+	free(td_jobhelp_bluebtnbg.rpcdata);
+	free(td_jobhelp_redbtnbg.rpcdata);
+	free(td_jobhelp_optselbg.rpcdata);
+	free(td_jobhelp_enexgreen.rpcdata);
+	free(td_jobhelp_txtgreen.rpcdata);
+	free(td_jobhelp_actiongreen.rpcdata);
+	free(td_jobhelp_enexblue.rpcdata);
+	free(td_jobhelp_txtblue.rpcdata);
+	free(td_jobhelp_actionblue.rpcdata);
+	free(td_jobhelp_enexred.rpcdata);
+	free(td_jobhelp_txtred.rpcdata);
+	free(td_jobhelp_actionred.rpcdata);
+}
+
+static
 void missions_init()
 {
 	struct AIRPORT *ap;
 	struct MISSIONPOINT *msp;
 	int apid, lastapid, i, cacheid, *f = nc_params + 2;
 
+	/*varinit*/
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		activemission[i] = NULL;
 	}
+
+	/*textdraws*/
+	textdraws_load_from_file("jobhelp", TEXTDRAW_MISSIONHELP_BASE, 17,
+		/*remember to free them in some dispose func*/
+		&td_jobhelp_keyhelp, &td_jobhelp_header, &td_jobhelp_optsbg,
+		&td_jobhelp_text, &td_jobhelp_greenbtnbg, &td_jobhelp_bluebtnbg,
+		&td_jobhelp_redbtnbg, &td_jobhelp_optselbg, &td_jobhelp_enexgreen,
+		&td_jobhelp_txtgreen, &td_jobhelp_actiongreen, &td_jobhelp_enexblue,
+		&td_jobhelp_txtblue, &td_jobhelp_actionblue, &td_jobhelp_enexred,
+		&td_jobhelp_txtred, &td_jobhelp_actionred);
 
 	/*load missionpoints*/
 	atoc(buf144,
@@ -185,23 +300,6 @@ int missions_append_pay(char *buf, char *description, int amount)
 	}
 	buf[p++] = '\n';
 	return p;
-}
-
-void missions_freepoints()
-{
-	int i = numairports;
-	struct AIRPORT *ap = airports;
-	struct MISSIONPOINT *msp, *tmp;
-
-	while (i--) {
-		msp = ap->missionpoints;
-		while (msp != NULL) {
-			tmp = msp->next;
-			free(msp);
-			msp = tmp;
-		}
-		ap++;
-	}
 }
 
 /**
@@ -649,6 +747,10 @@ void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh)
 
 void missions_on_player_connect(int playerid)
 {
+	mission_help_option[playerid] = 0;
+	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
+	activemission[playerid] = NULL;
+
 	NC_PARS(4);
 	nc_params[1] = playerid;
 	nc_paramf[2] = 88.0f;
@@ -679,7 +781,15 @@ void missions_on_player_death(int playerid)
 	int stopreason, vehicleid;
 	float hp;
 
-	if ((mission = activemission[playerid]) != NULL) {
+	switch (mission_stage[playerid]) {
+	case MISSION_STAGE_NOMISSION:
+		break;
+	case MISSION_STAGE_HELP:
+		break;
+	case MISSION_STAGE_JOBMAP:
+		missions_help_hide(playerid);
+		break;
+	default:
 		NC_DisablePlayerRaceCheckpoint(playerid);
 		stopreason = MISSION_STATE_DIED;
 		vehicleid = NC_GetPlayerVehicleID(playerid);
@@ -691,6 +801,8 @@ void missions_on_player_death(int playerid)
 		}
 		missions_end_unfinished(mission, playerid, stopreason);
 	}
+
+	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 }
 
 void missions_on_player_disconnect(int playerid)
@@ -742,7 +854,7 @@ void missions_start_flight(int playerid, struct MISSION *mission)
 		NC(n_PlayerTextDrawShow);
 	}
 
-	mission->stage = MISSION_STAGE_FLIGHT;
+	mission_stage[playerid] = MISSION_STAGE_FLIGHT;
 
 	NC_PARS(9);
 	nc_params[1] = playerid;
@@ -807,7 +919,7 @@ void missions_querycb_create(void* d)
 	/*buf32 is len 32 * 4 so 40 is fine*/
 	NC_ssocket_send(tracker, buf32a, 40);
 
-	if (mission->stage == MISSION_STAGE_POSTLOAD) {
+	if (mission_stage[playerid] == MISSION_STAGE_POSTLOAD) {
 		/*loading timer already done, start flight stage*/
 		missions_start_flight(playerid, mission);
 	}
@@ -830,10 +942,6 @@ Starts a mission for given player that is in given vehicle.
 static
 void missions_start_mission(int playerid)
 {
-	static const char *AUTOWORKNOTICE = "Constant work is ON, "
-		"a new mission will be started when you complete this one "
-		"(/autow to disable).";
-
 	struct MISSION_CB_DATA *cbdata;
 	struct MISSION *mission;
 	struct MISSIONPOINT *startpoint, *endpoint;
@@ -902,9 +1010,9 @@ unknownvehicle:
 	dx = startpoint->pos.x - endpoint->pos.x;
 	dy = startpoint->pos.y - endpoint->pos.y;
 
+	mission_stage[playerid] = MISSION_STAGE_PRELOAD;
 	activemission[playerid] = mission = malloc(sizeof(struct MISSION));
 	mission->id = -1;
-	mission->stage = MISSION_STAGE_PRELOAD;
 	mission->missiontype = missiontype;
 	mission->startpoint = startpoint;
 	mission->endpoint = endpoint;
@@ -970,11 +1078,6 @@ unknownvehicle:
 		mission->endpoint->name);
 	NC_SendClientMessage(playerid, COL_MISSION, buf144a);
 
-	if (prefs[playerid] & PREF_CONSTANT_WORK) {
-		B144((char*) AUTOWORKNOTICE);
-		NC_SendClientMessage(playerid, COL_SAMP_GREY, buf144a);
-	}
-
 	if (prefs[playerid] & PREF_WORK_AUTONAV) {
 		nav_navigate_to_airport(
 			mission->veh->spawnedvehicleid,
@@ -1009,7 +1112,7 @@ void missions_after_load(int playerid, struct MISSION *mission)
 		missions_start_flight(playerid, mission);
 	} else {
 		/*otherwise missions_querycb_create will start it*/
-		mission->stage = MISSION_STAGE_POSTLOAD;
+		mission_stage[playerid] = MISSION_STAGE_POSTLOAD;
 	}
 }
 
@@ -1204,10 +1307,6 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 	free(dlgbase);
 
 	missions_cleanup(miss, playerid);
-
-	if (prefs[playerid] & PREF_CONSTANT_WORK) {
-		missions_start_mission(playerid);
-	}
 }
 
 /**
@@ -1264,7 +1363,7 @@ int missions_on_player_enter_race_checkpoint(int playerid)
 		return 0;
 	}
 
-	switch (mission->stage) {
+	switch (mission_stage[playerid]) {
 	case MISSION_STAGE_PRELOAD: cppos = mission->startpoint->pos; break;
 	case MISSION_STAGE_FLIGHT: cppos = mission->endpoint->pos; break;
 	default: return 0;
@@ -1306,14 +1405,14 @@ int missions_on_player_enter_race_checkpoint(int playerid)
 	lddata->cbdata.mission = mission;
 	lddata->cbdata.player_cc = MK_PLAYER_CC(playerid);
 
-	switch (mission->stage) {
+	switch (mission_stage[playerid]) {
 	case MISSION_STAGE_PRELOAD:
-		mission->stage = MISSION_STAGE_LOAD;
+		mission_stage[playerid] = MISSION_STAGE_LOAD;
 		lddata->isload = 1;
 		B144((char*) LOADING);
 		break;
 	case MISSION_STAGE_FLIGHT:
-		mission->stage = MISSION_STAGE_UNLOAD;
+		mission_stage[playerid] = MISSION_STAGE_UNLOAD;
 		lddata->isload = 0;
 		lddata->vehiclehp = anticheat_GetVehicleHealth(vehicleid);
 		if (lddata->vehiclehp < 251.0f) {
@@ -1353,6 +1452,8 @@ void missions_on_player_state_changed(int playerid, int from, int to)
 		(mission = activemission[playerid]) != NULL &&
 		mission->vehicleid == NC_GetPlayerVehicleID(playerid))
 	{
+		/*TODO: update this mess "objective can only be disabled by disabling it globally"*/
+
 		/*SA:MP wiki: Vehicles must be respawned for the 'objective' to
 		be removed. This can be circumvented somewhat using
 		Get/SetVehicleParamsEx which do not require the vehicle to be
@@ -1451,27 +1552,6 @@ void missions_send_tracker_data(
 }
 
 /**
-The /automission cmd, toggles automatically starting new mission on finish.
-
-Aliases: /autow
-*/
-static
-int missions_cmd_automission(CMDPARAMS)
-{
-	static const char
-		*ENABLED = "Constant work enabled.",
-		*DISABLED = "Constant work disabled.";
-
-	if ((prefs[playerid] ^= PREF_CONSTANT_WORK) & PREF_CONSTANT_WORK) {
-		B144((char*) ENABLED);
-	} else {
-		B144((char*) DISABLED);
-	}
-	NC_SendClientMessage(playerid, COL_SAMP_GREY, buf144a);
-	return 1;
-}
-
-/**
 The /cancelmission cmd, stops current mission for the player, for a fee.
 
 Aliases: /s
@@ -1484,9 +1564,7 @@ int missions_cmd_cancelmission(CMDPARAMS)
 	struct MISSION *mission;
 
 	if ((mission = activemission[playerid]) != NULL) {
-		if (mission->stage == MISSION_STAGE_LOAD ||
-			mission->stage == MISSION_STAGE_UNLOAD)
-		{
+		if (mission_stage[playerid] == MISSION_STAGE_LOAD || mission_stage[playerid] == MISSION_STAGE_UNLOAD) {
 			NC_TogglePlayerControllable(playerid, 1);
 			common_hide_gametext_for_player(playerid);
 		} else {
@@ -1502,10 +1580,6 @@ int missions_cmd_cancelmission(CMDPARAMS)
 	return 1;
 }
 
-const static char
-	*ALREADYWORKING = WARN"You're already working! Use /s to stop "
-		"your current work first ($"EQ(MISSION_CANCEL_FINE)" fee).";
-
 /**
 The /mission cmd, starts a new mission
 
@@ -1514,22 +1588,78 @@ Aliases: /w /m
 static
 int missions_cmd_mission(CMDPARAMS)
 {
-	if (activemission[playerid] != NULL) {
-		B144((char*) ALREADYWORKING);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
-	} else {
-		missions_start_mission(playerid);
+	struct dbvehicle *veh;
+	int vehicleid;
+
+	switch (mission_stage[playerid]) {
+	case MISSION_STAGE_HELP:
+	case MISSION_STAGE_JOBMAP:
+		break;
+	case MISSION_STAGE_NOMISSION:
+		/*TODO check if speed is low (to not do this command while in the air*/
+		nc_params[1] = playerid;
+		vehicleid = NC(n_GetPlayerVehicleID);
+		veh = gamevehicles[vehicleid].dbvehicle;
+		if (veh) {
+			mission_stage[playerid] = MISSION_STAGE_HELP;
+			TogglePlayerControllable(playerid, 0);
+			missions_help_show(playerid);
+			missions_help_update_selection(playerid);
+
+			/*missions_start_mission(playerid);*/
+		} else {
+			SendClientMessage(playerid, COL_WARN, WARN"Get in a vehicle first!");
+		}
+		break;
+	default:
+		SendClientMessage(playerid, COL_WARN,
+			WARN"You're already working! Use /s to stop your current work first ($"EQ(MISSION_CANCEL_FINE)" fee).");
+		break;
 	}
 	return 1;
 }
 
-int missions_get_stage(int playerid)
+static
+void missions_driversync_udkeystate_change(int playerid, short udkey)
 {
-	struct MISSION *mission = activemission[playerid];
-	if (mission != NULL) {
-		return mission->stage;
+	if (mission_stage[playerid] == MISSION_STAGE_HELP) {
+		if (udkey < 0) {
+			mission_help_option[playerid]--;
+			if (mission_help_option[playerid] < 0) {
+				mission_help_option[playerid] = 2;
+			}
+			missions_help_update_selection(playerid);
+			PlayerPlaySound(playerid, 1053);
+		} else if (udkey > 0) {
+			mission_help_option[playerid]++;
+			if (mission_help_option[playerid] > 2) {
+				mission_help_option[playerid] = 0;
+			}
+			missions_help_update_selection(playerid);
+			PlayerPlaySound(playerid, 1052);
+		}
+	} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
 	}
-	return MISSION_STAGE_NOMISSION;
+}
+
+void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
+{
+	if (mission_stage[playerid] == MISSION_STAGE_HELP) {
+		/*Since player is set to not be controllable, these use on-foot controls even when player is in-vehicle.*/
+		if (!(oldkeys & KEY_VEHICLE_ENTER_EXIT) && (newkeys & KEY_VEHICLE_ENTER_EXIT)) {
+			mission_stage[playerid] = MISSION_STAGE_NOMISSION;
+			missions_help_hide(playerid);
+			TogglePlayerControllable(playerid, 1);
+			PlayerPlaySound(playerid, 1084);
+		} else if (!(oldkeys & KEY_SPRINT) && (newkeys & KEY_SPRINT)) {
+			mission_stage[playerid] = MISSION_STAGE_NOMISSION;
+			missions_help_hide(playerid);
+			TogglePlayerControllable(playerid, 1);
+			PlayerPlaySound(playerid, 1083);
+			/*LOCATE MISSION*/
+		}
+	} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
+	}
 }
 
 void missions_on_vehicle_refueled(int vehicleid, float refuelamount)
@@ -1570,9 +1700,9 @@ void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
 	int last_satisfaction;
 	float pitchlimit, rolllimit;
 
-	if ((miss = activemission[pid]) != NULL &&
-		miss->missiontype & PASSENGER_MISSIONTYPES &&
-		miss->stage == MISSION_STAGE_FLIGHT &&
+	if (mission_stage[pid] == MISSION_STAGE_FLIGHT &&
+		(miss = activemission[pid]) != NULL &&
+		(miss->missiontype & PASSENGER_MISSIONTYPES) &&
 		miss->veh->spawnedvehicleid == vid &&
 		miss->passenger_satisfaction != 0)
 	{
@@ -1621,7 +1751,7 @@ int missions_get_distance_to_next_cp(int playerid, struct vec3 *frompos)
 		return -1;
 	}
 
-	if (miss->stage < MISSION_STAGE_FLIGHT) {
+	if (mission_stage[playerid] < MISSION_STAGE_FLIGHT) {
 		cp = miss->startpoint->pos;
 	} else {
 		cp = miss->endpoint->pos;

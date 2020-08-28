@@ -40,9 +40,10 @@ EXPECT_SIZE(union TEXT_FILE_ENTRY, 905);
 Load a map from file as specified in given map.
 
 @param filename the file name, excluding path/extension.
+@param base_textdraw_id the textdraw id for the first textdraw, the next ones will have consequtive ids
 */
 static
-void textdraws_load_from_file(char *filename, int numtextdraws, ...)
+void textdraws_load_from_file(char *filename, int base_textdraw_id, int numtextdraws, ...)
 {
 	union TEXT_FILE_ENTRY entry;
 	struct TEXTDRAW *td;
@@ -81,6 +82,7 @@ void textdraws_load_from_file(char *filename, int numtextdraws, ...)
 				td->rpcsize = sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->allocated_text_length;
 				td->rpcdata = malloc(td->rpcsize);
 				memcpy(td->rpcdata, &entry.entry.rpcdata, td->rpcsize);
+				td->rpcdata->textdrawid = base_textdraw_id + i;
 				/*the ending 0 byte is not needed in the rpc,
 				but it's still allocated to be safe when checking out the string*/
 				td->rpcsize--;
@@ -109,6 +111,7 @@ ret:
 			td->rpcdata->y = 224.0f;
 			td->rpcdata->font_color = -1;
 			td->rpcdata->text_length = 12;
+			td->rpcdata->textdrawid = base_textdraw_id + i;
 			strcpy(td->rpcdata->text, "missing text");
 		}
 	}

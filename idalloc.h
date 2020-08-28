@@ -1,11 +1,3 @@
-/*OBJECT IDS*/
-
-/*Max amount of objects the mapsystem may use.*/
-/*These are also the ids, so mapsystem uses ids 0-899
-(unless the code changed to not use objectid 0).*/
-#define MAX_MAPSYSTEM_OBJECTS (900)
-#define ROTATING_RADAR_OBJECT_ID (999)
-
 /*DIALOG IDS*/
 
 /*can be used when no response is needed*/
@@ -36,3 +28,19 @@
 #define TRANSACTION_CHANGEPASS 100002
 #define TRANSACTION_CHANGEPASS_ABORTED 100003
 #define TRANSACTION_GUESTREGISTER 100004
+
+/*OBJECT IDS*/
+
+/*Max amount of objects the mapsystem may use.*/
+/*These are also the ids, so mapsystem uses ids 0-899
+(unless the code changed to not use objectid 0).*/
+#define MAX_MAPSYSTEM_OBJECTS (900)
+#define ROTATING_RADAR_OBJECT_ID (999)
+
+/*TEXTDRAW IDS*/
+
+/*Ids 0-2047 are global TDs, ids 2048-2303 are player TDs.*/
+/*Drawing order is .. questionable and TBD.*/
+/*It seems like font 0 text always gets draw on top.*/
+
+#define TEXTDRAW_MISSIONHELP_BASE (2000)

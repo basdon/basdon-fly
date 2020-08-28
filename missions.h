@@ -2,12 +2,15 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 /*internal use*/
-#define MISSION_STAGE_NOMISSION -1
-#define MISSION_STAGE_PRELOAD	1 /*taxiing to CP*/
-#define MISSION_STAGE_LOAD	2 /*loading timer*/
-#define MISSION_STAGE_POSTLOAD	4 /*loading done, but waiting for create query*/
-#define MISSION_STAGE_FLIGHT	8 /*flight*/
-#define MISSION_STAGE_UNLOAD	16 /*unloading timer*/
+/*these have to be in order for some usages to work*/
+#define MISSION_STAGE_NOMISSION	0
+#define MISSION_STAGE_HELP	1 /*the 'go to a loading point to start a mission' page*/
+#define MISSION_STAGE_JOBMAP 	2 /*the mission map job select screen*/
+#define MISSION_STAGE_PRELOAD	3 /*taxiing to CP*/
+#define MISSION_STAGE_LOAD	4 /*loading timer*/
+#define MISSION_STAGE_POSTLOAD	5 /*loading done, but waiting for create query*/
+#define MISSION_STAGE_FLIGHT	6 /*flight*/
+#define MISSION_STAGE_UNLOAD	7 /*unloading timer*/
 
 /*states saved in db*/
 #define MISSION_STATE_INPROGRESS 1
@@ -98,17 +101,9 @@ void missions_cb_create(void* data);
 void missions_create_tracker_socket();
 void missions_destroy_tracker_socket();
 /**
-Free missionpoints from airport data.
-*/
-void missions_freepoints();
-/**
 Gets distance in meters for player to next mission cp, -1 if not on a mission.
 */
 int missions_get_distance_to_next_cp(int playerid, struct vec3 *frompos);
-/**
-Loads mission points and inits variables.
-*/
-void missions_init();
 /**
 Check if player is currently doing a mission.
 */
@@ -144,10 +139,6 @@ Sends flight tracker message.
 void missions_send_tracker_data(
 	int playerid, int vehicleid, float hp,
 	struct vec3 *vpos, struct vec3 *vvel, int engine, float pich, float roll);
-/**
-Gets mission stage for given player, one of MISSION_STAGE_ constants.
-*/
-int missions_get_stage(int playerid);
 /**
 Updates satisfaction for player mission.
 

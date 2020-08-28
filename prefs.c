@@ -6,18 +6,23 @@ Appends a row for a preference to show in the preferences dialog.
 Format is {description}:\t<color><ENABLED|DISABLED>\n
 */
 static
-char *prefs_append_pref(char *buf, char *description, const int state)
+char *prefs_append_pref(char *buf, char *description, int state, int available)
 {
 	while ((*(buf++) = *(description++)));
 	*(--buf) = ':';
 	buf++;
 	*(buf++) = '\t';
-	if (state) {
-		strcpy(buf, "{00f600}ENABLED");
-		buf += 15;
+	if (available) {
+		if (state) {
+			strcpy(buf, "{00f600}ENABLED");
+			buf += 15;
+		} else {
+			strcpy(buf, "{f60000}DISABLED");
+			buf += 16;
+		}
 	} else {
-		strcpy(buf, "{f60000}DISABLED");
-		buf += 16;
+		strcpy(buf, "{777777}UNAVAILABLE");
+		buf += 19;
 	}
 	*(buf++) = '\n';
 	return buf;
@@ -33,12 +38,10 @@ void prefs_show_dialog(int playerid)
 	char buf[255], *bp = buf;
 
 	/* must be same order as in Prefs_DoActionForRow */
-	bp = prefs_append_pref(bp, "Accepting PMs", p & PREF_ENABLE_PM);
-	bp = prefs_append_pref(bp, "Mission Messages",
-		p & PREF_SHOW_MISSION_MSGS);
-	bp = prefs_append_pref(bp, "Constant Work", p & PREF_CONSTANT_WORK);
-	bp = prefs_append_pref(bp, "Auto engage nav when working",
-		p & PREF_WORK_AUTONAV);
+	bp = prefs_append_pref(bp, "Accepting PMs", p & PREF_ENABLE_PM, 1);
+	bp = prefs_append_pref(bp, "Mission Messages", p & PREF_SHOW_MISSION_MSGS, 1);
+	bp = prefs_append_pref(bp, "Constant Work", p & PREF_CONSTANT_WORK, 0);
+	bp = prefs_append_pref(bp, "Auto engage nav when working", p & PREF_WORK_AUTONAV, 1);
 	*(--bp) = 0;
 
 	dialog_ShowPlayerDialog(

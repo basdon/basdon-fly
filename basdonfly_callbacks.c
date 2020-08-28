@@ -133,7 +133,7 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 {
 	unsigned long starttime;
 
-	missions_freepoints(); /*call this before airports_destroy!*/
+	missions_dispose(); /*call this before airports_destroy! TODO: explain why*/
 	airports_destroy();
 	echo_dispose();
 	heartbeat_end_session();
@@ -512,8 +512,7 @@ cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerKeyStateChange(AMX *amx, cell *params)
 {
-	const int playerid = PARAM(1), oldkeys = PARAM(2);
-	const int newkeys = PARAM(3);
+	const int playerid = PARAM(1), newkeys = PARAM(2), oldkeys = PARAM(3);
 
 	veh_on_player_key_state_change(playerid, oldkeys, newkeys);
 	return 1;

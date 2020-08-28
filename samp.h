@@ -135,6 +135,47 @@ struct RPCDATA_HideTextDraw {
 };
 EXPECT_SIZE(struct RPCDATA_HideTextDraw, 2);
 
+struct RPCDATA_SendClientMessage {
+	int color;
+	int message_length;
+	char message[144];
+};
+EXPECT_SIZE(struct RPCDATA_SendClientMessage, 4 + 4 + 144);
+
+struct RPCDATA_PlaySound {
+	int soundid;
+	struct vec3 pos;
+};
+EXPECT_SIZE(struct RPCDATA_PlaySound, 4 + 12);
+
+struct SYNCDATA_Driver {
+	char packet_id;
+	short vehicle_id;
+	/*when player is not controllable, this is actually from foot controls??*/
+	short lrkey;
+	/*when player is not controllable, this is actually from foot controls??*/
+	/*this is steer forward/down backward/up*/
+	short udkey;
+	/*when player is not controllable, this is actually from foot controls??*/
+	short keys;
+	float quat_w;
+	float quat_x;
+	float quat_y;
+	float quat_z;
+	struct vec3 pos;
+	struct vec3 vel;
+	float vehicle_hp;
+	char player_hp;
+	char player_armor;
+	char additional_key : 2;
+	char weapon_id : 6;
+	char siren_state;
+	char landing_gear_state; /*0 down 1 up*/
+	short trailer_id;
+	int misc; /*data depending on vehicle model*/
+};
+EXPECT_SIZE(struct SYNCDATA_Driver, 1 + 2 + 2 + 2 + 2 + 16 + 12 + 12 + 4 + 1 + 1 + 1 + 1 + 1 + 2 + 4);
+
 static struct BitStream bitstream_freeform;
 static union {
 	char byte[16];
@@ -156,5 +197,6 @@ static union {
 #define RPC_ShowActor 0x8157CC9 /*ptr to 0xAB(171)*/
 #define RPC_ShowTextDraw 0x815AA74 /*ptr to 0x86(134)*/
 #define RPC_HideTextDraw 0x815AA72 /*ptr to 0x87(135)*/
-
-extern int samp_pNetGame;
+#define RPC_TogglePlayerControllable 0x815CCFA /*ptr to 0x0F(15)*/
+#define RPC_SendClientMessage 0x815A027 /*ptr to 0x5D(93)*/
+#define RPC_PlaySound 0x815CD0C /*ptr to 0x10(16)*/

@@ -231,7 +231,7 @@ int cmd_park(CMDPARAMS)
 static const char* NO_RECLASSSPAWN =
 	WARN"You cannot reclass/respawn while on a mission. "
 	"Use /s to cancel your current mission for a fee "
-	"($"EQ(MISSION_CANCEL_FINE_)").";
+	"($"EQ(MISSION_CANCEL_FINE)").";
 
 static
 int cmd_reclass(CMDPARAMS)

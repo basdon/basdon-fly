@@ -109,7 +109,7 @@ amx data segment
 */
 static struct FAKEAMX fakeamx;
 
-#include "allocations.h"
+#include "idalloc.h"
 #include "samphost.h"
 #include "common.h"
 #include "admin.h"
@@ -137,10 +137,13 @@ static struct FAKEAMX fakeamx;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <time.h>
 
 static void zones_update(int playerid, struct vec3 pos);
 
+#include "memstuff.c"
+#include "samp.c"
 #include "textdraws.c"
 #include "cmd_utils.c"
 #include "natives.c"
@@ -177,7 +180,6 @@ static void zones_update(int playerid, struct vec3 pos);
 #include "playerdata.c"
 #include "playerstats.c"
 #include "pm.c"
-#include "samp.c"
 #include "servicepoints.c"
 #include "spawn.c"
 #include "timecyc.c"
@@ -186,6 +188,7 @@ static void zones_update(int playerid, struct vec3 pos);
 
 #include "cmd.c"
 #include "basdonfly_callbacks.c"
+#include "samphooks.c"
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {
@@ -199,6 +202,8 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 
 	bitstream_freeform.readOffset = 0;
 	bitstream_freeform.copyData = 1;
+
+	samphooks_init();
 
 	cmd_init();
 	game_sa_init();
