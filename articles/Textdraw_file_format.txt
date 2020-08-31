@@ -42,7 +42,7 @@ byte 91-94: preview rotation z (FLOAT)
 byte 95-98: preview zoom (FLOAT)
 byte 99-100: preview color 1 (SHORT)
 byte 101-102: preview color 2 (SHORT)
-byte 103-104: text length (SHORT)
+byte 103-104: text length, without zero terminator (SHORT)
 byte 105-904: text
 -------------
 size 905 bytes
