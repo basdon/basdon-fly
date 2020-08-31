@@ -1,9 +1,5 @@
 #define MAX_MAPS (50)
 #define MAP_MAX_FILENAME (34) /*see db col*/
-/*define to print msg to console each time map streams in/out*/
-#define MAPS_LOG_STREAMING
-/*define to show total amount of maps/objects/removes/zones at boot*/
-#define MAPS_PRINT_STATS
 #define MAX_REMOVED_OBJECTS 1000
 
 /*Octavia's actor id*/
@@ -90,10 +86,6 @@ static struct RPCDATA_ShowActor rpcdata_show_actor;
 static struct RPCDATA_HideActor rpcdata_hide_actor;
 static struct BitStream bs_maps_remove_building;
 static struct RPCDATA_RemoveBuilding rpcdata_RemoveBuilding;
-static struct BitStream bs_maps_create_object;
-static struct RPCDATA_CreateObject rpcdata_CreateObject;
-static struct BitStream bs_maps_destroy_object;
-static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 static struct BitStream bs_maps_show_gang_zone;
 static struct RPCDATA_ShowGangZone rpcdata_ShowGangZone;
 static struct BitStream bs_maps_move_object;
@@ -320,7 +312,7 @@ int maps_timer_rotate_radar(void *data)
 	for (playerindex = 0; playerindex < playercount; playerindex++) {
 		playerid = players[playerindex];
 		if ((object = map_radar_object_for_player[playerid])) {
-			rpcdata_MoveObject.objectid = ROTATING_RADAR_OBJECT_ID;
+			rpcdata_MoveObject.objectid = OBJECT_ROTATING_RADAR;
 			rpcdata_MoveObject.from_x = object->map_file_object.x;
 			rpcdata_MoveObject.from_y = object->map_file_object.y;
 			rpcdata_MoveObject.from_z = object->map_file_object.z;
@@ -354,24 +346,6 @@ void maps_init()
 	rpcdata_CreateObject.no_camera_col = 0;
 	rpcdata_CreateObject.attached_object = -1;
 	rpcdata_CreateObject.attached_vehicle = -1;
-
-	bs_maps_create_object.numberOfBitsUsed = sizeof(rpcdata_CreateObject) * 8;
-	bs_maps_create_object.numberOfBitsAllocated = sizeof(rpcdata_CreateObject) * 8;
-	bs_maps_create_object.readOffset = 0;
-	bs_maps_create_object.ptrData = &rpcdata_CreateObject;
-	bs_maps_create_object.copyData = 1;
-
-	bs_maps_destroy_object.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
-	bs_maps_destroy_object.numberOfBitsAllocated = sizeof(rpcdata_DestroyObject) * 8;
-	bs_maps_destroy_object.readOffset = 0;
-	bs_maps_destroy_object.ptrData = &rpcdata_DestroyObject;
-	bs_maps_destroy_object.copyData = 1;
-
-	bs_maps_show_gang_zone.numberOfBitsUsed = sizeof(rpcdata_ShowGangZone) * 8;
-	bs_maps_show_gang_zone.numberOfBitsAllocated = sizeof(rpcdata_ShowGangZone) * 8;
-	bs_maps_show_gang_zone.readOffset = 0;
-	bs_maps_show_gang_zone.ptrData = &rpcdata_ShowGangZone;
-	bs_maps_show_gang_zone.copyData = 1;
 
 	bs_maps_move_object.numberOfBitsUsed = sizeof(rpcdata_MoveObject) * 8;
 	bs_maps_move_object.numberOfBitsAllocated = sizeof(rpcdata_MoveObject) * 8;
@@ -428,7 +402,7 @@ void maps_stream_in_for_player(int playerid, int mapidx)
 			objectid_to_mapidx[rpcdata_CreateObject.objectid] = mapidx;
 			obj++;
 			/*TODO: what's the 2 for? possibly priority*/
-			SAMP_SendRPCToPlayer(RPC_CreateObject, &bs_maps_create_object, playerid, 2);
+			SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream_create_object, playerid, 2);
 		}
 	}
 skip_objects:
@@ -440,9 +414,9 @@ skip_objects:
 	No maps with radars should have intersecting stream radii anyways.*/
 	if (map_radar_object_for_map[mapidx] && !map_radar_object_for_player[playerid]) {
 		map_radar_object_for_player[playerid] = map_radar_object_for_map[mapidx];
-		rpcdata_CreateObject.objectid = ROTATING_RADAR_OBJECT_ID;
+		rpcdata_CreateObject.objectid = OBJECT_ROTATING_RADAR;
 		memcpy(&rpcdata_CreateObject.modelid, map_radar_object_for_map[mapidx], sizeof(struct OBJECT));
-		SAMP_SendRPCToPlayer(RPC_CreateObject, &bs_maps_create_object, playerid, 2);
+		SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream_create_object, playerid, 2);
 	}
 
 	/*gang zones*/
@@ -499,8 +473,8 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 	/*the special rotating radar object*/
 	if (map_radar_object_for_map[mapidx] && map_radar_object_for_map[mapidx] == map_radar_object_for_player[playerid]) {
 		map_radar_object_for_player[playerid] = 0;
-		rpcdata_DestroyObject.objectid = ROTATING_RADAR_OBJECT_ID;
-		SAMP_SendRPCToPlayer(RPC_DestroyObject, &bs_maps_destroy_object, playerid, 2);
+		rpcdata_DestroyObject.objectid = OBJECT_ROTATING_RADAR;
+		SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream_destroy_object, playerid, 2);
 	}
 
 	/*gang zones*/
@@ -531,7 +505,7 @@ void maps_destroy_stale_objects_for_player(int playerid)
 		if (player_objectid_to_mapidx[playerid][objectid] == -2) {
 			player_objectid_to_mapidx[playerid][objectid] = -1;
 			rpcdata_DestroyObject.objectid = objectid;
-			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bs_maps_destroy_object, playerid, 2);
+			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream_destroy_object, playerid, 2);
 		}
 	}
 }

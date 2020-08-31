@@ -10,7 +10,6 @@ struct COMMAND {
 static struct COMMAND cmds[] = {
 #ifdef DEV
 	{ 0, "/*m", GROUPS_ALL, cmd_dev_STARm },
-	{ 0, "/closestmp", GROUPS_ALL, cmd_dev_closestmp },
 	{ 0, "/cp", GROUPS_ALL, cmd_dev_cp },
 	{ 0, "/crashme", GROUPS_ALL, cmd_dev_crashme },
 	{ 0, "/gt", GROUPS_ALL, cmd_dev_gt },

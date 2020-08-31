@@ -133,7 +133,7 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 {
 	unsigned long starttime;
 
-	missions_dispose(); /*call this before airports_destroy! TODO: explain why*/
+	missions_dispose();
 	airports_destroy();
 	echo_dispose();
 	heartbeat_end_session();
@@ -568,6 +568,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 	money_on_player_spawn(playerid);
 	spawn_on_player_spawn(playerid);
 	svp_update_mapicons(playerid, pos.x, pos.y);
+	missions_update_missionpoint_indicators(playerid, pos.x, pos.y);
 	zones_on_player_spawn(playerid, pos);
 
 	return 1;

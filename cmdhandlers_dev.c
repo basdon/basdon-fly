@@ -1,14 +1,4 @@
 /**
-Toggles constantly showing the closest mission checkpoint for every player.
-*/
-static
-int cmd_dev_closestmp(CMDPARAMS)
-{
-	dev_missions_toggle_closest_point();
-	return 1;
-}
-
-/**
 The /cp command creates a checkpoint on top of the player.
 */
 static

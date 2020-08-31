@@ -827,6 +827,7 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 	maps_stream_for_player(playerid, pos);
 	veh_on_player_now_driving(playerid, vehicleid, gamevehicles[vehicleid].dbvehicle);
 	svp_update_mapicons(playerid, pos.x, pos.y);
+	missions_update_missionpoint_indicators(playerid, pos.x, pos.y);
 	zones_update(playerid, pos);
 
 	NC_PARS(3);
@@ -883,6 +884,7 @@ int natives_SetPlayerPos(int playerid, struct vec3 pos)
 	B144("_");
 	NC_GameTextForPlayer(playerid, buf144a, 0, 5);
 	svp_update_mapicons(playerid, pos.x, pos.y);
+	missions_update_missionpoint_indicators(playerid, pos.x, pos.y);
 	zones_update(playerid, pos);
 
 	NC_PARS(4);

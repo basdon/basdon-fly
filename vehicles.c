@@ -877,6 +877,8 @@ void veh_timed_1s_update()
 
 		common_GetPlayerPos(playerid, ppos);
 		svp_update_mapicons(playerid, ppos->x, ppos->y);
+		/*TODO move this elsewhere I guess*/
+		missions_update_missionpoint_indicators(playerid, ppos->x, ppos->y);
 
 		NC_PARS(1);
 		nc_params[1] = playerid;

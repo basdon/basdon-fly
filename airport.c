@@ -1,5 +1,3 @@
-static struct AIRPORT *airports = NULL;
-static int numairports = 0;
 
 /**
 Map of airports corresponding to nearest airports from /nearest cmd.
@@ -27,20 +25,46 @@ void airports_destroy()
 	airports = NULL;
 }
 
+#ifdef AIRPORT_PRINT_STATS
+static
+void airports_print_stats()
+{
+	struct AIRPORT *ap;
+	struct RUNWAY *rnw;
+	struct MISSIONPOINT *msp;
+	int i, j;
+
+	ap = airports;
+	for (i = 0; i < numairports; i++) {
+		printf("airport %d: %s code %s\n", ap->id, ap->name, ap->code);
+		printf(" runwaycount: %d\n", ap->runwaysend - ap->runways);
+		rnw = ap->runways;
+		while (rnw != ap->runwaysend) {
+			printf("  runway %s type %d nav %d\n", rnw->id, rnw->type, rnw->nav);
+			rnw++;
+		}
+		printf(" missionpoints: %d\n", ap->num_missionpts);
+		msp = ap->missionpoints;
+		for (j = 0; j < ap->num_missionpts; j++) {
+			printf("  missionpoint %d: %s type %d point_type %d\n", msp->id, msp->name, msp->type, msp->point_type);
+			msp++;
+		}
+		ap++;
+	}
+}
+#endif
+
 /**
-Loads airports and runways (and init other things).
+Loads airports/runways/missionpoints (and init other things).
 */
 static
 void airports_init()
 {
-	int cacheid, rowcount, lastap, i, *field = nc_params + 2;
 	struct AIRPORT *ap;
 	struct RUNWAY *rnw;
-
-	if (airports != NULL) {
-		logprintf("airport_init(): table was not empty");
-		airports_destroy();
-	}
+	struct MISSIONPOINT *msp;
+	int cacheid, rowcount, lastap, *field = nc_params + 2;
+	int i, j, airportid;
 
 	/*init indexmap*/
 	i = MAX_PLAYERS;
@@ -49,49 +73,43 @@ void airports_init()
 	}
 
 	/*load airports*/
-	atoc(buf144,
-		"SELECT c,n,e,x,y,z,flags "
-		"FROM apt ORDER BY i ASC", 144);
+	atoc(buf144, "SELECT i,c,n,e,x,y,z,flags FROM apt ORDER BY i ASC", 144);
 	cacheid = NC_mysql_query(buf144a);
-	rowcount = NC_cache_get_row_count();
-	if (!rowcount) {
-		goto noairports;
+	numairports = NC_cache_get_row_count();
+	if (!numairports) {
+		assert(("no airports", 0));
 	}
-	numairports = rowcount;
 	airports = malloc(sizeof(struct AIRPORT) * numairports);
 	nc_params[3] = buf144a;
-	while (rowcount--) {
-		ap = airports + rowcount;
+	for (i = 0; i < numairports; i++) {
+		ap = &airports[i];
 		ap->runways = ap->runwaysend = NULL;
 		ap->missionpoints = NULL;
 		ap->num_missionpts = 0;
 		ap->missiontypes = 0;
-		ap->id = rowcount;
 		NC_PARS(3);
-		nc_params[1] = rowcount;
-		*field = 0; NC(n_cache_get_field_s);
-		ctoa(ap->code, buf144, sizeof(ap->code));
+		nc_params[1] = i;
+		ap->id = (*field = 0, NC(n_cache_get_field_i));
 		*field = 1; NC(n_cache_get_field_s);
+		ctoa(ap->code, buf144, sizeof(ap->code));
+		*field = 2; NC(n_cache_get_field_s);
 		ctoa(ap->name, buf144, sizeof(ap->name));
 		NC_PARS(2);
-		ap->enabled = (char) (*field = 2, NC(n_cache_get_field_i));
-		ap->pos.x = (*field = 3, NCF(n_cache_get_field_f));
-		ap->pos.y = (*field = 4, NCF(n_cache_get_field_f));
-		ap->pos.z = (*field = 5, NCF(n_cache_get_field_f));
-		ap->flags = (*field = 6, NC(n_cache_get_field_i));
+		ap->enabled = (char) (*field = 3, NC(n_cache_get_field_i));
+		ap->pos.x = (*field = 4, NCF(n_cache_get_field_f));
+		ap->pos.y = (*field = 5, NCF(n_cache_get_field_f));
+		ap->pos.z = (*field = 6, NCF(n_cache_get_field_f));
+		ap->flags = (*field = 7, NC(n_cache_get_field_i));
 	}
-noairports:
 	NC_cache_delete(cacheid);
 
+	/*TODO make this into one big arraw aswell?*/
 	/*load runways*/
-	B144("SELECT a,x,y,z,n,type,h,s "
-		"FROM rnw "
-		/*"WHERE type="EQ(RUNWAY_TYPE_RUNWAY)" "*/
-		"ORDER BY a ASC");
+	B144("SELECT a,x,y,z,n,type,h,s FROM rnw ORDER BY a ASC");
 	cacheid = NC_mysql_query(buf144a);
 	rowcount = NC_cache_get_row_count();
 	if (!rowcount) {
-		goto norunways;
+		assert(("no runways", 0));
 	}
 	rowcount--;
 	while (rowcount >= 0) {
@@ -133,23 +151,70 @@ noairports:
 			rowcount--;
 		}
 	}
-norunways:
 	NC_cache_delete(cacheid);
 
-#ifdef TEST_AIRPORT_LOADING
-	ap = airports;
-	i = numairports;
-	while (i--) {
-		printf("airport %d: %s code %s\n", ap->id, ap->name, ap->code);
-		printf(" runwaycount: %d\n", ap->runwaysend - ap->runways);
-		rnw = ap->runways;
-		while (rnw != ap->runwaysend) {
-			printf("  runway %s type %d nav %d\n",
-				rnw->id, rnw->type, rnw->nav);
-			rnw++;
-		}
-		ap++;
+	/*load missionpoints*/
+	/*They _HAVE_ to be ordered by airport.*/
+	atoc(buf144, "SELECT a,i,x,y,z,t,name FROM msp ORDER BY a ASC,i ASC", 144);
+	cacheid = NC_mysql_query(buf144a);
+	nummissionpoints = NC_cache_get_row_count();
+	if (!nummissionpoints) {
+		assert(("no missionpoints", 0));
 	}
+	missionpoints = malloc(sizeof(struct MISSIONPOINT) * nummissionpoints);
+	ap = NULL;
+	nc_params[3] = buf32a;
+	for (i = 0; i < nummissionpoints; i++) {
+		msp = &missionpoints[i];
+		NC_PARS(2);
+		nc_params[1] = i;
+		airportid = (*field = 0, NC(n_cache_get_field_i));
+		if (!ap || ap->id != airportid) {
+			for (j = 0; j < numairports; j++) {
+				if (airports[j].id == airportid) {
+					ap = &airports[j];
+					goto have_airport;
+				}
+			}
+			/*This should never happen, as per database scheme.*/
+			assert(("failed to link msp to ap", 0));
+have_airport:
+			ap->missionpoints = msp;
+		}
+		ap->num_missionpts++;
+		ap->missiontypes |= msp->type;
+
+		msp->ap = ap;
+		msp->currentlyactivemissions = 0;
+		msp->id = (unsigned short) (*field = 1, NC(n_cache_get_field_i));
+		msp->pos.x = (*field = 2, NCF(n_cache_get_field_f));
+		msp->pos.y = (*field = 3, NCF(n_cache_get_field_f));
+		msp->pos.z = (*field = 4, NCF(n_cache_get_field_f));
+		msp->type = (*field = 5, NC(n_cache_get_field_i));
+		if (msp->type & PASSENGER_MISSIONTYPES) {
+			msp->point_type = MISSION_POINT_PASSENGERS;
+			if (msp->type & ~PASSENGER_MISSIONTYPES) {
+mixed_missionpoints:
+				/*TODO replace with logprintf*/
+				printf("mixed missionpoint types msp id %d ap %s\n", msp->id, ap->name);
+				assert(("mixed missionpoint types", 0));
+			}
+		} else if (msp->type & CARGO_MISSIONTYPES) {
+			msp->point_type = MISSION_POINT_CARGO;
+			if (msp->type & ~CARGO_MISSIONTYPES) {
+				goto mixed_missionpoints;
+			}
+		} else {
+			msp->point_type = MISSION_POINT_SPECIAL;
+		}
+		NC_PARS(3);
+		*field = 6; NC(n_cache_get_field_s);
+		ctoa(msp->name, buf32, MAX_MSP_NAME + 1);
+	}
+	NC_cache_delete(cacheid);
+
+#ifdef AIRPORT_PRINT_STATS
+	airports_print_stats();
 #endif
 }
 

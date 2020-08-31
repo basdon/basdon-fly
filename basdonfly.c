@@ -1,5 +1,18 @@
 #define VERSION "0.1"
 
+
+
+/*define to print airport data when airports are loaded*/
+#undef AIRPORT_PRINT_STATS
+/*define to print map data when maps are loaded*/
+#undef MAPS_PRINT_STATS
+/*define to print msg to console each time map streams in/out*/
+#undef MAPS_LOG_STREAMING
+/*define to print msg when mission point indicator is made/destroyed/available*/
+#undef MISSIONS_LOG_POINT_INDICATOR_ALLOC
+
+
+
 #include "vendor/SDK/amxplugin.c" /*includes plugincommon.h*/
 
 #define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
@@ -67,18 +80,83 @@ struct RUNWAY {
 	int type;
 };
 
+/**
+See {@link missions_get_gethicle_model_msptype_mask} for vehicle assignments
+*/
+#define MISSION_TYPE_PASSENGER_S 1
+#define MISSION_TYPE_PASSENGER_M 2
+#define MISSION_TYPE_PASSENGER_L 4
+#define MISSION_TYPE_CARGO_S 8
+#define MISSION_TYPE_CARGO_M 16
+#define MISSION_TYPE_CARGO_L 32
+#define MISSION_TYPE_HELI 64
+#define MISSION_TYPE_HELI_CARGO 128
+#define MISSION_TYPE_MIL_HELI 256
+#define MISSION_TYPE_MIL 512
+#define MISSION_TYPE_AWACS 1024
+#define MISSION_TYPE_STUNT 2048
+#define MISSION_TYPE_CROPD 4096
+#define MISSION_TYPE_PASSENGER_WATER 8192
+/*TODO cargo water*/
+
+#define PASSENGER_MISSIONTYPES \
+	(MISSION_TYPE_PASSENGER_S | MISSION_TYPE_PASSENGER_M | \
+	MISSION_TYPE_PASSENGER_L | MISSION_TYPE_PASSENGER_WATER | \
+	MISSION_TYPE_HELI)
+
+#define CARGO_MISSIONTYPES \
+	(MISSION_TYPE_CARGO_S | MISSION_TYPE_CARGO_M | MISSION_TYPE_CARGO_L | MISSION_TYPE_HELI_CARGO)
+
+/*all heli missions, including cargo*/
+#define HELI_MISSIONTYPES \
+	(MISSION_TYPE_HELI | MISSION_TYPE_HELI_CARGO | MISSION_TYPE_MIL_HELI)
+#define MIL_MISSIONTYPES \
+	(MISSION_TYPE_MIL | MISSION_TYPE_MIL_HELI)
+
+/*excluding zero term*/
+#define MAX_MSP_NAME (9)
+
+/**
+The point type, decides the enex color and related things.
+*/
+#define MISSION_POINT_PASSENGERS 1
+#define MISSION_POINT_CARGO 2
+#define MISSION_POINT_SPECIAL 4
+
+struct MISSIONPOINT {
+	unsigned short id;
+	struct vec3 pos;
+	unsigned int type;
+	/**
+	See MISSION_POINT_*, decides the enex color and related things.
+	*/
+	char point_type;
+	char name[MAX_MSP_NAME + 1];
+	unsigned short currentlyactivemissions;
+	struct AIRPORT *ap;
+};
+
+static struct MISSIONPOINT *missionpoints;
+static int nummissionpoints;
+
 struct AIRPORT {
 	int id;
 	struct vec3 pos;
 	char code[4 + 1];
 	char enabled;
 	char name[MAX_AIRPORT_NAME + 1];
+	/**
+	OR'd value of all the types of all the missionpoints
+	*/
 	int missiontypes;
 	int flags;
 	struct RUNWAY *runways, *runwaysend;
 	struct MISSIONPOINT *missionpoints;
 	int num_missionpts;
 };
+
+static struct AIRPORT *airports;
+static int numairports;
 
 /*prefs*/
 
@@ -132,6 +210,7 @@ static struct FAKEAMX fakeamx;
 #include "timer.h"
 #include "vehicles.h"
 #include "kneeboard.h"
+#include <assert.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -141,6 +220,15 @@ static struct FAKEAMX fakeamx;
 #include <time.h>
 
 static void zones_update(int playerid, struct vec3 pos);
+static void missions_update_missionpoint_indicators(int playerid, float player_x, float player_y);
+
+static struct BitStream bitstream_create_object;
+/**
+Reset no_camera_col(0), attached_vehicle(-1), attached_object(-1) after use.
+*/
+static struct RPCDATA_CreateObject rpcdata_CreateObject;
+static struct BitStream bitstream_destroy_object;
+static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 
 #include "memstuff.c"
 #include "samp.c"
@@ -200,8 +288,19 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 
-	bitstream_freeform.readOffset = 0;
 	bitstream_freeform.copyData = 1;
+
+	rpcdata_CreateObject.no_camera_col = 0;
+	rpcdata_CreateObject.attached_object = -1;
+	rpcdata_CreateObject.attached_vehicle = -1;
+
+	bitstream_create_object.numberOfBitsUsed = sizeof(rpcdata_CreateObject) * 8;
+	bitstream_create_object.ptrData = &rpcdata_CreateObject;
+	bitstream_create_object.copyData = 1;
+
+	bitstream_destroy_object.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
+	bitstream_destroy_object.ptrData = &rpcdata_DestroyObject;
+	bitstream_destroy_object.copyData = 1;
 
 	samphooks_init();
 
@@ -254,9 +353,6 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 		/*timer100*/
 		anticheat_decrease_flood();
 		maps_process_tick();
-#ifdef DEV
-		dev_missions_update_closest_point();
-#endif /*DEV*/
 		panel_timed_update();
 		veh_timed_speedo_update();
 		playerstats_check_for_afk();
@@ -407,4 +503,3 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *a)
 	}
 	return AMX_ERR_NONE;
 }
-

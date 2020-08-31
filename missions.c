@@ -1,5 +1,11 @@
 #define TRACKER_PORT 7766
 
+/*TODO: stuff when special missions are added...
+Currently there's 3 categories: passenger/cargo/special(military).
+Missionenexes are shown for the vehicle you're in.
+In the case of special missions (eg andromada AWACS), not all of the red enexes will apply.
+*/
+
 #define MAX_UNLOAD_SPEED_KNOTS (35.0f)
 #define MAX_UNLOAD_SPEED_VEL (MAX_UNLOAD_SPEED_KNOTS / VEL_TO_KTS)
 #define MAX_UNLOAD_SPEED_SQ_VEL (MAX_UNLOAD_SPEED_VEL * MAX_UNLOAD_SPEED_VEL)
@@ -7,17 +13,6 @@
 const static char *SATISFACTION_TEXT_FORMAT = "Passenger~n~Satisfaction: %d%%";
 const static char *LOADING = "~p~Loading...";
 const static char *UNLOADING = "~p~Unloading...";
-
-/*TODO: make this something that's not a linked list*/
-struct MISSIONPOINT {
-	unsigned short id;
-	struct vec3 pos;
-	unsigned int type;
-	char name[MAX_MSP_NAME + 1];
-	unsigned short currentlyactivemissions;
-	struct AIRPORT *ap;
-	struct MISSIONPOINT *next;
-};
 
 struct MISSION {
 	int id;
@@ -47,6 +42,22 @@ struct MISSION {
 The selected option in the job help screen, should be 0-2.
 */
 static char mission_help_option[MAX_PLAYERS];
+/**
+Available mission point types for player.
+Usages are a.o. for in job help screen (after converting to point type) and to show mission point enexes.
+*/
+static char missions_available_msptype_mask[MAX_PLAYERS];
+/**
+Mission point index for mission indicator slots.
+*/
+static short missionpoint_indicator_index[MAX_PLAYERS][MAX_MISSION_INDICATORS];
+#define MISSIONPOINT_INDICATOR_STATE_FREE 0
+#define MISSIONPOINT_INDICATOR_STATE_USED 1
+#define MISSIONPOINT_INDICATOR_STATE_AVAILABLE 2 /*indicator created, but it can be discarded*/
+/**
+See MISSIONPOINT_INDICATOR_STATE_* defs.
+*/
+static char missionpoint_indicator_state[MAX_PLAYERS][MAX_MISSION_INDICATORS];
 /**
 See {@code MISSION_STAGE} definitions.
 
@@ -83,6 +94,105 @@ static struct TEXTDRAW td_jobhelp_enexred = { "enexred", TEXTDRAW_ALLOC_AS_NEEDE
 static struct TEXTDRAW td_jobhelp_txtred = { "txtred", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
 static struct TEXTDRAW td_jobhelp_actionred = { "actionred", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
 
+/**
+@return mask of MISSION_POINT_* values
+*/
+static
+int msptype_mask_to_point_mask(int msptype_mask)
+{
+	int point_mask;
+
+	point_mask = 0;
+	if (msptype_mask & PASSENGER_MISSIONTYPES) {
+		point_mask |= MISSION_POINT_PASSENGERS;
+	}
+	if (msptype_mask & CARGO_MISSIONTYPES) {
+		point_mask |= MISSION_POINT_CARGO;
+	}
+	if (msptype_mask & ~(PASSENGER_MISSIONTYPES | CARGO_MISSIONTYPES)) {
+		point_mask |= MISSION_POINT_SPECIAL;
+	}
+
+	return point_mask;
+}
+
+/**
+@return mask of MISSION_TYPE_* values
+*/
+static
+int missions_get_vehicle_model_msptype_mask(int model)
+{
+	switch (model) {
+	case MODEL_ANDROM:
+		return MISSION_TYPE_PASSENGER_L | MISSION_TYPE_CARGO_L;
+	case MODEL_AT400:
+		return MISSION_TYPE_PASSENGER_L | MISSION_TYPE_CARGO_L;
+	case MODEL_BEAGLE:
+		return MISSION_TYPE_PASSENGER_M | MISSION_TYPE_CARGO_M;
+	case MODEL_CARGOBOB:
+		return MISSION_TYPE_MIL_HELI | MISSION_TYPE_HELI_CARGO;
+	case MODEL_DODO:
+		return MISSION_TYPE_PASSENGER_S | MISSION_TYPE_CARGO_S;
+	case MODEL_LEVIATHN:
+		return MISSION_TYPE_HELI | MISSION_TYPE_HELI_CARGO;
+	case MODEL_MAVERICK:
+		return MISSION_TYPE_HELI | MISSION_TYPE_HELI_CARGO;
+	case MODEL_NEVADA:
+		return MISSION_TYPE_PASSENGER_M | MISSION_TYPE_CARGO_M;
+	case MODEL_RAINDANC:
+		return MISSION_TYPE_HELI | MISSION_TYPE_HELI_CARGO;
+	case MODEL_SKIMMER:
+		return MISSION_TYPE_PASSENGER_WATER;
+	case MODEL_POLMAV:
+		return MISSION_TYPE_HELI;
+	case MODEL_SPARROW:
+		return MISSION_TYPE_HELI;
+	case MODEL_SHAMAL:
+		return MISSION_TYPE_PASSENGER_M;
+	case MODEL_VCNMAV:
+		return MISSION_TYPE_HELI | MISSION_TYPE_HELI_CARGO;
+	case MODEL_HUNTER:
+		return MISSION_TYPE_MIL_HELI;
+	case MODEL_HYDRA:
+		return MISSION_TYPE_MIL;
+	case MODEL_RUSTLER:
+		return MISSION_TYPE_MIL;
+	default:
+		return 0;
+	}
+}
+
+/**
+@return mask of MISSION_POINT_* values
+*/
+static
+int missions_get_vehicle_model_mission_point_mask(int model)
+{
+	switch (model) {
+	case MODEL_ANDROM:
+	case MODEL_AT400:
+	case MODEL_BEAGLE:
+	case MODEL_CARGOBOB:
+	case MODEL_DODO:
+	case MODEL_LEVIATHN:
+	case MODEL_MAVERICK:
+	case MODEL_NEVADA:
+	case MODEL_RAINDANC:
+	case MODEL_SKIMMER:
+		return MISSION_POINT_PASSENGERS | MISSION_POINT_CARGO;
+	case MODEL_POLMAV:
+	case MODEL_SPARROW:
+	case MODEL_SHAMAL:
+	case MODEL_VCNMAV:
+		return MISSION_POINT_PASSENGERS;
+	case MODEL_HUNTER:
+	case MODEL_HYDRA:
+	case MODEL_RUSTLER: return MISSION_POINT_SPECIAL;
+	default:
+		return 0;
+	}
+}
+
 static
 void missions_help_hide(int playerid)
 {
@@ -94,9 +204,38 @@ void missions_help_hide(int playerid)
 		&td_jobhelp_actionblue, &td_jobhelp_enexred, &td_jobhelp_txtred,
 		&td_jobhelp_actionred, &td_jobhelp_optselbg);
 }
+
+/**
+Ensure to update {@link mission_help_option} first.
+*/
 static
-void missions_help_show(int playerid)
+void missions_help_show(int playerid, int point_mask)
 {
+	assert(point_mask);
+
+	/*Remember textdraw string length is allocated as needed using the strlen from the text in the file.*/
+	if (point_mask & MISSION_POINT_PASSENGERS) {
+		strcpy(td_jobhelp_actiongreen.rpcdata->text, "~w~Find nearest point");
+		td_jobhelp_greenbtnbg.rpcdata->box_color = 0xff333333;
+	} else {
+		strcpy(td_jobhelp_actiongreen.rpcdata->text, "~r~Wrong vehicle");
+		td_jobhelp_greenbtnbg.rpcdata->box_color = 0xff202020;
+	}
+	if (point_mask & MISSION_POINT_CARGO) {
+		strcpy(td_jobhelp_actionblue.rpcdata->text, "~w~Find nearest point");
+		td_jobhelp_bluebtnbg.rpcdata->box_color = 0xff333333;
+	} else {
+		strcpy(td_jobhelp_actionblue.rpcdata->text, "~r~Wrong vehicle");
+		td_jobhelp_bluebtnbg.rpcdata->box_color = 0xff202020;
+	}
+	if (point_mask & MISSION_POINT_SPECIAL) {
+		strcpy(td_jobhelp_actionred.rpcdata->text, "~w~Find nearest point");
+		td_jobhelp_redbtnbg.rpcdata->box_color = 0xff333333;
+	} else {
+		strcpy(td_jobhelp_actionred.rpcdata->text, "~r~Wrong vehicle");
+		td_jobhelp_redbtnbg.rpcdata->box_color = 0xff202020;
+	}
+
 	textdraws_show(playerid, 16,
 		&td_jobhelp_keyhelp, &td_jobhelp_header, &td_jobhelp_optsbg,
 		&td_jobhelp_text, &td_jobhelp_greenbtnbg, &td_jobhelp_bluebtnbg,
@@ -106,10 +245,33 @@ void missions_help_show(int playerid)
 		&td_jobhelp_actionred);
 }
 
+/**
+@param newselection new selected option
+@param direction to go in, in case the selected option is invalid
+*/
 static
-void missions_help_update_selection(playerid)
+void mission_help_update_selection_ensure_available(int playerid, int newselection, int direction)
 {
+	int point_mask;
 	float optdif;
+
+#if DEV
+	assert(direction != 0);
+#endif
+
+	mission_help_option[playerid] = newselection;
+invalid:
+	if (mission_help_option[playerid] > 2) {
+		mission_help_option[playerid] = 0;
+	} else if (mission_help_option[playerid] < 0) {
+		mission_help_option[playerid] = 2;
+	}
+	point_mask = msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]);
+	if (!((point_mask >> mission_help_option[playerid]) & 1)) {
+		assert(direction != 0);
+		mission_help_option[playerid] += direction;
+		goto invalid;
+	}
 
 	optdif = td_jobhelp_bluebtnbg.rpcdata->y - td_jobhelp_greenbtnbg.rpcdata->y;
 	td_jobhelp_optselbg.rpcdata->y = td_jobhelp_greenbtnbg.rpcdata->y + mission_help_option[playerid] * optdif;
@@ -143,28 +305,104 @@ void missions_destroy_tracker_socket()
 }
 
 static
-void missions_freepoints()
+void missions_update_missionpoint_indicators(int playerid, float player_x, float player_y)
 {
-	int i = numairports;
-	struct AIRPORT *ap = airports;
-	struct MISSIONPOINT *msp, *tmp;
+#define AIRPORT_RANGE_SQ (1500.0f * 1500.0f)
+#define POINT_RANGE_SQ (500.0f * 500.0f)
 
-	while (i--) {
-		msp = ap->missionpoints;
-		while (msp != NULL) {
-			tmp = msp->next;
-			free(msp);
-			msp = tmp;
+	struct MISSIONPOINT *msp;
+	int airportidx, indicatoridx, missionptidx, idxtouse;
+	float dx, dy;
+
+	for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
+		if (missionpoint_indicator_state[playerid][indicatoridx] == MISSIONPOINT_INDICATOR_STATE_USED) {
+			dx = missionpoints[missionpoint_indicator_index[playerid][indicatoridx]].pos.x - player_x;
+			dy = missionpoints[missionpoint_indicator_index[playerid][indicatoridx]].pos.y - player_y;
+			if (dx * dx + dy * dy > POINT_RANGE_SQ + 250.0f) {
+				/*No real need to destroy (unless its type doesn't match the player's available types anymore,
+				but the last loop of this method will deal with that).*/
+				missionpoint_indicator_state[playerid][indicatoridx] = MISSIONPOINT_INDICATOR_STATE_AVAILABLE;
+#ifdef MISSIONS_LOG_POINT_INDICATOR_ALLOC
+				printf("%d %d available %d\n", indicatoridx, missionpoint_indicator_index[playerid][indicatoridx], time_timestamp());
+#endif
+			}
 		}
-		ap++;
 	}
+
+	for (airportidx = 0; airportidx < numairports; airportidx++) {
+		dx = airports[airportidx].pos.x - player_x;
+		dy = airports[airportidx].pos.y - player_y;
+		if (dx * dx + dy * dy < AIRPORT_RANGE_SQ) {
+			msp = airports[airportidx].missionpoints;
+			for (missionptidx = airports[airportidx].num_missionpts; missionptidx > 0; missionptidx--) {
+				if (!(msp->type & missions_available_msptype_mask[playerid])) {
+					goto next;
+				}
+
+				dx = msp->pos.x - player_x;
+				dy = msp->pos.y - player_y;
+				if (dx * dx + dy * dy > POINT_RANGE_SQ) {
+					goto next;
+				}
+
+				idxtouse = -1;
+				for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
+					if (missionpoint_indicator_state[playerid][indicatoridx] != MISSIONPOINT_INDICATOR_STATE_USED) {
+						idxtouse = indicatoridx;
+					} else if (missionpoint_indicator_index[playerid][indicatoridx] == msp - missionpoints) {
+						/*This missionpoint is already created.*/
+						goto next;
+					}
+				}
+
+				if (idxtouse != -1) {
+					rpcdata_CreateObject.objectid = OBJECT_MISSION_INDICATOR_BASE + idxtouse;
+					/*This relies on the types being 1, 2, 4.*/
+					/*Passenger 1 19606*/
+					/*Cargo 2 19607*/
+					/*Special 4 19605*/
+					rpcdata_CreateObject.modelid = 19607 - (msp->point_type & 1) - ((msp->point_type >> 1) & 0x2);
+					rpcdata_CreateObject.x = msp->pos.x;
+					rpcdata_CreateObject.y = msp->pos.y;
+					rpcdata_CreateObject.z = msp->pos.z;
+					rpcdata_CreateObject.rotx = 0.0f;
+					rpcdata_CreateObject.roty = 0.0f;
+					rpcdata_CreateObject.rotz = 0.0f;
+					rpcdata_CreateObject.drawdistance = 1000.0f;
+					SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream_create_object, playerid, 2);
+					missionpoint_indicator_state[playerid][idxtouse] = MISSIONPOINT_INDICATOR_STATE_USED;
+					missionpoint_indicator_index[playerid][idxtouse] = msp - missionpoints;
+#ifdef MISSIONS_LOG_POINT_INDICATOR_ALLOC
+					printf("%d %d created %d\n", idxtouse, msp-missionpoints, time_timestamp());
+#endif
+					goto next;
+				}
+next:
+				msp++;
+			}
+		}
+	}
+
+	for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
+		if (missionpoint_indicator_state[playerid][indicatoridx] != MISSIONPOINT_INDICATOR_STATE_FREE &&
+			!(missionpoints[missionpoint_indicator_index[playerid][indicatoridx]].type & missions_available_msptype_mask[playerid]))
+		{
+			rpcdata_DestroyObject.objectid = OBJECT_MISSION_INDICATOR_BASE + indicatoridx;
+			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream_destroy_object, playerid, 2);
+			missionpoint_indicator_state[playerid][indicatoridx] = MISSIONPOINT_INDICATOR_STATE_FREE;
+#ifdef MISSIONS_LOG_POINT_INDICATOR_ALLOC
+			printf("%d %d destroyed %d\n", indicatoridx, missionpoint_indicator_index[playerid][indicatoridx], time_timestamp());
+#endif
+		}
+	}
+
+#undef AIRPORT_RANGE_SQ
+#undef POINT_RANGE_SQ
 }
 
 static
 void missions_dispose()
 {
-	missions_freepoints();
-
 	free(td_jobhelp_keyhelp.rpcdata);
 	free(td_jobhelp_header.rpcdata);
 	free(td_jobhelp_optsbg.rpcdata);
@@ -187,9 +425,7 @@ void missions_dispose()
 static
 void missions_init()
 {
-	struct AIRPORT *ap;
-	struct MISSIONPOINT *msp;
-	int apid, lastapid, i, cacheid, *f = nc_params + 2;
+	int i;
 
 	/*varinit*/
 	for (i = 0; i < MAX_PLAYERS; i++) {
@@ -206,44 +442,7 @@ void missions_init()
 		&td_jobhelp_txtblue, &td_jobhelp_actionblue, &td_jobhelp_enexred,
 		&td_jobhelp_txtred, &td_jobhelp_actionred);
 
-	/*load missionpoints*/
-	atoc(buf144,
-		"SELECT a,i,x,y,z,t,name "
-		"FROM msp "
-		"ORDER BY a ASC,i ASC",
-		144);
-	cacheid = NC_mysql_query(buf144a);
-	i = NC_cache_get_row_count();
-	lastapid = -1;
-	nc_params[3] = buf32a;
-	while (i--) {
-		NC_PARS(2);
-		nc_params[1] = i;
-		apid = (*f = 0, NC(n_cache_get_field_i));
-		if (apid != lastapid) {
-			lastapid = apid;
-			ap = airports + apid;
-			msp = malloc(sizeof(struct MISSIONPOINT));
-			ap->missionpoints = msp;
-		} else {
-			msp->next = malloc(sizeof(struct MISSIONPOINT));
-			msp = msp->next;
-		}
-		msp->next = NULL;
-		msp->ap = ap;
-		msp->currentlyactivemissions = 0;
-		msp->id = (unsigned short) (*f = 1, NC(n_cache_get_field_i));
-		msp->pos.x = (*f = 2, NCF(n_cache_get_field_f));
-		msp->pos.y = (*f = 3, NCF(n_cache_get_field_f));
-		msp->pos.z = (*f = 4, NCF(n_cache_get_field_f));
-		msp->type = (*f = 5, NC(n_cache_get_field_i));
-		NC_PARS(3);
-		*f = 6; NC(n_cache_get_field_s);
-		ctoa(msp->name, buf32, MAX_MSP_NAME + 1);
-		ap->missiontypes |= msp->type;
-		ap->num_missionpts++;
-	}
-	NC_cache_delete(cacheid);
+	/*missionpoints are loaded in airport.c*/
 
 	/*end unfinished dangling flights*/
 	atoc(buf144,
@@ -374,6 +573,7 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 {
 	struct MISSIONPOINT *msp;
 	struct RUNWAY *rnw;
+	int i;
 	int costpermsp, tax = 500, chargernws = 0;
 
 	switch (missiontype) {
@@ -416,11 +616,11 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 
 	/*missionpoint cost for every missionpoint this missiontype has*/
 	msp = ap->missionpoints;
-	while (msp != NULL) {
+	for (i = ap->num_missionpts; i > 0; i--) {
 		if (msp->type & missiontype) {
 			tax += costpermsp;
 		}
-		msp = msp->next;
+		msp++;
 	}
 
 	/*for helis: 40 per helipad*/
@@ -447,88 +647,6 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 	return tax;
 }
 
-#ifdef DEV
-/**
-@see dev_missions_toggle_closest_point
-@see dev_missions_update_closest_point
-*/
-static int dev_show_closest_point = 0;
-
-void dev_missions_toggle_closest_point()
-{
-	int i;
-
-	if (!(dev_show_closest_point ^= 1)) {
-		for (i = 0; i < playercount; i++) {
-			NC_DisablePlayerRaceCheckpoint(players[i]);
-		}
-	}
-	csprintf(buf144, "showing mission points: %d", dev_show_closest_point);
-	NC_SendClientMessageToAll(-1, buf144a);
-}
-
-void dev_missions_update_closest_point()
-{
-	static struct MISSIONPOINT *dev_closest_point[MAX_PLAYERS];
-
-	int i, playerid;
-	struct vec3 ppos;
-	float dx, dy, shortestdistance, dist;
-	struct AIRPORT *ap, *apend, *closestap;
-	struct MISSIONPOINT *mp, *closestmp;
-
-	if (!dev_show_closest_point) {
-		return;
-	}
-
-	apend = airports + numairports;
-
-	for (i = 0; i < playercount; i++) {
-		playerid = players[i];
-		common_GetPlayerPos(playerid, &ppos);
-		shortestdistance = 0x7F800000;
-		closestap = NULL;
-		ap = airports;
-		while (ap != apend) {
-			dx = ap->pos.x - ppos.x;
-			dy = ap->pos.y - ppos.y;
-			dist = dx * dx + dy * dy;
-			if (dist < shortestdistance) {
-				shortestdistance = dist;
-				closestap = ap;
-			}
-			ap++;
-		}
-		if (closestap == NULL) {
-			continue;
-		}
-		shortestdistance = 0x7F800000;
-		closestmp = NULL;
-		mp = closestap->missionpoints;
-		while (mp) {
-			dx = mp->pos.x - ppos.x;
-			dy = mp->pos.y - ppos.y;
-			dist = dx * dx + dy * dy;
-			if (dist < shortestdistance) {
-				shortestdistance = dist;
-				closestmp = mp;
-			}
-			mp = mp->next;
-		}
-		if (closestmp && dev_closest_point[playerid] != closestmp) {
-			dev_closest_point[playerid] = closestmp;
-			NC_PARS(9);
-			nc_params[1] = playerid;
-			nc_params[2] = MISSION_CHECKPOINT_TYPE;
-			nc_paramf[3] = nc_paramf[6] = closestmp->pos.x;
-			nc_paramf[4] = nc_paramf[7] = closestmp->pos.y;
-			nc_paramf[5] = nc_paramf[8] = closestmp->pos.z;
-			nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
-			NC(n_SetPlayerRaceCheckpoint);
-		}
-	}
-}
-#endif /*DEV*/
 
 /**
 Find a random endpoint for given missiontype, skipping airport of startpoint.
@@ -537,8 +655,7 @@ Find a random endpoint for given missiontype, skipping airport of startpoint.
 @return NULL on no applicable points found
 */
 static
-struct MISSIONPOINT *missions_get_random_endpoint(
-	int missiontype, struct MISSIONPOINT *startpoint)
+struct MISSIONPOINT *missions_get_random_endpoint(int missiontype, struct MISSIONPOINT *startpoint)
 {
 	struct MISSIONPOINT *msp, **possible_missionpts;
 	struct AIRPORT *airport, **possible_airports;
@@ -579,7 +696,7 @@ struct MISSIONPOINT *missions_get_random_endpoint(
 	msp = airport->missionpoints;
 	possible_missionpts = malloc(sizeof(int*) * airport->num_missionpts);
 	num_possible_missionpts = 0;
-	while (msp != NULL) {
+	for (i = airport->num_missionpts; i > 0; i--) {
 		if (msp->type & missiontype) {
 			if (msp->currentlyactivemissions < minconcurrent) {
 				minconcurrent = msp->currentlyactivemissions;
@@ -587,7 +704,7 @@ struct MISSIONPOINT *missions_get_random_endpoint(
 			}
 			possible_missionpts[num_possible_missionpts++] = msp;
 		}
-		msp = msp->next;
+		msp++;
 	}
 
 	switch (num_possible_missionpts) {
@@ -648,7 +765,7 @@ struct MISSIONPOINT *missions_get_startpoint(int missiontype, struct vec3 *ppos)
 	num_free_missionpts = 0;
 	least_active = 1000000;
 	msp = airport->missionpoints;
-	while (msp != NULL) {
+	for (i = airport->num_missionpts; i > 0; i--) {
 		if (msp->type & missiontype) {
 			if (msp->currentlyactivemissions < least_active) {
 				least_active = msp->currentlyactivemissions;
@@ -656,7 +773,7 @@ struct MISSIONPOINT *missions_get_startpoint(int missiontype, struct vec3 *ppos)
 			}
 			free_missionpts[num_free_missionpts++] = msp;
 		}
-		msp = msp->next;
+		msp++;
 	}
 
 	/*then choose the missionpoint that is the closest to the player*/
@@ -747,6 +864,12 @@ void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh)
 
 void missions_on_player_connect(int playerid)
 {
+	int i;
+
+	for (i = 0; i < MAX_MISSION_INDICATORS; i++) {
+		missionpoint_indicator_state[MAX_PLAYERS][i] = MISSIONPOINT_INDICATOR_STATE_FREE;
+	}
+	missions_available_msptype_mask[playerid] = -1;
 	mission_help_option[playerid] = 0;
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	activemission[playerid] = NULL;
@@ -1435,6 +1558,19 @@ void missions_on_player_state_changed(int playerid, int from, int to)
 {
 	struct MISSION *mission;
 	struct VEHICLEPARAMS vpars;
+	struct vec3 pos;
+	int vehicleid;
+
+	if (to == PLAYER_STATE_ONFOOT || from == PLAYER_STATE_ONFOOT) {
+		vehicleid = NC_GetPlayerVehicleID(playerid);
+		if (vehicleid) {
+			missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(NC_GetVehicleModel(vehicleid));
+		} else {
+			missions_available_msptype_mask[playerid] = -1;
+		}
+		common_GetPlayerPos(playerid, &pos);
+		missions_update_missionpoint_indicators(playerid, pos.x, pos.y);
+	}
 
 	if (from == PLAYER_STATE_DRIVER &&
 		(mission = activemission[playerid]) != NULL &&
@@ -1601,12 +1737,22 @@ int missions_cmd_mission(CMDPARAMS)
 		vehicleid = NC(n_GetPlayerVehicleID);
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (veh) {
+			missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(veh->model);
+			if (missions_available_msptype_mask[playerid] == 0) {
+				SendClientMessage(playerid, COL_WARN, WARN"This vehicle can't do any missions!");
+				return 1;
+			}
 			mission_stage[playerid] = MISSION_STAGE_HELP;
 			TogglePlayerControllable(playerid, 0);
-			missions_help_show(playerid);
-			missions_help_update_selection(playerid);
 
-			/*missions_start_mission(playerid);*/
+			/*For SOME reason, when many enexes are shown, the preview can be messed up
+			(as in the type of messed up you see when only model is on screen).
+			Deleting all enexes before showing the textdraw would help, but it wouldn't work
+			unless there's a game update in between the deletion of the objects and the textdraw
+			creation. But that would add too much delay (and complexity), so I'm just letting it be messed up atm..*/
+
+			missions_help_show(playerid, msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]));
+			mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid], 1);
 		} else {
 			SendClientMessage(playerid, COL_WARN, WARN"Get in a vehicle first!");
 		}
@@ -1624,18 +1770,10 @@ void missions_driversync_udkeystate_change(int playerid, short udkey)
 {
 	if (mission_stage[playerid] == MISSION_STAGE_HELP) {
 		if (udkey < 0) {
-			mission_help_option[playerid]--;
-			if (mission_help_option[playerid] < 0) {
-				mission_help_option[playerid] = 2;
-			}
-			missions_help_update_selection(playerid);
+			mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid] - 1, -1);
 			PlayerPlaySound(playerid, 1053);
 		} else if (udkey > 0) {
-			mission_help_option[playerid]++;
-			if (mission_help_option[playerid] > 2) {
-				mission_help_option[playerid] = 0;
-			}
-			missions_help_update_selection(playerid);
+			mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid] + 1, 1);
 			PlayerPlaySound(playerid, 1052);
 		}
 	} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {

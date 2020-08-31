@@ -1,3 +1,5 @@
+#define MAX_MISSION_INDICATORS (15)
+
 /*DIALOG IDS*/
 
 /*can be used when no response is needed*/
@@ -35,7 +37,11 @@
 /*These are also the ids, so mapsystem uses ids 0-899
 (unless the code changed to not use objectid 0).*/
 #define MAX_MAPSYSTEM_OBJECTS (900)
-#define ROTATING_RADAR_OBJECT_ID (999)
+#define OBJECT_MISSION_INDICATOR_BASE (984)
+#define OBJECT_ROTATING_RADAR (999)
+#if OBJECT_MISSION_INDICATOR_BASE + MAX_MISSION_INDICATORS != OBJECT_ROTATING_RADAR
+#error "update object ids"
+#endif
 
 /*TEXTDRAW IDS*/
 
