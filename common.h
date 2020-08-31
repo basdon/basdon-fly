@@ -117,12 +117,6 @@ void ctoai(char *dstsrc);
 #define COL_IRC_MODE 0x00ffffff
 #define COL_IRC_ACTION 0xff00ffff
 
-#define VEL_MAX (0.66742320819112627986348122866894f)
-#define VEL_TO_KPH (VEL_MAX * 270.0f)
-#define VEL_TO_KTS (VEL_MAX * 145.0f)
-#define VEL_TO_MPS (VEL_TO_KPH / 3.6f) /*(KPH / 3.6)*/
-#define VEL_TO_KFPM (VEL_TO_MPS * 3.28084f * 60.0f / 1000.0f) /* K feet/m*/
-
 #define GROUP_BANNED (1)
 #define GROUP_GUEST (2)
 #define GROUP_MEMBER (4)

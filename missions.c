@@ -1724,6 +1724,7 @@ Aliases: /w /m
 static
 int missions_cmd_mission(CMDPARAMS)
 {
+	struct vec3 vel;
 	struct dbvehicle *veh;
 	int vehicleid;
 
@@ -1732,37 +1733,47 @@ int missions_cmd_mission(CMDPARAMS)
 	case MISSION_STAGE_JOBMAP:
 		break;
 	case MISSION_STAGE_NOMISSION:
-		/*TODO check if speed is low (to not do this command while in the air*/
 		nc_params[1] = playerid;
 		vehicleid = NC(n_GetPlayerVehicleID);
 		veh = gamevehicles[vehicleid].dbvehicle;
-		if (veh) {
-			missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(veh->model);
-			if (missions_available_msptype_mask[playerid] == 0) {
-				SendClientMessage(playerid, COL_WARN, WARN"This vehicle can't do any missions!");
-				return 1;
-			}
-			mission_stage[playerid] = MISSION_STAGE_HELP;
-			TogglePlayerControllable(playerid, 0);
-
-			/*For SOME reason, when many enexes are shown, the preview can be messed up
-			(as in the type of messed up you see when only model is on screen).
-			Deleting all enexes before showing the textdraw would help, but it wouldn't work
-			unless there's a game update in between the deletion of the objects and the textdraw
-			creation. But that would add too much delay (and complexity), so I'm just letting it be messed up atm..*/
-
-			missions_help_show(playerid, msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]));
-			mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid], 1);
-		} else {
+		if (!veh) {
 			SendClientMessage(playerid, COL_WARN, WARN"Get in a vehicle first!");
+			return 1;
 		}
-		break;
+
+		/*Checking speed for two reasons:
+		- this command will freeze the player, meaning they will drop from the sky when flying
+		- the player should stop completely before starting a mission*/
+		common_GetVehicleVelocity(vehicleid, &vel);
+		/*Ignoring z velocity because it would be annoying with skimmers riding heavy waves.*/
+		if (vel.x * vel.x + vel.y * vel.y > (3.0f / VEL_TO_KPH) * (3.0f / VEL_TO_KPH)) {
+			SendClientMessage(playerid, COL_WARN, WARN"Slow down first!");
+			return 1;
+		}
+
+		missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(veh->model);
+		if (missions_available_msptype_mask[playerid] == 0) {
+			SendClientMessage(playerid, COL_WARN, WARN"This vehicle can't do any missions!");
+			return 1;
+		}
+		mission_stage[playerid] = MISSION_STAGE_HELP;
+		TogglePlayerControllable(playerid, 0);
+
+		/*For SOME reason, when many enexes are shown, the preview can be messed up
+		(as in the type of messed up you see when only model is on screen).
+		Deleting all enexes before showing the textdraw would help, but it wouldn't work
+		unless there's a game update in between the deletion of the objects and the textdraw creation.
+		But that would add too much delay (and complexity), so I'm just letting it be messed up atm..*/
+
+		missions_help_show(playerid, msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]));
+		mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid], 1);
+
+		return 1;
 	default:
 		SendClientMessage(playerid, COL_WARN,
 			WARN"You're already working! Use /s to stop your current work first ($"EQ(MISSION_CANCEL_FINE)" fee).");
-		break;
+		return 1;
 	}
-	return 1;
 }
 
 static
