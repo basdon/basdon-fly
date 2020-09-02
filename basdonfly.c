@@ -350,12 +350,6 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	int newtickcount;
 #endif /*LOG_SLOW_TICKS*/
 
-	/*occurs when doing gmx*/
-	if (amx == NULL) {
-		count = 0;
-		return;
-	}
-
 	timer_tick();
 
 	if (joinpressure > 0) {
@@ -515,15 +509,5 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *a)
 {
-	if (amx == a) {
-		amx = NULL;
-		/*Most likely doing gmx for update, so the server needs
-		to restart (exit and start) to copy and load the new plugin.*/
-		buf32[0] = 'e'; buf32[1] = 'x'; buf32[2] = 'i'; buf32[3] = 't';
-		buf32[4] = 0;
-		NC_SendRconCommand(buf32a);
-		/*TODO this actually crashes the server somewhere. Although the
-		result is the same, it would be nice if it didn't crash :)*/
-	}
 	return AMX_ERR_NONE;
 }
