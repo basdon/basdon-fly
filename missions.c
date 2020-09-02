@@ -1,11 +1,5 @@
 #define TRACKER_PORT 7766
 
-/*TODO: stuff when special missions are added...
-Currently there's 3 categories: passenger/cargo/special(military).
-Missionenexes are shown for the vehicle you're in.
-In the case of special missions (eg andromada AWACS), not all of the red enexes will apply.
-*/
-
 #define MAX_UNLOAD_SPEED_KNOTS (35.0f)
 #define MAX_UNLOAD_SPEED_VEL (MAX_UNLOAD_SPEED_KNOTS / VEL_TO_KTS)
 #define MAX_UNLOAD_SPEED_SQ_VEL (MAX_UNLOAD_SPEED_VEL * MAX_UNLOAD_SPEED_VEL)
@@ -94,6 +88,39 @@ static struct TEXTDRAW td_jobhelp_enexred = { "enexred", TEXTDRAW_ALLOC_AS_NEEDE
 static struct TEXTDRAW td_jobhelp_txtred = { "txtred", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
 static struct TEXTDRAW td_jobhelp_actionred = { "actionred", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
 
+#define NUM_MAP_TEXTDRAWS (27)
+static struct TEXTDRAW td_jobmap_keyhelp = { "keyhelp", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_header = { "header", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_optsbg = { "optsbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_mapbg = { "mapbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_island_mainland = { "mapsquaremin", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_island_octa = { "mapsquaremax", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+#if AIRPORT_CODE_LEN != 4
+#error "mapmin/mapmax text alloc depend on airport code being 4 chars at most"
+#endif
+static struct TEXTDRAW td_jobmap_from = { "mapmin", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_to = { "mapmax", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt1bg = { "opt1bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt2bg = { "opt2bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt3bg = { "opt3bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt4bg = { "opt4bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt5bg = { "opt5bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt6bg = { "opt6bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt7bg = { "opt7bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt8bg = { "opt8bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt9bg = { "opt9bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_optselbg = { "optselbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+/*Very scientific text measurement system: "Some very long airport name - Very special mission type - 100000m"*/
+static struct TEXTDRAW td_jobmap_opt1 = { "opt1", 65, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt2 = { "opt2", 65, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt3 = { "opt3", 65, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt4 = { "opt4", 65, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt5 = { "opt5", 65, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt6 = { "opt6", 65, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt7 = { "opt7", 65, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt8 = { "opt8", 65, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt9 = { "opt9", 65, 0, NULL };
+
 /**
 @return mask of MISSION_POINT_* values
 */
@@ -162,9 +189,6 @@ int missions_get_vehicle_model_msptype_mask(int model)
 	}
 }
 
-/**
-@return mask of MISSION_POINT_* values
-*/
 static
 int missions_get_vehicle_model_mission_point_mask(int model)
 {
@@ -196,13 +220,7 @@ int missions_get_vehicle_model_mission_point_mask(int model)
 static
 void missions_help_hide(int playerid)
 {
-	textdraws_hide(playerid, 17,
-		&td_jobhelp_keyhelp, &td_jobhelp_header, &td_jobhelp_optsbg,
-		&td_jobhelp_text, &td_jobhelp_greenbtnbg, &td_jobhelp_bluebtnbg,
-		&td_jobhelp_redbtnbg, &td_jobhelp_enexgreen, &td_jobhelp_txtgreen,
-		&td_jobhelp_actiongreen, &td_jobhelp_enexblue, &td_jobhelp_txtblue,
-		&td_jobhelp_actionblue, &td_jobhelp_enexred, &td_jobhelp_txtred,
-		&td_jobhelp_actionred, &td_jobhelp_optselbg);
+	textdraws_hide_consecutive(playerid, 17, TEXTDRAW_MISSIONHELP_BASE);
 }
 
 /**
@@ -236,6 +254,7 @@ void missions_help_show(int playerid, int point_mask)
 		td_jobhelp_redbtnbg.rpcdata->box_color = 0xff202020;
 	}
 
+	/*Showing all but the "selection option background" textdraw.*/
 	textdraws_show(playerid, 16,
 		&td_jobhelp_keyhelp, &td_jobhelp_header, &td_jobhelp_optsbg,
 		&td_jobhelp_text, &td_jobhelp_greenbtnbg, &td_jobhelp_bluebtnbg,
@@ -420,6 +439,34 @@ void missions_dispose()
 	free(td_jobhelp_enexred.rpcdata);
 	free(td_jobhelp_txtred.rpcdata);
 	free(td_jobhelp_actionred.rpcdata);
+
+	free(td_jobmap_keyhelp.rpcdata);
+	free(td_jobmap_header.rpcdata);
+	free(td_jobmap_optsbg.rpcdata);
+	free(td_jobmap_mapbg.rpcdata);
+	free(td_jobmap_island_mainland.rpcdata);
+	free(td_jobmap_island_octa.rpcdata);
+	free(td_jobmap_from.rpcdata);
+	free(td_jobmap_to.rpcdata);
+	free(td_jobmap_opt1bg.rpcdata);
+	free(td_jobmap_opt2bg.rpcdata);
+	free(td_jobmap_opt3bg.rpcdata);
+	free(td_jobmap_opt4bg.rpcdata);
+	free(td_jobmap_opt5bg.rpcdata);
+	free(td_jobmap_opt6bg.rpcdata);
+	free(td_jobmap_opt7bg.rpcdata);
+	free(td_jobmap_opt8bg.rpcdata);
+	free(td_jobmap_opt9bg.rpcdata);
+	free(td_jobmap_optselbg.rpcdata);
+	free(td_jobmap_opt1.rpcdata);
+	free(td_jobmap_opt2.rpcdata);
+	free(td_jobmap_opt3.rpcdata);
+	free(td_jobmap_opt4.rpcdata);
+	free(td_jobmap_opt5.rpcdata);
+	free(td_jobmap_opt6.rpcdata);
+	free(td_jobmap_opt7.rpcdata);
+	free(td_jobmap_opt8.rpcdata);
+	free(td_jobmap_opt9.rpcdata);
 }
 
 static
@@ -434,13 +481,23 @@ void missions_init()
 
 	/*textdraws*/
 	textdraws_load_from_file("jobhelp", TEXTDRAW_MISSIONHELP_BASE, 17,
-		/*remember to free them in some dispose func*/
+		/*remember to free their rpcdata in missions_dispose*/
 		&td_jobhelp_keyhelp, &td_jobhelp_header, &td_jobhelp_optsbg,
 		&td_jobhelp_text, &td_jobhelp_greenbtnbg, &td_jobhelp_bluebtnbg,
 		&td_jobhelp_redbtnbg, &td_jobhelp_optselbg, &td_jobhelp_enexgreen,
 		&td_jobhelp_txtgreen, &td_jobhelp_actiongreen, &td_jobhelp_enexblue,
 		&td_jobhelp_txtblue, &td_jobhelp_actionblue, &td_jobhelp_enexred,
 		&td_jobhelp_txtred, &td_jobhelp_actionred);
+
+	textdraws_load_from_file("jobmap", TEXTDRAW_MISSIONMAP_BASE, 27,
+		/*remember to free their rpcdata in missions_dispose*/
+		&td_jobmap_keyhelp, &td_jobmap_header, &td_jobmap_optsbg, &td_jobmap_mapbg,
+		&td_jobmap_island_mainland, &td_jobmap_island_octa, &td_jobmap_from,
+		&td_jobmap_to, &td_jobmap_opt1bg, &td_jobmap_opt2bg, &td_jobmap_opt3bg,
+		&td_jobmap_opt4bg, &td_jobmap_opt5bg, &td_jobmap_opt6bg, &td_jobmap_opt7bg,
+		&td_jobmap_opt8bg, &td_jobmap_opt9bg, &td_jobmap_optselbg, &td_jobmap_opt1,
+		&td_jobmap_opt2, &td_jobmap_opt3, &td_jobmap_opt4, &td_jobmap_opt5, &td_jobmap_opt6,
+		&td_jobmap_opt7, &td_jobmap_opt8, &td_jobmap_opt9);
 
 	/*missionpoints are loaded in airport.c*/
 
@@ -1747,7 +1804,7 @@ int missions_cmd_mission(CMDPARAMS)
 		common_GetVehicleVelocity(vehicleid, &vel);
 		/*Ignoring z velocity because it would be annoying with skimmers riding heavy waves.*/
 		if (vel.x * vel.x + vel.y * vel.y > (3.0f / VEL_TO_KPH) * (3.0f / VEL_TO_KPH)) {
-			SendClientMessage(playerid, COL_WARN, WARN"Slow down first!");
+			SendClientMessage(playerid, COL_WARN, WARN"Stop the vehicle first!");
 			return 1;
 		}
 
@@ -1767,7 +1824,6 @@ int missions_cmd_mission(CMDPARAMS)
 
 		missions_help_show(playerid, msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]));
 		mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid], 1);
-
 		return 1;
 	default:
 		SendClientMessage(playerid, COL_WARN,

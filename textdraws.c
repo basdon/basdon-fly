@@ -13,6 +13,8 @@ struct TEXTDRAW {
 	Amount of characters allocated for the text.
 	May be TEXTDRAW_ALLOC_AS_NEEDED when passed to the loading function so
 	it will allocate just as many characters as needed to fit the text that is set in the file.
+	When TEXTDRAW_ALLOC_AS_NEEDED, this value will be replaced with the actual allocated amount,
+	including a spot for the ending zero terminator.
 	*/
 	int allocated_text_length;
 	/**
@@ -50,7 +52,7 @@ void textdraws_load_from_file(char *filename, int base_textdraw_id, int numtextd
 	FILE *fs;
 	char fullfilepath[100];
 	int magic;
-	int i, allocated_text_size;
+	int i;
 	va_list va;
 
 	sprintf(fullfilepath, "scriptfiles/texts/%s.text", filename);
@@ -77,8 +79,10 @@ void textdraws_load_from_file(char *filename, int base_textdraw_id, int numtextd
 			td = va_arg(va, struct TEXTDRAW*);
 			if (strcmp(td->name, entry.name) == 0) {
 				if (td->allocated_text_length == TEXTDRAW_ALLOC_AS_NEEDED) {
+					/*+1 for zero terminator*/
 					td->allocated_text_length = entry.entry.rpcdata.text_length + 1;
 				}
+				/*-1 because struct includes a 1-sized char array for the text*/
 				td->rpcsize = sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->allocated_text_length;
 				td->rpcdata = malloc(td->rpcsize);
 				memcpy(td->rpcdata, &entry.entry.rpcdata, td->rpcsize);
@@ -156,4 +160,20 @@ void textdraws_hide(int playerid, int num, ...)
 		SAMP_SendRPCToPlayer(RPC_HideTextDraw, &bitstream_freeform, playerid, 2);
 	}
 	va_end(va);
+}
+
+/**
+Hides a number of textdraws that all have ids that follow each other.
+*/
+static
+void textdraws_hide_consecutive(int playerid, int num, int base_id)
+{
+	bitstream_freeform.numberOfBitsUsed = sizeof(short) * 8;
+	bitstream_freeform.numberOfBitsAllocated = sizeof(short) * 8;
+	bitstream_freeform.ptrData = &rpcdata_freeform;
+	while (num--) {
+		rpcdata_freeform.word[0] = base_id;
+		SAMP_SendRPCToPlayer(RPC_HideTextDraw, &bitstream_freeform, playerid, 2);
+		base_id++;
+	}
 }

@@ -63,6 +63,7 @@ EXPECT_SIZE(struct quat, 4 * sizeof(cell));
 /*airportstuff*/
 
 #define MAX_AIRPORT_NAME (24)
+#define AIRPORT_CODE_LEN (4)
 
 #define APT_FLAG_TOWERED (0x1)
 
@@ -76,7 +77,7 @@ EXPECT_SIZE(struct quat, 4 * sizeof(cell));
 #define RUNWAY_TYPE_HELIPAD (2)
 
 struct RUNWAY {
-	char id[4];
+	char id[AIRPORT_CODE_LEN];
 	float heading, headingr;
 	struct vec3 pos;
 	int nav;
@@ -99,10 +100,13 @@ See {@link missions_get_gethicle_model_msptype_mask} for vehicle assignments
 #define MISSION_TYPE_HELI_CARGO 128
 #define MISSION_TYPE_MIL_HELI 256
 #define MISSION_TYPE_MIL 512
-#define MISSION_TYPE_AWACS 1024
+/*
+TODO
+#define MISSION_TYPE_PASSENGER_WATER 1024
 #define MISSION_TYPE_STUNT 2048
 #define MISSION_TYPE_CROPD 4096
-#define MISSION_TYPE_PASSENGER_WATER 8192
+#define MISSION_TYPE_AWACS 8192
+*/
 /*TODO cargo water*/
 
 #define PASSENGER_MISSIONTYPES \

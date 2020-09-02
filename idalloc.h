@@ -47,6 +47,8 @@
 
 /*Ids 0-2047 are global TDs, ids 2048-2303 are player TDs.*/
 /*Drawing order is .. questionable and TBD.*/
-/*It seems like font 0 text always gets draw on top.*/
+/*It seems like font 0 text always gets drawn on top.*/
 
 #define TEXTDRAW_MISSIONHELP_BASE (2000)
+/*Missionmap: using same base as missionhelp, since they can't show at the same time anyways.*/
+#define TEXTDRAW_MISSIONMAP_BASE (2000)
