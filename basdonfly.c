@@ -90,24 +90,38 @@ struct RUNWAY {
 /**
 See {@link missions_get_gethicle_model_msptype_mask} for vehicle assignments
 */
+#define NUM_MISSION_TYPES 11
+static char *mission_type_names[NUM_MISSION_TYPES] = {
 #define MISSION_TYPE_PASSENGER_S 1
+	"Passengers (S)",
 #define MISSION_TYPE_PASSENGER_M 2
+	"Passengers (M)",
 #define MISSION_TYPE_PASSENGER_L 4
+	"Passengers (L)",
 #define MISSION_TYPE_CARGO_S 8
+	"Cargo (S)",
 #define MISSION_TYPE_CARGO_M 16
+	"Cargo (M)",
 #define MISSION_TYPE_CARGO_L 32
+	"Cargo (L)",
 #define MISSION_TYPE_HELI 64
+	"Heli",
 #define MISSION_TYPE_HELI_CARGO 128
+	"Heli (cargo)",
 #define MISSION_TYPE_MIL_HELI 256
+	"Heli (military)",
 #define MISSION_TYPE_MIL 512
+	"Military",
+#define MISSION_TYPE_PASSENGER_WATER 1024
+	"Passengers (water)",
 /*
 TODO
-#define MISSION_TYPE_PASSENGER_WATER 1024
 #define MISSION_TYPE_STUNT 2048
 #define MISSION_TYPE_CROPD 4096
 #define MISSION_TYPE_AWACS 8192
 */
 /*TODO cargo water*/
+};
 
 #define PASSENGER_MISSIONTYPES \
 	(MISSION_TYPE_PASSENGER_S | MISSION_TYPE_PASSENGER_M | \

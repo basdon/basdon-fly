@@ -54,11 +54,16 @@ See MISSIONPOINT_INDICATOR_STATE_* defs.
 static char missionpoint_indicator_state[MAX_PLAYERS][MAX_MISSION_INDICATORS];
 /**
 See {@code MISSION_STAGE} definitions.
-
-When non-zero, associated {@link activemission} must not be NULL!
 */
 static char mission_stage[MAX_PLAYERS];
 static struct MISSION *activemission[MAX_PLAYERS];
+/**
+Description for every mission type.
+Example: "Passengers(L): Andromada/AT-400"
+Index is the bit of MISSION_TYPE_* definitions.
+*/
+static char *mission_type_text[NUM_MISSION_TYPES];
+static char textpool_mission_type[434];
 /*whether one flightdata data packet with afk flag has been sent already*/
 static char tracker_afk_packet_sent[MAX_PLAYERS];
 /**
@@ -163,7 +168,7 @@ int missions_get_vehicle_model_msptype_mask(int model)
 	case MODEL_LEVIATHN:
 		return MISSION_TYPE_HELI | MISSION_TYPE_HELI_CARGO;
 	case MODEL_MAVERICK:
-		return MISSION_TYPE_HELI | MISSION_TYPE_HELI_CARGO;
+		return MISSION_TYPE_HELI;
 	case MODEL_NEVADA:
 		return MISSION_TYPE_PASSENGER_M | MISSION_TYPE_CARGO_M;
 	case MODEL_RAINDANC:
@@ -177,7 +182,7 @@ int missions_get_vehicle_model_msptype_mask(int model)
 	case MODEL_SHAMAL:
 		return MISSION_TYPE_PASSENGER_M;
 	case MODEL_VCNMAV:
-		return MISSION_TYPE_HELI | MISSION_TYPE_HELI_CARGO;
+		return MISSION_TYPE_HELI;
 	case MODEL_HUNTER:
 		return MISSION_TYPE_MIL_HELI;
 	case MODEL_HYDRA:
@@ -190,30 +195,32 @@ int missions_get_vehicle_model_msptype_mask(int model)
 }
 
 static
-int missions_get_vehicle_model_mission_point_mask(int model)
+void missions_init_type_text()
 {
-	switch (model) {
-	case MODEL_ANDROM:
-	case MODEL_AT400:
-	case MODEL_BEAGLE:
-	case MODEL_CARGOBOB:
-	case MODEL_DODO:
-	case MODEL_LEVIATHN:
-	case MODEL_MAVERICK:
-	case MODEL_NEVADA:
-	case MODEL_RAINDANC:
-	case MODEL_SKIMMER:
-		return MISSION_POINT_PASSENGERS | MISSION_POINT_CARGO;
-	case MODEL_POLMAV:
-	case MODEL_SPARROW:
-	case MODEL_SHAMAL:
-	case MODEL_VCNMAV:
-		return MISSION_POINT_PASSENGERS;
-	case MODEL_HUNTER:
-	case MODEL_HYDRA:
-	case MODEL_RUSTLER: return MISSION_POINT_SPECIAL;
-	default:
-		return 0;
+	int type_index;
+	int type;
+	int vehiclemodel;
+	char *position;
+
+	position = textpool_mission_type;
+	for (type_index = 0; type_index < NUM_MISSION_TYPES; type_index++) {
+		mission_type_text[type_index] = position;
+		type = 1 << type_index;
+		position += sprintf(position, "%s: ", mission_type_names[type_index]);
+		for (vehiclemodel = VEHICLE_MODEL_MIN; vehiclemodel < VEHICLE_MODEL_MAX; vehiclemodel++) {
+			if ((type & missions_get_vehicle_model_msptype_mask(vehiclemodel))) {
+				position += sprintf(position, "%s/", vehnames[vehiclemodel - VEHICLE_MODEL_MIN]);
+			}
+		}
+		/*Replace the last / with a zero term (and now position is right after that zero term)*/
+		position[-1] = 0;
+	}
+
+	if (position > textpool_mission_type + 1 + sizeof(textpool_mission_type)) {
+#if DEV
+		printf("need %d more bytes\n", position - textpool_mission_type - 1 - sizeof(textpool_mission_type));
+#endif
+		assert(0);
 	}
 }
 
@@ -474,6 +481,8 @@ void missions_init()
 {
 	int i;
 
+	missions_init_type_text();
+
 	/*varinit*/
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		activemission[i] = NULL;
@@ -663,9 +672,6 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 		break;
 	case MISSION_TYPE_MIL_HELI:
 	case MISSION_TYPE_MIL:
-	case MISSION_TYPE_AWACS:
-	case MISSION_TYPE_STUNT:
-	case MISSION_TYPE_CROPD:
 	default:
 		/* military is govt, and no tax for special missions */
 		return 0;
