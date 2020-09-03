@@ -53,13 +53,18 @@ See MISSIONPOINT_INDICATOR_STATE_* defs.
 */
 static char missionpoint_indicator_state[MAX_PLAYERS][MAX_MISSION_INDICATORS];
 /**
+Holds the index of the missionpoint the player is in range of, -1 when none.
+When not -1, the missionpoint is always valid for the vehicle the player is driver in.
+*/
+static short active_msp_index[MAX_PLAYERS];
+/**
 See {@code MISSION_STAGE} definitions.
 */
 static char mission_stage[MAX_PLAYERS];
 static struct MISSION *activemission[MAX_PLAYERS];
 /**
 Description for every mission type.
-Example: "Passengers(L): Andromada/AT-400"
+Example: "Andromada/AT-400" which would go together with {@link mission_type_names} at same index: "Passengers (L)"
 Index is the bit of MISSION_TYPE_* definitions.
 */
 static char *mission_type_text[NUM_MISSION_TYPES];
@@ -224,18 +229,58 @@ void missions_init_type_text()
 	}
 }
 
+/**
+Also resets the player's {@link mission_stage} and sets player controllable.
+*/
 static
-void missions_help_hide(int playerid)
+void missions_jobmap_hide(int playerid)
 {
+	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
+	TogglePlayerControllable(playerid, 1);
+	textdraws_hide_consecutive(playerid, NUM_MAP_TEXTDRAWS, TEXTDRAW_MISSIONMAP_BASE);
+}
+
+/**
+Also sets the player's {@link mission_stage} and sets player uncontrollable.
+*/
+static
+void missions_jobmap_show(int playerid)
+{
+	mission_stage[playerid] = MISSION_STAGE_JOBMAP;
+	TogglePlayerControllable(playerid, 0);
+
+	/*Showing all but the "selection option background" textdraw.*/
+	textdraws_show(playerid, NUM_MAP_TEXTDRAWS - 1,
+		&td_jobmap_keyhelp, &td_jobmap_header, &td_jobmap_optsbg, &td_jobmap_mapbg,
+		&td_jobmap_island_mainland, &td_jobmap_island_octa, &td_jobmap_from,
+		&td_jobmap_to, &td_jobmap_opt1bg, &td_jobmap_opt2bg, &td_jobmap_opt3bg,
+		&td_jobmap_opt4bg, &td_jobmap_opt5bg, &td_jobmap_opt6bg, &td_jobmap_opt7bg,
+		&td_jobmap_opt8bg, &td_jobmap_opt9bg, /*&td_jobmap_optselbg, */&td_jobmap_opt1,
+		&td_jobmap_opt2, &td_jobmap_opt3, &td_jobmap_opt4, &td_jobmap_opt5, &td_jobmap_opt6,
+		&td_jobmap_opt7, &td_jobmap_opt8, &td_jobmap_opt9);
+}
+
+/**
+Also resets the player's {@link mission_stage} and sets player controllable.
+*/
+static
+void missions_jobhelp_hide(int playerid)
+{
+	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
+	TogglePlayerControllable(playerid, 1);
 	textdraws_hide_consecutive(playerid, 17, TEXTDRAW_MISSIONHELP_BASE);
 }
 
 /**
 Ensure to update {@link mission_help_option} first.
+Also sets the player's {@link mission_stage} and sets player uncontrollable.
 */
 static
-void missions_help_show(int playerid, int point_mask)
+void missions_jobhelp_show(int playerid, int point_mask)
 {
+	mission_stage[playerid] = MISSION_STAGE_HELP;
+	TogglePlayerControllable(playerid, 0);
+
 	assert(point_mask);
 
 	/*Remember textdraw string length is allocated as needed using the strlen from the text in the file.*/
@@ -331,15 +376,16 @@ void missions_destroy_tracker_socket()
 }
 
 static
-void missions_update_missionpoint_indicators(int playerid, float player_x, float player_y)
+void missions_update_missionpoint_indicators(int playerid, float player_x, float player_y, float player_z)
 {
 #define AIRPORT_RANGE_SQ (1500.0f * 1500.0f)
 #define POINT_RANGE_SQ (500.0f * 500.0f)
 
 	struct MISSIONPOINT *msp;
 	int airportidx, indicatoridx, missionptidx, idxtouse;
-	float dx, dy;
+	float dx, dy, dz;
 
+	/*change now out-of-range ones to AVAILABLE*/
 	for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
 		if (missionpoint_indicator_state[playerid][indicatoridx] == MISSIONPOINT_INDICATOR_STATE_USED) {
 			dx = missionpoints[missionpoint_indicator_index[playerid][indicatoridx]].pos.x - player_x;
@@ -355,6 +401,7 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 		}
 	}
 
+	/*check for new ones in range*/
 	for (airportidx = 0; airportidx < numairports; airportidx++) {
 		dx = airports[airportidx].pos.x - player_x;
 		dy = airports[airportidx].pos.y - player_y;
@@ -409,6 +456,7 @@ next:
 		}
 	}
 
+	/*delete AVAILABLE ones when they don't apply anymore*/
 	for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
 		if (missionpoint_indicator_state[playerid][indicatoridx] != MISSIONPOINT_INDICATOR_STATE_FREE &&
 			!(missionpoints[missionpoint_indicator_index[playerid][indicatoridx]].type & missions_available_msptype_mask[playerid]))
@@ -421,6 +469,32 @@ next:
 #endif
 		}
 	}
+
+	/*update active_msp_index and show 'press ...' text if needed*/
+	if (NC_GetPlayerVehicleSeat(playerid) != 0) {
+		goto force_no_active_msp;
+	}
+	for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
+		if (missionpoint_indicator_state[playerid][indicatoridx] == MISSIONPOINT_INDICATOR_STATE_USED) {
+			msp = &missionpoints[missionpoint_indicator_index[playerid][indicatoridx]];
+			dx = msp->pos.x - player_x;
+			dy = msp->pos.y - player_y;
+			dz = msp->pos.z - player_z;
+			if (dx * dx + dy * dy + dz * dz < MISSION_CHECKPOINT_SIZE_SQ) {
+				if (active_msp_index[playerid] != missionpoint_indicator_index[playerid][indicatoridx]) {
+					active_msp_index[playerid] = missionpoint_indicator_index[playerid][indicatoridx];
+					/*TODO: sometimes when entering/exiting vehicle, this text doesn't show even though code gets hit*/
+					GameTextForPlayer(playerid, 3000, 3,
+						"~w~Press ~b~~k~~CONVERSATION_YES~~w~ to view missions,~n~or type ~b~/w");
+				}
+				goto have_active_msp;
+			}
+		}
+	}
+force_no_active_msp:
+	active_msp_index[playerid] = -1;
+have_active_msp:
+	;
 
 #undef AIRPORT_RANGE_SQ
 #undef POINT_RANGE_SQ
@@ -933,6 +1007,7 @@ void missions_on_player_connect(int playerid)
 		missionpoint_indicator_state[MAX_PLAYERS][i] = MISSIONPOINT_INDICATOR_STATE_FREE;
 	}
 	missions_available_msptype_mask[playerid] = -1;
+	active_msp_index[playerid] = -1;
 	mission_help_option[playerid] = 0;
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	activemission[playerid] = NULL;
@@ -971,9 +1046,10 @@ void missions_on_player_death(int playerid)
 	case MISSION_STAGE_NOMISSION:
 		break;
 	case MISSION_STAGE_HELP:
+		missions_jobhelp_hide(playerid); /*sets controllable and mission stage*/
 		break;
 	case MISSION_STAGE_JOBMAP:
-		missions_help_hide(playerid);
+		missions_jobmap_hide(playerid); /*sets controllable and mission stage*/
 		break;
 	default:
 		NC_DisablePlayerRaceCheckpoint(playerid);
@@ -986,9 +1062,9 @@ void missions_on_player_death(int playerid)
 			}
 		}
 		missions_end_unfinished(mission, playerid, stopreason);
+		mission_stage[playerid] = MISSION_STAGE_NOMISSION;
+		break;
 	}
-
-	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 }
 
 void missions_on_player_disconnect(int playerid)
@@ -1632,7 +1708,7 @@ void missions_on_player_state_changed(int playerid, int from, int to)
 			missions_available_msptype_mask[playerid] = -1;
 		}
 		common_GetPlayerPos(playerid, &pos);
-		missions_update_missionpoint_indicators(playerid, pos.x, pos.y);
+		missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 	}
 
 	if (from == PLAYER_STATE_DRIVER &&
@@ -1796,10 +1872,15 @@ int missions_cmd_mission(CMDPARAMS)
 	case MISSION_STAGE_JOBMAP:
 		break;
 	case MISSION_STAGE_NOMISSION:
+		if (active_msp_index[playerid] != -1) {
+			missions_jobmap_show(playerid); /*sets controllable and mission state*/
+			return 1;
+		}
+
 		nc_params[1] = playerid;
 		vehicleid = NC(n_GetPlayerVehicleID);
 		veh = gamevehicles[vehicleid].dbvehicle;
-		if (!veh) {
+		if (!veh || NC_GetPlayerVehicleSeat(playerid) != 0) {
 			SendClientMessage(playerid, COL_WARN, WARN"Get in a vehicle first!");
 			return 1;
 		}
@@ -1819,8 +1900,6 @@ int missions_cmd_mission(CMDPARAMS)
 			SendClientMessage(playerid, COL_WARN, WARN"This vehicle can't do any missions!");
 			return 1;
 		}
-		mission_stage[playerid] = MISSION_STAGE_HELP;
-		TogglePlayerControllable(playerid, 0);
 
 		/*For SOME reason, when many enexes are shown, the preview can be messed up
 		(as in the type of messed up you see when only model is on screen).
@@ -1828,7 +1907,7 @@ int missions_cmd_mission(CMDPARAMS)
 		unless there's a game update in between the deletion of the objects and the textdraw creation.
 		But that would add too much delay (and complexity), so I'm just letting it be messed up atm..*/
 
-		missions_help_show(playerid, msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]));
+		missions_jobhelp_show(playerid, msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]));
 		mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid], 1);
 		return 1;
 	default:
@@ -1856,20 +1935,27 @@ void missions_driversync_udkeystate_change(int playerid, short udkey)
 void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 {
 	if (mission_stage[playerid] == MISSION_STAGE_HELP) {
-		/*Since player is set to not be controllable, these use on-foot controls even when player is in-vehicle.*/
-		if (!(oldkeys & KEY_VEHICLE_ENTER_EXIT) && (newkeys & KEY_VEHICLE_ENTER_EXIT)) {
-			mission_stage[playerid] = MISSION_STAGE_NOMISSION;
-			missions_help_hide(playerid);
-			TogglePlayerControllable(playerid, 1);
+		/*Since player is set to not be controllable, these use on-foot controls even though the player is in-vehicle.*/
+		if (KEY_JUST_DOWN(KEY_VEHICLE_ENTER_EXIT)) {
 			PlayerPlaySound(playerid, 1084);
-		} else if (!(oldkeys & KEY_SPRINT) && (newkeys & KEY_SPRINT)) {
-			mission_stage[playerid] = MISSION_STAGE_NOMISSION;
-			missions_help_hide(playerid);
-			TogglePlayerControllable(playerid, 1);
+			missions_jobhelp_hide(playerid); /*sets controllable and mission state*/
+		} else if (KEY_JUST_DOWN(KEY_SPRINT)) {
 			PlayerPlaySound(playerid, 1083);
-			/*LOCATE MISSION*/
+			/*TODO: LOCATE MISSION*/
+			missions_jobhelp_hide(playerid); /*sets controllable and mission state*/
 		}
 	} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
+		/*Since player is set to not be controllable, these use on-foot controls even though the player is in-vehicle.*/
+		if (KEY_JUST_DOWN(KEY_VEHICLE_ENTER_EXIT)) {
+			PlayerPlaySound(playerid, 1084);
+			missions_jobmap_hide(playerid); /*sets controllable and mission state*/
+		} else if (KEY_JUST_DOWN(KEY_SPRINT)) {
+			PlayerPlaySound(playerid, 1083);
+			missions_jobmap_hide(playerid); /*sets controllable and mission state*/
+			/*TODO: START MISSION*/
+		}
+	} else if (mission_stage[playerid] == MISSION_STAGE_NOMISSION && KEY_JUST_DOWN(KEY_YES) && active_msp_index[playerid] != -1) {
+		missions_jobmap_show(playerid); /*sets controllable and mission state*/
 	}
 }
 

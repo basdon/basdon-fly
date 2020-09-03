@@ -1,14 +1,17 @@
-short drive_keystates[MAX_PLAYERS];
+int drive_keystates[MAX_PLAYERS];
 char drive_udkeystate[MAX_PLAYERS];
 
 void hook_OnDriverSync(int playerid, struct SYNCDATA_Driver *data)
 {
 	/*TODO reset these keystate variables when player gets into the drive state?*/
+	int keys;
+
+	keys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF;
 
 	/*keystate change*/
-	if (drive_keystates[playerid] != data->keys) {
-		missions_driversync_keystate_change(playerid, drive_keystates[playerid], data->keys);
-		drive_keystates[playerid] = data->keys;
+	if (drive_keystates[playerid] != keys) {
+		missions_driversync_keystate_change(playerid, drive_keystates[playerid], keys);
+		drive_keystates[playerid] = keys;
 	}
 
 	/*up/down keystate change*/

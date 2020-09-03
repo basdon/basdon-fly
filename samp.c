@@ -45,3 +45,21 @@ void PlayerPlaySound(int playerid, int soundid)
 	bitstream_freeform.numberOfBitsUsed = sizeof(struct RPCDATA_PlaySound) * 8;
 	SAMP_SendRPCToPlayer(RPC_PlaySound, &bitstream_freeform, playerid, 2);
 }
+
+/**
+In the PAWN API, text is actually the 2nd parameter. Placing it at the end here, for code style reasons.
+*/
+static
+void GameTextForPlayer(int playerid, int milliseconds, int style, char *text)
+{
+	int len;
+
+	len = strlen(text);
+	rpcdata_freeform.dword[0] = style;
+	rpcdata_freeform.dword[1] = milliseconds;
+	rpcdata_freeform.dword[2] = len;
+	memcpy(&rpcdata_freeform.byte[12], text, len);
+	bitstream_freeform.ptrData = &rpcdata_freeform;
+	bitstream_freeform.numberOfBitsUsed = 32 + 32 + 32 + len * 8;
+	SAMP_SendRPCToPlayer(RPC_ShowGameText, &bitstream_freeform, playerid, 3);
+}

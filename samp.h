@@ -148,6 +148,14 @@ struct RPCDATA_PlaySound {
 };
 EXPECT_SIZE(struct RPCDATA_PlaySound, 4 + 12);
 
+struct RPCDATA_ShowGameText {
+	int style;
+	int time;
+	int message_length;
+	char message[100];
+};
+EXPECT_SIZE(struct RPCDATA_ShowGameText, 4 + 4 + 4 + 100);
+
 struct SYNCDATA_Driver {
 	char packet_id;
 	short vehicle_id;
@@ -157,7 +165,8 @@ struct SYNCDATA_Driver {
 	/*this is steer forward/down backward/up*/
 	short udkey;
 	/*when player is not controllable, this is actually from foot controls??*/
-	short keys;
+	/*combine with additional_keys*/
+	short partial_keys;
 	float quat_w;
 	float quat_x;
 	float quat_y;
@@ -167,8 +176,9 @@ struct SYNCDATA_Driver {
 	float vehicle_hp;
 	char player_hp;
 	char player_armor;
-	char additional_key : 2;
 	char weapon_id : 6;
+	/*two extra bits for YES/NO keys*/
+	char additional_keys : 2;
 	char siren_state;
 	char landing_gear_state; /*0 down 1 up*/
 	short trailer_id;
@@ -178,10 +188,11 @@ EXPECT_SIZE(struct SYNCDATA_Driver, 1 + 2 + 2 + 2 + 2 + 16 + 12 + 12 + 4 + 1 + 1
 
 static struct BitStream bitstream_freeform;
 static union {
-	char byte[16];
-	short word[8];
-	int dword[4];
+	char byte[1000];
+	short word[500];
+	int dword[250];
 } rpcdata_freeform;
+EXPECT_SIZE(rpcdata_freeform, 1000);
 #pragma pack()
 
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,unk) \
@@ -200,3 +211,4 @@ static union {
 #define RPC_TogglePlayerControllable 0x815CCFA /*ptr to 0x0F(15)*/
 #define RPC_SendClientMessage 0x815A027 /*ptr to 0x5D(93)*/
 #define RPC_PlaySound 0x815CD0C /*ptr to 0x10(16)*/
+#define RPC_ShowGameText 0x815A19A /*ptr to 0x49(73)*/

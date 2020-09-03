@@ -568,7 +568,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 	money_on_player_spawn(playerid);
 	spawn_on_player_spawn(playerid);
 	svp_update_mapicons(playerid, pos.x, pos.y);
-	missions_update_missionpoint_indicators(playerid, pos.x, pos.y);
+	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 	zones_on_player_spawn(playerid, pos);
 
 	return 1;
