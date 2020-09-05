@@ -146,3 +146,71 @@ int cmd_get_str_param(const char* cmdtext, int *parseidx, char *buf)
 	}
 	return 0;
 }
+
+/**
+Gets next vehicle model parameter in cmdtext after parseidx.
+
+Vehicle model can be either the id or the model name or the vehicle name.
+Preceding whitespace(s) are skipped.
+On match, parseidx is the index right after the value, so either space or \0.
+Note: parseidx will also advance if a non-valid id was given.
+
+@return non-zero on success, with filled in modelid parameter.
+*/
+static
+int cmd_get_vehiclemodel_param(const char *cmdtext, int *parseidx, int *modelid)
+{
+	int i, matchindex, minimum_pos, startpos, pos;
+
+	if (cmd_get_int_param(cmdtext, parseidx, &modelid)) {
+		if (VEHICLE_MODEL_MIN  <= modelid && modelid < VEHICLE_MODEL_MAX) {
+			return 1;
+		}
+		return 0;
+	}
+
+	if (cmd_get_str_param(cmdtext, parseidx, cbuf144)) {
+		strlower(cbuf144);
+
+		/*Modelnames, full match.*/
+		for (i = 0; i < VEHICLE_MODEL_TOTAL; i++) {
+			if (!strcmp(vehmodelnames[i], cbuf144)) {
+				*modelid =  i + VEHICLE_MODEL_MIN;
+				return 1;
+			}
+		}
+
+		/*Vehicle names, partial match.*/
+		/*Return the one where the occurence is the earliest,
+		eg when inputting 'hy' it should prioritise 'HYdra' before 'dingHY'.*/
+		matchindex = -1;
+		minimum_pos = 1000;
+		for (i = 0; i < VEHICLE_MODEL_TOTAL; i++) {
+			startpos = 0;
+			do {
+				pos = 0;
+				while ((vehnames[i][startpos + pos] | 0x20) == cbuf144[pos]) {
+					pos++;
+					if (cbuf144[pos] == 0) {
+						if (startpos == 0) {
+							*modelid = i + VEHICLE_MODEL_MIN;
+							return 1;
+						}
+						if (startpos < minimum_pos) {
+							minimum_pos = startpos;
+							matchindex = i;
+						}
+						break;
+					}
+				}
+				startpos++;
+			} while (vehnames[i][startpos]);
+		}
+		if (matchindex != -1) {
+			*modelid = matchindex + VEHICLE_MODEL_MIN;
+			return 1;
+		}
+	}
+
+	return 0;
+}

@@ -168,27 +168,12 @@ static
 int cmd_dev_v(CMDPARAMS)
 {
 	int modelid = -1;
-	if (!cmd_get_int_param(cmdtext, &parseidx, &modelid) ||
-		modelid < 400 || 400 + VEHICLE_MODEL_TOTAL <= modelid)
-	{
-		if (modelid == -1 &&
-			cmd_get_str_param(cmdtext, &parseidx, cbuf144))
-		{
-			for (modelid = 0;
-				modelid < VEHICLE_MODEL_TOTAL;
-				modelid++)
-			{
-				if (!strcmp(vehmodelnames[modelid], cbuf144)) {
-					modelid += 400;
-					goto gotid;
-				}
-			}
-		}
-		B144(WARN"Syntax: /v <modelid|modelname>");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+
+	if (!cmd_get_vehiclemodel_param(cmdtext, &parseidx, &modelid)) {
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /v <modelid|modelname>");
 		return 1;
 	}
-gotid:
+
 	if (devvehicle != INVALID_VEHICLE_ID) {
 		NC_PARS(1);
 		nc_params[1] = devvehicle;
