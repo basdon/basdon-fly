@@ -36,6 +36,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "//goto", GROUPS_ADMIN, cmd_admin_goto },
 	{ 0, "//streamdistance", GROUPS_ADMIN, cmd_admin_streamdistance },
 	{ 0, "//tocar", GROUPS_ADMIN, cmd_admin_tocar },
+	{ 0, "//tomsp", GROUPS_ADMIN, cmd_admin_tomsp },
 	{ 0, "//getcar", GROUPS_ADMIN, cmd_admin_getcar },
 	{ 0, "//makeanewpermanentpublicvehiclehere", GROUP_OWNER,
 		cmd_admin_makeanewpermanentpublicvehiclehere },

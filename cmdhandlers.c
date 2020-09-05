@@ -100,6 +100,67 @@ int cmd_admin_tocar(CMDPARAMS)
 	return 1;
 }
 
+/**
+//tomsp [id]
+
+Teleport to a missionpoint.
+
+Either closest missionpoint for matching vehicle (or any if not in vehicle), or to given id.
+*/
+static
+int cmd_admin_tomsp(CMDPARAMS)
+{
+	struct vec3 *closest_pos, player_pos;
+	int mspid;
+	float dx, dy;
+	float closest_distance_sq;
+	int vehicleid;
+	int msptype_mask;
+	int mspindex;
+
+	vehicleid = NC_GetPlayerVehicleID(playerid);
+	if (vehicleid) {
+		msptype_mask = missions_get_vehicle_model_msptype_mask(NC_GetVehicleModel(vehicleid));
+	} else {
+		msptype_mask = -1;
+	}
+
+	closest_distance_sq = float_pinf;
+	if (cmd_get_int_param(cmdtext, &parseidx, &mspid)) {
+		for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {
+			if (missionpoints[mspindex].id == mspid) {
+				closest_distance_sq = 0.0f;
+				closest_pos = &missionpoints[mspindex].pos;
+				break;
+			}
+		}
+	} else {
+		common_GetPlayerPos(playerid, &player_pos);
+		for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {
+			if (missionpoints[mspindex].type & msptype_mask) {
+				dx = player_pos.x - missionpoints[mspindex].pos.x;
+				dy = player_pos.y - missionpoints[mspindex].pos.y;
+				if (dx * dx + dy * dy < closest_distance_sq) {
+					closest_distance_sq = dx * dx + dy * dy;
+					closest_pos = &missionpoints[mspindex].pos;
+				}
+			}
+		}
+	}
+
+	if (closest_distance_sq != float_pinf) {
+		if (vehicleid) {
+			common_SetVehiclePos(vehicleid, closest_pos);
+		} else {
+			natives_SetPlayerPos(playerid, *closest_pos);
+		}
+	} else {
+		SendClientMessage(playerid, COL_WARN, WARN"Can't find compatible mission point");
+	}
+
+	return 1;
+}
+
 static
 int cmd_at400(CMDPARAMS)
 {

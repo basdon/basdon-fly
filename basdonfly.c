@@ -298,10 +298,6 @@ static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 #include "anticheat.c"
 #include "changepassword.c"
 #include "class.c"
-#include "cmdhandlers.c"
-#ifdef DEV
-#include "cmdhandlers_dev.c"
-#endif /*DEV*/
 #include "echo.c"
 #include "game_sa.c"
 #include "game_sa_data.c"
@@ -321,6 +317,11 @@ static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 #include "timecyc.c"
 #include "timer.c"
 #include "vehicles.c"
+
+#include "cmdhandlers.c"
+#ifdef DEV
+#include "cmdhandlers_dev.c"
+#endif /*DEV*/
 
 #include "cmd.c"
 #include "basdonfly_callbacks.c"
