@@ -19,8 +19,8 @@ void zones_init()
 
 	while (z < zmax) {
 nr:
-		if (pz->x1 < r->zone.x1 || r->zone.x2 < pz->x2 ||
-			pz->y1 < r->zone.y1 || r->zone.y2 < pz->y2)
+		if (pz->min_x < r->zone.min_x || r->zone.max_x < pz->max_x ||
+			pz->min_y < r->zone.min_y || r->zone.max_y < pz->max_y)
 		{
 #ifdef ZONES_DEBUG
 			printf("%d zones in region %d\n", zonesinregion,
@@ -57,9 +57,9 @@ Check if given position is inside given zone
 static
 int zones_is_in_zone(struct vec3 pos, struct ZONE *zone)
 {
-	return zone->x1 <= pos.x && pos.x <= zone->x2 &&
-		zone->y1 <= pos.y && pos.y <= zone->y2 &&
-		zone->z1 <= pos.z && pos.z <= zone->z2;
+	return zone->min_x <= pos.x && pos.x <= zone->max_x &&
+		zone->min_y <= pos.y && pos.y <= zone->max_y &&
+		zone->min_z <= pos.z && pos.z <= zone->max_z;
 }
 
 static

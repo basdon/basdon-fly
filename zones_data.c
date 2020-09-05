@@ -1,5 +1,5 @@
 struct ZONE {
-	float x1, y1, z1, x2, y2, z2;
+	float min_x, min_y, min_z, max_x, max_y, max_z;
 	int id;
 };
 
