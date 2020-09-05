@@ -295,7 +295,7 @@ static
 int cmd_dev_vhpninf(CMDPARAMS)
 {
 	int vehicleid = NC_GetPlayerVehicleID(playerid);
-	NC_SetVehicleHealth(vehicleid, FLOAT_NINF);
+	NC_SetVehicleHealth(vehicleid, float_ninf);
 	return 1;
 }
 
@@ -306,6 +306,6 @@ static
 int cmd_dev_vhppinf(CMDPARAMS)
 {
 	int vehicleid = NC_GetPlayerVehicleID(playerid);
-	NC_SetVehicleHealth(vehicleid, FLOAT_PINF);
+	NC_SetVehicleHealth(vehicleid, float_pinf);
 	return 1;
 }

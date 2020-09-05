@@ -600,8 +600,8 @@ static struct TEXTDRAW td_jobmap_island_lima = { "mapsqminbotright", TEXTDRAW_AL
 			zoneindex = regions[regionindex].minzone;
 			maxzoneindex = regions[regionindex].maxzone;
 			octa_region_found = 1;
-			*(int*) &min_x = *(int*) &min_y = FLOAT_PINF;
-			*(int*) &max_x = *(int*) &max_y = FLOAT_NINF;
+			min_x = min_y = float_pinf;
+			max_x = max_y = float_ninf;
 			for (; zoneindex < maxzoneindex; zoneindex++) {
 				zone = &zones[zoneindex];
 				if (zone->min_x < min_x) {
@@ -965,7 +965,7 @@ struct MISSIONPOINT *missions_get_startpoint(int missiontype, struct vec3 *ppos)
 	float dx, dy, dz, dist, shortest_distance;
 	int i, num_free_missionpts, least_active;
 
-	shortest_distance = FLOAT_PINF;
+	shortest_distance = float_pinf;
 	airport = NULL;
 	i = numairports;
 	while (i--) {
@@ -1002,7 +1002,7 @@ struct MISSIONPOINT *missions_get_startpoint(int missiontype, struct vec3 *ppos)
 	}
 
 	/*then choose the missionpoint that is the closest to the player*/
-	shortest_distance = FLOAT_PINF;
+	shortest_distance = float_pinf;
 	while (num_free_missionpts--) {
 		dx = free_missionpts[num_free_missionpts]->pos.x - ppos->x;
 		dy = free_missionpts[num_free_missionpts]->pos.y - ppos->y;

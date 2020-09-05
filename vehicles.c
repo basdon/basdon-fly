@@ -391,7 +391,7 @@ void veh_init()
 
 			NC_PARS(9);
 			nc_params[1] = veh->model;
-			nc_paramf[2] = nc_paramf[3] = nc_paramf[4] = FLOAT_PINF;
+			nc_paramf[2] = nc_paramf[3] = nc_paramf[4] = float_pinf;
 			nc_paramf[5] = veh->pos.r;
 			nc_params[6] = nc_params[7] = 1;
 			nc_params[8] = VEHICLE_RESPAWN_DELAY;
@@ -538,7 +538,7 @@ int veh_create(struct dbvehicle *veh)
 
 	NC_PARS(9);
 	nc_params[1] = veh->model;
-	nc_paramf[2] = nc_paramf[3] = nc_paramf[4] = FLOAT_PINF;
+	nc_paramf[2] = nc_paramf[3] = nc_paramf[4] = float_pinf;
 	nc_paramf[5] = veh->pos.r;
 	nc_params[6] = nc_params[7] = 126;
 	nc_params[8] = VEHICLE_RESPAWN_DELAY;

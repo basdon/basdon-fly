@@ -54,23 +54,6 @@ Convert a cell string to a char string, in place.
 Relies on good faith that the cell string is zero terminated.
 */
 void ctoai(char *dstsrc);
-#define csprintf(DST,FMT,...) atoci(DST,sprintf((char*)DST,FMT,__VA_ARGS__))
-#define B144(X) atoc(buf144,X,144)
-
-#ifdef DEV
-#define DBG(format,...) sprintf(cbuf64,format,__VA_ARGS__);\
-			printf("%s\n", cbuf64);printf("\n");\
-			atoc(buf144,cbuf64,144);\
-			NC_SendClientMessageToAll(-1,buf144a);
-#else
-#define DBG(...)
-#endif
-
-#define FLOAT_PINF (0x7F800000)
-#define FLOAT_NINF (0xFF800000)
-#define M_PI 3.14159265358979323846f
-#define M_PI2 1.57079632679489661923f
-#define DEG_TO_RAD (M_PI / 180.0f)
 
 #define CLAMP(X,L,U) ((X < L) ? L : ((X > U) ? U : X))
 #define Q_USE_EQ_INSTEAD(X) #X

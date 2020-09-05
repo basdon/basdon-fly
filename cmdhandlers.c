@@ -73,7 +73,7 @@ int cmd_at400(CMDPARAMS)
 	}
 
 	found_vehicle = 0;
-	shortest_distance = FLOAT_PINF;
+	shortest_distance = float_pinf;
 	common_GetPlayerPos(playerid, &playerpos);
 	for (vehicleid = 0; vehicleid < MAX_VEHICLES; vehicleid++) {
 		veh = gamevehicles[vehicleid].dbvehicle;

@@ -41,6 +41,28 @@ EXPECT_SIZE(float, 4);
 #define VEL_TO_MPS (VEL_TO_KPH / 3.6f) /*(KPH / 3.6)*/
 #define VEL_TO_KFPM (VEL_TO_MPS * 3.28084f * 60.0f / 1000.0f) /* K feet/m*/
 
+#define csprintf(DST,FMT,...) atoci(DST,sprintf((char*)DST,FMT,__VA_ARGS__))
+#define B144(X) atoc(buf144,X,144)
+
+#ifdef DEV
+#define DBG(format,...) sprintf(cbuf64,format,__VA_ARGS__);\
+			printf("%s\n", cbuf64);printf("\n");\
+			atoc(buf144,cbuf64,144);\
+			NC_SendClientMessageToAll(-1,buf144a);
+#else
+#define DBG(...)
+#endif
+
+/*
+There are moved to variables float_pinf and float_ninf because this are ints.
+#define FLOAT_PINF (0x7F800000)
+#define FLOAT_NINF (0xFF800000)
+*/
+static float float_pinf, float_ninf;
+#define M_PI 3.14159265358979323846f
+#define M_PI2 1.57079632679489661923f
+#define DEG_TO_RAD (M_PI / 180.0f)
+
 struct vec3 {
 	float x, y, z;
 };
@@ -313,6 +335,9 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
+
+	*(int*) &float_pinf = 0x7F800000;
+	*(int*) &float_ninf = 0xFF800000;
 
 	bitstream_freeform.copyData = 1;
 
