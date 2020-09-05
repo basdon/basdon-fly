@@ -154,6 +154,7 @@ Vehicle model can be either the id or the model name or the vehicle name.
 Preceding whitespace(s) are skipped.
 On match, parseidx is the index right after the value, so either space or \0.
 Note: parseidx will also advance if a non-valid id was given.
+Note: underscores can be used for vehicle names that have spaces.
 
 @return non-zero on success, with filled in modelid parameter.
 */
@@ -161,16 +162,26 @@ static
 int cmd_get_vehiclemodel_param(const char *cmdtext, int *parseidx, int *modelid)
 {
 	int i, matchindex, minimum_pos, startpos, pos;
+	char *b;
 
 	if (cmd_get_int_param(cmdtext, parseidx, modelid)) {
-		if (VEHICLE_MODEL_MIN  <= *modelid && *modelid <= VEHICLE_MODEL_MAX) {
+		if (VEHICLE_MODEL_MIN <= *modelid && *modelid <= VEHICLE_MODEL_MAX) {
 			return 1;
 		}
 		return 0;
 	}
 
 	if (cmd_get_str_param(cmdtext, parseidx, cbuf144)) {
-		strlower(cbuf144);
+		/*Lowercase, replace _ with space.*/
+		b = cbuf144;
+		while (*b) {
+			if (*b == '_') {
+				*b = ' ';
+			} else if ('A' <= *b && *b <= 'Z') {
+				*b |= 0x20;
+			}
+			b++;
+		}
 
 		/*Modelnames, full match.*/
 		for (i = 0; i < VEHICLE_MODEL_TOTAL; i++) {
@@ -189,7 +200,10 @@ int cmd_get_vehiclemodel_param(const char *cmdtext, int *parseidx, int *modelid)
 			startpos = 0;
 			do {
 				pos = 0;
-				while ((vehnames[i][startpos + pos] | 0x20) == cbuf144[pos]) {
+				/*Fun fun, "Monster","Admiral" 0|0x20 = ' '
+				Thus 'monster_a' matches 'monster\0a', giving monster instead of monster A.
+				So, need to check for zero term explicitly...*/
+				while (vehnames[i][startpos + pos] && (vehnames[i][startpos + pos] | 0x20) == cbuf144[pos]) {
 					pos++;
 					if (cbuf144[pos] == 0) {
 						if (startpos == 0) {

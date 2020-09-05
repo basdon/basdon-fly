@@ -33,19 +33,6 @@ void ctoai(char *dstsrc)
 	while ((*dstsrc++ = (char) *src++));
 }
 
-static
-void strlower(char *str)
-{
-nextchar:
-	if ('A' <= *str && *str <= 'Z') {
-		*str |= 0x20;
-	}
-	if (*str) {
-		str++;
-		goto nextchar;
-	}
-}
-
 void common_tp_player(int playerid, struct vec4 pos)
 {
 	natives_SetPlayerPos(playerid, pos.coords);
