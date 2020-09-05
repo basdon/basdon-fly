@@ -919,8 +919,8 @@ void veh_timed_1s_update()
 			if (game_is_air_vehicle(vehiclemodel)) {
 				veh_timed_1s_update_a(playerid, vehicleid, &vpos, &vparams);
 
-				if (aircraftmodelindex[vehiclemodel] != -1) {
-					aircraftindex = aircraftmodelindex[vehiclemodel];
+				aircraftindex = aircraftmodelindex[vehiclemodel - VEHICLE_MODEL_MIN];
+				if (aircraftindex != -1) {
 					model_stats = player_model_stats[playerid] + aircraftindex;
 				}
 

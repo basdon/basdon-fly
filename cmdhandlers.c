@@ -125,16 +125,16 @@ int cmd_admin_tomsp(CMDPARAMS)
 		msptype_mask = -1;
 	}
 
-	closest_distance_sq = float_pinf;
+	closest_pos = NULL;
 	if (cmd_get_int_param(cmdtext, &parseidx, &mspid)) {
 		for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {
 			if (missionpoints[mspindex].id == mspid) {
-				closest_distance_sq = 0.0f;
 				closest_pos = &missionpoints[mspindex].pos;
 				break;
 			}
 		}
 	} else {
+		closest_distance_sq = float_pinf;
 		common_GetPlayerPos(playerid, &player_pos);
 		for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {
 			if (missionpoints[mspindex].type & msptype_mask) {
@@ -148,7 +148,7 @@ int cmd_admin_tomsp(CMDPARAMS)
 		}
 	}
 
-	if (closest_distance_sq != float_pinf) {
+	if (closest_pos) {
 		if (vehicleid) {
 			common_SetVehiclePos(vehicleid, closest_pos);
 		} else {

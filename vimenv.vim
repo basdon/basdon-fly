@@ -1,5 +1,5 @@
 func! BasdonPluginMake(parm)
-	update all
+	update
 	vertical botright new
 	setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile wrap
 	execute "read !. " a:parm

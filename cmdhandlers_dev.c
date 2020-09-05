@@ -227,7 +227,7 @@ int cmd_dev_vdamage(CMDPARAMS)
 	vehicleid = NC_GetPlayerVehicleID(playerid);
 	common_GetVehicleDamageStatus(vehicleid, &vdmg);
 	csprintf(buf144,
-		"panels %p doors %p lights %02x tires %02x",
+		"panels %X doors %X lights %02X tires %02X",
 		vdmg.panels,
 		vdmg.doors,
 		vdmg.lights,

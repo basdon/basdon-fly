@@ -213,7 +213,7 @@ void missions_init_type_text()
 		mission_type_text[type_index] = position;
 		type = 1 << type_index;
 		position += sprintf(position, "%s: ", mission_type_names[type_index]);
-		for (vehiclemodel = VEHICLE_MODEL_MIN; vehiclemodel < VEHICLE_MODEL_MAX; vehiclemodel++) {
+		for (vehiclemodel = VEHICLE_MODEL_MIN; vehiclemodel <= VEHICLE_MODEL_MAX; vehiclemodel++) {
 			if ((type & missions_get_vehicle_model_msptype_mask(vehiclemodel))) {
 				position += sprintf(position, "%s/", vehnames[vehiclemodel - VEHICLE_MODEL_MIN]);
 			}
@@ -222,7 +222,7 @@ void missions_init_type_text()
 		position[-1] = 0;
 	}
 
-	if (position > textpool_mission_type + 1 + sizeof(textpool_mission_type)) {
+	if (position + 1 > textpool_mission_type - 1 + sizeof(textpool_mission_type)) {
 #if DEV
 		printf("need %d more bytes\n", position - textpool_mission_type - 1 - sizeof(textpool_mission_type));
 #endif
@@ -1021,13 +1021,17 @@ struct MISSIONPOINT *missions_get_startpoint(int missiontype, struct vec3 *ppos)
 /**
 Cleanup a mission and free memory. Does not query. Does send a tracker msg.
 
-Call when ending a mission.
+Player must be on a mission or get segfault'd.
 
-@param mission mission of the player. Must match with given playerid.
+Call when ending a mission.
 */
 static
-void missions_cleanup(struct MISSION *mission, int playerid)
+void missions_cleanup(int playerid)
 {
+	struct MISSION *mission;
+
+	mission = activemission[playerid];
+
 	/* flight tracker packet 3 */
 	buf32[0] = 0x03594C46;
 	buf32[1] = mission->id;
@@ -1048,11 +1052,16 @@ void missions_cleanup(struct MISSION *mission, int playerid)
 }
 
 /**
+player must be on a mission or get segfault'd.
+
 @param reason one of MISSION_STATE_ constants
 */
 static
-void missions_end_unfinished(struct MISSION *mission, int playerid, int reason)
+void missions_end_unfinished(int playerid, int reason)
 {
+	struct MISSION *mission;
+
+	mission = activemission[playerid];
 	csprintf(buf144,
 	        "UPDATE flg "
 		"SET state=%d,tlastupdate=UNIX_TIMESTAMP(),adistance=%f "
@@ -1062,7 +1071,7 @@ void missions_end_unfinished(struct MISSION *mission, int playerid, int reason)
 	        mission->id);
 	NC_mysql_tquery_nocb(buf144a);
 
-	missions_cleanup(mission, playerid);
+	missions_cleanup(playerid);
 }
 
 void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh)
@@ -1080,8 +1089,7 @@ void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh)
 			NC_SendClientMessage(playerid, COL_WARN, buf144a);
 			NC_DisablePlayerRaceCheckpoint(playerid);
 			money_take(playerid, MISSION_CANCEL_FINE);
-			missions_end_unfinished(mission,
-				playerid, MISSION_STATE_ABANDONED);
+			missions_end_unfinished(playerid, MISSION_STATE_ABANDONED);
 			return;
 		}
 	}
@@ -1092,7 +1100,7 @@ void missions_on_player_connect(int playerid)
 	int i;
 
 	for (i = 0; i < MAX_MISSION_INDICATORS; i++) {
-		missionpoint_indicator_state[MAX_PLAYERS][i] = MISSIONPOINT_INDICATOR_STATE_FREE;
+		missionpoint_indicator_state[playerid][i] = MISSIONPOINT_INDICATOR_STATE_FREE;
 	}
 	missions_available_msptype_mask[playerid] = -1;
 	active_msp_index[playerid] = -1;
@@ -1126,7 +1134,6 @@ void missions_on_player_connect(int playerid)
 
 void missions_on_player_death(int playerid)
 {
-	struct MISSION *mission;
 	int stopreason, vehicleid;
 	float hp;
 
@@ -1149,7 +1156,7 @@ void missions_on_player_death(int playerid)
 				stopreason = MISSION_STATE_CRASHED;
 			}
 		}
-		missions_end_unfinished(mission, playerid, stopreason);
+		missions_end_unfinished(playerid, stopreason);
 		mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 		break;
 	}
@@ -1160,8 +1167,7 @@ void missions_on_player_disconnect(int playerid)
 	struct MISSION *miss;
 
 	if ((miss = activemission[playerid]) != NULL) {
-		missions_end_unfinished(
-			miss, playerid, MISSION_STATE_ABANDONED);
+		missions_end_unfinished(playerid, MISSION_STATE_ABANDONED);
 	}
 }
 
@@ -1656,7 +1662,7 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 		TRANSACTION_MISSION_OVERVIEW);
 	free(dlgbase);
 
-	missions_cleanup(miss, playerid);
+	missions_cleanup(playerid);
 }
 
 /**
@@ -1934,8 +1940,7 @@ int missions_cmd_cancelmission(CMDPARAMS)
 			NC_DisablePlayerRaceCheckpoint(playerid);
 		}
 		money_take(playerid, MISSION_CANCEL_FINE);
-		missions_end_unfinished(mission,
-			playerid, MISSION_STATE_DECLINED);
+		missions_end_unfinished(playerid, MISSION_STATE_DECLINED);
 	} else {
 		B144((char*) NOMISSION);
 		NC_SendClientMessage(playerid, COL_WARN, buf144a);
@@ -1958,7 +1963,7 @@ int missions_cmd_mission(CMDPARAMS)
 	switch (mission_stage[playerid]) {
 	case MISSION_STAGE_HELP:
 	case MISSION_STAGE_JOBMAP:
-		break;
+		return 1;
 	case MISSION_STAGE_NOMISSION:
 		if (active_msp_index[playerid] != -1) {
 			missions_jobmap_show(playerid); /*sets controllable and mission state*/

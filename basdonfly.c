@@ -266,6 +266,9 @@ static struct FAKEAMX fakeamx;
 #include <string.h>
 #include <sys/mman.h>
 #include <time.h>
+#define __USE_MISC /*for getpagesize()*/
+#include <unistd.h>
+#undef __USE_MISC
 
 static void zones_update(int playerid, struct vec3 pos);
 static void missions_update_missionpoint_indicators(int playerid, float player_x, float player_y, float player_z);

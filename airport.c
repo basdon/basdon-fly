@@ -77,7 +77,7 @@ void airports_init()
 	cacheid = NC_mysql_query(buf144a);
 	numairports = NC_cache_get_row_count();
 	if (!numairports) {
-		assert(("no airports", 0));
+		assert(((void) "no airports", 0));
 	}
 	airports = malloc(sizeof(struct AIRPORT) * numairports);
 	nc_params[3] = buf144a;
@@ -109,7 +109,7 @@ void airports_init()
 	cacheid = NC_mysql_query(buf144a);
 	rowcount = NC_cache_get_row_count();
 	if (!rowcount) {
-		assert(("no runways", 0));
+		assert(((void) "no runways", 0));
 	}
 	rowcount--;
 	while (rowcount >= 0) {
@@ -159,7 +159,7 @@ void airports_init()
 	cacheid = NC_mysql_query(buf144a);
 	nummissionpoints = NC_cache_get_row_count();
 	if (!nummissionpoints) {
-		assert(("no missionpoints", 0));
+		assert(((void) "no missionpoints", 0));
 	}
 	missionpoints = malloc(sizeof(struct MISSIONPOINT) * nummissionpoints);
 	ap = NULL;
@@ -177,7 +177,7 @@ void airports_init()
 				}
 			}
 			/*This should never happen, as per database scheme.*/
-			assert(("failed to link msp to ap", 0));
+			assert(((void) "failed to link msp to ap", 0));
 have_airport:
 			ap->missionpoints = msp;
 		}
@@ -197,7 +197,7 @@ have_airport:
 mixed_missionpoints:
 				/*TODO replace with logprintf*/
 				printf("mixed missionpoint types msp id %d ap %s\n", msp->id, ap->name);
-				assert(("mixed missionpoint types", 0));
+				assert(((void) "mixed missionpoint types", 0));
 			}
 		} else if (msp->type & CARGO_MISSIONTYPES) {
 			msp->point_type = MISSION_POINT_CARGO;

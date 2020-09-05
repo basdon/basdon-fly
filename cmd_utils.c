@@ -162,8 +162,8 @@ int cmd_get_vehiclemodel_param(const char *cmdtext, int *parseidx, int *modelid)
 {
 	int i, matchindex, minimum_pos, startpos, pos;
 
-	if (cmd_get_int_param(cmdtext, parseidx, &modelid)) {
-		if (VEHICLE_MODEL_MIN  <= modelid && modelid < VEHICLE_MODEL_MAX) {
+	if (cmd_get_int_param(cmdtext, parseidx, modelid)) {
+		if (VEHICLE_MODEL_MIN  <= *modelid && *modelid <= VEHICLE_MODEL_MAX) {
 			return 1;
 		}
 		return 0;

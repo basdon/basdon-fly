@@ -52,33 +52,15 @@ int cmd_admin_makeanewpermanentpublicvehiclehere(CMDPARAMS)
 	struct vec4 ppos;
 	int modelid = -1, vehicleid;
 
-	if (!cmd_get_int_param(cmdtext, &parseidx, &modelid) ||
-		modelid < 400 || 400 + VEHICLE_MODEL_TOTAL <= modelid)
-	{
-		if (modelid == -1 &&
-			cmd_get_str_param(cmdtext, &parseidx, cbuf144))
-		{
-			for (modelid = 0;
-				modelid < VEHICLE_MODEL_TOTAL;
-				modelid++)
-			{
-				if (!strcmp(vehmodelnames[modelid], cbuf144)) {
-					modelid += 400;
-					goto gotid;
-				}
-			}
+	if (cmd_get_vehiclemodel_param(cmdtext, &parseidx, &modelid)) {
+		common_GetPlayerPosRot(playerid, &ppos);
+		veh = veh_create_new_dbvehicle(modelid, &ppos);
+		vehicleid = veh_create(veh);
+		if (vehicleid != INVALID_VEHICLE_ID) {
+			natives_PutPlayerInVehicle(playerid, veh->spawnedvehicleid, 0);
 		}
-		B144(WARN"gimme a modelid or modelname");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
-		return 1;
-	}
-gotid:
-
-	common_GetPlayerPosRot(playerid, &ppos);
-	veh = veh_create_new_dbvehicle(modelid, &ppos);
-	vehicleid = veh_create(veh);
-	if (vehicleid != INVALID_VEHICLE_ID) {
-		natives_PutPlayerInVehicle(playerid, veh->spawnedvehicleid, 0);
+	} else {
+		SendClientMessage(playerid, COL_WARN, WARN"gimme a modelid or modelname");
 	}
 	return 1;
 }

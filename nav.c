@@ -647,7 +647,7 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 		n->dist = (n->dist / 100) * 100;
 	}
 	n->alt = (int) (pos->z - beacon->z);
-	if (n->vor != NULL ) {
+	if (n->vor != NULL) {
 		crs = (360.0f - heading) - n->vor->heading;
 		vorangle = (float) atan2(dy, dx) - n->vor->headingr;
 		horizontaldeviation = dist * (float) sin(vorangle);
@@ -664,14 +664,11 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 	if (n->vor == NULL || !n->ils) {
 		n->ilsx = 0;
 		n->ilsz = INVALID_ILS_VALUE;
-	} else if (dist > ILS_MAX_DIST ||
-		(dist *= (float) cos(vorangle)) <= 0.0f)
-	{
+	} else if (dist > ILS_MAX_DIST || (dist *= (float) cos(vorangle)) <= 0.0f) {
 		n->ilsx = INVALID_ILS_VALUE;
 		n->ilsz = 0;
 	} else {
-		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, pos->z, beacon->z,
-			horizontaldeviation);
+		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, pos->z, beacon->z, horizontaldeviation);
 	}
 	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);
 }
