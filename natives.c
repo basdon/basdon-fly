@@ -70,7 +70,6 @@ static AMX_NATIVE n_RemovePlayerMapIcon;
 static AMX_NATIVE n_SHA256_PassHash;
 static AMX_NATIVE n_SendClientMessage;
 static AMX_NATIVE n_SendClientMessageToAll;
-static AMX_NATIVE n_SendDeathMessage;
 static AMX_NATIVE n_SendRconCommand;
 static AMX_NATIVE n_SetCameraBehindPlayer;
 static AMX_NATIVE n_SetGameModeText;
@@ -370,10 +369,6 @@ static cell tmpfloat;
 	(NC_PARS_(2)nc_params[1]=COLOR,nc_params[2]=BUF,\
 	n_SendClientMessageToAll(amx,nc_params))
 
-#define NC_SendDeathMessage(KILLER,KILLEE,REASON) (NC_PARS_(3)\
-	nc_params[1]=KILLER,nc_params[2]=KILLEE,nc_params[3]=REASON,\
-	n_SendDeathMessage(amx,nc_params))
-
 #define NC_SendRconCommand(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
 	n_SendRconCommand(amx,nc_params))
 
@@ -617,7 +612,6 @@ int natives_find()
 		N(SHA256_PassHash),
 		N(SendClientMessage),
 		N(SendClientMessageToAll),
-		N(SendDeathMessage),
 		N(SendRconCommand),
 		N(SetCameraBehindPlayer),
 		N(SetGameModeText),

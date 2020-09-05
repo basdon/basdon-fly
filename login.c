@@ -272,12 +272,6 @@ alreadyin:
 		NC_mysql_tquery_nocb(buf4096a);
 	}
 
-	NC_PARS(3);
-	nc_params[1] = INVALID_PLAYER_ID;
-	nc_params[2] = playerid;
-	nc_params[3] = WEAPON_CONNECT;
-	NC(n_SendDeathMessage);
-
 	if (status == LOGGED_GUEST) {
 		money_set(playerid, MONEY_DEFAULT_AMOUNT);
 	} else {
