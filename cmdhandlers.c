@@ -30,7 +30,6 @@ int cmd_admin_goto(CMDPARAMS)
 	{
 		/*TODO: tp with vehicle?*/
 		/*TODO: accept interior id as param*/
-		/*TODO: common_tp_player seems to bug out?*/
 		pos.coords.x = (float) x;
 		pos.coords.y = (float) y;
 		pos.coords.z = (float) z;
@@ -56,6 +55,48 @@ int cmd_admin_goto(CMDPARAMS)
 		}
 	}
 
+	return 1;
+}
+
+static
+int cmd_admin_tocar(CMDPARAMS)
+{
+	struct vec3 vehicle_pos, player_pos;
+	int vehicleid, closest_vehicleid, modelid;
+	float dx, dy;
+	float min_distance_sq;
+
+	if (cmd_get_int_param(cmdtext, &parseidx, &vehicleid)) {
+		if (NC_GetVehicleModel(vehicleid)) {
+			natives_PutPlayerInVehicle(playerid, vehicleid, 0);
+		} else {
+			SendClientMessage(playerid, COL_WARN, WARN"Invalid vehicle id");
+		}
+	} else if (cmd_get_vehiclemodel_param(cmdtext, &parseidx, &modelid)) {
+		closest_vehicleid = -1;
+		min_distance_sq = float_pinf;
+		common_GetPlayerPos(playerid, &player_pos);
+		for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
+			if (NC_GetVehicleModel(vehicleid) == modelid) {
+				common_GetVehiclePos(vehicleid, &vehicle_pos);
+				dx = player_pos.x - vehicle_pos.x;
+				dy = player_pos.y - vehicle_pos.y;
+				if (dx * dx + dy * dy < min_distance_sq &&
+					common_find_player_in_vehicle_seat(vehicleid, 0) == INVALID_PLAYER_ID)
+				{
+					min_distance_sq = dx * dx + dy * dy;
+					closest_vehicleid = vehicleid;
+				}
+			}
+		}
+		if (closest_vehicleid != -1) {
+			natives_PutPlayerInVehicle(playerid, closest_vehicleid, 0);
+		} else {
+			SendClientMessage(playerid, COL_WARN, WARN"None spawned");
+		}
+	} else {
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: //tocar (<vehicleid>|<modelname>)");
+	}
 	return 1;
 }
 

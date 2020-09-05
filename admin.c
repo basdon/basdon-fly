@@ -114,8 +114,7 @@ int cmd_admin_rr(CMDPARAMS)
 				goto skip_occupied;
 			}
 		}
-		common_GetVehiclePos(vehicleid, &oppos);
-		if (common_xy_dist_sq(ppos, oppos) < RR_SQ) {
+		if (common_GetVehiclePos(vehicleid, &oppos) && common_xy_dist_sq(ppos, oppos) < RR_SQ) {
 			NC_SetVehicleToRespawn(vehicleid);
 		}
 skip_occupied:
