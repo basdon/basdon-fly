@@ -33,9 +33,13 @@ struct MISSION {
 };
 
 /**
-The selected option in the job help screen, should be 0-2.
+The selected option in the job help screen, value should be 0-2.
 */
 static char mission_help_option[MAX_PLAYERS];
+/**
+The selected option in the job help screen, value should be 0-NUM_PRESET_MISSION_LOCATIONS.
+*/
+static char mission_map_option[MAX_PLAYERS];
 /**
 Available mission point types for player.
 Usages are a.o. for in job help screen (after converting to point type) and to show mission point enexes.
@@ -122,7 +126,8 @@ static struct TEXTDRAW td_jobmap_opt7bg = { "opt7bg", TEXTDRAW_ALLOC_AS_NEEDED, 
 static struct TEXTDRAW td_jobmap_opt8bg = { "opt8bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
 static struct TEXTDRAW td_jobmap_opt9bg = { "opt9bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
 static struct TEXTDRAW td_jobmap_optselbg = { "optselbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-#if NUM_MISSION_LOCATIONS != 9
+/*Checking for 8 because the last one is the random entry.*/
+#if NUM_PRESET_MISSION_LOCATIONS != 8
 #error "num option textdraws does not match, hurr durr"
 #endif
 /*Very scientific text measurement system: "Some very long airport name gate P1 - Very special mission type (M) - 100000m"*/
@@ -136,6 +141,9 @@ static struct TEXTDRAW td_jobmap_opt6 = { "opt6", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 
 static struct TEXTDRAW td_jobmap_opt7 = { "opt7", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
 static struct TEXTDRAW td_jobmap_opt8 = { "opt8", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
 static struct TEXTDRAW td_jobmap_opt9 = { "opt9", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
+
+static float map_text_x_base, map_text_x_unit;
+static float map_text_y_base, map_text_y_unit;
 
 /**
 @return mask of MISSION_POINT_* values
@@ -237,6 +245,8 @@ void missions_init_type_text()
 
 /**
 Makes sure every possible location of the missionpoint is set.
+
+All locations are reset.
 */
 static
 void missions_update_mission_locations(struct MISSIONPOINT *msp)
@@ -249,62 +259,60 @@ void missions_update_mission_locations(struct MISSIONPOINT *msp)
 	int num_applicable_airports, num_applicable_msp;
 	int airportidx, locationidx, mspidx, typeidx;
 
-	for (locationidx = 0; locationidx < NUM_MISSION_LOCATIONS; locationidx++) {
-		if (!msp->missionlocations[locationidx]) {
-			/*Collect all applicable airports.*/
-			num_applicable_airports = 0;
-			for (airportidx = 0; airportidx < numairports; airportidx++) {
-				if (msp->ap != airports + airportidx && (airports[airportidx].missiontypes & msp->type)) {
-					applicable_airports[num_applicable_airports++] = airportidx;
-				}
+	for (locationidx = 0; locationidx < NUM_PRESET_MISSION_LOCATIONS; locationidx++) {
+		/*Collect all applicable airports.*/
+		num_applicable_airports = 0;
+		for (airportidx = 0; airportidx < numairports; airportidx++) {
+			if (msp->ap != airports + airportidx && (airports[airportidx].missiontypes & msp->type)) {
+				applicable_airports[num_applicable_airports++] = airportidx;
 			}
-
-			/*Select one of the airports.*/
-			if (num_applicable_airports == 0) {
-				/*TODO replace with logprintf*/
-				printf("msp id %d\n", msp->id);
-				/*This func is called on boot for all missionpoints,
-				so if this ever fails it will be at boot and never at a random time.*/
-				assert(((void) "no other airport for msp", 0));
-			}
-			airportidx = 0;
-			if (num_applicable_airports > 1) {
-				airportidx = NC_random(num_applicable_airports);
-			}
-			airportidx = applicable_airports[airportidx];
-
-			/*Collect all applicable missionpoints (for the selected airport).*/
-			num_applicable_msp = 0;
-			for (mspidx = 0; mspidx < airports[airportidx].num_missionpts; mspidx++) {
-				tmp_msp = airports[airportidx].missionpoints + mspidx;
-				/*No need to check if this is the same msp, since it's a different airport.*/
-				if (tmp_msp->type & msp->type) {
-					applicable_missionpoints[num_applicable_msp++] = tmp_msp;
-				}
-			}
-
-			assert(num_applicable_airports != 0);
-
-			/*Select one.*/
-			mspidx = 0;
-			if (num_applicable_msp > 1) {
-				mspidx = NC_random(num_applicable_msp);
-			}
-			msp->missionlocations[locationidx] = applicable_missionpoints[mspidx];
-
-			/*Decide on the type (since the type can still be mixed).*/
-			num_applicable_typeidx = 0;
-			for (typeidx = 0; typeidx < NUM_MISSION_TYPES; typeidx++) {
-				if (msp->type & msp->missionlocations[locationidx]->type & (1 << typeidx)) {
-					applicable_typeidx[num_applicable_typeidx++] = typeidx;
-				}
-			}
-			typeidx = 0;
-			if (num_applicable_typeidx > 1) {
-				typeidx = NC_random(num_applicable_typeidx);
-			}
-			msp->missiontypeindices[locationidx] = applicable_typeidx[typeidx];
 		}
+
+		/*Select one of the airports.*/
+		if (num_applicable_airports == 0) {
+			/*TODO replace with logprintf*/
+			printf("msp id %d\n", msp->id);
+			/*This func is called on boot for all missionpoints,
+			so if this ever fails it will be at boot and never at a random time.*/
+			assert(((void) "no other airport for msp", 0));
+		}
+		airportidx = 0;
+		if (num_applicable_airports > 1) {
+			airportidx = NC_random(num_applicable_airports);
+		}
+		airportidx = applicable_airports[airportidx];
+
+		/*Collect all applicable missionpoints (for the selected airport).*/
+		num_applicable_msp = 0;
+		for (mspidx = 0; mspidx < airports[airportidx].num_missionpts; mspidx++) {
+			tmp_msp = airports[airportidx].missionpoints + mspidx;
+			/*No need to check if this is the same msp, since it's a different airport.*/
+			if (tmp_msp->type & msp->type) {
+				applicable_missionpoints[num_applicable_msp++] = tmp_msp;
+			}
+		}
+
+		assert(num_applicable_airports != 0);
+
+		/*Select one.*/
+		mspidx = 0;
+		if (num_applicable_msp > 1) {
+			mspidx = NC_random(num_applicable_msp);
+		}
+		msp->missionlocations[locationidx] = applicable_missionpoints[mspidx];
+
+		/*Decide on the type (since the type can still be mixed).*/
+		num_applicable_typeidx = 0;
+		for (typeidx = 0; typeidx < NUM_MISSION_TYPES; typeidx++) {
+			if (msp->type & msp->missionlocations[locationidx]->type & (1 << typeidx)) {
+				applicable_typeidx[num_applicable_typeidx++] = typeidx;
+			}
+		}
+		typeidx = 0;
+		if (num_applicable_typeidx > 1) {
+			typeidx = NC_random(num_applicable_typeidx);
+		}
+		msp->missiontypeindices[locationidx] = applicable_typeidx[typeidx];
 	}
 }
 
@@ -317,6 +325,49 @@ void missions_jobmap_hide(int playerid)
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	TogglePlayerControllable(playerid, 1);
 	textdraws_hide_consecutive(playerid, NUM_MAP_TEXTDRAWS, TEXTDRAW_MISSIONMAP_BASE);
+}
+
+/**
+@param newselection new selected option
+@param direction to go in, in case the selected option is invalid
+*/
+static
+void mission_map_update_selection_ensure_available(int playerid, int newselection, int direction)
+{
+	struct MISSIONPOINT *msp, *tomsp;
+	int mission_typeidx;
+	float optdif;
+
+	assert(direction != 0);
+
+	mission_map_option[playerid] = newselection;
+invalid:
+	if (mission_map_option[playerid] > NUM_PRESET_MISSION_LOCATIONS + 1) {
+		mission_map_option[playerid] = 0;
+	} else if (mission_map_option[playerid] < 0) {
+		mission_map_option[playerid] = NUM_PRESET_MISSION_LOCATIONS;
+	}
+	/*The last option is the 'random' destination, and is always available.*/
+	if (mission_map_option[playerid] != NUM_PRESET_MISSION_LOCATIONS) {
+		msp = &missionpoints[active_msp_index[playerid]];
+		mission_typeidx = msp->missiontypeindices[(unsigned char) mission_map_option[playerid]];
+		if (!((1 << mission_typeidx) & missions_available_msptype_mask[playerid])) {
+			mission_map_option[playerid] += direction;
+			goto invalid;
+		}
+		tomsp = msp->missionlocations[(unsigned char) mission_map_option[playerid]];
+		strcpy(td_jobmap_to.rpcdata->text, tomsp->ap->code);
+		td_jobmap_to.rpcdata->x = map_text_x_base + map_text_x_unit * (tomsp->pos.x + 20000.0f);
+		td_jobmap_to.rpcdata->y = map_text_y_base + map_text_y_unit * (-tomsp->pos.y + 20000.0f);
+	} else {
+		strcpy(td_jobmap_to.rpcdata->text, "????");
+		td_jobmap_to.rpcdata->x = map_text_x_base + map_text_x_unit * 20000.0f;
+		td_jobmap_to.rpcdata->y = map_text_y_base + map_text_y_unit * 20000.0f;
+	}
+
+	optdif = td_jobmap_opt2bg.rpcdata->y - td_jobmap_opt1bg.rpcdata->y;
+	td_jobmap_optselbg.rpcdata->y = td_jobmap_opt1bg.rpcdata->y + mission_map_option[playerid] * optdif;
+	textdraws_show(playerid, 2, &td_jobmap_optselbg, &td_jobmap_to);
 }
 
 /**
@@ -347,7 +398,7 @@ void missions_jobmap_show(int playerid)
 	mission_stage[playerid] = MISSION_STAGE_JOBMAP;
 	TogglePlayerControllable(playerid, 0);
 
-	for (jobidx = 0; jobidx < NUM_MISSION_LOCATIONS; jobidx++) {
+	for (jobidx = 0; jobidx < NUM_PRESET_MISSION_LOCATIONS; jobidx++) {
 		tomsp = msp->missionlocations[jobidx];
 		dx = msp->pos.x - tomsp->pos.x;
 		dy = msp->pos.y - tomsp->pos.y;
@@ -366,19 +417,32 @@ void missions_jobmap_show(int playerid)
 			mission_type_names[msp->missiontypeindices[jobidx]],
 			distance);
 #ifdef DEV
-		assert(((void) "mission entry text too long", optiontexts[jobidx]->rpcdata->text_length < JOBMAP_ENTRY_MAX_TEXT_LENGTH));
+		if (optiontexts[jobidx]->rpcdata->text_length >= JOBMAP_ENTRY_MAX_TEXT_LENGTH) {
+			/*TODO replace with logprintf thing once patched*/
+			printf("msp id %d\n", tomsp->id);
+			assert(((void) "mission entry text too long", 0));
+		}
 #endif
 	}
+	/*TODO THIS SHOULD REALLY BE DONE IN THE TEXT FILE ITSELF*/
+	optiontexts[NUM_PRESET_MISSION_LOCATIONS]->rpcdata->text_length = sprintf(optiontexts[NUM_PRESET_MISSION_LOCATIONS]->rpcdata->text,
+		"~p~Random destination");
 
-	/*Showing all but "selection option background" and from/to textdraws.*/
-	textdraws_show(playerid, NUM_MAP_TEXTDRAWS - 3,
+	strcpy(td_jobmap_from.rpcdata->text, msp->ap->code);
+	td_jobmap_from.rpcdata->x = map_text_x_base + map_text_x_unit * (msp->pos.x + 20000.0f);
+	td_jobmap_from.rpcdata->y = map_text_y_base + map_text_y_unit * (-msp->pos.y + 20000.0f);
+
+	/*Showing all but "selection option background" and "to" textdraws.*/
+	textdraws_show(playerid, NUM_MAP_TEXTDRAWS - 2,
 		&td_jobmap_keyhelp, &td_jobmap_header, &td_jobmap_optsbg, &td_jobmap_mapbg,
 		&td_jobmap_island_mainland, &td_jobmap_island_octa, &td_jobmap_island_lima,
-		/*&td_jobmap_from, &td_jobmap_to, */&td_jobmap_opt1bg, &td_jobmap_opt2bg, &td_jobmap_opt3bg,
+		&td_jobmap_from, /*&td_jobmap_to, */&td_jobmap_opt1bg, &td_jobmap_opt2bg, &td_jobmap_opt3bg,
 		&td_jobmap_opt4bg, &td_jobmap_opt5bg, &td_jobmap_opt6bg, &td_jobmap_opt7bg,
 		&td_jobmap_opt8bg, &td_jobmap_opt9bg, /*&td_jobmap_optselbg, */&td_jobmap_opt1,
 		&td_jobmap_opt2, &td_jobmap_opt3, &td_jobmap_opt4, &td_jobmap_opt5, &td_jobmap_opt6,
 		&td_jobmap_opt7, &td_jobmap_opt8, &td_jobmap_opt9);
+
+	mission_map_update_selection_ensure_available(playerid, mission_map_option[playerid], 1);
 }
 
 /**
@@ -390,6 +454,36 @@ void missions_jobhelp_hide(int playerid)
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	TogglePlayerControllable(playerid, 1);
 	textdraws_hide_consecutive(playerid, NUM_HELP_TEXTDRAWS, TEXTDRAW_MISSIONHELP_BASE);
+}
+
+/**
+@param newselection new selected option
+@param direction to go in, in case the selected option is invalid
+*/
+static
+void mission_help_update_selection_ensure_available(int playerid, int newselection, int direction)
+{
+	int point_mask;
+	float optdif;
+
+	assert(direction != 0);
+
+	mission_help_option[playerid] = newselection;
+invalid:
+	if (mission_help_option[playerid] > 2) {
+		mission_help_option[playerid] = 0;
+	} else if (mission_help_option[playerid] < 0) {
+		mission_help_option[playerid] = 2;
+	}
+	point_mask = msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]);
+	if (!((point_mask >> mission_help_option[playerid]) & 1)) {
+		mission_help_option[playerid] += direction;
+		goto invalid;
+	}
+
+	optdif = td_jobhelp_bluebtnbg.rpcdata->y - td_jobhelp_greenbtnbg.rpcdata->y;
+	td_jobhelp_optselbg.rpcdata->y = td_jobhelp_greenbtnbg.rpcdata->y + mission_help_option[playerid] * optdif;
+	textdraws_show(playerid, 1, &td_jobhelp_optselbg);
 }
 
 /**
@@ -435,39 +529,8 @@ void missions_jobhelp_show(int playerid, int point_mask)
 		&td_jobhelp_actiongreen, &td_jobhelp_enexblue, &td_jobhelp_txtblue,
 		&td_jobhelp_actionblue, &td_jobhelp_enexred, &td_jobhelp_txtred,
 		&td_jobhelp_actionred);
-}
 
-/**
-@param newselection new selected option
-@param direction to go in, in case the selected option is invalid
-*/
-static
-void mission_help_update_selection_ensure_available(int playerid, int newselection, int direction)
-{
-	int point_mask;
-	float optdif;
-
-#if DEV
-	assert(direction != 0);
-#endif
-
-	mission_help_option[playerid] = newselection;
-invalid:
-	if (mission_help_option[playerid] > 2) {
-		mission_help_option[playerid] = 0;
-	} else if (mission_help_option[playerid] < 0) {
-		mission_help_option[playerid] = 2;
-	}
-	point_mask = msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]);
-	if (!((point_mask >> mission_help_option[playerid]) & 1)) {
-		assert(direction != 0);
-		mission_help_option[playerid] += direction;
-		goto invalid;
-	}
-
-	optdif = td_jobhelp_bluebtnbg.rpcdata->y - td_jobhelp_greenbtnbg.rpcdata->y;
-	td_jobhelp_optselbg.rpcdata->y = td_jobhelp_greenbtnbg.rpcdata->y + mission_help_option[playerid] * optdif;
-	textdraws_show(playerid, 1, &td_jobhelp_optselbg);
+	mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid], 1);
 }
 
 int missions_is_player_on_mission(int playerid)
@@ -505,6 +568,8 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 	struct MISSIONPOINT *msp;
 	int airportidx, indicatoridx, missionptidx, idxtouse;
 	float dx, dy, dz;
+
+	/*TODO: as long as missionhelp/map is option, this shouldn't update (because the active_point must not change*/
 
 	/*change now out-of-range ones to AVAILABLE*/
 	for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
@@ -678,41 +743,41 @@ Size the textdraws that are used for their box to indicate islands on the jobmap
 static
 void missions_init_jobmap_islands()
 {
-	/*base is the middle of the map*/
-	float letterheight_base, letterheight_unit;
-	float y_base, y_unit;
-	float x_base, x_unit;
-	float boxwidth_min, boxwidth_max, boxwidth_unit;
+	float map_coords_fontheight_base, map_coords_fontheight_unit;
+	float map_coords_y_base, map_coords_y_unit;
+	float map_coords_x_base, map_coords_x_unit;
+	float boxwidth_unit;
+	float boxwidth_min, boxwidth_max;
 	struct ZONE *zone;
 	int zoneindex, maxzoneindex;
 	int regionindex;
 	int octa_region_found;
 	float min_x, min_y, max_x, max_y;
 
-/*
-static struct TEXTDRAW td_jobmap_island_mainland = { "mapsqfull", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_island_octa = { "mapsqmintopleft", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_island_lima = { "mapsqminbotright", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-*/
+	map_text_x_base = td_jobmap_from.rpcdata->x;
+	map_text_x_unit = (td_jobmap_to.rpcdata->x - td_jobmap_from.rpcdata->x) / 40000.0f;
 
-	x_base = td_jobmap_island_octa.rpcdata->x;
-	x_unit = (td_jobmap_island_lima.rpcdata->x - td_jobmap_island_octa.rpcdata->x) / 40000.0f;
+	map_text_y_base = td_jobmap_from.rpcdata->y;
+	map_text_y_unit = (td_jobmap_to.rpcdata->y - td_jobmap_from.rpcdata->y) / 40000.0f;
 
-	y_base = td_jobmap_island_octa.rpcdata->y;
-	y_unit = (td_jobmap_island_lima.rpcdata->y - td_jobmap_island_octa.rpcdata->y) / 40000.0f;
+	map_coords_x_base = td_jobmap_island_octa.rpcdata->x;
+	map_coords_x_unit = (td_jobmap_island_lima.rpcdata->x - td_jobmap_island_octa.rpcdata->x) / 40000.0f;
+
+	map_coords_y_base = td_jobmap_island_octa.rpcdata->y;
+	map_coords_y_unit = (td_jobmap_island_lima.rpcdata->y - td_jobmap_island_octa.rpcdata->y) / 40000.0f;
 
 	/*actual box width is the relation of x (font position) to box_width*/
 	boxwidth_min = td_jobmap_island_octa.rpcdata->box_width - td_jobmap_island_octa.rpcdata->x;
 	boxwidth_max = td_jobmap_island_mainland.rpcdata->box_width - td_jobmap_island_mainland.rpcdata->x;
 	boxwidth_unit = (boxwidth_max - boxwidth_min) / 40000.0f;
 
-	letterheight_base = td_jobmap_island_octa.rpcdata->font_height;
-	letterheight_unit = (td_jobmap_island_mainland.rpcdata->font_height - letterheight_base) / 40000.0f;
+	map_coords_fontheight_base = td_jobmap_island_octa.rpcdata->font_height;
+	map_coords_fontheight_unit = (td_jobmap_island_mainland.rpcdata->font_height - map_coords_fontheight_base) / 40000.0f;
 
-	td_jobmap_island_mainland.rpcdata->x = x_base + x_unit * (20000.0f - 3000.0f);
+	td_jobmap_island_mainland.rpcdata->x = map_coords_x_base + map_coords_x_unit * (20000.0f - 3000.0f);
 	td_jobmap_island_mainland.rpcdata->box_width = td_jobmap_island_mainland.rpcdata->x + boxwidth_unit * 6000.0f;
-	td_jobmap_island_mainland.rpcdata->y = y_base + y_unit * (20000.0f - 3000.0f);
-	td_jobmap_island_mainland.rpcdata->font_height = letterheight_base + letterheight_unit * 6000.0f;
+	td_jobmap_island_mainland.rpcdata->y = map_coords_y_base + map_coords_y_unit * (20000.0f - 3000.0f);
+	td_jobmap_island_mainland.rpcdata->font_height = map_coords_fontheight_base + map_coords_fontheight_unit * 6000.0f;
 
 	octa_region_found = 0;
 	for (regionindex = 0; regionindex < regioncount; regionindex++) {
@@ -740,10 +805,10 @@ static struct TEXTDRAW td_jobmap_island_lima = { "mapsqminbotright", TEXTDRAW_AL
 			assert(min_x < max_x);
 			assert(min_y < max_y);
 
-			td_jobmap_island_octa.rpcdata->x = x_base + x_unit * (20000.0f + min_x);
+			td_jobmap_island_octa.rpcdata->x = map_coords_x_base + map_coords_x_unit * (20000.0f + min_x);
 			td_jobmap_island_octa.rpcdata->box_width = td_jobmap_island_octa.rpcdata->x + boxwidth_unit * (max_x - min_x);
-			td_jobmap_island_octa.rpcdata->y = y_base + y_unit * (20000.0f + -max_y);
-			td_jobmap_island_octa.rpcdata->font_height = letterheight_base + letterheight_unit * (max_y - min_y);
+			td_jobmap_island_octa.rpcdata->y = map_coords_y_base + map_coords_y_unit * (20000.0f + -max_y);
+			td_jobmap_island_octa.rpcdata->font_height = map_coords_fontheight_base + map_coords_fontheight_unit * (max_y - min_y);
 
 			/*TODO this is temp until lima gets added*/
 			td_jobmap_island_lima.rpcdata->x = td_jobmap_island_octa.rpcdata->x;
@@ -1238,6 +1303,7 @@ void missions_on_player_connect(int playerid)
 	missions_available_msptype_mask[playerid] = -1;
 	active_msp_index[playerid] = -1;
 	mission_help_option[playerid] = 0;
+	mission_map_option[playerid] = 0;
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	activemission[playerid] = NULL;
 
@@ -2131,7 +2197,6 @@ int missions_cmd_mission(CMDPARAMS)
 		But that would add too much delay (and complexity), so I'm just letting it be messed up atm..*/
 
 		missions_jobhelp_show(playerid, msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]));
-		mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid], 1);
 		return 1;
 	default:
 		SendClientMessage(playerid, COL_WARN,
@@ -2152,6 +2217,13 @@ void missions_driversync_udkeystate_change(int playerid, short udkey)
 			PlayerPlaySound(playerid, 1052);
 		}
 	} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
+		if (udkey < 0) {
+			mission_map_update_selection_ensure_available(playerid, mission_map_option[playerid] - 1, -1);
+			PlayerPlaySound(playerid, 1053);
+		} else if (udkey > 0) {
+			mission_map_update_selection_ensure_available(playerid, mission_map_option[playerid] + 1, 1);
+			PlayerPlaySound(playerid, 1052);
+		}
 	}
 }
 

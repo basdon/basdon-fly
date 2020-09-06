@@ -145,8 +145,8 @@ TODO
 /*TODO cargo water*/
 };
 
-/*Amount of mission locations each mission point should have.*/
-#define NUM_MISSION_LOCATIONS (9)
+/*Amount of preset mission locations each mission point should have (so excluding the last one, which is 'random destination'.*/
+#define NUM_PRESET_MISSION_LOCATIONS (8)
 
 #define PASSENGER_MISSIONTYPES \
 	(MISSION_TYPE_PASSENGER_S | MISSION_TYPE_PASSENGER_M | \
@@ -184,11 +184,14 @@ struct MISSIONPOINT {
 	char point_type;
 	char name[MAX_MSP_NAME + 1];
 	struct AIRPORT *ap;
-	struct MISSIONPOINT *missionlocations[NUM_MISSION_LOCATIONS];
+	/**
+	The last one is actually unused because it's the 'random' destination.
+	*/
+	struct MISSIONPOINT *missionlocations[NUM_PRESET_MISSION_LOCATIONS];
 	/**
 	Mission type is {@code 1 << this}
 	*/
-	int missiontypeindices[NUM_MISSION_LOCATIONS];
+	int missiontypeindices[NUM_PRESET_MISSION_LOCATIONS];
 };
 
 static struct MISSIONPOINT *missionpoints;
