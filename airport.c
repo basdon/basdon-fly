@@ -43,7 +43,7 @@ void airports_print_stats()
 			printf("  runway %s type %d nav %d\n", rnw->id, rnw->type, rnw->nav);
 			rnw++;
 		}
-		printf(" missionpoints: %d\n", ap->num_missionpts);
+		printf(" missionpoints: %d types: %d\n", ap->num_missionpts, ap->missiontypes);
 		msp = ap->missionpoints;
 		for (j = 0; j < ap->num_missionpts; j++) {
 			printf("  missionpoint %d: %s type %d point_type %d\n", msp->id, msp->name, msp->type, msp->point_type);
@@ -78,6 +78,8 @@ void airports_init()
 	numairports = NC_cache_get_row_count();
 	if (!numairports) {
 		assert(((void) "no airports", 0));
+	} else if (numairports > MAX_AIRPORTS) {
+		assert(((void) "too many airports", 0));
 	}
 	airports = malloc(sizeof(struct AIRPORT) * numairports);
 	nc_params[3] = buf144a;
@@ -182,15 +184,21 @@ have_airport:
 			ap->missionpoints = msp;
 		}
 		ap->num_missionpts++;
-		ap->missiontypes |= msp->type;
 
+		if (ap->num_missionpts > MAX_MISSIONPOINTS_PER_AIRPORT) {
+			assert(((void) "too many missionpoints", 0));
+		}
+
+		/*missionlocations are filled in mission.c, they should still be zero initialized though.
+		(They are filled based on if they are null.)*/
+		memset(msp->missionlocations, 0, sizeof(msp->missionlocations));
 		msp->ap = ap;
-		msp->currentlyactivemissions = 0;
 		msp->id = (unsigned short) (*field = 1, NC(n_cache_get_field_i));
 		msp->pos.x = (*field = 2, NCF(n_cache_get_field_f));
 		msp->pos.y = (*field = 3, NCF(n_cache_get_field_f));
 		msp->pos.z = (*field = 4, NCF(n_cache_get_field_f));
 		msp->type = (*field = 5, NC(n_cache_get_field_i));
+		ap->missiontypes |= msp->type;
 		if (msp->type & PASSENGER_MISSIONTYPES) {
 			msp->point_type = MISSION_POINT_PASSENGERS;
 			if (msp->type & ~PASSENGER_MISSIONTYPES) {

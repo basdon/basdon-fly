@@ -704,6 +704,8 @@ void veh_on_player_now_driving(int playerid, int vehicleid, struct dbvehicle *ve
 {
 	int reqenginestate;
 
+	/*veh could be NULL*/
+
 	lastvehicle[playerid] = vehicleid;
 	common_GetVehiclePos(vehicleid, &lastvpos[playerid]);
 

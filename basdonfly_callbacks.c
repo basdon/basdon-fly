@@ -238,7 +238,7 @@ exit:
 	heartbeat_create_session();
 	maps_init();
 	missions_create_tracker_socket();
-	missions_init();
+	missions_init(); /*airports_init() must be called first, to initialize missionpoints*/
 	panel_on_gamemode_init();
 	playerstats_init();
 	protips_init();

@@ -54,7 +54,7 @@ EXPECT_SIZE(float, 4);
 #endif
 
 /*
-There are moved to variables float_pinf and float_ninf because this are ints.
+These are moved to variables float_pinf and float_ninf because these are ints.
 #define FLOAT_PINF (0x7F800000)
 #define FLOAT_NINF (0xFF800000)
 */
@@ -145,6 +145,9 @@ TODO
 /*TODO cargo water*/
 };
 
+/*Amount of mission locations each mission point should have.*/
+#define NUM_MISSION_LOCATIONS (9)
+
 #define PASSENGER_MISSIONTYPES \
 	(MISSION_TYPE_PASSENGER_S | MISSION_TYPE_PASSENGER_M | \
 	MISSION_TYPE_PASSENGER_L | MISSION_TYPE_PASSENGER_WATER | \
@@ -169,6 +172,8 @@ The point type, decides the enex color and related things.
 #define MISSION_POINT_CARGO 2
 #define MISSION_POINT_SPECIAL 4
 
+#define MAX_MISSIONPOINTS_PER_AIRPORT 15
+
 struct MISSIONPOINT {
 	unsigned short id;
 	struct vec3 pos;
@@ -178,12 +183,18 @@ struct MISSIONPOINT {
 	*/
 	char point_type;
 	char name[MAX_MSP_NAME + 1];
-	unsigned short currentlyactivemissions;
 	struct AIRPORT *ap;
+	struct MISSIONPOINT *missionlocations[NUM_MISSION_LOCATIONS];
+	/**
+	Mission type is {@code 1 << this}
+	*/
+	int missiontypeindices[NUM_MISSION_LOCATIONS];
 };
 
 static struct MISSIONPOINT *missionpoints;
 static int nummissionpoints;
+
+#define MAX_AIRPORTS 20
 
 struct AIRPORT {
 	int id;
@@ -272,6 +283,7 @@ static struct FAKEAMX fakeamx;
 
 static void zones_update(int playerid, struct vec3 pos);
 static void missions_update_missionpoint_indicators(int playerid, float player_x, float player_y, float player_z);
+static int missions_get_vehicle_model_msptype_mask(int model);
 
 static struct BitStream bitstream_create_object;
 /**
@@ -285,6 +297,7 @@ static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 #include "samp.c"
 #include "textdraws.c"
 #include "natives.c"
+#include "natives_funcs.c"
 #include "common.c"
 #include "cmd_utils.c"
 #include "time.c"
@@ -329,6 +342,9 @@ static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 #include "cmd.c"
 #include "basdonfly_callbacks.c"
 #include "samphooks.c"
+
+#define NATIVES_IMPL
+#include "natives_funcs.c"
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {

@@ -1,3 +1,5 @@
+/*See MAX_MISSIONPOINTS_PER_AIRPORT. 15 is enough.
+If an airport has more, they are probably split out enough anyways.*/
 #define MAX_MISSION_INDICATORS (15)
 
 /*DIALOG IDS*/
@@ -51,4 +53,4 @@
 
 #define TEXTDRAW_MISSIONHELP_BASE (2000)
 /*Missionmap: using same base as missionhelp, since they can't show at the same time anyways.*/
-#define TEXTDRAW_MISSIONMAP_BASE (2000)
+#define TEXTDRAW_MISSIONMAP_BASE TEXTDRAW_MISSIONHELP_BASE
