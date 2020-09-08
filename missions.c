@@ -131,7 +131,8 @@ static struct TEXTDRAW td_jobmap_optselbg = { "optselbg", TEXTDRAW_ALLOC_AS_NEED
 #error "num option textdraws does not match, hurr durr"
 #endif
 /*Very scientific text measurement system: "Some very long airport name gate P1 - Very special mission type (M) - 100000m"*/
-#define JOBMAP_ENTRY_MAX_TEXT_LENGTH (77)
+#define JOBMAP_ENTRY_MAX_TEXT_LENGTH (100)
+static struct TEXTDRAW td_jobmap_opt1multiline = { "opt1multiline", 0, 0, NULL }; /*This one is just for measurements.*/
 static struct TEXTDRAW td_jobmap_opt1 = { "opt1", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
 static struct TEXTDRAW td_jobmap_opt2 = { "opt2", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
 static struct TEXTDRAW td_jobmap_opt3 = { "opt3", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
@@ -144,6 +145,7 @@ static struct TEXTDRAW td_jobmap_opt9 = { "opt9", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 
 
 static float map_text_x_base, map_text_x_unit;
 static float map_text_y_base, map_text_y_unit;
+static float map_text_multiline_offset;
 
 /**
 @return mask of MISSION_POINT_* values
@@ -225,7 +227,6 @@ void missions_init_type_text()
 	for (type_index = 0; type_index < NUM_MISSION_TYPES; type_index++) {
 		mission_type_text[type_index] = position;
 		type = 1 << type_index;
-		position += sprintf(position, "%s: ", mission_type_names[type_index]);
 		for (vehiclemodel = VEHICLE_MODEL_MIN; vehiclemodel <= VEHICLE_MODEL_MAX; vehiclemodel++) {
 			if ((type & missions_get_vehicle_model_msptype_mask(vehiclemodel))) {
 				position += sprintf(position, "%s/", vehnames[vehiclemodel - VEHICLE_MODEL_MIN]);
@@ -336,26 +337,30 @@ void mission_map_update_selection_ensure_available(int playerid, int newselectio
 {
 	struct MISSIONPOINT *msp, *tomsp;
 	int mission_typeidx;
+	int preset_option_idx;
 	float optdif;
 
 	assert(direction != 0);
 
 	mission_map_option[playerid] = newselection;
 invalid:
+	/*Number of options is amount of preset locations + the one random option.*/
 	if (mission_map_option[playerid] > NUM_PRESET_MISSION_LOCATIONS + 1) {
 		mission_map_option[playerid] = 0;
 	} else if (mission_map_option[playerid] < 0) {
-		mission_map_option[playerid] = NUM_PRESET_MISSION_LOCATIONS;
+		mission_map_option[playerid] = NUM_PRESET_MISSION_LOCATIONS + 1;
 	}
-	/*The last option is the 'random' destination, and is always available.*/
-	if (mission_map_option[playerid] != NUM_PRESET_MISSION_LOCATIONS) {
+	/*The first option is the 'random destination', and is always available.*/
+	if (mission_map_option[playerid]) {
 		msp = &missionpoints[active_msp_index[playerid]];
-		mission_typeidx = msp->missiontypeindices[(unsigned char) mission_map_option[playerid]];
+		/*-1 because 0 is the 'random destination' option*/
+		preset_option_idx = mission_map_option[playerid] - 1;
+		mission_typeidx = msp->missiontypeindices[preset_option_idx];
 		if (!((1 << mission_typeidx) & missions_available_msptype_mask[playerid])) {
 			mission_map_option[playerid] += direction;
 			goto invalid;
 		}
-		tomsp = msp->missionlocations[(unsigned char) mission_map_option[playerid]];
+		tomsp = msp->missionlocations[preset_option_idx];
 		strcpy(td_jobmap_to.rpcdata->text, tomsp->ap->code);
 		td_jobmap_to.rpcdata->x = map_text_x_base + map_text_x_unit * (tomsp->pos.x + 20000.0f);
 		td_jobmap_to.rpcdata->y = map_text_y_base + map_text_y_unit * (-tomsp->pos.y + 20000.0f);
@@ -377,22 +382,25 @@ Requires active_msp_index to be valid.
 static
 void missions_jobmap_show(int playerid)
 {
+	/*Opt1 is the 'random' entry, which is always available.*/
 	static struct TEXTDRAW *optiontexts[] = {
-		&td_jobmap_opt1, &td_jobmap_opt2, &td_jobmap_opt3,
-		&td_jobmap_opt4, &td_jobmap_opt5, &td_jobmap_opt6,
-		&td_jobmap_opt7, &td_jobmap_opt8, &td_jobmap_opt9,
+		&td_jobmap_opt2, &td_jobmap_opt3, &td_jobmap_opt4,
+		&td_jobmap_opt5, &td_jobmap_opt6, &td_jobmap_opt7,
+		&td_jobmap_opt8, &td_jobmap_opt9,
 	};
 	static struct TEXTDRAW *optionbgs[] = {
-		&td_jobmap_opt1bg, &td_jobmap_opt2bg, &td_jobmap_opt3bg,
-		&td_jobmap_opt4bg, &td_jobmap_opt5bg, &td_jobmap_opt6bg,
-		&td_jobmap_opt7bg, &td_jobmap_opt8bg, &td_jobmap_opt9bg,
+		&td_jobmap_opt2bg, &td_jobmap_opt3bg, &td_jobmap_opt4bg,
+		&td_jobmap_opt5bg, &td_jobmap_opt6bg, &td_jobmap_opt7bg,
+		&td_jobmap_opt8bg, &td_jobmap_opt9bg,
 	};
 
+	struct RPCDATA_ShowTextDraw *txtrpc;
 	struct MISSIONPOINT *msp, *tomsp;
 	float dx, dy, dz;
 	int distance;
 	int jobidx;
 	int is_available;
+	float original_text_y_locations[NUM_PRESET_MISSION_LOCATIONS];
 
 	msp = &missionpoints[active_msp_index[playerid]];
 	mission_stage[playerid] = MISSION_STAGE_JOBMAP;
@@ -405,17 +413,23 @@ void missions_jobmap_show(int playerid)
 		dz = msp->pos.z - tomsp->pos.z;
 		distance = (int) sqrt(dx * dx + dy * dy + dz * dz);
 		is_available = missions_available_msptype_mask[playerid] & (1 << msp->missiontypeindices[jobidx]);
+		txtrpc = optiontexts[jobidx]->rpcdata;
+		original_text_y_locations[jobidx] = txtrpc->y;
+		txtrpc->text_length = sprintf(txtrpc->text,
+			"~w~%s - %s - %dm",
+			tomsp->ap->name,
+			mission_type_names[msp->missiontypeindices[jobidx]],
+			distance);
 		if (is_available) {
 			optionbgs[jobidx]->rpcdata->box_color = 0xff333333;
 		} else {
 			optionbgs[jobidx]->rpcdata->box_color = 0xff202020;
+			txtrpc->y += map_text_multiline_offset;
+			txtrpc->text[1] = 'r';
+			txtrpc->text_length += sprintf(txtrpc->text + txtrpc->text_length,
+				"~n~Requires %s",
+				mission_type_text[msp->missiontypeindices[jobidx]]);
 		}
-		optiontexts[jobidx]->rpcdata->text_length = sprintf(optiontexts[jobidx]->rpcdata->text,
-			"~%c~%s - %s - %dm",
-			'r' + ('w' - 'r') * is_available,
-			tomsp->ap->name,
-			mission_type_names[msp->missiontypeindices[jobidx]],
-			distance);
 #ifdef DEV
 		if (optiontexts[jobidx]->rpcdata->text_length >= JOBMAP_ENTRY_MAX_TEXT_LENGTH) {
 			/*TODO replace with logprintf thing once patched*/
@@ -424,9 +438,6 @@ void missions_jobmap_show(int playerid)
 		}
 #endif
 	}
-	/*TODO THIS SHOULD REALLY BE DONE IN THE TEXT FILE ITSELF*/
-	optiontexts[NUM_PRESET_MISSION_LOCATIONS]->rpcdata->text_length = sprintf(optiontexts[NUM_PRESET_MISSION_LOCATIONS]->rpcdata->text,
-		"~p~Random destination");
 
 	strcpy(td_jobmap_from.rpcdata->text, msp->ap->code);
 	td_jobmap_from.rpcdata->x = map_text_x_base + map_text_x_unit * (msp->pos.x + 20000.0f);
@@ -443,6 +454,10 @@ void missions_jobmap_show(int playerid)
 		&td_jobmap_opt7, &td_jobmap_opt8, &td_jobmap_opt9);
 
 	mission_map_update_selection_ensure_available(playerid, mission_map_option[playerid], 1);
+
+	for (jobidx = 0; jobidx < NUM_PRESET_MISSION_LOCATIONS; jobidx++) {
+		txtrpc->y = original_text_y_locations[jobidx];
+	}
 }
 
 /**
@@ -726,6 +741,7 @@ void missions_dispose()
 	free(td_jobmap_opt8bg.rpcdata);
 	free(td_jobmap_opt9bg.rpcdata);
 	free(td_jobmap_optselbg.rpcdata);
+	/*Don't free opt1multiline, it's already free'd right after loading.*/
 	free(td_jobmap_opt1.rpcdata);
 	free(td_jobmap_opt2.rpcdata);
 	free(td_jobmap_opt3.rpcdata);
@@ -847,7 +863,8 @@ void missions_init()
 		&td_jobhelp_txtblue, &td_jobhelp_actionblue, &td_jobhelp_enexred,
 		&td_jobhelp_txtred, &td_jobhelp_actionred);
 
-	textdraws_load_from_file("jobmap", TEXTDRAW_MISSIONMAP_BASE, NUM_MAP_TEXTDRAWS,
+	/*Num +1 for the opt1multiline, which is just loaded for measurements.*/
+	textdraws_load_from_file("jobmap", TEXTDRAW_MISSIONMAP_BASE, NUM_MAP_TEXTDRAWS + 1,
 		/*remember to free their rpcdata in missions_dispose*/
 		&td_jobmap_keyhelp, &td_jobmap_header, &td_jobmap_optsbg, &td_jobmap_mapbg,
 		&td_jobmap_island_mainland, &td_jobmap_island_octa, &td_jobmap_island_lima,
@@ -855,26 +872,9 @@ void missions_init()
 		&td_jobmap_opt4bg, &td_jobmap_opt5bg, &td_jobmap_opt6bg, &td_jobmap_opt7bg,
 		&td_jobmap_opt8bg, &td_jobmap_opt9bg, &td_jobmap_optselbg, &td_jobmap_opt1,
 		&td_jobmap_opt2, &td_jobmap_opt3, &td_jobmap_opt4, &td_jobmap_opt5, &td_jobmap_opt6,
-		&td_jobmap_opt7, &td_jobmap_opt8, &td_jobmap_opt9);
-	/*TODO decide on this and do it in the text fiels*/
-	td_jobmap_opt1.rpcdata->font_width /= 1.2f;
-	td_jobmap_opt1.rpcdata->font_height /= 1.2f;
-	td_jobmap_opt2.rpcdata->font_width /= 1.2f;
-	td_jobmap_opt2.rpcdata->font_height /= 1.2f;
-	td_jobmap_opt3.rpcdata->font_width /= 1.2f;
-	td_jobmap_opt3.rpcdata->font_height /= 1.2f;
-	td_jobmap_opt4.rpcdata->font_width /= 1.2f;
-	td_jobmap_opt4.rpcdata->font_height /= 1.2f;
-	td_jobmap_opt5.rpcdata->font_width /= 1.2f;
-	td_jobmap_opt5.rpcdata->font_height /= 1.2f;
-	td_jobmap_opt6.rpcdata->font_width /= 1.2f;
-	td_jobmap_opt6.rpcdata->font_height /= 1.2f;
-	td_jobmap_opt7.rpcdata->font_width /= 1.2f;
-	td_jobmap_opt7.rpcdata->font_height /= 1.2f;
-	td_jobmap_opt8.rpcdata->font_width /= 1.2f;
-	td_jobmap_opt8.rpcdata->font_height /= 1.2f;
-	td_jobmap_opt9.rpcdata->font_width /= 1.2f;
-	td_jobmap_opt9.rpcdata->font_height /= 1.2f;
+		&td_jobmap_opt7, &td_jobmap_opt8, &td_jobmap_opt9, &td_jobmap_opt1multiline);
+	map_text_multiline_offset = td_jobmap_opt1multiline.rpcdata->y - td_jobmap_opt1.rpcdata->y;
+	free(td_jobmap_opt1multiline.rpcdata);
 
 	missions_init_jobmap_islands();
 
@@ -1997,6 +1997,15 @@ void missions_on_player_state_changed(int playerid, int from, int to)
 		} else {
 			missions_available_msptype_mask[playerid] = -1;
 		}
+
+		/*This could be unnecessary, unless the player gets jacked or teleported.
+		(They can't exit because it'd trigger the keystate change to hide the ui)*/
+		if (mission_stage[playerid] == MISSION_STAGE_HELP) {
+			missions_jobhelp_hide(playerid); /*sets controllable and mission state*/
+		} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
+			missions_jobmap_hide(playerid); /*sets controllable and mission state*/
+		}
+
 		common_GetPlayerPos(playerid, &pos);
 		missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 	}
@@ -2247,7 +2256,7 @@ void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 		} else if (KEY_JUST_DOWN(KEY_SPRINT)) {
 			PlayerPlaySound(playerid, 1083);
 			missions_jobmap_hide(playerid); /*sets controllable and mission state*/
-			/*TODO: START MISSION*/
+			/*TODO: START MISSION (doublecheck vehicle and player position first!!)*/
 		}
 	} else if (mission_stage[playerid] == MISSION_STAGE_NOMISSION && KEY_JUST_DOWN(KEY_YES) && active_msp_index[playerid] != -1) {
 		missions_jobmap_show(playerid); /*sets controllable and mission state*/
