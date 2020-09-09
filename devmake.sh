@@ -1,4 +1,1 @@
-#!/usr/bin/env bash
-BASDON_EXTRA_COMPILATION_OPTIONS="-DDEV $1 $2 $3 $4 $5"
-. nixmake.sh
-BASDON_EXTRA_COMPILATION_OPTIONS=
+. nixmake.sh -DDEV $1 $2 $3 $4 $5 $6
