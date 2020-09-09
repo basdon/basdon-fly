@@ -862,6 +862,7 @@ void missions_init()
 		&td_jobhelp_txtgreen, &td_jobhelp_actiongreen, &td_jobhelp_enexblue,
 		&td_jobhelp_txtblue, &td_jobhelp_actionblue, &td_jobhelp_enexred,
 		&td_jobhelp_txtred, &td_jobhelp_actionred);
+	textdraws_set_textbox_properties(td_jobhelp_keyhelp.rpcdata);
 
 	/*Num +1 for the opt1multiline, which is just loaded for measurements.*/
 	textdraws_load_from_file("jobmap", TEXTDRAW_MISSIONMAP_BASE, NUM_MAP_TEXTDRAWS + 1,
@@ -873,6 +874,7 @@ void missions_init()
 		&td_jobmap_opt8bg, &td_jobmap_opt9bg, &td_jobmap_optselbg, &td_jobmap_opt1,
 		&td_jobmap_opt2, &td_jobmap_opt3, &td_jobmap_opt4, &td_jobmap_opt5, &td_jobmap_opt6,
 		&td_jobmap_opt7, &td_jobmap_opt8, &td_jobmap_opt9, &td_jobmap_opt1multiline);
+	textdraws_set_textbox_properties(td_jobmap_keyhelp.rpcdata);
 	map_text_multiline_offset = td_jobmap_opt1multiline.rpcdata->y - td_jobmap_opt1.rpcdata->y;
 	free(td_jobmap_opt1multiline.rpcdata);
 

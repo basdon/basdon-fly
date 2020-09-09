@@ -37,6 +37,10 @@ union TEXT_FILE_ENTRY {
 EXPECT_SIZE(union TEXT_FILE_ENTRY, 905);
 #pragma pack()
 
+/**
+Template textbox textdraw. Use {@link textdraws_set_textbox_properties}.
+*/
+static struct TEXTDRAW td_helpbox_template = { "58B6E0", 0, 0, NULL };
 
 /**
 Load a map from file as specified in given map.
@@ -176,4 +180,22 @@ void textdraws_hide_consecutive(int playerid, int num, int base_id)
 		SAMP_SendRPCToPlayer(RPC_HideTextDraw, &bitstream_freeform, playerid, 2);
 		base_id++;
 	}
+}
+
+static
+void textdraws_init()
+{
+	textdraws_load_from_file("help", 0, 1, &td_helpbox_template);
+}
+
+/**
+Copies textdraw properties from the textbox template textdraw to the given textdraw data.
+*/
+static
+void textdraws_set_textbox_properties(struct RPCDATA_ShowTextDraw *textdraw_rpcdata)
+{
+	memcpy(
+		(void*) ((int) textdraw_rpcdata + MEMBER_OFFSET(struct RPCDATA_ShowTextDraw, flags)),
+		(void*) ((int) td_helpbox_template.rpcdata + MEMBER_OFFSET(struct RPCDATA_ShowTextDraw, flags)),
+		MEMBER_OFFSET(struct RPCDATA_ShowTextDraw, preview_model) - MEMBER_OFFSET(struct RPCDATA_ShowTextDraw, flags));
 }

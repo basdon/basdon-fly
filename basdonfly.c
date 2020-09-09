@@ -17,6 +17,7 @@
 
 #define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
 #define EXPECT_SIZE(S,SIZE) STATIC_ASSERT(sizeof(S)==(SIZE))
+#define MEMBER_OFFSET(S,M) ((int) (&(((S*) 0)->M)))
 
 typedef void (*cb_t)(void* data);
 typedef void (*logprintf_t)(char* format, ...);
@@ -377,6 +378,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	bitstream_destroy_object.copyData = 1;
 
 	samphooks_init();
+	textdraws_init();
 
 	cmd_init();
 	game_sa_init();
