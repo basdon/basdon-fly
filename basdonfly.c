@@ -363,19 +363,15 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	*(int*) &float_pinf = 0x7F800000;
 	*(int*) &float_ninf = 0xFF800000;
 
-	bitstream_freeform.copyData = 1;
-
 	rpcdata_CreateObject.no_camera_col = 0;
 	rpcdata_CreateObject.attached_object = -1;
 	rpcdata_CreateObject.attached_vehicle = -1;
 
 	bitstream_create_object.numberOfBitsUsed = sizeof(rpcdata_CreateObject) * 8;
 	bitstream_create_object.ptrData = &rpcdata_CreateObject;
-	bitstream_create_object.copyData = 1;
 
 	bitstream_destroy_object.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
 	bitstream_destroy_object.ptrData = &rpcdata_DestroyObject;
-	bitstream_destroy_object.copyData = 1;
 
 	samphooks_init();
 	textdraws_init();

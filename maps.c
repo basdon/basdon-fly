@@ -339,19 +339,19 @@ void maps_init()
 
 	bs_maps_remove_building.numberOfBitsUsed = sizeof(rpcdata_RemoveBuilding) * 8;
 	bs_maps_remove_building.numberOfBitsAllocated = sizeof(rpcdata_RemoveBuilding) * 8;
-	bs_maps_remove_building.readOffset = 0;
 	bs_maps_remove_building.ptrData = &rpcdata_RemoveBuilding;
-	bs_maps_remove_building.copyData = 1;
 
 	rpcdata_CreateObject.no_camera_col = 0;
 	rpcdata_CreateObject.attached_object = -1;
 	rpcdata_CreateObject.attached_vehicle = -1;
 
+	bs_maps_show_gang_zone.numberOfBitsUsed = sizeof(rpcdata_ShowGangZone) * 8;
+	bs_maps_show_gang_zone.numberOfBitsAllocated = sizeof(rpcdata_ShowGangZone) * 8;
+	bs_maps_show_gang_zone.ptrData = &rpcdata_ShowGangZone;
+
 	bs_maps_move_object.numberOfBitsUsed = sizeof(rpcdata_MoveObject) * 8;
 	bs_maps_move_object.numberOfBitsAllocated = sizeof(rpcdata_MoveObject) * 8;
-	bs_maps_move_object.readOffset = 0;
 	bs_maps_move_object.ptrData = &rpcdata_MoveObject;
-	bs_maps_move_object.copyData = 1;
 
 	rpcdata_show_actor.actorid = OCTA_ACTORID;
 	rpcdata_show_actor.modelid = 141;
@@ -363,7 +363,6 @@ void maps_init()
 	rpcdata_show_actor.invulnerable = 1;
 
 	rpcdata_hide_actor.actorid = OCTA_ACTORID;
-
 	timer_set(2000, maps_timer_rotate_radar, NULL);
 }
 
