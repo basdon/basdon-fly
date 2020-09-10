@@ -456,7 +456,7 @@ void missions_jobmap_show(int playerid)
 	mission_map_update_selection_ensure_available(playerid, mission_map_option[playerid], 1);
 
 	for (jobidx = 0; jobidx < NUM_PRESET_MISSION_LOCATIONS; jobidx++) {
-		txtrpc->y = original_text_y_locations[jobidx];
+		optiontexts[jobidx]->rpcdata->y = original_text_y_locations[jobidx];
 	}
 }
 
