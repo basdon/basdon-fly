@@ -363,6 +363,7 @@ void maps_init()
 	rpcdata_show_actor.invulnerable = 1;
 
 	rpcdata_hide_actor.actorid = OCTA_ACTORID;
+
 	timer_set(2000, maps_timer_rotate_radar, NULL);
 }
 

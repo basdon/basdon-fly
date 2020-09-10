@@ -345,10 +345,10 @@ void mission_map_update_selection_ensure_available(int playerid, int newselectio
 	mission_map_option[playerid] = newselection;
 invalid:
 	/*Number of options is amount of preset locations + the one random option.*/
-	if (mission_map_option[playerid] > NUM_PRESET_MISSION_LOCATIONS + 1) {
+	if (mission_map_option[playerid] > NUM_PRESET_MISSION_LOCATIONS) {
 		mission_map_option[playerid] = 0;
 	} else if (mission_map_option[playerid] < 0) {
-		mission_map_option[playerid] = NUM_PRESET_MISSION_LOCATIONS + 1;
+		mission_map_option[playerid] = NUM_PRESET_MISSION_LOCATIONS;
 	}
 	/*The first option is the 'random destination', and is always available.*/
 	if (mission_map_option[playerid]) {
