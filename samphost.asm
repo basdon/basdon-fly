@@ -7,7 +7,7 @@ DriverSyncHook:
 	push eax
 	call hook_OnDriverSync
 	add esp, 08h
-	mov eax, 080AEC5Fh
+	mov eax, 080AEB71h
 	jmp eax
 
 ;float* samphost_GetPtrStreamDistance();
