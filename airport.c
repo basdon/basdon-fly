@@ -198,6 +198,7 @@ have_airport:
 		msp->pos.y = (*field = 3, NCF(n_cache_get_field_f));
 		msp->pos.z = (*field = 4, NCF(n_cache_get_field_f));
 		msp->type = (*field = 5, NC(n_cache_get_field_i));
+		msp->has_player_browsing_missions = 0;
 		ap->missiontypes |= msp->type;
 		if (msp->type & PASSENGER_MISSIONTYPES) {
 			msp->point_type = MISSION_POINT_PASSENGERS;

@@ -318,11 +318,15 @@ void missions_update_mission_locations(struct MISSIONPOINT *msp)
 }
 
 /**
+Requires a valid player's {@link active_msp_index} to reset missionpoint 'is player browsing this' state.
 Also resets the player's {@link mission_stage} and sets player controllable.
 */
 static
 void missions_jobmap_hide(int playerid)
 {
+	assert(active_msp_index[playerid] != -1);
+
+	missionpoints[active_msp_index[playerid]].has_player_browsing_missions = 0;
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	TogglePlayerControllable(playerid, 1);
 	textdraws_hide_consecutive(playerid, NUM_MAP_TEXTDRAWS, TEXTDRAW_MISSIONMAP_BASE);
@@ -376,8 +380,9 @@ invalid:
 }
 
 /**
-Also sets the player's {@link mission_stage} and sets player uncontrollable.
 Requires active_msp_index to be valid.
+Does nothing when another player is already looking at the same missionpoint's missions.
+Also sets the player's {@link mission_stage} and sets player uncontrollable.
 */
 static
 void missions_jobmap_show(int playerid)
@@ -401,6 +406,11 @@ void missions_jobmap_show(int playerid)
 	int jobidx;
 	int is_available;
 	float original_text_y_locations[NUM_PRESET_MISSION_LOCATIONS];
+
+	if (missionpoints[active_msp_index[playerid]].has_player_browsing_missions) {
+		SendClientMessage(playerid, COL_WARN, WARN"Another player is browsing this point, try again later.");
+		return;
+	}
 
 	msp = &missionpoints[active_msp_index[playerid]];
 	mission_stage[playerid] = MISSION_STAGE_JOBMAP;
@@ -454,6 +464,8 @@ void missions_jobmap_show(int playerid)
 		&td_jobmap_opt7, &td_jobmap_opt8, &td_jobmap_opt9);
 
 	mission_map_update_selection_ensure_available(playerid, mission_map_option[playerid], 1);
+
+	missionpoints[active_msp_index[playerid]].has_player_browsing_missions = 1;
 
 	for (jobidx = 0; jobidx < NUM_PRESET_MISSION_LOCATIONS; jobidx++) {
 		optiontexts[jobidx]->rpcdata->y = original_text_y_locations[jobidx];
@@ -582,6 +594,7 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 
 	struct MISSIONPOINT *msp;
 	int airportidx, indicatoridx, missionptidx, idxtouse;
+	int player_new_active_msp_index;
 	float dx, dy, dz;
 
 	/*TODO: as long as missionhelp/map is option, this shouldn't update (because the active_point must not change*/
@@ -672,30 +685,36 @@ next:
 	}
 
 	/*update active_msp_index and show 'press ...' text if needed*/
-	if (NC_GetPlayerVehicleSeat(playerid) != 0) {
-		goto force_no_active_msp;
-	}
-	for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
-		if (missionpoint_indicator_state[playerid][indicatoridx] == MISSIONPOINT_INDICATOR_STATE_USED) {
-			msp = &missionpoints[missionpoint_indicator_index[playerid][indicatoridx]];
-			dx = msp->pos.x - player_x;
-			dy = msp->pos.y - player_y;
-			dz = msp->pos.z - player_z;
-			if (dx * dx + dy * dy + dz * dz < MISSION_CHECKPOINT_SIZE_SQ) {
-				if (active_msp_index[playerid] != missionpoint_indicator_index[playerid][indicatoridx]) {
-					active_msp_index[playerid] = missionpoint_indicator_index[playerid][indicatoridx];
+	if (NC_GetPlayerVehicleSeat(playerid) == 0) {
+		for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
+			if (missionpoint_indicator_state[playerid][indicatoridx] == MISSIONPOINT_INDICATOR_STATE_USED) {
+				msp = &missionpoints[missionpoint_indicator_index[playerid][indicatoridx]];
+				dx = msp->pos.x - player_x;
+				dy = msp->pos.y - player_y;
+				dz = msp->pos.z - player_z;
+				if (dx * dx + dy * dy + dz * dz < MISSION_CHECKPOINT_SIZE_SQ) {
+					if (active_msp_index[playerid] == missionpoint_indicator_index[playerid][indicatoridx]) {
+						return;
+					}
 					/*TODO: sometimes when entering/exiting vehicle, this text doesn't show even though code gets hit*/
 					GameTextForPlayer(playerid, 3000, 3,
 						"~w~Press ~b~~k~~CONVERSATION_YES~~w~ to view missions,~n~or type ~b~/w");
+					player_new_active_msp_index = missionpoint_indicator_index[playerid][indicatoridx];
+					goto active_msp_changed;
 				}
-				goto have_active_msp;
 			}
 		}
 	}
-force_no_active_msp:
-	active_msp_index[playerid] = -1;
-have_active_msp:
-	;
+	if (active_msp_index[playerid] == -1) {
+		return;
+	}
+	player_new_active_msp_index = -1;
+active_msp_changed:
+	if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
+		missions_jobmap_hide(playerid); /*sets controllable and mission stage*/
+	}
+	/*this assignment has to be done *after* the missions_jobmap_hide call*/
+	active_msp_index[playerid] = player_new_active_msp_index;
 
 #undef AIRPORT_RANGE_SQ
 #undef POINT_RANGE_SQ
@@ -1366,6 +1385,10 @@ void missions_on_player_death(int playerid)
 void missions_on_player_disconnect(int playerid)
 {
 	struct MISSION *miss;
+
+	if (mission_stage[playerid] == MISSION_STAGE_JOBMAP && active_msp_index[playerid] != -1) {
+		missionpoints[active_msp_index[playerid]].has_player_browsing_missions = 0;
+	}
 
 	if ((miss = activemission[playerid]) != NULL) {
 		missions_end_unfinished(playerid, MISSION_STATE_ABANDONED);

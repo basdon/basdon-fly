@@ -193,6 +193,7 @@ struct MISSIONPOINT {
 	Mission type is {@code 1 << this}
 	*/
 	int missiontypeindices[NUM_PRESET_MISSION_LOCATIONS];
+	char has_player_browsing_missions;
 };
 
 static struct MISSIONPOINT *missionpoints;
