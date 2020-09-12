@@ -255,6 +255,8 @@ amx data segment
 */
 static struct FAKEAMX fakeamx;
 
+#include "game_sa_data.c"
+
 #include "idalloc.h"
 #include "samphost.h"
 #include "common.h"
@@ -317,14 +319,12 @@ static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 
 #include "score.c"
 #include "admin.c"
-#include "zones_data.c"
 #include "zones.c"
 #include "anticheat.c"
 #include "changepassword.c"
 #include "class.c"
 #include "echo.c"
 #include "game_sa.c"
-#include "game_sa_data.c"
 #include "login.c"
 #include "guestregister.c"
 #include "heartbeat.c"
