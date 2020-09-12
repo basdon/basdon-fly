@@ -303,10 +303,9 @@ static struct BitStream bitstream_destroy_object;
 static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 
 #include "memstuff.c"
+#include "natives.c"
 #include "samp.c"
 #include "textdraws.c"
-#include "natives.c"
-#include "natives_funcs.c"
 #include "common.c"
 #include "cmd_utils.c"
 #include "time.c"
@@ -350,10 +349,9 @@ static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 
 #include "cmd.c"
 #include "basdonfly_callbacks.c"
-#include "samphooks.c"
 
-#define NATIVES_IMPL
-#include "natives_funcs.c"
+#define SAMP_NATIVES_IMPL
+#include "samp.c"
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {
@@ -378,7 +376,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	bitstream_destroy_object.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
 	bitstream_destroy_object.ptrData = &rpcdata_DestroyObject;
 
-	samphooks_init();
+	samp_init();
 	textdraws_init();
 
 	cmd_init();
