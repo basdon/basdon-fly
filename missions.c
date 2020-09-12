@@ -271,8 +271,7 @@ void missions_update_mission_locations(struct MISSIONPOINT *msp)
 
 		/*Select one of the airports.*/
 		if (num_applicable_airports == 0) {
-			/*TODO replace with logprintf*/
-			printf("msp id %d\n", msp->id);
+			logprintf("msp id %d", msp->id);
 			/*This func is called on boot for all missionpoints,
 			so if this ever fails it will be at boot and never at a random time.*/
 			assert(((void) "no other airport for msp", 0));
@@ -442,8 +441,7 @@ void missions_jobmap_show(int playerid)
 		}
 #ifdef DEV
 		if (optiontexts[jobidx]->rpcdata->text_length >= JOBMAP_ENTRY_MAX_TEXT_LENGTH) {
-			/*TODO replace with logprintf thing once patched*/
-			printf("msp id %d\n", tomsp->id);
+			logprintf("msp id %d", tomsp->id);
 			assert(((void) "mission entry text too long", 0));
 		}
 #endif

@@ -1,4 +1,19 @@
 extern hook_OnDriverSync
+extern logprintf
+extern printf
+
+;void printf_logprintf(char *format, ...);
+global printf_logprintf:function
+printf_logprintf:
+	pop dword [logprintRetAddr]
+	call printf
+	push aNewline;
+	call printf
+	pop eax
+	mov eax, dword [logprintf]
+	call eax
+	push dword [logprintRetAddr]
+	ret
 
 ;void DriverSyncHook();
 global DriverSyncHook:function
@@ -21,4 +36,7 @@ samphost_GetPtrStreamDistance:
 	add esp, 0x8
 	ret
 
-aStreamDistance db "stream_distance", 00h
+segment .data
+aStreamDistance	db "stream_distance", 00h
+aNewline	db 0Ah, 00h
+logprintRetAddr	dd 00h

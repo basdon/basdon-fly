@@ -105,8 +105,7 @@ ret:
 	for (i = 0; i < numtextdraws; i++) {
 		td = va_arg(va, struct TEXTDRAW*);
 		if (td->rpcdata == NULL) {
-			/*TODO replace with logprintf once logprintf is patched*/
-			printf("WARN: textdraw '%s' not found in '%s'\n", td->name, fullfilepath);
+			logprintf("WARN: textdraw '%s' not found in '%s'", td->name, fullfilepath);
 			td->rpcsize = sizeof(struct RPCDATA_ShowTextDraw) + 12;
 			td->rpcdata = malloc(td->rpcsize);
 			memset(td->rpcdata, 0, td->rpcsize);

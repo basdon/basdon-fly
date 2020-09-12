@@ -20,8 +20,13 @@
 #define MEMBER_OFFSET(S,M) ((int) (&(((S*) 0)->M)))
 
 typedef void (*cb_t)(void* data);
+
 typedef void (*logprintf_t)(char* format, ...);
-static logprintf_t logprintf;
+logprintf_t logprintf;
+/*Run logprintf through printf_logprintf when DEV, so it'll also print to terminal.*/
+#ifdef DEV
+#define logprintf printf_logprintf
+#endif
 
 EXPECT_SIZE(char, 1);
 EXPECT_SIZE(short, 2);
@@ -363,6 +368,7 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
+#undef logprintf
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 
 	*(int*) &float_pinf = 0x7F800000;

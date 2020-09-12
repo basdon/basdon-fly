@@ -204,8 +204,7 @@ have_airport:
 			msp->point_type = MISSION_POINT_PASSENGERS;
 			if (msp->type & ~PASSENGER_MISSIONTYPES) {
 mixed_missionpoints:
-				/*TODO replace with logprintf*/
-				printf("mixed missionpoint types msp id %d ap %s\n", msp->id, ap->name);
+				logprintf("mixed missionpoint types msp id %d ap %s", msp->id, ap->name);
 				assert(((void) "mixed missionpoint types", 0));
 			}
 		} else if (msp->type & CARGO_MISSIONTYPES) {
