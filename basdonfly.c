@@ -231,6 +231,10 @@ static int numairports;
 
 /*randomstuff*/
 
+/*New world boundaries +40k/-40k*/
+#define WORLD_XY_MAX 0x471C4000
+#define WORLD_XY_MIN 0xC71C4000
+
 #define KEY_JUST_DOWN(X) (!(oldkeys & X) && (newkeys & X))
 
 /**

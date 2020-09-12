@@ -148,6 +148,14 @@ struct RPCDATA_PlaySound {
 };
 EXPECT_SIZE(struct RPCDATA_PlaySound, 4 + 12);
 
+struct RPCDATA_SetWorldBounds {
+	float x_max;
+	float x_min;
+	float y_max;
+	float y_min;
+};
+EXPECT_SIZE(struct RPCDATA_SetWorldBounds, 4 + 4 + 4 + 4);
+
 struct RPCDATA_ShowGameText {
 	int style;
 	int time;
@@ -212,3 +220,4 @@ EXPECT_SIZE(rpcdata_freeform, 1000);
 #define RPC_SendClientMessage 0x815A027 /*ptr to 0x5D(93)*/
 #define RPC_PlaySound 0x815CD0C /*ptr to 0x10(16)*/
 #define RPC_ShowGameText 0x815A19A /*ptr to 0x49(73)*/
+#define RPC_SetWorldBounds 0x815CCB8 /*ptr to 0x11(17)*/
