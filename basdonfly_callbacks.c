@@ -518,6 +518,9 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
 }
 
 /* native B_OnPlayerRequestSpawn(playerid) */
+/**
+Called when trying to spawn from the 'class selection' state.
+*/
 static
 cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 {

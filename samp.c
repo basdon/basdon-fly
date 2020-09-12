@@ -288,11 +288,11 @@ void natives_SpawnPlayer(int playerid)
 		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
 		NC(n_SetPlayerPos_);
 	}
+	spawn_prespawn(playerid);
+
 	NC_PARS(1);
 	/*nc_params[1] = playerid;*/
 	NC(n_SpawnPlayer_);
-
-	spawn_prespawn(playerid);
 }
 #endif
 ;
