@@ -141,7 +141,6 @@ void textdraws_show(int playerid, int num, ...)
 	while (num--) {
 		td = va_arg(va, struct TEXTDRAW*);
 		bitstream_freeform.numberOfBitsUsed = td->rpcsize * 8;
-		bitstream_freeform.numberOfBitsAllocated = td->rpcsize * 8;
 		bitstream_freeform.ptrData = td->rpcdata;
 		SAMP_SendRPCToPlayer(RPC_ShowTextDraw, &bitstream_freeform, playerid, 2);
 	}
@@ -155,7 +154,6 @@ void textdraws_hide(int playerid, int num, ...)
 	va_list va;
 
 	bitstream_freeform.numberOfBitsUsed = sizeof(short) * 8;
-	bitstream_freeform.numberOfBitsAllocated = sizeof(short) * 8;
 	bitstream_freeform.ptrData = &rpcdata_freeform;
 	va_start(va, num);
 	while (num--) {
@@ -173,7 +171,6 @@ static
 void textdraws_hide_consecutive(int playerid, int num, int base_id)
 {
 	bitstream_freeform.numberOfBitsUsed = sizeof(short) * 8;
-	bitstream_freeform.numberOfBitsAllocated = sizeof(short) * 8;
 	bitstream_freeform.ptrData = &rpcdata_freeform;
 	while (num--) {
 		rpcdata_freeform.word[0] = base_id;

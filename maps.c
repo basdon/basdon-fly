@@ -338,7 +338,6 @@ void maps_init()
 	maps_load_from_db();
 
 	bs_maps_remove_building.numberOfBitsUsed = sizeof(rpcdata_RemoveBuilding) * 8;
-	bs_maps_remove_building.numberOfBitsAllocated = sizeof(rpcdata_RemoveBuilding) * 8;
 	bs_maps_remove_building.ptrData = &rpcdata_RemoveBuilding;
 
 	rpcdata_CreateObject.no_camera_col = 0;
@@ -346,11 +345,9 @@ void maps_init()
 	rpcdata_CreateObject.attached_vehicle = -1;
 
 	bs_maps_show_gang_zone.numberOfBitsUsed = sizeof(rpcdata_ShowGangZone) * 8;
-	bs_maps_show_gang_zone.numberOfBitsAllocated = sizeof(rpcdata_ShowGangZone) * 8;
 	bs_maps_show_gang_zone.ptrData = &rpcdata_ShowGangZone;
 
 	bs_maps_move_object.numberOfBitsUsed = sizeof(rpcdata_MoveObject) * 8;
-	bs_maps_move_object.numberOfBitsAllocated = sizeof(rpcdata_MoveObject) * 8;
 	bs_maps_move_object.ptrData = &rpcdata_MoveObject;
 
 	rpcdata_show_actor.actorid = OCTA_ACTORID;
@@ -441,7 +438,6 @@ skip_gang_zones:
 	/*Octavia actor*/
 	if (mapidx == octavia_island_actor_mapidx) {
 		bitstream_freeform.numberOfBitsUsed = sizeof(rpcdata_show_actor) * 8;
-		bitstream_freeform.numberOfBitsAllocated = sizeof(rpcdata_show_actor) * 8;
 		bitstream_freeform.ptrData = &rpcdata_show_actor;
 		SAMP_SendRPCToPlayer(RPC_ShowActor, &bitstream_freeform, playerid, 2);
 	}
@@ -490,7 +486,6 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 	/*Octavia actor*/
 	if (mapidx == octavia_island_actor_mapidx) {
 		bitstream_freeform.numberOfBitsUsed = sizeof(rpcdata_hide_actor) * 8;
-		bitstream_freeform.numberOfBitsAllocated = sizeof(rpcdata_hide_actor) * 8;
 		bitstream_freeform.ptrData = &rpcdata_hide_actor;
 		SAMP_SendRPCToPlayer(RPC_HideActor, &bitstream_freeform, playerid, 2);
 	}
