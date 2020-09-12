@@ -696,6 +696,7 @@ next:
 					if (active_msp_index[playerid] == missionpoint_indicator_index[playerid][indicatoridx]) {
 						return;
 					}
+					/*TODO: when on mission, only show text when in the destination point & text 'to unload, ..'*/
 					/*TODO: sometimes when entering/exiting vehicle, this text doesn't show even though code gets hit*/
 					GameTextForPlayer(playerid, 3000, 3,
 						"~w~Press ~b~~k~~CONVERSATION_YES~~w~ to view missions,~n~or type ~b~/w");
@@ -817,8 +818,8 @@ void missions_init_jobmap_islands()
 	octa_region_found = 0;
 	for (regionindex = 0; regionindex < regioncount; regionindex++) {
 		if (regions[regionindex].zone.id == ZONE_OCTA) {
-			zoneindex = regions[regionindex].minzone;
-			maxzoneindex = regions[regionindex].maxzone;
+			zoneindex = regions[regionindex].from_zone_idx;
+			maxzoneindex = regions[regionindex].to_zone_idx_exclusive;
 			octa_region_found = 1;
 			min_x = min_y = float_pinf;
 			max_x = max_y = float_ninf;
@@ -2233,6 +2234,7 @@ int missions_cmd_mission(CMDPARAMS)
 		missions_jobhelp_show(playerid, msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]));
 		return 1;
 	default:
+		/*TODO: SetPlayerRaceCheckpoint again in here */
 		SendClientMessage(playerid, COL_WARN,
 			WARN"You're already working! Use /s to stop your current work first ($"EQ(MISSION_CANCEL_FINE)" fee).");
 		return 1;

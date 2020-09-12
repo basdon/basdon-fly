@@ -5,7 +5,7 @@ struct ZONE {
 
 struct REGION {
 	struct ZONE zone;
-	int minzone, maxzone;
+	int from_zone_idx, to_zone_idx_exclusive;
 };
 
 /* see info.zon and american.gxt */

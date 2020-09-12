@@ -1,6 +1,6 @@
-static int lastzoneid[MAX_PLAYERS];
-static int lastregionid[MAX_PLAYERS];
-static int lastzoneindex[MAX_PLAYERS];
+static int zone_last_id[MAX_PLAYERS];
+static int zone_last_region[MAX_PLAYERS];
+static int zone_last_index[MAX_PLAYERS];
 
 static struct TEXTDRAW td_gps = { "gps", 200, 0, NULL };
 
@@ -10,31 +10,32 @@ static char gps_text_is_shown[MAX_PLAYERS];
 static
 void zones_init()
 {
-	struct REGION *r = regions, *rmax = regions + regioncount;
+	struct REGION *region, *region_end;
 	struct ZONE *pz = zones;
 	int z = 0, zmax = zonecount;
 #ifdef ZONES_DEBUG
 	int zonesinregion = 0;
 #endif /*ZONES_DEBUG*/
 
+	region = regions;
+	region_end = regions + regioncount;
+
 	while (z < zmax) {
 nr:
-		if (pz->min_x < r->zone.min_x || r->zone.max_x < pz->max_x ||
-			pz->min_y < r->zone.min_y || r->zone.max_y < pz->max_y)
+		if (pz->min_x < region->zone.min_x || region->zone.max_x < pz->max_x ||
+			pz->min_y < region->zone.min_y || region->zone.max_y < pz->max_y)
 		{
 #ifdef ZONES_DEBUG
-			printf("%d zones in region %d\n", zonesinregion,
-				r - regions);
+			printf("%d zones in region %d\n", zonesinregion, region - regions);
 			zonesinregion = 0;
 #endif /*ZONES_DEBUG*/
-			r->maxzone = z;
-			r++;
-			if (r >= rmax) {
-				logprintf("zones.c error: at zone %d but "
-					"regions are depleted", z);
+			region->to_zone_idx_exclusive = z;
+			region++;
+			if (region >= region_end) {
+				logprintf("zones.c error: at zone %d but " "regions are depleted", z);
 				return;
 			}
-			r->minzone = z;
+			region->from_zone_idx = z;
 			goto nr;
 		}
 		z++;
@@ -43,11 +44,11 @@ nr:
 		zonesinregion++;
 #endif /*ZONES_DEBUG*/
 	}
-	r->maxzone = z;
+	region->to_zone_idx_exclusive = z;
 
 	for (z = 0; z < MAX_PLAYERS; z++) {
-		lastzoneindex[z] = lastzoneid[z] = -1;
-		lastregionid[z] = ZONE_INVALID;
+		zone_last_index[z] = zone_last_id[z] = -1;
+		zone_last_region[z] = ZONE_INVALID;
 	}
 
 	textdraws_load_from_file("gps", TEXTDRAW_GPS, 1, &td_gps);
@@ -69,8 +70,8 @@ void zones_on_player_connect(int playerid)
 {
 	gps_text_should_show[playerid] = 0;
 	gps_text_is_shown[playerid] = 0;
-	lastzoneindex[playerid] = lastzoneid[playerid] = -1;
-	lastregionid[playerid] = ZONE_INVALID;
+	zone_last_index[playerid] = zone_last_id[playerid] = -1;
+	zone_last_region[playerid] = ZONE_INVALID;
 }
 
 /**
@@ -81,49 +82,48 @@ Should also be called when OnPlayerSetPos is called.
 static
 void zones_update(int playerid, struct vec3 pos)
 {
-	struct REGION *r = regions, *rmax = regions + regioncount;
-	struct ZONE *pz;
-	int i;
-	int lrid = lastregionid[playerid];
-	int lzid = lastzoneid[playerid];
+	struct REGION *region, *region_end;
+	int zoneindex;
+	int previous_last_region_id, previous_last_zone_id;
 	char *target_buffer;
 	short td_text_length;
 
-	if (lastzoneindex[playerid] >= 0 && zones_is_in_zone(pos, zones + lastzoneindex[playerid])) {
+	if (zone_last_index[playerid] >= 0 && zones_is_in_zone(pos, zones + zone_last_index[playerid])) {
 		if (gps_text_should_show[playerid] && !gps_text_is_shown[playerid]) {
 			goto showtext;
 		}
 		return;
 	}
 
-	lastzoneindex[playerid] = -1;
-	lastzoneid[playerid] = -1;
-	r = regions;
-	rmax = regions + regioncount;
+	previous_last_region_id = zone_last_region[playerid];
+	previous_last_zone_id = zone_last_id[playerid];
+	zone_last_index[playerid] = -1;
+	zone_last_id[playerid] = -1;
+	region = regions;
+	region_end = regions + regioncount;
 
-	while (r < rmax) {
-		if (zones_is_in_zone(pos, &r->zone)) {
-			lastregionid[playerid] = r->zone.id;
-			for (i = r->minzone; i < r->maxzone; i++) {
-				pz = zones + i;
-				if (zones_is_in_zone(pos, pz)) {
-					lastzoneindex[playerid] = i;
-					lastzoneid[playerid] = pz->id;
+	while (region < region_end) {
+		if (zones_is_in_zone(pos, &region->zone)) {
+			zone_last_region[playerid] = region->zone.id;
+			for (zoneindex = region->from_zone_idx; zoneindex < region->to_zone_idx_exclusive; zoneindex++) {
+				if (zones_is_in_zone(pos, &zones[zoneindex])) {
+					zone_last_index[playerid] = zoneindex;
+					zone_last_id[playerid] = zones[zoneindex].id;
 					goto gotcha;
 				}
 			}
 			goto gotcha;
 		}
-		r++;
+		region++;
 	}
 
-	lastregionid[playerid] = ZONE_NONE_NW + ((pos.y < 0.0f) << 1) + (pos.x > 0.0f);
+	zone_last_region[playerid] = ZONE_NONE_NW + ((pos.y < 0.0f) << 1) + (pos.x > 0.0f);
 gotcha:
 	if (!gps_text_should_show[playerid]) {
 		return;
 	}
 
-	if (lrid != lastregionid[playerid] || lzid != lastzoneid[playerid]) {
+	if (previous_last_region_id != zone_last_region[playerid] || previous_last_zone_id != zone_last_id[playerid]) {
 showtext:
 		if (gps_text_is_shown[playerid]) {
 			target_buffer = rpcdata_freeform.byte + 2 + 2; /*see struct RPCDATA_TextDrawSetString*/
@@ -131,11 +131,13 @@ showtext:
 			target_buffer = td_gps.rpcdata->text;
 		}
 
-		if (lastzoneid[playerid] != -1) {
-			td_text_length = sprintf(target_buffer, "%s~n~%s", zonenames[lastzoneid[playerid]], zonenames[lastregionid[playerid]]);
+		if (zone_last_id[playerid] != -1) {
+			td_text_length = sprintf(target_buffer, "%s~n~%s",
+						zonenames[zone_last_id[playerid]],
+						zonenames[zone_last_region[playerid]]);
 		} else {
 			/*regionid should _always_ be valid*/
-			td_text_length = sprintf(target_buffer, "~n~%s", zonenames[lastregionid[playerid]]);
+			td_text_length = sprintf(target_buffer, "~n~%s", zonenames[zone_last_region[playerid]]);
 		}
 
 		if (gps_text_is_shown[playerid]) {
@@ -193,10 +195,10 @@ int zones_cmd_loc(CMDPARAMS)
 	b = buf;
 	b += sprintf(buf, "%s(%d) is located in ",
 		pdata[target]->name, target);
-	if (lastzoneid[target] >= 0) {
-		b += sprintf(b, "%s, ", zonenames[lastzoneid[target]]);
+	if (zone_last_id[target] >= 0) {
+		b += sprintf(b, "%s, ", zonenames[zone_last_id[target]]);
 	}
-	b += sprintf(b, "%s ", zonenames[lastregionid[target]]);
+	b += sprintf(b, "%s ", zonenames[zone_last_region[target]]);
 	vehicleid = NC_GetPlayerVehicleID(target);
 	if (vehicleid) {
 		model = NC_GetVehicleModel(vehicleid);
