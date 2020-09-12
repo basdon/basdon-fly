@@ -3,7 +3,7 @@ short players[MAX_PLAYERS];
 int playercount;
 int spawned[MAX_PLAYERS];
 
-static const char *NOLOG = WARN"Log in first.";
+static char *NOLOG = WARN"Log in first.";
 
 /*adjusted parameter addr, since FRM and return addres are on top of the stack*/
 #define PARAM(X) (*(params + 2 + X))
@@ -308,21 +308,17 @@ cell AMX_NATIVE_CALL B_OnIncomingConnection(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
 {
-	static const char *NO = WARN"You can't use commands when not spawned.";
-
 	const int playerid = PARAM(1);
 	char cmdtext[145];
 	cell *addr;
 
 	if (!ISPLAYING(playerid)) {
-		B144((char*) NOLOG);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, NOLOG);
 		return 1;
 	}
 
 	if (!spawned[playerid]) {
-		B144((char*) NO);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"You can't use commands when not spawned.");
 		return 1;
 	}
 
@@ -528,8 +524,7 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 	const int playerid = PARAM(1);
 
 	if (!ISPLAYING(playerid)) {
-		B144((char*) NOLOG);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, NOLOG);
 		return 0;
 	}
 
@@ -595,9 +590,8 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 	const int playerid = PARAM(1);
 
 	if (!ISPLAYING(playerid)) {
-		B144((char*) NOLOG);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
-		return 1;
+		SendClientMessage(playerid, COL_WARN, NOLOG);
+		return 0;
 	}
 
 	if (!anticheat_on_player_text(playerid)) {
