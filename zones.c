@@ -1,11 +1,11 @@
 static int zone_last_id[MAX_PLAYERS];
 static int zone_last_region[MAX_PLAYERS];
 static int zone_last_index[MAX_PLAYERS];
+static char gps_text_is_shown[MAX_PLAYERS];
 
 static struct TEXTDRAW td_gps = { "gps", 200, 0, NULL };
 
-static char gps_text_should_show[MAX_PLAYERS];
-static char gps_text_is_shown[MAX_PLAYERS];
+#define GPS_SHOULD_SHOW(PLAYERID) (spawned[PLAYERID] && (prefs[playerid] & PREF_SHOW_GPS))
 
 static
 void zones_init()
@@ -68,7 +68,6 @@ int zones_is_in_zone(struct vec3 pos, struct ZONE *zone)
 static
 void zones_on_player_connect(int playerid)
 {
-	gps_text_should_show[playerid] = 0;
 	gps_text_is_shown[playerid] = 0;
 	zone_last_index[playerid] = zone_last_id[playerid] = -1;
 	zone_last_region[playerid] = ZONE_INVALID;
@@ -89,8 +88,12 @@ void zones_update(int playerid, struct vec3 pos)
 	short td_text_length;
 
 	if (zone_last_index[playerid] >= 0 && zones_is_in_zone(pos, zones + zone_last_index[playerid])) {
-		if (gps_text_should_show[playerid] && !gps_text_is_shown[playerid]) {
-			goto showtext;
+		if (GPS_SHOULD_SHOW(playerid)) {
+			if (!gps_text_is_shown[playerid]) {
+				goto showtext;
+			}
+		} else {
+			goto hide_if_shown_and_return;
 		}
 		return;
 	}
@@ -119,7 +122,12 @@ void zones_update(int playerid, struct vec3 pos)
 
 	zone_last_region[playerid] = ZONE_NONE_NW + ((pos.y < 0.0f) << 1) + (pos.x > 0.0f);
 gotcha:
-	if (!gps_text_should_show[playerid]) {
+	if (!GPS_SHOULD_SHOW(playerid)) {
+hide_if_shown_and_return:
+		if (gps_text_is_shown[playerid]) {
+			gps_text_is_shown[playerid] = 0;
+			textdraws_hide_consecutive(playerid, 1, TEXTDRAW_GPS);
+		}
 		return;
 	}
 
@@ -167,6 +175,8 @@ void zones_update_for_all()
 	while (idx--) {
 		playerid = players[idx];
 		if (!isafk[playerid]) {
+			/*GPS_SHOULD_SHOW could be checked here,
+			but most players will probably have it enabled so that branch is left out here.*/
 			common_GetPlayerPos(playerid, &pos);
 			zones_update(playerid, pos);
 		}
@@ -216,29 +226,4 @@ int zones_cmd_loc(CMDPARAMS)
 
 	SendClientMessage(playerid, COL_INFO_GENERIC, buf);
 	return 1;
-}
-
-/**
-Shows and updates zone textdraw for player, to be called from OnPlayerSpawn.
-*/
-static
-void zones_on_player_spawn(int playerid, struct vec3 pos)
-{
-	gps_text_should_show[playerid] = 1;
-	zones_update(playerid, pos);
-}
-
-/**
-Hides the zone textdraw.
-
-Call in OnPlayerDeath
-*/
-static
-void zones_hide_text(int playerid)
-{
-	if (gps_text_should_show[playerid]) {
-		gps_text_should_show[playerid] = 0;
-		gps_text_is_shown[playerid] = 0;
-		textdraws_hide_consecutive(playerid, 1, TEXTDRAW_GPS);
-	}
 }

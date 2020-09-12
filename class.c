@@ -132,10 +132,6 @@ void class_on_player_request_class(int playerid, int _classid)
 	nc_params[3] = 0x800000;
 	nc_params[4] = 3;
 	NC(n_GameTextForPlayer);
-
-	/*Can happen, eg when doing /respawn (uses TogglePlayerSpectating,
-	which won't hide it.*/
-	zones_hide_text(playerid);
 }
 
 int class_on_player_request_spawn(int playerid)

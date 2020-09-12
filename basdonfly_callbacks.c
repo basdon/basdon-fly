@@ -398,6 +398,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 {
+	struct vec3 pos;
 	const int playerid = PARAM(1), killerid = PARAM(2);
 	const int reason = PARAM(3);
 	int killeruid;
@@ -422,7 +423,8 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 	missions_on_player_death(playerid);
 	spawn_prespawn(playerid);
 	timecyc_on_player_death(playerid);
-	zones_hide_text(playerid);
+	common_GetPlayerPos(playerid, &pos);
+	zones_update(playerid, pos);
 
 	/*kneeboard*/
 	NC_PARS(2);
@@ -566,7 +568,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 	spawn_on_player_spawn(playerid);
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
-	zones_on_player_spawn(playerid, pos);
+	zones_update(playerid, pos);
 
 	return 1;
 }

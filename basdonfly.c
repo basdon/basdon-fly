@@ -224,10 +224,12 @@ static int numairports;
 
 #define PREF_ENABLE_PM 1
 #define PREF_SHOW_MISSION_MSGS 2
-#define PREF_CONSTANT_WORK 4
+#define PREF_SHOW_GPS 4
 #define PREF_WORK_AUTONAV 8
 
-#define DEFAULTPREFS (PREF_ENABLE_PM | PREF_SHOW_MISSION_MSGS | PREF_WORK_AUTONAV)
+#define DEFAULTPREFS (PREF_ENABLE_PM | PREF_SHOW_MISSION_MSGS | PREF_SHOW_GPS | PREF_WORK_AUTONAV)
+
+static int prefs[MAX_PLAYERS];
 
 /*randomstuff*/
 
@@ -313,7 +315,6 @@ static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 #include "time.c"
 #include "money.c"
 #include "dialog.c"
-#include "prefs.c"
 #include "airport.c"
 #include "protips.c"
 
@@ -341,6 +342,7 @@ static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 #include "timecyc.c"
 #include "timer.c"
 #include "vehicles.c"
+#include "prefs.c"
 
 #include "cmdhandlers.c"
 #ifdef DEV
