@@ -2,10 +2,10 @@ static int lastzoneid[MAX_PLAYERS];
 static int lastregionid[MAX_PLAYERS];
 static int lastzoneindex[MAX_PLAYERS];
 
-/**
-Holds player text draw id for each player.
-*/
-static int ptextid[MAX_PLAYERS];
+static struct TEXTDRAW td_gps = { "gps", 200, 0, NULL };
+
+static char gps_text_should_show[MAX_PLAYERS];
+static char gps_text_is_shown[MAX_PLAYERS];
 
 static
 void zones_init()
@@ -49,6 +49,8 @@ nr:
 		lastzoneindex[z] = lastzoneid[z] = -1;
 		lastregionid[z] = ZONE_INVALID;
 	}
+
+	textdraws_load_from_file("gps", TEXTDRAW_GPS, 1, &td_gps);
 }
 
 /**
@@ -65,35 +67,10 @@ int zones_is_in_zone(struct vec3 pos, struct ZONE *zone)
 static
 void zones_on_player_connect(int playerid)
 {
+	gps_text_should_show[playerid] = 0;
+	gps_text_is_shown[playerid] = 0;
 	lastzoneindex[playerid] = lastzoneid[playerid] = -1;
 	lastregionid[playerid] = ZONE_INVALID;
-
-	NC_PARS(4);
-	nc_params[1] = playerid;
-	nc_paramf[2] = 88.0f; /*x*/
-	nc_paramf[3] = 320.0f; /*y*/
-	nc_params[4] = emptystringa; /*txt*/
-	ptextid[playerid] = NC(n_CreatePlayerTextDraw);
-
-	nc_params[2] = ptextid[playerid];
-	nc_paramf[3] = 0.3f; /*x*/
-	nc_paramf[4] = 1.0f; /*y*/
-	NC(n_PlayerTextDrawLetterSize);
-
-	NC_PARS(3);
-	nc_params[3] = TD_ALIGNMENT_CENTER;
-	NC(n_PlayerTextDrawAlignment);
-
-	nc_params[3] = 1;
-	NC(n_PlayerTextDrawFont);
-	NC(n_PlayerTextDrawSetOutline);
-	NC(n_PlayerTextDrawSetProportional);
-
-	nc_params[3] = 0;
-	NC(n_PlayerTextDrawSetShadow);
-
-	nc_params[3] = -1;
-	NC(n_PlayerTextDrawColor);
 }
 
 /**
@@ -109,9 +86,13 @@ void zones_update(int playerid, struct vec3 pos)
 	int i;
 	int lrid = lastregionid[playerid];
 	int lzid = lastzoneid[playerid];
-	char buf[144];
+	char *target_buffer;
+	short td_text_length;
 
 	if (lastzoneindex[playerid] >= 0 && zones_is_in_zone(pos, zones + lastzoneindex[playerid])) {
+		if (gps_text_should_show[playerid] && !gps_text_is_shown[playerid]) {
+			goto showtext;
+		}
 		return;
 	}
 
@@ -138,17 +119,36 @@ void zones_update(int playerid, struct vec3 pos)
 
 	lastregionid[playerid] = ZONE_NONE_NW + ((pos.y < 0.0f) << 1) + (pos.x > 0.0f);
 gotcha:
+	if (!gps_text_should_show[playerid]) {
+		return;
+	}
+
 	if (lrid != lastregionid[playerid] || lzid != lastzoneid[playerid]) {
+showtext:
+		if (gps_text_is_shown[playerid]) {
+			target_buffer = rpcdata_freeform.byte + 2 + 2; /*see struct RPCDATA_TextDrawSetString*/
+		} else {
+			target_buffer = td_gps.rpcdata->text;
+		}
+
 		if (lastzoneid[playerid] != -1) {
-			sprintf(buf, "%s~n~%s", zonenames[lastzoneid[playerid]], zonenames[lastregionid[playerid]]);
+			td_text_length = sprintf(target_buffer, "%s~n~%s", zonenames[lastzoneid[playerid]], zonenames[lastregionid[playerid]]);
 		} else {
 			/*regionid should _always_ be valid*/
-			buf[0] = buf[2] = '~';
-			buf[1] = 'n';
-			strcpy(buf + 3, zonenames[lastregionid[playerid]]);
+			td_text_length = sprintf(target_buffer, "~n~%s", zonenames[lastregionid[playerid]]);
 		}
-		atoc(buf144, buf, 144);
-		NC_PlayerTextDrawSetString(playerid, ptextid[playerid], buf144a);
+
+		if (gps_text_is_shown[playerid]) {
+			rpcdata_freeform.word[0] = td_gps.rpcdata->textdrawid;
+			rpcdata_freeform.word[1] = td_text_length;
+			bitstream_freeform.ptrData = &rpcdata_freeform;
+			bitstream_freeform.numberOfBitsUsed = (2 + 2 + td_text_length) * 8;
+			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, playerid, 2);
+		} else {
+			gps_text_is_shown[playerid] = 1;
+			td_gps.rpcdata->text_length = td_text_length;
+			textdraws_show(playerid, 1, &td_gps);
+		}
 	}
 }
 
@@ -174,21 +174,17 @@ void zones_update_for_all()
 static
 int zones_cmd_loc(CMDPARAMS)
 {
-	static const char *CMD_SYN = WARN"Syntax: /loc [id/part of name]";
-	static const char *CMD_NOT_ONLINE = WARN"That player is not online.";
 	int target, vehicleid, model;
 	struct vec3 pos;
 	float vx, vy, vz;
 	char buf[144], *b;
 
 	if (!cmd_get_player_param(cmdtext, &parseidx, &target)) {
-		atoc(buf144, (char*) CMD_SYN, 144);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /loc [id/part of name]");
 		return 1;
 	}
 	if (target == INVALID_PLAYER_ID) {
-		atoc(buf144, (char*) CMD_NOT_ONLINE, 144);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"That player is not online.");
 		return 1;
 	}
 	common_GetPlayerPos(target, &pos);
@@ -216,8 +212,7 @@ int zones_cmd_loc(CMDPARAMS)
 		sprintf(b, "on foot (%.0f FT)", pos.z);
 	}
 
-	atoc(buf144, buf, 144);
-	NC_SendClientMessage(playerid, COL_INFO_GENERIC, buf144a);
+	SendClientMessage(playerid, COL_INFO_GENERIC, buf);
 	return 1;
 }
 
@@ -227,7 +222,7 @@ Shows and updates zone textdraw for player, to be called from OnPlayerSpawn.
 static
 void zones_on_player_spawn(int playerid, struct vec3 pos)
 {
-	NC_PlayerTextDrawShow(playerid, ptextid[playerid]);
+	gps_text_should_show[playerid] = 1;
 	zones_update(playerid, pos);
 }
 
@@ -239,5 +234,9 @@ Call in OnPlayerDeath
 static
 void zones_hide_text(int playerid)
 {
-	NC_PlayerTextDrawHide(playerid, ptextid[playerid]);
+	if (gps_text_should_show[playerid]) {
+		gps_text_should_show[playerid] = 0;
+		gps_text_is_shown[playerid] = 0;
+		textdraws_hide_consecutive(playerid, 1, TEXTDRAW_GPS);
+	}
 }

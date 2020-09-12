@@ -135,6 +135,13 @@ struct RPCDATA_HideTextDraw {
 };
 EXPECT_SIZE(struct RPCDATA_HideTextDraw, 2);
 
+struct RPCDATA_TextDrawSetString {
+	short textdrawid;
+	short text_length;
+	char text[1]; /*actually artibrary size*/
+};
+EXPECT_SIZE(struct RPCDATA_TextDrawSetString, 2 + 2 + 1);
+
 struct RPCDATA_SendClientMessage {
 	int color;
 	int message_length;
@@ -221,3 +228,4 @@ EXPECT_SIZE(rpcdata_freeform, 1000);
 #define RPC_PlaySound 0x815CD0C /*ptr to 0x10(16)*/
 #define RPC_ShowGameText 0x815A19A /*ptr to 0x49(73)*/
 #define RPC_SetWorldBounds 0x815CCB8 /*ptr to 0x11(17)*/
+#define RPC_TextDrawSetString 0x815214C /*ptr to 0x69(105)*/
