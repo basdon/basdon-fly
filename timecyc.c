@@ -615,6 +615,8 @@ timecyc_sync_clocks()
 void timecyc_tick()
 {
 	unsigned long nowtime;
+	int idx, playerid;
+	struct vec3 pos;
 
 	nowtime = time_timestamp();
 	if (nowtime - lasttime > 1000) {
@@ -642,7 +644,19 @@ timer30s:
 		/*timer1000*/
 		veh_timed_1s_update();
 		veh_timed_panel_update();
-		zones_update_for_all();
+
+		idx = playercount;
+		while (idx--) {
+			playerid = players[idx];
+			if (!isafk[playerid]) {
+				common_GetPlayerPos(playerid, &pos);
+				kneeboard_update_distance(playerid, &pos);
+				/*GPS_SHOULD_SHOW could be checked here,
+				but most players will probably have it enabled so that branch is left out here.*/
+				zones_update(playerid, pos);
+			}
+		}
+
 		if ((time_m % 5) == 0) {
 			/*timer5000*/
 			anticheat_decrease_infractions();

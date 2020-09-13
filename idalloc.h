@@ -49,9 +49,10 @@ If an airport has more, they are probably split out enough anyways.*/
 
 /*Ids 0-2047 are global TDs, ids 2048-2303 are player TDs.*/
 /*Drawing order is .. questionable and TBD.*/
-/*It seems like font 0 text always gets drawn on top.*/
 
 #define TEXTDRAW_GPS (1999)
 #define TEXTDRAW_MISSIONHELP_BASE (2000)
 /*Missionmap: using same base as missionhelp, since they can't show at the same time anyways.*/
 #define TEXTDRAW_MISSIONMAP_BASE TEXTDRAW_MISSIONHELP_BASE
+#define NUM_KNEEBOARD_TEXTDRAWS (3)
+#define TEXTDRAW_KNEEBOARD_BASE (TEXTDRAW_GPS - NUM_KNEEBOARD_TEXTDRAWS)

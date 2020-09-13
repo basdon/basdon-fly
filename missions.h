@@ -105,3 +105,4 @@ No effect when player is not on a (passenger) mission or when passed vehicle
 is not the mission vehicle.
 */
 void missions_update_satisfaction(int pid, int vid, float pitch, float roll);
+static int missions_format_kneeboard_info_text(int playerid, char *dest);

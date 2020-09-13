@@ -1248,6 +1248,7 @@ Call when ending a mission.
 static
 void missions_cleanup(int playerid)
 {
+	struct vec3 pos;
 	struct MISSION *mission;
 
 	mission = activemission[playerid];
@@ -1264,9 +1265,8 @@ void missions_cleanup(int playerid)
 	free(mission);
 	activemission[playerid] = NULL;
 
-	/*this might not be needed if mission was finished normally and player
-	uses the auto work setting, but that's just a minor optimization*/
-	kneeboard_reset_show(playerid);
+	common_GetPlayerPos(playerid, &pos);
+	kneeboard_update_all(playerid, &pos);
 }
 
 /**
@@ -1415,6 +1415,8 @@ PRELOAD/LOAD stages).
 static
 void missions_start_flight(int playerid, struct MISSION *mission)
 {
+	struct vec3 pos;
+
 	if (prefs[playerid] & PREF_WORK_AUTONAV) {
 		nav_navigate_to_airport(
 			mission->veh->spawnedvehicleid,
@@ -1454,16 +1456,8 @@ void missions_start_flight(int playerid, struct MISSION *mission)
 	        mission->id);
 	NC_mysql_tquery_nocb(buf144a);
 
-	/*kneeboard*/
-	NC_PARS(3);
-	nc_params[1] = playerid;
-	nc_params[2] = kneeboard_ptxt_info[playerid];
-	nc_params[3] = buf4096a;
-	csprintf(buf4096,
-		"~w~Flight from %s to ~r~%s~w~.",
-		mission->startpoint->ap->name,
-		mission->endpoint->ap->name);
-	NC(n_PlayerTextDrawSetString);
+	common_GetPlayerPos(playerid, &pos);
+	kneeboard_update_all(playerid, &pos);
 }
 
 /**
@@ -1661,16 +1655,7 @@ unknownvehicle:
 			mission->startpoint->ap);
 	}
 
-	/*kneeboard*/
-	NC_PARS(3);
-	nc_params[1] = playerid;
-	nc_params[2] = kneeboard_ptxt_info[playerid];
-	nc_params[3] = buf4096a;
-	csprintf(buf4096,
-		"~w~Flight from ~r~%s~w~ to %s.",
-		mission->startpoint->ap->name,
-		mission->endpoint->ap->name);
-	NC(n_PlayerTextDrawSetString);
+	kneeboard_update_all(playerid, &ppos);
 
 	return;
 err:
@@ -2387,4 +2372,22 @@ int missions_get_distance_to_next_cp(int playerid, struct vec3 *frompos)
 	cp.y -= frompos->y;
 	cp.z -= frompos->z;
 	return (int) sqrt(common_vectorsize_sq(cp));
+}
+
+static
+int missions_format_kneeboard_info_text(int playerid, char *dest)
+{
+	if (mission_stage[playerid] > MISSION_STAGE_LOAD) {
+		sprintf(dest, "~w~Flight from ~r~%s~w~ to %s.",
+			activemission[playerid]->startpoint->ap->name,
+			activemission[playerid]->endpoint->ap->name);
+		return 1;
+	} else if (mission_stage[playerid] >= MISSION_STAGE_PRELOAD) {
+		sprintf(dest,
+			"~w~Flight from %s to ~r~%s~w~.",
+			activemission[playerid]->startpoint->ap->name,
+			activemission[playerid]->endpoint->ap->name);
+		return 1;
+	}
+	return 0;
 }

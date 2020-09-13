@@ -373,6 +373,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	chpw_on_player_connect(playerid);
 	echo_on_player_connection(playerid, ECHO_CONN_REASON_GAME_CONNECTED);
 	dialog_on_player_connect(playerid);
+	kneeboard_on_player_connect(playerid);
 	maps_on_player_connect(playerid);
 	missions_on_player_connect(playerid);
 	money_set(playerid, 0);
@@ -421,16 +422,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 	timecyc_on_player_death(playerid);
 	common_GetPlayerPos(playerid, &pos);
 	zones_update(playerid, pos);
-
-	/*kneeboard*/
-	NC_PARS(2);
-	nc_params[1] = playerid;
-	nc_params[2] = kneeboard_ptxt_header[playerid];
-	NC(n_PlayerTextDrawHide);
-	nc_params[2] = kneeboard_ptxt_info[playerid];
-	NC(n_PlayerTextDrawHide);
-	nc_params[2] = kneeboard_ptxt_distance[playerid];
-	NC(n_PlayerTextDrawHide);
+	kneeboard_update_all(playerid, &pos);
 
 	return 1;
 }
@@ -560,7 +552,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 	spawned[playerid] = 1;
 
 	common_GetPlayerPos(playerid, &pos);
-	kneeboard_reset_show(playerid);
+	kneeboard_update_all(playerid, &pos);
 	maps_stream_for_player(playerid, pos);
 	money_on_player_spawn(playerid);
 	spawn_on_player_spawn(playerid);

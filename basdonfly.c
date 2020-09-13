@@ -286,7 +286,6 @@ static struct FAKEAMX fakeamx;
 #include "timecyc.h"
 #include "timer.h"
 #include "vehicles.h"
-#include "kneeboard.h"
 #include <assert.h>
 #include <math.h>
 #include <stdarg.h>
@@ -389,6 +388,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 
 	cmd_init();
 	game_sa_init();
+	kneeboard_init();
 	nav_init();
 	pdata_init();
 	time_init();

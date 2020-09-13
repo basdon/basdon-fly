@@ -278,8 +278,6 @@ alreadyin:
 		veh_spawn_player_vehicles(playerid);
 	}
 	class_on_player_request_class(playerid, -1);
-
-	kneeboard_create_player_text(playerid);
 }
 
 /**

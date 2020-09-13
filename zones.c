@@ -162,27 +162,6 @@ showtext:
 	}
 }
 
-/**
-Update player zone for all players, should be called periodically.
-*/
-static
-void zones_update_for_all()
-{
-	int idx, playerid;
-	struct vec3 pos;
-
-	idx = playercount;
-	while (idx--) {
-		playerid = players[idx];
-		if (!isafk[playerid]) {
-			/*GPS_SHOULD_SHOW could be checked here,
-			but most players will probably have it enabled so that branch is left out here.*/
-			common_GetPlayerPos(playerid, &pos);
-			zones_update(playerid, pos);
-		}
-	}
-}
-
 static
 int zones_cmd_loc(CMDPARAMS)
 {
