@@ -650,7 +650,6 @@ timer30s:
 			playerid = players[idx];
 			if (!isafk[playerid]) {
 				common_GetPlayerPos(playerid, &pos);
-				kneeboard_update_distance(playerid, &pos);
 				/*GPS_SHOULD_SHOW could be checked here,
 				but most players will probably have it enabled so that branch is left out here.*/
 				zones_update(playerid, pos);
