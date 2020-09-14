@@ -72,6 +72,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/refuel", GROUPS_ALL, svp_cmd_refuel },
 	{ 0, "/respawn", GROUPS_ALL, cmd_respawn },
 	{ 0, "/s", GROUPS_ALL, missions_cmd_cancelmission },
+	{ 0, "/stoplocate", GROUPS_ALL, missions_cmd_stoplocate },
 	{ 0, "/tickrate", GROUPS_ALL, cmd_tickrate },
 	{ 0, "/spray", GROUPS_ALL, cmd_spray },
 	{ 0, "/vor", GROUPS_ALL, nav_cmd_vor },

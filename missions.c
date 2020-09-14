@@ -62,6 +62,11 @@ When not -1, the missionpoint is always valid for the vehicle the player is driv
 */
 static short active_msp_index[MAX_PLAYERS];
 /**
+Holds the index of the missionpoint that has an active checkpoint for player, for locating purposes.
+When none, -1.
+*/
+static short locating_msp_index[MAX_PLAYERS];
+/**
 See {@code MISSION_STAGE} definitions.
 */
 static char mission_stage[MAX_PLAYERS];
@@ -709,6 +714,10 @@ next:
 	}
 	player_new_active_msp_index = -1;
 active_msp_changed:
+	if (player_new_active_msp_index == locating_msp_index[playerid]) {
+		locating_msp_index[playerid] = -1;
+		DisablePlayerRaceCheckpoint(playerid);
+	}
 	if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
 		missions_jobmap_hide(playerid); /*sets controllable and mission stage*/
 	}
@@ -1322,6 +1331,7 @@ void missions_on_player_connect(int playerid)
 	}
 	missions_available_msptype_mask[playerid] = -1;
 	active_msp_index[playerid] = -1;
+	locating_msp_index[playerid] = -1;
 	mission_help_option[playerid] = 0;
 	mission_map_option[playerid] = 0;
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
@@ -1378,6 +1388,11 @@ void missions_on_player_death(int playerid)
 		missions_end_unfinished(playerid, stopreason);
 		mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 		break;
+	}
+
+	if (locating_msp_index[playerid] != -1) {
+		locating_msp_index[playerid] = -1;
+		DisablePlayerRaceCheckpoint(playerid);
 	}
 }
 
@@ -2225,6 +2240,48 @@ int missions_cmd_mission(CMDPARAMS)
 }
 
 static
+int missions_cmd_stoplocate(CMDPARAMS)
+{
+	if (locating_msp_index[playerid] != -1) {
+		locating_msp_index[playerid] = -1;
+		DisablePlayerRaceCheckpoint(playerid);
+	}
+	return 1;
+}
+
+static
+void missions_locate_closest_mission(int playerid)
+{
+	struct vec3 pos;
+	int mspindex;
+	int closest_index;
+	float dx, dy;
+	float closest_distance_sq, distance_sq;
+
+	common_GetPlayerPos(playerid, &pos);
+	closest_index = -1;
+	closest_distance_sq = float_pinf;
+	for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {
+		if (missionpoints[mspindex].type & missions_available_msptype_mask[playerid]) {
+			dx = missionpoints[mspindex].pos.x - pos.x;
+			dy = missionpoints[mspindex].pos.y - pos.y;
+			distance_sq = dx * dx + dy * dy;
+			if (distance_sq < closest_distance_sq) {
+				closest_distance_sq = distance_sq;
+				closest_index = mspindex;
+			}
+		}
+	}
+
+	if (closest_index == -1) {
+		SendClientMessage(playerid, COL_WARN, WARN"No mission points available for this vehicle.");
+	} else {
+		locating_msp_index[playerid] = closest_index;
+		SetPlayerRaceCheckpointNoDirection(playerid, RACE_CP_TYPE_NORMAL, &missionpoints[closest_index].pos, 11.0f);
+	}
+}
+
+static
 void missions_driversync_udkeystate_change(int playerid, short udkey)
 {
 	if (mission_stage[playerid] == MISSION_STAGE_HELP) {
@@ -2246,6 +2303,7 @@ void missions_driversync_udkeystate_change(int playerid, short udkey)
 	}
 }
 
+static
 void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 {
 	if (mission_stage[playerid] == MISSION_STAGE_HELP) {
@@ -2255,8 +2313,8 @@ void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 			missions_jobhelp_hide(playerid); /*sets controllable and mission state*/
 		} else if (KEY_JUST_DOWN(KEY_SPRINT)) {
 			PlayerPlaySound(playerid, 1083);
-			/*TODO: LOCATE MISSION*/
 			missions_jobhelp_hide(playerid); /*sets controllable and mission state*/
+			missions_locate_closest_mission(playerid);
 		}
 	} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
 		/*Since player is set to not be controllable, these use on-foot controls even though the player is in-vehicle.*/

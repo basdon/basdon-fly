@@ -171,6 +171,14 @@ struct RPCDATA_ShowGameText {
 };
 EXPECT_SIZE(struct RPCDATA_ShowGameText, 4 + 4 + 4 + 100);
 
+struct RPCDATA_SetRaceCheckpoint {
+	char type;
+	struct vec3 pos;
+	struct vec3 pointAt;
+	float radius;
+};
+EXPECT_SIZE(struct RPCDATA_SetRaceCheckpoint, 1 + 12 + 12 + 4);
+
 struct SYNCDATA_Driver {
 	char packet_id;
 	short vehicle_id;
@@ -229,3 +237,5 @@ EXPECT_SIZE(rpcdata_freeform, 1000);
 #define RPC_ShowGameText 0x815A19A /*ptr to 0x49(73)*/
 #define RPC_SetWorldBounds 0x815CCB8 /*ptr to 0x11(17)*/
 #define RPC_TextDrawSetString 0x815214C /*ptr to 0x69(105)*/
+#define RPC_SetRaceCheckpoint 0x815CD7A /*ptr to 0x26(38)*/
+#define RPC_DisableRaceCheckpoint 0x81587C7 /*ptr to 0x27(39)*/

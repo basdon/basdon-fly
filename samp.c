@@ -2,6 +2,27 @@
 
 static int samp_pNetGame;
 
+static
+void SetPlayerRaceCheckpointNoDirection(int playerid, int type, struct vec3 *pos, float radius)
+{
+	struct RPCDATA_SetRaceCheckpoint data;
+
+	data.type = 0;
+	data.pos = *pos;
+	data.radius = radius;
+	bitstream_freeform.ptrData = &data;
+	bitstream_freeform.numberOfBitsUsed = sizeof(struct RPCDATA_SetRaceCheckpoint) * 8;
+	SAMP_SendRPCToPlayer(RPC_SetRaceCheckpoint, &bitstream_freeform, playerid, 2);
+}
+
+static
+void DisablePlayerRaceCheckpoint(int playerid)
+{
+	bitstream_freeform.numberOfBitsUsed = 0;
+	bitstream_freeform.ptrData = &rpcdata_freeform;
+	SAMP_SendRPCToPlayer(RPC_DisableRaceCheckpoint, &bitstream_freeform, playerid, 2);
+}
+
 /**
 When respawning, the player will always regain control.
 

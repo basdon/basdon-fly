@@ -349,11 +349,6 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 #endif /*DEV*/
 
-	NC_PARS(1);
-	nc_params[1] = playerid;
-	NC(n_DisablePlayerCheckpoint);
-	NC(n_DisablePlayerRaceCheckpoint);
-
 	/*do not remove so callbacks can validate*/
 	/*needs to be present both on connect and disconnect*/
 	_cc[playerid]++;
@@ -471,9 +466,8 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerEnterRaceCP(AMX *amx, cell *params)
 {
-	const int playerid = PARAM(1);
-
-	return missions_on_player_enter_race_checkpoint(playerid);
+	/*TODO: When actually using this, check if it's needed to call DisablePlayerRaceCheckpoint in OnPlayerConnect.*/
+	return 1;
 }
 
 /* native B_OnPlayerEnterVehicle(playerid, vehicleid, ispassenger) */
