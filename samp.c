@@ -274,12 +274,10 @@ int natives_SetPlayerPos(int playerid, struct vec3 pos)
 	Because of that, a map with 100 objects but all different models might block more
 	than a 1000 object map with 1 model, but the check below is pure object count.*/
 	if (maps_calculate_objects_to_create_for_player_at_position(playerid, pos) > 200) {
-		B144("Loading objects...");
-		NC_GameTextForPlayer(playerid, buf144a, 0x80000, 5);
+		GameTextForPlayer(playerid, 0x80000, 3, "Loading objects...");
 	}
 	maps_stream_for_player(playerid, pos);
-	B144("_");
-	NC_GameTextForPlayer(playerid, buf144a, 0, 5);
+	GameTextForPlayer(playerid, 0, 5, "_");
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 	zones_update(playerid, pos);
