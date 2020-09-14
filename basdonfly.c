@@ -284,7 +284,6 @@ static struct FAKEAMX fakeamx;
 #include "servicepoints.h"
 #include "spawn.h"
 #include "timecyc.h"
-#include "timer.h"
 #include "vehicles.h"
 #include <assert.h>
 #include <math.h>
@@ -317,6 +316,7 @@ static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 #include "common.c"
 #include "cmd_utils.c"
 #include "time.c"
+#include "timer.c"
 #include "money.c"
 #include "dialog.c"
 #include "airport.c"
@@ -344,7 +344,6 @@ static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 #include "servicepoints.c"
 #include "spawn.c"
 #include "timecyc.c"
-#include "timer.c"
 #include "vehicles.c"
 #include "prefs.c"
 
