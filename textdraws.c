@@ -121,6 +121,10 @@ ret:
 			td->rpcdata->textdrawid = base_textdraw_id + i;
 			strcpy(td->rpcdata->text, "missing text");
 		}
+		/*Put some propaganda in the client's unused allocated memory.*/
+		if (td->rpcdata->font != 5) {
+			memcpy(&td->rpcdata->preview_model, "basdon.net robin_be", 20);
+		}
 	}
 	va_end(va);
 
