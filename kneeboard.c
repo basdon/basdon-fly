@@ -25,10 +25,10 @@ void kneeboard_on_player_connect(int playerid)
 }
 
 /**
-@return 0 if no update is needed
+@return the length of the string that was put in out_buf, or 0 when no update is needed
 */
 static
-int kneeboard_format_distance(int playerid, struct vec3 *playerpos)
+int kneeboard_format_distance(int playerid, struct vec3 *playerpos, char *out_buf)
 {
 	int dist;
 
@@ -40,15 +40,12 @@ int kneeboard_format_distance(int playerid, struct vec3 *playerpos)
 	if (dist != kneeboard_last_distance[playerid]) {
 		kneeboard_last_distance[playerid] = dist;
 		if (dist == -1) {
-			rpcdata_freeform.word[1] = sprintf(&rpcdata_freeform.byte[4], "~n~~n~~n~~n~~n~");
+			return sprintf(out_buf, "~n~~n~~n~~n~~n~");
 		} else if (dist < 1000) {
-			rpcdata_freeform.word[1] =
-				sprintf(&rpcdata_freeform.byte[4], "~n~~n~~n~~n~~n~~w~Distance: %dm~n~", dist);
+			return sprintf(out_buf, "~n~~n~~n~~n~~n~~w~Distance: %dm~n~", dist);
 		} else {
-			rpcdata_freeform.word[1] =
-				sprintf(&rpcdata_freeform.byte[4], "~n~~n~~n~~n~~n~~w~Distance: %.1fKm~n~", (float) dist / 1000.0f);
+			return sprintf(out_buf, "~n~~n~~n~~n~~n~~w~Distance: %.1fKm~n~", (float) dist / 1000.0f);
 		}
-		return 1;
 	}
 	return 0;
 }
@@ -56,11 +53,17 @@ int kneeboard_format_distance(int playerid, struct vec3 *playerpos)
 static
 void kneeboard_update_distance(int playerid, struct vec3 *playerpos)
 {
-	if (kneeboard_is_shown[playerid] && kneeboard_format_distance(playerid, playerpos)) {
-		rpcdata_freeform.word[0] = td_kb_distance.rpcdata->textdrawid;
-		bitstream_freeform.ptrData = &rpcdata_freeform;
-		bitstream_freeform.numberOfBitsUsed = (2 + 2 + rpcdata_freeform.word[1]) * 8;
-		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, playerid, 2);
+	int len;
+
+	if (kneeboard_is_shown[playerid]) {
+		len = kneeboard_format_distance(playerid, playerpos, &rpcdata_freeform.byte[4]);
+		if (len) {
+			rpcdata_freeform.word[0] = td_kb_distance.rpcdata->textdrawid;
+			rpcdata_freeform.word[1] = (short) len;
+			bitstream_freeform.ptrData = &rpcdata_freeform;
+			bitstream_freeform.numberOfBitsUsed = (2 + 2 + rpcdata_freeform.word[1]) * 8;
+			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, playerid, 2);
+		}
 	}
 }
 
@@ -83,11 +86,11 @@ void kneeboard_update_all(int playerid, struct vec3 *playerpos)
 	}
 	td_kb_info.rpcdata->text_length = sprintf(td_kb_info.rpcdata->text, "%s", info_text);
 
-	kneeboard_last_distance[playerid] = -2; /*To force update.*/
-	assert(kneeboard_format_distance(playerid, playerpos));
+	kneeboard_last_distance[playerid] = -2; /*To force update when calling kneeboard_format_distance below.*/
 
 	if (kneeboard_is_shown[playerid]) {
 		rpcdata_freeform.word[0] = td_kb_distance.rpcdata->textdrawid;
+		rpcdata_freeform.word[1] = kneeboard_format_distance(playerid, playerpos, &rpcdata_freeform.byte[4]);
 		bitstream_freeform.ptrData = &rpcdata_freeform;
 		bitstream_freeform.numberOfBitsUsed = (2 + 2 + rpcdata_freeform.word[1]) * 8;
 		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, playerid, 2);
@@ -100,8 +103,7 @@ void kneeboard_update_all(int playerid, struct vec3 *playerpos)
 		bitstream_freeform.numberOfBitsUsed = (2 + 2 + len) * 8;
 		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, playerid, 2);
 	} else {
-		td_kb_distance.rpcdata->text_length = rpcdata_freeform.word[1];
-		memcpy(td_kb_distance.rpcdata->text, &rpcdata_freeform.word[2], rpcdata_freeform.word[1]);
+		td_kb_distance.rpcdata->text_length = kneeboard_format_distance(playerid, playerpos, td_kb_distance.rpcdata->text);
 
 		textdraws_show(playerid, 3, &td_kb_header, &td_kb_info, &td_kb_distance);
 		kneeboard_is_shown[playerid] = 1;
