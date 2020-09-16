@@ -3,11 +3,11 @@
 static int samp_pNetGame;
 
 static
-void SetPlayerRaceCheckpointNoDirection(int playerid, int type, struct vec3 *pos, float radius)
+void SetPlayerRaceCheckpointNoDir(int playerid, int type, struct vec3 *pos, float radius)
 {
 	struct RPCDATA_SetRaceCheckpoint data;
 
-	data.type = 0;
+	data.type = type;
 	data.pos = *pos;
 	data.radius = radius;
 	bitstream_freeform.ptrData = &data;

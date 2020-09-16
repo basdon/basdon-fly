@@ -7,10 +7,10 @@
 #define MISSION_STAGE_HELP	1 /*the 'go to a loading point to start a mission' page*/
 #define MISSION_STAGE_JOBMAP 	2 /*the mission map job select screen*/
 #define MISSION_STAGE_PRELOAD	3 /*taxiing to CP*/
-#define MISSION_STAGE_LOAD	4 /*loading timer*/
-#define MISSION_STAGE_POSTLOAD	5 /*loading done, but waiting for create query*/
-#define MISSION_STAGE_FLIGHT	6 /*flight*/
-#define MISSION_STAGE_UNLOAD	7 /*unloading timer*/
+#define MISSION_STAGE_LOAD	4 /*loading time (query executing or timer)*/
+#define MISSION_STAGE_FLIGHT	5 /*flight*/
+#define MISSION_STAGE_UNLOAD	6 /*unloading timer*/
+/*TODO remove POSTLOAD stuff*/
 
 /*states saved in db*/
 #define MISSION_STATE_INPROGRESS 1
@@ -30,9 +30,8 @@
 #define MISSION_WEATHERBONUS_DEVIATION 500
 
 #define MISSION_LOAD_UNLOAD_TIME 2200
-#define MISSION_CHECKPOINT_SIZE 11.0f
-#define MISSION_CHECKPOINT_SIZE_SQ (MISSION_CHECKPOINT_SIZE * MISSION_CHECKPOINT_SIZE)
-#define MISSION_CHECKPOINT_TYPE 2
+#define MISSION_CP_RAD 11.0f
+#define MISSION_CP_RAD_SQ (MISSION_CP_RAD * MISSION_CP_RAD)
 
 #ifdef DEV
 /**
@@ -70,10 +69,6 @@ int missions_is_player_on_mission(int playerid);
 void missions_on_player_connect(int playerid);
 void missions_on_player_death(int playerid);
 void missions_on_player_disconnect(int playerid);
-/**
-@return non-zero if the event was handled
-*/
-int missions_on_player_enter_race_checkpoint(int playerid);
 void missions_on_player_state_changed(int playerid, int from, int to);
 /**
 Call when a vehicle is destroyed or respawned.

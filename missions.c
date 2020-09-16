@@ -1,12 +1,16 @@
 #define TRACKER_PORT 7766
 
-#define MAX_UNLOAD_SPEED_KNOTS (35.0f)
-#define MAX_UNLOAD_SPEED_VEL (MAX_UNLOAD_SPEED_KNOTS / VEL_TO_KTS)
-#define MAX_UNLOAD_SPEED_SQ_VEL (MAX_UNLOAD_SPEED_VEL * MAX_UNLOAD_SPEED_VEL)
+#define MAX_SPEED_SQ ((3.0f / VEL_TO_KPH) * (3.0f / VEL_TO_KPH))
 
 const static char *SATISFACTION_TEXT_FORMAT = "Passenger~n~Satisfaction: %d%%";
-const static char *LOADING = "~p~Loading...";
-const static char *UNLOADING = "~p~Unloading...";
+
+/**
+Keeps track how much missions a playerid has started and/or stopped (number increased on mission start AND stop).
+Pointers to missions must not be passed in callback data, since they could be free'd before that happens.
+Instead, callbacks should pass this number, and if it is equal to the current number it means that the
+activemission[playerid] is still the same mission as it was when the async func was started.
+*/
+static int number_missions_started_stopped[MAX_PLAYERS];
 
 struct MISSION {
 	int id;
@@ -42,7 +46,7 @@ The selected option in the job help screen, value should be 0-NUM_PRESET_MISSION
 static char mission_map_option[MAX_PLAYERS];
 /**
 Available mission point types for player.
-Usages are a.o. for in job help screen (after converting to point type) and to show mission point enexes.
+Usages are a.o. for in job help/map screen and to show mission point enexes.
 */
 static char missions_available_msptype_mask[MAX_PLAYERS];
 /**
@@ -249,6 +253,77 @@ void missions_init_type_text()
 	}
 }
 
+static
+void missions_get_random_destination_mission_point_and_type(from_msp, mission_type_mask, out_msp, out_mission_typeIDX)
+	struct MISSIONPOINT *from_msp;
+	int mission_type_mask;
+	struct MISSIONPOINT **out_msp;
+	int *out_mission_typeIDX;
+{
+	int applicable_typeidx[NUM_MISSION_TYPES];
+	int num_applicable_typeidx;
+	int applicable_airports[MAX_AIRPORTS];
+	struct MISSIONPOINT *applicable_missionpoints[MAX_MISSIONPOINTS_PER_AIRPORT];
+	struct MISSIONPOINT *tmp_msp;
+	int num_applicable_airports, num_applicable_msp;
+	int airportidx, mspidx, typeidx;
+
+	/*Collect all applicable airports.*/
+	num_applicable_airports = 0;
+	for (airportidx = 0; airportidx < numairports; airportidx++) {
+		if (from_msp->ap != airports + airportidx && (airports[airportidx].missiontypes & mission_type_mask)) {
+			applicable_airports[num_applicable_airports++] = airportidx;
+		}
+	}
+
+	/*Select one of the airports.*/
+	if (num_applicable_airports == 0) {
+		logprintf("msp id %d", from_msp->id);
+		/*This func is called on boot for all missionpoints,
+		so if this ever fails it will be at boot and never at a random time.*/
+		assert(((void) "no other airport for msp", 0));
+	}
+	airportidx = 0;
+	if (num_applicable_airports > 1) {
+		airportidx = NC_random(num_applicable_airports);
+	}
+	airportidx = applicable_airports[airportidx];
+
+	/*Collect all applicable missionpoints (for the selected airport).*/
+	num_applicable_msp = 0;
+	for (mspidx = 0; mspidx < airports[airportidx].num_missionpts; mspidx++) {
+		tmp_msp = airports[airportidx].missionpoints + mspidx;
+		/*No need to check if this is the same msp, since it's a different airport.*/
+		if (tmp_msp->type & mission_type_mask) {
+			applicable_missionpoints[num_applicable_msp++] = tmp_msp;
+		}
+	}
+
+	/*If this fails it means the airport's mission type mask does not match
+	the OR'd mask of all mission points at that airport.*/
+	assert(num_applicable_msp != 0);
+
+	/*Select one.*/
+	mspidx = 0;
+	if (num_applicable_msp > 1) {
+		mspidx = NC_random(num_applicable_msp);
+	}
+	*out_msp = applicable_missionpoints[mspidx];
+
+	/*Decide on the type (since the type can still be mixed).*/
+	num_applicable_typeidx = 0;
+	for (typeidx = 0; typeidx < NUM_MISSION_TYPES; typeidx++) {
+		if (mission_type_mask & (*out_msp)->type & (1 << typeidx)) {
+			applicable_typeidx[num_applicable_typeidx++] = typeidx;
+		}
+	}
+	typeidx = 0;
+	if (num_applicable_typeidx > 1) {
+		typeidx = NC_random(num_applicable_typeidx);
+	}
+	*out_mission_typeIDX = applicable_typeidx[typeidx];
+}
+
 /**
 Makes sure every possible location of the missionpoint is set.
 
@@ -257,67 +332,11 @@ All locations are reset.
 static
 void missions_update_mission_locations(struct MISSIONPOINT *msp)
 {
-	int applicable_typeidx[NUM_MISSION_TYPES];
-	int num_applicable_typeidx;
-	int applicable_airports[MAX_AIRPORTS];
-	struct MISSIONPOINT *applicable_missionpoints[MAX_MISSIONPOINTS_PER_AIRPORT];
-	struct MISSIONPOINT *tmp_msp;
-	int num_applicable_airports, num_applicable_msp;
-	int airportidx, locationidx, mspidx, typeidx;
+	int locationidx;
 
 	for (locationidx = 0; locationidx < NUM_PRESET_MISSION_LOCATIONS; locationidx++) {
-		/*Collect all applicable airports.*/
-		num_applicable_airports = 0;
-		for (airportidx = 0; airportidx < numairports; airportidx++) {
-			if (msp->ap != airports + airportidx && (airports[airportidx].missiontypes & msp->type)) {
-				applicable_airports[num_applicable_airports++] = airportidx;
-			}
-		}
-
-		/*Select one of the airports.*/
-		if (num_applicable_airports == 0) {
-			logprintf("msp id %d", msp->id);
-			/*This func is called on boot for all missionpoints,
-			so if this ever fails it will be at boot and never at a random time.*/
-			assert(((void) "no other airport for msp", 0));
-		}
-		airportidx = 0;
-		if (num_applicable_airports > 1) {
-			airportidx = NC_random(num_applicable_airports);
-		}
-		airportidx = applicable_airports[airportidx];
-
-		/*Collect all applicable missionpoints (for the selected airport).*/
-		num_applicable_msp = 0;
-		for (mspidx = 0; mspidx < airports[airportidx].num_missionpts; mspidx++) {
-			tmp_msp = airports[airportidx].missionpoints + mspidx;
-			/*No need to check if this is the same msp, since it's a different airport.*/
-			if (tmp_msp->type & msp->type) {
-				applicable_missionpoints[num_applicable_msp++] = tmp_msp;
-			}
-		}
-
-		assert(num_applicable_airports != 0);
-
-		/*Select one.*/
-		mspidx = 0;
-		if (num_applicable_msp > 1) {
-			mspidx = NC_random(num_applicable_msp);
-		}
-		msp->missionlocations[locationidx] = applicable_missionpoints[mspidx];
-
-		/*Decide on the type (since the type can still be mixed).*/
-		num_applicable_typeidx = 0;
-		for (typeidx = 0; typeidx < NUM_MISSION_TYPES; typeidx++) {
-			if (msp->type & msp->missionlocations[locationidx]->type & (1 << typeidx)) {
-				applicable_typeidx[num_applicable_typeidx++] = typeidx;
-			}
-		}
-		typeidx = 0;
-		if (num_applicable_typeidx > 1) {
-			typeidx = NC_random(num_applicable_typeidx);
-		}
-		msp->missiontypeindices[locationidx] = applicable_typeidx[typeidx];
+		missions_get_random_destination_mission_point_and_type(
+			msp, msp->type, &msp->missionlocations[locationidx], &msp->missiontypeindices[locationidx]);
 	}
 }
 
@@ -695,15 +714,25 @@ next:
 				dx = msp->pos.x - player_x;
 				dy = msp->pos.y - player_y;
 				dz = msp->pos.z - player_z;
-				if (dx * dx + dy * dy + dz * dz < MISSION_CHECKPOINT_SIZE_SQ) {
+				if (dx * dx + dy * dy + dz * dz < MISSION_CP_RAD_SQ) {
 					if (active_msp_index[playerid] == missionpoint_indicator_index[playerid][indicatoridx]) {
 						return;
 					}
-					/*TODO: when on mission, only show text when in the destination point & text 'to unload, ..'*/
+
+					player_new_active_msp_index = missionpoint_indicator_index[playerid][indicatoridx];
+					if (activemission[playerid]) {
+						/*TODO: when on mission, only show text when in the destination point & text 'to unload, ..'*/
+						if (player_new_active_msp_index == activemission[playerid]->endpoint - missionpoints) {
+							GameTextForPlayer(playerid, 3000, 3,
+								"~w~Press ~b~~k~~CONVERSATION_YES~~w~ to unload,~n~or type ~b~/w");
+						}
+						active_msp_index[playerid] = player_new_active_msp_index;
+						return;
+					}
+
 					/*TODO: sometimes when entering/exiting vehicle, this text doesn't show even though code gets hit*/
 					GameTextForPlayer(playerid, 3000, 3,
 						"~w~Press ~b~~k~~CONVERSATION_YES~~w~ to view missions,~n~or type ~b~/w");
-					player_new_active_msp_index = missionpoint_indicator_index[playerid][indicatoridx];
 					goto active_msp_changed;
 				}
 			}
@@ -714,7 +743,7 @@ next:
 	}
 	player_new_active_msp_index = -1;
 active_msp_changed:
-	if (player_new_active_msp_index == locating_msp_index[playerid]) {
+	if (player_new_active_msp_index == locating_msp_index[playerid] && locating_msp_index[playerid] != -1) {
 		locating_msp_index[playerid] = -1;
 		DisablePlayerRaceCheckpoint(playerid);
 	}
@@ -873,11 +902,6 @@ void missions_init()
 
 	for (i = 0; i < nummissionpoints; i++) {
 		missions_update_mission_locations(&missionpoints[i]);
-	}
-
-	/*varinit*/
-	for (i = 0; i < MAX_PLAYERS; i++) {
-		activemission[i] = NULL;
 	}
 
 	/*textdraws*/
@@ -1109,146 +1133,8 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 	return tax;
 }
 
-
 /**
-Find a random endpoint for given missiontype, skipping airport of startpoint.
-
-@param startpoint may be NULL
-@return NULL on no applicable points found
-*/
-static
-struct MISSIONPOINT *missions_get_random_endpoint(int missiontype, struct MISSIONPOINT *startpoint)
-{
-	struct MISSIONPOINT *msp, **possible_missionpts;
-	struct AIRPORT *airport, **possible_airports;
-	int num_possible_airports, num_possible_missionpts;
-	int i;
-
-	if (startpoint == NULL) {
-		return NULL;
-	}
-
-	i = numairports;
-	airport = airports;
-	possible_airports = malloc(sizeof(struct AIRPORT*) * numairports);
-	num_possible_airports = 0;
-	while (i--) {
-		if ((airport->missiontypes & missiontype) &&
-			airport != startpoint->ap)
-		{
-			possible_airports[num_possible_airports++] = airport;
-		}
-		airport++;
-	}
-
-	switch (num_possible_airports) {
-	case 0: airport = NULL; break;
-	case 1: airport = possible_airports[0]; break;
-	default:
-		airport = possible_airports[NC_random(num_possible_airports)];
-		break;
-	}
-
-	free(possible_airports);
-	if (airport == NULL) {
-		return NULL;
-	}
-
-	/*got a random airport, now mission points*/
-	msp = airport->missionpoints;
-	possible_missionpts = malloc(sizeof(int*) * airport->num_missionpts);
-	num_possible_missionpts = 0;
-	for (i = airport->num_missionpts; i > 0; i--) {
-		if (msp->type & missiontype) {
-			possible_missionpts[num_possible_missionpts++] = msp;
-		}
-		msp++;
-	}
-
-	switch (num_possible_missionpts) {
-	case 0:
-		/*should not happen, since only airports that has the wanted
-		missiontype have been selected*/
-		msp = NULL;
-		break;
-	case 1:
-		msp = possible_missionpts[0];
-		break;
-	default:
-		msp = possible_missionpts[NC_random(num_possible_missionpts)];
-		break;
-	}
-	free(possible_missionpts);
-	return msp;
-}
-
-/**
-TODO REMOVE
-Find a random startpoint for given missiontype.
-
-Startpoint is chosen based on least amount of currently active missions, then
-distance.
-
-@return NULL on no applicable points found
-*/
-static
-struct MISSIONPOINT *missions_get_startpoint(int missiontype, struct vec3 *ppos)
-{
-	struct AIRPORT *airport;
-	struct MISSIONPOINT *msp, **free_missionpts;
-	float dx, dy, dz, dist, shortest_distance;
-	int i, num_free_missionpts;
-
-	shortest_distance = float_pinf;
-	airport = NULL;
-	i = numairports;
-	while (i--) {
-		if (airports[i].missiontypes & missiontype) {
-			dx = airports[i].pos.x - ppos->x;
-			dy = airports[i].pos.y - ppos->y;
-			dz = airports[i].pos.z - ppos->z;
-			dist = dx * dx + dy * dy + dz * dz;
-			if (dist < shortest_distance) {
-				shortest_distance = dist;
-				airport = airports + i;
-			}
-		}
-	}
-
-	if (airport == NULL) {
-		return NULL;
-	}
-
-	/*first select mission points with least amount of active missions*/
-	free_missionpts = malloc(sizeof(int*) * airport->num_missionpts);
-	num_free_missionpts = 0;
-	msp = airport->missionpoints;
-	for (i = airport->num_missionpts; i > 0; i--) {
-		if (msp->type & missiontype) {
-			free_missionpts[num_free_missionpts++] = msp;
-		}
-		msp++;
-	}
-
-	/*then choose the missionpoint that is the closest to the player*/
-	shortest_distance = float_pinf;
-	while (num_free_missionpts--) {
-		dx = free_missionpts[num_free_missionpts]->pos.x - ppos->x;
-		dy = free_missionpts[num_free_missionpts]->pos.y - ppos->y;
-		dz = free_missionpts[num_free_missionpts]->pos.z - ppos->z;
-		dist = dx * dx + dy * dy + dz * dz;
-		if (dist < shortest_distance) {
-			shortest_distance = dist;
-			msp = free_missionpts[num_free_missionpts];
-		}
-	}
-
-	free(free_missionpts);
-	return msp;
-}
-
-/**
-Cleanup a mission and free memory. Does not query. Does send a tracker msg.
+Cleanup a mission and free memory. Does not query. Does send a tracker msg. Resets {@code mission_stage}.
 
 Player must be on a mission or get segfault'd.
 
@@ -1273,6 +1159,8 @@ void missions_cleanup(int playerid)
 
 	free(mission);
 	activemission[playerid] = NULL;
+	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
+	number_missions_started_stopped[playerid]++;
 
 	common_GetPlayerPos(playerid, &pos);
 	kneeboard_update_all(playerid, &pos);
@@ -1336,6 +1224,7 @@ void missions_on_player_connect(int playerid)
 	mission_map_option[playerid] = 0;
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	activemission[playerid] = NULL;
+	number_missions_started_stopped[playerid]++;
 
 	NC_PARS(4);
 	nc_params[1] = playerid;
@@ -1386,7 +1275,6 @@ void missions_on_player_death(int playerid)
 			}
 		}
 		missions_end_unfinished(playerid, stopreason);
-		mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 		break;
 	}
 
@@ -1411,32 +1299,36 @@ void missions_on_player_disconnect(int playerid)
 
 struct MISSION_CB_DATA {
 	int player_cc;
-	struct MISSION *mission;
-};
-
-struct MISSION_LOAD_UNLOAD_DATA {
-	struct MISSION_CB_DATA cbdata;
-	char isload;
-	float vehiclehp;
+	int number_missions_started_stopped;
+	int query_time;
 };
 
 /**
 Starts the FLIGHT stage of the mission.
 
-This is called either by missions_cb_create or missions_after_load, which ever
-comes last (query is started when missions starts and might be ongoing during
-PRELOAD/LOAD stages).
+May be called from a timer.
 */
 static
-void missions_start_flight(int playerid, struct MISSION *mission)
+int missions_start_flight(void *data)
 {
+	struct MISSION_CB_DATA *mission_cb_data;
+	int playerid;
+	struct MISSION *mission;
 	struct vec3 pos;
 
+	mission_cb_data = (struct MISSION_CB_DATA*) data;
+	playerid = PLAYER_CC_GETID(mission_cb_data->player_cc);
+	if (!PLAYER_CC_CHECK(mission_cb_data->player_cc, playerid) ||
+		mission_cb_data->number_missions_started_stopped != number_missions_started_stopped[playerid])
+	{
+		free(mission_cb_data);
+		return TIMER_NO_REPEAT;
+	}
+
+	mission = activemission[playerid];
+
 	if (prefs[playerid] & PREF_WORK_AUTONAV) {
-		nav_navigate_to_airport(
-			mission->veh->spawnedvehicleid,
-			mission->veh->model,
-			mission->endpoint->ap);
+		nav_navigate_to_airport(playerid, mission->veh->spawnedvehicleid, mission->veh->model, mission->endpoint->ap);
 	}
 
 	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
@@ -1451,18 +1343,11 @@ void missions_start_flight(int playerid, struct MISSION *mission)
 	}
 
 	mission_stage[playerid] = MISSION_STAGE_FLIGHT;
-
-	NC_PARS(9);
-	nc_params[1] = playerid;
-	nc_params[2] = MISSION_CHECKPOINT_TYPE;
-	nc_paramf[3] = nc_paramf[6] = mission->endpoint->pos.x;
-	nc_paramf[4] = nc_paramf[7] = mission->endpoint->pos.y;
-	nc_paramf[5] = nc_paramf[8] = mission->endpoint->pos.z;
-	nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
-	NC(n_SetPlayerRaceCheckpoint);
-
+	SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &mission->endpoint->pos, MISSION_CP_RAD);
 	common_hide_gametext_for_player(playerid);
-	NC_TogglePlayerControllable(playerid, 1);
+	TogglePlayerControllable(playerid, 1);
+	common_GetPlayerPos(playerid, &pos);
+	kneeboard_update_all(playerid, &pos);
 
 	csprintf(buf144,
 	        "UPDATE flg "
@@ -1471,29 +1356,31 @@ void missions_start_flight(int playerid, struct MISSION *mission)
 	        mission->id);
 	NC_mysql_tquery_nocb(buf144a);
 
-	common_GetPlayerPos(playerid, &pos);
-	kneeboard_update_all(playerid, &pos);
+	free(mission_cb_data);
+	return TIMER_NO_REPEAT;
 }
 
 /**
 Called when mission create query has been executed.
 */
 static
-void missions_querycb_create(void* d)
+void missions_querycb_create(void *data)
 {
-	struct MISSION_CB_DATA *data;
-	struct MISSION *mission;
+	struct MISSION_CB_DATA *mission_cb_data;
 	int playerid;
+	struct MISSION *mission;
+	int loading_time_left;
 
-	data = (struct MISSION_CB_DATA*) d;
-	playerid = PLAYER_CC_GETID(data->player_cc);
-	if (!PLAYER_CC_CHECK(data->player_cc, playerid) ||
-		activemission[playerid] != data->mission)
+	mission_cb_data = (struct MISSION_CB_DATA*) data;
+	playerid = PLAYER_CC_GETID(mission_cb_data->player_cc);
+	if (!PLAYER_CC_CHECK(mission_cb_data->player_cc, playerid) ||
+		mission_cb_data->number_missions_started_stopped != number_missions_started_stopped[playerid])
 	{
-		goto ret;
+		free(mission_cb_data);
+		return;
 	}
 
-	mission = data->mission;
+	mission = activemission[playerid];
 	mission->id = NC_cache_insert_id();
 
 	/* flight tracker packet 1 */
@@ -1507,99 +1394,65 @@ void missions_querycb_create(void* d)
 	/*buf32 is len 32 * 4 so 40 is fine*/
 	NC_ssocket_send(tracker, buf32a, 40);
 
-	if (mission_stage[playerid] == MISSION_STAGE_POSTLOAD) {
-		/*loading timer already done, start flight stage*/
-		missions_start_flight(playerid, mission);
+	loading_time_left = mission_cb_data->query_time + MISSION_LOAD_UNLOAD_TIME - time_timestamp();
+	if (loading_time_left > 100) {
+		timer_set(loading_time_left, missions_start_flight, mission_cb_data);
+	} else {
+		missions_start_flight(mission_cb_data);
 	}
-
-ret:
-	free(d);
+	/*The missions_start_flight func will free the passed mission_cb_data.*/
 }
 
-static const char
-	*NOTYPES = WARN"This vehicle can't complete any type of missions!",
-	*NOMISS = WARN"There are no missions available for this type "
-		"of vehicle!",
-	*VEHUSED = WARN"This vehicle is already used in a mission!",
-	*MUSTBEDRIVER = WARN"You must be the driver of a vehicle "
-		"before starting work!";
-
 /**
-Starts a mission for given player that is in given vehicle.
+Starts a mission for given player.
 */
 static
-void missions_start_mission(int playerid)
+void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struct MISSIONPOINT *endpoint, int missiontype)
 {
 	struct MISSION_CB_DATA *cbdata;
 	struct MISSION *mission;
-	struct MISSIONPOINT *startpoint, *endpoint;
 	struct dbvehicle *veh;
-	struct vec3 ppos;
-	int vehicleid, missiontype, i;
+	struct vec3 player_position;
+	int vehicleid, i;
 	float vhp, dx, dy;
 
 	NC_PARS(1);
 	nc_params[1] = playerid;
-	if (NC(n_GetPlayerVehicleSeat) != 0) {
-		B144((char*) MUSTBEDRIVER);
-		goto err;
-	}
 	vehicleid = NC(n_GetPlayerVehicleID);
+	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL || NC(n_GetPlayerVehicleSeat) != 0) {
+		SendClientMessage(playerid, COL_WARN, WARN"You must be the driver of a vehicle ");
+		return;
+	}
 
-	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL) {
-		goto unknownvehicle;
+	if (!(missions_get_vehicle_model_msptype_mask(veh->model) & missiontype)) {
+		SendClientMessage(playerid, COL_WARN, WARN"Wrong vehicle type!");
+		return;
 	}
 
 	for (i = 0; i < playercount; i++) {
-		if ((mission = activemission[players[i]]) != NULL &&
-			mission->veh == veh)
-		{
-			B144((char*) VEHUSED);
-			goto err;
+		if ((mission = activemission[players[i]]) != NULL && mission->veh == veh) {
+			SendClientMessage(playerid, COL_WARN, WARN"This vehicle is already used in a mission!");
+			return;
 		}
 	}
 
-	switch (veh->model) {
-	case MODEL_DODO: missiontype = MISSION_TYPE_PASSENGER_S; break;
-	case MODEL_SHAMAL:
-	case MODEL_BEAGLE: missiontype = MISSION_TYPE_PASSENGER_M; break;
-	case MODEL_AT400:
-	case MODEL_ANDROM: missiontype = MISSION_TYPE_PASSENGER_L; break;
-	case MODEL_NEVADA: missiontype = MISSION_TYPE_CARGO_M; break;
-	case MODEL_MAVERICK:
-	case MODEL_VCNMAV:
-	case MODEL_RAINDANC:
-	case MODEL_LEVIATHN:
-	case MODEL_POLMAV:
-	case MODEL_SPARROW: missiontype = MISSION_TYPE_HELI; break;
-	case MODEL_HUNTER:
-	case MODEL_CARGOBOB: missiontype = MISSION_TYPE_MIL_HELI; break;
-	case MODEL_HYDRA:
-	case MODEL_RUSTLER: missiontype = MISSION_TYPE_MIL; break;
-	case MODEL_SKIMMER: missiontype = MISSION_TYPE_PASSENGER_WATER; break;
-	default:
-unknownvehicle:
-		B144((char*) NOTYPES);
-		goto err;
-	}
-
-	common_GetPlayerPos(playerid, &ppos);
-
-	startpoint = missions_get_startpoint(missiontype, &ppos);
-	endpoint = missions_get_random_endpoint(missiontype, startpoint);
-	/*endpoint will also be NULL when startpoint is NULL*/
-	if (endpoint == NULL) {
-		B144((char*) NOMISS);
-		goto err;
+	common_GetPlayerPos(playerid, &player_position);
+	dx = player_position.x - startpoint->pos.x;
+	dy = player_position.y - startpoint->pos.y;
+	if (dx * dx + dy * dy > MISSION_CP_RAD_SQ) {
+		SendClientMessage(playerid, COL_WARN, WARN"Get inside the mission point first!");
+		return;
 	}
 
 	vhp = anticheat_GetVehicleHealth(vehicleid);
+	/*TODO: if less than 300?, set to 300 (TogglePlayerControllable will do that anyways, so that'll fix cheat penalty as well*/
 
 	dx = startpoint->pos.x - endpoint->pos.x;
 	dy = startpoint->pos.y - endpoint->pos.y;
 
-	mission_stage[playerid] = MISSION_STAGE_PRELOAD;
+	mission_stage[playerid] = MISSION_STAGE_LOAD;
 	activemission[playerid] = mission = malloc(sizeof(struct MISSION));
+	number_missions_started_stopped[playerid]++;
 	mission->id = -1;
 	mission->missiontype = missiontype;
 	mission->startpoint = startpoint;
@@ -1637,23 +1490,14 @@ unknownvehicle:
 		endpoint->id,
 		mission->distance);
 	cbdata = malloc(sizeof(struct MISSION_CB_DATA));
-	cbdata->mission = mission;
 	cbdata->player_cc = MK_PLAYER_CC(playerid);
+	cbdata->number_missions_started_stopped = number_missions_started_stopped[playerid];
+	cbdata->query_time = time_timestamp();
 	common_mysql_tquery(cbuf4096_, missions_querycb_create, cbdata);
 
 	tracker_afk_packet_sent[playerid] = 0;
 
-	NC_PARS(9);
-	nc_params[1] = playerid;
-	nc_params[2] = 2;
-	nc_paramf[3] = mission->startpoint->pos.x;
-	nc_paramf[4] = mission->startpoint->pos.y;
-	nc_paramf[5] = mission->startpoint->pos.z;
-	nc_paramf[6] = nc_paramf[7] = nc_paramf[8] = 0.0f;
-	nc_paramf[9] = MISSION_CHECKPOINT_SIZE;
-	NC(n_SetPlayerRaceCheckpoint);
-
-	csprintf(buf144,
+	sprintf(cbuf144,
 		"Flight from %s (%s) %s to %s (%s) %s",
 		mission->startpoint->ap->name,
 		mission->startpoint->ap->code,
@@ -1661,48 +1505,74 @@ unknownvehicle:
 		mission->endpoint->ap->name,
 		mission->endpoint->ap->code,
 		mission->endpoint->name);
-	NC_SendClientMessage(playerid, COL_MISSION, buf144a);
+	SendClientMessage(playerid, COL_MISSION, cbuf144);
 
-	if (prefs[playerid] & PREF_WORK_AUTONAV) {
-		nav_navigate_to_airport(
-			mission->veh->spawnedvehicleid,
-			mission->veh->model,
-			mission->startpoint->ap);
-	}
-
-	kneeboard_update_all(playerid, &ppos);
-
-	return;
-err:
-	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	TogglePlayerControllable(playerid, 0);
+	GameTextForPlayer(playerid, 0x800000, 3, "~p~Loading");
+	kneeboard_update_all(playerid, &player_position);
+	locating_msp_index[playerid] = -1;
 }
 
-/**
-Called from timer callback for mission load checkpoint.
-*/
 static
-void missions_after_load(int playerid, struct MISSION *mission)
+void missions_start_mission_from_map(int playerid)
 {
-	if (mission->id != -1) {
-		/*create query finished, the mission can be started*/
-		missions_start_flight(playerid, mission);
-	} else {
-		/*otherwise missions_querycb_create will start it*/
-		mission_stage[playerid] = MISSION_STAGE_POSTLOAD;
+	struct MISSIONPOINT *startpoint, *endpoint;
+	int selected_map_option;
+	int mission_type_index;
+
+	if (active_msp_index[playerid] == -1) {
+		SendClientMessage(playerid, COL_WARN, WARN"Not in a mission point.");
+		return;
 	}
+
+	startpoint = &missionpoints[active_msp_index[playerid]];
+	selected_map_option = mission_map_option[playerid];
+	if (selected_map_option == 0) {
+		missions_get_random_destination_mission_point_and_type(
+			startpoint, missions_available_msptype_mask[playerid], &endpoint, &mission_type_index);
+	} else {
+		endpoint = startpoint->missionlocations[selected_map_option - 1];
+		mission_type_index = startpoint->missiontypeindices[selected_map_option - 1];
+	}
+	missions_start_mission(playerid, startpoint, endpoint, 1 << mission_type_index);
+	missions_update_mission_locations(startpoint);
 }
+
+struct MISSION_UNLOAD_DATA {
+	int player_cc;
+	int number_missions_started_stopped;
+	float vehiclehp;
+};
 
 /**
 Called from timer callback for mission unload checkpoint.
 */
 static
-void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
+int missions_after_unload(void *data)
 {
-	float paymp, mintime;
+	struct MISSION_UNLOAD_DATA *mission_cb_data;
+	int playerid;
+	struct MISSION *miss;
+	float vehhp, paymp, mintime;
 	int ptax, psatisfaction, pdistance, pbonus = 0, ptotal, pdamage, pcheat;
 	int totaltime, duration_h, duration_m, extra_damage_taken;
 	int i;
 	char *dlg, *dlgbase;
+
+	mission_cb_data = (struct MISSION_UNLOAD_DATA*) data;
+	playerid = PLAYER_CC_GETID(mission_cb_data->player_cc);
+	if (!PLAYER_CC_CHECK(mission_cb_data->player_cc, playerid) ||
+		mission_cb_data->number_missions_started_stopped != number_missions_started_stopped[playerid])
+	{
+		free(mission_cb_data);
+		return TIMER_NO_REPEAT;
+	}
+
+	vehhp = mission_cb_data->vehiclehp;
+	miss = activemission[playerid];
+
+	common_hide_gametext_for_player(playerid);
+	TogglePlayerControllable(playerid, 1);
 
 	pcheat = 0;
 	psatisfaction = 0;
@@ -1883,128 +1753,59 @@ void missions_after_unload(int playerid, struct MISSION *miss, float vehhp)
 	free(dlgbase);
 
 	missions_cleanup(playerid);
+
+	free(mission_cb_data);
+	return TIMER_NO_REPEAT;
 }
 
-/**
-Callback for timer set when player enters mission unload checkpoint.
-*/
 static
-int missions_after_load_unload(void *d)
+void missions_start_unload(int playerid)
 {
-	struct MISSION_LOAD_UNLOAD_DATA *data;
-	int playerid;
-
-	data = (struct MISSION_LOAD_UNLOAD_DATA*) d;
-	playerid = PLAYER_CC_GETID(data->cbdata.player_cc);
-	if (!PLAYER_CC_CHECK(data->cbdata.player_cc, playerid) ||
-		activemission[playerid] != data->cbdata.mission)
-	{
-		goto ret;
-	}
-
-	/*TODO: what if vehicle is destroyed?*/
-
-	if (data->isload) {
-		/*don't hide gametext or toggle player controllable,
-		query might still be ongoing*/
-		missions_after_load(playerid, data->cbdata.mission);
-	} else {
-		common_hide_gametext_for_player(playerid);
-		NC_TogglePlayerControllable(playerid, 1);
-		missions_after_unload(playerid,
-			data->cbdata.mission, data->vehiclehp);
-	}
-ret:
-	free(d);
-	return 0; /*non-repeating timer*/
-}
-
-int missions_on_player_enter_race_checkpoint(int playerid)
-{
-	static const char
-		*WRONGVEHICLE = WARN"You must be in the starting vehicle "
-				"to continue!",
-		*TOOFAST = WARN"You need to slow down to load/unload! "
-				"Re-enter the checkpoint.";
-
-	struct MISSION_LOAD_UNLOAD_DATA *lddata;
+	struct MISSION_UNLOAD_DATA *cbdata;
 	struct MISSION *mission;
-	struct vec3 cppos, vpos, vvel;
+	struct vec3 vvel;
 	struct dbvehicle *veh;
 	int vehicleid, vv;
 
-	if ((mission = activemission[playerid]) == NULL ||
-		NC_GetPlayerVehicleSeat(playerid) != 0)
-	{
-		return 0;
+	if (NC_GetPlayerVehicleSeat(playerid) != 0) {
+		return;
 	}
 
-	switch (mission_stage[playerid]) {
-	case MISSION_STAGE_PRELOAD: cppos = mission->startpoint->pos; break;
-	case MISSION_STAGE_FLIGHT: cppos = mission->endpoint->pos; break;
-	default: return 0;
+	mission = activemission[playerid];
+
+	if (mission == NULL) {
+		return;
 	}
 
 	vehicleid = veh_GetPlayerVehicle(playerid, &vv, &veh);
-
-	common_GetVehiclePos(vehicleid, &vpos);
-	/*this check might not be needed, but just in case the checkpoint
-	position changes...*/
-	if (common_dist_sq(cppos, vpos) >
-		MISSION_CHECKPOINT_SIZE * MISSION_CHECKPOINT_SIZE * 2.0f)
-	{
-		return 0;
-	}
-
-	if (vehicleid != mission->vehicleid ||
-		vv != mission->vehicle_reincarnation ||
-		veh->id != mission->veh->id)
-	{
-		B144((char*) WRONGVEHICLE);
-		goto reterr;
+	if (vehicleid != mission->vehicleid || vv != mission->vehicle_reincarnation || veh->id != mission->veh->id) {
+		SendClientMessage(playerid, COL_WARN, WARN"You must be in the starting vehicle to continue!");
+		return;
 	}
 
 	common_GetVehicleVelocity(vehicleid, &vvel);
-	if (common_vectorsize_sq(vvel) > MAX_UNLOAD_SPEED_SQ_VEL)
-	{
-		B144((char*) TOOFAST);
-		goto reterr;
+	/*Ignoring z velocity because it would be annoying with skimmers riding heavy waves.*/
+	if (vvel.x * vvel.x + vvel.y * vvel.y > MAX_SPEED_SQ) {
+		SendClientMessage(playerid, COL_WARN, WARN"Stop the vehicle first!");
+		return;
 	}
 
-	NC_DisablePlayerRaceCheckpoint(playerid);
-	NC_TogglePlayerControllable(playerid, 0);
+	mission_stage[playerid] = MISSION_STAGE_UNLOAD;
+	cbdata = malloc(sizeof(struct MISSION_UNLOAD_DATA));
+	cbdata->number_missions_started_stopped = number_missions_started_stopped[playerid];
+	cbdata->player_cc = MK_PLAYER_CC(playerid);
+	cbdata->vehiclehp = anticheat_GetVehicleHealth(vehicleid);
+
+	NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
+	GameTextForPlayer(playerid, 0x8000000, 3, "~p~Unloading");
+	TogglePlayerControllable(playerid, 0); /*Needs to be after getting vehicle health, it repairs the vehicle.*/
+	DisablePlayerRaceCheckpoint(playerid);
 	if (prefs[playerid] & PREF_WORK_AUTONAV) {
 		nav_reset_for_vehicle(vehicleid);
 		panel_reset_nav_for_passengers(vehicleid);
 	}
-	lddata = malloc(sizeof(struct MISSION_LOAD_UNLOAD_DATA));
-	lddata->cbdata.mission = mission;
-	lddata->cbdata.player_cc = MK_PLAYER_CC(playerid);
 
-	switch (mission_stage[playerid]) {
-	case MISSION_STAGE_PRELOAD:
-		mission_stage[playerid] = MISSION_STAGE_LOAD;
-		lddata->isload = 1;
-		B144((char*) LOADING);
-		break;
-	case MISSION_STAGE_FLIGHT:
-		mission_stage[playerid] = MISSION_STAGE_UNLOAD;
-		lddata->isload = 0;
-		lddata->vehiclehp = anticheat_GetVehicleHealth(vehicleid);
-		if (lddata->vehiclehp < 251.0f) {
-			NC_SetVehicleHealth(vehicleid, 300.0f);
-		}
-		NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
-		B144((char*) UNLOADING);
-		break;
-	}
-	NC_GameTextForPlayer(playerid, buf144a, 0x8000000, 3);
-
-	timer_set(MISSION_LOAD_UNLOAD_TIME, missions_after_load_unload, lddata);
-	return 1;
-reterr:
-	NC_SendClientMessage(playerid, COL_WARN, buf144a);
-	return 1;
+	timer_set(MISSION_LOAD_UNLOAD_TIME, missions_after_unload, cbdata);
 }
 
 void missions_on_player_state_changed(int playerid, int from, int to)
@@ -2038,14 +1839,14 @@ void missions_on_player_state_changed(int playerid, int from, int to)
 		(mission = activemission[playerid]) != NULL &&
 		mission->vehicleid == lastvehicle[playerid])
 	{
+		/*TODO: This gets hit when the vehicle explodes and player dies. Prevent that.*/
 		NC_PARS(4);
 		nc_params[1] = lastvehicle[playerid];
 		nc_params[2] = playerid;
 		nc_params[3] = 1;
 		nc_params[4] = 0;
 		NC(n_SetVehicleParamsForPlayer);
-		B144(WARN" Get back in your vehicle!");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"Get back in your vehicle!");
 	} else if (to == PLAYER_STATE_DRIVER &&
 		(mission = activemission[playerid]) != NULL &&
 		mission->vehicleid == NC_GetPlayerVehicleID(playerid))
@@ -2190,9 +1991,6 @@ int missions_cmd_mission(CMDPARAMS)
 	int vehicleid;
 
 	switch (mission_stage[playerid]) {
-	case MISSION_STAGE_HELP:
-	case MISSION_STAGE_JOBMAP:
-		return 1;
 	case MISSION_STAGE_NOMISSION:
 		if (active_msp_index[playerid] != -1) {
 			missions_jobmap_show(playerid); /*sets controllable and mission state*/
@@ -2212,7 +2010,7 @@ int missions_cmd_mission(CMDPARAMS)
 		- the player should stop completely before starting a mission*/
 		common_GetVehicleVelocity(vehicleid, &vel);
 		/*Ignoring z velocity because it would be annoying with skimmers riding heavy waves.*/
-		if (vel.x * vel.x + vel.y * vel.y > (3.0f / VEL_TO_KPH) * (3.0f / VEL_TO_KPH)) {
+		if (vel.x * vel.x + vel.y * vel.y > MAX_SPEED_SQ) {
 			SendClientMessage(playerid, COL_WARN, WARN"Stop the vehicle first!");
 			return 1;
 		}
@@ -2231,12 +2029,18 @@ int missions_cmd_mission(CMDPARAMS)
 
 		missions_jobhelp_show(playerid, msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]));
 		return 1;
-	default:
-		/*TODO: SetPlayerRaceCheckpoint again in here */
+	case MISSION_STAGE_FLIGHT:
+		if (active_msp_index[playerid] == activemission[playerid]->endpoint - missionpoints) {
+			missions_start_unload(playerid);
+			return 1;
+		}
+		SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &activemission[playerid]->endpoint->pos, MISSION_CP_RAD);
 		SendClientMessage(playerid, COL_WARN,
 			WARN"You're already working! Use /s to stop your current work first ($"EQ(MISSION_CANCEL_FINE)" fee).");
 		return 1;
 	}
+
+	return 1;
 }
 
 static
@@ -2252,11 +2056,14 @@ int missions_cmd_stoplocate(CMDPARAMS)
 static
 void missions_locate_closest_mission(int playerid)
 {
+	struct MISSIONPOINT *msp;
+	struct dbvehicle *veh;
 	struct vec3 pos;
 	int mspindex;
 	int closest_index;
 	float dx, dy;
 	float closest_distance_sq, distance_sq;
+	int vehicleid;
 
 	common_GetPlayerPos(playerid, &pos);
 	closest_index = -1;
@@ -2277,7 +2084,11 @@ void missions_locate_closest_mission(int playerid)
 		SendClientMessage(playerid, COL_WARN, WARN"No mission points available for this vehicle.");
 	} else {
 		locating_msp_index[playerid] = closest_index;
-		SetPlayerRaceCheckpointNoDirection(playerid, RACE_CP_TYPE_NORMAL, &missionpoints[closest_index].pos, 11.0f);
+		msp = &missionpoints[closest_index];
+		SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &msp->pos, MISSION_CP_RAD);
+		if ((vehicleid = NC_GetPlayerVehicleID(playerid)) && (veh = gamevehicles[vehicleid].dbvehicle)) {
+			nav_navigate_to_airport(playerid, veh->spawnedvehicleid, veh->model, msp->ap);
+		}
 	}
 }
 
@@ -2324,10 +2135,16 @@ void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 		} else if (KEY_JUST_DOWN(KEY_SPRINT)) {
 			PlayerPlaySound(playerid, 1083);
 			missions_jobmap_hide(playerid); /*sets controllable and mission state*/
-			/*TODO: START MISSION (doublecheck vehicle and player position first!!)*/
+			missions_start_mission_from_map(playerid);
 		}
-	} else if (mission_stage[playerid] == MISSION_STAGE_NOMISSION && KEY_JUST_DOWN(KEY_YES) && active_msp_index[playerid] != -1) {
-		missions_jobmap_show(playerid); /*sets controllable and mission state*/
+	} else if (KEY_JUST_DOWN(KEY_YES) && active_msp_index[playerid] != -1) {
+		if (mission_stage[playerid] == MISSION_STAGE_NOMISSION) {
+			missions_jobmap_show(playerid); /*sets controllable and mission state*/
+		} else if (mission_stage[playerid] == MISSION_STAGE_FLIGHT &&
+			active_msp_index[playerid] == activemission[playerid]->endpoint - missionpoints)
+		{
+			missions_start_unload(playerid);
+		}
 	}
 }
 
@@ -2436,13 +2253,13 @@ static
 int missions_format_kneeboard_info_text(int playerid, char *dest)
 {
 	if (mission_stage[playerid] > MISSION_STAGE_LOAD) {
-		sprintf(dest, "~w~Flight from ~r~%s~w~ to %s.",
+		sprintf(dest,
+			"~w~Flight from %s to ~r~%s~w~.",
 			activemission[playerid]->startpoint->ap->name,
 			activemission[playerid]->endpoint->ap->name);
 		return 1;
 	} else if (mission_stage[playerid] >= MISSION_STAGE_PRELOAD) {
-		sprintf(dest,
-			"~w~Flight from %s to ~r~%s~w~.",
+		sprintf(dest, "~w~Flight from ~r~%s~w~ to %s.",
 			activemission[playerid]->startpoint->ap->name,
 			activemission[playerid]->endpoint->ap->name);
 		return 1;

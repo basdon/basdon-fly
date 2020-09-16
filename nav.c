@@ -523,9 +523,7 @@ int nav_get_active_type(int vehicleid)
 	return NAV_NONE;
 }
 
-void nav_navigate_to_airport(
-	int vehicleid, int vehiclemodel,
-	struct AIRPORT *ap)
+void nav_navigate_to_airport(int playerid, int vehicleid, int vehiclemodel, struct AIRPORT *ap)
 {
 	struct vec3 vpos;
 	struct RUNWAY *rw, *closestrw;
@@ -553,6 +551,8 @@ void nav_navigate_to_airport(
 		}
 		if (closestrw != NULL) {
 			nav_enable(vehicleid, NULL, closestrw);
+			sprintf(cbuf144, "Navigation set to %s runway %s", ap->code, closestrw->id);
+			SendClientMessage(playerid, COL_SAMP_GREY, cbuf144);
 			return;
 		}
 	} else if (game_is_heli(vehiclemodel)) {

@@ -32,9 +32,10 @@ Set given vehicle's navigation to given airport.
 
 Navigation target is decided by the runway or heliport (decision based on
 given vehiclemodel) that is the closest to the vehicle.
+When target is a runway, player will be notified of which runway the VOR is tuned into.
 When no target is found, airport's ADF beacon will be used.
 */
-void nav_navigate_to_airport(int vid, int vmodel, struct AIRPORT *ap);
+void nav_navigate_to_airport(int playerid, int vid, int vmodel, struct AIRPORT *ap);
 /**
 Reset cache so textdraws will be updated next timer tick.
 */
