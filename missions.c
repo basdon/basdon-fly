@@ -2,7 +2,7 @@
 
 #define MAX_SPEED_SQ ((3.0f / VEL_TO_KPH) * (3.0f / VEL_TO_KPH))
 
-const static char *SATISFACTION_TEXT_FORMAT = "Passenger~n~Satisfaction: %d%%";
+static struct TEXTDRAW td_satisfaction = { "textdraw", 50, 0, NULL };
 
 /**
 Keeps track how much missions a playerid has started and/or stopped (number increased on mission start AND stop).
@@ -88,10 +88,6 @@ static char tracker_afk_packet_sent[MAX_PLAYERS];
 Tracker socket handle.
 */
 static int tracker;
-/**
-Player textdraw handles for passenger satisfaction indicator.
-*/
-static int ptxt_satisfaction[MAX_PLAYERS];
 
 #define NUM_HELP_TEXTDRAWS (17)
 static struct TEXTDRAW td_jobhelp_keyhelp = { "keyhelp", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
@@ -905,6 +901,8 @@ void missions_init()
 	}
 
 	/*textdraws*/
+	textdraws_load_from_file("jobsatisfaction", TEXTDRAW_JOBSATISFACTION, 1, &td_satisfaction);
+
 	textdraws_load_from_file("jobhelp", TEXTDRAW_MISSIONHELP_BASE, NUM_HELP_TEXTDRAWS,
 		/*remember to free their rpcdata in missions_dispose*/
 		&td_jobhelp_keyhelp, &td_jobhelp_header, &td_jobhelp_optsbg,
@@ -1154,7 +1152,7 @@ void missions_cleanup(int playerid)
 	NC_ssocket_send(tracker, buf32a, 8);
 
 	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
-		NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
+		textdraws_hide_consecutive(playerid, 1, TEXTDRAW_JOBSATISFACTION);
 	}
 
 	free(mission);
@@ -1225,29 +1223,6 @@ void missions_on_player_connect(int playerid)
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	activemission[playerid] = NULL;
 	number_missions_started_stopped[playerid]++;
-
-	NC_PARS(4);
-	nc_params[1] = playerid;
-	nc_paramf[2] = 88.0f;
-	nc_paramf[3] = 425.0f;
-	nc_params[4] = underscorestringa;
-	nc_params[2] = NC(n_CreatePlayerTextDraw);
-	ptxt_satisfaction[playerid] = nc_params[2];
-	nc_paramf[3] = 0.3f;
-	nc_paramf[4] = 1.0f;
-	NC(n_PlayerTextDrawLetterSize);
-
-	NC_PARS(3);
-	nc_params[3] = 255;
-	NC(n_PlayerTextDrawBackgroundColor);
-	nc_params[3] = 2;
-	NC(n_PlayerTextDrawAlignment);
-	nc_params[3] = 1;
-	NC(n_PlayerTextDrawFont);
-	NC(n_PlayerTextDrawSetProportional);
-	NC(n_PlayerTextDrawSetOutline);
-	nc_params[3] = -1;
-	NC(n_PlayerTextDrawColor);
 }
 
 void missions_on_player_death(int playerid)
@@ -1297,6 +1272,12 @@ void missions_on_player_disconnect(int playerid)
 	}
 }
 
+static
+int missions_format_satisfaction_text(int satisfaction, char *out_buf)
+{
+	return sprintf(out_buf, "Passenger~n~Satisfaction: %d%%", satisfaction);
+}
+
 struct MISSION_CB_DATA {
 	int player_cc;
 	int number_missions_started_stopped;
@@ -1332,14 +1313,8 @@ int missions_start_flight(void *data)
 	}
 
 	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
-		csprintf(buf32, SATISFACTION_TEXT_FORMAT, 100);
-		NC_PARS(3);
-		nc_params[1] = playerid;
-		nc_params[2] = ptxt_satisfaction[playerid];
-		nc_params[3] = buf32a;
-		NC(n_PlayerTextDrawSetString);
-		NC_PARS(2);
-		NC(n_PlayerTextDrawShow);
+		td_satisfaction.rpcdata->text_length = missions_format_satisfaction_text(100, td_satisfaction.rpcdata->text);
+		textdraws_show(playerid, 1, &td_satisfaction);
 	}
 
 	mission_stage[playerid] = MISSION_STAGE_FLIGHT;
@@ -1796,7 +1771,7 @@ void missions_start_unload(int playerid)
 	cbdata->player_cc = MK_PLAYER_CC(playerid);
 	cbdata->vehiclehp = anticheat_GetVehicleHealth(vehicleid);
 
-	NC_PlayerTextDrawHide(playerid, ptxt_satisfaction[playerid]);
+	textdraws_hide_consecutive(playerid, 1, TEXTDRAW_JOBSATISFACTION);
 	GameTextForPlayer(playerid, 0x8000000, 3, "~p~Unloading");
 	TogglePlayerControllable(playerid, 0); /*Needs to be after getting vehicle health, it repairs the vehicle.*/
 	DisablePlayerRaceCheckpoint(playerid);
@@ -2222,8 +2197,11 @@ void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
 		}
 
 		if (last_satisfaction != miss->passenger_satisfaction) {
-			csprintf(buf32, SATISFACTION_TEXT_FORMAT, miss->passenger_satisfaction);
-			NC_PlayerTextDrawSetString(pid, ptxt_satisfaction[pid], buf32a);
+			rpcdata_freeform.word[0] = td_satisfaction.rpcdata->textdrawid;
+			rpcdata_freeform.word[1] = missions_format_satisfaction_text(miss->passenger_satisfaction, &rpcdata_freeform.byte[4]);
+			bitstream_freeform.ptrData = &rpcdata_freeform;
+			bitstream_freeform.numberOfBitsUsed = (2 + 2 + rpcdata_freeform.word[1]) * 8;
+			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, pid, 2);
 		}
 	}
 }
