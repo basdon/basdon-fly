@@ -50,8 +50,9 @@ If an airport has more, they are probably split out enough anyways.*/
 /*Ids 0-2047 are global TDs, ids 2048-2303 are player TDs.*/
 /*Drawing order is .. questionable and TBD.*/
 
+/*TODO lower these ids again when all textdraws are converted*/
 #define TEXTDRAW_GPS (1999)
-#define TEXTDRAW_MISSIONHELP_BASE (2000)
+#define TEXTDRAW_MISSIONHELP_BASE (2250)
 /*Missionmap: using same base as missionhelp, since they can't show at the same time anyways.*/
 #define TEXTDRAW_MISSIONMAP_BASE TEXTDRAW_MISSIONHELP_BASE
 #define NUM_KNEEBOARD_TEXTDRAWS (3)
