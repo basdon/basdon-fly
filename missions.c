@@ -2253,16 +2253,14 @@ static
 int missions_format_kneeboard_info_text(int playerid, char *dest)
 {
 	if (mission_stage[playerid] > MISSION_STAGE_LOAD) {
-		sprintf(dest,
-			"~w~Flight from %s to ~r~%s~w~.",
+		return sprintf(dest, "~w~Flight from %s to ~r~%s~w~.",
 			activemission[playerid]->startpoint->ap->name,
 			activemission[playerid]->endpoint->ap->name);
-		return 1;
 	} else if (mission_stage[playerid] >= MISSION_STAGE_PRELOAD) {
-		sprintf(dest, "~w~Flight from ~r~%s~w~ to %s.",
+		return sprintf(dest, "~w~Flight from ~r~%s~w~ to %s.",
 			activemission[playerid]->startpoint->ap->name,
 			activemission[playerid]->endpoint->ap->name);
-		return 1;
+	} else {
+		return sprintf(dest, "%s", "~w~Not on a job, type ~y~/w~w~ to start working.");
 	}
-	return 0;
 }

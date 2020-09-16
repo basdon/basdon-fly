@@ -70,9 +70,6 @@ void kneeboard_update_distance(int playerid, struct vec3 *playerpos)
 static
 void kneeboard_update_all(int playerid, struct vec3 *playerpos)
 {
-	int len;
-	char info_text[200];
-
 	if (!KNEEBOARD_SHOULD_SHOW(playerid)) {
 		if (kneeboard_is_shown[playerid]) {
 			textdraws_hide_consecutive(playerid, TEXTDRAW_KNEEBOARD_BASE, 3);
@@ -80,11 +77,6 @@ void kneeboard_update_all(int playerid, struct vec3 *playerpos)
 		}
 		return;
 	}
-
-	if (!missions_format_kneeboard_info_text(playerid, info_text)) {
-		strcpy(info_text, "~w~Not on a job, type ~y~/w~w~ to start working.");
-	}
-	td_kb_info.rpcdata->text_length = sprintf(td_kb_info.rpcdata->text, "%s", info_text);
 
 	kneeboard_last_distance[playerid] = -2; /*To force update when calling kneeboard_format_distance below.*/
 
@@ -95,15 +87,14 @@ void kneeboard_update_all(int playerid, struct vec3 *playerpos)
 		bitstream_freeform.numberOfBitsUsed = (2 + 2 + rpcdata_freeform.word[1]) * 8;
 		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, playerid, 2);
 
-		len = td_kb_info.rpcdata->text_length;
 		rpcdata_freeform.word[0] = td_kb_info.rpcdata->textdrawid;
-		rpcdata_freeform.word[1] = len;
-		memcpy(&rpcdata_freeform.word[2], td_kb_info.rpcdata->text, len);
+		rpcdata_freeform.word[1] = missions_format_kneeboard_info_text(playerid, &rpcdata_freeform.byte[4]);
 		bitstream_freeform.ptrData = &rpcdata_freeform;
-		bitstream_freeform.numberOfBitsUsed = (2 + 2 + len) * 8;
+		bitstream_freeform.numberOfBitsUsed = (2 + 2 + rpcdata_freeform.word[1]) * 8;
 		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, playerid, 2);
 	} else {
 		td_kb_distance.rpcdata->text_length = kneeboard_format_distance(playerid, playerpos, td_kb_distance.rpcdata->text);
+		td_kb_info.rpcdata->text_length = missions_format_kneeboard_info_text(playerid, td_kb_info.rpcdata->text);
 
 		textdraws_show(playerid, 3, &td_kb_header, &td_kb_info, &td_kb_distance);
 		kneeboard_is_shown[playerid] = 1;
