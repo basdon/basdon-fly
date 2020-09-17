@@ -143,7 +143,7 @@ void textdraws_show(int playerid, int num, ...)
 	va_start(va, num);
 	while (num--) {
 		td = va_arg(va, struct TEXTDRAW*);
-		bitstream_freeform.numberOfBitsUsed = td->rpcsize * 8;
+		bitstream_freeform.numberOfBitsUsed = (sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->rpcdata->text_length) * 8;
 		bitstream_freeform.ptrData = td->rpcdata;
 		SAMP_SendRPCToPlayer(RPC_ShowTextDraw, &bitstream_freeform, playerid, 2);
 	}
