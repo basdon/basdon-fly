@@ -33,30 +33,6 @@ Holds player textdraw id of the vehicle panel speedo.
 */
 static int ptxt_speedo[MAX_PLAYERS];
 /**
-Holds global textdraw id of the vehicle panel background.
-*/
-static int txt_bg;
-/**
-holds player textdraw id of the vehicle panel text, -1 if not created.
-*/
-static int ptxt_txt[MAX_PLAYERS];
-/**
-Holds player textdraw id of the fuel level bar text, -1 if not created.
-*/
-static int ptxt_fl[MAX_PLAYERS];
-/**
-Holds player textdraw id of the health bar text, -1 if not created.
-*/
-static int ptxt_hp[MAX_PLAYERS];
-/**
-Last fuel value that was shown to a player.
-*/
-static short ptxtcache_fl[MAX_PLAYERS];
-/**
-Last health value that was shown to a player.
-*/
-static short ptxtcache_hp[MAX_PLAYERS];
-/**
 Last vehicle position for player (when driver), for ODO purposes.
 
 To be inited in veh_on_player_now_driving and updated on ODO update.
@@ -1040,132 +1016,6 @@ void veh_on_vehicle_stream_out(int vehicleid, int forplayerid)
 	veh_owner_label_destroy(vehicleid, forplayerid);
 }
 
-/**
-Updates vehicle panel for a single player.
-*/
-static
-void veh_update_panel_for_player(int playerid)
-{
-	struct dbvehicle *veh;
-	int vehicleid;
-	float odo, hp, fuel;
-	short cache;
-
-	vehicleid = NC_GetPlayerVehicleID(playerid);
-	if (!vehicleid) {
-		return;
-	}
-
-	veh = gamevehicles[vehicleid].dbvehicle;
-	if (veh != NULL) {
-		odo = veh->odoKM;
-		fuel = veh->fuel;
-		fuel /= model_fuel_capacity(veh->model);
-	} else {
-		fuel = odo = 0.0f;
-	}
-
-	hp = anticheat_GetVehicleHealth(vehicleid);
-	hp -= 250.0f;
-	if (hp < 0.0f) {
-		hp = 0.0f;
-	} else {
-		hp /= 750.0f;
-	}
-
-	sprintf(cbuf64,
-		"ODO %08.0f~n~_FL i-------i~n~_HP i-------i",
-		odo);
-	if (time_m % 2) {
-		if (fuel < 0.2f) {
-			cbuf64[16] = '_';
-			cbuf64[17] = '_';
-		}
-		if (hp < 0.2f) {
-			cbuf64[32] = '_';
-			cbuf64[33] = '_';
-		}
-	}
-	B144(cbuf64);
-	NC_PARS(3);
-	nc_params[1] = playerid;
-	nc_params[2] = ptxt_txt[playerid];
-	nc_params[3] = buf144a;
-	NC(n_PlayerTextDrawSetString);
-
-	cache = (short) (fuel * 100.0f);
-	if (ptxtcache_fl[playerid] != cache) {
-		ptxtcache_fl[playerid] = cache;
-		NC_PARS(2);
-		nc_params[1] = playerid;
-		nc_params[2] = ptxt_fl[playerid];
-		NC(n_PlayerTextDrawDestroy);
-
-		buf144[0] = 'i';
-		buf144[1] = 0;
-		NC_PARS(4);
-		nc_params[1] = playerid;
-		nc_paramf[2] = 555.0f + (608.0f - 555.0f) * fuel;
-		nc_paramf[3] = 413.0f;
-		nc_params[4] = buf144a;
-		ptxt_fl[playerid] = NC(n_CreatePlayerTextDraw);
-
-		nc_params[2] = ptxt_fl[playerid];
-		nc_paramf[3] = 0.25f;
-		nc_paramf[4] = 1.0f;
-		NC(n_PlayerTextDrawLetterSize);
-
-		NC_PARS(3);
-		nc_params[3] = 0xFF00FFFF;
-		NC(n_PlayerTextDrawColor);
-		NC(n_PlayerTextDrawBackgroundColor);
-		nc_params[3] = 1,
-		NC(n_PlayerTextDrawSetOutline);
-		NC(n_PlayerTextDrawSetProportional);
-		nc_params[3] = 2;
-		NC(n_PlayerTextDrawFont);
-
-		NC_PARS(2);
-		NC(n_PlayerTextDrawShow);
-	}
-
-	cache = (short) (hp * 100.0f);
-	if (ptxtcache_hp[playerid] != cache) {
-		ptxtcache_hp[playerid] = cache;
-		NC_PARS(2);
-		nc_params[1] = playerid;
-		nc_params[2] = ptxt_hp[playerid];
-		NC(n_PlayerTextDrawDestroy);
-
-		buf144[0] = 'i';
-		buf144[1] = 0;
-		NC_PARS(4);
-		nc_params[1] = playerid;
-		nc_paramf[2] = 555.0f + (608.0f - 555.0f) * hp;
-		nc_paramf[3] = 422.0f;
-		nc_params[4] = buf144a;
-		ptxt_hp[playerid] = NC(n_CreatePlayerTextDraw);
-
-		nc_params[2] = ptxt_hp[playerid];
-		nc_paramf[3] = 0.25f;
-		nc_paramf[4] = 1.0f;
-		NC(n_PlayerTextDrawLetterSize);
-
-		NC_PARS(3);
-		nc_params[3] = 0xFF00FFFF;
-		NC(n_PlayerTextDrawColor);
-		NC(n_PlayerTextDrawBackgroundColor);
-		nc_params[3] = 1,
-		NC(n_PlayerTextDrawSetOutline);
-		NC(n_PlayerTextDrawSetProportional);
-		nc_params[3] = 2;
-		NC(n_PlayerTextDrawFont);
-
-		NC_PARS(2);
-		NC(n_PlayerTextDrawShow);
-	}
-}
-
 void veh_on_player_state_change(int playerid, int from, int to)
 {
 	struct dbvehicle *veh;
@@ -1180,56 +1030,21 @@ void veh_on_player_state_change(int playerid, int from, int to)
 			vehiclemodel = NC_GetVehicleModel(vehicleid);
 		}
 
-		buf144[0] = '_';
-		buf144[1] = 0;
-		NC_PARS(4);
-		nc_params[1] = playerid;
-		nc_paramf[2] = -10.0f;
-		nc_paramf[3] = -10.0f;
-		nc_params[4] = buf144a;
-		ptxt_hp[playerid] = NC(n_CreatePlayerTextDraw);
-		ptxt_fl[playerid] = NC(n_CreatePlayerTextDraw);
-
-		NC_PARS(2);
-		nc_params[2] = txt_bg;
-		NC(n_TextDrawShowForPlayer);
-		nc_params[2] = ptxt_txt[playerid];
-		NC(n_PlayerTextDrawShow);
-
 		if (veh != NULL && !game_is_air_vehicle(veh->model)) {
+			NC_PARS(2);
+			nc_params[1] = playerid;
 			nc_params[2] = ptxt_speedo[playerid];
 			NC(n_PlayerTextDrawShow);
 		}
-
-		ptxtcache_fl[playerid] = -1;
-		ptxtcache_hp[playerid] = -1;
-
-		veh_update_panel_for_player(playerid);
 	} else {
 		vehicleid = -1;
 		veh = NULL;
 		vehiclemodel = 400;
 
-		if (ptxt_fl[playerid] != -1 /*if panel active*/) {
-			NC_PARS(2);
-			nc_params[1] = playerid;
-			nc_params[2] = txt_bg;
-			NC(n_TextDrawHideForPlayer);
-			nc_params[2] = ptxt_txt[playerid];
-			NC(n_PlayerTextDrawHide);
-			nc_params[2] = ptxt_speedo[playerid];
-			NC(n_PlayerTextDrawHide);
-			nc_params[2] = ptxt_fl[playerid];
-			NC(n_PlayerTextDrawDestroy);
-			nc_params[2] = ptxt_hp[playerid];
-			NC(n_PlayerTextDrawDestroy);
-
-			ptxt_fl[playerid] = -1;
-			ptxt_hp[playerid] = -1;
-
-			ptxtcache_fl[playerid] = -1;
-			ptxtcache_hp[playerid] = -1;
-		}
+		NC_PARS(2);
+		nc_params[1] = playerid;
+		nc_params[2] = ptxt_speedo[playerid];
+		NC(n_PlayerTextDrawHide);
 	}
 
 	if (to == PLAYER_STATE_DRIVER) {
@@ -1266,17 +1081,6 @@ void veh_on_player_state_change(int playerid, int from, int to)
 	}
 }
 
-void veh_timed_panel_update()
-{
-	int n = playercount;
-
-	while (n--) {
-		if (spawned[players[n]]) {
-			veh_update_panel_for_player(players[n]);
-		}
-	}
-}
-
 void veh_timed_speedo_update()
 {
 	struct dbvehicle *veh;
@@ -1307,26 +1111,16 @@ void veh_timed_speedo_update()
 
 void veh_create_player_textdraws(int playerid)
 {
-	ptxt_fl[playerid] = ptxt_hp[playerid] = -1;
-
 	/*create em first*/
 	NC_PARS(4);
 	nc_params[1] = playerid;
-	nc_paramf[2] = 528.0f;
-	nc_paramf[3] = 404.0f;
-	nc_params[4] = buf144a;
-	B144("ODO 00000000~n~_FL i-------i~n~_HP i-------i");
-	ptxt_txt[playerid] = NC(n_CreatePlayerTextDraw);
 	nc_paramf[2] = 615.0f;
 	nc_paramf[3] = 380.0f;
+	nc_params[4] = buf144a;
 	B144("0");
 	ptxt_speedo[playerid] = NC(n_CreatePlayerTextDraw);
 
 	/*letter sizes*/
-	nc_params[2] = ptxt_txt[playerid];
-	nc_paramf[3] = 0.25f;
-	nc_paramf[4] = 1.0f;
-	NC(n_PlayerTextDrawLetterSize);
 	nc_params[2] = ptxt_speedo[playerid];
 	nc_paramf[3] = 0.5f;
 	nc_paramf[4] = 1.5f;
@@ -1334,16 +1128,6 @@ void veh_create_player_textdraws(int playerid)
 
 	NC_PARS(3);
 	/*rest*/
-	nc_params[2] = ptxt_txt[playerid];
-	nc_params[3] = -1;
-	NC(n_PlayerTextDrawColor);
-	nc_params[3] = 0,
-	NC(n_PlayerTextDrawSetOutline);
-	NC(n_PlayerTextDrawSetProportional);
-	NC(n_PlayerTextDrawSetShadow);
-	nc_params[3] = 2;
-	NC(n_PlayerTextDrawFont);
-
 	nc_params[2] = ptxt_speedo[playerid];
 	nc_params[3] = -1;
 	NC(n_PlayerTextDrawColor);
@@ -1354,29 +1138,4 @@ void veh_create_player_textdraws(int playerid)
 	nc_params[3] = 3;
 	NC(n_PlayerTextDrawFont);
 	NC(n_PlayerTextDrawAlignment);
-}
-
-void veh_create_global_textdraws()
-{
-	NC_PARS(3);
-	nc_paramf[1] = 570.0f;
-	nc_paramf[2] = 405.0f;
-	nc_params[3] = buf144a;
-	B144("~n~~n~~n~");
-	txt_bg = NC(n_TextDrawCreate);
-	nc_params[1] = txt_bg;
-	nc_paramf[2] = 0.5f;
-	nc_paramf[3] = 1.0f;
-	NC(n_TextDrawLetterSize);
-	nc_paramf[2] = 30.0f;
-	nc_paramf[3] = 90.0f;
-	NC(n_TextDrawTextSize);
-	NC_PARS(2);
-	nc_params[2] = 0x00000077; /*should be same as PANEL_BG*/
-	NC(n_TextDrawBoxColor);
-	nc_params[2] = 1;
-	NC(n_TextDrawFont);
-	NC(n_TextDrawUseBox);
-	nc_params[2] = 2;
-	NC(n_TextDrawAlignment);
 }

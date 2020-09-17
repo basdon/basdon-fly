@@ -29,6 +29,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/vdamage", GROUPS_ALL, cmd_dev_vdamage },
 	{ 0, "/vehrespawn", GROUPS_ALL, cmd_dev_vehrespawn },
 	{ 0, "/vhp", GROUPS_ALL, cmd_dev_vhp },
+	{ 0, "/vfl", GROUPS_ALL, cmd_dev_vfl },
 	{ 0, "/vhpnan", GROUPS_ALL, cmd_dev_vhpnan },
 	{ 0, "/vhpninf", GROUPS_ALL, cmd_dev_vhpninf },
 	{ 0, "/vhppinf", GROUPS_ALL, cmd_dev_vhppinf },

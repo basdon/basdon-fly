@@ -203,20 +203,18 @@ struct SYNCDATA_Driver {
 	/*two extra bits for YES/NO keys*/
 	char additional_keys : 2;
 	char siren_state;
-	char landing_gear_state; /*0 down 1 up*/
+	char landing_gear_state; /*0 down 1 up (or transitioning)*/
 	short trailer_id;
 	int misc; /*data depending on vehicle model*/
 };
 EXPECT_SIZE(struct SYNCDATA_Driver, 1 + 2 + 2 + 2 + 2 + 16 + 12 + 12 + 4 + 1 + 1 + 1 + 1 + 1 + 2 + 4);
 
-static struct BitStream bitstream_freeform;
-static union {
-	char byte[1000];
-	short word[500];
-	int dword[250];
-} rpcdata_freeform;
-EXPECT_SIZE(rpcdata_freeform, 1000);
+#define UNION_FREEFORM_RPCDATA(SIZE) union{char byte[SIZE];short word[SIZE/2];int dword[SIZE/4];}
 #pragma pack()
+
+static struct BitStream bitstream_freeform;
+static UNION_FREEFORM_RPCDATA(1000) rpcdata_freeform;
+EXPECT_SIZE(rpcdata_freeform, 1000);
 
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,unk) \
 	((void (*)(void*,void*,struct BitStream*,short,int))0x80AC1D0)((void*)samp_pNetGame,(void*)pRPC,pBS,playerid,unk)

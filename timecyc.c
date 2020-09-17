@@ -630,6 +630,10 @@ void timecyc_tick()
 			if (++time_h >= 24) {
 				time_h = 0;
 			}
+
+			if (time_h == PANEL_NIGHT_COLORS_FROM_HR || time_h == PANEL_NIGHT_COLORS_TO_HR) {
+				panel_day_night_changed();
+			}
 			/*timer1m*/
 timer30s:
 			/*timer30s*/
@@ -643,7 +647,6 @@ timer30s:
 		NC_SendRconCommand(buf144a);
 		/*timer1000*/
 		veh_timed_1s_update();
-		veh_timed_panel_update();
 
 		idx = playercount;
 		while (idx--) {
@@ -741,6 +744,7 @@ int cmd_dev_timex(CMDPARAMS)
 		time_h = h;
 		time_m = m;
 		NC_SetPlayerTime(playerid, h, m);
+		panel_day_night_changed();
 	}
 	return 1;
 }

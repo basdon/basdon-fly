@@ -6,6 +6,7 @@ static const char *protips[] = {
 #ifndef MISSION_CANCEL_FINE
 #error need MISSION_CANCE_FINE
 #endif
+	"Pro Tip: Don't like the aviation panel night colors? Disable it in /p(references).",
 	"Pro Tip: Use /w(ork) to find a mission. /s(top) to cancel your mission ($"EQ(MISSION_CANCEL_FINE)" fee).",
 	"Pro Tip: Use /nearest to get a list of all airports, sorted by proximity!",
 	"Pro Tip: Enable navigation with /adf [beacon] or /vor [beacon][runway]",

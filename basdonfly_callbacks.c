@@ -239,13 +239,11 @@ exit:
 	maps_init();
 	missions_create_tracker_socket();
 	missions_init(); /*airports_init() must be called first, to initialize missionpoints*/
-	panel_on_gamemode_init();
 	playerstats_init();
 	protips_init();
 	spawn_init(); /*MUST run after airports_init*/
 	svp_init();
 	timecyc_init();
-	veh_create_global_textdraws();
 	veh_init();
 
 	B144("basdon-fly "VERSION);

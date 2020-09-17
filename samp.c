@@ -1,6 +1,8 @@
 #ifndef SAMP_NATIVES_IMPL
 
 static int samp_pNetGame;
+static unsigned char vehicle_gear_state[MAX_VEHICLES];
+static int vehicle_gear_change_time[MAX_VEHICLES];
 
 static
 void SetPlayerRaceCheckpointNoDir(int playerid, int type, struct vec3 *pos, float radius)
@@ -325,14 +327,20 @@ static char drive_udkeystate[MAX_PLAYERS];
 void hook_OnDriverSync(int playerid, struct SYNCDATA_Driver *data)
 {
 	/*TODO reset these keystate variables when player gets into the drive state?*/
-	int keys;
+	int oldkeys, newkeys;
 
-	keys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF;
+	newkeys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF;
+
+	vehicle_gear_state[data->vehicle_id] = data->landing_gear_state;
 
 	/*keystate change*/
-	if (drive_keystates[playerid] != keys) {
-		missions_driversync_keystate_change(playerid, drive_keystates[playerid], keys);
-		drive_keystates[playerid] = keys;
+	oldkeys = drive_keystates[playerid];
+	if (oldkeys != newkeys) {
+		if (KEY_JUST_DOWN(KEY_SUBMISSION)) {
+			vehicle_gear_change_time[data->vehicle_id] = time_timestamp();
+		}
+		missions_driversync_keystate_change(playerid, oldkeys, newkeys);
+		drive_keystates[playerid] = newkeys;
 	}
 
 	/*up/down keystate change*/

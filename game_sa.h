@@ -1,5 +1,6 @@
 #define PLANE 0x1
 #define HELI 0x2
+#define RETRACTABLE_GEAR 0x4
 
 /**
 Some mapping, every air vehicle has a unique value 0-22, -1 for others

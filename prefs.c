@@ -35,6 +35,8 @@ void prefs_show_dialog(int playerid)
 	bp = prefs_append_pref(bp, "Mission Messages", p & PREF_SHOW_MISSION_MSGS);
 	bp = prefs_append_pref(bp, "Show GPS", p & PREF_SHOW_GPS);
 	bp = prefs_append_pref(bp, "Auto engage nav when working", p & PREF_WORK_AUTONAV);
+	bp = prefs_append_pref(bp, "Aviation panel night colors ("
+		EQ(PANEL_NIGHT_COLORS_FROM_HR)"h-"EQ(PANEL_NIGHT_COLORS_TO_HR)"h)", p & PREF_PANEL_NIGHTCOLORS);
 	*(--bp) = 0;
 
 	dialog_ShowPlayerDialog(
@@ -62,12 +64,16 @@ void prefs_on_dialog_response(int playerid, int response, int idx)
 
 	/*must be same order the calls to prefs_append_pref in
 	prefs_cmd_preferences*/
-	if (response && 0 <= idx && idx <= 3) {
+	if (response && 0 <= idx && idx <= 4) {
 		val = 1 << idx;
 		prefs[playerid] ^= val;
 		if (val == PREF_SHOW_GPS) {
 			common_GetPlayerPos(playerid, &pos);
 			zones_update(playerid, pos);
+		} else if (val == PREF_PANEL_NIGHTCOLORS) {
+			if (panel_is_active_for(playerid)) {
+				panel_reshow(playerid);
+			}
 		}
 		prefs_show_dialog(playerid);
 	}

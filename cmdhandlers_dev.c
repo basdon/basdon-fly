@@ -248,17 +248,66 @@ int cmd_dev_vehrespawn(CMDPARAMS)
 }
 
 /**
-The /vhp command prints the hp of the player's vehicle.
+/vhp [set_hp]
+When hp_percent present, set the hp.
+Prints the hp of the player's vehicle.
 */
 static
 int cmd_dev_vhp(CMDPARAMS)
 {
+	int vehicleid;
+	int set_hp;
+
+	vehicleid = NC_GetPlayerVehicleID(playerid);
+	if (!vehicleid) {
+		return 1;
+	}
+
+	if (cmd_get_int_param(cmdtext, &parseidx, &set_hp)) {
+		NC_SetVehicleHealth(vehicleid, set_hp);
+	}
+
 	NC_PARS(2);
-	nc_params[1] = NC_GetPlayerVehicleID(playerid);
+	nc_params[1] = vehicleid;
 	nc_params[2] = buf32a;
 	NC(n_GetVehicleHealth_);
-	csprintf(buf32, "hp %f", *fbuf32);
-	NC_SendClientMessageToAll(-1, buf32a);
+	sprintf(cbuf32, "hp %f", *fbuf32);
+	SendClientMessage(playerid, -1, cbuf32);
+	return 1;
+}
+
+/**
+/vfl [fl_percent]
+When fl_percent present, set the fuel leven (in percentage).
+Prints the fl of the player's vehicle.
+*/
+static
+int cmd_dev_vfl(CMDPARAMS)
+{
+	struct dbvehicle *veh;
+	int vehicleid;
+	int fl_pct;
+	float capacity;
+
+	vehicleid = NC_GetPlayerVehicleID(playerid);
+	if (!vehicleid) {
+		return 1;
+	}
+
+	veh = gamevehicles[vehicleid].dbvehicle;
+	if (!veh) {
+		SendClientMessage(playerid, COL_WARN, WARN"unknown vehicle");
+		return 1;
+	}
+
+	capacity = model_fuel_capacity(veh->model);
+
+	if (cmd_get_int_param(cmdtext, &parseidx, &fl_pct)) {
+		veh->fuel = capacity * fl_pct / 100.0f;
+	}
+
+	sprintf(cbuf32, "fl %f/%f (%.1f%%)", veh->fuel, capacity, veh->fuel / capacity);
+	SendClientMessage(playerid, -1, cbuf32);
 	return 1;
 }
 

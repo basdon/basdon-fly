@@ -10,6 +10,12 @@
 #undef MAPS_LOG_STREAMING
 /*define to print msg when mission point indicator is made/destroyed/available*/
 #undef MISSIONS_LOG_POINT_INDICATOR_ALLOC
+/*define to test panel updates/cache busting*/
+#undef PANEL_PRINT_UPDATES
+/*define to test vor updates/cache busting*/
+#undef VOR_PRINT_UPDATES
+/*define to test ils updates/cache busting*/
+#undef ILS_PRINT_UPDATES
 
 
 
@@ -225,14 +231,22 @@ struct AIRPORT {
 static struct AIRPORT *airports;
 static int numairports;
 
+/*navs*/
+
+#define NAV_NONE 0
+#define NAV_ADF 1
+#define NAV_VOR 2
+#define NAV_ILS 4
+
 /*prefs*/
 
 #define PREF_ENABLE_PM 1
 #define PREF_SHOW_MISSION_MSGS 2
 #define PREF_SHOW_GPS 4
 #define PREF_WORK_AUTONAV 8
+#define PREF_PANEL_NIGHTCOLORS 16
 
-#define DEFAULTPREFS (PREF_ENABLE_PM | PREF_SHOW_MISSION_MSGS | PREF_SHOW_GPS | PREF_WORK_AUTONAV)
+#define DEFAULTPREFS (PREF_ENABLE_PM | PREF_SHOW_MISSION_MSGS | PREF_SHOW_GPS | PREF_WORK_AUTONAV | PREF_PANEL_NIGHTCOLORS)
 
 static int prefs[MAX_PLAYERS];
 
@@ -277,8 +291,6 @@ static struct FAKEAMX fakeamx;
 #include "login.h"
 #include "maps.h"
 #include "missions.h"
-#include "nav.h"
-#include "panel.h"
 #include "playerdata.h"
 #include "playerstats.h"
 #include "servicepoints.h"
@@ -297,9 +309,11 @@ static struct FAKEAMX fakeamx;
 #include <unistd.h>
 #undef __USE_MISC
 
+/*TODO remove these*/
 static void zones_update(int playerid, struct vec3 pos);
 static void missions_update_missionpoint_indicators(int playerid, float player_x, float player_y, float player_z);
 static int missions_get_vehicle_model_msptype_mask(int model);
+static void nav_reset_for_vehicle(int vehicleid);
 
 static struct BitStream bitstream_create_object;
 /**
@@ -335,9 +349,9 @@ static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 #include "heartbeat.c"
 #include "kneeboard.c"
 #include "maps.c"
-#include "missions.c"
 #include "nav.c"
 #include "panel.c"
+#include "missions.c"
 #include "playerdata.c"
 #include "playerstats.c"
 #include "pm.c"
@@ -389,6 +403,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	game_sa_init();
 	kneeboard_init();
 	nav_init();
+	panel_init();
 	pdata_init();
 	time_init();
 	zones_init();

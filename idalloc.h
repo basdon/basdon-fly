@@ -51,10 +51,13 @@ If an airport has more, they are probably split out enough anyways.*/
 /*Drawing order is .. questionable and TBD.*/
 
 /*TODO lower these ids again when all textdraws are converted*/
-#define TEXTDRAW_MISSIONHELP_BASE (2250)
+#define TEXTDRAW_MISSIONHELP_BASE (1000)
 /*Missionmap: using same base as missionhelp, since they can't show at the same time anyways.*/
 #define TEXTDRAW_MISSIONMAP_BASE TEXTDRAW_MISSIONHELP_BASE
 #define TEXTDRAW_JOBSATISFACTION (TEXTDRAW_MISSIONHELP_BASE - 1)
 #define TEXTDRAW_GPS (TEXTDRAW_JOBSATISFACTION - 1)
 #define NUM_KNEEBOARD_TEXTDRAWS (3)
 #define TEXTDRAW_KNEEBOARD_BASE (TEXTDRAW_GPS - NUM_KNEEBOARD_TEXTDRAWS)
+#define NUM_PANEL_TEXTDRAWS (28)
+#define TEXTDRAW_PANEL_BASE (TEXTDRAW_KNEEBOARD_BASE - NUM_PANEL_TEXTDRAWS)
+STATIC_ASSERT(TEXTDRAW_PANEL_BASE > 0);

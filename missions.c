@@ -1777,7 +1777,6 @@ void missions_start_unload(int playerid)
 	DisablePlayerRaceCheckpoint(playerid);
 	if (prefs[playerid] & PREF_WORK_AUTONAV) {
 		nav_reset_for_vehicle(vehicleid);
-		panel_reset_nav_for_passengers(vehicleid);
 	}
 
 	timer_set(MISSION_LOAD_UNLOAD_TIME, missions_after_unload, cbdata);

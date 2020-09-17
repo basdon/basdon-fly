@@ -53,10 +53,6 @@ TODO: decide where this goes
 extern float playerodoKM[MAX_PLAYERS];
 
 /**
-Should be called in OnGameModeInit.
-*/
-void veh_create_global_textdraws();
-/**
 Creates a new vehicle and commits it to db.
 
 Think twice before doing this.
