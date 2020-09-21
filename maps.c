@@ -2,9 +2,6 @@
 #define MAP_MAX_FILENAME (34) /*see db col*/
 #define MAX_REMOVED_OBJECTS 1000
 
-/*Octavia's actor id*/
-#define OCTA_ACTORID 999
-
 #pragma pack(1)
 struct MAP_FILE_HEADER {
 	int spec_version;

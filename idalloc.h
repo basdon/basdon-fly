@@ -2,6 +2,11 @@
 If an airport has more, they are probably split out enough anyways.*/
 #define MAX_MISSION_INDICATORS (15)
 
+/*ACTOR IDS*/
+
+/*Octavia's actor id on Octavia Island*/
+#define OCTA_ACTORID 999
+
 /*DIALOG IDS*/
 
 /*can be used when no response is needed*/
