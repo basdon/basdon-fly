@@ -350,8 +350,10 @@ ob_start();
 									$text .= ' (passengers)';
 								} else if ($p->t & (8 | 16 | 32)) {
 									$text .= ' (cargo)';
-								} else if ($p->t & (64 | 128)) {
+								} else if ($p->t & (64)) {
 									$text .= ' (heli)';
+								} else if ($p->t & (128)) {
+									$text .= ' (heli cargo)';
 								} else if ($p->t & (256)) {
 									$text .= ' (military heli)';
 								} else if ($p->t & (512)) {
