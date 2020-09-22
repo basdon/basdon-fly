@@ -48,7 +48,7 @@ static char mission_map_option[MAX_PLAYERS];
 Available mission point types for player.
 Usages are a.o. for in job help/map screen and to show mission point enexes.
 */
-static char missions_available_msptype_mask[MAX_PLAYERS];
+static int missions_available_msptype_mask[MAX_PLAYERS];
 /**
 Mission point index for mission indicator slots.
 */
