@@ -52,7 +52,7 @@ int cmd_admin_goto(CMDPARAMS)
 	}
 
 	vehicleid = NC_GetPlayerVehicleID(playerid);
-	if (vehicleid ) {
+	if (vehicleid && NC_GetPlayerVehicleSeat(playerid) == 0) {
 		common_SetVehiclePos(vehicleid, &pos.coords);
 	} else {
 		common_tp_player(playerid, pos);
