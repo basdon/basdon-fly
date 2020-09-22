@@ -17,7 +17,7 @@
 		</thead>
 		<tbody>
 			{@if $flightlist_url_returnpage}
-				{@eval $rp = $page != 1 ? "&rp=$page" : "";}
+				{@eval $rp = $page != 1 ? "&amp;rp=$page" : "";}
 			{@endif}
 			{@foreach $flightlist as $f}
 				<tr>
