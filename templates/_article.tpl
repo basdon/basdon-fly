@@ -16,7 +16,7 @@
 				<a href="article.php?category={@urlencode $c->name}">{@unsafe $c->name}</a>
 			{@endforeach}
 			&#32;&gt;&#32;
-			<a href="article.php?title={$article_name}">{$article_name}</a>
+			<a href="article.php?title={$article_name}">{$article_title}</a>
 			{@if $article_redirected_from != null}
 				<small> (Redirected from {@unsafe $article_redirected_from})</small>
 			{@endif}
