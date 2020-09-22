@@ -615,8 +615,6 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 	int player_new_active_msp_index;
 	float dx, dy, dz;
 
-	/*TODO: as long as missionhelp/map is option, this shouldn't update (because the active_point must not change*/
-
 	/*change now out-of-range ones to AVAILABLE*/
 	for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
 		if (missionpoint_indicator_state[playerid][indicatoridx] == MISSIONPOINT_INDICATOR_STATE_USED) {
@@ -717,7 +715,6 @@ next:
 
 					player_new_active_msp_index = missionpoint_indicator_index[playerid][indicatoridx];
 					if (activemission[playerid]) {
-						/*TODO: when on mission, only show text when in the destination point & text 'to unload, ..'*/
 						if (player_new_active_msp_index == activemission[playerid]->endpoint - missionpoints) {
 							GameTextForPlayer(playerid, 3000, 3,
 								"~w~Press ~b~~k~~CONVERSATION_YES~~w~ to unload,~n~or type ~b~/w");
@@ -1420,7 +1417,6 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 	}
 
 	vhp = anticheat_GetVehicleHealth(vehicleid);
-	/*TODO: if less than 300?, set to 300 (TogglePlayerControllable will do that anyways, so that'll fix cheat penalty as well*/
 
 	dx = startpoint->pos.x - endpoint->pos.x;
 	dy = startpoint->pos.y - endpoint->pos.y;
