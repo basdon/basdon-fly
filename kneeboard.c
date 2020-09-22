@@ -1,9 +1,9 @@
 #if NUM_KNEEBOARD_TEXTDRAWS != 3
 #error
 #endif
-static struct TEXTDRAW td_kb_header = { "title", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_kb_info = { "info", 300, 0, NULL };
-static struct TEXTDRAW td_kb_distance = { "bg/info2", 300, 0, NULL };
+static struct TEXTDRAW td_kb_header = { "title", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_kb_info = { "info", 300, NULL };
+static struct TEXTDRAW td_kb_distance = { "bg/info2", 300, NULL };
 
 static int kneeboard_last_distance[MAX_PLAYERS];
 

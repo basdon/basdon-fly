@@ -3,7 +3,7 @@ static int zone_last_region[MAX_PLAYERS];
 static int zone_last_index[MAX_PLAYERS];
 static char gps_text_is_shown[MAX_PLAYERS];
 
-static struct TEXTDRAW td_gps = { "gps", 200, 0, NULL };
+static struct TEXTDRAW td_gps = { "gps", 200, NULL };
 
 #define GPS_SHOULD_SHOW(PLAYERID) (spawned[PLAYERID] && (prefs[playerid] & PREF_SHOW_GPS))
 

@@ -3,34 +3,34 @@ STATIC_ASSERT(NUM_PANEL_TEXTDRAWS == 28);
 #define PANEL_NIGHT_COLORS_FROM_HR 21
 #define PANEL_NIGHT_COLORS_TO_HR 6
 
-static struct TEXTDRAW td_panel_navtxt = { "navtxt", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_bg = { "bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_spdbgs = { "spdbgs", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_spdvalue = { "spdvalue", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_spdsmall = { "spdsmall", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_spdlarge = { "spdlarge", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_altbgs = { "altbgs", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_altvalue = { "altvalue", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_altsmall = { "altsmall", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_altlarge = { "altlarge", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_heading = { "heading", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_headingbar = { "headingbar", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_vaibar = { "vaibar", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_navdis = { "navdis", 200, 0, NULL };
-static struct TEXTDRAW td_panel_navalt = { "navalt", 200, 0, NULL };
-static struct TEXTDRAW td_panel_navcrs = { "navcrs", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_fl = { "fl", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_flbarbg = { "flbarbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_flbar = { "flbar", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_hp = { "hp", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_hpbarbg = { "hpbarbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_hpbar = { "hpbar", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_odo = { "odo", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_gear = { "gear", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_vorbar = { "vorbar", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_vorbarind = { "vorbarind", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_vaiind = { "vaiind", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_panel_ils = { "ils", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_panel_navtxt = { "navtxt", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_bg = { "bg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_spdbgs = { "spdbgs", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_spdvalue = { "spdvalue", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_spdsmall = { "spdsmall", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_spdlarge = { "spdlarge", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_altbgs = { "altbgs", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_altvalue = { "altvalue", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_altsmall = { "altsmall", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_altlarge = { "altlarge", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_heading = { "heading", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_headingbar = { "headingbar", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_vaibar = { "vaibar", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_navdis = { "navdis", 200, NULL };
+static struct TEXTDRAW td_panel_navalt = { "navalt", 200, NULL };
+static struct TEXTDRAW td_panel_navcrs = { "navcrs", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_fl = { "fl", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_flbarbg = { "flbarbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_flbar = { "flbar", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_hp = { "hp", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_hpbarbg = { "hpbarbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_hpbar = { "hpbar", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_odo = { "odo", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_gear = { "gear", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_vorbar = { "vorbar", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_vorbarind = { "vorbarind", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_vaiind = { "vaiind", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_ils = { "ils", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 
 struct PANELCACHE {
 	short altitude_v;
@@ -1028,8 +1028,8 @@ void panel_on_player_connect(int playerid)
 static
 void panel_init()
 {
-	struct TEXTDRAW tmp_td_panel_vaiindmax = { "vaiindmax(up)", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-	struct TEXTDRAW tmp_td_panel_vorbarindmax = { "vorbarindmax(left)", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+	struct TEXTDRAW tmp_td_panel_vaiindmax = { "vaiindmax(up)", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+	struct TEXTDRAW tmp_td_panel_vorbarindmax = { "vorbarindmax(left)", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 
 	textdraws_load_from_file("panel", TEXTDRAW_PANEL_BASE, NUM_PANEL_TEXTDRAWS + 2,
 		&td_panel_navtxt, &td_panel_bg, &td_panel_spdbgs, &td_panel_spdvalue, &td_panel_spdsmall,

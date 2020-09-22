@@ -2,7 +2,7 @@
 
 #define MAX_SPEED_SQ ((3.0f / VEL_TO_KPH) * (3.0f / VEL_TO_KPH))
 
-static struct TEXTDRAW td_satisfaction = { "textdraw", 50, 0, NULL };
+static struct TEXTDRAW td_satisfaction = { "textdraw", 50, NULL };
 
 /**
 Keeps track how much missions a playerid has started and/or stopped (number increased on mission start AND stop).
@@ -90,63 +90,63 @@ Tracker socket handle.
 static int tracker;
 
 #define NUM_HELP_TEXTDRAWS (17)
-static struct TEXTDRAW td_jobhelp_keyhelp = { "keyhelp", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_header = { "header", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_optsbg = { "optsbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_text = { "text", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_greenbtnbg = { "greenbtnbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_bluebtnbg = { "bluebtnbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_redbtnbg = { "redbtnbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_optselbg = { "optselbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_enexgreen = { "enexgreen", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_txtgreen = { "txtgreen", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_actiongreen = { "actiongreen", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_enexblue = { "enexblue", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_txtblue = { "txtblue", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_actionblue = { "actionblue", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_enexred = { "enexred", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_txtred = { "txtred", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobhelp_actionred = { "actionred", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobhelp_keyhelp = { "keyhelp", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_header = { "header", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_optsbg = { "optsbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_text = { "text", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_greenbtnbg = { "greenbtnbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_bluebtnbg = { "bluebtnbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_redbtnbg = { "redbtnbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_optselbg = { "optselbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_enexgreen = { "enexgreen", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_txtgreen = { "txtgreen", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_actiongreen = { "actiongreen", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_enexblue = { "enexblue", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_txtblue = { "txtblue", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_actionblue = { "actionblue", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_enexred = { "enexred", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_txtred = { "txtred", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobhelp_actionred = { "actionred", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 
 #define NUM_MAP_TEXTDRAWS (28)
-static struct TEXTDRAW td_jobmap_keyhelp = { "keyhelp", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_header = { "header", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_optsbg = { "optsbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_mapbg = { "mapbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_island_mainland = { "mapsqfull", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_island_octa = { "mapsqmintopleft", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_island_lima = { "mapsqminbotright", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_keyhelp = { "keyhelp", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_header = { "header", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_optsbg = { "optsbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_mapbg = { "mapbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_island_mainland = { "mapsqfull", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_island_octa = { "mapsqmintopleft", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_island_lima = { "mapsqminbotright", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 #if AIRPORT_CODE_LEN != 4
 #error "mapmin/mapmax text alloc depend on airport code being 4 chars at most"
 #endif
-static struct TEXTDRAW td_jobmap_from = { "mapmin", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_to = { "mapmax", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt1bg = { "opt1bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt2bg = { "opt2bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt3bg = { "opt3bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt4bg = { "opt4bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt5bg = { "opt5bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt6bg = { "opt6bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt7bg = { "opt7bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt8bg = { "opt8bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt9bg = { "opt9bg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
-static struct TEXTDRAW td_jobmap_optselbg = { "optselbg", TEXTDRAW_ALLOC_AS_NEEDED, 0, NULL };
+static struct TEXTDRAW td_jobmap_from = { "mapmin", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_to = { "mapmax", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_opt1bg = { "opt1bg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_opt2bg = { "opt2bg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_opt3bg = { "opt3bg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_opt4bg = { "opt4bg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_opt5bg = { "opt5bg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_opt6bg = { "opt6bg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_opt7bg = { "opt7bg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_opt8bg = { "opt8bg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_opt9bg = { "opt9bg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_optselbg = { "optselbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 /*Checking for 8 because the last one is the random entry.*/
 #if NUM_PRESET_MISSION_LOCATIONS != 8
 #error "num option textdraws does not match, hurr durr"
 #endif
 /*Very scientific text measurement system: "Some very long airport name gate P1 - Very special mission type (M) - 100000m"*/
 #define JOBMAP_ENTRY_MAX_TEXT_LENGTH (100)
-static struct TEXTDRAW td_jobmap_opt1multiline = { "opt1multiline", 0, 0, NULL }; /*This one is just for measurements.*/
-static struct TEXTDRAW td_jobmap_opt1 = { "opt1", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt2 = { "opt2", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt3 = { "opt3", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt4 = { "opt4", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt5 = { "opt5", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt6 = { "opt6", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt7 = { "opt7", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt8 = { "opt8", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
-static struct TEXTDRAW td_jobmap_opt9 = { "opt9", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 0, NULL };
+static struct TEXTDRAW td_jobmap_opt1multiline = { "opt1multiline", 0, NULL }; /*This one is just for measurements.*/
+static struct TEXTDRAW td_jobmap_opt1 = { "opt1", JOBMAP_ENTRY_MAX_TEXT_LENGTH, NULL };
+static struct TEXTDRAW td_jobmap_opt2 = { "opt2", JOBMAP_ENTRY_MAX_TEXT_LENGTH, NULL };
+static struct TEXTDRAW td_jobmap_opt3 = { "opt3", JOBMAP_ENTRY_MAX_TEXT_LENGTH, NULL };
+static struct TEXTDRAW td_jobmap_opt4 = { "opt4", JOBMAP_ENTRY_MAX_TEXT_LENGTH, NULL };
+static struct TEXTDRAW td_jobmap_opt5 = { "opt5", JOBMAP_ENTRY_MAX_TEXT_LENGTH, NULL };
+static struct TEXTDRAW td_jobmap_opt6 = { "opt6", JOBMAP_ENTRY_MAX_TEXT_LENGTH, NULL };
+static struct TEXTDRAW td_jobmap_opt7 = { "opt7", JOBMAP_ENTRY_MAX_TEXT_LENGTH, NULL };
+static struct TEXTDRAW td_jobmap_opt8 = { "opt8", JOBMAP_ENTRY_MAX_TEXT_LENGTH, NULL };
+static struct TEXTDRAW td_jobmap_opt9 = { "opt9", JOBMAP_ENTRY_MAX_TEXT_LENGTH, NULL };
 
 static float map_text_x_base, map_text_x_unit;
 static float map_text_y_base, map_text_y_unit;

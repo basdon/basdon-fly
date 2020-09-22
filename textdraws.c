@@ -17,10 +17,6 @@ struct TEXTDRAW {
 	including a spot for the ending zero terminator.
 	*/
 	int allocated_text_length;
-	/**
-	Will be set by loading function.
-	*/
-	int rpcsize;
 	struct RPCDATA_ShowTextDraw *rpcdata;
 };
 
@@ -40,7 +36,7 @@ EXPECT_SIZE(union TEXT_FILE_ENTRY, 905);
 /**
 Template textbox textdraw. Use {@link textdraws_set_textbox_properties}.
 */
-static struct TEXTDRAW td_helpbox_template = { "58B6E0", 0, 0, NULL };
+static struct TEXTDRAW td_helpbox_template = { "58B6E0", 0, NULL };
 
 /**
 Load a map from file as specified in given map.
@@ -57,6 +53,7 @@ void textdraws_load_from_file(char *filename, int base_textdraw_id, int numtextd
 	char fullfilepath[100];
 	int magic;
 	int i;
+	int allocated_size;
 	va_list va;
 
 	sprintf(fullfilepath, "scriptfiles/texts/%s.text", filename);
@@ -87,13 +84,10 @@ void textdraws_load_from_file(char *filename, int base_textdraw_id, int numtextd
 					td->allocated_text_length = entry.entry.rpcdata.text_length + 1;
 				}
 				/*-1 because struct includes a 1-sized char array for the text*/
-				td->rpcsize = sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->allocated_text_length;
-				td->rpcdata = malloc(td->rpcsize);
-				memcpy(td->rpcdata, &entry.entry.rpcdata, td->rpcsize);
+				allocated_size = sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->allocated_text_length;
+				td->rpcdata = malloc(allocated_size);
+				memcpy(td->rpcdata, &entry.entry.rpcdata, allocated_size);
 				td->rpcdata->textdrawid = base_textdraw_id + i;
-				/*the ending 0 byte is not needed in the rpc,
-				but it's still allocated to be safe when checking out the string*/
-				td->rpcsize--;
 				break;
 			}
 		}
@@ -106,10 +100,10 @@ ret:
 		td = va_arg(va, struct TEXTDRAW*);
 		if (td->rpcdata == NULL) {
 			logprintf("WARN: textdraw '%s' not found in '%s'", td->name, fullfilepath);
-			td->rpcsize = sizeof(struct RPCDATA_ShowTextDraw) + 12;
-			td->rpcdata = malloc(td->rpcsize);
-			memset(td->rpcdata, 0, td->rpcsize);
-			td->rpcsize--;
+			td->allocated_text_length = 12;
+			allocated_size = sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->allocated_text_length;
+			td->rpcdata = malloc(allocated_size);
+			memset(td->rpcdata, 0, allocated_size);
 			td->rpcdata->flags = TEXTDRAW_FLAG_CENTER;
 			td->rpcdata->font = 1;
 			td->rpcdata->font_width = 1.0f;
@@ -143,26 +137,25 @@ void textdraws_show(int playerid, int num, ...)
 	va_start(va, num);
 	while (num--) {
 		td = va_arg(va, struct TEXTDRAW*);
+#ifdef DEV
+		if (td->rpcdata->text_length > td->allocated_text_length) {
+			printf("ERR: textdraw '%s' text length %d exceed allocated length %d\n",
+				td->name,
+				td->rpcdata->text_length,
+				td->allocated_text_length);
+			printf("text is: ");
+#define i td->rpcdata->preview_model
+			for (i = 0; i < td->allocated_text_length; i++) {
+				printf("%c", td->rpcdata->text[i]);
+			}
+			printf("\n");
+			assert(0);
+#undef i
+		}
+#endif
 		bitstream_freeform.numberOfBitsUsed = (sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->rpcdata->text_length) * 8;
 		bitstream_freeform.ptrData = td->rpcdata;
 		SAMP_SendRPCToPlayer(RPC_ShowTextDraw, &bitstream_freeform, playerid, 2);
-	}
-	va_end(va);
-}
-
-static
-void textdraws_hide(int playerid, int num, ...)
-{
-	struct TEXTDRAW *td;
-	va_list va;
-
-	bitstream_freeform.numberOfBitsUsed = sizeof(short) * 8;
-	bitstream_freeform.ptrData = &rpcdata_freeform;
-	va_start(va, num);
-	while (num--) {
-		td = va_arg(va, struct TEXTDRAW*);
-		rpcdata_freeform.word[0] = td->rpcdata->textdrawid;
-		SAMP_SendRPCToPlayer(RPC_HideTextDraw, &bitstream_freeform, playerid, 2);
 	}
 	va_end(va);
 }
