@@ -95,7 +95,7 @@ int panel_remove_panel_player(int playerid)
 	while (i--) {
 		if (panelplayers[i] == playerid) {
 			panelplayers[i]	= panelplayers[--numpanelplayers];
-			shown_panel[i] = 0;
+			shown_panel[playerid] = 0;
 			return 1;
 		}
 	}
