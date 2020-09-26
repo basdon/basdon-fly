@@ -1,6 +1,21 @@
-extern hook_OnDriverSync
 extern logprintf
+extern samp_pNetGame
+
+extern hook_OnDriverSync
 extern printf
+
+;void InitAfterPoolsCreated:function();
+global InitAfterPoolsCreated:function
+InitAfterPoolsCreated:
+	; get netgame
+	mov eax, 081CA4BCh
+	mov eax, [eax]
+	mov [samp_pNetGame], eax
+
+	; the hook replaced a call to logprintf
+	push 080AB93Dh
+	mov eax, 080A91D0h
+	jmp eax
 
 ;void printf_logprintf(char *format, ...);
 global printf_logprintf:function

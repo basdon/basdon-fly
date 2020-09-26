@@ -1,6 +1,7 @@
 #ifndef SAMP_NATIVES_IMPL
 
-static int samp_pNetGame;
+int samp_pNetGame;
+
 static unsigned char vehicle_gear_state[MAX_VEHICLES];
 static int vehicle_gear_change_time[MAX_VEHICLES];
 
@@ -384,6 +385,19 @@ void hook_OnDriverSync(int playerid, struct SYNCDATA_Driver *data)
 static
 void samp_init()
 {
+	/*See InitAfterPoolsCreated in asm for more init stuff.*/
+	mem_mkjmp(0x80AB938, &InitAfterPoolsCreated);
+
+	/*Remove filtering in chat messages coming from clients.*/
+	/*OnPlayerText*/
+	mem_protect(0x80B0760, 0x14, PROT_READ | PROT_WRITE | PROT_EXEC);
+	*(int*) 0x80B0760 = 0x90909090;
+	*(unsigned char*) 0x80B0764 = 0x90;
+	/*OnPlayerCommandText*/
+	mem_protect(0x80B16D6, 0x14, PROT_READ | PROT_WRITE | PROT_EXEC);
+	*(int*) 0x80B16D6 = 0x90909090;
+	*(unsigned char*) 0x80B16DA = 0x90;
+
 	/*Sync data is dropped when coordinates exceed -20k/+20k, update those limits here.
 	See 804B5D0 CheckSyncBounds.*/
 	mem_protect(0x815070C, 0x10, PROT_READ | PROT_WRITE);
