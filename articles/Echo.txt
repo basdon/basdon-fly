@@ -60,11 +60,12 @@ either side.
 byte 4: lo byte of player id as WORD (0 when IRC to game)
 byte 5: hi byte of player id as WORD (0 when IRC to game)
 byte 6: length of the nickname (must be less than 50)
-byte 7: length of the message (must be less than 512)
-byte 8 - 7+[byte6]: nickname
-byte 8+[byte6] - 7+[byte6]+[byte7]: message
+byte 7: lo byte of length of the message as WORD (must be less than 512)
+byte 8: hi byte length of the message as WORD (must be less than 512)
+byte 9 - 8+[byte6]: nickname
+byte 9+[byte6] - 8+[byte6]+[byte7/8]: message
 
-total len: 8+[byte6]+[byte7]
+total len: 9+[byte6]+[byte7/8]
 </pre>
 
 {@h4(id=p11) Packet 11: Action}
