@@ -60,7 +60,7 @@ either side.
 byte 4: lo byte of player id as WORD (0 when IRC to game)
 byte 5: hi byte of player id as WORD (0 when IRC to game)
 byte 6: length of the nickname (must be less than 50)
-byte 7: length of the message (must be less than 145)
+byte 7: length of the message (must be less than 512)
 byte 8 - 7+[byte6]: nickname
 byte 8+[byte6] - 7+[byte6]+[byte7]: message
 
