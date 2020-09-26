@@ -102,8 +102,8 @@ void echo_on_game_chat_or_action(int t, int playerid, char *text)
 	if (socket_out != SOCKET_INVALID_SOCKET) {
 		nicklen = pd->namelen;
 		msglen = strlen(text);
-		if (msglen > 144) {
-			msglen = 144;
+		if (msglen > 480) {
+			msglen = 480;
 		}
 #if PACK_ACTION != PACK_CHAT + 1
 #error "the next line will fail"
@@ -111,11 +111,12 @@ void echo_on_game_chat_or_action(int t, int playerid, char *text)
 		buf144[0] = 0x0A594C46 + 0x01000000 * t;
 		buf144[1] =
 			(playerid & 0xFFFF) |
-			((pd->namelen & 0xFF) << 16) |
-			((msglen & 0xFF) << 24);
-		memcpy((cbuf144) + 8, pd->name, nicklen);
-		memcpy((cbuf144) + 8 + nicklen, text, msglen);
-		NC_ssocket_send(socket_out, buf144a, 8 + nicklen + msglen);
+			((pd->namelen & 0xFF) << 16);
+		cbuf144[7] = msglen & 0xFF;
+		cbuf144[8] = (msglen >> 8) & 0xFF;
+		memcpy((cbuf144) + 9, pd->name, nicklen);
+		memcpy((cbuf144) + 9 + nicklen, text, msglen);
+		NC_ssocket_send(socket_out, buf144a, 9 + nicklen + msglen);
 	}
 }
 
@@ -164,11 +165,11 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			int nicklen, col;
 			char *b;
 
-			if (len < 10 ||
+			if (len < 11 ||
 				(nicklen = data[6]) < 1 || nicklen > 49 ||
-				(msglen = (data[7] & 0xFF)) < 1 ||
+				(msglen = *((short*) (data + 7))) < 1 ||
 				msglen > 512 ||
-				8 + nicklen + msglen != len)
+				9 + nicklen + msglen != len)
 			{
 				break;
 			}
@@ -186,13 +187,13 @@ void echo_on_receive(cell socket_handle, cell data_a,
 				*(b++) = '<';
 				col = COL_IRC;
 			}
-			memcpy(b, data + 8, nicklen + 1);
+			memcpy(b, data + 9, nicklen + 1);
 			b += nicklen;
 			if (data[3] != PACK_ACTION) {
 				*(b++) = '>';
 			}
 			*(b++) = ' ';
-			memcpy(b, data + 8 + nicklen, msglen);
+			memcpy(b, data + 9 + nicklen, msglen);
 			b[msglen] = 0;
 			/*Do we want to filter out embedded colors?*/
 			SendClientMessageToAll(col, msg512);
