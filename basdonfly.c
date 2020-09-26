@@ -59,8 +59,7 @@ EXPECT_SIZE(float, 4);
 #ifdef DEV
 #define DBG(format,...) sprintf(cbuf64,format,__VA_ARGS__);\
 			printf("%s\n", cbuf64);printf("\n");\
-			atoc(buf144,cbuf64,144);\
-			NC_SendClientMessageToAll(-1,buf144a);
+			SendClientMessageToAll(-1,cbuf644);
 #else
 #define DBG(...)
 #endif

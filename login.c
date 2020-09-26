@@ -287,6 +287,7 @@ static
 void login_cb_create_session_guest(void *data)
 {
 	int playerid;
+	char msg144[144];
 
 	playerid = PLAYER_CC_GETID(data);
 	if (!PLAYER_CC_CHECK(data, playerid)) {
@@ -301,14 +302,9 @@ void login_cb_create_session_guest(void *data)
 		no real problem, but time will not be registered
 	}
 	*/
-	csprintf(buf144,
-		"%s[%d] joined as a guest, welcome!",
-		pdata[playerid]->name,
-		playerid);
-	NC_SendClientMessageToAll(COL_JOIN, buf144a);
-	B144(INFO"You are now playing as a guest. "
-		"You can use /register at any time to save your stats.");
-	NC_SendClientMessage(playerid, COL_INFO, buf144a);
+	sprintf(msg144, "%s[%d] joined as a guest, welcome!", pdata[playerid]->name, playerid);
+	SendClientMessageToAll(COL_JOIN, msg144);
+	SendClientMessage(playerid, COL_INFO, INFO"You are now playing as a guest. You can use /register at any time to save your stats.");
 	login_login_player(playerid, LOGGED_GUEST);
 }
 
@@ -319,6 +315,7 @@ static
 void login_cb_create_session_new_member(void *data)
 {
 	int playerid;
+	char msg144[144];
 
 	playerid = PLAYER_CC_GETID(data);
 	if (!PLAYER_CC_CHECK(data, playerid)) {
@@ -334,11 +331,8 @@ void login_cb_create_session_new_member(void *data)
 		no real problem, but time will not be registered
 	}
 	*/
-	csprintf(buf144,
-		"%s[%d] just registered an account, welcome!",
-		pdata[playerid]->name,
-		playerid);
-	NC_SendClientMessageToAll(COL_JOIN, buf144a);
+	sprintf(msg144, "%s[%d] just registered an account, welcome!", pdata[playerid]->name, playerid);
+	SendClientMessageToAll(COL_JOIN, msg144);
 	login_login_player(playerid, LOGGED_IN);
 }
 
@@ -349,6 +343,7 @@ static
 void login_cb_create_session_existing_member(void *data)
 {
 	int playerid;
+	char msg144[144];
 
 	playerid = PLAYER_CC_GETID(data);
 	if (!PLAYER_CC_CHECK(data, playerid)) {
@@ -364,11 +359,8 @@ void login_cb_create_session_existing_member(void *data)
 		no real problem, but time will not be registered
 	}
 	*/
-	csprintf(buf144,
-		"%s[%d] just logged in, welcome back!",
-		pdata[playerid]->name,
-		playerid);
-	NC_SendClientMessageToAll(COL_JOIN, buf144a);
+	sprintf(msg144, "%s[%d] just logged in, welcome back!", pdata[playerid]->name, playerid);
+	SendClientMessageToAll(COL_JOIN, msg144);
 	login_login_player(playerid, LOGGED_IN);
 }
 
@@ -390,11 +382,8 @@ void login_cb_create_guest_usr(void *data)
 	userid[playerid] = NC_cache_insert_id();
 	if (userid[playerid] == -1) {
 		common_hide_gametext_for_player(playerid);
-		B144(WARN"An error occurred while creating a guest session.");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
-		B144(WARN"You can play, but you won't be able to save your"
-			"stats later.");
-		NC(n_SendClientMessage);
+		SendClientMessage(playerid, COL_WARN, WARN"An error occurred while creating a guest session.");
+		SendClientMessage(playerid, COL_WARN, WARN"You can play, but you won't be able to save your stats later.");
 		login_login_player(playerid, LOGGED_GUEST);
 		return;
 	}
@@ -431,8 +420,7 @@ int login_give_guest_name(int playerid)
 		}
 	}
 	logprintf("login: failed to give user a random guestname");
-	B144(WARN"Fatal error, please reconnect!");
-	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	SendClientMessage(playerid, COL_WARN, WARN"Fatal error, please reconnect!");
 	natives_Kick(playerid, "can't login", NULL, -1);
 	return 0;
 }
@@ -603,10 +591,8 @@ void login_cb_member_user_created(void *data)
 	money_set(playerid, MONEY_DEFAULT_AMOUNT);
 	if (userid[playerid] == -1) {
 		common_hide_gametext_for_player(playerid);
-		B144(WARN"An error occured while registering.");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
-		B144(WARN"You will be spawned as a guest.");
-		NC(n_SendClientMessage);
+		SendClientMessage(playerid, COL_WARN, WARN"An error occured while registering.");
+		SendClientMessage(playerid, COL_WARN, WARN"You will be spawned as a guest.");
 		login_spawn_as_guest_WITHOUT_ACCOUNT(playerid);
 		return;
 	}
@@ -668,8 +654,7 @@ void login_cb_check_user_exists(void *data)
 	
 	if (failedattempts > MAX_ALLOWED_FAILED_LOGINS_IN_30_MINUTES) {
 asguest:
-		B144("You will be spawned as a guest.");
-		NC_SendClientMessage(playerid, COL_SAMP_GREEN, buf144a);
+		SendClientMessage(playerid, COL_SAMP_GREEN, "You will be spawned as a guest.");
 		login_spawn_as_guest(playerid);
 		return;
 	}
@@ -686,7 +671,7 @@ asguest:
 
 	/*user doesn't exist when password is NULL*/
 	(nc_params[2] = 1, NC(n_cache_get_field_s));
-	ctoa(password, buf144, 144);
+	ctoa(password, buf144, sizeof(password));
 	if (strcmp(password, "NULL") == 0) {
 		login_show_dialog_register_step1(playerid, 0);
 	} else {
@@ -835,13 +820,6 @@ void login_dlg_register_firstpass(int playerid, int response, cell inputaddr)
 
 int login_on_player_connect(int playerid)
 {
-	static const char
-		*ATNOTICE = "Names starting with '@' are reserved "
-				"for guest players.",
-		*FAILEDCHANGE = WARN"Failed to change your nickname. "
-				"Please come back with a different name.",
-		*INVALIDNAME = "invalid name";
-
 	struct playerdata *pd;
 
 	pwdata[playerid] = NULL;
@@ -853,16 +831,14 @@ int login_on_player_connect(int playerid)
 
 	pd = pdata[playerid];
 	while (pd->name[0] == '@') {
-		B144((char*) ATNOTICE);
-		NC_SendClientMessage(playerid, COL_SAMP_GREEN, buf144a);
+		SendClientMessage(playerid, COL_SAMP_GREEN, "Names starting with '@' are reserved for guest players.");
 		/*wiki states that SetPlayerName does not propagate for the user
 		when used in OnPlayerConnect, but tests have proven otherwise.*/
 		if (pd->namelen <= 3 ||
 			natives_SetPlayerName(playerid, pd->name + 1) != 1)
 		{
-			B144((char*) FAILEDCHANGE);
-			NC_SendClientMessage(playerid, COL_WARN, buf144a);
-			natives_Kick(playerid, (char*) INVALIDNAME, NULL, -1);
+			SendClientMessage(playerid, COL_WARN, WARN"Failed to change your nickname. Please come back with a different name.");
+			natives_Kick(playerid, "invalid name", NULL, -1);
 			return 0;
 		}
 	}
@@ -873,10 +849,11 @@ int login_on_player_connect(int playerid)
 
 void login_on_player_disconnect(int playerid, int reason)
 {
+	char msg144[144];
 	char *b;
 
 	if (loggedstatus[playerid]) {
-		b = cbuf64;
+		b = msg144;
 		b += sprintf(b,
 			"%s[%d] left the server",
 			pdata[playerid]->name,
@@ -886,8 +863,7 @@ void login_on_player_disconnect(int playerid, int reason)
 		case 1: strcpy(b, " (quit)"); break;
 		case 2: strcpy(b, " (kicked)"); break;
 		}
-		atoc(buf144, cbuf64, 144);
-		NC_SendClientMessageToAll(COL_QUIT, buf144a);
+		SendClientMessageToAll(COL_QUIT, msg144);
 	}
 	if (pwdata[playerid] != NULL) {
 		free(pwdata[playerid]);

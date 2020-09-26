@@ -169,32 +169,29 @@ Checks if a player can do a nav cmd by checking if the vehicle can do the nav.
 static
 int nav_check_can_do_cmd(int playerid, int navtype, int *vehicleid)
 {
-	static const char
-		*NO_NAV = WARN"You're not in a%s capable vehicle",
-		*NO_PILOT = WARN"Only the pilot can change navigation settings";
-
 	int vehiclemodel;
 
 	*vehicleid = NC_GetPlayerVehicleID(playerid);
 	vehiclemodel = NC_GetVehicleModel(*vehicleid);
 	if (navtype == NAV_ADF) {
 		if (!game_is_air_vehicle(vehiclemodel)) {
-			csprintf(buf144, NO_NAV, "n ADF");
-			goto sendmsgfail;
+			SendClientMessage(playerid, COL_WARN, WARN"You're not in an ADF capable vehicle");
+			return 0;
 		}
 	} else if (!game_is_plane(vehiclemodel)) {
-		csprintf(buf144, NO_NAV, navtype == NAV_VOR ? " VOR" : "n ILS");
-		goto sendmsgfail;
+		if (navtype == NAV_VOR) {
+			SendClientMessage(playerid, COL_WARN, WARN"You're not in a VOR capable vehicle");
+		} else {
+			SendClientMessage(playerid, COL_WARN, WARN"You're not in an ILS capable vehicle");
+		}
+		return 0;
 	}
 	if (NC_GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
-		B144((char*) NO_PILOT);
-sendmsgfail:	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"Only the pilot can change navigation settings");
 		return 0;
 	}
 	return 1;
 }
-
-static const char *UNK_BEACON = WARN"Unknown beacon - see /beacons or /nearest";
 
 /**
 The /adf cmd.
@@ -206,9 +203,6 @@ When no beacon, disable nav
 static
 int nav_cmd_adf(CMDPARAMS)
 {
-	static const char
-		*SYN = WARN"Syntax: /adf [beacon] - see /beacons or /nearest";
-
 	struct AIRPORT *ap;
 	int vehicleid, len;
 	char beacon[144], *bp;
@@ -223,8 +217,7 @@ int nav_cmd_adf(CMDPARAMS)
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL);
 			return 1;
 		}
-		B144((char*) SYN);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /adf [beacon] - see /beacons or /nearest");
 		return 1;
 	}
 
@@ -252,8 +245,7 @@ int nav_cmd_adf(CMDPARAMS)
 		ap++;
 	}
 unkbeacon:
-	B144((char*) UNK_BEACON);
-	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	SendClientMessage(playerid, COL_WARN, WARN"Unknown beacon - see /beacons or /nearest");
 	return 1;
 }
 
@@ -269,11 +261,6 @@ When no or invalid runway, print a list of valid runways
 static
 int nav_cmd_vor(CMDPARAMS)
 {
-	static const char
-		*SYN = WARN"Syntax: /vor [beacon][runway] - "
-			"see /beacons or /nearest",
-		*NO_CAP = WARN"There are no VOR capable runways at this beacon";
-
 	struct AIRPORT *ap;
 	struct RUNWAY *rw;
 	int vehicleid;
@@ -291,8 +278,8 @@ int nav_cmd_vor(CMDPARAMS)
 			NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL);
 			return 1;
 		}
-		B144((char*) SYN);
-		goto sendwarnmsg;
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /vor [beacon][runway] - see /beacons or /nearest");
+		return 1;
 	}
 	combinedparameter = !cmd_get_str_param(cmdtext, &parseidx, runwaypar);
 
@@ -333,8 +320,8 @@ havebeacon:
 		ap++;
 	}
 unkbeacon:
-	B144((char*) UNK_BEACON);
-	goto sendwarnmsg;
+	SendClientMessage(playerid, COL_WARN, WARN"Unknown beacon - see /beacons or /nearest");
+	return 1;
 haveairport:
 	if (b[0] < '0' || '9' < b[0] ||
 		b[1] < '0' || '9' < b[1] ||
@@ -367,12 +354,11 @@ tellrws:
 		rw++;
 	}
 	if (len) {
-		B144(beaconpar);
-	} else {
-		B144((char*) NO_CAP);
+		SendClientMessage(playerid, COL_WARN, beaconpar);
+		return 1;
 	}
-sendwarnmsg:
-	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+
+	SendClientMessage(playerid, COL_WARN, WARN"There are no VOR capable runways at this beacon");
 	return 1;
 }
 
@@ -385,10 +371,6 @@ Only toggles ils when VOR is already active and the runway has ILS capabilities.
 static
 int nav_cmd_ils(CMDPARAMS)
 {
-	static const char
-		*N_VOR = "ILS can only be activated when VOR is already active",
-		*N_CAP = "The selected runway does not have ILS capabilities";
-
 	struct vec3 vpos;
 	struct NAVDATA *np;
 	int heading;
@@ -398,12 +380,11 @@ int nav_cmd_ils(CMDPARAMS)
 		return 1;
 	}
 	if ((np = nav[vehicleid]) == NULL || np->vor == NULL) {
-		B144((char*) N_VOR);
-		goto retmsg;
+		SendClientMessage(playerid, COL_WARN, WARN"ILS can only be activated when VOR is already active");
+		return 1;
 	}
 	if ((np->vor->nav & NAV_ILS) != NAV_ILS) {
-		B144((char*) N_CAP);
-retmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"The selected runway does not have ILS capabilities");
 		return 1;
 	}
 	np->ilsx = np->ilsz = INVALID_ILS_VALUE;

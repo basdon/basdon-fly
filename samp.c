@@ -42,9 +42,10 @@ void TogglePlayerControllable(int playerid, char controllable)
 }
 
 static
-void SendClientMessage(int playerid, int color, char *message)
+void SendClientMessageToBatch(short *playerids, int numplayerids, int color, char *message)
 {
 	struct RPCDATA_SendClientMessage data;
+	int i;
 
 	data.color = color;
 	data.message_length = strlen(message);
@@ -55,7 +56,21 @@ void SendClientMessage(int playerid, int color, char *message)
 	memcpy(data.message, message, data.message_length);
 	bitstream_freeform.ptrData = &data;
 	bitstream_freeform.numberOfBitsUsed = 32 + 32 + data.message_length * 8;
-	SAMP_SendRPCToPlayer(RPC_SendClientMessage, &bitstream_freeform, playerid, 3);
+	for (i = 0; i < numplayerids; i++) {
+		SAMP_SendRPCToPlayer(RPC_SendClientMessage, &bitstream_freeform, playerids[i], 3);
+	}
+}
+
+static
+void SendClientMessageToAll(int color, char *message)
+{
+	SendClientMessageToBatch(players, playercount, color, message);
+}
+
+static
+void SendClientMessage(short playerid, int color, char *message)
+{
+	SendClientMessageToBatch(&playerid, 1, color, message);
 }
 
 static
@@ -131,6 +146,7 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 
 	int intv;
 	char *escapedreason;
+	char msg[144];
 
 	if (!kick_update_delay[playerid]) {
 		if (issuer == NULL) {
@@ -138,13 +154,13 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 		}
 
 		if (reason != NULL) {
-			csprintf(buf144,
+			sprintf(msg,
 				"%s[%d] was kicked by %s (%s)",
 				pdata[playerid]->name,
 				playerid,
 				issuer,
 				reason);
-			NC_SendClientMessageToAll(COL_WARN, buf144a);
+			SendClientMessageToAll(COL_WARN, msg);
 		}
 
 		B144("~r~You've been kicked.");
@@ -240,6 +256,7 @@ int natives_SetPlayerName(int playerid, char *name)
 #ifdef SAMP_NATIVES_IMPL
 {
 	int res;
+	char msg144[144];
 
 	atoc(buf32, name, 32);
 	NC_PARS(2);
@@ -251,13 +268,8 @@ int natives_SetPlayerName(int playerid, char *name)
 			strcpy(pdata[playerid]->name, name);
 		}
 		pdata_on_name_updated(playerid);
-		csprintf(buf144,
-			"Your name has been changed to '%s'",
-			pdata[playerid]->name);
-		NC_PARS(3);
-		nc_params[2] = COL_SAMP_GREEN;
-		nc_params[3] = buf144a;
-		NC(n_SendClientMessage);
+		sprintf(msg144, "Your name has been changed to '%s'", pdata[playerid]->name);
+		SendClientMessage(playerid, COL_SAMP_GREEN, msg144);
 	}
 	return res;
 }

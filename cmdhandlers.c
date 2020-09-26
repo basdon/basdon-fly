@@ -3,13 +3,14 @@ int cmd_admin_streamdistance(CMDPARAMS)
 {
 	int newdistance;
 	float *stream_distance;
+	char msg144[144];
 
 	stream_distance = samphost_GetPtrStreamDistance();
 	if (cmd_get_int_param(cmdtext, &parseidx, &newdistance)) {
 		*stream_distance = (float) newdistance;
 	}
-	csprintf(buf144, "stream_distance=%.0f", *stream_distance);
-	NC_SendClientMessage(playerid, -1, buf144a);
+	sprintf(msg144, "stream_distance=%.0f", *stream_distance);
+	SendClientMessage(playerid, -1, msg144);
 	return 1;
 }
 
@@ -207,11 +208,6 @@ int cmd_at400(CMDPARAMS)
 	return 1;
 }
 
-static const char
-	*MSG_VEH_PARK_Y = SUCC"Vehicle parked!",
-	*MSG_VEH_PARK_N = WARN"You are not allowed to park this vehicle",
-	*MSG_VEH_SPRAY_N = WARN"You are not allowed to respray this vehicle";
-
 /**
 The /camera command gives the player a camera.
 */
@@ -240,11 +236,12 @@ int cmd_getspray(CMDPARAMS)
 {
 	struct dbvehicle *veh;
 	int vehicleid;
+	char msg144[144];
 
 	vehicleid = NC_GetPlayerVehicleID(playerid);
 	if (vehicleid && (veh = gamevehicles[vehicleid].dbvehicle)) {
-		csprintf(buf144, "colors: %d, %d", veh->col1, veh->col2);
-		NC_SendClientMessage(playerid, -1, buf144a);
+		sprintf(msg144, "colors: %d, %d", veh->col1, veh->col2);
+		SendClientMessage(playerid, -1, msg144);
 	}
 	return 1;
 }
@@ -264,13 +261,12 @@ int cmd_helpkeys(CMDPARAMS)
 static
 int cmd_me(CMDPARAMS)
 {
-	char *from;
-	cell *to;
+	char *to, *from;
 	int hascontent = 0;
+	char msg[150 + MAX_PLAYER_NAME];
 
-	csprintf(buf4096, "* %s", pdata[playerid]->name);
 	from = (char*) cmdtext + 3;
-	to = buf4096 + 2 + pdata[playerid]->namelen;
+	to = msg + sprintf(msg, "* %s", pdata[playerid]->name);
 	while ((*to = *from)) {
 		if (*from != ' ') {
 			hascontent = 1;
@@ -279,12 +275,10 @@ int cmd_me(CMDPARAMS)
 		to++;
 	}
 	if (hascontent) {
-		buf4096[144] = 0;
-		NC_SendClientMessageToAll(-1, buf4096a);
+		SendClientMessageToAll(-1, msg);
 		echo_on_game_chat_or_action(1, playerid, (char*) cmdtext + 4);
 	} else {
-		B144((char*) WARN"Syntax: /me <action>");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /me <action>");
 	}
 	return 1;
 }
@@ -299,10 +293,8 @@ int cmd_park(CMDPARAMS)
 	vehicleid = NC_GetPlayerVehicleID(playerid);
 	if (vehicleid) {
 		veh = gamevehicles[vehicleid].dbvehicle;
-		if (!veh_can_player_modify_veh(playerid, veh))
-		{
-			B144((char*) MSG_VEH_PARK_N);
-			NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		if (!veh_can_player_modify_veh(playerid, veh)) {
+			SendClientMessage(playerid, COL_WARN, WARN"You are not allowed to park this vehicle");
 			return 1;
 		}
 		lastrot = veh->pos.r;
@@ -327,23 +319,20 @@ int cmd_park(CMDPARAMS)
 			veh->pos.r,
 			veh->id);
 		NC_mysql_tquery_nocb(buf144a);
-		B144((char*) MSG_VEH_PARK_Y);
-		NC_SendClientMessage(playerid, COL_SUCC, buf144a);
+		SendClientMessage(playerid, COL_SUCC, SUCC"Vehicle parked!");
 	}
 	return 1;
 }
 
-static const char* NO_RECLASSSPAWN =
-	WARN"You cannot reclass/respawn while on a mission. "
-	"Use /s to cancel your current mission for a fee "
-	"($"EQ(MISSION_CANCEL_FINE)").";
+#define NO_RECLASSSPAWN WARN"You cannot reclass/respawn while on a mission. "\
+			"Use /s to cancel your current mission for a fee "\
+			"($"EQ(MISSION_CANCEL_FINE)")."
 
 static
 int cmd_reclass(CMDPARAMS)
 {
 	if (missions_is_player_on_mission(playerid)) {
-		B144((char*) NO_RECLASSSPAWN);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, NO_RECLASSSPAWN);
 	} else {
 		spawned[playerid] = 0;
 		NC_ForceClassSelection(playerid);
@@ -358,8 +347,7 @@ static
 int cmd_respawn(CMDPARAMS)
 {
 	if (missions_is_player_on_mission(playerid)) {
-		B144((char*) NO_RECLASSSPAWN);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, NO_RECLASSSPAWN);
 	} else {
 		natives_SpawnPlayer(playerid);
 	}
@@ -383,8 +371,7 @@ int cmd_spray(CMDPARAMS)
 	if (vehicleid) {
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (!veh_can_player_modify_veh(playerid, veh)) {
-			B144((char*) MSG_VEH_SPRAY_N);
-			NC_SendClientMessage(playerid, COL_WARN, buf144a);
+			SendClientMessage(playerid, COL_WARN, WARN"You are not allowed to respray this vehicle");
 			return 1;
 		}
 		a = b = NULL;
@@ -431,7 +418,9 @@ The /tickrate command to print the server's current tick rate.
 static
 int cmd_tickrate(CMDPARAMS)
 {
-	csprintf(buf32, "%d", (int) NC_GetServerTickRate());
-	NC_SendClientMessage(playerid, -1, buf32a);
+	char msg144[144];
+
+	sprintf(msg144, "%d", (int) NC_GetServerTickRate());
+	SendClientMessage(playerid, -1, msg144);
 	return 1;
 }

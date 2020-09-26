@@ -150,8 +150,7 @@ void chpw_cb_password_updated(void *data)
 
 	common_hide_gametext_for_player(playerid);
 	dialog_end_transaction(playerid, TRANSACTION_CHANGEPASS);
-	B144(SUCC"Password changed!");
-	NC_SendClientMessage(playerid, COL_SUCC, buf144a);
+	SendClientMessage(playerid, COL_SUCC, SUCC"Password changed!");
 }
 
 /**

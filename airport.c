@@ -253,8 +253,6 @@ additional dialog with information about the selected airport.
 static
 int airport_cmd_nearest(CMDPARAMS)
 {
-	static const char *NONE = WARN"No airports!";
-
 	int i = 0;
 	int num = 0;
 	struct vec3 playerpos;
@@ -277,8 +275,7 @@ int airport_cmd_nearest(CMDPARAMS)
 		i++;
 	}
 	if (num == 0) {
-		B144((char*) NONE);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"No airports!");
 		return 1;
 	}
 	qsort(aps, num, sizeof(struct APREF), sortaprefs);

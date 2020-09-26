@@ -136,11 +136,8 @@ void class_on_player_request_class(int playerid, int _classid)
 
 int class_on_player_request_spawn(int playerid)
 {
-	static const char *NO_TRUCK = WARN"Trucker class is not available yet.";
-
 	if (classid[playerid] == CLASS_TRUCKER) {
-		B144((char*) NO_TRUCK);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"Trucker class is not available yet.");
 		return 0;
 	}
 	common_hide_gametext_for_player(playerid);

@@ -11,9 +11,6 @@
 #define FUEL_BASE_COST 75
 #define FUEL_PCT_COST 10
 
-static const char *MSG_REFUEL_NEED_SVP =
-	WARN"You need to be at a service point to do this!";
-
 struct SERVICEPOINT {
 	int id;
 	struct vec3 pos;
@@ -99,10 +96,11 @@ int svp_cmd_refuel(CMDPARAMS)
 	struct VEHICLEPARAMS vparams;
 	struct dbvehicle *veh;
 	struct vec3 vpos;
-	int vehicleid, driverid, budget, svpid, msgcol, cost, refuelpct;
+	int vehicleid, driverid, budget, svpid, cost, refuelpct;
 	int driveruserid;
 	float capacity, refuelamount;
-	char *msg, buf1[10];
+	char buf1[10];
+	char msg144[144];
 
 	vehicleid = veh_GetPlayerVehicle(playerid, NULL, &veh);
 	if (!vehicleid || veh == NULL) {
@@ -111,33 +109,29 @@ int svp_cmd_refuel(CMDPARAMS)
 
 	common_GetVehicleParamsEx(vehicleid, &vparams);
 	if (vparams.engine) {
-		msgcol = COL_WARN;
-		msg = "The engine must be turned off first. "
-			"Press n or check out /helpkeys";
-		goto retmsg;
+		SendClientMessage(playerid, COL_WARN, WARN"The engine must be turned off first. Press n or check out /helpkeys");
+		return 1;
 	}
 
 	common_GetVehiclePos(vehicleid, &vpos);
 	svpid = svp_find_point(vpos);
 	if (svpid == -1) {
-		msgcol = COL_WARN;
-		msg = (char*) MSG_REFUEL_NEED_SVP;
-		goto retmsg;
+		SendClientMessage(playerid, COL_WARN, WARN"You need to be at a service point to do this!");
+		return 1;
 	}
 
 	capacity = model_fuel_capacity(veh->model);
 	refuelamount = capacity - veh->fuel;
 	refuelpct = (int) (100.0f * refuelamount / capacity);
 	if (refuelpct <= 0) {
-		sprintf(cbuf4096,
+		sprintf(msg144,
 		        WARN"Refueling is not needed yet! "
 			"Capacity: %.0f/%.0f (%.0f'/.)",
 		        veh->fuel,
 		        capacity,
 			100.0f * veh->fuel / capacity);
-		msg = cbuf4096;
-		msgcol = COL_WARN;
-		goto retmsg;
+		SendClientMessage(playerid, COL_WARN, msg144);
+		return 1;
 	}
 
 	cost = FUEL_BASE_COST + FUEL_PCT_COST * refuelpct;
@@ -145,15 +139,14 @@ int svp_cmd_refuel(CMDPARAMS)
 	if (cost > budget) {
 		refuelpct = (budget - FUEL_BASE_COST) / FUEL_PCT_COST;
 		if (refuelpct < 1.0f) {
-			sprintf(cbuf4096,
+			sprintf(msg144,
 			        WARN"You can't pay the refuel fee! "
 				"Capacity: %.0f/%.0f (%.0f'/.)",
 			        veh->fuel,
 			        capacity,
 				100.0f * veh->fuel / capacity);
-			msg = cbuf4096;
-			msgcol = COL_WARN;
-			goto retmsg;
+			SendClientMessage(playerid, COL_WARN, msg144);
+			return 1;
 		}
 		refuelamount = refuelpct * capacity / 100.0f;
 		cost = FUEL_BASE_COST + FUEL_PCT_COST * refuelpct;
@@ -166,7 +159,7 @@ int svp_cmd_refuel(CMDPARAMS)
 
 	veh->fuel += refuelamount;
 
-	csprintf(buf144,
+	sprintf(msg144,
 		INFO"Your vehicle has been %s refueled for $%d (+%d'/.) "
 		"capacity: %.0f/%.0f (%.0f'/.)",
 	        buf1,
@@ -175,7 +168,7 @@ int svp_cmd_refuel(CMDPARAMS)
 	        veh->fuel,
 	        capacity,
 		100.0f * veh->fuel / capacity);
-	NC_SendClientMessage(playerid, COL_INFO, buf144a);
+	SendClientMessage(playerid, COL_INFO, msg144);
 
 	if (NC_GetPlayerVehicleSeat(playerid) != 0) {
 		driverid = common_find_player_in_vehicle_seat(vehicleid, 0);
@@ -183,11 +176,11 @@ int svp_cmd_refuel(CMDPARAMS)
 			driveruserid = -1;
 		} else {
 			driveruserid = userid[driverid];
-			csprintf(buf144,
+			sprintf(msg144,
 				INFO"Player %s[%d] refueled your vehicle!",
 				pdata[playerid]->name,
 				playerid);
-			NC_SendClientMessage(driverid, COL_INFO, buf144a);
+			SendClientMessage(driverid, COL_INFO, msg144);
 		}
 	} else {
 		driverid = playerid;
@@ -212,10 +205,6 @@ int svp_cmd_refuel(CMDPARAMS)
 
 	missions_on_vehicle_refueled(vehicleid, refuelamount);
 	return 1;
-retmsg:
-	B144(msg);
-	NC_SendClientMessage(playerid, msgcol, buf144a);
-	return 1;
 }
 
 /**
@@ -228,9 +217,9 @@ int svp_cmd_repair(CMDPARAMS)
 {
 	struct dbvehicle *veh;
 	struct vec3 vpos;
-	int vehicleid, driverid, driveruserid, budget, svpid, msgcol, cost;
+	int vehicleid, driverid, driveruserid, budget, svpid, cost;
 	float hp, fixamount;
-	char *msg;
+	char msg144[144];
 
 	vehicleid = veh_GetPlayerVehicle(playerid, NULL, &veh);
 	if (!vehicleid) {
@@ -240,16 +229,14 @@ int svp_cmd_repair(CMDPARAMS)
 	common_GetVehiclePos(vehicleid, &vpos);
 	svpid = svp_find_point(vpos);
 	if (svpid == -1) {
-		msgcol = COL_WARN;
-		msg = (char*) MSG_REFUEL_NEED_SVP;
-		goto retmsg;
+		SendClientMessage(playerid, COL_WARN, WARN"You need to be at a service point to do this!");
+		return 1;
 	}
 
 	hp = anticheat_GetVehicleHealth(vehicleid);
 	if (hp > 999.9f) {
-		msgcol = COL_WARN;
-		msg = WARN"Your vehicle doesn't need to be repaired!";
-		goto retmsg;
+		SendClientMessage(playerid, COL_WARN, WARN"Your vehicle doesn't need to be repaired!");
+		return 1;
 	}
 
 	fixamount = 1000.0f - hp;
@@ -258,20 +245,15 @@ int svp_cmd_repair(CMDPARAMS)
 	if (cost > budget) {
 		fixamount = (float) ((budget - FIX_BASE_COST) / FIX_HP_COST);
 		if (fixamount <= 0.0f) {
-			msg = WARN"You can't afford the repair fee!";
-			msgcol = COL_WARN;
-			goto retmsg;
+			SendClientMessage(playerid, COL_WARN, WARN"You can't afford the repair fee!");
+			return 1;
 		}
 		cost = FIX_BASE_COST + FIX_HP_COST * (int) fixamount;
-		csprintf(buf144,
-			INFO"Your vehicle has been partially repaired for $%d",
-			cost);
+		sprintf(msg144, INFO"Your vehicle has been partially repaired for $%d", cost);
 	} else {
-		csprintf(buf144,
-			INFO"Your vehicle has been fully repaired for $%d",
-			cost);
+		sprintf(msg144, INFO"Your vehicle has been fully repaired for $%d", cost);
 	}
-	NC_SendClientMessage(playerid, COL_INFO, buf144a);
+	SendClientMessage(playerid, COL_INFO, msg144);
 
 	hp += fixamount;
 	money_take(playerid, cost);
@@ -289,11 +271,8 @@ int svp_cmd_repair(CMDPARAMS)
 			driveruserid = -1;
 		} else {
 			driveruserid = userid[driverid];
-			csprintf(buf144,
-				INFO"Player %s[%d] repaired your vehicle!",
-				pdata[playerid]->name,
-				playerid);
-			NC_SendClientMessage(driverid, COL_INFO, buf144a);
+			sprintf(msg144, INFO"Player %s[%d] repaired your vehicle!", pdata[playerid]->name, playerid);
+			SendClientMessage(driverid, COL_INFO, msg144);
 		}
 	} else {
 		driverid = playerid;
@@ -318,10 +297,6 @@ int svp_cmd_repair(CMDPARAMS)
 	}
 
 	missions_on_vehicle_repaired(vehicleid, fixamount, hp);
-	return 1;
-retmsg:
-	B144(msg);
-	NC_SendClientMessage(playerid, msgcol, buf144a);
 	return 1;
 }
 

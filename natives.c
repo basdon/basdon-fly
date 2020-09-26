@@ -68,8 +68,6 @@ static AMX_NATIVE n_ResetPlayerMoney_;
 static AMX_NATIVE n_RepairVehicle;
 static AMX_NATIVE n_RemovePlayerMapIcon;
 static AMX_NATIVE n_SHA256_PassHash;
-static AMX_NATIVE n_SendClientMessage;
-static AMX_NATIVE n_SendClientMessageToAll;
 static AMX_NATIVE n_SendRconCommand;
 static AMX_NATIVE n_SetCameraBehindPlayer;
 static AMX_NATIVE n_SetGameModeText;
@@ -360,15 +358,6 @@ static cell tmpfloat;
 	nc_params[3]=DEST,nc_params[4]=MAXLEN,\
 	n_SHA256_PassHash(amx,nc_params))
 
-#define NC_SendClientMessage(PLAYERID,COLOR,BUF) \
-	(NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=COLOR,nc_params[3]=BUF,\
-	n_SendClientMessage(amx,nc_params))
-
-#define NC_SendClientMessageToAll(COLOR,BUF) \
-	(NC_PARS_(2)nc_params[1]=COLOR,nc_params[2]=BUF,\
-	n_SendClientMessageToAll(amx,nc_params))
-
 #define NC_SendRconCommand(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
 	n_SendRconCommand(amx,nc_params))
 
@@ -610,8 +599,6 @@ int natives_find()
 		N(RepairVehicle),
 		N_(ResetPlayerMoney),
 		N(SHA256_PassHash),
-		N(SendClientMessage),
-		N(SendClientMessageToAll),
 		N(SendRconCommand),
 		N(SetCameraBehindPlayer),
 		N(SetGameModeText),

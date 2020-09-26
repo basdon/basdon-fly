@@ -26,8 +26,7 @@ static const int numprotips = sizeof(protips)/sizeof(protips[0]);
 static
 int protips_timed_broadcast(void *data)
 {
-	B144((char*) protips[NC_random(numprotips)]);
-	NC_SendClientMessageToAll(COL_INFO_LIGHT, buf144a);
+	SendClientMessageToAll(COL_INFO_LIGHT, (char*) protips[NC_random(numprotips)]);
 	return PROTIPS_INTERVAL;
 }
 
@@ -40,7 +39,6 @@ void protips_init()
 static
 int protips_cmd_protip(CMDPARAMS)
 {
-	B144((char*) protips[NC_random(numprotips)]);
-	NC_SendClientMessage(playerid, COL_INFO_LIGHT, buf144a);
+	SendClientMessage(playerid, COL_INFO_LIGHT, (char*) protips[NC_random(numprotips)]);
 	return 1;
 }

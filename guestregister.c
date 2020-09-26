@@ -133,6 +133,7 @@ static
 void guestreg_cb_registered(void *data)
 {
 	int playerid;
+	char msg144[144];
 
 	playerid = PLAYER_CC_GETID(data);
 	if (!PLAYER_CC_CHECK(data, playerid)) {
@@ -141,14 +142,9 @@ void guestreg_cb_registered(void *data)
 
 	common_hide_gametext_for_player(playerid);
 	dialog_end_transaction(playerid, TRANSACTION_GUESTREGISTER);
-	B144(SUCC"Your account has been registered and "
-		"your stats are saved, welcome!");
-	NC_SendClientMessage(playerid, COL_SUCC, buf144a);
-	csprintf(buf144,
-		"Guest %s[%d] just registered their account, welcome!",
-		pdata[playerid]->name,
-		playerid);
-	NC_SendClientMessageToAll(COL_JOIN, buf144a);
+	SendClientMessage(playerid, COL_SUCC, SUCC"Your account has been registered and your stats are saved, welcome!");
+	sprintf(msg144, "Guest %s[%d] just registered their account, welcome!", pdata[playerid]->name, playerid);
+	SendClientMessageToAll(COL_JOIN, msg144);
 }
 
 /**
@@ -203,8 +199,7 @@ void guestreg_cb_check_username_exists(void *data)
 		return;
 	}
 
-	B144("Failed to change your name.");
-	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	SendClientMessage(playerid, COL_WARN, WARN"Failed to change your name.");
 	dialog_end_transaction(playerid, TRANSACTION_GUESTREGISTER);
 }
 
@@ -250,9 +245,8 @@ static
 int guestreg_cmd_register(CMDPARAMS)
 {
 	if (sessionid[playerid] == -1 || userid[playerid] == -1) {
-		B144(WARN"Your guest session is not linked to a guest "
-			"account. Please reconnect if you want to register.");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN,
+			WARN"Your guest session is not linked to a guest account. Please reconnect if you want to register.");
 	} else {
 		guestreg_show_dialog_namechange(playerid, 0, 0);
 	}

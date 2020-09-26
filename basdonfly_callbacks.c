@@ -277,27 +277,29 @@ static
 cell AMX_NATIVE_CALL B_OnIncomingConnection(AMX *amx, cell *params)
 {
 	int i, playerid;
+	char msg144[144];
+	short msg_playerids[MAX_PLAYERS];
+	int num_msg_playerids;
 
 	joinpressure += JOINPRESSURE_INC;
 	if (joinpressure > JOINPRESSURE_MAX && !minconnectiontime) {
 		set_minconnectiontime(
 			(void*) JOINPRESSURE_SLOWMODE_MINCONNECTIONTIME);
 		timer_set(JOINPRESSURE_SLOWMODE_LEN, set_minconnectiontime, 0);
-		csprintf(buf144,
+		sprintf(msg144,
 			WARN"too many joins; throttling incoming connections "
 			"next %dms to one per %dms",
 			JOINPRESSURE_SLOWMODE_LEN,
 			JOINPRESSURE_SLOWMODE_MINCONNECTIONTIME);
-		NC_PARS(3);
-		nc_params[2] = COL_WARN;
-		nc_params[3] = buf144a;
+		num_msg_playerids = 0;
 		for (i = 0; i < playercount; i++) {
 			playerid = players[i];
 			if (GROUPS_ISADMIN(pdata[playerid]->groups)) {
-				nc_params[1] = playerid;
-				NC(n_SendClientMessage);
+				msg_playerids[num_msg_playerids] = playerid;
+				num_msg_playerids++;
 			}
 		}
+		SendClientMessageToBatch(msg_playerids, num_msg_playerids, COL_WARN, msg144);
 	}
 	return 1;
 }
@@ -343,8 +345,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	const int playerid = PARAM(1);
 
 #ifdef DEV
-	B144("DEVELOPMENT BUILD");
-	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	SendClientMessage(playerid, COL_WARN, "DEVELOPMENT BUILD");
 #endif /*DEV*/
 
 	/*do not remove so callbacks can validate*/

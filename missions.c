@@ -1193,10 +1193,10 @@ void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh)
 		playerid = players[i];
 		mission = activemission[playerid];
 		if (mission != NULL && mission->veh == veh) {
-			B144(WARN" Your mission vehicle has been destroyed, "
+			SendClientMessage(playerid, COL_WARN,
+				WARN" Your mission vehicle has been destroyed, "
 				"your mission has been aborted and you have "
 				"been fined $"EQ(MISSION_CANCEL_FINE)".");
-			NC_SendClientMessage(playerid, COL_WARN, buf144a);
 			NC_DisablePlayerRaceCheckpoint(playerid);
 			money_take(playerid, MISSION_CANCEL_FINE);
 			missions_end_unfinished(playerid, MISSION_STATE_ABANDONED);
@@ -1529,6 +1529,8 @@ int missions_after_unload(void *data)
 	int totaltime, duration_h, duration_m, extra_damage_taken;
 	int i;
 	char *dlg, *dlgbase;
+	short missionmsg_playerids[MAX_PLAYERS];
+	int num_missionmsg_playerids;
 
 	mission_cb_data = (struct MISSION_UNLOAD_DATA*) data;
 	playerid = PLAYER_CC_GETID(mission_cb_data->player_cc);
@@ -1609,17 +1611,14 @@ int missions_after_unload(void *data)
 	        duration_h,
 	        duration_m);
 	echo_on_flight_finished(cbuf4096);
-	atoci(buf4096, i);
-	NC_PARS(3);
-	nc_params[2] = COL_MISSION;
-	nc_params[3] = buf4096a;
-	i = playercount;
-	while (i--) {
+	num_missionmsg_playerids = 0;
+	for (i = 0; i < playercount; i++) {
 		if (prefs[players[i]] & PREF_SHOW_MISSION_MSGS) {
-			nc_params[1] = players[i];
-			NC(n_SendClientMessage);
+			missionmsg_playerids[num_missionmsg_playerids] = players[i];
+			num_missionmsg_playerids++;
 		}
 	}
+	SendClientMessageToBatch(missionmsg_playerids, num_missionmsg_playerids, COL_MISSION, cbuf4096);
 
 	csprintf(buf4096,
 		"UPDATE flg SET tunload=UNIX_TIMESTAMP(),"
@@ -1928,8 +1927,6 @@ Aliases: /s
 static
 int missions_cmd_cancelmission(CMDPARAMS)
 {
-	static const char *NOMISSION = WARN"You're not on an active mission.";
-
 	struct MISSION *mission;
 
 	if ((mission = activemission[playerid]) != NULL) {
@@ -1942,8 +1939,7 @@ int missions_cmd_cancelmission(CMDPARAMS)
 		money_take(playerid, MISSION_CANCEL_FINE);
 		missions_end_unfinished(playerid, MISSION_STATE_DECLINED);
 	} else {
-		B144((char*) NOMISSION);
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"You're not on an active mission.");
 	}
 	return 1;
 }

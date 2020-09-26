@@ -8,16 +8,14 @@ int cmd_admin_getcar(CMDPARAMS)
 	int vehicleid;
 
 	if (!cmd_get_int_param(cmdtext, &parseidx, &vehicleid)) {
-		B144(WARN" Syntax: //getcar <vehicleid>");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN" Syntax: //getcar <vehicleid>");
 	} else {
 		common_GetPlayerPosRot(playerid, &ppos);
 		if (common_SetVehiclePos(vehicleid, &ppos.coords)) {
 			natives_PutPlayerInVehicle(playerid, vehicleid, 0);
 			NC_SetVehicleZAngle(vehicleid, ppos.r);
 		} else {
-			B144(WARN" Invalid vehicleid");
-			NC_SendClientMessage(playerid, COL_WARN, buf144a);
+			SendClientMessage(playerid, COL_WARN, WARN" Invalid vehicleid");
 		}
 	}
 	return 1;
@@ -234,8 +232,7 @@ void admin_dlg_vehinfo_assign_response(int pid, int res, int listitem)
 			atoci(buf4096, b - cbuf4096);
 			NC_mysql_tquery_nocb(buf4096a);
 		} else {
-			B144(WARN" Invalid vehicle");
-			NC_SendClientMessage(pid, COL_WARN, buf144a);
+			SendClientMessage(pid, COL_WARN, WARN" Invalid vehicle");
 		}
 	}
 	admin_vehinfo_show(pid);

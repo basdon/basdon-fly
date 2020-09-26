@@ -29,8 +29,7 @@ int cmd_dev_gt(CMDPARAMS)
 		B144(cbuf4096);
 		NC_GameTextForPlayer(playerid, buf144a, 4000, style);
 	} else {
-		B144(WARN"Syntax: /gt <style> <text>");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /gt <style> <text>");
 	}
 	return 1;
 }
@@ -139,8 +138,7 @@ The /kickme commands kicks the player.
 static
 int cmd_dev_kickme(CMDPARAMS)
 {
-	B144("you're kicked, bye");
-	NC_SendClientMessage(playerid, -1, buf144a);
+	SendClientMessage(playerid, -1, "you're kicked, bye");
 	natives_Kick(playerid, "requested \n''\n \0 ok", NULL, -1);
 	return 1;
 }
@@ -168,6 +166,7 @@ static
 int cmd_dev_v(CMDPARAMS)
 {
 	int modelid = -1;
+	char msg144[144];
 
 	if (!cmd_get_vehiclemodel_param(cmdtext, &parseidx, &modelid)) {
 		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /v <modelid|modelname>");
@@ -191,11 +190,8 @@ int cmd_dev_v(CMDPARAMS)
 	nc_params[9] = 0;
 	devvehicle = NC(n_CreateVehicle_);
 	natives_PutPlayerInVehicle(playerid, devvehicle, 0);
-	csprintf(buf144, "%d - %s - %s",
-		modelid,
-		vehmodelnames[modelid - 400],
-		vehnames[modelid - 400]);
-	NC_SendClientMessage(playerid, -1, buf144a);
+	sprintf(msg144, "%d - %s - %s", modelid, vehmodelnames[modelid - 400], vehnames[modelid - 400]);
+	SendClientMessage(playerid, -1, msg144);
 	return 1;
 }
 
@@ -207,8 +203,7 @@ int cmd_dev_sound(CMDPARAMS)
 {
 	int soundid;
 	if (!cmd_get_int_param(cmdtext, &parseidx, &soundid)) {
-		B144(WARN"Syntax: /sound <soundid>");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /sound <soundid>");
 	} else {
 		NC_PlayerPlaySound0(playerid, soundid);
 	}
@@ -223,16 +218,12 @@ int cmd_dev_vdamage(CMDPARAMS)
 {
 	struct VEHICLEDAMAGE vdmg;
 	int vehicleid;
+	char msg144[144];
 
 	vehicleid = NC_GetPlayerVehicleID(playerid);
 	common_GetVehicleDamageStatus(vehicleid, &vdmg);
-	csprintf(buf144,
-		"panels %X doors %X lights %02X tires %02X",
-		vdmg.panels,
-		vdmg.doors,
-		vdmg.lights,
-		vdmg.tires);
-	NC_SendClientMessageToAll(-1, buf144a);
+	sprintf(msg144, "panels %X doors %X lights %02X tires %02X", vdmg.panels, vdmg.doors, vdmg.lights, vdmg.tires);
+	SendClientMessageToAll(-1, msg144);
 	return 1;
 }
 

@@ -450,11 +450,6 @@ float model_fuel_usage(int modelid)
 	}
 }
 
-static const char *MSG_FUEL_0 = WARN"Your vehicle ran out of fuel!";
-static const char *MSG_FUEL_5 = WARN"Your vehicle has 5%% fuel left!";
-static const char *MSG_FUEL_10 = WARN"Your vehicle has 10%% fuel left!";
-static const char *MSG_FUEL_20 = WARN"Your vehicle has 20%% fuel left!";
-
 /**
 Make given vehicle consumer fuel. Should be called every second.
 
@@ -478,17 +473,16 @@ void veh_consume_fuel(int playerid, int vehicleid, int throttle,
 	if (lastpercentage > 0.0f && newpercentage == 0.0f) {
 		vparams->engine = 0;
 		common_SetVehicleParamsEx(vehicleid, vparams);
-		B144((char*) MSG_FUEL_0);
+		SendClientMessage(playerid, COL_WARN, WARN"Your vehicle ran out of fuel!");
 	} else if (lastpercentage > 0.05f && newpercentage <= 0.05f) {
-		B144((char*) MSG_FUEL_5);
+		SendClientMessage(playerid, COL_WARN, WARN"Your vehicle has 5% fuel left!");
 	} else if (lastpercentage > 0.1f && newpercentage <= 0.1f) {
-		B144((char*) MSG_FUEL_10);
+		SendClientMessage(playerid, COL_WARN, WARN"Your vehicle has 10% fuel left!");
 	} else if (lastpercentage > 0.2f && newpercentage <= 0.2f) {
-		B144((char*) MSG_FUEL_20);
+		SendClientMessage(playerid, COL_WARN, WARN"Your vehicle has 20% fuel left!");
 	} else {
 		return;
 	}
-	NC_SendClientMessage(playerid, COL_WARN, buf144a);
 	NC_PlayerPlaySound0(playerid, FUEL_WARNING_SOUND);
 }
 
@@ -541,14 +535,14 @@ If player is already inside, this will instantly eject them.
 static
 void veh_disallow_player_in_vehicle(int playerid, struct dbvehicle *v)
 {
+	char msg144[144];
+
 	/*when player is entering, this stops them*/
 	/*when player is already in, this should instantly eject the player*/
 	NC_ClearAnimations(playerid, 1);
 
-	csprintf(buf4096,
-		WARN"This vehicle belongs to %s!",
-		v->ownerstring + v->ownerstringowneroffset);
-	NC_SendClientMessage(playerid, COL_WARN, buf144a);
+	sprintf(msg144, WARN"This vehicle belongs to %s!", v->ownerstring + v->ownerstringowneroffset);
+	SendClientMessage(playerid, COL_WARN, msg144);
 }
 
 int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh)
@@ -623,12 +617,6 @@ Pre: playerid is the driver of vehicleid and pressed the engine key.
 static
 void veh_start_or_stop_engine(int playerid, int vehicleid)
 {
-	static const char
-		*NOFUEL = WARN"The engine cannot be started, there is no fuel!",
-		*MOVING = WARN"The engine cannot be shut down while moving!",
-		*STARTED = INFO"Engine started",
-		*STOPPED = INFO"Engine stopped";
-
 	struct VEHICLEPARAMS vpars;
 	struct dbvehicle *veh;
 	struct vec3 vvel;
@@ -636,26 +624,21 @@ void veh_start_or_stop_engine(int playerid, int vehicleid)
 	common_GetVehicleParamsEx(vehicleid, &vpars);
 	if (vpars.engine) {
 		common_GetVehicleVelocity(vehicleid, &vvel);
-		if (common_vectorsize_sq(vvel) > MAX_ENGINE_CUTOFF_VEL_SQ)
-		{
-			B144((char*) MOVING);
-			NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		if (common_vectorsize_sq(vvel) > MAX_ENGINE_CUTOFF_VEL_SQ) {
+			SendClientMessage(playerid, COL_WARN, WARN"The engine cannot be shut down while moving!");
 		} else {
 			vpars.engine = 0;
 			common_SetVehicleParamsEx(vehicleid, &vpars);
-			B144((char*) STOPPED);
-			NC_SendClientMessage(playerid, COL_INFO, buf144a);
+			SendClientMessage(playerid, COL_INFO, INFO"Engine stopped");
 		}
 	} else {
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (veh != NULL && veh->fuel == 0.0f) {
-			B144((char*) NOFUEL);
-			NC_SendClientMessage(playerid, COL_WARN, buf144a);
+			SendClientMessage(playerid, COL_WARN, WARN"The engine cannot be started, there is no fuel!");
 		} else {
 			vpars.engine = 1;
 			common_SetVehicleParamsEx(vehicleid, &vpars);
-			B144((char*) STARTED);
-			NC_SendClientMessage(playerid, COL_INFO, buf144a);
+			SendClientMessage(playerid, COL_INFO, INFO"Engine started");
 		}
 	}
 }
@@ -689,8 +672,7 @@ void veh_on_player_now_driving(int playerid, int vehicleid, struct dbvehicle *ve
 	reqenginestate = veh == NULL || veh->fuel > 0.0f;
 	common_set_vehicle_engine(vehicleid, reqenginestate);
 	if (!reqenginestate) {
-		B144(WARN"This vehicle is out of fuel!");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"This vehicle is out of fuel!");
 	}
 }
 

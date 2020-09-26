@@ -37,36 +37,27 @@ Sends a pm. Target player is assumed to be online.
 static
 void pm_send(int from, int to, char *msg)
 {
-	static const char
-		*FROM_DIS = WARN"Your PMs are disabled, use /p to enable them.",
-		*TO_DIS = WARN"That player has PMs disabled.",
-		*REPLYHINT = INFO"Use /r to quickly reply to the message.";
+	char msg288[288];
 
 	if (!(prefs[from] & PREF_ENABLE_PM)) {
-		B144((char*) FROM_DIS);
-		goto errmsg;
+		SendClientMessage(from, COL_WARN, WARN"Your PMs are disabled, use /p to enable them.");
+		return;
 	}
 	if (!(prefs[to] & PREF_ENABLE_PM)) {
-		B144((char*) TO_DIS);
-		goto errmsg;
+		SendClientMessage(from, COL_WARN, WARN"That player has PMs disabled.");
+		return;
 	}
-	/*using buf4096 to not overflow 144 since formatted str might be long*/
-	csprintf(buf4096, ">> %s(%d): %s", pdata[to]->name, to, msg);
-	buf4096[143] = 0; /*message won't send if too long*/
-	NC_SendClientMessage(from, COL_PRIVMSG, buf4096a);
-	csprintf(buf4096, "** %s(%d): %s", pdata[from]->name, from, msg);
-	buf4096[143] = 0; /*message won't send if too long*/
-	NC_SendClientMessage(to, COL_PRIVMSG, buf4096a);
+
+	sprintf(msg288, ">> %s(%d): %s", pdata[to]->name, to, msg);
+	SendClientMessage(from, COL_PRIVMSG, msg288);
+	sprintf(msg288, "** %s(%d): %s", pdata[from]->name, from, msg);
+	SendClientMessage(to, COL_PRIVMSG, msg288);
+
 	NC_PlayerPlaySound0(to, 1139 /*SOUND_CHECKPOINT_RED*/);
 	if (lastpmtarget[to] == LAST_PMTARGET_NOBODY) {
-		B144((char*) REPLYHINT);
-		NC_SendClientMessage(to, COL_PRIVMSG_HINT, buf144a);
+		SendClientMessage(to, COL_PRIVMSG_HINT, INFO"Use /r to quickly reply to the message.");
 	}
 	lastpmtarget[to] = from;
-	return;
-errmsg:
-	NC_SendClientMessage(from, COL_WARN, buf144a);
-	return;
 }
 
 /**
@@ -77,19 +68,15 @@ Sends a pm to given player.
 static
 int pm_cmd_pm(CMDPARAMS)
 {
-	static const char
-		*SYNERR = WARN"Syntax: /pm [id/name] [message]",
-		*NOTONLINE = WARN"That player is not online.";
-
 	int targetid;
 
 	if (!cmd_get_player_param(cmdtext, &parseidx, &targetid)) {
-synerr:		B144((char*) SYNERR);
-		goto errmsg;
+synerr:
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /pm [id/name] [message]");
+		return 1;
 	}
 	if (targetid == INVALID_PLAYER_ID) {
-		B144((char*) NOTONLINE);
-errmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"That player is not online.");
 		return 1;
 	}
 	while (cmdtext[parseidx] == ' ') {
@@ -111,30 +98,24 @@ Sends a reply pm to the player that last sent a pm to the invoker.
 static
 int pm_cmd_r(CMDPARAMS)
 {
-	static const char
-		*SYN = WARN"Syntax: /r [message]",
-		*NOTARGET = WARN"Nobody has sent you a PM yet! "
-			"Use /pm [id/name] [message]",
-		*INVALID = WARN"The person who last sent you a PM left";
-
 	while (cmdtext[parseidx] == ' ') {
 		parseidx++;
 	}
+
 	if (cmdtext[parseidx]) {
 		switch (lastpmtarget[playerid]) {
 		case LAST_PMTARGET_NOBODY:
-			B144((char*) NOTARGET);
-			goto errmsg;
+			SendClientMessage(playerid, COL_WARN, WARN"Nobody has sent you a PM yet! Use /pm [id/name] [message]");
+			return 1;
 		case LAST_PMTARGET_INVALID:
-			B144((char*) INVALID);
-			goto errmsg;
+			SendClientMessage(playerid, COL_WARN, WARN"The person who last sent you a PM left");
+			return 1;
+		default:
+			pm_send(playerid, lastpmtarget[playerid], (char*) cmdtext + parseidx);
+			return 1;
 		}
-		pm_send(playerid, lastpmtarget[playerid],
-			(char*) cmdtext + parseidx);
-	} else {
-		B144((char*) SYN);
-errmsg:		NC_SendClientMessage(playerid, COL_WARN, buf144a);
-		return 1;
 	}
+
+	SendClientMessage(playerid, COL_WARN, WARN"Syntax: /r [message]");
 	return 1;
 }

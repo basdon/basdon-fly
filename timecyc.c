@@ -363,14 +363,14 @@ static unsigned long lasttime;
 #define WEATHER_TIMER_DEVIATION (3 * 60000)
 
 /**
-Formats the METAR weather message into buf144.
+Formats the METAR weather message.
 
 @param type should be either 'report' or 'forecast'
 */
 static
-void timecyc_fmt_metar_msg_into_buf144(const char* type, int weather)
+void timecyc_fmt_metar_msg(char *dest, const char* type, int weather)
 {
-	csprintf(buf144,
+	sprintf(dest,
 		"METAR weather %s: %s, "
 		"visibility: %s, winds: %.0fkts, waves: %s",
 		type,
@@ -414,6 +414,7 @@ static
 int timecyc_next_weather(void *unused)
 {
 	int newweather;
+	char msg144[144];
 
 	newweather = weather_mapping[NC_random(NEXT_WEATHER_POSSIBILITIES)];
 	if (weather.current != WEATHER_INITIAL) {
@@ -426,8 +427,8 @@ int timecyc_next_weather(void *unused)
 	}
 	timecyc_set_weather(newweather);
 	missions_on_weather_changed(newweather);
-	timecyc_fmt_metar_msg_into_buf144("forecast", newweather);
-	NC_SendClientMessageToAll(COL_METAR, buf144a);
+	timecyc_fmt_metar_msg(msg144, "forecast", newweather);
+	SendClientMessageToAll(COL_METAR, msg144);
 
 	return WEATHER_TIMER_INTERVAL + NC_random(WEATHER_TIMER_DEVIATION);
 }
@@ -440,12 +441,14 @@ Alias /weather.
 static
 int timecyc_cmd_metar(CMDPARAMS)
 {
+	char msg144[144];
+
 	if (weather.upcoming != weather.current) {
-		timecyc_fmt_metar_msg_into_buf144("forecast", weather.upcoming);
+		timecyc_fmt_metar_msg(msg144, "forecast", weather.upcoming);
 	} else {
-		timecyc_fmt_metar_msg_into_buf144("report", weather.current);
+		timecyc_fmt_metar_msg(msg144, "report", weather.current);
 	}
-	NC_SendClientMessage(playerid, COL_METAR, buf144a);
+	SendClientMessage(playerid, COL_METAR, msg144);
 	return 1;
 }
 
@@ -680,11 +683,9 @@ int timecyc_cmd_dev_fweather(CMDPARAMS)
 	if (cmd_get_int_param(cmdtext, &parseidx, &w)) {
 		weather.current = weather.locked = weather.upcoming = w;
 		timecyc_sync(playerid);
-		B144("forced weather");
-		NC_SendClientMessageToAll(-1, buf144a);
+		SendClientMessageToAll(-1, "forced weather");
 	} else {
-		B144(WARN"Syntax: /fweather <weather>");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /fweather <weather>");
 	}
 	return 1;
 }
@@ -695,7 +696,9 @@ Dev /timecyc to see current timecyc data.
 static
 int timecyc_cmd_dev_timecyc(CMDPARAMS)
 {
-	csprintf(buf144,
+	char msg144[144];
+
+	sprintf(msg144,
 		"%02d:%02d current %d upcoming %d locked %d "
 		"syncstate %d\n",
 		time_h,
@@ -704,7 +707,7 @@ int timecyc_cmd_dev_timecyc(CMDPARAMS)
 		weather.upcoming,
 		weather.locked,
 		timecycstate[playerid]);
-	NC_SendClientMessage(playerid, -1, buf144a);
+	SendClientMessage(playerid, -1, msg144);
 	return 1;
 }
 
@@ -718,11 +721,9 @@ int timecyc_cmd_dev_tweather(CMDPARAMS)
 
 	if (cmd_get_int_param(cmdtext, &parseidx, &w)) {
 		timecyc_set_weather(w);
-		B144("changing weather");
-		NC_SendClientMessageToAll(-1, buf144a);
+		SendClientMessageToAll(-1, "changing weather");
 	} else {
-		B144(WARN"Syntax: /tweather <weather>");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /tweather <weather>");
 	}
 	return 1;
 }
@@ -738,8 +739,7 @@ int cmd_dev_timex(CMDPARAMS)
 	if (!cmd_get_int_param(cmdtext, &parseidx, &h) ||
 		!cmd_get_int_param(cmdtext, &parseidx, &m))
 	{
-		B144(WARN"Syntax: /timex <h> <m>");
-		NC_SendClientMessage(playerid, COL_WARN, buf144a);
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /timex <h> <m>");
 	} else {
 		time_h = h;
 		time_m = m;
@@ -755,8 +755,7 @@ Dev /nweather to change the weather, as if it's called by the timer.
 static
 int timecyc_cmd_dev_nweather(CMDPARAMS)
 {
-	B144("changing weather");
-	NC_SendClientMessageToAll(-1, buf144a);
+	SendClientMessageToAll(-1, "changing weather");
 	timecyc_next_weather(NULL);
 	return 1;
 }

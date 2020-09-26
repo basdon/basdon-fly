@@ -119,63 +119,26 @@ void echo_on_game_chat_or_action(int t, int playerid, char *text)
 	}
 }
 
-/**
-Send text in buf4096 using SendClientToAll after sanitizing.
-
-Currently only replaces % characters to # characters.
-Also splits up message when it's too long.
-*/
-static
-void echo_sendclientmessage_buf4096_filtered(int color)
-{
-	int len;
-	cell tmp;
-	cell addr, *b;
-
-	len = 0;
-	addr = buf4096a;
-	b = buf4096;
-	/*escape stuff TODO: escape embedded colors?*/
-	while (*b != 0) {
-		if (*b == '%') {
-			*b = '#';
-		}
-		/*split up message when too long*/
-		if (len > 140) {
-			tmp = *b;
-			*b = 0;
-			NC_SendClientMessageToAll(COL_IRC, addr);
-			addr += len * 4;
-			len = 1;
-			*b = tmp;
-		}
-		b++;
-		len++;
-	}
-	NC_SendClientMessageToAll(color, addr);
-}
-
-static const char *BRIDGE_UP = "IRC bridge is up";
-static const char *BRIDGE_DOWN = "IRC bridge is down";
-
 void echo_on_receive(cell socket_handle, cell data_a,
 		     char *data, int len)
 {
+	/*An IRC message can be up to 512 chars*/
+	char msg512[512];
+
 	if (socket_handle == socket_in && len >= 4 &&
 		data[0] == 'F' && data[1] == 'L' && data[2] == 'Y')
 	{
 		switch (data[3]) {
 		case PACK_HELLO:
-			logprintf((char*) BRIDGE_UP);
-			B144((char*) BRIDGE_UP);
-			NC_SendClientMessageToAll(COL_IRC, buf144a);
+			logprintf("IRC bridge is up");
+			SendClientMessageToAll(COL_IRC, "IRC brige is up");
 			if (len == 8) {
 				data[3] = PACK_IMTHERE;
 				NC_ssocket_send(socket_out, data_a, 8);
 			}
 			break;
 		case PACK_IMTHERE:
-			logprintf((char*) BRIDGE_UP);
+			logprintf("IRC bridge is up");
 			/*no point printing this to chat, because this only
 			happens right after the server starts, thus nobody
 			is connected yet*/
@@ -188,10 +151,10 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			break;
 		/*game doesn't send PING packets, so not checking PONG*/
 		case PACK_BYE:
-			logprintf((char*) BRIDGE_DOWN);
+			logprintf("IRC bridge is down");
 			if (len == 4) {
-				B144((char*) BRIDGE_DOWN);
-				NC_SendClientMessageToAll(COL_IRC, buf144a);
+				/*TODO: why is this only sent when len is checked?*/
+				SendClientMessageToAll(COL_IRC, "IRC brige is down");
 			}
 			break;
 		case PACK_CHAT:
@@ -199,7 +162,7 @@ void echo_on_receive(cell socket_handle, cell data_a,
 		{
 			short msglen;
 			int nicklen, col;
-			cell *b;
+			char *b;
 
 			if (len < 10 ||
 				(nicklen = data[6]) < 1 || nicklen > 49 ||
@@ -209,12 +172,12 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			{
 				break;
 			}
-			buf4096[0] = 'I';
-			buf4096[1] = 'R';
-			buf4096[2] = 'C';
-			buf4096[3] = ':';
-			buf4096[4] = ' ';
-			b = buf4096 + 5;
+			msg512[0] = 'I';
+			msg512[1] = 'R';
+			msg512[2] = 'C';
+			msg512[3] = ':';
+			msg512[4] = ' ';
+			b = msg512 + 5;
 			if (data[3] == PACK_ACTION) {
 				*(b++) = '*';
 				*(b++) = ' ';
@@ -223,14 +186,16 @@ void echo_on_receive(cell socket_handle, cell data_a,
 				*(b++) = '<';
 				col = COL_IRC;
 			}
-			atoc(b, data + 8, nicklen + 1);
+			memcpy(b, data + 8, nicklen + 1);
 			b += nicklen;
 			if (data[3] != PACK_ACTION) {
 				*(b++) = '>';
 			}
 			*(b++) = ' ';
-			atoc(b, data + 8 + nicklen, msglen + 1);
-			echo_sendclientmessage_buf4096_filtered(col);
+			memcpy(b, data + 8 + nicklen, msglen);
+			b[msglen] = 0;
+			/*Do we want to filter out embedded colors?*/
+			SendClientMessageToAll(col, msg512);
 			break;
 		}
 		case PACK_GENERIC_MESSAGE:
@@ -244,7 +209,8 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			{
 				break;
 			}
-			atoc(buf4096, data + 7, msglen + 1);
+			memcpy(msg512, data + 7, msglen);
+			msg512[msglen] = 0;
 			switch (data[4]) {
 			case PACK12_TRAC_MESSAGE:
 				col = COL_INFO_BROWN;
@@ -259,7 +225,7 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			default:
 				return;
 			}
-			echo_sendclientmessage_buf4096_filtered(col);
+			SendClientMessageToAll(col, msg512);
 			break;
 		}
 		case PACK_PLAYER_CONNECTION:
@@ -273,31 +239,25 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			{
 				break;
 			}
-			buf4096[0] = 0x3A435249;
-			cbuf4096[4] = ' ';
-			b = cbuf4096 + 5;
 			switch (data[6]) {
 			case ECHO_CONN_REASON_IRC_QUIT:
-				memcpy(b, "Quits: ", 7);
-				b += 7;
+				b = msg512 + sprintf(msg512, "IRC: Quits: ");
 				break;
 			case ECHO_CONN_REASON_IRC_PART:
-				memcpy(b, "Parts: ", 7);
-				b += 7;
+				b = msg512 + sprintf(msg512, "IRC: Parts: ");
 				break;
 			case ECHO_CONN_REASON_IRC_KICK:
-				memcpy(b, "Kicked: ", 8);
-				b += 8;
+				b = msg512 + sprintf(msg512, "IRC: Kicked: ");
 				break;
 			case ECHO_CONN_REASON_IRC_JOIN:
-				memcpy(b, "Joins: ", 7);
-				b += 7;
+				b = msg512 + sprintf(msg512, "IRC: Joins: ");
 				break;
+			default:
+				return;
 			}
 			memcpy(b, data + 8, nicklen);
 			b[nicklen] = 0;
-			atoci(buf4096, (b - cbuf4096) + nicklen);
-			echo_sendclientmessage_buf4096_filtered(COL_IRC);
+			SendClientMessageToAll(COL_IRC, msg512);
 			break;
 		}
 		}

@@ -125,13 +125,7 @@ void spawn_on_player_spawn(int playerid)
 	}
 
 	if (NC_GetPlayerScore(playerid) < 10) {
-		NC_PARS(3);
-		nc_params[1] = playerid;
-		nc_params[2] = COL_INFO_LIGHT;
-		nc_params[3] = buf144a;
-		B144("* Use /reclass to change to a different class.");
-		NC(n_SendClientMessage);
-		B144("* Use /respawn to go to a different spawn place.");
-		NC(n_SendClientMessage);
+		SendClientMessage(playerid, COL_INFO_LIGHT, INFO"Use /reclass to change to a different class.");
+		SendClientMessage(playerid, COL_INFO_LIGHT, INFO"Use /respawn to go to a different spawn place.");
 	}
 }
