@@ -1,5 +1,5 @@
 JAVAC=javac
-JFLAGS=-g# -Xlint:all
+JFLAGS=-g -source 8 -target 8# -Xlint:all
 
 default: .echo
 

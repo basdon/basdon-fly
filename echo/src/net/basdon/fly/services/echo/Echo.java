@@ -180,22 +180,22 @@ throws InterruptedIOException
 	{
 		byte nicklen;
 		int msglen;
-		if (length > 9 &&
+		if (length > 10 &&
 			(nicklen = buf[6]) > 0 && nicklen < 50 &&
-			(msglen = buf[7] & 0xFF) > 0 &&
+			(msglen = ((buf[7] & 0xFF) | ((buf[8] << 8) & 0xFF00))) > 0 &&
 			/*Arbitrary length limit. Echo spec says 512, but 512 is the limit of an IRC message.*/
-			msglen < 450 &&
-			8 + nicklen + msglen == length)
+			msglen < 480 &&
+			9 + nicklen + msglen == length)
 		{
 			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
 			StringBuilder sb = new StringBuilder(225);
-			sb.append(new String(buf, 8, nicklen, StandardCharsets.US_ASCII));
+			sb.append(new String(buf, 9, nicklen, StandardCharsets.US_ASCII));
 			sb.append('(').append(pid).append(')');
 			if (buf[3] != PACK_ACTION) {
 				sb.append(':');
 			}
 			sb.append(' ');
-			for (int i = 8 + nicklen, j = 0; j < msglen; j++, i++) {
+			for (int i = 9 + nicklen, j = 0; j < msglen; j++, i++) {
 				char c = (char) buf[i];
 				if (c >= ' ') {
 					sb.append(c);
@@ -337,15 +337,16 @@ void send_chat_or_action_to_game(boolean isaction, char prefix, char[] nickname,
 		nicklen++;
 	}
 	int msglen = Math.min(len, 512);
-	byte[] msg = new byte[8 + nicklen + msglen];
+	byte[] msg = new byte[9 + nicklen + msglen];
 	msg[0] = 'F';
 	msg[1] = 'L';
 	msg[2] = 'Y';
 	msg[3] = (byte) (isaction ? PACK_ACTION : PACK_CHAT);
 	msg[4] = msg[5] = 0; // as per spec
 	msg[6] = nicklen;
-	msg[7] = (byte) msglen;
-	int j = 8;
+	msg[7] = (byte) (msglen & 0xFF);
+	msg[8] = (byte) ((msglen >> 8) & 0xFF);
+	int j = 9;
 	if (prefix != 0) {
 		msg[j] = (byte) prefix;
 		j++;
