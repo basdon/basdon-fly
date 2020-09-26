@@ -7,4 +7,5 @@
 /articles/islandmaps/*.html
 /inc/conf.php
 /static/fdr/*.flight
+/static/chatlogs/*
 /articles/tohtml.sed
