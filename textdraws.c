@@ -39,7 +39,7 @@ Template textbox textdraw. Use {@link textdraws_set_textbox_properties}.
 static struct TEXTDRAW td_helpbox_template = { "58B6E0", 0, NULL };
 
 /**
-Load a map from file as specified in given map.
+Load textdraws from a textdraw file.
 
 @param filename the file name, excluding path/extension.
 @param base_textdraw_id the textdraw id for the first textdraw, the next ones will have consequtive ids

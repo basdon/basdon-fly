@@ -140,6 +140,6 @@ int class_on_player_request_spawn(int playerid)
 		SendClientMessage(playerid, COL_WARN, WARN"Trucker class is not available yet.");
 		return 0;
 	}
-	common_hide_gametext_for_player(playerid);
+	HideGameTextForPlayer(playerid);
 	return 1;
 }

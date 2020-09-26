@@ -140,7 +140,7 @@ void guestreg_cb_registered(void *data)
 		return;
 	}
 
-	common_hide_gametext_for_player(playerid);
+	HideGameTextForPlayer(playerid);
 	dialog_end_transaction(playerid, TRANSACTION_GUESTREGISTER);
 	SendClientMessage(playerid, COL_SUCC, SUCC"Your account has been registered and your stats are saved, welcome!");
 	sprintf(msg144, "Guest %s[%d] just registered their account, welcome!", pdata[playerid]->name, playerid);
@@ -187,7 +187,7 @@ void guestreg_cb_check_username_exists(void *data)
 		return;
 	}
 
-	common_hide_gametext_for_player(playerid);
+	HideGameTextForPlayer(playerid);
 
 	if (NC_cache_get_row_count()) {
 		guestreg_show_dialog_namechange(playerid, 0, 1);

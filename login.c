@@ -294,7 +294,7 @@ void login_cb_create_session_guest(void *data)
 		return;
 	}
 
-	common_hide_gametext_for_player(playerid);
+	HideGameTextForPlayer(playerid);
 	sessionid[playerid] = NC_cache_insert_id();
 	/*
 	if (sessionid[playerid] == -1) {
@@ -323,7 +323,7 @@ void login_cb_create_session_new_member(void *data)
 	}
 
 	dialog_end_transaction(playerid, TRANSACTION_LOGIN);
-	common_hide_gametext_for_player(playerid);
+	HideGameTextForPlayer(playerid);
 	sessionid[playerid] = NC_cache_insert_id();
 	/*
 	if (sessionid[playerid] == -1) {
@@ -351,7 +351,7 @@ void login_cb_create_session_existing_member(void *data)
 	}
 
 	dialog_end_transaction(playerid, TRANSACTION_LOGIN);
-	common_hide_gametext_for_player(playerid);
+	HideGameTextForPlayer(playerid);
 	sessionid[playerid] = NC_cache_insert_id();
 	/*
 	if (sessionid[playerid] == -1) {
@@ -381,7 +381,7 @@ void login_cb_create_guest_usr(void *data)
 	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
 	userid[playerid] = NC_cache_insert_id();
 	if (userid[playerid] == -1) {
-		common_hide_gametext_for_player(playerid);
+		HideGameTextForPlayer(playerid);
 		SendClientMessage(playerid, COL_WARN, WARN"An error occurred while creating a guest session.");
 		SendClientMessage(playerid, COL_WARN, WARN"You can play, but you won't be able to save your stats later.");
 		login_login_player(playerid, LOGGED_GUEST);
@@ -475,7 +475,7 @@ void login_cb_load_account_data(void *data)
 	}
 
 	if (!NC_cache_get_row_count()) {
-		common_hide_gametext_for_player(playerid);
+		HideGameTextForPlayer(playerid);
 		logprintf("login_cb_load_account_data: empty response");
 		dialog_ShowPlayerDialog(
 			playerid, DIALOG_DUMMY, DIALOG_STYLE_MSGBOX,
@@ -542,7 +542,7 @@ void login_cb_verify_password(void *data)
 	}
 
 	if (!NC_bcrypt_is_equal()) {
-		common_hide_gametext_for_player(playerid);
+		HideGameTextForPlayer(playerid);
 
 		sprintf(cbuf4096_,
 			"INSERT INTO fal(u,stamp,ip) "
@@ -590,7 +590,7 @@ void login_cb_member_user_created(void *data)
 	userid[playerid] = NC_cache_insert_id();
 	money_set(playerid, MONEY_DEFAULT_AMOUNT);
 	if (userid[playerid] == -1) {
-		common_hide_gametext_for_player(playerid);
+		HideGameTextForPlayer(playerid);
 		SendClientMessage(playerid, COL_WARN, WARN"An error occured while registering.");
 		SendClientMessage(playerid, COL_WARN, WARN"You will be spawned as a guest.");
 		login_spawn_as_guest_WITHOUT_ACCOUNT(playerid);
@@ -634,7 +634,7 @@ void login_cb_check_user_exists(void *data)
 	}
 
 	dialog_end_transaction(playerid, TRANSACTION_LOGIN);
-	common_hide_gametext_for_player(playerid);
+	HideGameTextForPlayer(playerid);
 
 	if (!NC_cache_get_row_count()) {
 		logprintf("login_cb_check_user_exists: empty response");

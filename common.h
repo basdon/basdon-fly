@@ -220,10 +220,6 @@ Teleport the player to a coordinate, and set facing angle and reset camera.
 */
 void common_tp_player(int playerid, struct vec4 pos);
 /**
-Hides game text for given player.
-*/
-void common_hide_gametext_for_player(int playerid);
-/**
 Try to find the player that is in given seat of given vehicle.
 
 @return player id or INVALID_PLAYER_ID
@@ -231,10 +227,6 @@ Try to find the player that is in given seat of given vehicle.
 int common_find_player_in_vehicle_seat(int vehicleid, int seat);
 #define common_find_vehicle_driver(VEHICLEID) \
 	common_find_player_in_vehicle_seat(VEHICLEID,0)
-/**
-Attempt to crash the player.
-*/
-void common_crash_player(int playerid);
 /**
 @return squared xyz distance between given points
 */

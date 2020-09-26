@@ -40,7 +40,7 @@ The /crashme command crashes the player.
 static
 int cmd_dev_crashme(CMDPARAMS)
 {
-	common_crash_player(playerid);
+	CrashPlayer(playerid);
 	return 1;
 }
 

@@ -44,13 +44,6 @@ void common_tp_player(int playerid, struct vec4 pos)
 	NC(n_SetCameraBehindPlayer);
 }
 
-void common_hide_gametext_for_player(int playerid)
-{
-	buf32[0] = '_';
-	buf32[1] = 0;
-	NC_GameTextForPlayer(playerid, buf32a, 2, 3);
-}
-
 int common_find_player_in_vehicle_seat(int vehicleid, int seat)
 {
 	int n = playercount;
@@ -65,16 +58,6 @@ int common_find_player_in_vehicle_seat(int vehicleid, int seat)
 		}
 	}
 	return INVALID_PLAYER_ID;
-}
-
-void common_crash_player(int playerid)
-{
-	B144("Wasted"
-		"~k~SWITCH_DEBUG_CAM_ON~"
-		"~k~~TOGGLE_DPAD~"
-		"~k~~NETWORK_TALK~"
-		"~k~~SHOW_MOUSE_POINTER_TOGGLE~");
-	NC_GameTextForPlayer(playerid, buf144a, 5, 5);
 }
 
 float common_dist_sq(struct vec3 a, struct vec3 b)

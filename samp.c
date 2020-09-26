@@ -174,6 +174,27 @@ void GameTextForPlayer(int playerid, int milliseconds, int style, char *text)
 	SAMP_SendRPCToPlayer(RPC_ShowGameText, &bitstream_freeform, playerid, 3);
 }
 
+static
+void HideGameTextForPlayer(int playerid)
+{
+	GameTextForPlayer(playerid, 2, 3, "_");
+}
+
+static
+void CrashPlayer(int playerid)
+{
+	struct RPCDATA_ShowGangZone data;
+	struct BitStream bs;
+
+	GameTextForPlayer(playerid, 5, 5, "Wasted~k~SWITCH_DEBUG_CAM_ON~~k~~TOGGLE_DPAD~~k~~NETWORK_TALK~~k~~SHOW_MOUSE_POINTER_TOGGLE~");
+
+	bs.ptrData = &data;
+	bs.numberOfBitsUsed = sizeof(data) * 8;
+	data.zoneid = 65535;
+	SAMP_SendRPCToPlayer(RPC_ShowGangZone, &bs, playerid, 2);
+	data.zoneid = -2700;
+	SAMP_SendRPCToPlayer(RPC_ShowGangZone, &bs, playerid, 2);
+}
 #endif
 
 

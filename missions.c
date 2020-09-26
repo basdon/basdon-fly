@@ -1316,7 +1316,7 @@ int missions_start_flight(void *data)
 
 	mission_stage[playerid] = MISSION_STAGE_FLIGHT;
 	SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &mission->endpoint->pos, MISSION_CP_RAD);
-	common_hide_gametext_for_player(playerid);
+	HideGameTextForPlayer(playerid);
 	TogglePlayerControllable(playerid, 1);
 	common_GetPlayerPos(playerid, &pos);
 	kneeboard_update_all(playerid, &pos);
@@ -1544,7 +1544,7 @@ int missions_after_unload(void *data)
 	vehhp = mission_cb_data->vehiclehp;
 	miss = activemission[playerid];
 
-	common_hide_gametext_for_player(playerid);
+	HideGameTextForPlayer(playerid);
 	TogglePlayerControllable(playerid, 1);
 
 	pcheat = 0;
@@ -1932,7 +1932,7 @@ int missions_cmd_cancelmission(CMDPARAMS)
 	if ((mission = activemission[playerid]) != NULL) {
 		if (mission_stage[playerid] == MISSION_STAGE_LOAD || mission_stage[playerid] == MISSION_STAGE_UNLOAD) {
 			NC_TogglePlayerControllable(playerid, 1);
-			common_hide_gametext_for_player(playerid);
+			HideGameTextForPlayer(playerid);
 		} else {
 			NC_DisablePlayerRaceCheckpoint(playerid);
 		}

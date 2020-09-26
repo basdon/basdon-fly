@@ -76,7 +76,7 @@ void chpw_cb_verify_old_password(void *data)
 		return;
 	}
 
-	common_hide_gametext_for_player(playerid);
+	HideGameTextForPlayer(playerid);
 	if (NC_bcrypt_is_equal()) {
 		chpw_show_dialog(playerid, 1, 0);
 	} else {
@@ -148,7 +148,7 @@ void chpw_cb_password_updated(void *data)
 		return;
 	}
 
-	common_hide_gametext_for_player(playerid);
+	HideGameTextForPlayer(playerid);
 	dialog_end_transaction(playerid, TRANSACTION_CHANGEPASS);
 	SendClientMessage(playerid, COL_SUCC, SUCC"Password changed!");
 }

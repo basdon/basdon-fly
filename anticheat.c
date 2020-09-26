@@ -164,7 +164,7 @@ float anticheat_GetVehicleHealth(int vehicleid)
 	} else {
 		return hp;
 	}
-	common_crash_player(playerid);
+	CrashPlayer(playerid);
 	natives_Kick(playerid, "invalid vehicle hp", NULL, -1);
 resethp:
 	NC_PARS(2);
