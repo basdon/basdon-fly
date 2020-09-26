@@ -182,7 +182,9 @@ throws InterruptedIOException
 		int msglen;
 		if (length > 9 &&
 			(nicklen = buf[6]) > 0 && nicklen < 50 &&
-			(msglen = buf[7] & 0xFF) > 0 && msglen < 144 &&
+			(msglen = buf[7] & 0xFF) > 0 &&
+			/*Arbitrary length limit. Echo spec says 512, but 512 is the limit of an IRC message.*/
+			msglen < 450 &&
 			8 + nicklen + msglen == length)
 		{
 			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
@@ -334,7 +336,7 @@ void send_chat_or_action_to_game(boolean isaction, char prefix, char[] nickname,
 	if (prefix != 0) {
 		nicklen++;
 	}
-	int msglen = Math.min(len, 144);
+	int msglen = Math.min(len, 512);
 	byte[] msg = new byte[8 + nicklen + msglen];
 	msg[0] = 'F';
 	msg[1] = 'L';
