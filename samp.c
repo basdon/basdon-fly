@@ -45,20 +45,90 @@ void TogglePlayerControllable(int playerid, char controllable)
 static
 void SendClientMessageToBatch(short *playerids, int numplayerids, int color, char *message)
 {
-	struct RPCDATA_SendClientMessage data;
-	int i;
+	/*Using 4 packets should handle messages with a length up to 144*4.*/
+	struct RPCDATA_SendClientMessage data[4];
+	struct BitStream bitstream;
+	int i, j, packetidx;
+	int num_packets;
+	char *msg_start;
+	int msglen;
+	int cut_pos, min_cut_pos;
+	int pos_inc;
+	char colorpart;
+	int newcolor;
 
-	data.color = color;
-	data.message_length = strlen(message);
-	if (data.message_length > 144) {
-		/*TODO: handle messages with a length > 144 (parse the last embedded color)*/
-		data.message_length = 144;
+	msglen = strlen(message);
+
+	/*(Probably unneeded) optimization to skip cutting and looping stuff.*/
+	if (msglen < 145) {
+		data[0].color = color;
+		data[0].message_length = msglen;
+		memcpy(data[0].message, message, msglen);
+		bitstream.ptrData = &data[0];
+		bitstream.numberOfBitsUsed = 32 + 32 + msglen * 8;
+		for (i = 0; i < numplayerids; i++) {
+			SAMP_SendRPCToPlayer(RPC_SendClientMessage, &bitstream, playerids[i], 3);
+		}
+		return;
 	}
-	memcpy(data.message, message, data.message_length);
-	bitstream_freeform.ptrData = &data;
-	bitstream_freeform.numberOfBitsUsed = 32 + 32 + data.message_length * 8;
+
+	num_packets = 0;
+	msg_start = message;
+
+	/*See /testmsgsplit command.*/
+	while (msglen > 0 && num_packets < 4) {
+		if (msglen > 144) {
+			/*Try to split on whitespace or color boundaries.*/
+			for (cut_pos = 144, min_cut_pos = 144 - 15; cut_pos > min_cut_pos; cut_pos--) {
+				if (msg_start[cut_pos] == ' ') {
+					pos_inc = cut_pos + 1;
+					goto have_cut_pos;
+				} else if (cut_pos <= msglen - 7 && msg_start[cut_pos] == '{' && msg_start[cut_pos + 7] == '}') {
+					pos_inc = cut_pos;
+					goto have_cut_pos;
+				}
+			}
+			cut_pos = pos_inc = 144;
+		} else {
+			cut_pos = pos_inc = msglen;
+		}
+have_cut_pos:
+		data[num_packets].color = color;
+		data[num_packets].message_length = cut_pos;
+		memcpy(data[num_packets].message, msg_start, cut_pos);
+		num_packets++;
+		/*Find the last embedded color to use for the next packet.*/
+		for (i = cut_pos - 1; i >= 7; i--) {
+			if (msg_start[i] == '}' && msg_start[i - 7] == '{') {
+				newcolor = color & 0xFF;
+				for (j = 0; j < 6; j++) {
+					colorpart = msg_start[i - 6 + j];
+					if ('0' <= colorpart && colorpart <= '9') {
+						newcolor |= (colorpart - '0') << (28 - j * 4);
+					} else if ('a' <= colorpart && colorpart <= 'f') {
+						newcolor |= (colorpart - 'a' + 10) << (28 - j * 4);
+					} else if ('A' <= colorpart && colorpart <= 'F') {
+						newcolor |= (colorpart - 'A' + 10) << (28 - j * 4);
+					} else {
+						goto not_a_color;
+					}
+				}
+				color = newcolor;
+				break;
+			}
+not_a_color:
+			;
+		}
+		msglen -= pos_inc;
+		msg_start += pos_inc;
+	}
+
 	for (i = 0; i < numplayerids; i++) {
-		SAMP_SendRPCToPlayer(RPC_SendClientMessage, &bitstream_freeform, playerids[i], 3);
+		for (packetidx = 0; packetidx < num_packets; packetidx++) {
+			bitstream.ptrData = &data[packetidx];
+			bitstream.numberOfBitsUsed = 32 + 32 + data[packetidx].message_length * 8;
+			SAMP_SendRPCToPlayer(RPC_SendClientMessage, &bitstream, playerids[i], 3);
+		}
 	}
 }
 
@@ -406,6 +476,6 @@ void samp_init()
 	/**(int*) 0x8150714 = ; *//*sync bounds z max, default 200000.0*/
 	/**(int*) 0x8150718 = ; *//*sync bounds z min, default -1000.0*/
 
-	mem_mkjmp(0x80AEC4F, &DriverSyncHook); /*defined in samphost.asm*/
+	mem_mkjmp(0x80AEC4F, &DriverSyncHook);
 }
 #endif
