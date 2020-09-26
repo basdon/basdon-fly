@@ -167,7 +167,7 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			if (len < 10 ||
 				(nicklen = data[6]) < 1 || nicklen > 49 ||
 				(msglen = (data[7] & 0xFF)) < 1 ||
-				msglen > 144 ||
+				msglen > 512 ||
 				8 + nicklen + msglen != len)
 			{
 				break;
