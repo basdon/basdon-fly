@@ -10,20 +10,31 @@ if (!isset($conf_maps_dir)) {
 
 $aptids = [];
 $aptcodes = [];
-if (isset($_GET['id'])) {
-	$aptids[] = $_GET['id'];
-	$aptcodes[] = $db->query('SELECT c FROM apt WHERE i='.$_GET['id'])->fetchAll()[0]->c;
-} else {
-	foreach ($db->query('SELECT DISTINCT i,c FROM apt') as $r) {
-		$aptids[] = $r->i;
-		$aptcodes[] = $r->c;
-	}
+foreach ($db->query('SELECT DISTINCT i,c FROM apt') as $r) {
+	$aptids[] = $r->i;
+	$aptcodes[] = $r->c;
 }
+
+$flightmap_polydata = [];
+
+// mainland
+$flightmap_polydata[] = 1;
+$flightmap_polydata[] = -3000;
+$flightmap_polydata[] = -3000;
+$flightmap_polydata[] = 0;
+$flightmap_polydata[] = 0;
+$flightmap_polydata[] = 6000;
+$flightmap_polydata[] = 6000;
 
 nextap:
 
 $aptid = array_pop($aptids);
 if ($aptid == null) {
+	$island_data = 'var fm_islands=' . json_encode($flightmap_polydata) . ';';
+	file_put_contents('../static/gen/flightmap_islands.js', $island_data);
+	$island_data .= file_get_contents('../static/flightmap.js');
+	$island_data = str_replace("\t", "", $island_data);
+	file_put_contents('../static/gen/fm_complete.js', $island_data);
 	exit();
 }
 $aptcode = array_pop($aptcodes);
@@ -60,20 +71,20 @@ foreach($db->query('SELECT filename FROM map WHERE ap=\''.$aptid.'\'')->fetchAll
 	$numzones = $data[13] | ($data[14] << 8) | ($data[15] << 16) | ($data[16] << 24);
 	$offset = 1 /*remember data starts at 1 because php idk*/ + 28 + 20 * $numremoves + 28 * $numobjects;
 	while ($numzones--) {
-		$zonedata = new stdClass();
+		$zd = new stdClass();
 		for ($i = 0; $i < 4; $i++) {
 			$int = $data[$offset] | ($data[$offset+1] << 8) | ($data[$offset+2] << 16) | ($data[$offset+3] << 24);
-			$zonedata->coords[$i] = unpack('f', pack('i', $int))[1];
+			$zd->coords[$i] = unpack('f', pack('i', $int))[1];
 			$offset += 4;
 		}
-		$zonedata->color = $data[$offset] | ($data[$offset+1] << 8) | ($data[$offset+2] << 16) | ($data[$offset+3] << 24);
-		$zones[] = $zonedata;
+		$zd->color = $data[$offset] | ($data[$offset+1] << 8) | ($data[$offset+2] << 16) | ($data[$offset+3] << 24);
+		$zones[] = $zd;
 		$offset += 4;
 
-		if ($zonedata->coords[0] < $minx) $minx = $zonedata->coords[0];
-		if ($zonedata->coords[1] < $miny) $miny = $zonedata->coords[1];
-		if ($zonedata->coords[2] > $maxx) $maxx = $zonedata->coords[2];
-		if ($zonedata->coords[3] > $maxy) $maxy = $zonedata->coords[3];
+		if ($zd->coords[0] < $minx) $minx = $zd->coords[0];
+		if ($zd->coords[1] < $miny) $miny = $zd->coords[1];
+		if ($zd->coords[2] > $maxx) $maxx = $zd->coords[2];
+		if ($zd->coords[3] > $maxy) $maxy = $zd->coords[3];
 	}
 }
 
@@ -82,6 +93,16 @@ if (count($zones) < 100) {
 	// but those obviously aren't islands.
 	// Assume it's not an island and skip if there are too little amount of zones
 	goto nomapforthisap;
+}
+
+$flightmap_polydata[] = count($zones);
+$flightmap_polydata[] = round($minx);
+$flightmap_polydata[] = -round($miny);
+foreach ($zones as $zd) {
+	$flightmap_polydata[] = round($zd->coords[0] - $minx);
+	$flightmap_polydata[] = -round($zd->coords[1] - $miny);
+	$flightmap_polydata[] = round($zd->coords[2] - $minx);
+	$flightmap_polydata[] = -round($zd->coords[3] - $miny);
 }
 
 // this block is blindlessly copied from genaerodromechart

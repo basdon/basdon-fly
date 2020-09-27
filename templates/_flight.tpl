@@ -8,29 +8,10 @@
 			border-left: 1px solid #000;
 			font-family: 'Courier New',monospace;
 		}
-		#rm {
+		#fm_mapcanvas {
+			max-width:900px;
+			margin:1em auto;
 			display:none
-		}
-		.rmi {
-			float: right;
-			width: 24%;
-			padding-left: 1%
-		}
-		#rmm {
-			float: left;
-			width: 49%
-		}
-		canvas {
-			width: 100%
-		}
-		@media (max-width: 800px) {
-			#rmm {
-				float: none;
-				width: 100%
-			}
-			.rmi {
-				width: 49%
-			}
 		}
 	</style>
 </head>
@@ -89,7 +70,7 @@ try{
 				{@if $r->tload > 0}
 					<li><strong>{@unsafe date('H:i:s', $r->tload)}</strong> cargo loaded</li>
 				{@endif}
-				<li id="rmt" style="display:none"></li>
+				<li id="fm_flightevents" style="display:none"></li>
 				{@if $r->tunload > 0}
 					<li><strong>{@unsafe date('H:i:s', $r->tunload)}</strong> cargo unloaded, flight ended</li>
 				{@endif}
@@ -131,36 +112,9 @@ try{
 		<div class="clear"></div>
 		<h3>Flight map/info</h3>
 		<noscript><p>Enable JavaScript to see the detailed flight map/info.</p></noscript>
-		<div id="rmmsg"><p>Loading...</p></div>
-		<div id="rm">
-			<div id="rmm">
-				<h4>Map</h4>
-				<canvas id="crmm" width="1000" height="1000"></canvas>
-				<p style="font-size:.8em"><a href="https://forum.sa-mp.com/showthread.php?t=564899">San Andreas Vector Map</a> made by Blantas</p>
-			</div>
-			<div class="rmi">
-				<h4>Speed</h4>
-				<canvas id="crms" width="500" height="200"></canvas>
-			</div>
-			<div class="rmi">
-				<h4>Altitude</h4>
-				<canvas id="crma" width="500" height="200"></canvas>
-			</div>
-			<div class="rmi">
-				<h4>Aircraft health</h4>
-				<canvas id="crmh" width="500" height="200"></canvas>
-			</div>
-			<div class="rmi">
-				<h4>Passenger satisfaction</h4>
-				<canvas id="crmp" width="500" height="200"></canvas>
-			</div>
-			<div class="rmi">
-				<h4>Fuel</h4>
-				<canvas id="crmf" width="500" height="200"></canvas>
-			</div>
-			<div class="clear"></div>
-		</div>
-		<script src="{@unsafe $STATICPATH}/flightmap.js?v5v2"></script>
+		<div id="fm_mapmsg"><p>Loading...</p></div>
+		<div id="fm_mapcanvas"><canvas id="fm_canvas" width="900" height="600" style="width:100%;border:1px solid"></canvas></div>
+		<script src="{@unsafe $STATICPATH}/gen/fm_complete.js?v6"></script>
 		<script>UTCoffset={@unsafe date('Z')};flightmap('{@unsafe $STATICPATH}', {@unsafe $id})</script>
 <?php 
 	}
