@@ -277,8 +277,10 @@ static struct FAKEAMX fakeamx;
 
 #include "game_sa_data.c"
 
+#include <assert.h>
 #include "idalloc.h"
-#include "samphost.h"
+/*This file is generated during build.*/
+#include "__sampasm.h"
 #include "common.h"
 #include "admin.h"
 #include "anticheat.h"
@@ -296,7 +298,6 @@ static struct FAKEAMX fakeamx;
 #include "spawn.h"
 #include "timecyc.h"
 #include "vehicles.h"
-#include <assert.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -395,6 +396,9 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	bitstream_destroy_object.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
 	bitstream_destroy_object.ptrData = &rpcdata_DestroyObject;
 
+#ifdef DEV
+	sampasm_sanitycheck();
+#endif
 	samp_init();
 	textdraws_init();
 

@@ -4,7 +4,9 @@ extern samp_pNetGame
 extern hook_OnDriverSync
 extern printf
 
-;void InitAfterPoolsCreated:function();
+;prot void InitAfterPoolsCreated();
+;test *(int*) 0x80AB939 == 0xFFFFD893 /*The logprintf call.*/
+;test *(int*) 0x80AA0E8 == 0x81CA4BC /*The write to pNetGame.*/
 global InitAfterPoolsCreated:function
 InitAfterPoolsCreated:
 	; get netgame
@@ -17,7 +19,7 @@ InitAfterPoolsCreated:
 	mov eax, 080A91D0h
 	jmp eax
 
-;void printf_logprintf(char *format, ...);
+;prot void printf_logprintf(char *format, ...);
 global printf_logprintf:function
 printf_logprintf:
 	pop dword [logprintRetAddr]
@@ -30,7 +32,7 @@ printf_logprintf:
 	push dword [logprintRetAddr]
 	ret
 
-;void DriverSyncHook();
+;prot void DriverSyncHook();
 global DriverSyncHook:function
 DriverSyncHook:
 	push dword [esi+0Ch] ; BitStream::ptrData
@@ -40,7 +42,7 @@ DriverSyncHook:
 	mov eax, 080AEB71h
 	jmp eax
 
-;float* samphost_GetPtrStreamDistance();
+;prot float* samphost_GetPtrStreamDistance();
 global samphost_GetPtrStreamDistance:function
 samphost_GetPtrStreamDistance:
 	push aStreamDistance
