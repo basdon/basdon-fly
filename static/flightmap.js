@@ -110,7 +110,7 @@ function flightmap(staticpath, id)
 		e('fm_mapcanvas').style.display = 'block';
 		/*TODO: uncomment this if we want to zoom out to show all islands completely.*/
 		/*
-		for (var i = 0; i < fm_islands.length; i++) {
+		for (var i = 1 + fm_islands[0] * 6; i < fm_islands.length; i++) {
 			var count = fm_islands[i];
 			var mx = fm_islands[i + 1], my = fm_islands[i + 2];
 			if (mx < minx) minx = mx;
@@ -126,13 +126,13 @@ function flightmap(staticpath, id)
 		*/
 		var map_vsize = maxx - minx;
 		var map_vsize_y = maxy - miny;
-		if (map_vsize / map_vsize_y > 6 / 4) {
-			var dif = (map_vsize - map_vsize_y) * 6 / 5;
+		if (map_vsize > map_vsize_y) {
+			var dif = (map_vsize - map_vsize_y) * 4 / 6;
 			miny -= dif / 2;
 			maxy += dif / 2;
 			map_vsize_y = map_vsize;
 		} else {
-			var dif = (map_vsize_y - map_vsize) * 5 / 6;
+			var dif = (map_vsize_y - map_vsize) * 6 / 4;
 			minx -= dif / 2;
 			maxx += dif / 2;
 			map_vsize = map_vsize_y;
@@ -150,8 +150,9 @@ function flightmap(staticpath, id)
 		var mc = basecanvas.getContext('2d');
 		mc.fillStyle = "#6486A4";
 		mc.fillRect(sidebar_width, 0, 900, 600);
+		/*Draw islands.*/
 		mc.fillStyle = '#ccc';
-		for (var i = 0; i < fm_islands.length;) {
+		for (var i = 1 + fm_islands[0] * 6; i < fm_islands.length;) {
 			var count = fm_islands[i];
 			var mx = fm_islands[i + 1], my = fm_islands[i + 2];
 			i += 3;
@@ -162,6 +163,21 @@ function flightmap(staticpath, id)
 				mc.fillRect(map_pad_x + (mx + fx - minx) * map_scale, map_pad_y + (my + fy - miny) * map_scale, w, h);
 				i += 4;
 			}
+		}
+		/*Draw runways.*/
+		var count = fm_islands[0];
+		i = 1;
+		while (count--) {
+			var x = fm_islands[i + 1], y = -fm_islands[i + 2], w = fm_islands[i + 4] * map_scale;
+			x = map_pad_x + (x - minx) * map_scale;
+			y = map_pad_y + (y - miny) * map_scale;
+			mc.save();
+			mc.fillStyle = (fm_islands[i] & 1) ? '#0C88C0' : '#9C6B9F';
+			mc.translate(x, y);
+			mc.rotate(fm_islands[i + 3] / 180 * Math.PI);
+			mc.fillRect(-w / 2, 0, w, -fm_islands[i + 5] * map_scale);
+			mc.restore();
+			i += 6;
 		}
 		mc.fillStyle = '#333';
 		mc.fillRect(0, 0, sidebar_width, 900);

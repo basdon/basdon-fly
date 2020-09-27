@@ -17,6 +17,34 @@ foreach ($db->query('SELECT DISTINCT i,c FROM apt') as $r) {
 
 $flightmap_polydata = [];
 
+// runways
+$runways_by_airport = [];
+$numrunways = 0;
+$runwaydata = [];
+foreach($db->query('SELECT r.a,r.x,r.y,r.i,r.h,r.w,a.flags FROM rnw r JOIN apt a ON r.a=a.i WHERE r.type=1') as $r) {
+	if (!isset($runways_by_airport[$r->a])) {
+		$runways_by_airport[$r->a] = [];
+	}
+	if (isset($runways_by_airport[$r->a][$r->i])) {
+		$data = $runways_by_airport[$r->a][$r->i];
+		$dx = $data[1] - $r->x;
+		$dy = $data[2] - $r->y;
+		$runwaydata[] = (int) $data[0];
+		$runwaydata[] = (int) $data[1];
+		$runwaydata[] = (int) $data[2];
+		$runwaydata[] = (int) $data[3];
+		$runwaydata[] = (int) $data[4];
+		$runwaydata[] = round(sqrt($dx * $dx + $dy * $dy));
+		$numrunways++;
+	} else {
+		$runways_by_airport[$r->a][$r->i] = [$r->flags, $r->x, $r->y, $r->h, $r->w, 0];
+	}
+}
+$flightmap_polydata[] = $numrunways;
+foreach ($runwaydata as $r) {
+	$flightmap_polydata[] = $r;
+}
+
 // mainland
 $flightmap_polydata[] = 1;
 $flightmap_polydata[] = -3000;
