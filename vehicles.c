@@ -623,7 +623,7 @@ void veh_start_or_stop_engine(int playerid, int vehicleid)
 
 	common_GetVehicleParamsEx(vehicleid, &vpars);
 	if (vpars.engine) {
-		common_GetVehicleVelocity(vehicleid, &vvel);
+		GetVehicleVelocityUnsafe(vehicleid, &vvel);
 		if (common_vectorsize_sq(vvel) > MAX_ENGINE_CUTOFF_VEL_SQ) {
 			SendClientMessage(playerid, COL_WARN, WARN"The engine cannot be shut down while moving!");
 		} else {
@@ -666,7 +666,7 @@ void veh_on_player_now_driving(int playerid, int vehicleid, struct dbvehicle *ve
 	/*veh could be NULL*/
 
 	lastvehicle[playerid] = vehicleid;
-	common_GetVehiclePos(vehicleid, &lastvpos[playerid]);
+	GetVehiclePosUnsafe(vehicleid, &lastvpos[playerid]);
 
 	lastcontrolactivity[playerid] = time_timestamp();
 	reqenginestate = veh == NULL || veh->fuel > 0.0f;
@@ -787,7 +787,7 @@ new Float:tox = v1 * (1 - 2 * q2 * q2 - 2 * q3 * q3) + v2 * 2 *(q1 * q2 + q0 * q
 new Float:toy = v1 * 2 * (q1 * q2 - q0 * q3) + v2 * (1 - 2 * q1 * q1 - 2 * q3 * q3) + v3 * 2 * (q2 * q3 + q0 * q1);
 new Float:toz = v1 * 2 * (q1 * q3 + q0 * q2) + v2 * 2 * (q2 * q3 - q0 * q1) + v3 * (1 - 2 * q1 * q1 - 2 * q2 * q2);
 */
-	common_GetVehicleRotationQuat(vehicleid, &vrot);
+	GetVehicleRotationQuatUnsafe(vehicleid, &vrot);
 	x = 2.0f * (vrot.qx * vrot.qy + vrot.qw * vrot.qz); /*+front tox*/
 	y = (1.0f - 2.0f * vrot.qx * vrot.qx - 2.0f * vrot.qz * vrot.qz); /*+front toy*/
 	z = 2.0f * (vrot.qy * vrot.qz - vrot.qw * vrot.qx); /*+front toz*/
@@ -815,7 +815,7 @@ new Float:toz = v1 * 2 * (q1 * q3 + q0 * q2) + v2 * 2 * (q2 * q3 - q0 * q1) + v3
 
 	if (mission_stage[playerid] == MISSION_STAGE_FLIGHT) {
 		hp = anticheat_GetVehicleHealth(vehicleid);
-		common_GetVehicleVelocity(vehicleid, &vvel);
+		GetVehicleVelocityUnsafe(vehicleid, &vvel);
 		missions_send_tracker_data(playerid, vehicleid, hp, vpos, &vvel, vparams->engine, pitch, roll);
 	}
 }
@@ -865,7 +865,7 @@ void veh_timed_1s_update()
 
 
 		if (vehicleid == lastvehicle[playerid]) {
-			common_GetVehiclePos(vehicleid, &vpos);
+			GetVehiclePosUnsafe(vehicleid, &vpos);
 
 			common_GetVehicleParamsEx(vehicleid, &vparams);
 
@@ -1066,7 +1066,7 @@ void veh_on_player_state_change(int playerid, int from, int to)
 void veh_timed_speedo_update()
 {
 	struct dbvehicle *veh;
-	float x, y, z;
+	struct vec3 vvel;
 	int n, playerid, vehicleid;
 
 	n = playercount;
@@ -1076,11 +1076,8 @@ void veh_timed_speedo_update()
 			(veh = gamevehicles[vehicleid].dbvehicle) &&
 			!game_is_air_vehicle(veh->model))
 		{
-			NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
-			x = *fbuf32;
-			y = *fbuf64;
-			z = *fbuf144;
-			sprintf(cbuf64, "%.0f", VEL_TO_KPH * (float) sqrt(x * x + y * y + z * z));
+			GetVehicleVelocityUnsafe(vehicleid, &vvel);
+			sprintf(cbuf64, "%.0f", VEL_TO_KPH * (float) sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z));
 			B144(cbuf64);
 			NC_PARS(3);
 			nc_params[1] = playerid;

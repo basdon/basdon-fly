@@ -86,7 +86,8 @@ struct vec4 {
 EXPECT_SIZE(struct vec4, 4 * sizeof(cell));
 
 struct quat {
-	float qx, qy, qz, qw;
+	/*The w component comes first in SAMP, do not change this order.*/
+	float qw, qx, qy, qz;
 };
 EXPECT_SIZE(struct quat, 4 * sizeof(cell));
 

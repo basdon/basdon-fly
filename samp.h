@@ -2,7 +2,24 @@ EXPECT_SIZE(char, 1);
 EXPECT_SIZE(short, 2);
 EXPECT_SIZE(int, 4);
 
-#pragma  pack(1)
+#pragma pack(1)
+struct SampNetGame {
+	void *unk0;
+	void *unk4;
+	void *unk8;
+	int pVehiclePool;
+	/*Incomplete.*/
+};
+EXPECT_SIZE(struct SampNetGame, 16);
+
+struct SampVehicle {
+	struct vec3 pos;
+	char _pad10[0x40];
+	struct vec3 vel;
+	/*Incomplete.*/
+};
+EXPECT_SIZE(struct SampVehicle, 12 + 0x40 + 12);
+
 struct BitStream {
 	int numberOfBitsUsed;
 	int numberOfBitsAllocated;

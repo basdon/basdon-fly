@@ -1753,7 +1753,7 @@ void missions_start_unload(int playerid)
 		return;
 	}
 
-	common_GetVehicleVelocity(vehicleid, &vvel);
+	GetVehicleVelocityUnsafe(vehicleid, &vvel);
 	/*Ignoring z velocity because it would be annoying with skimmers riding heavy waves.*/
 	if (vvel.x * vvel.x + vvel.y * vvel.y > MAX_SPEED_SQ) {
 		SendClientMessage(playerid, COL_WARN, WARN"Stop the vehicle first!");
@@ -1974,7 +1974,7 @@ int missions_cmd_mission(CMDPARAMS)
 		/*Checking speed for two reasons:
 		- this command will freeze the player, meaning they will drop from the sky when flying
 		- the player should stop completely before starting a mission*/
-		common_GetVehicleVelocity(vehicleid, &vel);
+		GetVehicleVelocityUnsafe(vehicleid, &vel);
 		/*Ignoring z velocity because it would be annoying with skimmers riding heavy waves.*/
 		if (vel.x * vel.x + vel.y * vel.y > MAX_SPEED_SQ) {
 			SendClientMessage(playerid, COL_WARN, WARN"Stop the vehicle first!");

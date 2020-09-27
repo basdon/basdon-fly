@@ -832,9 +832,9 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 static
 void panel_timed_update()
 {
-	struct vec3 vpos;
+	struct vec4 vpos;
+	struct vec3 vvel;
 	int playerid, vehicleid, n = numpanelplayers;
-	float x, y, z;
 	int heading, altitude, speed;
 
 	while (n--) {
@@ -845,18 +845,14 @@ void panel_timed_update()
 
 		vehicleid = NC_GetPlayerVehicleID(playerid);
 
-		common_GetVehiclePos(vehicleid, &vpos);
-		kneeboard_update_distance(playerid, &vpos);
-		altitude = (int) vpos.z;
-		NC_GetVehicleZAngle(vehicleid, buf144a);
-		heading = (int) *fbuf144;
-		NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
-		x = *fbuf32;
-		y = *fbuf64;
-		z = *fbuf144;
-		speed = (int) (VEL_TO_KTS * (float) sqrt(x * x + y * y + z * z));
+		GetVehiclePosRotUnsafe(vehicleid, &vpos);
+		kneeboard_update_distance(playerid, &vpos.coords);
+		altitude = (int) vpos.coords.z;
+		heading = (int) vpos.r;
+		GetVehicleVelocityUnsafe(vehicleid, &vvel);
+		speed = (int) (VEL_TO_KTS * (float) sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z));
 		if (NC_GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
-			nav_update(vehicleid, &vpos, heading);
+			nav_update(vehicleid, &vpos);
 		}
 
 		panel_update_hdg_alt_spd(playerid, heading, altitude, speed, 1);
@@ -864,14 +860,14 @@ void panel_timed_update()
 		panel_update_nav(playerid, vehicleid, 1);
 
 		/*vai*/
-		z *= VEL_TO_KFPM * -14.5f;
-		if (z > vai_y_dev) {
-			z = vai_y_dev;
-		} else if (z < -vai_y_dev) {
-			z = -vai_y_dev;
+		vvel.z *= VEL_TO_KFPM * -14.5f;
+		if (vvel.z > vai_y_dev) {
+			vvel.z = vai_y_dev;
+		} else if (vvel.z < -vai_y_dev) {
+			vvel.z = -vai_y_dev;
 		}
-		z += vai_y_base;
-		td_panel_vaiind.rpcdata->y = z;
+		vvel.z += vai_y_base;
+		td_panel_vaiind.rpcdata->y = vvel.z;
 		textdraws_show(playerid, 1, &td_panel_vaiind);
 	}
 }
@@ -897,9 +893,9 @@ void panel_nav_updated(int vehicleid)
 static
 void panel_reshow(int playerid)
 {
-	struct vec3 vpos;
+	struct vec4 vpos;
+	struct vec3 vvel;
 	int vehicleid;
-	float x, y, z;
 	int heading, altitude, speed;
 	char new_shown_panel;
 	unsigned char color;
@@ -936,16 +932,12 @@ void panel_reshow(int playerid)
 
 	vehicleid = NC_GetPlayerVehicleID(playerid);
 
-	common_GetVehiclePos(vehicleid, &vpos);
-	kneeboard_update_distance(playerid, &vpos);
-	altitude = (int) vpos.z;
-	NC_GetVehicleZAngle(vehicleid, buf144a);
-	heading = (int) *fbuf144;
-	NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
-	x = *fbuf32;
-	y = *fbuf64;
-	z = *fbuf144;
-	speed = (int) (VEL_TO_KTS * (float) sqrt(x * x + y * y + z * z));
+	GetVehiclePosRotUnsafe(vehicleid, &vpos);
+	kneeboard_update_distance(playerid, &vpos.coords);
+	altitude = (int) vpos.coords.z;
+	heading = (int) vpos.r;
+	GetVehicleVelocityUnsafe(vehicleid, &vvel);
+	speed = (int) (VEL_TO_KTS * (float) sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z));
 	panel_update_hdg_alt_spd(playerid, heading, altitude, speed, 0);
 	panel_update_odo_fl_hp_gear(playerid, vehicleid, 0);
 	panel_update_nav(playerid, vehicleid, 0);
@@ -968,8 +960,8 @@ void panel_reshow(int playerid)
 
 void panel_on_player_state_change(int playerid, int from, int to)
 {
-	struct vec3 vpos;
-	int vehicleid, heading;
+	struct vec4 vpos;
+	int vehicleid;
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
 		vehicleid = NC_GetPlayerVehicleID(playerid);
@@ -981,10 +973,8 @@ void panel_on_player_state_change(int playerid, int from, int to)
 		}
 
 		if (to == PLAYER_STATE_DRIVER) {
-			NC_GetVehicleZAngle(vehicleid, buf144a);
-			heading = (int) *fbuf144;
-			common_GetVehiclePos(vehicleid, &vpos);
-			nav_update(vehicleid, &vpos, heading);
+			GetVehiclePosRotUnsafe(vehicleid, &vpos);
+			nav_update(vehicleid, &vpos);
 		}
 
 		panelplayers[numpanelplayers++] = playerid;

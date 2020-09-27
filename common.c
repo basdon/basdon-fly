@@ -152,57 +152,6 @@ int common_GetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p)
 	return res;
 }
 
-int common_GetVehiclePos(int vehicleid, struct vec3 *pos)
-{
-	int res;
-	res = NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
-	pos->x = *fbuf32;
-	pos->y = *fbuf64;
-	pos->z = *fbuf144;
-	return res;
-}
-
-int common_GetVehiclePosRot(int vehicleid, struct vec4 *pos)
-{
-	int res;
-	NC_GetVehiclePos(vehicleid, buf32a, buf64a, buf144a);
-	pos->coords.x = *fbuf32;
-	pos->coords.y = *fbuf64;
-	pos->coords.z = *fbuf144;
-	NC_PARS(2);
-	res = NC(n_GetVehicleZAngle);
-	pos->r = *fbuf32;
-	return res;
-}
-
-int common_GetVehicleRotationQuat(int vehicleid, struct quat *rot)
-{
-	int res;
-	/*in SA:MP qw comes first*/
-	NC_PARS(5);
-	nc_params[1] = vehicleid;
-	nc_params[2] = buf32_1a;
-	nc_params[3] = buf32a;
-	nc_params[4] = buf64a;
-	nc_params[5] = buf144a;
-	res = NC(n_GetVehicleRotationQuat);
-	rot->qx = *fbuf32;
-	rot->qy = *fbuf64;
-	rot->qz = *fbuf144;
-	rot->qw = *fbuf32_1;
-	return res;
-}
-
-int common_GetVehicleVelocity(int vehicleid, struct vec3 *vel)
-{
-	int res;
-	res = NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
-	vel->x = *fbuf32;
-	vel->y = *fbuf64;
-	vel->z = *fbuf144;
-	return res;
-}
-
 void common_on_vehicle_respawn_or_destroy(int vehicleid, struct dbvehicle *veh)
 {
 	missions_on_vehicle_destroyed_or_respawned(veh);

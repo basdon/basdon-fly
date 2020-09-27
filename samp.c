@@ -1,6 +1,6 @@
 #ifndef SAMP_NATIVES_IMPL
 
-int samp_pNetGame;
+struct SampNetGame *samp_pNetGame;
 
 static unsigned char vehicle_gear_state[MAX_VEHICLES];
 static int vehicle_gear_change_time[MAX_VEHICLES];
@@ -175,6 +175,37 @@ void GameTextForPlayer(int playerid, int milliseconds, int style, char *text)
 }
 
 static
+int GetVehiclePos(int vehicleid, struct vec3 *pos)
+{
+	struct SampVehicle *veh;
+
+	veh = *(struct SampVehicle**) (samp_pNetGame->pVehiclePool + 0x3F54 + vehicleid * 4);
+	if (veh) {
+		*pos = veh->pos;
+		return 1;
+	}
+	return 0;
+}
+
+/**
+Crashes if vehicle does not exist.
+*/
+static
+void GetVehiclePosUnsafe(int vehicleid, struct vec3 *pos)
+{
+	*pos = (*(struct SampVehicle**) (samp_pNetGame->pVehiclePool + 0x3F54 + vehicleid * 4))->pos;
+}
+
+/**
+Crashes if vehicle does not exist.
+*/
+static
+void GetVehicleVelocityUnsafe(int vehicleid, struct vec3 *vel)
+{
+	*vel = (*(struct SampVehicle**) (samp_pNetGame->pVehiclePool + 0x3F54 + vehicleid * 4))->vel;
+}
+
+static
 void HideGameTextForPlayer(int playerid)
 {
 	GameTextForPlayer(playerid, 2, 3, "_");
@@ -323,7 +354,7 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 		}
 	}
 
-	common_GetVehiclePos(vehicleid, &pos);
+	GetVehiclePos(vehicleid, &pos);
 	maps_stream_for_player(playerid, pos);
 	veh_on_player_now_driving(playerid, vehicleid, gamevehicles[vehicleid].dbvehicle);
 	svp_update_mapicons(playerid, pos.x, pos.y);

@@ -7,7 +7,7 @@ int cmd_dev_cp(CMDPARAMS)
 	struct vec3 pos;
 	int vehicleid = NC_GetPlayerVehicleID(playerid);
 	if (vehicleid) {
-		common_GetVehiclePos(vehicleid, &pos);
+		GetVehiclePos(vehicleid, &pos);
 	} else {
 		common_GetPlayerPos(playerid, &pos);
 	}

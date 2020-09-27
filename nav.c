@@ -87,11 +87,12 @@ void nav_calc_ils_values(
 }
 
 static
-void nav_update(int vehicleid, struct vec3 *pos, float heading)
+void nav_update(int vehicleid, struct vec4 *pos)
 {
 	struct NAVDATA *n = nav[vehicleid];
 	float dx, dy;
 	float dist, crs, vorangle, horizontaldeviation;
+	float heading;
 	struct vec3 *beacon;
 
 	if (n == NULL) {
@@ -106,14 +107,15 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 		return;
 	}
 
-	dx = beacon->x - pos->x;
-	dy = beacon->y - pos->y;
+	heading = pos->r;
+	dx = beacon->x - pos->coords.x;
+	dy = beacon->y - pos->coords.y;
 	dist = sqrt(dx * dx + dy * dy);
 	n->dist = (int) dist;
 	if (n->dist > 1000) {
 		n->dist = (n->dist / 100) * 100;
 	}
-	n->alt = (int) (pos->z - beacon->z);
+	n->alt = (int) (pos->coords.z - beacon->z);
 	if (n->vor != NULL) {
 		crs = (360.0f - heading) - n->vor->heading;
 		vorangle = (float) atan2(dy, dx) - n->vor->headingr;
@@ -131,7 +133,7 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 	if ((n->vor == NULL || !n->ils) || (dist > ILS_MAX_DIST || (dist *= (float) cos(vorangle)) <= 0.0f)) {
 		n->ilsx = n->ilsz = INVALID_ILS_VALUE;
 	} else {
-		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, pos->z, beacon->z, horizontaldeviation);
+		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, pos->coords.z, beacon->z, horizontaldeviation);
 	}
 	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);
 }
@@ -139,9 +141,8 @@ void nav_update(int vehicleid, struct vec3 *pos, float heading)
 static
 void nav_enable(int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 {
-	struct vec3 vpos;
+	struct vec4 vpos;
 	struct NAVDATA *navdata;
-	int heading;
 
 	navdata = nav[vehicleid];
 	if (navdata == NULL) {
@@ -152,10 +153,8 @@ void nav_enable(int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 	navdata->vor = vor;
 	navdata->ils = 0;
 
-	common_GetVehiclePos(vehicleid, &vpos);
-	NC_GetVehicleZAngle(vehicleid, buf144a);
-	heading = (int) *fbuf144;
-	nav_update(vehicleid, &vpos, heading);
+	GetVehiclePosRotUnsafe(vehicleid, &vpos);
+	nav_update(vehicleid, &vpos);
 	panel_nav_updated(vehicleid);
 }
 
@@ -371,9 +370,8 @@ Only toggles ils when VOR is already active and the runway has ILS capabilities.
 static
 int nav_cmd_ils(CMDPARAMS)
 {
-	struct vec3 vpos;
+	struct vec4 vpos;
 	struct NAVDATA *np;
-	int heading;
 	int vehicleid;
 
 	if (!nav_check_can_do_cmd(playerid, NAV_ILS, &vehicleid)) {
@@ -393,10 +391,8 @@ int nav_cmd_ils(CMDPARAMS)
 #endif
 	NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL - (np->ils ^= 1));
 
-	common_GetVehiclePos(vehicleid, &vpos);
-	NC_GetVehicleZAngle(vehicleid, buf144a);
-	heading = (int) *fbuf144;
-	nav_update(vehicleid, &vpos, heading);
+	GetVehiclePosRotUnsafe(vehicleid, &vpos);
+	nav_update(vehicleid, &vpos);
 	panel_nav_updated(vehicleid);
 	return 1;
 }
@@ -410,7 +406,7 @@ void nav_navigate_to_airport(int playerid, int vehicleid, int vehiclemodel, stru
 	rw = ap->runways;
 	mindist = 0x7F800000;
 	closestrw = NULL;
-	common_GetVehiclePos(vehicleid, &vpos);
+	GetVehiclePos(vehicleid, &vpos);
 
 	/* if plane, try VOR if available, prioritizing ILS runways */
 	if (game_is_plane(vehiclemodel)) {

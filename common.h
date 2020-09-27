@@ -270,30 +270,6 @@ Uses buf32.
 */
 int common_GetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p);
 /**
-Alternative for GetVehiclePos to get it directly into a vec3 struct.
-
-Will use buf32, buf64, buf144.
-*/
-int common_GetVehiclePos(int vehicleid, struct vec3 *pos);
-/**
-Gets a vehicle's position and Z angle into a vec4 struct.
-
-Will use buf32, buf64, buf144.
-*/
-int common_GetVehiclePosRot(int vehicleid, struct vec4 *pos);
-/**
-Alternative for GetVehicleRotationQuat to get it directly into a quat struct.
-
-Will use buf32, buf64, buf144, buf32_1.
-*/
-int common_GetVehicleRotationQuat(int vehicleid, struct quat *rot);
-/**
-Alternative for GetVehicleVelocity to get it directly into a vec3 struct.
-
-Will use buf32, buf64, buf144.
-*/
-int common_GetVehicleVelocity(int vehicleid, struct vec3 *vel);
-/**
 Callback-like for DestroyVehicle and OnVehicleSpawn (without recreation) events.
 
 In the case of OnVehicleSpawn WITH recreation, DestroyVehicle is used, which

@@ -113,7 +113,7 @@ int svp_cmd_refuel(CMDPARAMS)
 		return 1;
 	}
 
-	common_GetVehiclePos(vehicleid, &vpos);
+	GetVehiclePosUnsafe(vehicleid, &vpos);
 	svpid = svp_find_point(vpos);
 	if (svpid == -1) {
 		SendClientMessage(playerid, COL_WARN, WARN"You need to be at a service point to do this!");
@@ -226,7 +226,7 @@ int svp_cmd_repair(CMDPARAMS)
 		return 1;
 	}
 
-	common_GetVehiclePos(vehicleid, &vpos);
+	GetVehiclePosUnsafe(vehicleid, &vpos);
 	svpid = svp_find_point(vpos);
 	if (svpid == -1) {
 		SendClientMessage(playerid, COL_WARN, WARN"You need to be at a service point to do this!");

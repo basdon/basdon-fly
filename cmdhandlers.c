@@ -82,7 +82,7 @@ int cmd_admin_tocar(CMDPARAMS)
 		common_GetPlayerPos(playerid, &player_pos);
 		for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
 			if (NC_GetVehicleModel(vehicleid) == modelid) {
-				common_GetVehiclePos(vehicleid, &vehicle_pos);
+				GetVehiclePosUnsafe(vehicleid, &vehicle_pos);
 				dx = player_pos.x - vehicle_pos.x;
 				dy = player_pos.y - vehicle_pos.y;
 				if (dx * dx + dy * dy < min_distance_sq &&
@@ -187,7 +187,7 @@ int cmd_at400(CMDPARAMS)
 			veh->model == MODEL_AT400 &&
 			veh_is_player_allowed_in_vehicle(playerid, veh))
 		{
-			common_GetVehiclePos(vehicleid, &vehiclepos);
+			GetVehiclePosUnsafe(vehicleid, &vehiclepos);
 			dx = vehiclepos.x - playerpos.x;
 			dy = vehiclepos.y - playerpos.y;
 			dz = vehiclepos.z - playerpos.z;
@@ -298,7 +298,7 @@ int cmd_park(CMDPARAMS)
 			return 1;
 		}
 		lastrot = veh->pos.r;
-		common_GetVehiclePosRot(vehicleid, &veh->pos);
+		GetVehiclePosRotUnsafe(vehicleid, &veh->pos);
 		if (356.0f < veh->pos.r || veh->pos.r < 4.0f) {
 			veh->pos.r = 0.0f;
 		} else if (86.0f < veh->pos.r && veh->pos.r < 94.0f) {

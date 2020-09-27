@@ -35,11 +35,7 @@ static AMX_NATIVE n_GetVehicleDamageStatus;
 static AMX_NATIVE n_GetVehicleHealth_;
 static AMX_NATIVE n_GetVehicleModel;
 static AMX_NATIVE n_GetVehicleParamsEx;
-static AMX_NATIVE n_GetVehiclePos;
 static AMX_NATIVE n_GetVehiclePoolSize;
-static AMX_NATIVE n_GetVehicleRotationQuat;
-static AMX_NATIVE n_GetVehicleVelocity;
-static AMX_NATIVE n_GetVehicleZAngle;
 static AMX_NATIVE n_GivePlayerMoney_;
 static AMX_NATIVE n_GivePlayerWeapon;
 static AMX_NATIVE n_IsValidVehicle;
@@ -263,25 +259,6 @@ static cell tmpfloat;
 	nc_params[3]=LIGHTS,nc_params[4]=ALARM,nc_params[5]=DOORS,\
 	nc_params[6]=BONNET,nc_params[7]=BOOT,nc_params[8]=OBJ,\
 	n_GetVehicleParamsEx(amx,nc_params))
-
-#define NC_GetVehiclePos(VEHICLEID,FX,FY,FZ) \
-	(NC_PARS_(4)nc_params[1]=VEHICLEID,\
-	nc_params[2]=FX,nc_params[3]=FY,nc_params[4]=FZ,\
-	n_GetVehiclePos(amx,nc_params))
-
-#define NC_GetVehicleRotationQuat(VEHICLEID,FQW,FQX,FQY,FQZ) \
-	(NC_PARS_(5)nc_params[1]=VEHICLEID,nc_params[2]=FQW,\
-	nc_params[3]=FQX,nc_params[4]=FQY,nc_params[5]=FQZ,\
-	n_GetVehicleRotationQuat(amx,nc_params))
-
-#define NC_GetVehicleVelocity(VEHICLEID,FX,FY,FZ) \
-	(NC_PARS_(4)nc_params[1]=VEHICLEID,\
-	nc_params[2]=FX,nc_params[3]=FY,nc_params[4]=FZ,\
-	n_GetVehicleVelocity(amx,nc_params))
-
-#define NC_GetVehicleZAngle(VEHICLEID,FR) \
-	(NC_PARS_(2)nc_params[1]=VEHICLEID,nc_params[2]=FR,\
-	n_GetVehicleZAngle(amx,nc_params))
 
 #define NC_GetVehiclePoolSize() (NC_PARS_(0)\
 	n_GetVehiclePoolSize(amx,nc_params))
@@ -565,12 +542,8 @@ int natives_find()
 		N(GetVehicleDamageStatus),
 		N_(GetVehicleHealth),
 		N(GetVehicleModel),
-		N(GetVehicleRotationQuat),
 		N(GetVehicleParamsEx),
-		N(GetVehiclePos),
 		N(GetVehiclePoolSize),
-		N(GetVehicleVelocity),
-		N(GetVehicleZAngle),
 		N_(GivePlayerMoney),
 		N(GivePlayerWeapon),
 		N(IsValidVehicle),

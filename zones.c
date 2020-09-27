@@ -167,7 +167,7 @@ int zones_cmd_loc(CMDPARAMS)
 {
 	int target, vehicleid, model;
 	struct vec3 pos;
-	float vx, vy, vz;
+	struct vec3 vvel;
 	char buf[144], *b;
 
 	if (!cmd_get_player_param(cmdtext, &parseidx, &target)) {
@@ -191,12 +191,9 @@ int zones_cmd_loc(CMDPARAMS)
 	vehicleid = NC_GetPlayerVehicleID(target);
 	if (vehicleid) {
 		model = NC_GetVehicleModel(vehicleid);
-		NC_GetVehicleVelocity(vehicleid, buf32a, buf64a, buf144a);
-		vx = *fbuf32;
-		vy = *fbuf64;
-		vz = *fbuf144;
+		GetVehicleVelocityUnsafe(vehicleid, &vvel);
 		sprintf(b, "travelling at %.0f KPH in a %s (%.0f FT)",
-			VEL_TO_KPH * sqrt(vx * vx + vy * vy + vz * vz),
+			VEL_TO_KPH * sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z),
 			vehnames[model - 400],
 			pos.z);
 	} else {

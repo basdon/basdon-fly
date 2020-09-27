@@ -53,6 +53,78 @@ samphost_GetPtrStreamDistance:
 	add esp, 0x8
 	ret
 
+;/**
+;Crashes if vehicle does not exist.
+;*/
+;prot void GetVehiclePosRotUnsafe(int vehicleid, struct vec4 *pos);
+global GetVehiclePosRotUnsafe:function
+GetVehiclePosRotUnsafe:
+	push ebp
+	mov ebp, esp
+	push ebx
+	sub esp, 024h
+	;
+	mov eax, [samp_pNetGame]
+	mov ebx, [eax+0Ch]
+	mov eax, [ebp+08h] ;vehicleid
+	mov ebx, [ebx+eax*4+03F54h]
+	;
+	mov eax, [ebp+0Ch] ;*pos
+	mov ecx, [ebx] ;x
+	mov [eax], ecx
+	mov ecx, [ebx+04h] ;y
+	mov [eax+04h], ecx
+	mov ecx, [ebx+08h] ;z
+	mov [eax+08h], ecx
+	;
+	add eax, 0Ch ;pos->r
+	mov [ebp-0Ch], eax ;phys_addr
+	mov eax, 080DD032h ;n_GetVehicleZAngle
+	jmp eax
+
+;/**
+;Crashes if vehicle does not exist.
+;{@param rot} must be ptr to {@code struct { float w, x, y, z }}.
+;*/
+;prot void GetVehicleRotationQuatUnsafe(int vehicleid, struct quat *rot);
+;test *(int*) 0x80DD14C == 0xFFF6E970 /*Call to MatrixToQuat?*/
+global GetVehicleRotationQuatUnsafe:function
+GetVehicleRotationQuatUnsafe:
+	push ebx
+	mov eax, [samp_pNetGame]
+	mov ebx, [eax+0Ch]
+	mov eax, [esp+08h] ;vehicleid
+	mov ebx, [ebx+eax*4+03F54h]
+	add ebx, 0Ch
+	mov eax, [esp+0Ch] ;*rot
+	push eax
+	push ebx
+	mov eax, 0804BAC0h ;MatrixToQuat?
+	call eax
+	add esp, 08h
+	pop ebx
+	ret
+
+;/**
+;Crashes if vehicle does not exist.
+;*/
+;prot void GetVehicleZAngleUnsafe(int vehicleid, float *angle);
+global GetVehicleZAngleUnsafe:function
+GetVehicleZAngleUnsafe:
+	push ebp
+	mov ebp, esp
+	push ebx
+	sub esp, 024h
+	;
+	mov eax, [ebp+0Ch] ;*angle
+	mov [ebp-0Ch], eax ;phys_addr
+	mov eax, [samp_pNetGame]
+	mov ebx, [eax+0Ch]
+	mov eax, [ebp+08h] ;vehicleid
+	mov ebx, [ebx+eax*4+03F54h]
+	mov eax, 080DD032h ;n_GetVehicleZAngle
+	jmp eax
+
 segment .data
 aStreamDistance	db "stream_distance", 00h
 aNewline	db 0Ah, 00h
