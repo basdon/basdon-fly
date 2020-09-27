@@ -28,7 +28,7 @@ static struct TEXTDRAW td_panel_hpbar = { "hpbar", TEXTDRAW_ALLOC_AS_NEEDED, NUL
 static struct TEXTDRAW td_panel_odo = { "odo", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_panel_gear = { "gear", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_panel_vorbar = { "vorbar", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_panel_vorbarind = { "vorbarind", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_panel_vorbarind = { "vorbarind", 10, NULL };
 static struct TEXTDRAW td_panel_vaiind = { "vaiind", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_panel_ils = { "ils", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 
