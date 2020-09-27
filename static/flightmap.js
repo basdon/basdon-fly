@@ -42,7 +42,7 @@ function flightmap(staticpath, id)
 		var minspd = -9e9, maxspd = 9e9, minalt = 9e9, maxalt = -9e9, minsat = -9e9, maxsat = 9e9;
 		var minhp = -9e9, maxhp = 9e9, maxfuel = -9e9;
 		var minx = 9e9, miny = 9e9, maxx = -9e9, maxy = -9e9;
-		var tim = [], spd = [], alt = [], sat = [], hp = [], pos = [], fuel = [], flags = [];
+		var tim = [], spd = [], alt = [], sat = [], hp = [], pos = [], fuel = [], flags = [], pitch10 = [], roll10 = [];
 		var pausetime, totalpausetime = 0;
 		for (var i = 0; i < num_frames; i++) {
 			var value, dv = new DataView(req.response, 40 + i * chunksize);
@@ -101,6 +101,10 @@ function flightmap(staticpath, id)
 			if (y > maxy) maxy = y;
 			if (y < miny) miny = y;
 			pos.push({x: x, y: y});
+			if (version >= 4) {
+				pitch10.push(dv.getInt16(24, 1));
+				roll10.push(dv.getInt16(26, 1));
+			}
 		}
 		e('fm_flightevents').outerHTML = events;
 		e('fm_mapcanvas').style.display = 'block';
@@ -273,10 +277,9 @@ function flightmap(staticpath, id)
 			drawgraph('Passenger satisfaction', 'f9f', sat, 0, 100, graphy += yinc, 0, [75,50,25]),
 			drawgraph('Fuel', 'dd9', fuel, 0, maxfuel, graphy += yinc, 1, []),
 		];
+		var last_t = -2; /*-2 to force update on first call.*/
 		mc = canvas.getContext('2d')
-		mc.drawImage(basecanvas, 0, 0);
-		var last_t = -1;
-		canvas.addEventListener('mousemove', function(mm) {
+		var drawupdate = function(mm) {
 			var x = mm.offsetX, y = mm.offsetY;
 			var t = -1;
 			for (graph of graph_regions) {
@@ -393,7 +396,128 @@ function flightmap(staticpath, id)
 				mc.fillRect(-3, 3, 6, 1);
 				mc.restore();
 			}
-		});
+			/*Attitude indicator.*/
+			var roll = 0, pitch = 0;
+			if (roll10.length && t != -1) {
+				roll = roll10[dataindex] / 10;
+				pitch = pitch10[dataindex] / 10;
+			}
+			mc.save();
+			mc.translate((sidebar_width - 100) / 2, 480);
+			mc.translate(50, 50);
+			mc.save();
+			mc.fillStyle = '#444';
+			mc.fillRect(-50, -50, 100, 100);
+			mc.beginPath();
+			mc.arc(0, 0, 45, 0, Math.PI * 2);
+			mc.clip();
+			mc.rotate(roll / 180 * Math.PI);
+			mc.fillStyle = '#4BA4D9';
+			mc.fillRect(-50, -50, 100, 48);
+			mc.fillStyle = '#fff';
+			mc.fillRect(-50, -2, 100, 4);
+			mc.fillStyle = '#786240';
+			mc.fillRect(-50, 2, 100, 48);
+			/*Pointer.*/
+			mc.fillStyle = '#fff';
+			mc.beginPath();
+			mc.moveTo(-4, -44);
+			mc.lineTo(0, -34);
+			mc.lineTo(4, -44);
+			mc.closePath();
+			mc.fill();
+			/*Angles.*/
+			mc.lineWidth = 1;
+			mc.strokeStyle = '#fff';
+			for (var i = -1; i < 3; i += 2) {
+				mc.save();
+				/*10*/
+				mc.rotate(i * 10 / 180 * Math.PI);
+				mc.beginPath();
+				mc.moveTo(0, -40);
+				mc.lineTo(0, -33);
+				mc.stroke();
+				/*20*/
+				mc.rotate(i * 10 / 180 * Math.PI);
+				mc.beginPath();
+				mc.moveTo(0, -40);
+				mc.lineTo(0, -33);
+				mc.stroke();
+				/*30*/
+				mc.rotate(i * 10 / 180 * Math.PI);
+				mc.lineWidth = 2;
+				mc.beginPath();
+				mc.moveTo(0, -44);
+				mc.lineTo(0, -33);
+				mc.stroke();
+				/*45*/
+				mc.rotate(i * 15 / 180 * Math.PI);
+				mc.lineWidth = 2;
+				mc.beginPath();
+				mc.moveTo(-2, -40);
+				mc.lineTo(0, -33);
+				mc.lineTo(2, -40);
+				mc.closePath();
+				mc.fill();
+				/*60*/
+				mc.rotate(i * 15 / 180 * Math.PI);
+				mc.lineWidth = 2;
+				mc.beginPath();
+				mc.moveTo(0, -44);
+				mc.lineTo(0, -33);
+				mc.stroke();
+				mc.restore();
+			}
+			mc.restore();
+			mc.save();
+			mc.beginPath();
+			mc.arc(0, 0, 34, 0, Math.PI * 2);
+			mc.clip();
+			mc.rotate(roll / 180 * Math.PI);
+			mc.translate(0, pitch);
+			mc.fillStyle = '#0085CB';
+			mc.fillRect(-50, -150, 100, 149);
+			mc.fillStyle = '#fff';
+			mc.fillRect(-50, -1, 100, 2);
+			mc.fillStyle = '#6B5530';
+			mc.fillRect(-50, 1, 100, 149);
+			mc.fillStyle = '#fff';
+			mc.font = '8px serif';
+			mc.textBaseline = 'middle';
+			for (var i = -4; i < 5; i++) {
+				if (i == 0) {
+					continue;
+				}
+				var k = Math.abs(i);
+				var w = 12;
+				if (k % 2) {
+					w = 6;
+				} else {
+					mc.fillText('' + (k * 5), w, i * 5);
+					mc.fillText('' + (k * 5), -w - 9, i * 5);
+				}
+				mc.fillRect(-w, i * 5, w * 2, 1);
+			}
+			mc.restore();
+			/*Orange thing.*/
+			mc.fillStyle = mc.strokeStyle = '#FF9E28';
+			mc.fillRect(-22, -1, 17, 2);
+			mc.fillRect(-6, -1, 2, 6);
+			mc.fillRect(22, -1, -17, 2);
+			mc.fillRect(6, -1, -2, 6);
+			mc.fillRect(-1, -1, 2, 2);
+			/*Orange pointer.*/
+			mc.lineWidth = 1;
+			mc.beginPath();
+			mc.moveTo(0, -33);
+			mc.lineTo(-3, -25);
+			mc.lineTo(3, -25);
+			mc.closePath();
+			mc.stroke();
+			mc.restore();
+		};
+		drawupdate({offsetX: -100, offsetY: -100});
+		canvas.addEventListener('mousemove', drawupdate);
 	};
 	var msgdiv = e('fm_mapmsg');
 	var req = new XMLHttpRequest();
