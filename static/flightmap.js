@@ -290,7 +290,7 @@ function flightmap(staticpath, id)
 			drawgraph('Altitude', '99f', alt, Math.min(0, minalt), Math.max(800, maxalt), graphy, 0, [0,minalt,maxalt]),
 			drawgraph('Speed', '8d8', spd, 0, 145, graphy += yinc, 0, [/*Dodo max speed.*/78,maxspd]),
 			drawgraph('Aircraft health', 'f99', hp, 0, 1000, graphy += yinc, 0, [250]),
-			drawgraph('Passenger satisfaction', 'f9f', sat, 0, 100, graphy += yinc, 0, [75,50,25]),
+			drawgraph('Passenger satisfaction', 'f9f', sat, 0, 100, graphy += yinc, 1, [75,50,25]),
 			drawgraph('Fuel', 'dd9', fuel, 0, maxfuel, graphy += yinc, 1, []),
 		];
 		var last_t = -2; /*-2 to force update on first call.*/
@@ -365,7 +365,7 @@ function flightmap(staticpath, id)
 				mc.fillRect(x - 2, y - 2, 5, 5);
 				var txt = '' + graph.data[dataindex];
 				if (graph.show_pct) {
-					txt = '' + Math.round(pct * 100);
+					txt = Math.round(pct * 100) + '%';
 				}
 				var size = mc.measureText(txt);
 				var w = Math.ceil(size.width);
