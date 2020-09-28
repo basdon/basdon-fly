@@ -415,7 +415,7 @@ function flightmap(staticpath, id)
 			/*Attitude indicator.*/
 			var roll = 0, pitch = 0;
 			if (roll10.length && t != -1) {
-				roll = roll10[dataindex] / 10;
+				roll = -roll10[dataindex] / 10;
 				pitch = pitch10[dataindex] / 10;
 			}
 			mc.save();
