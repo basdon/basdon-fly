@@ -8,15 +8,88 @@ byte 0-3: spec version
 The rest is dependent on the spec version:
 
 {@ul
-  {@li {@#=v2 Version 0x0250414D (version 2)}}
+  {@li {@#=v3 Version 0x0350414D (version 3)}}
   {@li {@#=old Old versions}
     {@ul
+      {@li {@#=v2 Version 0x0250414D (version 2)}}
       {@li {@#=v1 Version 1}}
     }
   }
 }
 
-{@h3(id="v2") Version 0x0250414D (version 2)}
+{@h3(id="v3") Version 0x0350414D (version 3)}
+
+v3 added material replacements (only textures for now).
+
+The size of an object is now variable, so the zones are now positioned before
+the objects. Total object size is placed in the header. Object data is the data
+that would be used in the RPC packet.
+
+<pre>
+byte 4-7: number of removed buildings [A]
+byte 8-11: number of objects [B]
+byte 12-15: total size of object data [D]
+byte 16-19: number of gangzones [C]
+byte 20-23: stream in radius (FLOAT)
+byte 24-27: stream out radius (FLOAT)
+byte 28-31: object drawdistance (FLOAT)
+-----------
+size 32 bytes
+
+> removed building, section repeated [A] times:
+byte 0-3: model (DWORD)
+byte 4-7: x (FLOAT)
+byte 8-11: y (FLOAT)
+byte 12-15: z (FLOAT)
+byte 16-19: radius (FLOAT)
+-----------
+size 20 bytes
+
+> gangzones, section repeated [C] times:
+byte 0-3: west/minx (FLOAT)
+byte 4-7: south/miny (FLOAT)
+byte 8-11: east/maxx (FLOAT)
+byte 12-15: north/maxy (FLOAT)
+byte 16-19: colorABGR (DWORD)
+-----------
+size 20 bytes
+
+> objects, section repeated [B] times:
+byte 0-2: size of object data (WORD) (can be reused for objectid in RPC)
+byte 3-6: model (DWORD)
+byte 7-10: x (FLOAT)
+byte 11-14: y (FLOAT)
+byte 15-18: z (FLOAT)
+byte 19-22: rx (FLOAT)
+byte 23-26: ry (FLOAT)
+byte 27-30: rz (FLOAT)
+byte 31-34: draw distance (FLOAT) (should be same as the one in header)
+byte 35: no camera col (BYTE) (should always be 0)
+byte 36-37: attached object id (WORD) (should always be -1)
+byte 38-39: attached vehicle id (WORD) (should always be -1)
+byte 40: number of materials (BYTE)
+(repeated [byte40] times):
+	byte 0: material type (BYTE) (1 = texture, 2 = font)
+	byte 1: material index (BYTE) (0-15)
+	(when material type is 1 aka texture):
+		byte 2-3: model id (WORD) (of the object that has the texture)
+		byte 4: length of txdname string (BYTE)
+		byte 5-x: txdname string (non zero term)
+		byte x: length of texture name string (BYTE)
+		byte x-x: texture name string (non zero term)
+		byte x-x: material color ARGB (DWORD)
+	(when material type is 2 aka text):
+		(unsupported)
+-----------
+size VARIABLE bytes
+
+total file size:
+32 + 20 * num_removed_buildings[A] + 20 * num_gangzones[B] + objectdata_size[D]
+</pre>
+
+{@h3(id="old") Old versions}
+
+{@h2(id="v2") Version 0x0250414D (version 2)}
 
 v2 introduced magic number {@code 0x0250414D ("MAP")} because we're cool kids now.
 The fourth byte is the actual version number.
@@ -70,8 +143,6 @@ size 20 bytes
 total file size:
 28 + 20 * num_removed_buildings + 28 * num_objects + 20 * num_gangzones
 </pre>
-
-{@h3(id="old") Old versions}
 
 {@h4(id="v1") Version 1}
 
