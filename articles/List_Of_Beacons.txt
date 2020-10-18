@@ -16,8 +16,8 @@ table.beaconlist td{
 table.beaconlist td:nth-child(2){
 	text-align:right;
 \}
-table.beaconlist tr :nth-child(3),
-table.beaconlist tr :nth-child(6){
+table.beaconlist tr :nth-child(4),
+table.beaconlist tr :nth-child(7){
 	background: #e7eeee;
 \}
 table.beaconlist tr th + th,
