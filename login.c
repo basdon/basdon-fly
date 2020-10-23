@@ -3,10 +3,19 @@
 
 #define BCRYPT_COST 12
 
+/**
+The userid of the LOGGED IN player.
+When not logged in yet, use unconfirmed_userid instead
+*/
 int userid[MAX_PLAYERS];
 int sessionid[MAX_PLAYERS];
 int loggedstatus[MAX_PLAYERS];
 void *pwdata[MAX_PLAYERS];
+
+/**
+The userid of the user that the player is trying to login for.
+*/
+static int unconfirmed_userid[MAX_PLAYERS];
 
 /**
 Failed login attempts.
@@ -228,7 +237,7 @@ void login_create_session(int playerid, cb_t callback)
 	sprintf(cbuf4096_,
 	        "INSERT INTO ses(u,s,e,ip) "
 		"VALUES(%d,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'%s')",
-	        userid[playerid],
+	        unconfirmed_userid[playerid],
 	        pdata[playerid]->ip);
 	common_mysql_tquery(cbuf4096_, callback, V_MK_PLAYER_CC(playerid));
 }
@@ -247,12 +256,13 @@ void login_login_player(int playerid, int status)
 
 	for (i = 0; i < playercount; i++){
 		if (players[i] == playerid) {
-			goto alreadyin; /*wtf?*/
+			goto alreadyin; /*TODO: this should NEVER happen. recheck why this is here*/
 		}
 	}
 	players[playercount++] = playerid;
 alreadyin:
 
+	userid[playerid] = unconfirmed_userid[playerid];
 	veh_load_user_model_stats(playerid);
 
 	if (pwdata[playerid]) {
@@ -379,8 +389,8 @@ void login_cb_create_guest_usr(void *data)
 
 	B144("~b~Creating game session...");
 	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
-	userid[playerid] = NC_cache_insert_id();
-	if (userid[playerid] == -1) {
+	unconfirmed_userid[playerid] = NC_cache_insert_id();
+	if (unconfirmed_userid[playerid] == -1) {
 		HideGameTextForPlayer(playerid);
 		SendClientMessage(playerid, COL_WARN, WARN"An error occurred while creating a guest session.");
 		SendClientMessage(playerid, COL_WARN, WARN"You can play, but you won't be able to save your stats later.");
@@ -502,9 +512,7 @@ void login_cb_load_account_data(void *data)
 
 	score_update_score(playerid);
 
-	csprintf(buf4096,
-            "UPDATE usr SET lastseengame=UNIX_TIMESTAMP() WHERE i=%d LIMIT 1",
-            userid[playerid]);
+	csprintf(buf4096, "UPDATE usr SET lastseengame=UNIX_TIMESTAMP() WHERE i=%d LIMIT 1", unconfirmed_userid[playerid]);
 	NC_mysql_tquery_nocb(buf4096a);
 
 	B144("~b~Creating game session...");
@@ -512,10 +520,7 @@ void login_cb_load_account_data(void *data)
 	login_create_session(playerid, login_cb_create_session_existing_member);
 
 	if (lastfal > falng) {
-		csprintf(buf4096,
-			"UPDATE usr SET falng=%d WHERE i=%d",
-			lastfal,
-			userid[playerid]);
+		csprintf(buf4096, "UPDATE usr SET falng=%d WHERE i=%d", lastfal, unconfirmed_userid[playerid]);
 		NC_mysql_tquery_nocb(buf4096a);
 		dialog_ShowPlayerDialog(
 			playerid, DIALOG_DUMMY, DIALOG_STYLE_MSGBOX,
@@ -547,10 +552,9 @@ void login_cb_verify_password(void *data)
 		sprintf(cbuf4096_,
 			"INSERT INTO fal(u,stamp,ip) "
 			"VALUES (%d,UNIX_TIMESTAMP(),'%s')",
-			userid[playerid],
+			unconfirmed_userid[playerid],
 			pdata[playerid]->ip);
-		common_mysql_tquery(cbuf4096_,
-			login_cb_failed_login_added, (void*) userid[playerid]);
+		common_mysql_tquery(cbuf4096_, login_cb_failed_login_added, (void*) unconfirmed_userid[playerid]);
 
 		fal = failedlogins[playerid] + 1;
 		if (fal > MAX_LOGIN_ATTEMPTS_IN_ONE_SESSION) {
@@ -567,9 +571,8 @@ void login_cb_verify_password(void *data)
 			"falng,lastfal,groups "
 			"FROM usr "
 			"WHERE i=%d",
-			userid[playerid]);
-		common_mysql_tquery(cbuf4096_,
-			login_cb_load_account_data, data);
+			unconfirmed_userid[playerid]);
+		common_mysql_tquery(cbuf4096_, login_cb_load_account_data, data);
 	}
 }
 
@@ -587,9 +590,9 @@ void login_cb_member_user_created(void *data)
 	}
 
 	pdata[playerid]->groups = GROUP_MEMBER;
-	userid[playerid] = NC_cache_insert_id();
+	unconfirmed_userid[playerid] = NC_cache_insert_id();
 	money_set(playerid, MONEY_DEFAULT_AMOUNT);
-	if (userid[playerid] == -1) {
+	if (unconfirmed_userid[playerid] == -1) {
 		HideGameTextForPlayer(playerid);
 		SendClientMessage(playerid, COL_WARN, WARN"An error occured while registering.");
 		SendClientMessage(playerid, COL_WARN, WARN"You will be spawned as a guest.");
@@ -679,7 +682,7 @@ asguest:
 			pwdata[playerid] = malloc(PW_HASH_LENGTH);
 		}
 		memcpy(pwdata[playerid], password, PW_HASH_LENGTH);
-		userid[playerid] = (nc_params[2] = 2, NC(n_cache_get_field_i));
+		unconfirmed_userid[playerid] = (nc_params[2] = 2, NC(n_cache_get_field_i));
 		login_show_dialog_login(playerid, 0);
 	}
 }
@@ -747,7 +750,7 @@ void login_dlg_namechange(int playerid, int response, char *inputtext)
 		} else if (!login_change_name_from_input(playerid, inputtext)) {
 			login_show_dialog_change_name(playerid, 1);
 		} else {
-			userid[playerid] = -1;
+			unconfirmed_userid[playerid] = -1;
 			dialog_ensure_transaction(playerid, TRANSACTION_LOGIN);
 			login_query_check_user_exists(playerid,
 				login_cb_check_user_exists);
@@ -824,6 +827,7 @@ int login_on_player_connect(int playerid)
 
 	pwdata[playerid] = NULL;
 	userid[playerid] = -1;
+	unconfirmed_userid[playerid] = -1;
 	sessionid[playerid] = -1;
 	failedlogins[playerid] = 0;
 	loggedstatus[playerid] = LOGGED_NO;
