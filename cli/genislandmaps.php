@@ -77,27 +77,28 @@ $zones = [];
 foreach($db->query('SELECT filename FROM map WHERE ap=\''.$aptid.'\'')->fetchAll() as $maprow) {
 	$filename = "{$conf_maps_dir}/{$maprow->filename}.map";
 	$filesize = filesize($filename);
-	if ($filesize < 28) {
+	if ($filesize < 32) {
 		echo "invalid map file: {$filename}";
 		continue;
 	}
 	$f = fopen($filename, 'rb');
 	if (!$f) {
+		echo "can't open: {$filename}";
 		continue;
 	}
 	$data = fread($f, $filesize);
 	fclose($f);
 	$data = unpack('C*', $data);
 	// the data array starts at index 1 for whatever reason
-	if ($data[4] != 2) {
+	if ($data[4] != 3) {
 		echo 'invalid map version: '.$data[3];
 		continue;
 	}
 	// assuming the map file is correctly structured
 	$numremoves = $data[5] | ($data[6] << 8) | ($data[7] << 16) | ($data[8] << 24);
 	$numobjects = $data[9] | ($data[10] << 8) | ($data[11] << 16) | ($data[12] << 24);
-	$numzones = $data[13] | ($data[14] << 8) | ($data[15] << 16) | ($data[16] << 24);
-	$offset = 1 /*remember data starts at 1 because php idk*/ + 28 + 20 * $numremoves + 28 * $numobjects;
+	$numzones = $data[17] | ($data[18] << 8) | ($data[19] << 16) | ($data[20] << 24);
+	$offset = 1 /*remember data starts at 1 because php idk*/ + 32 + 20 * $numremoves;
 	while ($numzones--) {
 		$zd = new stdClass();
 		for ($i = 0; $i < 4; $i++) {
