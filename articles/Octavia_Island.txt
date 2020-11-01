@@ -29,10 +29,10 @@ she used to own in the aforementioned server.
 
 {@h3 Service points}
 
-There are two airports at Octavia Island, however, only one is at the airport.
-The other service point is a gas station, which can not be used for aircrafts.
-Some pilots have parked their helicopter on top of the gas station and tried to
-refuel, but the local residents were not amused.
+There are two service points at Octavia Island, however, only one is at the
+airport. The other service point is a gas station, which can not be used for
+aircrafts. Some pilots have parked their helicopter on top of the gas station
+and tried to refuel, but the local residents were not amused.
 
 {@infobox
   {@aimg(style="width:100%;max-width:250px")=\

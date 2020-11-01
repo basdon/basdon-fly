@@ -111,6 +111,10 @@
 					{@article=Octavia_Island {@plainsimg=articles/octa.jpg;OCTA}}<br/>
 					{@article Octavia_Island}
 				</div>
+				<div>
+					{@article=Catalina_City {@plainsimg=articles/cata.jpg;CATA}}<br/>
+					{@article Catalina_City}
+				</div>
 			</td>
 		</tr>
 		<tr>
