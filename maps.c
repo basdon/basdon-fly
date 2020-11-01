@@ -7,20 +7,12 @@ struct MAP_FILE_HEADER {
 	int spec_version;
 	int num_removes;
 	int num_objects;
+	int objdata_size;
 	int num_gang_zones;
 	float stream_in_radius;
 	float stream_out_radius;
 	float draw_radius;
 };
-struct MAP_FILE_OBJECT {
-	int model;
-	float x, y, z, rx, ry, rz;
-};
-struct OBJECT {
-	struct MAP_FILE_OBJECT map_file_object;
-	float drawdistance;
-};
-EXPECT_SIZE(struct OBJECT, sizeof(cell) * 8);
 struct REMOVEDOBJECT {
 	int model;
 	float x, y, z, radius;
@@ -46,7 +38,7 @@ struct MAP {
 	/*TODO: for fun we can add a command to change the draw distance at runtime*/
 	char name[MAP_MAX_FILENAME];
 	/*unallocated when num_objects is 0*/
-	struct OBJECT *objects;
+	struct RPCDATA_CreateObject *objects;
 	int num_objects;
 	/*unallocated when num_gang_zones is 0*/
 	struct GANG_ZONE *gang_zones;
@@ -57,8 +49,8 @@ struct MAP {
 
 /*the rotating radar object for each map, NULL for maps that don't have any*/
 /*they are automatically made when a base object is found in a map (7981)*/
-static struct OBJECT *map_radar_object_for_map[MAX_MAPS];
-static struct OBJECT *map_radar_object_for_player[MAX_PLAYERS];
+static struct RPCDATA_CreateObject *map_radar_object_for_map[MAX_MAPS];
+static struct RPCDATA_CreateObject *map_radar_object_for_player[MAX_PLAYERS];
 
 static struct MAP maps[MAX_MAPS];
 static int num_maps;
@@ -100,7 +92,7 @@ int maps_load_from_file(int mapidx)
 	char filename[22 + MAP_MAX_FILENAME];
 	int i;
 	struct MAP_FILE_HEADER header;
-	struct OBJECT *object;
+	struct RPCDATA_CreateObject *object_data;
 	struct GANG_ZONE *gang_zone;
 	float middle_x, middle_y;
 	int total_element_count_for_middle;
@@ -117,7 +109,7 @@ int maps_load_from_file(int mapidx)
 		goto corrupted;
 	}
 
-	if (header.spec_version != 0x0250414D) {
+	if (header.spec_version != 0x0350414D) {
 		logprintf("unknown map spec %p in %s", header.spec_version, filename);
 		goto exitzero;
 	}
@@ -142,50 +134,6 @@ int maps_load_from_file(int mapidx)
 	total_element_count_for_middle = 0;
 	middle_x = middle_y = 0.0f;
 
-	/*read objects*/
-	map_radar_object_for_map[mapidx] = 0;
-	maps[mapidx].num_objects = header.num_objects;
-	if (header.num_objects) {
-		maps[mapidx].objects = object = malloc(sizeof(struct OBJECT) * header.num_objects);
-		for (i = header.num_objects; i > 0; i--) {
-			if (!fread(object, sizeof(struct MAP_FILE_OBJECT), 1, fs)) {
-				free(maps[mapidx].objects);
-				/*no need to null because the map will be discarded as a whole*/
-				goto corrupted;
-			}
-			total_element_count_for_middle++;
-			middle_x += object->map_file_object.x;
-			middle_y += object->map_file_object.y;
-			object->drawdistance = header.draw_radius;
-
-			/*automatically create object for the rotating radar if the base is found*/
-			if (!map_radar_object_for_map[mapidx]) {
-				if (object->map_file_object.model == 7981/*smallradar02_lvS*/) {
-					radar_angle = object->map_file_object.rz * M_PI / 180.0f;
-					radar_offset_x = 4.4148f * (float) cos(radar_angle);
-					radar_offset_y = 4.4148f * (float) sin(radar_angle);
-					goto addradar;
-				} else if (object->map_file_object.model == 10810/*ap_smallradar1_SFSe*/) {
-					radar_angle = object->map_file_object.rz * M_PI / 180.0f;
-					radar_offset_x = -4.2038f * (float) cos(radar_angle) - 1.2057f * (float) sin(radar_angle);
-					radar_offset_y = -4.2038f * (float) sin(radar_angle) + 1.2057f * (float) cos(radar_angle);
-addradar:
-					map_radar_object_for_map[mapidx] = malloc(sizeof(struct OBJECT));
-					map_radar_object_for_map[mapidx]->map_file_object.model = 1682;
-					map_radar_object_for_map[mapidx]->map_file_object.x = object->map_file_object.x + radar_offset_x;
-					map_radar_object_for_map[mapidx]->map_file_object.y = object->map_file_object.y + radar_offset_y;
-					map_radar_object_for_map[mapidx]->map_file_object.z = object->map_file_object.z + 11.4f;
-					map_radar_object_for_map[mapidx]->map_file_object.rx = 0.0f;
-					map_radar_object_for_map[mapidx]->map_file_object.ry = 0.0f;
-					map_radar_object_for_map[mapidx]->map_file_object.rz = 0.0f;
-					map_radar_object_for_map[mapidx]->drawdistance = header.draw_radius;
-				}
-			}
-
-			object++;
-		}
-	}
-
 	/*read gangzones*/
 	maps[mapidx].num_gang_zones = header.num_gang_zones;
 	if (header.num_gang_zones) {
@@ -206,6 +154,57 @@ addradar:
 			middle_y += gang_zone->min_y;
 			middle_y += gang_zone->max_y;
 			gang_zone++;
+		}
+	}
+
+	/*read objects*/
+	map_radar_object_for_map[mapidx] = 0;
+	maps[mapidx].num_objects = header.num_objects;
+	if (header.num_objects) {
+		maps[mapidx].objects = object_data = malloc(header.objdata_size);
+		for (i = header.num_objects; i > 0; i--) {
+			if (!fread(object_data, 2, 1, fs) ||
+				!fread((char*) object_data + 2, object_data->objectid - 2, 1, fs))
+			{
+				free(maps[mapidx].objects);
+				/*no need to null because the map will be discarded as a whole*/
+				goto corrupted;
+			}
+			total_element_count_for_middle++;
+			middle_x += object_data->x;
+			middle_y += object_data->y;
+			object_data->drawdistance = header.draw_radius;
+
+			/*automatically create object for the rotating radar if the base is found*/
+			if (!map_radar_object_for_map[mapidx]) {
+				if (object_data->modelid == 7981/*smallradar02_lvS*/) {
+					radar_angle = object_data->rz * M_PI / 180.0f;
+					radar_offset_x = 4.4148f * (float) cos(radar_angle);
+					radar_offset_y = 4.4148f * (float) sin(radar_angle);
+					goto addradar;
+				} else if (object_data->modelid == 10810/*ap_smallradar1_SFSe*/) {
+					radar_angle = object_data->rz * M_PI / 180.0f;
+					radar_offset_x = -4.2038f * (float) cos(radar_angle) - 1.2057f * (float) sin(radar_angle);
+					radar_offset_y = -4.2038f * (float) sin(radar_angle) + 1.2057f * (float) cos(radar_angle);
+addradar:
+					map_radar_object_for_map[mapidx] = malloc(sizeof(struct RPCDATA_CreateObject));
+					map_radar_object_for_map[mapidx]->objectid = OBJECT_ROTATING_RADAR;
+					map_radar_object_for_map[mapidx]->modelid = 1682;
+					map_radar_object_for_map[mapidx]->x = object_data->x + radar_offset_x;
+					map_radar_object_for_map[mapidx]->y = object_data->y + radar_offset_y;
+					map_radar_object_for_map[mapidx]->z = object_data->z + 11.4f;
+					map_radar_object_for_map[mapidx]->rx = 0.0f;
+					map_radar_object_for_map[mapidx]->ry = 0.0f;
+					map_radar_object_for_map[mapidx]->rz = 0.0f;
+					map_radar_object_for_map[mapidx]->drawdistance = header.draw_radius;
+					map_radar_object_for_map[mapidx]->no_camera_col = 0;
+					map_radar_object_for_map[mapidx]->attached_object_id = -1;
+					map_radar_object_for_map[mapidx]->attached_vehicle_id = -1;
+					map_radar_object_for_map[mapidx]->num_materials = 0;
+				}
+			}
+
+			object_data = (void*) ((char*) object_data + object_data->objectid);
 		}
 	}
 
@@ -295,7 +294,7 @@ int maps_timer_rotate_radar(void *data)
 	static float obj_radar_z_rot = 0.0f;
 	static int z_off_i = 0;
 
-	struct OBJECT *object;
+	struct RPCDATA_CreateObject *object;
 	int playerindex, playerid;
 	float zoffset;
 
@@ -310,12 +309,12 @@ int maps_timer_rotate_radar(void *data)
 		playerid = players[playerindex];
 		if ((object = map_radar_object_for_player[playerid])) {
 			rpcdata_MoveObject.objectid = OBJECT_ROTATING_RADAR;
-			rpcdata_MoveObject.from_x = object->map_file_object.x;
-			rpcdata_MoveObject.from_y = object->map_file_object.y;
-			rpcdata_MoveObject.from_z = object->map_file_object.z;
-			rpcdata_MoveObject.to_x = object->map_file_object.x;
-			rpcdata_MoveObject.to_y = object->map_file_object.y;
-			rpcdata_MoveObject.to_z = object->map_file_object.z + zoffset;
+			rpcdata_MoveObject.from_x = object->x;
+			rpcdata_MoveObject.from_y = object->y;
+			rpcdata_MoveObject.from_z = object->z;
+			rpcdata_MoveObject.to_x = object->x;
+			rpcdata_MoveObject.to_y = object->y;
+			rpcdata_MoveObject.to_z = object->z + zoffset;
 			rpcdata_MoveObject.speed = 0.0012f;
 			rpcdata_MoveObject.to_rx = 0.0f;
 			rpcdata_MoveObject.to_ry = 0.0f;
@@ -336,10 +335,6 @@ void maps_init()
 
 	bs_maps_remove_building.numberOfBitsUsed = sizeof(rpcdata_RemoveBuilding) * 8;
 	bs_maps_remove_building.ptrData = &rpcdata_RemoveBuilding;
-
-	rpcdata_CreateObject.no_camera_col = 0;
-	rpcdata_CreateObject.attached_object = -1;
-	rpcdata_CreateObject.attached_vehicle = -1;
 
 	bs_maps_show_gang_zone.numberOfBitsUsed = sizeof(rpcdata_ShowGangZone) * 8;
 	bs_maps_show_gang_zone.ptrData = &rpcdata_ShowGangZone;
@@ -367,10 +362,14 @@ Creates all objects/gangzones in given map for the given player.
 static
 void maps_stream_in_for_player(int playerid, int mapidx)
 {
-	struct OBJECT *obj, *objects_end;
+	struct BitStream bitstream;
+	struct RPCDATA_CreateObject *obj;
 	short *objectid_to_mapidx;
 	short *gangzoneid_to_mapidx;
+	int tmp_saved_objdata_size;
 	int gang_zone_idx;
+	int objectid;
+	int i;
 
 #ifdef MAPS_LOG_STREAMING
 	logprintf("map %s streamed in for %d", maps[mapidx].name, playerid);
@@ -381,22 +380,24 @@ void maps_stream_in_for_player(int playerid, int mapidx)
 	/*objects*/
 	if (maps[mapidx].num_objects) {
 		obj = maps[mapidx].objects;
-		objects_end = obj + maps[mapidx].num_objects;
 		objectid_to_mapidx = player_objectid_to_mapidx[playerid];
-		rpcdata_CreateObject.objectid = 0; /*TODO: samp starts at objectid 1, should we also do that?*/
-		while (obj != objects_end) {
-			while (objectid_to_mapidx[rpcdata_CreateObject.objectid] >= 0) {
-				rpcdata_CreateObject.objectid++;
-				if (rpcdata_CreateObject.objectid >= MAX_MAPSYSTEM_OBJECTS) {
+		objectid = 0; /*TODO: samp starts at objectid 1, should we also do that?*/
+		for (i = maps[mapidx].num_objects; i > 0; i--) {
+			while (objectid_to_mapidx[objectid] >= 0) {
+				objectid++;
+				if (objectid >= MAX_MAPSYSTEM_OBJECTS) {
 					logprintf("object limit hit while streaming map %s", maps[mapidx].name);
 					goto skip_objects;
 				}
 			}
-			memcpy(&rpcdata_CreateObject.modelid, obj, sizeof(struct OBJECT));
-			objectid_to_mapidx[rpcdata_CreateObject.objectid] = mapidx;
-			obj++;
-			/*TODO: what's the 2 for? possibly priority*/
-			SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream_create_object, playerid, 2);
+			objectid_to_mapidx[objectid] = mapidx;
+			tmp_saved_objdata_size = obj->objectid;
+			obj->objectid = objectid;
+			bitstream.ptrData = obj;
+			bitstream.numberOfBitsUsed = tmp_saved_objdata_size * 8;
+			SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
+			obj->objectid = tmp_saved_objdata_size;
+			obj = (void*) ((char*) obj + tmp_saved_objdata_size);
 		}
 	}
 skip_objects:
@@ -408,9 +409,9 @@ skip_objects:
 	No maps with radars should have intersecting stream radii anyways.*/
 	if (map_radar_object_for_map[mapidx] && !map_radar_object_for_player[playerid]) {
 		map_radar_object_for_player[playerid] = map_radar_object_for_map[mapidx];
-		rpcdata_CreateObject.objectid = OBJECT_ROTATING_RADAR;
-		memcpy(&rpcdata_CreateObject.modelid, map_radar_object_for_map[mapidx], sizeof(struct OBJECT));
-		SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream_create_object, playerid, 2);
+		bitstream.ptrData = map_radar_object_for_map[mapidx];
+		bitstream.numberOfBitsUsed = sizeof(struct RPCDATA_CreateObject) * 8;
+		SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
 	}
 
 	/*gang zones*/
@@ -446,8 +447,11 @@ Deletes all the objects/gangzones from given map for the given player.
 static
 void maps_stream_out_for_player(int playerid, int mapidx)
 {
+	struct RPCDATA_DestroyObject rpcdata_DestroyObject;
+	struct BitStream bitstream;
 	short *objectid_to_mapidx;
 	short *gangzoneid_to_mapidx;
+	int objectid;
 
 #ifdef MAPS_LOG_STREAMING
 	logprintf("map %s streamed out for %d", maps[mapidx].name, playerid);
@@ -457,9 +461,9 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 
 	/*objects*/
 	objectid_to_mapidx = player_objectid_to_mapidx[playerid];
-	for (rpcdata_DestroyObject.objectid = 0; rpcdata_DestroyObject.objectid < MAX_OBJECTS; rpcdata_DestroyObject.objectid++) {
-		if (objectid_to_mapidx[rpcdata_DestroyObject.objectid] == mapidx) {
-			objectid_to_mapidx[rpcdata_DestroyObject.objectid] = -2;
+	for (objectid = 0; objectid < MAX_OBJECTS; objectid++) {
+		if (objectid_to_mapidx[objectid] == mapidx) {
+			objectid_to_mapidx[objectid] = -2;
 		}
 	}
 
@@ -467,7 +471,9 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 	if (map_radar_object_for_map[mapidx] && map_radar_object_for_map[mapidx] == map_radar_object_for_player[playerid]) {
 		map_radar_object_for_player[playerid] = 0;
 		rpcdata_DestroyObject.objectid = OBJECT_ROTATING_RADAR;
-		SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream_destroy_object, playerid, 2);
+		bitstream.ptrData = &rpcdata_DestroyObject;
+		bitstream.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
+		SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream, playerid, 2);
 	}
 
 	/*gang zones*/
@@ -491,13 +497,15 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 static
 void maps_destroy_stale_objects_for_player(int playerid)
 {
-	int objectid;
+	struct RPCDATA_DestroyObject rpcdata_DestroyObject;
+	struct BitStream bitstream;
 
-	for (objectid = 0; objectid < MAX_MAPSYSTEM_OBJECTS; objectid++) {
-		if (player_objectid_to_mapidx[playerid][objectid] == -2) {
-			player_objectid_to_mapidx[playerid][objectid] = -1;
-			rpcdata_DestroyObject.objectid = objectid;
-			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream_destroy_object, playerid, 2);
+	bitstream.ptrData = &rpcdata_DestroyObject;
+	bitstream.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
+	for (rpcdata_DestroyObject.objectid = 0; rpcdata_DestroyObject.objectid < MAX_MAPSYSTEM_OBJECTS; rpcdata_DestroyObject.objectid++) {
+		if (player_objectid_to_mapidx[playerid][rpcdata_DestroyObject.objectid] == -2) {
+			player_objectid_to_mapidx[playerid][rpcdata_DestroyObject.objectid] = -1;
+			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream, playerid, 2);
 		}
 	}
 }

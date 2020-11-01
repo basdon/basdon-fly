@@ -50,19 +50,19 @@ struct RPCDATA_SendDeathMessage {
 };
 EXPECT_SIZE(struct RPCDATA_SendDeathMessage, 2 + 2 + 1);
 
-struct RPCDATA_CreateObject {
+struct RPCDATA_CreateObject_Attached {
 	short objectid;
 	int modelid;
 	float x;
 	float y;
 	float z;
-	float rotx;
-	float roty;
-	float rotz;
+	float rx;
+	float ry;
+	float rz;
 	float drawdistance;
 	char no_camera_col;
-	short attached_object;
-	short attached_vehicle;
+	short attached_object_id;
+	short attached_vehicle_id;
 	float attach_offset_x;
 	float attach_offset_y;
 	float attach_offset_z;
@@ -70,8 +70,45 @@ struct RPCDATA_CreateObject {
 	float attach_rotation_y;
 	float attach_rotation_z;
 	char sync_rotation;
+	char num_materials;
+	/*material data*/
 };
-EXPECT_SIZE(struct RPCDATA_CreateObject, 2 + 4 + 24 + 4 + 1 + 2 + 2 + 24 + 1);
+EXPECT_SIZE(struct RPCDATA_CreateObject_Attached, 2 + 4 + 24 + 4 + 1 + 2 + 2 + 24 + 1 + 1);
+
+struct RPCDATA_CreateObject {
+	short objectid;
+	int modelid;
+	float x;
+	float y;
+	float z;
+	float rx;
+	float ry;
+	float rz;
+	float drawdistance;
+	char no_camera_col;
+	short attached_object_id;
+	short attached_vehicle_id;
+	char num_materials;
+	/*material data*/
+};
+EXPECT_SIZE(struct RPCDATA_CreateObject, 2 + 4 + 24 + 4 + 1 + 2 + 2 + 1);
+
+struct RPCDATA_CreateObject_Material {
+	char material_type;
+	char material_index;
+};
+EXPECT_SIZE(struct RPCDATA_CreateObject_Material, 1 + 1);
+
+/*
+struct material_texture {
+	short model_id;
+	char txdname_len;
+	char txdname[?];
+	char texture_len;
+	char texture[?];
+	int material_color;
+};
+*/
 
 struct RPCDATA_DestroyObject {
 	short objectid;

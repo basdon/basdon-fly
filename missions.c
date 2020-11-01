@@ -610,6 +610,9 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 #define AIRPORT_RANGE_SQ (1500.0f * 1500.0f)
 #define POINT_RANGE_SQ (500.0f * 500.0f)
 
+	struct RPCDATA_CreateObject rpcdata_CreateObject;
+	struct RPCDATA_DestroyObject rpcdata_DestroyObject;
+	struct BitStream bitstream;
 	struct MISSIONPOINT *msp;
 	int airportidx, indicatoridx, missionptidx, idxtouse;
 	int player_new_active_msp_index;
@@ -668,11 +671,17 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 					rpcdata_CreateObject.x = msp->pos.x;
 					rpcdata_CreateObject.y = msp->pos.y;
 					rpcdata_CreateObject.z = msp->pos.z;
-					rpcdata_CreateObject.rotx = 0.0f;
-					rpcdata_CreateObject.roty = 0.0f;
-					rpcdata_CreateObject.rotz = 0.0f;
+					rpcdata_CreateObject.rx = 0.0f;
+					rpcdata_CreateObject.ry = 0.0f;
+					rpcdata_CreateObject.rz = 0.0f;
 					rpcdata_CreateObject.drawdistance = 1000.0f;
-					SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream_create_object, playerid, 2);
+					rpcdata_CreateObject.no_camera_col = 0;
+					rpcdata_CreateObject.attached_object_id = -1;
+					rpcdata_CreateObject.attached_vehicle_id = -1;
+					rpcdata_CreateObject.num_materials = 0;
+					bitstream.ptrData = &rpcdata_CreateObject;
+					bitstream.numberOfBitsUsed = sizeof(rpcdata_CreateObject) * 8;
+					SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
 					missionpoint_indicator_state[playerid][idxtouse] = MISSIONPOINT_INDICATOR_STATE_USED;
 					missionpoint_indicator_index[playerid][idxtouse] = msp - missionpoints;
 #ifdef MISSIONS_LOG_POINT_INDICATOR_ALLOC
@@ -692,7 +701,9 @@ next:
 			!(missionpoints[missionpoint_indicator_index[playerid][indicatoridx]].type & missions_available_msptype_mask[playerid]))
 		{
 			rpcdata_DestroyObject.objectid = OBJECT_MISSION_INDICATOR_BASE + indicatoridx;
-			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream_destroy_object, playerid, 2);
+			bitstream.ptrData = &rpcdata_DestroyObject;
+			bitstream.numberOfBitsUsed = sizeof(rpcdata_DestroyObject);
+			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream, playerid, 2);
 			missionpoint_indicator_state[playerid][indicatoridx] = MISSIONPOINT_INDICATOR_STATE_FREE;
 #ifdef MISSIONS_LOG_POINT_INDICATOR_ALLOC
 			printf("%d %d destroyed %d\n", indicatoridx, missionpoint_indicator_index[playerid][indicatoridx], time_timestamp());

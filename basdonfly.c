@@ -316,14 +316,6 @@ static void missions_update_missionpoint_indicators(int playerid, float player_x
 static int missions_get_vehicle_model_msptype_mask(int model);
 static void nav_reset_for_vehicle(int vehicleid);
 
-static struct BitStream bitstream_create_object;
-/**
-Reset no_camera_col(0), attached_vehicle(-1), attached_object(-1) after use.
-*/
-static struct RPCDATA_CreateObject rpcdata_CreateObject;
-static struct BitStream bitstream_destroy_object;
-static struct RPCDATA_DestroyObject rpcdata_DestroyObject;
-
 #include "memstuff.c"
 #include "natives.c"
 #include "samp.c"
@@ -386,16 +378,6 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 
 	*(int*) &float_pinf = 0x7F800000;
 	*(int*) &float_ninf = 0xFF800000;
-
-	rpcdata_CreateObject.no_camera_col = 0;
-	rpcdata_CreateObject.attached_object = -1;
-	rpcdata_CreateObject.attached_vehicle = -1;
-
-	bitstream_create_object.numberOfBitsUsed = sizeof(rpcdata_CreateObject) * 8;
-	bitstream_create_object.ptrData = &rpcdata_CreateObject;
-
-	bitstream_destroy_object.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
-	bitstream_destroy_object.ptrData = &rpcdata_DestroyObject;
 
 #ifdef DEV
 	sampasm_sanitycheck();
