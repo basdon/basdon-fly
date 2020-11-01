@@ -448,7 +448,7 @@ static
 void maps_stream_out_for_player(int playerid, int mapidx)
 {
 	struct RPCDATA_DestroyObject rpcdata_DestroyObject;
-	struct BitStream bitstream;
+	struct BitStream bitstream_destroy;
 	short *objectid_to_mapidx;
 	short *gangzoneid_to_mapidx;
 	int objectid;
@@ -459,11 +459,16 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 
 	maps[mapidx].stream_status_for_player[playerid] = 0;
 
+	bitstream_destroy.ptrData = &rpcdata_DestroyObject;
+	bitstream_destroy.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
+
 	/*objects*/
 	objectid_to_mapidx = player_objectid_to_mapidx[playerid];
 	for (objectid = 0; objectid < MAX_OBJECTS; objectid++) {
 		if (objectid_to_mapidx[objectid] == mapidx) {
-			objectid_to_mapidx[objectid] = -2;
+			objectid_to_mapidx[objectid] = -1;
+			rpcdata_DestroyObject.objectid = objectid;
+			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream_destroy, playerid, 2);
 		}
 	}
 
@@ -471,9 +476,7 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 	if (map_radar_object_for_map[mapidx] && map_radar_object_for_map[mapidx] == map_radar_object_for_player[playerid]) {
 		map_radar_object_for_player[playerid] = 0;
 		rpcdata_DestroyObject.objectid = OBJECT_ROTATING_RADAR;
-		bitstream.ptrData = &rpcdata_DestroyObject;
-		bitstream.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
-		SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream, playerid, 2);
+		SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream_destroy, playerid, 2);
 	}
 
 	/*gang zones*/
@@ -494,31 +497,12 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 	}
 }
 
-static
-void maps_destroy_stale_objects_for_player(int playerid)
-{
-	struct RPCDATA_DestroyObject rpcdata_DestroyObject;
-	struct BitStream bitstream;
-
-	bitstream.ptrData = &rpcdata_DestroyObject;
-	bitstream.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
-	for (rpcdata_DestroyObject.objectid = 0; rpcdata_DestroyObject.objectid < MAX_MAPSYSTEM_OBJECTS; rpcdata_DestroyObject.objectid++) {
-		if (player_objectid_to_mapidx[playerid][rpcdata_DestroyObject.objectid] == -2) {
-			player_objectid_to_mapidx[playerid][rpcdata_DestroyObject.objectid] = -1;
-			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream, playerid, 2);
-		}
-	}
-}
-
 void maps_stream_for_player(int playerid, struct vec3 pos)
 {
 	float dx, dy, distance;
 	int mapidx;
-	int did_stream_out;
 
 	/*check everything to stream out first, only then stream in*/
-
-	did_stream_out = 0;
 
 	for (mapidx = 0; mapidx < num_maps; mapidx++) {
 		if (maps[mapidx].stream_status_for_player[playerid]) {
@@ -527,7 +511,6 @@ void maps_stream_for_player(int playerid, struct vec3 pos)
 			distance = dx * dx + dy * dy;
 			if (distance > maps[mapidx].stream_out_radius_sq) {
 				maps_stream_out_for_player(playerid, mapidx);
-				did_stream_out = 1;
 			}
 		}
 	}
@@ -541,10 +524,6 @@ void maps_stream_for_player(int playerid, struct vec3 pos)
 				maps_stream_in_for_player(playerid, mapidx);
 			}
 		}
-	}
-
-	if (did_stream_out) {
-		maps_destroy_stale_objects_for_player(playerid);
 	}
 }
 
