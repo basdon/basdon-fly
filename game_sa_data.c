@@ -1287,6 +1287,8 @@ struct REGION {
 #define ZONE_OCTA_RESIDENTIAL 176
 #define ZONE_OCTA_MOUNTAIN 177
 #define ZONE_OCTA_BEACH 178
+#define ZONE_CATA 179
+#define ZONE_CATA_CITY 179
 
 /* see info.zon and american.gxt */
 static char *zonenames[] = {
@@ -1469,6 +1471,7 @@ static char *zonenames[] = {
 	"Downtown",
 	"Mountain",
 	"Beach",
+	"Catalina City",
 };
 
 static struct REGION regions[] = {
@@ -1483,6 +1486,7 @@ static struct REGION regions[] = {
 	R(-1213.91f, -2892.97f, -242.99f, 44.6147f, -768.027f, 900.0f, ZONE_FLINTC),
 	R(-2997.47f, -2892.97f, -242.99f, -1213.91f, -1115.58f, 900.0f, ZONE_WHET),
 	R(11740.0f, 5875.0f, -242.99f, 13718.0f, 7471.5f, 900.0f, ZONE_OCTA),
+	R(-35585.12f, -2906.60f, -242.99f, -32640.87f, -228.24f, 900.0f, ZONE_CATA),
 	#undef R
 };
 
@@ -1900,6 +1904,9 @@ static struct ZONE zones[] = {
 	{ 12425.3369f, 6486.2881f, 0.0f, 12544.3184f, 6561.1528f, 200.0f, ZONE_OCTA_BEACH },
 	{ 12515.4824f, 6536.6035f, 0.0f, 12886.6074f, 6582.3755f, 200.0f, ZONE_OCTA_BEACH },
 	/* end OCTA region zones */
+	/* start CATA region zones */
+	{ -34629.93f, -1822.11f, 0.0f, -33286.82f, -848.27f, 200.0f, ZONE_CATA_CITY },
+	/* end CATA region zones */
 };
 
 static int regioncount = sizeof(regions)/sizeof(regions[0]);

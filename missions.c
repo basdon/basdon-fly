@@ -89,6 +89,9 @@ Tracker socket handle.
 */
 static int tracker;
 
+#define MISSION_MAP_SIZE 80000.0f
+#define MISSION_MAP_HALFSIZE 40000.0f
+
 #define NUM_HELP_TEXTDRAWS (17)
 static struct TEXTDRAW td_jobhelp_keyhelp = { "keyhelp", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobhelp_header = { "header", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
@@ -115,7 +118,7 @@ static struct TEXTDRAW td_jobmap_optsbg = { "optsbg", TEXTDRAW_ALLOC_AS_NEEDED, 
 static struct TEXTDRAW td_jobmap_mapbg = { "mapbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobmap_island_mainland = { "mapsqfull", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobmap_island_octa = { "mapsqmintopleft", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobmap_island_lima = { "mapsqminbotright", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_island_cata = { "mapsqminbotright", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 #if AIRPORT_CODE_LEN != 4
 #error "mapmin/mapmax text alloc depend on airport code being 4 chars at most"
 #endif
@@ -385,12 +388,12 @@ invalid:
 		}
 		tomsp = msp->missionlocations[preset_option_idx];
 		strcpy(td_jobmap_to.rpcdata->text, tomsp->ap->code);
-		td_jobmap_to.rpcdata->x = map_text_x_base + map_text_x_unit * (tomsp->pos.x + 20000.0f);
-		td_jobmap_to.rpcdata->y = map_text_y_base + map_text_y_unit * (-tomsp->pos.y + 20000.0f);
+		td_jobmap_to.rpcdata->x = map_text_x_base + map_text_x_unit * (tomsp->pos.x + MISSION_MAP_HALFSIZE);
+		td_jobmap_to.rpcdata->y = map_text_y_base + map_text_y_unit * (-tomsp->pos.y + MISSION_MAP_HALFSIZE);
 	} else {
 		strcpy(td_jobmap_to.rpcdata->text, "????");
-		td_jobmap_to.rpcdata->x = map_text_x_base + map_text_x_unit * 20000.0f;
-		td_jobmap_to.rpcdata->y = map_text_y_base + map_text_y_unit * 20000.0f;
+		td_jobmap_to.rpcdata->x = map_text_x_base + map_text_x_unit * MISSION_MAP_HALFSIZE;
+		td_jobmap_to.rpcdata->y = map_text_y_base + map_text_y_unit * MISSION_MAP_HALFSIZE;
 	}
 
 	optdif = td_jobmap_opt2bg.rpcdata->y - td_jobmap_opt1bg.rpcdata->y;
@@ -468,13 +471,13 @@ void missions_jobmap_show(int playerid)
 	}
 
 	strcpy(td_jobmap_from.rpcdata->text, msp->ap->code);
-	td_jobmap_from.rpcdata->x = map_text_x_base + map_text_x_unit * (msp->pos.x + 20000.0f);
-	td_jobmap_from.rpcdata->y = map_text_y_base + map_text_y_unit * (-msp->pos.y + 20000.0f);
+	td_jobmap_from.rpcdata->x = map_text_x_base + map_text_x_unit * (msp->pos.x + MISSION_MAP_HALFSIZE);
+	td_jobmap_from.rpcdata->y = map_text_y_base + map_text_y_unit * (-msp->pos.y + MISSION_MAP_HALFSIZE);
 
 	/*Showing all but "selection option background" and "to" textdraws.*/
 	textdraws_show(playerid, NUM_MAP_TEXTDRAWS - 2,
 		&td_jobmap_keyhelp, &td_jobmap_header, &td_jobmap_optsbg, &td_jobmap_mapbg,
-		&td_jobmap_island_mainland, &td_jobmap_island_octa, &td_jobmap_island_lima,
+		&td_jobmap_island_mainland, &td_jobmap_island_octa, &td_jobmap_island_cata,
 		&td_jobmap_from, /*&td_jobmap_to, */&td_jobmap_opt1bg, &td_jobmap_opt2bg, &td_jobmap_opt3bg,
 		&td_jobmap_opt4bg, &td_jobmap_opt5bg, &td_jobmap_opt6bg, &td_jobmap_opt7bg,
 		&td_jobmap_opt8bg, &td_jobmap_opt9bg, /*&td_jobmap_optselbg, */&td_jobmap_opt1,
@@ -788,7 +791,7 @@ void missions_dispose()
 	free(td_jobmap_mapbg.rpcdata);
 	free(td_jobmap_island_mainland.rpcdata);
 	free(td_jobmap_island_octa.rpcdata);
-	free(td_jobmap_island_lima.rpcdata);
+	free(td_jobmap_island_cata.rpcdata);
 	free(td_jobmap_from.rpcdata);
 	free(td_jobmap_to.rpcdata);
 	free(td_jobmap_opt1bg.rpcdata);
@@ -824,77 +827,82 @@ void missions_init_jobmap_islands()
 	float map_coords_x_base, map_coords_x_unit;
 	float boxwidth_unit;
 	float boxwidth_min, boxwidth_max;
+	struct RPCDATA_ShowTextDraw *txtdraw;
 	struct ZONE *zone;
 	int zoneindex, maxzoneindex;
 	int regionindex;
-	int octa_region_found;
+	int octa_region_found, cata_region_found;
 	float min_x, min_y, max_x, max_y;
 
 	map_text_x_base = td_jobmap_from.rpcdata->x;
-	map_text_x_unit = (td_jobmap_to.rpcdata->x - td_jobmap_from.rpcdata->x) / 40000.0f;
+	map_text_x_unit = (td_jobmap_to.rpcdata->x - td_jobmap_from.rpcdata->x) / MISSION_MAP_SIZE;
 
 	map_text_y_base = td_jobmap_from.rpcdata->y;
-	map_text_y_unit = (td_jobmap_to.rpcdata->y - td_jobmap_from.rpcdata->y) / 40000.0f;
+	map_text_y_unit = (td_jobmap_to.rpcdata->y - td_jobmap_from.rpcdata->y) / MISSION_MAP_SIZE;
 
 	map_coords_x_base = td_jobmap_island_octa.rpcdata->x;
-	map_coords_x_unit = (td_jobmap_island_lima.rpcdata->x - td_jobmap_island_octa.rpcdata->x) / 40000.0f;
+	map_coords_x_unit = (td_jobmap_island_cata.rpcdata->x - td_jobmap_island_octa.rpcdata->x) / MISSION_MAP_SIZE;
 
 	map_coords_y_base = td_jobmap_island_octa.rpcdata->y;
-	map_coords_y_unit = (td_jobmap_island_lima.rpcdata->y - td_jobmap_island_octa.rpcdata->y) / 40000.0f;
+	map_coords_y_unit = (td_jobmap_island_cata.rpcdata->y - td_jobmap_island_octa.rpcdata->y) / MISSION_MAP_SIZE;
 
 	/*actual box width is the relation of x (font position) to box_width*/
 	boxwidth_min = td_jobmap_island_octa.rpcdata->box_width - td_jobmap_island_octa.rpcdata->x;
 	boxwidth_max = td_jobmap_island_mainland.rpcdata->box_width - td_jobmap_island_mainland.rpcdata->x;
-	boxwidth_unit = (boxwidth_max - boxwidth_min) / 40000.0f;
+	boxwidth_unit = (boxwidth_max - boxwidth_min) / MISSION_MAP_SIZE;
 
 	map_coords_fontheight_base = td_jobmap_island_octa.rpcdata->font_height;
-	map_coords_fontheight_unit = (td_jobmap_island_mainland.rpcdata->font_height - map_coords_fontheight_base) / 40000.0f;
+	map_coords_fontheight_unit = (td_jobmap_island_mainland.rpcdata->font_height - map_coords_fontheight_base) / MISSION_MAP_SIZE;
 
-	td_jobmap_island_mainland.rpcdata->x = map_coords_x_base + map_coords_x_unit * (20000.0f - 3000.0f);
+	td_jobmap_island_mainland.rpcdata->x = map_coords_x_base + map_coords_x_unit * (MISSION_MAP_HALFSIZE - 3000.0f);
 	td_jobmap_island_mainland.rpcdata->box_width = td_jobmap_island_mainland.rpcdata->x + boxwidth_unit * 6000.0f;
-	td_jobmap_island_mainland.rpcdata->y = map_coords_y_base + map_coords_y_unit * (20000.0f - 3000.0f);
+	td_jobmap_island_mainland.rpcdata->y = map_coords_y_base + map_coords_y_unit * (MISSION_MAP_HALFSIZE - 3000.0f);
 	td_jobmap_island_mainland.rpcdata->font_height = map_coords_fontheight_base + map_coords_fontheight_unit * 6000.0f;
 
 	octa_region_found = 0;
+	cata_region_found = 0;
 	for (regionindex = 0; regionindex < regioncount; regionindex++) {
-		if (regions[regionindex].zone.id == ZONE_OCTA) {
-			zoneindex = regions[regionindex].from_zone_idx;
-			maxzoneindex = regions[regionindex].to_zone_idx_exclusive;
+		switch (regions[regionindex].zone.id) {
+		case ZONE_OCTA:
 			octa_region_found = 1;
-			min_x = min_y = float_pinf;
-			max_x = max_y = float_ninf;
-			for (; zoneindex < maxzoneindex; zoneindex++) {
-				zone = &zones[zoneindex];
-				if (zone->min_x < min_x) {
-					min_x = zone->min_x;
-				}
-				if (zone->min_y < min_y) {
-					min_y = zone->min_y;
-				}
-				if (zone->max_x > max_x) {
-					max_x = zone->max_x;
-				}
-				if (zone->max_y > max_y) {
-					max_y = zone->max_y;
-				}
-			}
-			assert(min_x < max_x);
-			assert(min_y < max_y);
-
-			td_jobmap_island_octa.rpcdata->x = map_coords_x_base + map_coords_x_unit * (20000.0f + min_x);
-			td_jobmap_island_octa.rpcdata->box_width = td_jobmap_island_octa.rpcdata->x + boxwidth_unit * (max_x - min_x);
-			td_jobmap_island_octa.rpcdata->y = map_coords_y_base + map_coords_y_unit * (20000.0f + -max_y);
-			td_jobmap_island_octa.rpcdata->font_height = map_coords_fontheight_base + map_coords_fontheight_unit * (max_y - min_y);
-
-			/*TODO this is temp until lima gets added*/
-			td_jobmap_island_lima.rpcdata->x = td_jobmap_island_octa.rpcdata->x;
-			td_jobmap_island_lima.rpcdata->box_width = td_jobmap_island_octa.rpcdata->box_width;
-			td_jobmap_island_lima.rpcdata->y = td_jobmap_island_octa.rpcdata->y;
-			td_jobmap_island_lima.rpcdata->font_height = td_jobmap_island_octa.rpcdata->font_height;
+			txtdraw = td_jobmap_island_octa.rpcdata;
 			break;
+		case ZONE_CATA:
+			cata_region_found = 1;
+			txtdraw = td_jobmap_island_cata.rpcdata;
+			break;
+		default:
+			continue;
 		}
+		zoneindex = regions[regionindex].from_zone_idx;
+		maxzoneindex = regions[regionindex].to_zone_idx_exclusive;
+		min_x = min_y = float_pinf;
+		max_x = max_y = float_ninf;
+		for (; zoneindex < maxzoneindex; zoneindex++) {
+			zone = &zones[zoneindex];
+			if (zone->min_x < min_x) {
+				min_x = zone->min_x;
+			}
+			if (zone->min_y < min_y) {
+				min_y = zone->min_y;
+			}
+			if (zone->max_x > max_x) {
+				max_x = zone->max_x;
+			}
+			if (zone->max_y > max_y) {
+				max_y = zone->max_y;
+			}
+		}
+		assert(min_x < max_x);
+		assert(min_y < max_y);
+
+		txtdraw->x = map_coords_x_base + map_coords_x_unit * (40000.0f + min_x);
+		txtdraw->box_width = txtdraw->x + boxwidth_unit * (max_x - min_x);
+		txtdraw->y = map_coords_y_base + map_coords_y_unit * (40000.0f + -max_y);
+		txtdraw->font_height = map_coords_fontheight_base + map_coords_fontheight_unit * (max_y - min_y);
 	}
 	assert(octa_region_found);
+	assert(cata_region_found);
 }
 
 static
@@ -925,7 +933,7 @@ void missions_init()
 	textdraws_load_from_file("jobmap", TEXTDRAW_MISSIONMAP_BASE, NUM_MAP_TEXTDRAWS + 1,
 		/*remember to free their rpcdata in missions_dispose*/
 		&td_jobmap_keyhelp, &td_jobmap_header, &td_jobmap_optsbg, &td_jobmap_mapbg,
-		&td_jobmap_island_mainland, &td_jobmap_island_octa, &td_jobmap_island_lima,
+		&td_jobmap_island_mainland, &td_jobmap_island_octa, &td_jobmap_island_cata,
 		&td_jobmap_from, &td_jobmap_to, &td_jobmap_opt1bg, &td_jobmap_opt2bg, &td_jobmap_opt3bg,
 		&td_jobmap_opt4bg, &td_jobmap_opt5bg, &td_jobmap_opt6bg, &td_jobmap_opt7bg,
 		&td_jobmap_opt8bg, &td_jobmap_opt9bg, &td_jobmap_optselbg, &td_jobmap_opt1,
