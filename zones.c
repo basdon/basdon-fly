@@ -129,6 +129,8 @@ hide_if_shown_and_return:
 			textdraws_hide_consecutive(playerid, 1, TEXTDRAW_GPS);
 		}
 		return;
+	} else if (!gps_text_is_shown[playerid]) {
+		goto showtext;
 	}
 
 	if (previous_last_region_id != zone_last_region[playerid] || previous_last_zone_id != zone_last_id[playerid]) {
