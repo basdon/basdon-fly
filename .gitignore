@@ -1,3 +1,9 @@
+**/.classpath
+**/.project
+**/.settings/
+**/bin/
+**/bin-test/
+**/out
 /fly-plugin/out/
 /fly-plugin/__sampasm.h
 /fly-web/**/.ignored.*
