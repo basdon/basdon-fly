@@ -1,2 +1,13 @@
 /fly-plugin/out/
 /fly-plugin/__sampasm.h
+/**/.ignored.*
+/**/gen/**
+!/**/gen/
+!/**/gen/.gitkeep
+/articles/apfactsheets/*.html
+/articles/aerodromecharts/*.html
+/articles/islandmaps/*.html
+/inc/conf.php
+/static/fdr/*.flight
+/static/chatlogs/*
+/articles/tohtml.sed

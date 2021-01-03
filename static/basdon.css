@@ -1,0 +1,231 @@
+body {
+	padding:0;
+	margin:0;
+	background: #CCC;
+	font-family: 'Tahoma', sans-serif;
+}
+body>div,body>header,body>footer{
+	background:#fff;
+	max-width:1000px;
+	margin:0 auto;
+}
+body>div>div{
+	padding:.1px 10px;
+}
+body>header,body>footer{
+	color:#fff;
+	background:#333;
+}
+header a:link,header a:visited,
+footer a:link,footer a:visited{
+	color:#fff;
+}
+header h1 {
+	margin:0;
+}
+header>div,footer>div{
+	padding:5px 10px;
+}
+header p {
+	text-align: right;
+}
+header p, footer p {
+	margin: 0;
+}
+header #ip {
+	float: left;
+}
+header small, footer small {
+	font-size: small;
+	float: right;
+	text-align: right;
+}
+footer {
+}
+footer p {
+	line-height: 1.1em;
+	font-size: x-small;
+}
+body > p.msg {
+	max-width: 1000px;
+	background: #faa;
+	margin: 0 auto;
+	padding: .2em 0;
+	text-align: center;
+	border-bottom:1px solid #a88;
+}
+hr {
+	height: 1px;
+}
+.fr49 {
+	float: right;
+	width: 49%;
+}
+.fl49 {
+	float: left;
+	width: 49%;
+}
+@media (max-width: 800px) {
+	header #ip {
+		float: none;
+		text-align: left;
+	}
+	header small, footer small {
+		float: none;
+		display: block;
+		text-align: right;
+	}
+	.fr49, .fl49 {
+		float: none;
+		width: 100%;
+	}
+}
+@media(max-width:600px){
+	header h1{
+		font-size:1.3em;
+	}
+}
+h2, h3, h4, h5, h6 {
+	border-bottom: 1px solid #000;
+}
+h2 {
+	font-size: 1.75em;
+}
+h3 {
+	font-size: 1.5em;
+}
+h4 {
+	font-size: 1.25em;
+}
+h5 {
+	font-size: .9em;
+}
+h6 {
+	font-size: .8em;
+}
+h2+div,h3+div,h4+div,h5+div{
+	margin-bottom:0;
+}
+#skip {
+	position: absolute;
+	overflow: hidden;
+	width: 0;
+	height: 0;
+	padding: 0;
+	background-color: #ccc;
+}
+#skip:focus {
+	width: auto;
+	height: auto;
+	padding: .3em;
+}
+img.missing {
+	width: 100%;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -o-crisp-edges;
+	image-rendering: -webkit-pixelated;
+	image-rendering: pixelated;
+}
+.newtableheader {
+	margin-bottom: 0;
+	text-align: center;
+	background: #99f;
+	border-bottom: 0;
+	border: 1px solid #000;
+	border-bottom: 0;
+	font-size: 1.3em;
+}
+.newtableheader + table.new {
+	border-top: 0;
+	margin-top:0;
+}
+table.new {
+	border: 1px solid #000;
+	border-collapse: collapse;
+	margin:1em 0;
+}
+table.new th {
+	background: #99f;
+}
+table.new td, table.new th {
+	padding: .2em .5em;
+}
+table.new td + td {
+	border-left: 1px solid #000;
+}
+table.new thead tr {
+	border-bottom: 1px solid #000;
+}
+table.highlight-row tr:hover {
+	background: #f0f0f0;
+}
+.clear {
+	clear: both;
+}
+.pagination {
+	text-align: right;
+	font-size: .8em;
+}
+.flight-state {
+	padding: 0;
+}
+.flight-state-1 {
+	background: #ddf;
+}
+.flight-state-8 {
+	background: #dfd;
+}
+.flight-state-2, .flight-state-4, .flight-state-32 {
+	background: #fdd;
+}
+.flight-state-16 {
+	background: #fdb;
+}
+.flight-state-64 {
+	background: #edf;
+}
+code {
+	font-family: 'Courier new', monospace;
+	background: #ddd;
+	border-radius: 2px;
+	padding: 1px 2px;
+}
+span.u {
+	text-decoration: underline;
+}
+p.msg {
+	text-align: left;
+	padding: .3em;
+}
+p.msg.error {
+	border: 1px solid #600;
+	background: #fbb;
+}
+p.msg.info {
+	border: 1px solid #00529b;
+	background: #cdf;
+}
+p.msg.warning {
+	border: 1px solid #9d6000;
+	background: #FCD0B3;
+}
+p.msg.success {
+	border: 1px solid #060;
+	background: #bfb;
+}
+.center {
+	text-align: center;
+}
+.right {
+	text-align: right;
+}
+@media (max-width: 800px) {
+	.no800 {
+		display: none;
+	}
+}
+@media (max-width: 600px) {
+	.no600 {
+		display: none;
+	}
+}

@@ -1,0 +1,76 @@
+The Automatic Direction Finder, or ADF, helps finding the direction towards a
+specific beacon. It tells the direction between the beacon and the aircraft,
+the difference in altitude and the difference in current aircraft course and
+course towards the beacon. For a list of beacons, see
+{@article List_Of_Beacons}.
+
+{@h3 Usage}
+
+<pre>
+/adf &lt;beacon&gt;
+
+examples:
+
+/adf salv
+/adf SALS
+</pre>
+
+Beacons and specifiers can be in uppercase or lowercase or even mixed.
+
+{@code &lt;beacon&gt;} is the code of the NDB beacon to use. See
+{@article List_Of_Beacons} for a list of all the available beacons. When ingame,
+the {@b /nearest} and {@b /beacons} commands can be used.
+
+To disable the navigation, simply type {@code /adf} again.
+
+{@h3 Panel}
+
+When ADF is engaged, values will be shown in the navigation top part of the
+panel.
+
+{@infobox
+  {@aimg=adf.png;a wide box with lots of numbers indicating speed, \
+    altitude, heading, vertical air speed, navigation stuff;panel}
+  {@small The aircraft panel with ADF navigation engaged}
+}
+
+Indicators and their meanings:
+
+{@dl
+  {@dt DIS}
+  {@dd
+    Horizontal distance between the aircraft and the beacon.
+  }
+  {@dt ALT}
+  {@dd
+    Difference in altitude. A positive number indicates the aircraft is at a
+    higher altitude than the beacon, a negative number indicated the opposite.
+  }
+  {@dt CRS}
+  {@dd
+    Difference in the aircraft's course and the course towards the beacon. If
+    this is 0, it means the aircraft is going directly towards the beacon.
+  }
+}
+
+{@h4 CRS examples}
+
+In the first image, the aircraft has a heading of 03 or 30&deg;. The course
+towards the beacon is 09, or 90&deg. In this case, the {@code CRS} indicator
+will show a value of {@code 60}.
+
+In the second image, the aircraft still has a heading of 03, or 30&deg;. This
+time the course towards the beacon is 33, or 330&deg;. Here, the {@code CRS}
+indicator will show {@code -60}.
+
+{@infobox
+  {@aimg=adf1.png;a compass, heading 03 on top, with a SALV beacon to the\
+    top-right;CRS example 1}
+  {@small CRS example 1}
+}
+
+{@infobox
+  {@aimg=adf2.png;a compass, heading 03 on top, with a SALV beacon to the\
+    top-left;CRS example 2}
+  {@small CRS example 2}
+}

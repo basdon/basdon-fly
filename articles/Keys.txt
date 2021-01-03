@@ -1,0 +1,11 @@
+
+There are a few hotkeys you can use while playing. The list below show the
+names as seen in the settings menu.
+
+Tip: the {@code /helpkeys} command shows you the bound keys in your game.
+
+{@ul
+  {@li {@b Start/Stop engine}: CONVERSATION - NO (foot controls)}
+  {@li {@b Toggle landing gear}: SUB-MISSION (vehicle controls)}
+}
+

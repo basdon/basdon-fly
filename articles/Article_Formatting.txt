@@ -1,0 +1,84 @@
+{@ul
+  {@li {@code &ltpre>code blocks&lt/pre>}
+	<pre>
+		code blocks
+	</pre>
+  }
+  {@li {@code &#x7B;@code inline code\}}}
+  {@li {@code &#x7B;@clear\}} clear floating}
+  {@li {@code &#x7B;@h1 stuff\}} (h1 is already used by page header)}
+  {@li {@code &#x7B;@h2 stuff\}} (h2 is already used by article title)}
+  {@li {@code &#x7B;@h3 stuff\}}}
+  {@li {@code &#x7B;@h4 stuff\}}}
+  {@li {@code &#x7B;@h5 stuff\}}}
+  {@li {@code &#x7B;@h6 stuff\}}}
+  {@li {@code &#x7B;@hr stuff\}}}
+  {@li {@code &#x7B;@blockquote stuff\}}
+	{@blockquote stuff}
+  }
+  {@li {@code &#x7B;@sup stuff\}}
+  	sup{@sup stuff}
+  }
+  {@li {@code &#x7B;@sub stuff\}}
+  	sub{@sub stuff}
+  }
+  {@li {@code &#x7B;@dl stuff\}} {@code &#x7B;@dt stuff\}} {@code &#x7B;@dd stuff\}}
+	<pre>
+		&#x7B;@dl
+			&#x7B;@dt DEV\}
+			&#x7B;@dd makes a development build\}
+		\}
+	</pre>
+	{@dl
+	  {@dt DEV}
+	  {@dd makes a development build}
+	}
+  }
+  {@li {@code &#x7B;@b bold\}} {@b bold}}
+  {@li {@code &#x7B;@u underline\}} {@u underline}}
+  {@li {@code &#x7B;@em italic\}} {@em italic}}
+  {@li {@code &#x7B;@small small\}} {@small small}}
+  {@li {@code &#x7B;@s strikethrough\}} {@s strikethrough}}
+  {@li {@code &#x7B;@ia=location internal link\} link to webroot/location}}
+  {@li {@code &#x7B;@nfa=httpwhatever external nofollow link\}}}
+  {@li {@code &#x7B;@a=httpwhatever external link\}}}
+  {@li {@code &#x7B;@#=anchor anchor link\}}}
+  {@li {@code &#x7B;@articlecategory Category_Name\}}}
+  {@li {@code &#x7B;@article Article_Name\}}}
+  {@li {@code &#x7B;@article=Article_Name custom text\}}}
+  {@li {@code &#x7B;@img=absolutesrc;alt;title;caption\}}}
+  {@li {@code &#x7B;@img(style="whatever" data-whatever="whatever")=absolutesrc;alt;title;caption\}}}
+  {@li {@code &#x7B;@img=absolutesrc;alt;title\}}}
+  {@li {@code &#x7B;@img(style="whatever" data-whatever="whatever")=absolutesrc;alt;title\}}}
+  {@li {@code &#x7B;@aimg=relativestaticarticlessrc;alt;title;caption\}}
+	{@aimg=servicepoint.png;service point;service point;service point}
+  }
+  {@li {@code &#x7B;@aimg(style="whatever" data-whatever="whatever")=relativestaticarticlessrc;alt;title;caption\}}}
+  {@li {@code &#x7B;@aimg=relativestaticarticlessrc;alt;title\}}
+	{@aimg=servicepoint.png;service point;service point}
+  }
+  {@li {@code &#x7B;@aimg(style="whatever" data-whatever="whatever")=relativestaticarticlessrc;alt;title\}}}
+  {@li {@code &#x7B;@simg=relativestaticsrc;alt;title;caption\}}}
+  {@li {@code &#x7B;@plainsimg=relativestaticsrc;alt;title\} plain image relative to static path}}
+  {@li {@code &#x7B;@plainsimg=relativestaticsrc;altntitle\} plain image relative to static path}}
+  {@li {@code &#x7B;@infobox infobox\}}
+	{@infobox info box, usually used for images}
+	<pre>
+		&#x7B;@infobox
+			&#x7B;@aimg=servicepoint.png;service point;service point\}
+			&#x7B;@small service point\}
+		\}
+	</pre>
+	{@infobox
+		{@aimg=servicepoint.png;service point;service point}
+		{@small service point}
+	}
+  }
+  {@li {@code &#x7B;@infoboxright infoboxright\}}
+	{@infoboxright info box, usually used for images}
+  }
+  {@li escape {@code &#x7B;@} tags with {@code &amp;#x7B;@}}
+  {@li escape end tags with {@code \\}}}
+  {@li {@code &#x7B;@rem a reminder (comment) @\}}}
+}
+

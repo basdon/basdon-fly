@@ -1,0 +1,3 @@
+@ECHO OFF
+make all
+IF %ERRORLEVEL% NEQ 0 PAUSE

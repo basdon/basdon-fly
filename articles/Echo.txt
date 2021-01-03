@@ -1,0 +1,129 @@
+The echo service is the bridge between in-game chat and IRC chat. The IRC side
+of echo is implemented as an {@a=https://github.com/yugecin/anna Anna^} mod.
+
+Echo runs on ports {@code 7767} (IRC) and {@code 7768} (In-game).
+
+{@h3 Packet spec}
+
+<pre>
+byte 0: F
+byte 1: L
+byte 2: Y
+byte 3: packet id
+</pre>
+
+{@h4(id=p2) Packet 2: Hello}
+
+A {@code Hello} packet is sent to the other side when the echo service comes
+online. Upon receiving, the other side should send an {@#=p3 I'm there}
+packet back.
+
+<pre>
+byte 4-7: random value (values 0 and 1 are forbidden)
+</pre>
+
+{@h4(id=p3) Packet 3: I'm there}
+
+An {@code I'm there} packet is sent as a response to a {@#=p2 Hello packet}.
+
+<pre>
+byte 4-7: same as bytes 4-7 as received from the Hello packet
+</pre>
+
+{@h4(id=p4) Packet 4: Bye}
+
+Sent when an echo service is shutting down.
+
+{@h4(id=p5) Packet 5: Ping}
+
+Simple ping packet. Upon receiving, the other side should send an
+{@#=p6 Pong} packet back with the same random value.
+
+<pre>
+byte 4-7: random value (values 0 and 1 are forbidden)
+</pre>
+
+{@h4(id=p6) Packet 6: Pong}
+
+Response to a {@#=p5 Ping}.
+
+<pre>
+byte 4-7: same as bytes 4-7 as received from the Ping packet
+</pre>
+
+{@h4(id=p10) Packet 10: Chat}
+
+A simple packet saying someone sent a message. This packet can be sent from
+either side.
+
+<pre>
+byte 4: lo byte of player id as WORD (0 when IRC to game)
+byte 5: hi byte of player id as WORD (0 when IRC to game)
+byte 6: length of the nickname (must be less than 50)
+byte 7: lo byte of length of the message as WORD (must be less than 512)
+byte 8: hi byte length of the message as WORD (must be less than 512)
+byte 9 - 8+[byte6]: nickname
+byte 9+[byte6] - 8+[byte6]+[byte7/8]: message
+
+total len: 9+[byte6]+[byte7/8]
+</pre>
+
+{@h4(id=p11) Packet 11: Action}
+
+Basically a copy of the {@#=p10 Chat} packet, but for an action ({@code /me}
+command).
+
+{@h4(id=p12) Packet 12: Generic message}
+
+Packet with a type and a message. See types below.
+
+<pre>
+byte 4: message type
+byte 5: lo byte of length of the message (max 450)
+byte 6: hi byte of length of the message (max 450)
+byte 7 - 6+[byte5/6]: message
+
+total len: 7+[byte5/6]
+</pre>
+
+Types:
+
+<pre>
+0: flight message, sent from game to irc when a player finishes a flight
+1: trac, sent from web to game and irc when a trac ticket/comment was made
+2: reserved
+3: IRC mode change message, sent from irc to game
+4: IRC topic change message, sent from irc to game
+5: IRC nick change message, sent from irc to game
+</pre>
+
+{@h4(id=p30) Packet 30: Player connection}
+
+Packet notifying a player has either connected or disconnected.
+
+<pre>
+byte 4: lo byte of player id as WORD (0 when IRC to game)
+byte 5: hi byte of player id as WORD (0 when IRC to game)
+byte 6: reason (see below)
+byte 7: length of the nickname (must be less than 25)
+byte 8 - 7+[byte6]: nickname
+
+total len: 8+[byte6]
+</pre>
+
+Reasons:
+
+<pre>
+Game:
+0: timeout
+1: quit
+2: kick
+3: connected
+
+IRC:
+6: quit
+7: part
+8: kick
+9: join
+</pre>
+

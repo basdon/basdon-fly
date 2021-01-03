@@ -1,0 +1,173 @@
+<div style="text-align:center">
+{@h2(style="border:2px solid #000;background:#ffa500") Welcome to basdon.net articles!}
+
+{@b Here you can find resources to learn and enchance your experience on this server.}
+
+{@ia=articleindex.php Article index}
+
+</div>
+<style>
+.article th{
+	text-align:center;
+	background:#ffa500
+\}
+.article tbody tr{
+	background:#ddd;
+\}
+.article table{
+	border-spacing:1px
+\}
+.article th,.article td{
+	border:0
+\}
+.article div {
+	margin:1em
+\}
+.article table.box{
+	width:100%;
+	border:1px solid #161A21;
+	border-collapse:collapse
+\}
+.article table.box img{
+	border:1px solid #000;
+	vertical-align:middle
+\}
+.article table.box tr{
+	background:#FAEBD7
+\}
+.article table.box td{
+	padding:.3em
+\}
+.article table.box td+td{
+	padding:.5em;
+	width:100%
+\}
+.article .smallthumbs{
+	padding: 0.5em
+\}
+.article .smallthumbs div{
+	display:inline-block;
+	padding: .5em;
+	margin: .5em;
+	text-align:center;
+	border:1px solid #161A21;
+	background:#FAEBD7
+\}
+.article .smallthumbs img{
+	width:100px;
+	border:1px solid #000;
+\}
+</style>
+<table width="100%">
+	<tbody>
+		<tr>
+			<th width="25%">{@articlecategory Basics}</th>
+			<th width="75%">{@articlecategory Airports}</th>
+		</tr>
+		<tr valign="top">
+			<td><ul>
+				{@li {@article How_To_Join}}
+				{@li {@article Keys}}
+				{@li {@article Fuel}}
+				{@li {@article List_of_aircraft}}
+				{@li {@article Service_points}}
+				{@li {@article Score}}
+				{@li {@article HUD}}
+			</ul></td>
+			<td class="smallthumbs">
+				<div>
+					{@article=Area_69 {@plainsimg=articles/base.jpg;BASE}}<br/>
+					{@article Area_69}
+				</div>
+				<div>
+					{@article=Caligulas_Palace {@plainsimg=articles/cali.jpg;CALI}}<br/>
+					{@article Caligulas_Palace}
+				</div>
+				<div>
+					{@article=Las_Venturas_Airport {@plainsimg=articles/salv.jpg;SALV}}<br/>
+					{@article Las_Venturas_Airport}
+				</div>
+				<div>
+					{@article=Los_Santos_Airport {@plainsimg=articles/sals.jpg;SALS}}<br/>
+					{@article Los_Santos_Airport}
+				</div>
+				<div>
+					{@article=Los_Santos_Inlet_Field {@plainsimg=articles/lsif.jpg;LSIF}}<br/>
+					{@article Los_Santos_Inlet_Field}
+				</div>
+				<div>
+					{@article=San_Fierro_Airport {@plainsimg=articles/sasf.jpg;SASF}}<br/>
+					{@article San_Fierro_Airport}
+				</div>
+				<div>
+					{@article=San_Fierro_Carrier {@plainsimg=articles/sfca.jpg;SFCA}}<br/>
+					{@article San_Fierro_Carrier}
+				</div>
+				<div>
+					{@article=Verdant_Meadows {@plainsimg=articles/savm.jpg;SAVM}}<br/>
+					{@article Verdant_Meadows}
+				</div>
+				<div>
+					{@article=Octavia_Island {@plainsimg=articles/octa.jpg;OCTA}}<br/>
+					{@article Octavia_Island}
+				</div>
+				<div>
+					{@article=Catalina_City {@plainsimg=articles/cata.jpg;CATA}}<br/>
+					{@article Catalina_City}
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<th>{@articlecategory Missions}</th>
+			<th>{@articlecategory Navigation}</th>
+		</tr>
+		<tr valign="top">
+			<td><ul>
+				{@li {@article Missions}}
+				{@li {@article Passenger_Satisfaction}}
+			</ul></td>
+			<td>
+			<div>
+				<table class="box">
+					<tr>
+						<td>{@article=List_Of_Beacons {@plainsimg=articles/cat_nav_beacons.png;Beacons;Beacons}}</td>
+						<td valign="center">
+							<p>{@article List_Of_Beacons}<br/>Every beacon for all your navigation needs.</p>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<table class="box">
+					<tr>
+						<td>{@article=ADF {@plainsimg=articles/cat_nav_adf.png;ADF;ADF}}</td>
+						<td valign="center">
+							<p>{@article ADF}<br/>Find your way towards a beacon.</p>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<table class="box">
+					<tr>
+						<td>{@article=VOR {@plainsimg=articles/cat_nav_vor.png;VOR;VOR}}</td>
+						<td valign="center">
+							<p>{@article VOR}<br/>Line up perfectly with a runway.</p>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<table class="box">
+					<tr>
+						<td>{@article=ILS {@plainsimg=articles/cat_nav_ils.png;ILS;ILS}}</td>
+						<td valign="center">
+							<p>{@article ILS}<br/>Optimize your descend into landing through any weather.</p>
+						</td>
+					</tr>
+				</table>
+			</div>
+			</td>
+		</tr>
+	</tbody>
+</table>

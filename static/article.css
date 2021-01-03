@@ -1,0 +1,71 @@
+.infobox {
+	background: #f6f6ff;
+	border: 1px solid #b5cdff;
+	margin: .4em;
+	padding: .4em;
+	display: inline-block;
+}
+.infobox .img {
+	padding: 0;
+	margin: 0;
+}
+.article table.artcat {
+	width: 100%;
+	border: 1px solid #ccc;
+	border-spacing: 2px;
+	margin-top: 1em;
+}
+.article table.artcat th,
+.article table.artcat td {
+	padding: .2em;
+}
+.article table.artcat td:first-child {
+	text-align: right;
+	padding-left: .8em;
+	padding-right: .2em;
+	white-space: nowrap;
+	width: auto;
+}
+.article table.artcat td + td {
+	width: 100%;
+}
+.article table {
+	border: 1px solid #a2a9b1;
+	border-spacing: 2px;
+}
+tr.fsh {
+	background: #69c;
+	font-weight: bold;
+	color: #fff;
+	text-align: center;
+	font-size: 110%;
+}
+@media (min-width: 600px) {
+	div.articleright {
+		float: right;
+		padding-left: 1em;
+	}
+}
+.article h3, .article h4 {
+	overflow: hidden;
+}
+.article pre {
+	background: #eee;
+	padding: 1em;
+}
+dt {
+	font-weight: bold;
+}
+dd {
+	margin-bottom: .5em;
+}
+.article .small {
+	font-size: small;
+}
+.article .s {
+	text-decoration: line-through;
+}
+img.gallery {
+	width:100%;
+	max-width:400px;
+}

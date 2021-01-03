@@ -1,0 +1,46 @@
+.trac {
+	font-family: monospace;
+}
+table.trac {
+	width: 100%;
+	border: 1px solid #000;
+	margin:1em 0;
+}
+table.trac td {
+	padding: .1em .5em;
+	background: #eee;
+	vertical-align: top;
+}
+table.trac .state0,
+table.trac .state0 td {
+	background: #fcbdbd;
+}
+table.trac .state1,
+table.trac .state1 td {
+	background: #e3b7eb;
+}
+table.trac .state2,
+table.trac .state2 td {
+	background: #ffdfb2;
+}
+table.trac .state3,
+table.trac .state3 td {
+	background: #c2dfff;
+}
+table.trac .state4,
+table.trac .state4 td {
+	background: #d2f5b0;
+}
+table.trac .state5,
+table.trac .state5 td {
+	background: #c9ccc4;
+}
+table.trac .severity6, table.trac .severity7, table.trac .severity8 {
+	font-weight: bold;
+}
+table.trac .severity8 {
+	color: #f00;
+}
+table.trac + table.trac {
+	margin-top: 1.5em;
+}

@@ -1,0 +1,47 @@
+<?php $code = 'SALS'; ?>
+
+<div class="articleright">
+  <?php readfile('../articles/apfactsheets/'.$code.'.html') ?>
+</div>
+
+Los Santos Airport was originally built as the airport for the National Guard of
+Los Santos. It was transformed into a civil airport in 1942. Since then, the
+terminals have seen millions of passengers passing through.
+
+The airport is located at the southern beach of Los Santos, bordered by the
+freeway, Verdant Bluffs, El Corona and Willowfied.
+
+There are two long runways at LSA, which are connected to each other in a
+U-shape. All runways have full navigation capabilities. There is only a single
+helipad at LSA.
+
+{@h3 Vehicle spawns}
+
+<?php readfile('../articles/apfactsheets/'.$code.'_vehs.html') ?>
+
+{@h3 Service points}
+
+Los Santos airport has two service points available, one in the east and one in
+the west.
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=\
+    sals_sp_east.jpg;East service point;East service point}
+  <small>East service point</small>
+}
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=\
+    sals_sp_west.jpg;West service point;West service point}
+  <small>West service point</small>
+}
+
+{@rem island map is either empty, or it contains the h3 header @}
+<?php readfile('../articles/islandmaps/'.$code.'.html') ?>
+
+{@h3 Aerodrome Chart}
+
+<?php readfile('../articles/aerodromecharts/'.$code.'.html') ?>
+
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php include('../articles/airport-dyn-stats.php') ?>

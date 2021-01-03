@@ -1,0 +1,30 @@
+<?php $code = 'LSIF'; ?>
+
+<div class="articleright">
+  <?php readfile('../articles/apfactsheets/'.$code.'.html') ?>
+</div>
+
+Los Santos Inlet Field is a small airfield located in the Los Santos Inlet area.
+It is almost soley used by recreational pilots and farmers. Since it's only a
+grass field, almost all the traffic is made of
+{@article=List_of_aircraft#Dodo Dodo}s and
+{@article=List_of_aircraft#Crop_duster Cropduster}s.
+
+{@h3 Vehicle spawns}
+
+<?php readfile('../articles/apfactsheets/'.$code.'_vehs.html') ?>
+
+{@h3 Service points}
+
+LSIF is a small airfield that doesn't have any service points. The closest
+service point is probably located at {@article Los_Santos_Airport}.
+
+{@rem island map is either empty, or it contains the h3 header @}
+<?php readfile('../articles/islandmaps/'.$code.'.html') ?>
+
+{@h3 Aerodrome Chart}
+
+<?php readfile('../articles/aerodromecharts/'.$code.'.html') ?>
+
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php include('../articles/airport-dyn-stats.php') ?>

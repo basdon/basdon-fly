@@ -1,2 +1,7 @@
 * eol=lf
+# for some reason, git wants to replace CRLF with LF in image files
+*.gif binary
+*.jpg binary
+*.png binary
+*.tpl linguist-language=HTML
 /fly-plugin/vendor/* linguist-vendored
