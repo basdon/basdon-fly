@@ -1,4 +1,4 @@
-// Copyright 2019 basdon.net - this source is licensed under GPL
+// Copyright 2019 basdon.net - this source is licensed under AGPL
 // see the LICENSE file for more details
 package net.basdon.fly.services.echo;
 
