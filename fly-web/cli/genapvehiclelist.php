@@ -29,7 +29,7 @@ if (count($mdata) == 0) {
 	}
 	echo '</ul>';
 }
-file_put_contents('../articles/apfactsheets/'.$apt->c.'_vehs.html', ob_get_contents());
+file_put_contents('../gen/apvehiclelist_'.$apt->c.'.html', ob_get_contents());
 ob_end_clean();
 
 goto nextap;

@@ -391,7 +391,7 @@ ob_start();
 $htmldata = ob_get_clean();
 $htmldata = str_replace("\t", "", $htmldata);
 $htmldata = str_replace("\n", "", $htmldata);
-file_put_contents('../articles/aerodromecharts/'.$apt->c.'.html', $htmldata);
+file_put_contents('../gen/aerodromechart_'.$apt->c.'.html', $htmldata);
 
 if (isset($_GET['id'])) {
 	echo $htmldata;

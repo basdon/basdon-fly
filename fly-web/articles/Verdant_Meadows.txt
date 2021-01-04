@@ -1,7 +1,7 @@
 <?php $code = 'SAVM'; ?>
 
 <div class="articleright">
-  <?php readfile('../articles/apfactsheets/'.$code.'.html') ?>
+  <?php readfile('../gen/apfactsheet_'.$code.'.html') ?>
 </div>
 
 Verdant Meadows, also known as Verdant Meadows Aircraft Graveyard, is an
@@ -16,7 +16,7 @@ potentially forming obstructions for an aircraft's wings.
 
 {@h3 Vehicle spawns}
 
-<?php readfile('../articles/apfactsheets/'.$code.'_vehs.html') ?>
+<?php readfile('../gen/apvehiclelist_'.$code.'.html') ?>
 
 {@h3 Service points}
 
@@ -24,11 +24,11 @@ Being abandoned, there are no service points to be found. The runway also
 doesn't have any navigational aids, however, there is a working beacon present.
 
 {@rem island map is either empty, or it contains the h3 header @}
-<?php readfile('../articles/islandmaps/'.$code.'.html') ?>
+<?php readfile('../gen/islandmap_'.$code.'.html') ?>
 
 {@h3 Aerodrome Chart}
 
-<?php readfile('../articles/aerodromecharts/'.$code.'.html') ?>
+<?php readfile('../gen/aerodromechart_'.$code.'.html') ?>
 
 {@rem no clear, the dyn-stats template clears (before the flights part) @}
 <?php include('../articles/airport-dyn-stats.php') ?>

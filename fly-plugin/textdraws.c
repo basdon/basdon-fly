@@ -56,7 +56,7 @@ void textdraws_load_from_file(char *filename, int base_textdraw_id, int numtextd
 	int allocated_size;
 	va_list va;
 
-	sprintf(fullfilepath, "scriptfiles/texts/%s.text", filename);
+	sprintf(fullfilepath, "../textdraws/%s.text", filename);
 	fs = fopen(fullfilepath, "rb");
 	if (!fs) {
 		logprintf("failed to open textdraw file %s", filename);
@@ -100,7 +100,7 @@ ret:
 		td = va_arg(va, struct TEXTDRAW*);
 		if (td->rpcdata == NULL) {
 			logprintf("WARN: textdraw '%s' not found in '%s'", td->name, fullfilepath);
-			td->allocated_text_length = 12;
+			td->allocated_text_length = 700;
 			allocated_size = sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->allocated_text_length;
 			td->rpcdata = malloc(allocated_size);
 			memset(td->rpcdata, 0, allocated_size);

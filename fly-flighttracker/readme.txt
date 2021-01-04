@@ -1,7 +1,7 @@
 flighttracker
 -------------
-Flight tracker for fly-server, implemented as an anna module.
-See github.com/yugecin/anna
+Accepts flight packets from fly-plugin and writes flight (fdr) files.
+This is an anna module, see github.com/yugecin/anna
 
 configuration
 -------------

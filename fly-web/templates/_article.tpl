@@ -26,11 +26,11 @@
 			<p>The article with name '{$article_name}' was not found.</p>
 		{@else}
 			<h2 id="main">{@unsafe $article_title}</h2>
-			{@eval $file = '../articles/gen/' . $article_name . '.html'}
+			{@eval $file = '../gen/article_' . $article_name . '.html'}
 			{@if !is_file($file)}
 				<p style="color:red">Failed to get article contents.</p>
 			{@else}
-				{@eval include('../articles/gen/articlemap.php')}
+				{@eval include('../gen/articlemap.php')}
 				{@eval include($file)}
 			{@endif}
 			{@if isset($cat)}

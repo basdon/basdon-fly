@@ -1,4 +1,5 @@
 * eol=lf
+*.amx binary
 # for some reason, git wants to replace CRLF with LF in image files
 *.gif binary
 *.jpg binary

@@ -1,7 +1,7 @@
 <?php $code = 'SALS'; ?>
 
 <div class="articleright">
-  <?php readfile('../articles/apfactsheets/'.$code.'.html') ?>
+  <?php readfile('../gen/apfactsheet_'.$code.'.html') ?>
 </div>
 
 Los Santos Airport was originally built as the airport for the National Guard of
@@ -17,7 +17,7 @@ helipad at LSA.
 
 {@h3 Vehicle spawns}
 
-<?php readfile('../articles/apfactsheets/'.$code.'_vehs.html') ?>
+<?php readfile('../gen/apvehicellist_'.$code.'.html') ?>
 
 {@h3 Service points}
 
@@ -37,11 +37,11 @@ the west.
 }
 
 {@rem island map is either empty, or it contains the h3 header @}
-<?php readfile('../articles/islandmaps/'.$code.'.html') ?>
+<?php readfile('../gen/islandmap_'.$code.'.html') ?>
 
 {@h3 Aerodrome Chart}
 
-<?php readfile('../articles/aerodromecharts/'.$code.'.html') ?>
+<?php readfile('../gen/aerodromechart_'.$code.'.html') ?>
 
 {@rem no clear, the dyn-stats template clears (before the flights part) @}
 <?php include('../articles/airport-dyn-stats.php') ?>

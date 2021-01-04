@@ -5,8 +5,8 @@ $db_name = '';
 $db_uname = '';
 $db_passw = '';
 
-$BASEPATH = 'https://example.com';
-$STATICPATH = 'https://static.example.com';
+$BASEPATH = 'http://basdon-local.net';
+$STATICPATH = 'http://static.basdon-local.net';
 $COOKIENAME = 'jsessionid';
 $COOKIEPATH = '';
 $COOKIEDOMAIN = '';
@@ -18,8 +18,8 @@ $CSS_SUFFIX = 'css';
 //$CSS_SUFFIX = 'm.css'
 
 // uncomment and point to the directory where server .map files are located (no trailing slash)
-// used for island maps and maybe other things
-//$conf_maps_dir = '';
+// used to create island maps and maybe other things
+//$conf_maps_dir = '../../maps';
 
 // set to true to reparse templates on every page load
 // don't enable this in production

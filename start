@@ -1,0 +1,29 @@
+# copies the built plugin (run 'make (plugin)' first),
+# combines the cfg files in server and starts the server
+
+# dev configuration is used if the $BASDONDEV environment variable is set
+
+pushd server > /dev/null
+if [ -f "servercfg-rcon_password.cfg" ]
+then
+	if [ -z "$BASDONDEV" ]
+	then
+		if cp ../fly-plugin/out/basdonfly-prod.so plugins/basdonfly.so &&
+			cat servercfg-common.cfg servercfg-rcon_password.cfg servercfg-prod-*.cfg > server.cfg
+		then
+			nohup ./samp03svr &
+		fi
+		popd > /dev/null
+	else
+		echo "RUNNING WITH DEV CONFIG"
+		if cp ../fly-plugin/out/basdonfly-dev.so plugins/basdonfly.so &&
+			cat servercfg-common.cfg servercfg-rcon_password.cfg servercfg-dev-*.cfg > server.cfg
+		then
+			./samp03svr
+		fi
+		popd > /dev/null
+	fi
+else
+	echo "rcon_password changme" > servercfg-rcon_password.cfg
+	echo "Please change the rcon password in server/servercfg-rcon_password.cfg and run again"
+fi

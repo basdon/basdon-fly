@@ -25,4 +25,4 @@ table.beaconlist tr td + td{
 	border-left:1px solid #a2a9b1;
 \}
 </style>
-<?php readfile('../articles/gen/beaconlist.html') ?>
+<?php readfile('../gen/beaconlist.html') ?>

@@ -23,7 +23,7 @@ nextap:
 $apt = array_shift($apts);
 if ($apt == null) {
 	echo '</table>';
-	file_put_contents('../articles/gen/beaconlist.html', ob_get_contents());
+	file_put_contents('../gen/beaconlist.html', ob_get_contents());
 	ob_end_clean();
 	exit();
 }

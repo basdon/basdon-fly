@@ -98,7 +98,7 @@ int maps_load_from_file(int mapidx)
 	int total_element_count_for_middle;
 	float radar_angle, radar_offset_x, radar_offset_y;
 
-	sprintf(filename, "scriptfiles/maps/%s.map", maps[mapidx].name);
+	sprintf(filename, "../maps/%s.map", maps[mapidx].name);
 	if (!(fs = fopen(filename, "rb"))) {
 		logprintf("failed to open map %s", filename);
 		return 0;

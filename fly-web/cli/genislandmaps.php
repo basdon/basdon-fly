@@ -59,10 +59,7 @@ nextap:
 $aptid = array_pop($aptids);
 if ($aptid == null) {
 	$island_data = 'var fm_islands=' . json_encode($flightmap_polydata) . ';';
-	file_put_contents('../static/gen/flightmap_islands.js', $island_data);
-	$island_data .= file_get_contents('../static/flightmap.js');
-	$island_data = str_replace("\t", "", $island_data);
-	file_put_contents('../static/gen/fm_complete.js', $island_data);
+	file_put_contents('../static/gen/islandmap_fm_islands.js', $island_data);
 	exit();
 }
 $aptcode = array_pop($aptcodes);
@@ -183,7 +180,7 @@ $imagedata = ob_get_clean();
 file_put_contents('../static/gen/islandmap_'.$aptcode.'.png', $imagedata);
 $htmldata = '<h3>Island map</h3><p><img src="'.$STATICPATH.'/gen/islandmap_'.$aptcode.'.png" alt="'.$aptcode.' island map" title="'.$aptcode.' island map" /></p>';
 writehtml:
-file_put_contents('../articles/islandmaps/'.$aptcode.'.html', $htmldata);
+file_put_contents('../gen/islandmap_'.$aptcode.'.html', $htmldata);
 
 if (isset($_GET['id'])) {
 	echo $htmldata;

@@ -35,4 +35,4 @@ $output .= <<<'EOD'
 	return $a.'">'.$name;
 }
 EOD;
-file_put_contents('../articles/gen/articlemap.php', $output);
+file_put_contents('../gen/articlemap.php', $output);

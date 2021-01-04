@@ -1,7 +1,7 @@
 <?php $code='CATA'; ?>
 
 <div class="articleright">
-  <?php readfile('../articles/apfactsheets/'.$code.'.html') ?>
+  <?php readfile('../gen/apfactsheet_'.$code.'.html') ?>
 </div>
 
 Catalina City is an island to the fast west of San Fierro. There is only a
@@ -11,7 +11,7 @@ This island was mapped by player Adalarva.
 
 {@h3 Vehicle spawns}
 
-<?php readfile('../articles/apfactsheets/'.$code.'_vehs.html') ?>
+<?php readfile('../gen/apvehiclelist_'.$code.'.html') ?>
 
 {@h3 Service points}
 
@@ -31,11 +31,11 @@ station. The other two are next to each other, at the west side.
 }
 
 {@rem island map is either empty, or it contains the h3 header @}
-<?php readfile('../articles/islandmaps/'.$code.'.html') ?>
+<?php readfile('../gen/islandmap_'.$code.'.html') ?>
 
 {@h3 Aerodrome Chart}
 
-<?php readfile('../articles/aerodromecharts/'.$code.'.html') ?>
+<?php readfile('../gen/aerodromechart_'.$code.'.html') ?>
 
 {@rem no clear, the dyn-stats template clears (before the flights part) @}
 <?php include('../articles/airport-dyn-stats.php') ?>
