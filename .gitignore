@@ -9,7 +9,7 @@
 !/fly-web/**/gen/.gitkeep
 /fly-web/inc/conf.php
 /fly-web/static/fdr/*.flight
-/fly-web/static/chatlogs/**.html
+/fly-web/static/chatlogs/**/*.html
 /maps/*.map
 /server/**
 !/server/gamemodes/
