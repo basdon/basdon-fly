@@ -124,8 +124,8 @@ Installation/configuration
 
 	      Or set it by sending commands to Anna^:
 
-			&conf mod_log channel.basdon.echo /path/to/basdon-fly/fly-web/static/chatlogs/basdon.echo
-			&conf mod_log channel.basdon /path/to/basdon-fly/fly-web/static/chatlogs/basdon
+			&confadd mod_log channel.basdon.echo /path/to/basdon-fly/fly-web/static/chatlogs/basdon.echo
+			&confadd mod_log channel.basdon /path/to/basdon-fly/fly-web/static/chatlogs/basdon
 
 	fly-echo:
 		The mod_bas_echo.jar file is placed in $ANNA_DIR/out by the
@@ -139,7 +139,7 @@ Installation/configuration
 
 		Or set it by sending commands to Anna^:
 
-			&conf mod_bas_echo echo.channel #basdon.echo
+			&confadd mod_bas_echo echo.channel #basdon.echo
 
 		Anna^ will join the channel when the module is loaded. If the
 		setting was not set upon load, either reload the module or use
@@ -157,7 +157,7 @@ Installation/configuration
 
 	      Or set it by sending commands to Anna^:
 
-			&conf mod_bas_ft fdr.path /path/to/basdon-fly/fly-web/static/fdr
+			&confadd mod_bas_ft fdr.path /path/to/basdon-fly/fly-web/static/fdr
 
 	fly-web:
 		An Apache http server configuration file is provided in
