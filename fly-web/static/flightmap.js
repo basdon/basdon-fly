@@ -85,13 +85,13 @@ function flightmap(staticpath, id)
 			if (value < minhp) minhp = value;
 			if (value > maxhp) maxhp = value;
 			if (lasthp && value > lasthp) {
-				events += formatevent('repaired ' + (value - lasthp) + ' damage');
+				events += formatevent(time, 'repaired ' + (value - lasthp) + ' damage');
 			}
 			lasthp = value;
 			fuel.push(value = dv.getFloat32(12, 1));
 			if (value > maxfuel) maxfuel = value;
 			if (lastfuel && value > lastfuel) {
-				events += formatevent('refueled ' + Math.round(value - lastfuel) + 'L');
+				events += formatevent(time, 'refueled ' + Math.round(value - lastfuel) + 'L');
 			}
 			lastfuel = value;
 			var x = dv.getFloat32(16, 1);
