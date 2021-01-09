@@ -120,7 +120,7 @@ try{
 	}
 } catch (PDOException $e) {
 ?>
-		<p style="color:red;">Failed to load flight info!</p>
+		<p style="color:#c22;">Failed to load flight info!</p>
 <?php } ?>
 	</div></div>
 	{@render defaultfooter.tpl}

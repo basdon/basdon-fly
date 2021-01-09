@@ -28,7 +28,7 @@
 			<h2 id="main">{@unsafe $article_title}</h2>
 			{@eval $file = '../gen/article_' . $article_name . '.html'}
 			{@if !is_file($file)}
-				<p style="color:red">Failed to get article contents.</p>
+				<p style="color:#c22">Failed to get article contents.</p>
 			{@else}
 				{@eval include('../gen/articlemap.php')}
 				{@eval include($file)}

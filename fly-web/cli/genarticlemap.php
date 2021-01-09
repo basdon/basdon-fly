@@ -17,7 +17,7 @@ $output = '<?php function map_article($name){$articlemap=' . var_export($article
 $output .= <<<'EOD'
 	$a='<a href="article.php?title='.$name;
 	if(!array_key_exists($name,$articlemap)){
-		$a.='" style="color:red';
+		$a.='" style="color:#c22';
 	} else {
 		$name=$articlemap[$name];
 	}
@@ -28,7 +28,7 @@ $output .= 'function map_article_cat($name){$articlecatmap=' . var_export($artic
 $output .= <<<'EOD'
 	$a='<a href="article.php?category='.$name;
 	if(!array_key_exists($name,$articlecatmap)){
-		$a.='" style="color:red';
+		$a.='" style="color:#c22';
 	} else {
 		$name=$articlecatmap[$name];
 	}

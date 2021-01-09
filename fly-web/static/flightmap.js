@@ -552,7 +552,7 @@ function flightmap(staticpath, id)
 	};
 	req.onerror = function()
 	{
-		msgdiv.innerHTML = '<p style="color:red">Could not retrieve mission route info.</p>';
+		msgdiv.innerHTML = '<p style="color:#c22">Could not retrieve mission route info.</p>';
 	};
 	req.send();
 	function hue(t)
