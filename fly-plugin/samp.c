@@ -360,6 +360,7 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 {
 	float hp;
 	struct vec3 pos;
+	int oldvehicleid;
 
 	if (seat == 0) {
 		NC_PARS(2);
@@ -374,7 +375,13 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 
 	GetVehiclePos(vehicleid, &pos);
 	maps_stream_for_player(playerid, pos);
-	veh_on_player_now_driving(playerid, vehicleid, gamevehicles[vehicleid].dbvehicle);
+	if (NC_GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
+		/*hook_OnDriverSync will invoke this already,
+		but that's supposed to be as last-resort (for players that are vehicle warping)*/
+		oldvehicleid = NC_GetPlayerVehicleID(playerid);
+		veh_on_driver_changed_vehicle_without_state_change(playerid, oldvehicleid, vehicleid);
+		lastvehicle_asdriver[playerid] = vehicleid; /*So hook_OnDriverSync doesn't detect warping.*/
+	}
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(NC_GetVehicleModel(vehicleid));
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
@@ -481,6 +488,7 @@ void hook_OnDriverSync(int playerid, struct SYNCDATA_Driver *data)
 {
 	/*TODO reset these keystate variables when player gets into the drive state?*/
 	int oldkeys, newkeys;
+	int storedlastvehicleid;
 
 	newkeys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF;
 
@@ -516,10 +524,20 @@ void hook_OnDriverSync(int playerid, struct SYNCDATA_Driver *data)
 
 	/*printf("DRIVER SYNC ud %hd rl %hd lnd %hd\n", data->udkey, data->lrkey, data->landing_gear_state);*/
 
+	storedlastvehicleid = lastvehicle_asdriver[playerid]; /*storing this because OnPlayerUpdate resets it to 0*/
+
 	/*TODO remove this when all OnPlayerUpdates are replaced*/
 	/*this is 3 because.. see PARAM definition*/
 	nc_params[3] = playerid;
 	B_OnPlayerUpdate(amx, nc_params);
+
+	lastvehicle_asdriver[playerid] = data->vehicle_id; /*always write this because OnPlayerUpdate resets it to 0*/
+	if (storedlastvehicleid != data->vehicle_id) {
+		veh_on_driver_changed_vehicle_without_state_change(playerid, storedlastvehicleid, data->vehicle_id);
+		/*TODO: This is vehicle warping when reaching this (but how trustworthy is it?
+		Maybe a player is still sending driversync of the old vehicle
+		after PutPlayerInVehicle was called?)*/
+	}
 }
 
 static

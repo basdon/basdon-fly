@@ -4,9 +4,9 @@ EXPECT_SIZE(int, 4);
 
 #pragma pack(1)
 struct SampNetGame {
-	void *unk0;
-	void *unk4;
-	void *unk8;
+	void *pGameMode;
+	void *pFilterScripts;
+	void *pPlayerPool;
 	int pVehiclePool;
 	/*Incomplete.*/
 };

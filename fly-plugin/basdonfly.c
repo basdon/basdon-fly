@@ -268,6 +268,19 @@ static int joinpressure = 0;
 static int minconnectiontime = 0;
 
 /**
+The vehicle the player was last in, as driver.
+This should be set to 0 at the end of OnPlayerUpdate (so all OnPlayerStateChange functions can use it).
+It will be set back to the correct vehicleid at the end of hook_OnDriverSync.
+hook_OnDriverSync will notice if player changed vehicle as driver without state changes.
+PutPlayerInVehicle will set this if the player is already driver.
+When checking if a player is now on foot with OnPlayerStateChange,
+one can use this to know what vehicle the player exited.
+This is also used to check if a player was put as driver in a vehicle while
+they were already driver of another vehicle (does not trigger OnPlayerStateChange).
+*/
+static int lastvehicle_asdriver[MAX_PLAYERS];
+
+/**
 amx
 */
 static AMX *amx;

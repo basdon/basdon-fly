@@ -1825,11 +1825,11 @@ void missions_on_player_state_changed(int playerid, int from, int to)
 
 	if (from == PLAYER_STATE_DRIVER &&
 		(mission = activemission[playerid]) != NULL &&
-		mission->vehicleid == lastvehicle[playerid])
+		mission->vehicleid == lastvehicle_asdriver[playerid])
 	{
 		/*TODO: This gets hit when the vehicle explodes and player dies. Prevent that.*/
 		NC_PARS(4);
-		nc_params[1] = lastvehicle[playerid];
+		nc_params[1] = lastvehicle_asdriver[playerid];
 		nc_params[2] = playerid;
 		nc_params[3] = 1;
 		nc_params[4] = 0;

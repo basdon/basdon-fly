@@ -627,6 +627,8 @@ cell AMX_NATIVE_CALL B_OnPlayerUpdate(AMX *amx, cell *params)
 	}
 	playerstats_on_player_update(playerid);
 	timecyc_on_player_update(playerid);
+
+	lastvehicle_asdriver[playerid] = 0; /*This will be set again at the end of hook_OnDriverSync.*/
 	return 1;
 }
 

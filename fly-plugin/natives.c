@@ -270,6 +270,9 @@ static cell tmpfloat;
 #define NC_IsValidVehicle(VEHICLEID) (NC_PARS_(1)nc_params[1]=VEHICLEID,\
 	n_IsValidVehicle(amx,nc_params))
 
+#define NC_IsVehicleStreamedIn(VEHICLEID,PLAYERID) (NC_PARS_(2)nc_params[1]=VEHICLEID,nc_params[2]=PLAYERID,\
+	n_IsVehicleStreamedIn(amx,nc_params))
+
 #define NC_Kick(PLAYERID) __USE__natives_Kick__
 
 #define NC_PlayerPlaySound(PLAYERID,SOUNDID,FX,FY,FZ) \

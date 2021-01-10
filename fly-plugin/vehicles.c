@@ -26,7 +26,7 @@ static struct vehnode *vehstoupdate;
 static struct dbvehicle **dbvehicles;
 int numdbvehicles, dbvehiclealloc;
 struct vehicle gamevehicles[MAX_VEHICLES];
-short labelids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB+ of mapping, errrr */
+static short owner_label_ids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB of mapping for 100 players, hmmm */
 
 /**
 Holds player textdraw id of the vehicle panel speedo.
@@ -110,9 +110,101 @@ struct dbvehicle *veh_create_new_dbvehicle(int model, struct vec4 *pos)
 	return veh;
 }
 
+/**
+Creates a vehicle owner 3D text label for given player.
+
+Does not check if the vehicle needs an owner label, use veh_needs_owner_label)
+*/
+static
+void veh_create_owner_label(struct dbvehicle *veh, int vehicleid, int playerid)
+{
+	if (owner_label_ids[playerid][vehicleid] == INVALID_3DTEXT_ID) {
+		atoc(buf144, veh->ownerstring, 144);
+		NC_PARS(10);
+		nc_params[1] = playerid;
+		nc_params[2] = buf144a;
+		nc_params[3] = 0xFFFF00FF;
+		nc_paramf[4] = nc_paramf[5] = nc_paramf[6] = 0.0f;
+		nc_paramf[7] = 75.0f;
+		nc_params[8] = INVALID_PLAYER_ID;
+		nc_params[9] = vehicleid;
+		nc_params[10] = 1; /*testLOS*/
+		owner_label_ids[playerid][vehicleid] = (short) NC(n_CreatePlayer3DTextLabel);
+	}
+}
+
+/**
+Destroys a vehicle owner 3D text label for given player.
+*/
+static
+void veh_destroy_owner_label(int vehicleid, int playerid)
+{
+	if (owner_label_ids[playerid][vehicleid] != INVALID_3DTEXT_ID) {
+		NC_DeletePlayer3DTextLabel(playerid, owner_label_ids[playerid][vehicleid]);
+		owner_label_ids[playerid][vehicleid] = INVALID_3DTEXT_ID;
+	}
+}
+
+/**
+Creates owner label for all players to which the vehicle is streamed in.
+
+@param veh needs to be not null
+*/
+static
+void veh_create_owner_label_for_all(struct dbvehicle *veh, int vehicleid)
+{
+	int n;
+
+	for (n = playercount; n;) {
+		if (NC_IsVehicleStreamedIn(vehicleid, players[--n])) {
+			veh_create_owner_label(veh, vehicleid, players[n]);
+		}
+	}
+}
+
+/**
+Destroys owner label for everyone.
+*/
+static
+void veh_destroy_owner_label_for_all(int vehicleid)
+{
+	int n;
+
+	for (n = playercount; n;) {
+		veh_destroy_owner_label(vehicleid, players[--n]);
+	}
+}
+
+/**
+Checks if a vehicle needs an owner label.
+
+@param veh may be NULL
+*/
+static
+int veh_needs_owner_label(struct dbvehicle *veh)
+{
+	return veh != NULL && veh->owneruserid;
+}
+
+void veh_on_vehicle_stream_in(int vehicleid, int forplayerid)
+{
+	struct dbvehicle *veh;
+
+	veh = gamevehicles[vehicleid].dbvehicle;
+	if (veh_needs_owner_label(veh) &&  common_find_vehicle_driver(vehicleid) == INVALID_PLAYER_ID) {
+		veh_create_owner_label(veh, vehicleid, forplayerid);
+	}
+}
+
+/*Despawning exploded vehicle is respawning = is also stream out and stream in.*/
+void veh_on_vehicle_stream_out(int vehicleid, int forplayerid)
+{
+	veh_destroy_owner_label(vehicleid, forplayerid);
+}
+
 void veh_on_player_connect(int playerid)
 {
-	short *labelid = &labelids[playerid][0];
+	short *labelid = &owner_label_ids[playerid][0];
 	int i = MAX_VEHICLES;
 
 	while (i--) {
@@ -120,7 +212,7 @@ void veh_on_player_connect(int playerid)
 		labelid++;
 	}
 
-	lastvehicle[playerid] = 0;
+	lastvehicle_asdriver[playerid] = 0;
 	playerodoKM[playerid] = 0.0f;
 
 	memset(player_model_stats[playerid], 0, sizeof(player_model_stats[playerid]));
@@ -569,11 +661,12 @@ void veh_on_player_disconnect(int playerid)
 		}
 	}
 
-	vehicleid = lastvehicle[playerid];
+	vehicleid = lastvehicle_asdriver[playerid];
 	if (vehicleid && NC_IsValidVehicle(vehicleid)) {
 		driver = common_find_vehicle_driver(vehicleid);
 		/*driver actually still is playerid at this point*/
 		if (driver == playerid || driver == INVALID_PLAYER_ID) {
+			/*If not respawning here, create ownership label again.*/
 			NC_SetVehicleToRespawn(vehicleid);
 		}
 	}
@@ -665,7 +758,6 @@ void veh_on_player_now_driving(int playerid, int vehicleid, struct dbvehicle *ve
 
 	/*veh could be NULL*/
 
-	lastvehicle[playerid] = vehicleid;
 	GetVehiclePosUnsafe(vehicleid, &lastvpos[playerid]);
 
 	lastcontrolactivity[playerid] = time_timestamp();
@@ -927,81 +1019,32 @@ void veh_on_vehicle_spawn(struct dbvehicle *veh)
 	}
 }
 
-/**
-Checks if a vehicle needs an owner label.
-
-@param veh may be NULL
-*/
 static
-int veh_needs_owner_label(struct dbvehicle *veh)
-{
-	return veh != NULL && veh->owneruserid;
-}
-
-/**
-Creates a vehicle owner 3D text label for given player.
-
-Does not check if the vehicle needs an owner label, use veh_needs_owner_label)
-*/
-static
-void veh_owner_label_create(struct dbvehicle *veh, int vid, int playerid)
-{
-	if (labelids[playerid][vid] == INVALID_3DTEXT_ID) {
-		atoc(buf144, veh->ownerstring, 144);
-		NC_PARS(10);
-		nc_params[1] = playerid;
-		nc_params[2] = buf144a;
-		nc_params[3] = 0xFFFF00FF;
-		nc_paramf[4] = nc_paramf[5] = nc_paramf[6] = 0.0f;
-		nc_paramf[7] = 75.0f;
-		nc_params[8] = INVALID_PLAYER_ID;
-		nc_params[9] = vid;
-		nc_params[10] = 1; /*testLOS*/
-		labelids[playerid][vid] = (short) NC(n_CreatePlayer3DTextLabel);
-	}
-}
-
-/**
-Destroys a vehicle owner 3D text label for given player.
-*/
-static
-void veh_owner_label_destroy(int vehicleid, int playerid)
+void veh_on_driver_changed_vehicle_without_state_change(int playerid, int oldvehicleid, int newvehicleid)
 {
 	struct dbvehicle *veh;
-	short *labelid;
+	int old_driver;
 
-	veh = gamevehicles[vehicleid].dbvehicle;
-	if (veh != NULL && veh->owneruserid != 0)
-	{
-		labelid = &labelids[playerid][vehicleid];
-		if (*labelid != INVALID_3DTEXT_ID) {
-			NC_DeletePlayer3DTextLabel(playerid, *labelid);
-			*labelid = INVALID_3DTEXT_ID;
+	veh_on_player_now_driving(playerid, newvehicleid, gamevehicles[newvehicleid].dbvehicle);
+
+	veh = gamevehicles[oldvehicleid].dbvehicle;
+	if (veh_needs_owner_label(veh)) {
+		old_driver = common_find_vehicle_driver(oldvehicleid);
+		if (old_driver == playerid || old_driver == INVALID_PLAYER_ID) {
+			veh_create_owner_label_for_all(veh, oldvehicleid);
 		}
 	}
-}
 
-void veh_on_vehicle_stream_in(int vehicleid, int forplayerid)
-{
-	struct dbvehicle *veh;
-
-	if (common_find_vehicle_driver(vehicleid) == INVALID_PLAYER_ID) {
-		veh = gamevehicles[vehicleid].dbvehicle;
-		if (veh_needs_owner_label(veh)) {
-			veh_owner_label_create(veh, vehicleid, forplayerid);
-		}
+	veh = gamevehicles[newvehicleid].dbvehicle;
+	if (veh_needs_owner_label(veh)) {
+		veh_destroy_owner_label_for_all(newvehicleid);
 	}
-}
-
-void veh_on_vehicle_stream_out(int vehicleid, int forplayerid)
-{
-	veh_owner_label_destroy(vehicleid, forplayerid);
 }
 
 void veh_on_player_state_change(int playerid, int from, int to)
 {
 	struct dbvehicle *veh;
-	int vehicleid, vehiclemodel, n, p, lastvehicleid;
+	int vehicleid, vehiclemodel;
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
 		vehicleid = NC_GetPlayerVehicleID(playerid);
@@ -1018,47 +1061,25 @@ void veh_on_player_state_change(int playerid, int from, int to)
 			nc_params[2] = ptxt_speedo[playerid];
 			NC(n_PlayerTextDrawShow);
 		}
-	} else {
-		vehicleid = -1;
-		veh = NULL;
-		vehiclemodel = 400;
 
+		if (to == PLAYER_STATE_DRIVER) {
+			veh_on_player_now_driving(playerid, vehicleid, veh);
+			csprintf(buf144, "~g~%s", vehnames[vehiclemodel - 400]);
+			NC_GameTextForPlayer(playerid, buf144a, 2000, 1);
+			veh_destroy_owner_label_for_all(vehicleid);
+		}
+	} else {
 		NC_PARS(2);
 		nc_params[1] = playerid;
 		nc_params[2] = ptxt_speedo[playerid];
 		NC(n_PlayerTextDrawHide);
 	}
 
-	if (to == PLAYER_STATE_DRIVER) {
-		veh_on_player_now_driving(playerid, vehicleid, veh);
-
-		NC_PARS(2);
-		nc_params[1] = vehicleid;
-		n = playercount;
-		while (n--) {
-			nc_params[2] = players[n];
-			if (NC(n_IsVehicleStreamedIn)) {
-				veh_owner_label_destroy(vehicleid, players[n]);
-			}
-		}
-
-		csprintf(buf144, "~g~%s", vehnames[vehiclemodel - 400]);
-		NC_GameTextForPlayer(playerid, buf144a, 2000, 1);
-	}
-
-	if (from == PLAYER_STATE_DRIVER &&
-		(lastvehicleid = lastvehicle[playerid]) &&
-		common_find_vehicle_driver(lastvehicleid) == INVALID_PLAYER_ID &&
-		veh_needs_owner_label(veh))
-	{
-		NC_PARS(2);
-		nc_params[1] = lastvehicleid;
-		n = playercount;
-		while (n--) {
-			nc_params[2] = p = players[n];
-			if (NC(n_IsVehicleStreamedIn)) {
-				veh_owner_label_create(veh, lastvehicleid, p);
-			}
+	if (from == PLAYER_STATE_DRIVER) {
+		vehicleid = lastvehicle_asdriver[playerid];
+		veh = gamevehicles[vehicleid].dbvehicle;
+		if (veh_needs_owner_label(veh) && common_find_vehicle_driver(vehicleid) == INVALID_PLAYER_ID) {
+			veh_create_owner_label_for_all(veh, vehicleid);
 		}
 	}
 }
