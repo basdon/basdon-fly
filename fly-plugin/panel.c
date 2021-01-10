@@ -168,12 +168,12 @@ void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed
 		"80-~n~_70-~n~_60-~n~_50-~n~_40-~n~_30-~n~_20-~n~_10-~n~___-"
 		"~n~___-~n~___~n~";
 
-	struct BitStream bitstream;
-	UNION_FREEFORM_RPCDATA(100) rpcdata;
+	struct RPCDATA_TextDrawSetString rpcdata;
+	struct BitStream bs;
 	int altitude_s_cacheval, altitude50, spd_l_cacheval;
 	char *alt_s_buf, *spd_s_buf;
 
-	bitstream.ptrData = &rpcdata;
+	bs.ptrData = &rpcdata;
 
 	/*heading*/
 	heading = 360 - heading;
@@ -189,14 +189,14 @@ void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed
 
 		if (is_update) {
 			/*hdg*/
-			rpcdata.word[0] = td_panel_heading.rpcdata->textdrawid;
-			rpcdata.word[1] = sprintf((char*) &rpcdata.word[2], "%03d", heading);
-			bitstream.numberOfBitsUsed = (2 + 2 + rpcdata.word[1]) * 8;
-			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+			rpcdata.textdrawid = td_panel_heading.rpcdata->textdrawid;
+			rpcdata.text_length = sprintf(rpcdata.text, "%03d", heading);
+			bs.numberOfBitsUsed = (2 + 2 + rpcdata.text_length) * 8;
+			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 
 			/*hdg meter*/
-			rpcdata.word[0] = td_panel_headingbar.rpcdata->textdrawid;
-			rpcdata.word[1] = sprintf((char*) &rpcdata.word[2],
+			rpcdata.textdrawid = td_panel_headingbar.rpcdata->textdrawid;
+			rpcdata.text_length = sprintf(rpcdata.text,
 				"%03d_%03d_%03d________%03d_%03d_%03d",
 				((heading + 356) % 360) + 1,
 				((heading + 357) % 360) + 1,
@@ -204,8 +204,8 @@ void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed
 				((heading + 0) % 360) + 1,
 				((heading + 1) % 360) + 1,
 				((heading + 2) % 360) + 1);
-			bitstream.numberOfBitsUsed = (2 + 2 + rpcdata.word[1]) * 8;
-			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+			bs.numberOfBitsUsed = (2 + 2 + rpcdata.text_length) * 8;
+			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 		} else {
 			/*hdg*/
 			td_panel_heading.rpcdata->text_length = sprintf(td_panel_heading.rpcdata->text, "%03d", heading);
@@ -236,10 +236,10 @@ void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed
 
 		/*alt_value*/
 		if (is_update) {
-			rpcdata.word[0] = td_panel_altvalue.rpcdata->textdrawid;
-			rpcdata.word[1] = sprintf((char*) &rpcdata.word[2], "%03d", altitude);
-			bitstream.numberOfBitsUsed = (2 + 2 + rpcdata.word[1]) * 8;
-			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+			rpcdata.textdrawid = td_panel_altvalue.rpcdata->textdrawid;
+			rpcdata.text_length = sprintf(rpcdata.text, "%03d", altitude);
+			bs.numberOfBitsUsed = (2 + 2 + rpcdata.text_length) * 8;
+			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 		} else {
 			td_panel_altvalue.rpcdata->text_length = sprintf(td_panel_altvalue.rpcdata->text, "%03d", altitude);
 		}
@@ -257,7 +257,7 @@ void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed
 #endif
 
 			if (is_update) {
-				alt_s_buf = (char*) &rpcdata.word[2];
+				alt_s_buf = rpcdata.text;
 			} else {
 				alt_s_buf = td_panel_altsmall.rpcdata->text;
 			}
@@ -276,10 +276,10 @@ void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed
 			}
 
 			if (is_update) {
-				rpcdata.word[0] = td_panel_altsmall.rpcdata->textdrawid;
-				rpcdata.word[1] = 12;
-				bitstream.numberOfBitsUsed = (2 + 2 + 12) * 8;
-				SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+				rpcdata.textdrawid = td_panel_altsmall.rpcdata->textdrawid;
+				rpcdata.text_length = 12;
+				bs.numberOfBitsUsed = (2 + 2 + 12) * 8;
+				SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 			} else {
 				td_panel_altsmall.rpcdata->text_length = 12;
 			}
@@ -299,15 +299,15 @@ void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed
 #endif
 
 			if (is_update) {
-				rpcdata.word[0] = td_panel_altlarge.rpcdata->textdrawid;
-				rpcdata.word[1] = sprintf((char*) &rpcdata.word[2],
+				rpcdata.textdrawid = td_panel_altlarge.rpcdata->textdrawid;
+				rpcdata.text_length = sprintf(rpcdata.text,
 					"%4d-~n~%4d-~n~~n~~n~~n~~n~%4d-~n~%4d-~n~",
 					(altitude50 + 2) * 50,
 					(altitude50 + 1) * 50,
 					(altitude50 + 0) * 50,
 					(altitude50 - 1) * 50);
-				bitstream.numberOfBitsUsed = (2 + 2 + rpcdata.word[1]) * 8;
-				SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+				bs.numberOfBitsUsed = (2 + 2 + rpcdata.text_length) * 8;
+				SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 			} else {
 				td_panel_altlarge.rpcdata->text_length = sprintf(td_panel_altlarge.rpcdata->text,
 					"%4d-~n~%4d-~n~~n~~n~~n~~n~%4d-~n~%4d-~n~",
@@ -329,10 +329,10 @@ void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed
 
 		/*spd_value*/
 		if (is_update) {
-			rpcdata.word[0] = td_panel_spdvalue.rpcdata->textdrawid;
-			rpcdata.word[1] = sprintf((char*) &rpcdata.word[2], "%03d", speed);
-			bitstream.numberOfBitsUsed = (2 + 2 + rpcdata.word[1]) * 8;
-			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+			rpcdata.textdrawid = td_panel_spdvalue.rpcdata->textdrawid;
+			rpcdata.text_length = sprintf(rpcdata.text, "%03d", speed);
+			bs.numberOfBitsUsed = (2 + 2 + rpcdata.text_length) * 8;
+			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 		} else {
 			td_panel_spdvalue.rpcdata->text_length = sprintf(td_panel_spdvalue.rpcdata->text, "%03d", speed);
 		}
@@ -341,7 +341,7 @@ void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed
 		if (0 <= speed && speed < 150) {
 			/*spd_small*/
 			if (is_update) {
-				spd_s_buf = (char*) &rpcdata.word[2];
+				spd_s_buf = rpcdata.text;
 			} else {
 				spd_s_buf = td_panel_spdsmall.rpcdata->text;
 			}
@@ -351,10 +351,10 @@ void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed
 				spd_s_buf[7] = '0' + ((speed + 9) % 10);
 			}
 			if (is_update) {
-				rpcdata.word[0] = td_panel_spdsmall.rpcdata->textdrawid;
-				rpcdata.word[1] = 8;
-				bitstream.numberOfBitsUsed = (2 + 2 + 8) * 8;
-				SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+				rpcdata.textdrawid = td_panel_spdsmall.rpcdata->textdrawid;
+				rpcdata.text_length = 8;
+				bs.numberOfBitsUsed = (2 + 2 + 8) * 8;
+				SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 			} else {
 				td_panel_spdsmall.rpcdata->text_length = 8;
 			}
@@ -369,13 +369,13 @@ void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed
 #endif
 
 				if (is_update) {
-					memcpy((char*) &rpcdata.word[2], SPD_METER_DATA + spd_l_cacheval, 11);
-					memcpy((char*) &rpcdata.word[2] + 11, "~n~~n~~n~~n~~n~", 15);
-					memcpy((char*) &rpcdata.word[2] + 26, SPD_METER_DATA + spd_l_cacheval + 14, 14);
-					rpcdata.word[0] = td_panel_spdlarge.rpcdata->textdrawid;
-					rpcdata.word[1] = 40;
-					bitstream.numberOfBitsUsed = (2 + 2 + 40) * 8;
-					SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+					memcpy(rpcdata.text, SPD_METER_DATA + spd_l_cacheval, 11);
+					memcpy(rpcdata.text + 11, "~n~~n~~n~~n~~n~", 15);
+					memcpy(rpcdata.text + 26, SPD_METER_DATA + spd_l_cacheval + 14, 14);
+					rpcdata.textdrawid = td_panel_spdlarge.rpcdata->textdrawid;
+					rpcdata.text_length = 40;
+					bs.numberOfBitsUsed = (2 + 2 + 40) * 8;
+					SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 				} else {
 					td_panel_spdlarge.rpcdata->text_length = 40;
 					memcpy(td_panel_spdlarge.rpcdata->text, SPD_METER_DATA + spd_l_cacheval, 11);
@@ -395,15 +395,15 @@ void panel_update_odo_fl_hp_gear(int playerid, int vehicleid, int is_update)
 {
 	static char GEAR_STATE_COLOR_CHAR[3] = { 'g', 'r', 'y' };
 
-	struct BitStream bitstream;
-	UNION_FREEFORM_RPCDATA(50) rpcdata;
+	struct RPCDATA_TextDrawSetString rpcdata;
+	struct BitStream bs;
 	int odo, fl_pct, hp_pct;
 	float tmp_fuel_percent, health;
 	struct dbvehicle *veh;
 	char fl_blink_state, hp_blink_state;
 	unsigned gear_state;
 
-	bitstream.ptrData = &rpcdata;
+	bs.ptrData = &rpcdata;
 
 	veh = gamevehicles[vehicleid].dbvehicle;
 	if (veh) {
@@ -434,10 +434,10 @@ void panel_update_odo_fl_hp_gear(int playerid, int vehicleid, int is_update)
 #endif
 
 		if (is_update) {
-			rpcdata.word[0] = td_panel_odo.rpcdata->textdrawid;
-			rpcdata.word[1] = sprintf((char*) &rpcdata.word[2], "ODO %08d", odo);
-			bitstream.numberOfBitsUsed = (2 + 2 + rpcdata.word[1]) * 8;
-			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+			rpcdata.textdrawid = td_panel_odo.rpcdata->textdrawid;
+			rpcdata.text_length = sprintf(rpcdata.text, "ODO %08d", odo);
+			bs.numberOfBitsUsed = (2 + 2 + rpcdata.text_length) * 8;
+			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 		} else {
 			td_panel_odo.rpcdata->text_length = sprintf(td_panel_odo.rpcdata->text, "ODO %08d", odo);
 		}
@@ -452,12 +452,12 @@ void panel_update_odo_fl_hp_gear(int playerid, int vehicleid, int is_update)
 #endif
 
 		if (is_update) {
-			rpcdata.word[0] = td_panel_fl.rpcdata->textdrawid;
-			rpcdata.word[1] = 2;
-			rpcdata.byte[4] = 'F' + ('_' - 'F') * fl_blink_state;
-			rpcdata.byte[5] = 'L' + ('_' - 'L') * fl_blink_state;
-			bitstream.numberOfBitsUsed = (2 + 2 + 2) * 8;
-			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+			rpcdata.textdrawid = td_panel_fl.rpcdata->textdrawid;
+			rpcdata.text_length = 2;
+			rpcdata.text[0] = 'F' + ('_' - 'F') * fl_blink_state;
+			rpcdata.text[1] = 'L' + ('_' - 'L') * fl_blink_state;
+			bs.numberOfBitsUsed = (2 + 2 + 2) * 8;
+			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 		} else {
 			td_panel_fl.rpcdata->text[0] = 'F' + ('_' - 'F') * fl_blink_state;
 			td_panel_fl.rpcdata->text[1] = 'L' + ('_' - 'L') * fl_blink_state;
@@ -473,12 +473,12 @@ void panel_update_odo_fl_hp_gear(int playerid, int vehicleid, int is_update)
 #endif
 
 		if (is_update) {
-			rpcdata.word[0] = td_panel_hp.rpcdata->textdrawid;
-			rpcdata.word[1] = 2;
-			rpcdata.byte[4] = 'H' + ('_' - 'H') * hp_blink_state;
-			rpcdata.byte[5] = 'P' + ('_' - 'P') * hp_blink_state;
-			bitstream.numberOfBitsUsed = (2 + 2 + 2) * 8;
-			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+			rpcdata.textdrawid = td_panel_hp.rpcdata->textdrawid;
+			rpcdata.text_length = 2;
+			rpcdata.text[0] = 'H' + ('_' - 'H') * hp_blink_state;
+			rpcdata.text[1] = 'P' + ('_' - 'P') * hp_blink_state;
+			bs.numberOfBitsUsed = (2 + 2 + 2) * 8;
+			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 		} else {
 			td_panel_hp.rpcdata->text[0] = 'H' + ('_' - 'H') * hp_blink_state;
 			td_panel_hp.rpcdata->text[1] = 'P' + ('_' - 'P') * hp_blink_state;
@@ -529,12 +529,12 @@ void panel_update_odo_fl_hp_gear(int playerid, int vehicleid, int is_update)
 #endif
 
 		if (is_update) {
-			rpcdata.word[0] = td_panel_gear.rpcdata->textdrawid;
-			rpcdata.word[1] = td_panel_gear.rpcdata->text_length;
-			memcpy((char*) &rpcdata.byte[4], td_panel_gear.rpcdata->text, rpcdata.word[1]);
-			rpcdata.byte[5] = GEAR_STATE_COLOR_CHAR[gear_state];
-			bitstream.numberOfBitsUsed = (2 + 2 + rpcdata.word[1]) * 8;
-			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+			rpcdata.textdrawid = td_panel_gear.rpcdata->textdrawid;
+			rpcdata.text_length = td_panel_gear.rpcdata->text_length;
+			memcpy(rpcdata.text, td_panel_gear.rpcdata->text, rpcdata.text_length);
+			rpcdata.text[1] = GEAR_STATE_COLOR_CHAR[gear_state];
+			bs.numberOfBitsUsed = (2 + 2 + rpcdata.text_length) * 8;
+			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 		} else {
 			td_panel_gear.rpcdata->text[1] = GEAR_STATE_COLOR_CHAR[gear_state];
 		}
@@ -544,16 +544,16 @@ void panel_update_odo_fl_hp_gear(int playerid, int vehicleid, int is_update)
 static
 void panel_update_nav_text_active(int playerid, struct RPCDATA_ShowTextDraw *textrpc, char *format, void *format_data, int is_update)
 {
-	struct BitStream bitstream;
-	UNION_FREEFORM_RPCDATA(50) rpcdata;
+	struct RPCDATA_TextDrawSetString rpcdata;
+	struct BitStream bs;
 
-	bitstream.ptrData = &rpcdata;
+	bs.ptrData = &rpcdata;
 
 	if (is_update) {
-		rpcdata.word[0] = textrpc->textdrawid;
-		rpcdata.word[1] = sprintf((char*) &rpcdata.word[2], format, format_data);
-		bitstream.numberOfBitsUsed = (2 + 2 + rpcdata.word[1]) * 8;
-		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+		rpcdata.textdrawid = textrpc->textdrawid;
+		rpcdata.text_length = sprintf(rpcdata.text, format, format_data);
+		bs.numberOfBitsUsed = (2 + 2 + rpcdata.text_length) * 8;
+		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 	} else {
 		textrpc->text_length = sprintf(textrpc->text, format, format_data);
 	}
@@ -562,17 +562,17 @@ void panel_update_nav_text_active(int playerid, struct RPCDATA_ShowTextDraw *tex
 static
 void panel_update_nav_text_inactive(int playerid, struct RPCDATA_ShowTextDraw *textrpc, int is_update)
 {
-	struct BitStream bitstream;
-	UNION_FREEFORM_RPCDATA(50) rpcdata;
+	struct RPCDATA_TextDrawSetString rpcdata;
+	struct BitStream bs;
 
-	bitstream.ptrData = &rpcdata;
+	bs.ptrData = &rpcdata;
 
 	if (is_update) {
-		rpcdata.word[0] = textrpc->textdrawid;
-		rpcdata.word[1] = 1;
-		rpcdata.byte[4] = '-';
-		bitstream.numberOfBitsUsed = (2 + 2 + 1) * 8;
-		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+		rpcdata.textdrawid = textrpc->textdrawid;
+		rpcdata.text_length = 1;
+		rpcdata.text[0] = '-';
+		bs.numberOfBitsUsed = (2 + 2 + 1) * 8;
+		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 	} else {
 		textrpc->text_length = 1;
 		textrpc->text[0] = '-';
@@ -589,8 +589,8 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 
 	static const unsigned char ILS_Z_OFFSETS[] = { 8, 15, 22, 29, 61, 93, 100, 107, 114 };
 
-	struct BitStream bitstream;
-	UNION_FREEFORM_RPCDATA(ILS_TEXT_LEN) rpcdata;
+	struct RPCDATA_TextDrawSetString rpcdata;
+	struct BitStream bs;
 	struct NAVDATA *navdata;
 	int new_dist, new_alt, new_crs;
 	char dist_buf[30];
@@ -606,7 +606,7 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 	char ils_buf[ILS_TEXT_LEN + 2];
 	short ils_len;
 
-	bitstream.ptrData = &rpcdata;
+	bs.ptrData = &rpcdata;
 	navdata = nav[vehicleid];
 
 	/*dist*/
@@ -730,11 +730,11 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 #ifdef VOR_PRINT_UPDATES
 				printf("    textonly vor\n");
 #endif
-				rpcdata.word[0] = td_panel_vorbarind.rpcdata->textdrawid;
-				rpcdata.word[1] = vorbar_textlen;
-				memcpy(&rpcdata.word[2], vorbar_text, vorbar_textlen);
-				bitstream.numberOfBitsUsed = (2 + 2 + vorbar_textlen) * 8;
-				SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+				rpcdata.textdrawid = td_panel_vorbarind.rpcdata->textdrawid;
+				rpcdata.text_length = vorbar_textlen;
+				memcpy(rpcdata.text, vorbar_text, vorbar_textlen);
+				bs.numberOfBitsUsed = (2 + 2 + vorbar_textlen) * 8;
+				SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 			}
 			caches[playerid].vor_shown = vorbar_pos;
 		}
@@ -810,11 +810,11 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 #ifdef ILS_PRINT_UPDATES
 				printf("    textonly ils %ld\n", time_timestamp());
 #endif
-				rpcdata.word[0] = td_panel_ils.rpcdata->textdrawid;
-				rpcdata.word[1] = ils_len;
-				memcpy(&rpcdata.word[2], ils_buf, ils_len);
-				bitstream.numberOfBitsUsed = (2 + 2 + ils_len) * 8;
-				SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream, playerid, 2);
+				rpcdata.textdrawid = td_panel_ils.rpcdata->textdrawid;
+				rpcdata.text_length = ils_len;
+				memcpy(rpcdata.text, ils_buf, ils_len);
+				bs.numberOfBitsUsed = (2 + 2 + ils_len) * 8;
+				SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 			}
 			caches[playerid].ils_shown = ilstype_new;
 		}

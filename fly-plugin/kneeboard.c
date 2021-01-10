@@ -14,7 +14,9 @@ static char kneeboard_is_shown[MAX_PLAYERS];
 static
 void kneeboard_init()
 {
-	textdraws_load_from_file("kneeboard", TEXTDRAW_KNEEBOARD_BASE, 3, &td_kb_distance, &td_kb_info, &td_kb_header);
+	textdraws_load_from_file("kneeboard",
+		TEXTDRAW_KNEEBOARD_BASE, NUM_KNEEBOARD_TEXTDRAWS,
+		&td_kb_distance, &td_kb_info, &td_kb_header);
 }
 
 static
@@ -53,16 +55,15 @@ int kneeboard_format_distance(int playerid, struct vec3 *playerpos, char *out_bu
 static
 void kneeboard_update_distance(int playerid, struct vec3 *playerpos)
 {
+	struct RPCDATA_TextDrawSetString rpcdata;
 	int len;
 
 	if (kneeboard_is_shown[playerid]) {
-		len = kneeboard_format_distance(playerid, playerpos, &rpcdata_freeform.byte[4]);
+		len = kneeboard_format_distance(playerid, playerpos, rpcdata.text);
 		if (len) {
-			rpcdata_freeform.word[0] = td_kb_distance.rpcdata->textdrawid;
-			rpcdata_freeform.word[1] = (short) len;
-			bitstream_freeform.ptrData = &rpcdata_freeform;
-			bitstream_freeform.numberOfBitsUsed = (2 + 2 + rpcdata_freeform.word[1]) * 8;
-			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, playerid, 2);
+			rpcdata.textdrawid = td_kb_distance.rpcdata->textdrawid;
+			rpcdata.text_length = (short) len;
+			SendRPCToPlayer(playerid, RPC_TextDrawSetString, &rpcdata, 2 + 2 + rpcdata.text_length, 2);
 		}
 	}
 }
@@ -70,9 +71,11 @@ void kneeboard_update_distance(int playerid, struct vec3 *playerpos)
 static
 void kneeboard_update_all(int playerid, struct vec3 *playerpos)
 {
+	struct RPCDATA_TextDrawSetString rpcdata;
+
 	if (!KNEEBOARD_SHOULD_SHOW(playerid)) {
 		if (kneeboard_is_shown[playerid]) {
-			textdraws_hide_consecutive(playerid, TEXTDRAW_KNEEBOARD_BASE, 3);
+			textdraws_hide_consecutive(playerid, TEXTDRAW_KNEEBOARD_BASE, NUM_KNEEBOARD_TEXTDRAWS);
 			kneeboard_is_shown[playerid] = 0;
 		}
 		return;
@@ -81,22 +84,18 @@ void kneeboard_update_all(int playerid, struct vec3 *playerpos)
 	kneeboard_last_distance[playerid] = -2; /*To force update when calling kneeboard_format_distance below.*/
 
 	if (kneeboard_is_shown[playerid]) {
-		rpcdata_freeform.word[0] = td_kb_distance.rpcdata->textdrawid;
-		rpcdata_freeform.word[1] = kneeboard_format_distance(playerid, playerpos, &rpcdata_freeform.byte[4]);
-		bitstream_freeform.ptrData = &rpcdata_freeform;
-		bitstream_freeform.numberOfBitsUsed = (2 + 2 + rpcdata_freeform.word[1]) * 8;
-		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, playerid, 2);
+		rpcdata.textdrawid = td_kb_distance.rpcdata->textdrawid;
+		rpcdata.text_length = (short) kneeboard_format_distance(playerid, playerpos, rpcdata.text);
+		SendRPCToPlayer(playerid, RPC_TextDrawSetString, &rpcdata, 2 + 2 + rpcdata.text_length, 2);
 
-		rpcdata_freeform.word[0] = td_kb_info.rpcdata->textdrawid;
-		rpcdata_freeform.word[1] = missions_format_kneeboard_info_text(playerid, &rpcdata_freeform.byte[4]);
-		bitstream_freeform.ptrData = &rpcdata_freeform;
-		bitstream_freeform.numberOfBitsUsed = (2 + 2 + rpcdata_freeform.word[1]) * 8;
-		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, playerid, 2);
+		rpcdata.textdrawid = td_kb_info.rpcdata->textdrawid;
+		rpcdata.text_length = (short) missions_format_kneeboard_info_text(playerid, rpcdata.text);
+		SendRPCToPlayer(playerid, RPC_TextDrawSetString, &rpcdata, 2 + 2 + rpcdata.text_length, 2);
 	} else {
 		td_kb_distance.rpcdata->text_length = kneeboard_format_distance(playerid, playerpos, td_kb_distance.rpcdata->text);
-		td_kb_info.rpcdata->text_length = missions_format_kneeboard_info_text(playerid, td_kb_info.rpcdata->text);
+		td_kb_info.rpcdata->text_length = (short) missions_format_kneeboard_info_text(playerid, td_kb_info.rpcdata->text);
 
-		textdraws_show(playerid, 3, &td_kb_header, &td_kb_info, &td_kb_distance);
+		textdraws_show(playerid, NUM_KNEEBOARD_TEXTDRAWS, &td_kb_header, &td_kb_info, &td_kb_distance);
 		kneeboard_is_shown[playerid] = 1;
 	}
 }

@@ -538,15 +538,14 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 {
+	struct RPCDATA_SetWorldBounds rpcdata;
 	struct vec3 pos;
 	const int playerid = PARAM(1);
 
 	/*SetWorldBounds doesn't (always) work in OnPlayerConnect, so this is a good location I suppose.*/
-	rpcdata_freeform.dword[0] = rpcdata_freeform.dword[2] = WORLD_XY_MAX;
-	rpcdata_freeform.dword[1] = rpcdata_freeform.dword[3] = WORLD_XY_MIN;
-	bitstream_freeform.ptrData = &rpcdata_freeform;
-	bitstream_freeform.numberOfBitsUsed = sizeof(struct RPCDATA_SetWorldBounds) * 8;
-	SAMP_SendRPCToPlayer(RPC_SetWorldBounds, &bitstream_freeform, playerid, 2);
+	*(int*)&rpcdata.x_max = *(int*)&rpcdata.y_max = WORLD_XY_MAX;
+	*(int*)&rpcdata.x_min = *(int*)&rpcdata.y_min = WORLD_XY_MIN;
+	SendRPCToPlayer(playerid, RPC_SetWorldBounds, &rpcdata, sizeof(rpcdata), 2);
 
 	if (!ISPLAYING(playerid)) {
 		return 0;

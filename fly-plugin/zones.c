@@ -81,6 +81,7 @@ Should also be called when OnPlayerSetPos is called.
 static
 void zones_update(int playerid, struct vec3 pos)
 {
+	struct RPCDATA_TextDrawSetString rpcdata;
 	struct REGION *region, *region_end;
 	int zoneindex;
 	int previous_last_region_id, previous_last_zone_id;
@@ -136,7 +137,7 @@ hide_if_shown_and_return:
 	if (previous_last_region_id != zone_last_region[playerid] || previous_last_zone_id != zone_last_id[playerid]) {
 showtext:
 		if (gps_text_is_shown[playerid]) {
-			target_buffer = rpcdata_freeform.byte + 2 + 2; /*see struct RPCDATA_TextDrawSetString*/
+			target_buffer = rpcdata.text;
 		} else {
 			target_buffer = td_gps.rpcdata->text;
 		}
@@ -151,11 +152,9 @@ showtext:
 		}
 
 		if (gps_text_is_shown[playerid]) {
-			rpcdata_freeform.word[0] = td_gps.rpcdata->textdrawid;
-			rpcdata_freeform.word[1] = td_text_length;
-			bitstream_freeform.ptrData = &rpcdata_freeform;
-			bitstream_freeform.numberOfBitsUsed = (2 + 2 + td_text_length) * 8;
-			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, playerid, 2);
+			rpcdata.textdrawid = td_gps.rpcdata->textdrawid;
+			rpcdata.text_length = td_text_length;
+			SendRPCToPlayer(playerid, RPC_TextDrawSetString, &rpcdata, 2 + 2 + td_text_length, 2);
 		} else {
 			gps_text_is_shown[playerid] = 1;
 			td_gps.rpcdata->text_length = td_text_length;

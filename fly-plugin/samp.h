@@ -192,9 +192,9 @@ EXPECT_SIZE(struct RPCDATA_HideTextDraw, 2);
 struct RPCDATA_TextDrawSetString {
 	short textdrawid;
 	short text_length;
-	char text[1]; /*actually artibrary size*/
+	char text[800]; /*actually artibrary size*/
 };
-EXPECT_SIZE(struct RPCDATA_TextDrawSetString, 2 + 2 + 1);
+EXPECT_SIZE(struct RPCDATA_TextDrawSetString, 2 + 2 + 800);
 
 struct RPCDATA_SendClientMessage {
 	int color;
@@ -221,9 +221,9 @@ struct RPCDATA_ShowGameText {
 	int style;
 	int time;
 	int message_length;
-	char message[100];
+	char message[800];
 };
-EXPECT_SIZE(struct RPCDATA_ShowGameText, 4 + 4 + 4 + 100);
+EXPECT_SIZE(struct RPCDATA_ShowGameText, 4 + 4 + 4 + 800);
 
 struct RPCDATA_SetRaceCheckpoint {
 	char type;
@@ -262,13 +262,7 @@ struct SYNCDATA_Driver {
 	int misc; /*data depending on vehicle model*/
 };
 EXPECT_SIZE(struct SYNCDATA_Driver, 1 + 2 + 2 + 2 + 2 + 16 + 12 + 12 + 4 + 1 + 1 + 1 + 1 + 1 + 2 + 4);
-
-#define UNION_FREEFORM_RPCDATA(SIZE) union{char byte[SIZE];short word[SIZE/2];int dword[SIZE/4];}
 #pragma pack()
-
-static struct BitStream bitstream_freeform;
-static UNION_FREEFORM_RPCDATA(1000) rpcdata_freeform;
-EXPECT_SIZE(rpcdata_freeform, 1000);
 
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,unk) \
 	((void (*)(void*,void*,struct BitStream*,short,int))0x80AC1D0)((void*)samp_pNetGame,(void*)pRPC,pBS,playerid,unk)

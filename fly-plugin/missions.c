@@ -2167,6 +2167,7 @@ void missions_on_vehicle_repaired(int vehicleid, float fixamount, float newhp)
 
 void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
 {
+	struct RPCDATA_TextDrawSetString rpcdata;
 	struct MISSION *miss;
 	int last_satisfaction;
 	float pitchlimit, rolllimit;
@@ -2207,11 +2208,9 @@ void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
 		}
 
 		if (last_satisfaction != miss->passenger_satisfaction) {
-			rpcdata_freeform.word[0] = td_satisfaction.rpcdata->textdrawid;
-			rpcdata_freeform.word[1] = missions_format_satisfaction_text(miss->passenger_satisfaction, &rpcdata_freeform.byte[4]);
-			bitstream_freeform.ptrData = &rpcdata_freeform;
-			bitstream_freeform.numberOfBitsUsed = (2 + 2 + rpcdata_freeform.word[1]) * 8;
-			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bitstream_freeform, pid, 2);
+			rpcdata.textdrawid = td_satisfaction.rpcdata->textdrawid;
+			rpcdata.text_length = (short) missions_format_satisfaction_text(miss->passenger_satisfaction, rpcdata.text);
+			SendRPCToPlayer(pid, RPC_TextDrawSetString, &rpcdata, 2 + 2 + rpcdata.text_length, 2);
 		}
 	}
 }

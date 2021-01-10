@@ -6,24 +6,36 @@ static unsigned char vehicle_gear_state[MAX_VEHICLES];
 static int vehicle_gear_change_time[MAX_VEHICLES];
 
 static
+void SendRPCToPlayer(int playerid, int rpc, void *rpcdata, int size_bytes, int unk)
+{
+	struct BitStream bs;
+
+	bs.ptrData = rpcdata;
+	bs.numberOfBitsUsed = size_bytes * 8;
+	SAMP_SendRPCToPlayer(rpc, &bs, playerid, unk);
+}
+
+static
 void SetPlayerRaceCheckpointNoDir(int playerid, int type, struct vec3 *pos, float radius)
 {
-	struct RPCDATA_SetRaceCheckpoint data;
+	struct RPCDATA_SetRaceCheckpoint rpcdata;
+	struct BitStream bs;
 
-	data.type = type;
-	data.pos = *pos;
-	data.radius = radius;
-	bitstream_freeform.ptrData = &data;
-	bitstream_freeform.numberOfBitsUsed = sizeof(struct RPCDATA_SetRaceCheckpoint) * 8;
-	SAMP_SendRPCToPlayer(RPC_SetRaceCheckpoint, &bitstream_freeform, playerid, 2);
+	rpcdata.type = type;
+	rpcdata.pos = *pos;
+	rpcdata.radius = radius;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	SAMP_SendRPCToPlayer(RPC_SetRaceCheckpoint, &bs, playerid, 2);
 }
 
 static
 void DisablePlayerRaceCheckpoint(int playerid)
 {
-	bitstream_freeform.numberOfBitsUsed = 0;
-	bitstream_freeform.ptrData = &rpcdata_freeform;
-	SAMP_SendRPCToPlayer(RPC_DisableRaceCheckpoint, &bitstream_freeform, playerid, 2);
+	struct BitStream bs;
+
+	bs.numberOfBitsUsed = 0;
+	SAMP_SendRPCToPlayer(RPC_DisableRaceCheckpoint, &bs, playerid, 2);
 }
 
 /**
@@ -36,18 +48,19 @@ uncontrollable and the vehicle hp is < 250 (maybe even when it's < 300?)
 static
 void TogglePlayerControllable(int playerid, char controllable)
 {
-	rpcdata_freeform.byte[0] = controllable;
-	bitstream_freeform.numberOfBitsUsed = 8;
-	bitstream_freeform.ptrData = &rpcdata_freeform;
-	SAMP_SendRPCToPlayer(RPC_TogglePlayerControllable, &bitstream_freeform, playerid, 2);
+	struct BitStream bs;
+
+	bs.ptrData = &controllable;
+	bs.numberOfBitsUsed = 8;
+	SAMP_SendRPCToPlayer(RPC_TogglePlayerControllable, &bs, playerid, 2);
 }
 
 static
 void SendClientMessageToBatch(short *playerids, int numplayerids, int color, char *message)
 {
 	/*Using 4 packets should handle messages with a length up to 144*4.*/
-	struct RPCDATA_SendClientMessage data[4];
-	struct BitStream bitstream;
+	struct RPCDATA_SendClientMessage rpcdata[4];
+	struct BitStream bs;
 	int i, j, packetidx;
 	int num_packets;
 	char *msg_start;
@@ -61,13 +74,13 @@ void SendClientMessageToBatch(short *playerids, int numplayerids, int color, cha
 
 	/*(Probably unneeded) optimization to skip cutting and looping stuff.*/
 	if (msglen < 145) {
-		data[0].color = color;
-		data[0].message_length = msglen;
-		memcpy(data[0].message, message, msglen);
-		bitstream.ptrData = &data[0];
-		bitstream.numberOfBitsUsed = 32 + 32 + msglen * 8;
+		rpcdata[0].color = color;
+		rpcdata[0].message_length = msglen;
+		memcpy(rpcdata[0].message, message, msglen);
+		bs.ptrData = &rpcdata[0];
+		bs.numberOfBitsUsed = 32 + 32 + msglen * 8;
 		for (i = 0; i < numplayerids; i++) {
-			SAMP_SendRPCToPlayer(RPC_SendClientMessage, &bitstream, playerids[i], 3);
+			SAMP_SendRPCToPlayer(RPC_SendClientMessage, &bs, playerids[i], 3);
 		}
 		return;
 	}
@@ -93,9 +106,9 @@ void SendClientMessageToBatch(short *playerids, int numplayerids, int color, cha
 			cut_pos = pos_inc = msglen;
 		}
 have_cut_pos:
-		data[num_packets].color = color;
-		data[num_packets].message_length = cut_pos;
-		memcpy(data[num_packets].message, msg_start, cut_pos);
+		rpcdata[num_packets].color = color;
+		rpcdata[num_packets].message_length = cut_pos;
+		memcpy(rpcdata[num_packets].message, msg_start, cut_pos);
 		num_packets++;
 		/*Find the last embedded color to use for the next packet.*/
 		for (i = cut_pos - 1; i >= 7; i--) {
@@ -125,9 +138,9 @@ not_a_color:
 
 	for (i = 0; i < numplayerids; i++) {
 		for (packetidx = 0; packetidx < num_packets; packetidx++) {
-			bitstream.ptrData = &data[packetidx];
-			bitstream.numberOfBitsUsed = 32 + 32 + data[packetidx].message_length * 8;
-			SAMP_SendRPCToPlayer(RPC_SendClientMessage, &bitstream, playerids[i], 3);
+			bs.ptrData = &rpcdata[packetidx];
+			bs.numberOfBitsUsed = 32 + 32 + rpcdata[packetidx].message_length * 8;
+			SAMP_SendRPCToPlayer(RPC_SendClientMessage, &bs, playerids[i], 3);
 		}
 	}
 }
@@ -147,13 +160,16 @@ void SendClientMessage(short playerid, int color, char *message)
 static
 void PlayerPlaySound(int playerid, int soundid)
 {
-	rpcdata_freeform.dword[0] = soundid;
-	rpcdata_freeform.dword[1] = 0;
-	rpcdata_freeform.dword[2] = 0;
-	rpcdata_freeform.dword[3] = 0;
-	bitstream_freeform.ptrData = &rpcdata_freeform;
-	bitstream_freeform.numberOfBitsUsed = sizeof(struct RPCDATA_PlaySound) * 8;
-	SAMP_SendRPCToPlayer(RPC_PlaySound, &bitstream_freeform, playerid, 2);
+	struct RPCDATA_PlaySound rpcdata;
+	struct BitStream bs;
+
+	rpcdata.soundid = soundid;
+	*(int*)&rpcdata.pos.x = 0;
+	*(int*)&rpcdata.pos.y = 0;
+	*(int*)&rpcdata.pos.z = 0;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	SAMP_SendRPCToPlayer(RPC_PlaySound, &bs, playerid, 2);
 }
 
 /**
@@ -162,16 +178,18 @@ In the PAWN API, text is actually the 2nd parameter. Placing it at the end here,
 static
 void GameTextForPlayer(int playerid, int milliseconds, int style, char *text)
 {
+	struct RPCDATA_ShowGameText rpcdata;
+	struct BitStream bs;
 	int len;
 
 	len = strlen(text);
-	rpcdata_freeform.dword[0] = style;
-	rpcdata_freeform.dword[1] = milliseconds;
-	rpcdata_freeform.dword[2] = len;
-	memcpy(&rpcdata_freeform.byte[12], text, len);
-	bitstream_freeform.ptrData = &rpcdata_freeform;
-	bitstream_freeform.numberOfBitsUsed = 32 + 32 + 32 + len * 8;
-	SAMP_SendRPCToPlayer(RPC_ShowGameText, &bitstream_freeform, playerid, 3);
+	rpcdata.style = style;
+	rpcdata.time = milliseconds;
+	rpcdata.message_length = len;
+	memcpy(&rpcdata.message, text, len);
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = (4 + 4 + 4 + len) * 8;
+	SAMP_SendRPCToPlayer(RPC_ShowGameText, &bs, playerid, 3);
 }
 
 static
@@ -214,16 +232,16 @@ void HideGameTextForPlayer(int playerid)
 static
 void CrashPlayer(int playerid)
 {
-	struct RPCDATA_ShowGangZone data;
+	struct RPCDATA_ShowGangZone rpcdata;
 	struct BitStream bs;
 
 	GameTextForPlayer(playerid, 5, 5, "Wasted~k~SWITCH_DEBUG_CAM_ON~~k~~TOGGLE_DPAD~~k~~NETWORK_TALK~~k~~SHOW_MOUSE_POINTER_TOGGLE~");
 
-	bs.ptrData = &data;
-	bs.numberOfBitsUsed = sizeof(data) * 8;
-	data.zoneid = 65535;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	rpcdata.zoneid = 65535;
 	SAMP_SendRPCToPlayer(RPC_ShowGangZone, &bs, playerid, 2);
-	data.zoneid = -2700;
+	rpcdata.zoneid = -2700;
 	SAMP_SendRPCToPlayer(RPC_ShowGangZone, &bs, playerid, 2);
 }
 #endif

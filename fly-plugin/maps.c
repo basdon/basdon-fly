@@ -435,9 +435,7 @@ skip_gang_zones:
 
 	/*Octavia actor*/
 	if (mapidx == octavia_island_actor_mapidx) {
-		bitstream_freeform.numberOfBitsUsed = sizeof(rpcdata_show_actor) * 8;
-		bitstream_freeform.ptrData = &rpcdata_show_actor;
-		SAMP_SendRPCToPlayer(RPC_ShowActor, &bitstream_freeform, playerid, 2);
+		SendRPCToPlayer(playerid, RPC_ShowActor, &rpcdata_show_actor, sizeof(rpcdata_show_actor), 2);
 	}
 }
 
@@ -491,9 +489,7 @@ void maps_stream_out_for_player(int playerid, int mapidx)
 
 	/*Octavia actor*/
 	if (mapidx == octavia_island_actor_mapidx) {
-		bitstream_freeform.numberOfBitsUsed = sizeof(rpcdata_hide_actor) * 8;
-		bitstream_freeform.ptrData = &rpcdata_hide_actor;
-		SAMP_SendRPCToPlayer(RPC_HideActor, &bitstream_freeform, playerid, 2);
+		SendRPCToPlayer(playerid, RPC_HideActor, &rpcdata_hide_actor, sizeof(rpcdata_hide_actor), 2);
 	}
 }
 

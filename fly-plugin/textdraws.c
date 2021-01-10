@@ -131,6 +131,7 @@ ret:
 static
 void textdraws_show(int playerid, int num, ...)
 {
+	struct BitStream bs;
 	struct TEXTDRAW *td;
 	va_list va;
 
@@ -153,9 +154,9 @@ void textdraws_show(int playerid, int num, ...)
 #undef i
 		}
 #endif
-		bitstream_freeform.numberOfBitsUsed = (sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->rpcdata->text_length) * 8;
-		bitstream_freeform.ptrData = td->rpcdata;
-		SAMP_SendRPCToPlayer(RPC_ShowTextDraw, &bitstream_freeform, playerid, 2);
+		bs.ptrData = td->rpcdata;
+		bs.numberOfBitsUsed = (sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->rpcdata->text_length) * 8;
+		SAMP_SendRPCToPlayer(RPC_ShowTextDraw, &bs, playerid, 2);
 	}
 	va_end(va);
 }
@@ -166,11 +167,14 @@ Hides a number of textdraws that all have ids that follow each other.
 static
 void textdraws_hide_consecutive(int playerid, int num, int base_id)
 {
-	bitstream_freeform.numberOfBitsUsed = sizeof(short) * 8;
-	bitstream_freeform.ptrData = &rpcdata_freeform;
+	struct RPCDATA_HideTextDraw rpcdata;
+	struct BitStream bs;
+
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
 	while (num--) {
-		rpcdata_freeform.word[0] = base_id;
-		SAMP_SendRPCToPlayer(RPC_HideTextDraw, &bitstream_freeform, playerid, 2);
+		rpcdata.textdrawid = (short) base_id;
+		SAMP_SendRPCToPlayer(RPC_HideTextDraw, &bs, playerid, 2);
 		base_id++;
 	}
 }

@@ -18,8 +18,7 @@ https://basdon.net and samp://basdon.net:7777
 This project is licensed under the GNU AGPLv3 License.
 Files in /fly-plugin/vendor/ do NOT fall under this License.
 Files in /fly-plugin/vendor/SDK/amx are Copyright (c) ITB CompuPhase, 1997-2005
-Files in /fly-plugin/vendor/SDK (excluding the amx/ directory) are
-Copyright 2004-2009 SA-MP Team
+Files in /fly-plugin/vendor/SDK (excluding the amx/ directory) are Copyright 2004-2009 SA-MP Team
 Modifications in these files are marked as such with comments.
 
 Anatomy
