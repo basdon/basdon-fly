@@ -1171,6 +1171,10 @@ void missions_cleanup(int playerid)
 		textdraws_hide_consecutive(playerid, 1, TEXTDRAW_JOBSATISFACTION);
 	}
 
+	if (GetPlayerVehicleID(playerid) != mission->vehicleid) {
+		SetVehicleObjectiveForPlayer(mission->vehicleid, playerid, 0);
+	}
+
 	free(mission);
 	activemission[playerid] = NULL;
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
