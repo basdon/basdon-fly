@@ -245,6 +245,11 @@ void SetVehicleObjectiveForPlayer(int vehicleid, int playerid, char objective)
 		rpcdata.vehicleid = (short) vehicleid;
 		rpcdata.objective = objective;
 		rpcdata.doors_locked = params.doors_locked;
+		if (rpcdata.doors_locked == -1) {
+			/*Global params can have -1 for doors_locked (unset),
+			but using -1 for non-global (non-SetVehicleParamsEx) will lock the doors.*/
+			rpcdata.doors_locked = 0;
+		}
 		bs.ptrData = &rpcdata;
 		bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
 		SAMP_SendRPCToPlayer(RPC_SetVehicleParams, &bs, playerid, 2);
