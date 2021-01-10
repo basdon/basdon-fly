@@ -364,6 +364,7 @@ void mission_map_update_selection_ensure_available(int playerid, int newselectio
 	struct MISSIONPOINT *msp, *tomsp;
 	int mission_typeidx;
 	int preset_option_idx;
+	int num_textdraws_to_show;
 	float optdif;
 
 	assert(direction != 0);
@@ -390,15 +391,15 @@ invalid:
 		strcpy(td_jobmap_to.rpcdata->text, tomsp->ap->code);
 		td_jobmap_to.rpcdata->x = map_text_x_base + map_text_x_unit * (tomsp->pos.x + MISSION_MAP_HALFSIZE);
 		td_jobmap_to.rpcdata->y = map_text_y_base + map_text_y_unit * (-tomsp->pos.y + MISSION_MAP_HALFSIZE);
+		num_textdraws_to_show = 2;
 	} else {
-		strcpy(td_jobmap_to.rpcdata->text, "????");
-		td_jobmap_to.rpcdata->x = map_text_x_base + map_text_x_unit * MISSION_MAP_HALFSIZE;
-		td_jobmap_to.rpcdata->y = map_text_y_base + map_text_y_unit * MISSION_MAP_HALFSIZE;
+		textdraws_hide_consecutive(playerid, 1, td_jobmap_to.rpcdata->textdrawid);
+		num_textdraws_to_show = 1;
 	}
 
 	optdif = td_jobmap_opt2bg.rpcdata->y - td_jobmap_opt1bg.rpcdata->y;
 	td_jobmap_optselbg.rpcdata->y = td_jobmap_opt1bg.rpcdata->y + mission_map_option[playerid] * optdif;
-	textdraws_show(playerid, 2, &td_jobmap_optselbg, &td_jobmap_to);
+	textdraws_show(playerid, num_textdraws_to_show, &td_jobmap_optselbg, &td_jobmap_to);
 }
 
 /**
