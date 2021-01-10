@@ -1,4 +1,8 @@
 /**
+Whether to adjust player's world bounds on spawn.
+*/
+char need_adjust_world_bounds[MAX_PLAYERS];
+/**
 Set as soon as a player is connected.
 */
 char playeronlineflag[MAX_PLAYERS];
@@ -392,6 +396,8 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	veh_on_player_connect(playerid);
 	zones_on_player_connect(playerid);
 
+	need_adjust_world_bounds[playerid] = 1;
+
 	return 1;
 }
 
@@ -543,9 +549,12 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 	const int playerid = PARAM(1);
 
 	/*SetWorldBounds doesn't (always) work in OnPlayerConnect, so this is a good location I suppose.*/
-	*(int*)&rpcdata.x_max = *(int*)&rpcdata.y_max = WORLD_XY_MAX;
-	*(int*)&rpcdata.x_min = *(int*)&rpcdata.y_min = WORLD_XY_MIN;
-	SendRPCToPlayer(playerid, RPC_SetWorldBounds, &rpcdata, sizeof(rpcdata), 2);
+	if (need_adjust_world_bounds[playerid]) {
+		need_adjust_world_bounds[playerid] = 0;
+		*(int*)&rpcdata.x_max = *(int*)&rpcdata.y_max = WORLD_XY_MAX;
+		*(int*)&rpcdata.x_min = *(int*)&rpcdata.y_min = WORLD_XY_MIN;
+		SendRPCToPlayer(playerid, RPC_SetWorldBounds, &rpcdata, sizeof(rpcdata), 2);
+	}
 
 	if (!ISPLAYING(playerid)) {
 		return 0;
