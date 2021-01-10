@@ -413,7 +413,6 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 
 	spawned[playerid] = 0;
 
-	missions_on_player_death(playerid);
 	spawn_prespawn(playerid);
 	timecyc_on_player_death(playerid);
 	common_GetPlayerPos(playerid, &pos);
@@ -567,7 +566,7 @@ cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 	const int playerid = PARAM(1);
 	const int newstate = PARAM(2), oldstate = PARAM(3);
 
-	missions_on_player_state_changed(playerid, oldstate, newstate);
+	missions_on_player_state_change(playerid, oldstate, newstate);
 	panel_on_player_state_change(playerid, oldstate, newstate);
 	veh_on_player_state_change(playerid, oldstate, newstate);
 	return 1;

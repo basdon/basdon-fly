@@ -67,9 +67,7 @@ Check if player is currently doing a mission.
 */
 int missions_is_player_on_mission(int playerid);
 void missions_on_player_connect(int playerid);
-void missions_on_player_death(int playerid);
 void missions_on_player_disconnect(int playerid);
-void missions_on_player_state_changed(int playerid, int from, int to);
 /**
 Call when a vehicle is destroyed or respawned.
 */

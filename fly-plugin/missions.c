@@ -1241,40 +1241,6 @@ void missions_on_player_connect(int playerid)
 	number_missions_started_stopped[playerid]++;
 }
 
-void missions_on_player_death(int playerid)
-{
-	int stopreason, vehicleid;
-	float hp;
-
-	switch (mission_stage[playerid]) {
-	case MISSION_STAGE_NOMISSION:
-		break;
-	case MISSION_STAGE_HELP:
-		missions_jobhelp_hide(playerid); /*sets controllable and mission stage*/
-		break;
-	case MISSION_STAGE_JOBMAP:
-		missions_jobmap_hide(playerid); /*sets controllable and mission stage*/
-		break;
-	default:
-		NC_DisablePlayerRaceCheckpoint(playerid);
-		stopreason = MISSION_STATE_DIED;
-		vehicleid = NC_GetPlayerVehicleID(playerid);
-		if (vehicleid) {
-			hp = anticheat_GetVehicleHealth(vehicleid);
-			if (hp <= 200.0f) {
-				stopreason = MISSION_STATE_CRASHED;
-			}
-		}
-		missions_end_unfinished(playerid, stopreason);
-		break;
-	}
-
-	if (locating_msp_index[playerid] != -1) {
-		locating_msp_index[playerid] = -1;
-		DisablePlayerRaceCheckpoint(playerid);
-	}
-}
-
 void missions_on_player_disconnect(int playerid)
 {
 	struct MISSION *miss;
@@ -1796,11 +1762,41 @@ void missions_start_unload(int playerid)
 	timer_set(MISSION_LOAD_UNLOAD_TIME, missions_after_unload, cbdata);
 }
 
-void missions_on_player_state_changed(int playerid, int from, int to)
+static
+void missions_on_player_state_change(int playerid, int from, int to)
 {
 	struct MISSION *mission;
 	struct vec3 pos;
 	int vehicleid;
+
+	if (to == PLAYER_STATE_WASTED) {
+		/*This basically handles on_player_death.*/
+		switch (mission_stage[playerid]) {
+		case MISSION_STAGE_NOMISSION:
+			break;
+		case MISSION_STAGE_HELP:
+			missions_jobhelp_hide(playerid); /*sets controllable and mission stage*/
+			break;
+		case MISSION_STAGE_JOBMAP:
+			missions_jobmap_hide(playerid); /*sets controllable and mission stage*/
+			break;
+		default:
+			DisablePlayerRaceCheckpoint(playerid);
+			vehicleid = GetPlayerVehicleID(playerid);
+			if (vehicleid && anticheat_GetVehicleHealth(vehicleid) < 250.0f) {
+				missions_end_unfinished(playerid, MISSION_STATE_CRASHED);
+			} else {
+				missions_end_unfinished(playerid, MISSION_STATE_DIED);
+			}
+			break;
+		}
+
+		if (locating_msp_index[playerid] != -1) {
+			locating_msp_index[playerid] = -1;
+			DisablePlayerRaceCheckpoint(playerid);
+		}
+		return;
+	}
 
 	if (to == PLAYER_STATE_ONFOOT || from == PLAYER_STATE_ONFOOT) {
 		vehicleid = NC_GetPlayerVehicleID(playerid);
@@ -1826,10 +1822,8 @@ void missions_on_player_state_changed(int playerid, int from, int to)
 		(mission = activemission[playerid]) != NULL &&
 		mission->vehicleid == lastvehicle_asdriver[playerid])
 	{
-		if (to != PLAYER_STATE_WASTED) {
-			SetVehicleObjectiveForPlayer(lastvehicle_asdriver[playerid], playerid, 1);
-			SendClientMessage(playerid, COL_WARN, WARN"Get back in your vehicle!");
-		}
+		SetVehicleObjectiveForPlayer(lastvehicle_asdriver[playerid], playerid, 1);
+		SendClientMessage(playerid, COL_WARN, WARN"Get back in your vehicle!");
 	} else if (to == PLAYER_STATE_DRIVER &&
 		(mission = activemission[playerid]) != NULL &&
 		mission->vehicleid == NC_GetPlayerVehicleID(playerid))
