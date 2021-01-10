@@ -1827,14 +1827,15 @@ void missions_on_player_state_changed(int playerid, int from, int to)
 		(mission = activemission[playerid]) != NULL &&
 		mission->vehicleid == lastvehicle_asdriver[playerid])
 	{
-		/*TODO: This gets hit when the vehicle explodes and player dies. Prevent that.*/
-		NC_PARS(4);
-		nc_params[1] = lastvehicle_asdriver[playerid];
-		nc_params[2] = playerid;
-		nc_params[3] = 1;
-		nc_params[4] = 0;
-		NC(n_SetVehicleParamsForPlayer);
-		SendClientMessage(playerid, COL_WARN, WARN"Get back in your vehicle!");
+		if (to != PLAYER_STATE_WASTED) {
+			NC_PARS(4);
+			nc_params[1] = lastvehicle_asdriver[playerid];
+			nc_params[2] = playerid;
+			nc_params[3] = 1;
+			nc_params[4] = 0;
+			NC(n_SetVehicleParamsForPlayer);
+			SendClientMessage(playerid, COL_WARN, WARN"Get back in your vehicle!");
+		}
 	} else if (to == PLAYER_STATE_DRIVER &&
 		(mission = activemission[playerid]) != NULL &&
 		mission->vehicleid == NC_GetPlayerVehicleID(playerid))
