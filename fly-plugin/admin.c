@@ -29,7 +29,7 @@ int cmd_admin_respawn(CMDPARAMS)
 {
 	int vehicleid;
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(playerid);
 	if (vehicleid) {
 		NC_SetVehicleToRespawn(vehicleid);
 	}
@@ -80,7 +80,7 @@ int cmd_admin_rr(CMDPARAMS)
 
 	common_GetPlayerPos(playerid, &ppos);
 	for (i = 0; i < playercount; i++) {
-		vehicleid = NC_GetPlayerVehicleID(players[i]);
+		vehicleid = GetPlayerVehicleID(players[i]);
 		if (vehicleid) {
 			common_GetPlayerPos(players[i], &oppos);
 			if (common_xy_dist_sq(ppos, oppos) < RR_SQ) {
@@ -176,7 +176,7 @@ void admin_vehinfo_show(int playerid)
 	int vehicleid;
 	char query[100];
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(playerid);
 	veh = gamevehicles[vehicleid].dbvehicle;
 	if (veh == NULL) {
 		dialog_ShowPlayerDialog(playerid, DIALOG_DUMMY,

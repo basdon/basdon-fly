@@ -46,15 +46,12 @@ void common_tp_player(int playerid, struct vec4 pos)
 
 int common_find_player_in_vehicle_seat(int vehicleid, int seat)
 {
-	int n = playercount;
+	int n, playerid;
 
-	NC_PARS(1);
-	while (n--) {
-		nc_params[1] = players[n];
-		if (NC(n_GetPlayerVehicleID) == vehicleid &&
-			NC(n_GetPlayerVehicleSeat) == seat)
-		{
-			return players[n];
+	for (n = playercount; n; ) {
+		playerid = players[--n];
+		if (GetPlayerVehicleID(playerid) == vehicleid && GetPlayerVehicleSeat(playerid) == seat) {
+			return playerid;
 		}
 	}
 	return INVALID_PLAYER_ID;

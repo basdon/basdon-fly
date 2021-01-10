@@ -27,9 +27,6 @@ static AMX_NATIVE n_GetPlayerName;
 static AMX_NATIVE n_GetPlayerPing;
 static AMX_NATIVE n_GetPlayerPos;
 static AMX_NATIVE n_GetPlayerScore;
-static AMX_NATIVE n_GetPlayerState;
-static AMX_NATIVE n_GetPlayerVehicleID;
-static AMX_NATIVE n_GetPlayerVehicleSeat;
 static AMX_NATIVE n_GetServerTickRate;
 static AMX_NATIVE n_GetVehicleDamageStatus;
 static AMX_NATIVE n_GetVehicleHealth_;
@@ -73,7 +70,6 @@ static AMX_NATIVE n_SetPlayerHealth;
 static AMX_NATIVE n_SetPlayerMapIcon;
 static AMX_NATIVE n_SetPlayerName_;
 static AMX_NATIVE n_SetPlayerPos_;
-static AMX_NATIVE n_SetPlayerRaceCheckpoint;
 static AMX_NATIVE n_SetPlayerScore;
 static AMX_NATIVE n_SetPlayerSpecialAction;
 static AMX_NATIVE n_SetPlayerTime;
@@ -230,17 +226,6 @@ static cell tmpfloat;
 #define NC_GetPlayerScore(PLAYERID) (NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_GetPlayerScore(amx,nc_params))
 
-#define NC_GetPlayerState(PLAYERID) (NC_PARS_(1)nc_params[1]=PLAYERID,\
-	n_GetPlayerState(amx,nc_params))
-
-#define NC_GetPlayerVehicleID(PLAYERID) \
-	(NC_PARS_(1)nc_params[1]=PLAYERID,\
-	n_GetPlayerVehicleID(amx,nc_params))
-
-#define NC_GetPlayerVehicleSeat(PLAYERID) \
-	(NC_PARS_(1)nc_params[1]=PLAYERID,\
-	n_GetPlayerVehicleSeat(amx,nc_params))
-
 #define NC_GetServerTickRate() (NC_PARS_(0)\
 	n_GetServerTickRate(amx,nc_params))
 
@@ -344,12 +329,6 @@ static cell tmpfloat;
 	n_SetPlayerHealth(amx,nc_params))
 
 #define NC_SetPlayerPos __USE__natives_SetPlayerPos__
-
-#define NC_SetPlayerRaceCheckpoint(PLAYERID,TYPE,FX,FY,FZ,FNX,FNY,FNZ,FSIZE) \
-	(NC_PARS_(9)nc_params[1]=PLAYERID,nc_params[2]=TYPE,\
-	nc_paramf[3]=FX,nc_paramf[4]=FY,nc_paramf[5]=FZ,nc_paramf[6]=FNX,\
-	nc_paramf[7]=FNY,nc_paramf[8]=FNZ,nc_paramf[9]=FSIZE,\
-	n_SetPlayerRaceCheckpoint(amx,nc_params))
 
 #define NC_SetPlayerScore(PLAYERID,SCORE) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=SCORE,\
@@ -519,9 +498,6 @@ int natives_find()
 		N(GetPlayerPing),
 		N(GetPlayerPos),
 		N(GetPlayerScore),
-		N(GetPlayerState),
-		N(GetPlayerVehicleID),
-		N(GetPlayerVehicleSeat),
 		N(GetServerTickRate),
 		N(GetVehicleDamageStatus),
 		N_(GetVehicleHealth),
@@ -565,7 +541,6 @@ int natives_find()
 		N(SetPlayerMapIcon),
 		N_(SetPlayerName),
 		N_(SetPlayerPos),
-		N(SetPlayerRaceCheckpoint),
 		N(SetPlayerScore),
 		N(SetPlayerSpecialAction),
 		N(SetPlayerTime),

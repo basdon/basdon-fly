@@ -5,14 +5,13 @@ static
 int cmd_dev_cp(CMDPARAMS)
 {
 	struct vec3 pos;
-	int vehicleid = NC_GetPlayerVehicleID(playerid);
+	int vehicleid = GetPlayerVehicleID(playerid);
 	if (vehicleid) {
 		GetVehiclePos(vehicleid, &pos);
 	} else {
 		common_GetPlayerPos(playerid, &pos);
 	}
-	NC_SetPlayerRaceCheckpoint(playerid, 2,
-		pos.x, pos.y, pos.z,0.0f, 0.0f, 0.0f, 8.0f);
+	SetPlayerRaceCheckpointNoDir(playerid, 2, &pos, 8.0f);
 	return 1;
 }
 
@@ -343,7 +342,7 @@ int cmd_dev_vdamage(CMDPARAMS)
 	int vehicleid;
 	char msg144[144];
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(playerid);
 	common_GetVehicleDamageStatus(vehicleid, &vdmg);
 	sprintf(msg144, "panels %X doors %X lights %02X tires %02X", vdmg.panels, vdmg.doors, vdmg.lights, vdmg.tires);
 	SendClientMessageToAll(-1, msg144);
@@ -356,7 +355,7 @@ The /vehrespawn command respawns the player's vehicle.
 static
 int cmd_dev_vehrespawn(CMDPARAMS)
 {
-	int vehicleid = NC_GetPlayerVehicleID(playerid);
+	int vehicleid = GetPlayerVehicleID(playerid);
 	NC_SetVehicleToRespawn(vehicleid);
 	return 1;
 }
@@ -372,7 +371,7 @@ int cmd_dev_vhp(CMDPARAMS)
 	int vehicleid;
 	int set_hp;
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(playerid);
 	if (!vehicleid) {
 		return 1;
 	}
@@ -403,7 +402,7 @@ int cmd_dev_vfl(CMDPARAMS)
 	int fl_pct;
 	float capacity;
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(playerid);
 	if (!vehicleid) {
 		return 1;
 	}
@@ -431,7 +430,7 @@ The /vphnan command sets player's vehicle to NaN hp.
 static
 int cmd_dev_vhpnan(CMDPARAMS)
 {
-	int vehicleid = NC_GetPlayerVehicleID(playerid);
+	int vehicleid = GetPlayerVehicleID(playerid);
 	NC_SetVehicleHealth(vehicleid, 0x7F800100);
 	return 1;
 }
@@ -442,7 +441,7 @@ The /vphninf command sets player's vehicle to negative infinite hp.
 static
 int cmd_dev_vhpninf(CMDPARAMS)
 {
-	int vehicleid = NC_GetPlayerVehicleID(playerid);
+	int vehicleid = GetPlayerVehicleID(playerid);
 	NC_SetVehicleHealth(vehicleid, float_ninf);
 	return 1;
 }
@@ -453,7 +452,7 @@ The /vphpinf command sets player's vehicle to positive infinite hp.
 static
 int cmd_dev_vhppinf(CMDPARAMS)
 {
-	int vehicleid = NC_GetPlayerVehicleID(playerid);
+	int vehicleid = GetPlayerVehicleID(playerid);
 	NC_SetVehicleHealth(vehicleid, float_pinf);
 	return 1;
 }

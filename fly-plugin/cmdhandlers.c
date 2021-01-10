@@ -19,7 +19,6 @@ int cmd_admin_goto(CMDPARAMS)
 {
 	int oldparseidx;
 	int targetplayerid;
-	int vehicleid;
 	int x, y, z;
 	struct vec4 pos;
 
@@ -52,9 +51,8 @@ int cmd_admin_goto(CMDPARAMS)
 		}
 	}
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
-	if (vehicleid && NC_GetPlayerVehicleSeat(playerid) == 0) {
-		common_SetVehiclePos(vehicleid, &pos.coords);
+	if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
+		common_SetVehiclePos(GetPlayerVehicleID(playerid), &pos.coords);
 	} else {
 		common_tp_player(playerid, pos);
 	}
@@ -125,7 +123,7 @@ int cmd_admin_tomsp(CMDPARAMS)
 	int msptype_mask;
 	int mspindex;
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(playerid);
 	if (vehicleid) {
 		msptype_mask = missions_get_vehicle_model_msptype_mask(NC_GetVehicleModel(vehicleid));
 	} else {
@@ -176,7 +174,7 @@ int cmd_at400(CMDPARAMS)
 	int vehicleid, found_vehicle;
 	float dx, dy, dz, shortest_distance, tmpdistance;
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(playerid);
 	if (vehicleid) {
 		return 1;
 	}
@@ -253,7 +251,7 @@ int cmd_getspray(CMDPARAMS)
 	int vehicleid;
 	char msg144[144];
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(playerid);
 	if (vehicleid && (veh = gamevehicles[vehicleid].dbvehicle)) {
 		sprintf(msg144, "colors: %d, %d", veh->col1, veh->col2);
 		SendClientMessage(playerid, -1, msg144);
@@ -305,7 +303,7 @@ int cmd_park(CMDPARAMS)
 	int vehicleid;
 	float lastrot;
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(playerid);
 	if (vehicleid) {
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (!veh_can_player_modify_veh(playerid, veh)) {
@@ -382,7 +380,7 @@ int cmd_spray(CMDPARAMS)
 	struct dbvehicle *veh;
 	int vehicleid, *col1, *col2, *a, *b;
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(playerid);
 	if (vehicleid) {
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (!veh_can_player_modify_veh(playerid, veh)) {

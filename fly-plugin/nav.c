@@ -170,7 +170,7 @@ int nav_check_can_do_cmd(int playerid, int navtype, int *vehicleid)
 {
 	int vehiclemodel;
 
-	*vehicleid = NC_GetPlayerVehicleID(playerid);
+	*vehicleid = GetPlayerVehicleID(playerid);
 	vehiclemodel = NC_GetVehicleModel(*vehicleid);
 	if (navtype == NAV_ADF) {
 		if (!game_is_air_vehicle(vehiclemodel)) {
@@ -185,7 +185,7 @@ int nav_check_can_do_cmd(int playerid, int navtype, int *vehicleid)
 		}
 		return 0;
 	}
-	if (NC_GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
+	if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
 		SendClientMessage(playerid, COL_WARN, WARN"Only the pilot can change navigation settings");
 		return 0;
 	}

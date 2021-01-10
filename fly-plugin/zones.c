@@ -189,7 +189,7 @@ int zones_cmd_loc(CMDPARAMS)
 		b += sprintf(b, "%s, ", zonenames[zone_last_id[target]]);
 	}
 	b += sprintf(b, "%s ", zonenames[zone_last_region[target]]);
-	vehicleid = NC_GetPlayerVehicleID(target);
+	vehicleid = GetPlayerVehicleID(target);
 	if (vehicleid) {
 		model = NC_GetVehicleModel(vehicleid);
 		GetVehicleVelocityUnsafe(vehicleid, &vvel);

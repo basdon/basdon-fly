@@ -179,6 +179,15 @@ int IsVehicleStreamedIn(int vehicleid, int forplayerid)
 }
 
 static
+short GetPlayerVehicleSeat(int playerid)
+{
+	return player[playerid]->vehicleseat;
+}
+
+/*
+@return 0 when not in vehicle
+*/
+static
 short GetPlayerVehicleID(int playerid)
 {
 	return player[playerid]->vehicleid;
@@ -488,10 +497,10 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 
 	GetVehiclePos(vehicleid, &pos);
 	maps_stream_for_player(playerid, pos);
-	if (NC_GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
+	if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
 		/*hook_OnDriverSync will invoke this already,
 		but that's supposed to be as last-resort (for players that are vehicle warping)*/
-		oldvehicleid = NC_GetPlayerVehicleID(playerid);
+		oldvehicleid = GetPlayerVehicleID(playerid);
 		veh_on_driver_changed_vehicle_without_state_change(playerid, oldvehicleid, vehicleid);
 		lastvehicle_asdriver[playerid] = vehicleid; /*So hook_OnDriverSync doesn't detect warping.*/
 	}
@@ -578,7 +587,7 @@ void natives_SpawnPlayer(int playerid)
 #ifdef SAMP_NATIVES_IMPL
 {
 	/*eject player first if they're in a vehicle*/
-	if (NC_GetPlayerVehicleID(playerid)) {
+	if (GetPlayerVehicleID(playerid)) {
 		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
 		NC(n_SetPlayerPos_);
 	}

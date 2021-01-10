@@ -843,7 +843,7 @@ void panel_timed_update()
 #endif
 		playerid = panelplayers[n];
 
-		vehicleid = NC_GetPlayerVehicleID(playerid);
+		vehicleid = GetPlayerVehicleID(playerid);
 
 		GetVehiclePosRotUnsafe(vehicleid, &vpos);
 		kneeboard_update_distance(playerid, &vpos.coords);
@@ -851,7 +851,7 @@ void panel_timed_update()
 		heading = (int) vpos.r;
 		GetVehicleVelocityUnsafe(vehicleid, &vvel);
 		speed = (int) (VEL_TO_KTS * (float) sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z));
-		if (NC_GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
+		if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
 			nav_update(vehicleid, &vpos);
 		}
 
@@ -884,7 +884,7 @@ void panel_nav_updated(int vehicleid)
 
 	for (i = 0; i < numpanelplayers; i++) {
 		playerid = panelplayers[i];
-		if (NC_GetPlayerVehicleID(playerid) == vehicleid) {
+		if (GetPlayerVehicleID(playerid) == vehicleid) {
 			panel_update_nav(playerid, vehicleid, 1);
 		}
 	}
@@ -930,7 +930,7 @@ void panel_reshow(int playerid)
 	td_panel_vorbar.rpcdata->font_color = col_panel_fg_light[color];
 	td_panel_vaibar.rpcdata->font_color = col_panel_fg_light[color];
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(playerid);
 
 	GetVehiclePosRotUnsafe(vehicleid, &vpos);
 	kneeboard_update_distance(playerid, &vpos.coords);
@@ -964,10 +964,7 @@ void panel_on_player_state_change(int playerid, int from, int to)
 	int vehicleid;
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
-		vehicleid = NC_GetPlayerVehicleID(playerid);
-		if (!vehicleid) {
-			return;
-		}
+		vehicleid = GetPlayerVehicleID(playerid);
 		if (!game_is_air_vehicle(NC_GetVehicleModel(vehicleid))) {
 			return;
 		}
@@ -999,7 +996,8 @@ void panel_day_night_changed()
 void panel_on_player_was_afk(int playerid)
 {
 	int vehicleid, vehiclemodel;
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+
+	vehicleid = GetPlayerVehicleID(playerid);
 	if (vehicleid) {
 		vehiclemodel = NC_GetVehicleModel(vehicleid);
 		if (game_is_air_vehicle(vehiclemodel)) {

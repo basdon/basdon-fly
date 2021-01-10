@@ -715,7 +715,7 @@ next:
 	}
 
 	/*update active_msp_index and show 'press ...' text if needed*/
-	if (NC_GetPlayerVehicleSeat(playerid) == 0) {
+	if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
 		for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
 			if (missionpoint_indicator_state[playerid][indicatoridx] == MISSIONPOINT_INDICATOR_STATE_USED) {
 				msp = &missionpoints[missionpoint_indicator_index[playerid][indicatoridx]];
@@ -1373,15 +1373,14 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 	int vehicleid, i;
 	float vhp, dx, dy;
 
-	NC_PARS(1);
-	nc_params[1] = playerid;
-	vehicleid = NC(n_GetPlayerVehicleID);
-	if ((veh = gamevehicles[vehicleid].dbvehicle) == NULL || NC(n_GetPlayerVehicleSeat) != 0) {
+	if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
 		SendClientMessage(playerid, COL_WARN, WARN"You must be the driver of a vehicle ");
 		return;
 	}
 
-	if (!(missions_get_vehicle_model_msptype_mask(veh->model) & missiontype)) {
+	vehicleid = GetPlayerVehicleID(playerid);
+	veh = gamevehicles[vehicleid].dbvehicle;
+	if (!veh || !(missions_get_vehicle_model_msptype_mask(veh->model) & missiontype)) {
 		SendClientMessage(playerid, COL_WARN, WARN"Wrong vehicle type!");
 		return;
 	}
@@ -1722,7 +1721,7 @@ void missions_start_unload(int playerid)
 	struct dbvehicle *veh;
 	int vehicleid, vv;
 
-	if (NC_GetPlayerVehicleSeat(playerid) != 0) {
+	if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
 		return;
 	}
 
@@ -1799,7 +1798,7 @@ void missions_on_player_state_change(int playerid, int from, int to)
 	}
 
 	if (to == PLAYER_STATE_ONFOOT || from == PLAYER_STATE_ONFOOT) {
-		vehicleid = NC_GetPlayerVehicleID(playerid);
+		vehicleid = GetPlayerVehicleID(playerid);
 		if (vehicleid) {
 			missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(NC_GetVehicleModel(vehicleid));
 		} else {
@@ -1826,7 +1825,7 @@ void missions_on_player_state_change(int playerid, int from, int to)
 		SendClientMessage(playerid, COL_WARN, WARN"Get back in your vehicle!");
 	} else if (to == PLAYER_STATE_DRIVER &&
 		(mission = activemission[playerid]) != NULL &&
-		mission->vehicleid == NC_GetPlayerVehicleID(playerid))
+		mission->vehicleid == GetPlayerVehicleID(playerid))
 	{
 		SetVehicleObjectiveForPlayer(mission->vehicleid, playerid, 0);
 	}
@@ -1956,10 +1955,9 @@ int missions_cmd_mission(CMDPARAMS)
 			return 1;
 		}
 
-		nc_params[1] = playerid;
-		vehicleid = NC(n_GetPlayerVehicleID);
+		vehicleid = GetPlayerVehicleID(playerid);
 		veh = gamevehicles[vehicleid].dbvehicle;
-		if (!veh || NC_GetPlayerVehicleSeat(playerid) != 0) {
+		if (!veh || GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
 			SendClientMessage(playerid, COL_WARN, WARN"Get in a vehicle first!");
 			return 1;
 		}
@@ -2045,8 +2043,12 @@ void missions_locate_closest_mission(int playerid)
 		locating_msp_index[playerid] = closest_index;
 		msp = &missionpoints[closest_index];
 		SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &msp->pos, MISSION_CP_RAD);
-		if ((vehicleid = NC_GetPlayerVehicleID(playerid)) && (veh = gamevehicles[vehicleid].dbvehicle)) {
-			nav_navigate_to_airport(playerid, veh->spawnedvehicleid, veh->model, msp->ap);
+		if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
+			vehicleid = GetPlayerVehicleID(playerid);
+			veh = gamevehicles[vehicleid].dbvehicle;
+			if (veh) {
+				nav_navigate_to_airport(playerid, vehicleid, veh->model, msp->ap);
+			}
 		}
 	}
 }

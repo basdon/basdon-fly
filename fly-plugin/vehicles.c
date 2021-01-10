@@ -782,7 +782,7 @@ int veh_GetPlayerVehicle(int playerid, int *reinc, struct dbvehicle **veh)
 {
 	int vehicleid;
 
-	vehicleid = NC_GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(playerid);
 	if (reinc != NULL) {
 		*reinc = gamevehicles[vehicleid].reincarnation;
 	}
@@ -901,7 +901,7 @@ new Float:toz = v1 * 2 * (q1 * q3 + q0 * q2) + v2 * 2 * (q2 * q3 - q0 * q1) + v3
 
 void veh_timed_1s_update()
 {
-	struct dbvehicle *v;
+	struct dbvehicle *veh;
 	struct vec3 vpos, *ppos = &vpos;
 	struct PLAYERKEYS pkeys;
 	int playerid, vehicleid, vehiclemodel, n = playercount;
@@ -919,25 +919,20 @@ void veh_timed_1s_update()
 		/*TODO move this elsewhere I guess*/
 		missions_update_missionpoint_indicators(playerid, ppos->x, ppos->y, ppos->z);
 
-		NC_PARS(1);
-		nc_params[1] = playerid;
-		vehicleid = NC(n_GetPlayerVehicleID);
-		if (!vehicleid) {
-			continue;
-		}
-		if (NC(n_GetPlayerVehicleSeat) != 0) {
+		if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
 			continue;
 		}
 
-		v = gamevehicles[vehicleid].dbvehicle;
-		if (!veh_is_player_allowed_in_vehicle(playerid, v)) {
-			veh_disallow_player_in_vehicle(playerid, v);
+		vehicleid = GetPlayerVehicleID(playerid);
+		veh = gamevehicles[vehicleid].dbvehicle;
+		if (!veh_is_player_allowed_in_vehicle(playerid, veh)) {
+			veh_disallow_player_in_vehicle(playerid, veh);
 			anticheat_disallowed_vehicle_1s(playerid);
 			continue;
 		}
 
-		if (v != NULL) {
-			vehiclemodel = v->model;
+		if (veh) {
+			vehiclemodel = veh->model;
 		} else {
 			vehiclemodel = NC_GetVehicleModel(vehicleid);
 		}
@@ -948,9 +943,9 @@ void veh_timed_1s_update()
 
 			engineState = GetVehicleEngineState(vehicleid);
 
-			if (engineState && v != NULL) {
+			if (engineState && veh) {
 				common_GetPlayerKeys(playerid, &pkeys);
-				veh_consume_fuel(playerid, vehicleid, pkeys.keys & KEY_SPRINT, v);
+				veh_consume_fuel(playerid, vehicleid, pkeys.keys & KEY_SPRINT, veh);
 			}
 
 			model_stats = NULL;
@@ -1032,7 +1027,7 @@ void veh_on_player_state_change(int playerid, int from, int to)
 	char veh_name_buf[32];
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
-		vehicleid = NC_GetPlayerVehicleID(playerid);
+		vehicleid = GetPlayerVehicleID(playerid);
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (veh != NULL) {
 			vehiclemodel = veh->model;
@@ -1078,7 +1073,7 @@ void veh_timed_speedo_update()
 	n = playercount;
 	while (n--) {
 		if (spawned[playerid = players[n]] &&
-			(vehicleid = NC_GetPlayerVehicleID(playerid)) &&
+			(vehicleid = GetPlayerVehicleID(playerid)) &&
 			(veh = gamevehicles[vehicleid].dbvehicle) &&
 			!game_is_air_vehicle(veh->model))
 		{
