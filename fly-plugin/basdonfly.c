@@ -23,7 +23,9 @@
 
 #define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
 #define EXPECT_SIZE(S,SIZE) STATIC_ASSERT(sizeof(S)==(SIZE))
-#define MEMBER_OFFSET(S,M) ((int) (&(((S*) 0)->M)))
+/*May also use offsetof(), but that requires stddef.h*/
+#define MEMBER_OFFSET(S,M) (__builtin_offsetof(S,M))
+#define STATIC_ASSERT_MEMBER_OFFSET(S,M,O) STATIC_ASSERT(MEMBER_OFFSET(S,M)==(O))
 
 typedef void (*cb_t)(void* data);
 

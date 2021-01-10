@@ -172,6 +172,58 @@ void PlayerPlaySound(int playerid, int soundid)
 	SAMP_SendRPCToPlayer(RPC_PlaySound, &bs, playerid, 2);
 }
 
+/*
+TODO: make a GetVehicleParamsExForPlayer? Where objective is set in case they're on a mission but not in their vehicle.
+*/
+static
+void GetVehicleParamsEx(int vehicleid, struct SampVehicleParams *params)
+{
+	struct SampVehicle *vehicle;
+
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+		*params = vehicle->params;
+	}
+}
+
+static
+void SetVehicleParamsExForPlayer(int vehicleid, int playerid, struct SampVehicleParams *params)
+{
+	struct RPCDATA_SetVehicleParamsEx rpcdata;
+	struct BitStream bs;
+
+	rpcdata.vehicleid = (short) vehicleid;
+	rpcdata.params = *params;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	SAMP_SendRPCToPlayer(RPC_SetVehicleParamsEx, &bs, playerid, 2);
+}
+
+/*
+XXX: this resets any player-specific doors_locked state back to the global doors_locked state.
+*/
+static
+void SetVehicleObjectiveForPlayer(int vehicleid, int playerid, char objective)
+{
+	struct RPCDATA_SetVehicleParams rpcdata;
+	struct BitStream bs;
+	struct SampVehicleParams params;
+
+	GetVehicleParamsEx(vehicleid, &params);
+	/*SetVehicleParams does not work to unset the object, SetVehicleParamsEx must be used.*/
+	if (!objective) {
+		params.objective = 0; /*TODO remove once we have GetVehicleParamsExForPlayer*/
+		SetVehicleParamsExForPlayer(vehicleid, playerid, &params);
+	} else {
+		rpcdata.vehicleid = (short) vehicleid;
+		rpcdata.objective = objective;
+		rpcdata.doors_locked = params.doors_locked;
+		bs.ptrData = &rpcdata;
+		bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+		SAMP_SendRPCToPlayer(RPC_SetVehicleParams, &bs, playerid, 2);
+	}
+}
+
 /**
 In the PAWN API, text is actually the 2nd parameter. Placing it at the end here, for code style reasons.
 */
@@ -195,11 +247,11 @@ void GameTextForPlayer(int playerid, int milliseconds, int style, char *text)
 static
 int GetVehiclePos(int vehicleid, struct vec3 *pos)
 {
-	struct SampVehicle *veh;
+	struct SampVehicle *vehicle;
 
-	veh = *(struct SampVehicle**) (samp_pNetGame->pVehiclePool + 0x3F54 + vehicleid * 4);
-	if (veh) {
-		*pos = veh->pos;
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+		*pos = vehicle->pos;
 		return 1;
 	}
 	return 0;
@@ -211,7 +263,7 @@ Crashes if vehicle does not exist.
 static
 void GetVehiclePosUnsafe(int vehicleid, struct vec3 *pos)
 {
-	*pos = (*(struct SampVehicle**) (samp_pNetGame->pVehiclePool + 0x3F54 + vehicleid * 4))->pos;
+	*pos = samp_pNetGame->vehiclePool->vehicles[vehicleid]->pos;
 }
 
 /**
@@ -220,7 +272,7 @@ Crashes if vehicle does not exist.
 static
 void GetVehicleVelocityUnsafe(int vehicleid, struct vec3 *vel)
 {
-	*vel = (*(struct SampVehicle**) (samp_pNetGame->pVehiclePool + 0x3F54 + vehicleid * 4))->vel;
+	*vel = samp_pNetGame->vehiclePool->vehicles[vehicleid]->vel;
 }
 
 static

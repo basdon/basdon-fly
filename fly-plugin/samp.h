@@ -3,22 +3,55 @@ EXPECT_SIZE(short, 2);
 EXPECT_SIZE(int, 4);
 
 #pragma pack(1)
+struct SampVehicleParamsDoorsWindows {
+	char frontleft; /*-1 unset, 0 closed, 1 open*/
+	char frontright; /*-1 unset, 0 closed, 1 open*/
+	char backleft; /*-1 unset, 0 closed, 1 open*/
+	char backright; /*-1 unset, 0 closed, 1 open*/
+};
+EXPECT_SIZE(struct SampVehicleParamsDoorsWindows, 0x4);
+
+struct SampVehicleParams {
+	char engine; /*0 off, 1 on*/
+	char lights; /*0 off, 1 on*/
+	char alarm; /*0 off, 1 on (or it was on and has finished)*/
+	char doors_locked; /*0 unlocked, 1 locked*/
+	char bonnet; /*0 closed, 1 open*/
+	char boot; /*0 closed, 1 open*/
+	char objective;
+	char siren_state; /*-1 unset (off), 0 off, 1 on*/
+	struct SampVehicleParamsDoorsWindows doors;
+	struct SampVehicleParamsDoorsWindows windows;
+};
+EXPECT_SIZE(struct SampVehicleParams, 0x10);
+
+struct SampVehicle {
+	struct vec3 pos;
+	char _padC[0x40];
+	struct vec3 vel;
+	char _pad58[0xEF-0x58];
+	struct SampVehicleParams params;
+	/*Incomplete.*/
+};
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, vel, 0xC + 0x40);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, params, 0xEF);
+
+struct SampVehiclePool {
+	char _pad0[8212];
+	int created[2000];
+	struct SampVehicle *vehicles[2000];
+};
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, created, 0x2014);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, vehicles, 0x3F54);
+
 struct SampNetGame {
 	void *pGameMode;
 	void *pFilterScripts;
 	void *pPlayerPool;
-	int pVehiclePool;
-	/*Incomplete.*/
+	struct SampVehiclePool *vehiclePool;
 };
-EXPECT_SIZE(struct SampNetGame, 16);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, vehiclePool, 0xC);
 
-struct SampVehicle {
-	struct vec3 pos;
-	char _pad10[0x40];
-	struct vec3 vel;
-	/*Incomplete.*/
-};
-EXPECT_SIZE(struct SampVehicle, 12 + 0x40 + 12);
 
 struct BitStream {
 	int numberOfBitsUsed;
@@ -233,6 +266,19 @@ struct RPCDATA_SetRaceCheckpoint {
 };
 EXPECT_SIZE(struct RPCDATA_SetRaceCheckpoint, 1 + 12 + 12 + 4);
 
+struct RPCDATA_SetVehicleParams {
+	short vehicleid;
+	char objective;
+	char doors_locked;
+};
+EXPECT_SIZE(struct RPCDATA_SetVehicleParams, 2 + 1 + 1);
+
+struct RPCDATA_SetVehicleParamsEx {
+	short vehicleid;
+	struct SampVehicleParams params;
+};
+EXPECT_SIZE(struct RPCDATA_SetVehicleParamsEx, 2 + 0x10);
+
 struct SYNCDATA_Driver {
 	char packet_id;
 	short vehicle_id;
@@ -285,3 +331,5 @@ EXPECT_SIZE(struct SYNCDATA_Driver, 1 + 2 + 2 + 2 + 2 + 16 + 12 + 12 + 4 + 1 + 1
 #define RPC_TextDrawSetString 0x815214C /*ptr to 0x69(105)*/
 #define RPC_SetRaceCheckpoint 0x815CD7A /*ptr to 0x26(38)*/
 #define RPC_DisableRaceCheckpoint 0x81587C7 /*ptr to 0x27(39)*/
+#define RPC_SetVehicleParams 0x815CCFC /*ptr to 0xA1(161)*/
+#define RPC_SetVehicleParamsEx 0x8166226 /*ptr to 0x18(24)*/

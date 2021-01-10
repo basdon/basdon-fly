@@ -1799,7 +1799,6 @@ void missions_start_unload(int playerid)
 void missions_on_player_state_changed(int playerid, int from, int to)
 {
 	struct MISSION *mission;
-	struct VEHICLEPARAMS vpars;
 	struct vec3 pos;
 	int vehicleid;
 
@@ -1828,29 +1827,14 @@ void missions_on_player_state_changed(int playerid, int from, int to)
 		mission->vehicleid == lastvehicle_asdriver[playerid])
 	{
 		if (to != PLAYER_STATE_WASTED) {
-			NC_PARS(4);
-			nc_params[1] = lastvehicle_asdriver[playerid];
-			nc_params[2] = playerid;
-			nc_params[3] = 1;
-			nc_params[4] = 0;
-			NC(n_SetVehicleParamsForPlayer);
+			SetVehicleObjectiveForPlayer(lastvehicle_asdriver[playerid], playerid, 1);
 			SendClientMessage(playerid, COL_WARN, WARN"Get back in your vehicle!");
 		}
 	} else if (to == PLAYER_STATE_DRIVER &&
 		(mission = activemission[playerid]) != NULL &&
 		mission->vehicleid == NC_GetPlayerVehicleID(playerid))
 	{
-		/*TODO: update this mess "objective can only be disabled by disabling it globally"*/
-
-		/*SA:MP wiki: Vehicles must be respawned for the 'objective' to
-		be removed. This can be circumvented somewhat using
-		Get/SetVehicleParamsEx which do not require the vehicle to be
-		respawned.*/
-		common_GetVehicleParamsEx(mission->vehicleid, &vpars);
-		/*probably not needed since the global object is not set,
-		but just in case*/
-		vpars.objective = 0;
-		common_SetVehicleParamsEx(mission->vehicleid, &vpars);
+		SetVehicleObjectiveForPlayer(mission->vehicleid, playerid, 0);
 	}
 }
 
@@ -1860,12 +1844,7 @@ void missions_on_vehicle_stream_in(int vehicleid, int forplayerid)
 
 	mission = activemission[forplayerid];
 	if (mission != NULL && mission->vehicleid == vehicleid) {
-		NC_PARS(4);
-		nc_params[1] = vehicleid;
-		nc_params[2] = forplayerid;
-		nc_params[3] = 1;
-		nc_params[4] = 0;
-		NC(n_SetVehicleParamsForPlayer);
+		SetVehicleObjectiveForPlayer(vehicleid, forplayerid, 1);
 	}
 }
 

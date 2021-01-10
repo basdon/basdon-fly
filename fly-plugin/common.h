@@ -15,7 +15,7 @@ struct VEHICLEPARAMS {
 	int engine;
 	int lights;
 	int alarm;
-	int doors;
+	int doors_locked;
 	int bonnet;
 	int boot;
 	int objective;
