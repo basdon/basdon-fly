@@ -270,6 +270,27 @@ static int joinpressure = 0;
 static int minconnectiontime = 0;
 
 /**
+Set as soon as a player is connected.
+*/
+static char playeronlineflag[MAX_PLAYERS];
+#define IsPlayerConnected(PLAYERID) playeronlineflag[PLAYERID]
+/**
+Contains all playerids that are passed the login screen (not sorted),
+so logged in as guest or member (or none or db error).
+
+i.e.: players that are actually playing.
+
+Contains 'playercount' elements
+*/
+static short players[MAX_PLAYERS];
+/**
+amount of playerids in players
+*/
+static int playercount;
+static struct SampPlayer *player[MAX_PLAYERS];
+static int spawned[MAX_PLAYERS];
+
+/**
 The vehicle the player was last in, as driver.
 This should be set to 0 at the end of OnPlayerUpdate (so all OnPlayerStateChange functions can use it).
 It will be set back to the correct vehicleid at the end of hook_OnDriverSync.
@@ -281,8 +302,6 @@ This is also used to check if a player was put as driver in a vehicle while
 they were already driver of another vehicle (does not trigger OnPlayerStateChange).
 */
 static int lastvehicle_asdriver[MAX_PLAYERS];
-
-static struct SampPlayer *player[MAX_PLAYERS];
 
 /**
 amx

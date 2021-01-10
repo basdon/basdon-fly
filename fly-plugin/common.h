@@ -171,16 +171,6 @@ struct FAKEAMX {
 #define fbuf144 fakeamx.a144.asflt
 #define fbuf4096 fakeamx.a4096.asflt
 
-
-/**
-element at index playerid is either 0 or 1
-*/
-extern char playeronlineflag[MAX_PLAYERS];
-/**
-contains 'playercount' elements, ids of connected players (not sorted)
-*/
-extern short players[MAX_PLAYERS];
-extern int playercount;
 /**
 Should be decremented in OnPlayerUpdate and player kicked when it reaches 0.
 */
@@ -201,8 +191,6 @@ extern int time_h;
 Current in-game minute.
 */
 extern int time_m;
-
-#define IsPlayerConnected(PLAYERID) playeronlineflag[PLAYERID]
 
 /**
 Teleport the player to a coordinate, and set facing angle and reset camera.

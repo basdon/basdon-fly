@@ -1,23 +1,7 @@
 /**
 Whether to adjust player's world bounds on spawn.
 */
-char need_adjust_world_bounds[MAX_PLAYERS];
-/**
-Set as soon as a player is connected.
-*/
-char playeronlineflag[MAX_PLAYERS];
-/**
-Contains all playerids that are passed the login screen,
-so logged in as guest or member (or none or db error).
-
-i.e.: players that are actually playing.
-*/
-short players[MAX_PLAYERS];
-/**
-amount of playerids in players
-*/
-int playercount;
-int spawned[MAX_PLAYERS];
+static char need_adjust_world_bounds[MAX_PLAYERS];
 
 static char *NOLOG = WARN"Log in first.";
 
