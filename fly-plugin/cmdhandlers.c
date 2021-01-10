@@ -66,17 +66,20 @@ static
 int cmd_admin_tocar(CMDPARAMS)
 {
 	struct vec3 vehicle_pos, player_pos;
-	int vehicleid, closest_vehicleid, modelid;
+	int vehicleid, closest_vehicleid, modelid, seat;
 	float dx, dy;
 	float min_distance_sq;
 
+	seat = 0;
 	if (cmd_get_int_param(cmdtext, &parseidx, &vehicleid)) {
+		cmd_get_int_param(cmdtext, &parseidx, &seat);
 		if (NC_GetVehicleModel(vehicleid)) {
-			natives_PutPlayerInVehicle(playerid, vehicleid, 0);
+			natives_PutPlayerInVehicle(playerid, vehicleid, seat);
 		} else {
 			SendClientMessage(playerid, COL_WARN, WARN"Invalid vehicle id");
 		}
 	} else if (cmd_get_vehiclemodel_param(cmdtext, &parseidx, &modelid)) {
+		cmd_get_int_param(cmdtext, &parseidx, &seat);
 		closest_vehicleid = -1;
 		min_distance_sq = float_pinf;
 		common_GetPlayerPos(playerid, &player_pos);
@@ -86,7 +89,7 @@ int cmd_admin_tocar(CMDPARAMS)
 				dx = player_pos.x - vehicle_pos.x;
 				dy = player_pos.y - vehicle_pos.y;
 				if (dx * dx + dy * dy < min_distance_sq &&
-					common_find_player_in_vehicle_seat(vehicleid, 0) == INVALID_PLAYER_ID)
+					common_find_player_in_vehicle_seat(vehicleid, seat) == INVALID_PLAYER_ID)
 				{
 					min_distance_sq = dx * dx + dy * dy;
 					closest_vehicleid = vehicleid;
@@ -94,12 +97,12 @@ int cmd_admin_tocar(CMDPARAMS)
 			}
 		}
 		if (closest_vehicleid != -1) {
-			natives_PutPlayerInVehicle(playerid, closest_vehicleid, 0);
+			natives_PutPlayerInVehicle(playerid, closest_vehicleid, seat);
 		} else {
 			SendClientMessage(playerid, COL_WARN, WARN"None spawned");
 		}
 	} else {
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: //tocar (<vehicleid>|<modelname>)");
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: //tocar (<vehicleid>|<modelname>) [seat]");
 	}
 	return 1;
 }
