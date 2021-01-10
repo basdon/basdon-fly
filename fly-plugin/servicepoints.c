@@ -107,7 +107,7 @@ int svp_cmd_refuel(CMDPARAMS)
 	}
 
 	if (GetVehicleEngineState(vehicleid)) {
-		SendClientMessage(playerid, COL_WARN, WARN"The engine must be turned off first. Press n or check out /helpkeys");
+		SendClientMessage(playerid, COL_WARN, WARN"The engine must be turned off first. Press n (/helpkeys) or use /engine");
 		return 1;
 	}
 

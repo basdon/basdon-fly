@@ -52,6 +52,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/cancelwork", GROUPS_ALL, missions_cmd_cancelmission },
 	{ 0, "/changepassword", GROUPS_REGISTERED, chpw_cmd_changepassword },
 	{ 0, "/chute", GROUPS_ALL, cmd_chute },
+	{ 0, "/engine", GROUPS_ALL, cmd_engine },
 	{ 0, "/fix", GROUPS_ALL, svp_cmd_repair },
 	{ 0, "/getspray", GROUPS_ALL, cmd_getspray },
 	{ 0, "/helpkeys", GROUPS_ALL, cmd_helpkeys },

@@ -232,6 +232,18 @@ int cmd_chute(CMDPARAMS)
 }
 
 /**
+The /engine command starts or stops the engine of the vehicle the player is currently driving.
+*/
+static
+int cmd_engine(CMDPARAMS)
+{
+	if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
+		veh_start_or_stop_engine(playerid, GetPlayerVehicleID(playerid));
+	}
+	return 1;
+}
+
+/**
 The /getspray command gets the colors of the vehicle the player is in.
 */
 static

@@ -732,16 +732,11 @@ void veh_start_or_stop_engine(int playerid, int vehicleid)
 
 void veh_on_player_key_state_change(int playerid, int oldkeys, int newkeys)
 {
-	int vehicleid;
-
 	/*not checking vehicle... for now*/
 	lastcontrolactivity[playerid] = time_timestamp();
 
-	if (newkeys & KEY_NO && !(oldkeys & KEY_NO)) {
-		vehicleid = NC_GetPlayerVehicleID(playerid);
-		if (vehicleid && NC_GetPlayerVehicleSeat(playerid) == 0) {
-			veh_start_or_stop_engine(playerid, vehicleid);
-		}
+	if (newkeys & KEY_NO && !(oldkeys & KEY_NO) && GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
+		veh_start_or_stop_engine(playerid, GetPlayerVehicleID(playerid));
 	}
 	return;
 }
@@ -1034,6 +1029,7 @@ void veh_on_player_state_change(int playerid, int from, int to)
 {
 	struct dbvehicle *veh;
 	int vehicleid, vehiclemodel;
+	char veh_name_buf[32];
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
 		vehicleid = NC_GetPlayerVehicleID(playerid);
@@ -1053,8 +1049,8 @@ void veh_on_player_state_change(int playerid, int from, int to)
 
 		if (to == PLAYER_STATE_DRIVER) {
 			veh_on_player_now_driving(playerid, vehicleid, veh);
-			csprintf(buf144, "~g~%s", vehnames[vehiclemodel - 400]);
-			NC_GameTextForPlayer(playerid, buf144a, 2000, 1);
+			sprintf(veh_name_buf, "~g~%s", vehnames[vehiclemodel - 400]);
+			GameTextForPlayer(playerid, 2000, 1, veh_name_buf);
 			veh_destroy_owner_label_for_all(vehicleid);
 		}
 	} else {

@@ -46,6 +46,8 @@ struct SampPlayer {
 	short playerid;
 	char _pad2969[0x2BA9-0x2969];
 	char currentState;
+	char _pad2BAA[0x2C32-0x2BAA];
+	short vehicleid;
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, playerStreamedIn, 0x155);
@@ -53,6 +55,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleStreamedIn, 0x53D);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, actorStreamedIn, 0x24F5);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, playerid, 0x2967);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, currentState, 0x2BA9);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleid, 0x2C32);
 
 struct SampVehiclePool {
 	char _pad0[8212];

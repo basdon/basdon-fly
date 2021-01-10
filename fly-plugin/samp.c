@@ -178,6 +178,18 @@ int IsVehicleStreamedIn(int vehicleid, int forplayerid)
 	return player[forplayerid]->vehicleStreamedIn[vehicleid];
 }
 
+static
+short GetPlayerVehicleID(int playerid)
+{
+	return player[playerid]->vehicleid;
+}
+
+static
+char GetPlayerState(int playerid)
+{
+	return player[playerid]->currentState;
+}
+
 /*
 TODO: make a GetVehicleParamsExForPlayer? Where objective is set in case they're on a mission but not in their vehicle.
 */
