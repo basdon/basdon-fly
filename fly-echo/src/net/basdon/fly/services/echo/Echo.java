@@ -412,7 +412,7 @@ void send_ping()
 		msg[i] = (byte) (r.nextInt(100) + 2);
 	}
 	this.last_ping_idx++;
-	if (this.last_ping_idx > this.last_ping_payloads.length) {
+	if (this.last_ping_idx >= this.last_ping_payloads.length) {
 		this.last_ping_idx = 0;
 	}
 	this.last_ping_payloads[this.last_ping_idx] = msg;
