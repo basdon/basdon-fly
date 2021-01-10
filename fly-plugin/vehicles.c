@@ -156,7 +156,7 @@ void veh_create_owner_label_for_all(struct dbvehicle *veh, int vehicleid)
 	int n;
 
 	for (n = playercount; n;) {
-		if (NC_IsVehicleStreamedIn(vehicleid, players[--n])) {
+		if (IsVehicleStreamedIn(vehicleid, players[--n])) {
 			veh_create_owner_label(veh, vehicleid, players[n]);
 		}
 	}
@@ -543,13 +543,12 @@ float model_fuel_usage(int modelid)
 }
 
 /**
-Make given vehicle consumer fuel. Should be called every second.
+Make given vehicle consumer fuel. Should be called every second while the engine is on.
 
 @param throttle whether the player is holding the throttle down
 */
 static
-void veh_consume_fuel(int playerid, int vehicleid, int throttle,
-	struct VEHICLEPARAMS *vparams, struct dbvehicle *veh)
+void veh_consume_fuel(int playerid, int vehicleid, int throttle, struct dbvehicle *veh)
 {
 	const float consumptionmp = throttle ? 1.0f : 0.2f;
 	float fuelcapacity, lastpercentage, newpercentage;
@@ -563,8 +562,7 @@ void veh_consume_fuel(int playerid, int vehicleid, int throttle,
 	newpercentage = veh->fuel / fuelcapacity;
 
 	if (lastpercentage > 0.0f && newpercentage == 0.0f) {
-		vparams->engine = 0;
-		common_SetVehicleParamsEx(vehicleid, vparams);
+		SetVehicleEngineState(vehicleid, 0);
 		SendClientMessage(playerid, COL_WARN, WARN"Your vehicle ran out of fuel!");
 	} else if (lastpercentage > 0.05f && newpercentage <= 0.05f) {
 		SendClientMessage(playerid, COL_WARN, WARN"Your vehicle has 5% fuel left!");
@@ -710,18 +708,15 @@ Pre: playerid is the driver of vehicleid and pressed the engine key.
 static
 void veh_start_or_stop_engine(int playerid, int vehicleid)
 {
-	struct VEHICLEPARAMS vpars;
 	struct dbvehicle *veh;
 	struct vec3 vvel;
 
-	common_GetVehicleParamsEx(vehicleid, &vpars);
-	if (vpars.engine) {
+	if (GetVehicleEngineState(vehicleid)) {
 		GetVehicleVelocityUnsafe(vehicleid, &vvel);
 		if (common_vectorsize_sq(vvel) > MAX_ENGINE_CUTOFF_VEL_SQ) {
 			SendClientMessage(playerid, COL_WARN, WARN"The engine cannot be shut down while moving!");
 		} else {
-			vpars.engine = 0;
-			common_SetVehicleParamsEx(vehicleid, &vpars);
+			SetVehicleEngineState(vehicleid, 0);
 			SendClientMessage(playerid, COL_INFO, INFO"Engine stopped");
 		}
 	} else {
@@ -729,8 +724,7 @@ void veh_start_or_stop_engine(int playerid, int vehicleid)
 		if (veh != NULL && veh->fuel == 0.0f) {
 			SendClientMessage(playerid, COL_WARN, WARN"The engine cannot be started, there is no fuel!");
 		} else {
-			vpars.engine = 1;
-			common_SetVehicleParamsEx(vehicleid, &vpars);
+			SetVehicleEngineState(vehicleid, 1);
 			SendClientMessage(playerid, COL_INFO, INFO"Engine started");
 		}
 	}
@@ -754,16 +748,16 @@ void veh_on_player_key_state_change(int playerid, int oldkeys, int newkeys)
 
 void veh_on_player_now_driving(int playerid, int vehicleid, struct dbvehicle *veh)
 {
-	int reqenginestate;
+	int required_engine_state;
 
 	/*veh could be NULL*/
 
 	GetVehiclePosUnsafe(vehicleid, &lastvpos[playerid]);
 
 	lastcontrolactivity[playerid] = time_timestamp();
-	reqenginestate = veh == NULL || veh->fuel > 0.0f;
-	common_set_vehicle_engine(vehicleid, reqenginestate);
-	if (!reqenginestate) {
+	required_engine_state = veh == NULL || veh->fuel > 0.0f;
+	SetVehicleEngineState(vehicleid, required_engine_state);
+	if (!required_engine_state) {
 		SendClientMessage(playerid, COL_WARN, WARN"This vehicle is out of fuel!");
 	}
 }
@@ -859,9 +853,7 @@ Continuation of veh_timed_1s_update.
 Called when player is still in same in air vehicle as last in update.
 */
 static
-void veh_timed_1s_update_a(
-	int playerid, int vehicleid, struct vec3 *vpos,
-	struct VEHICLEPARAMS *vparams)
+void veh_timed_1s_update_a(int playerid, int vehicleid, struct vec3 *vpos, int engineState)
 {
 	struct vec3 vvel;
 	struct quat vrot;
@@ -908,7 +900,7 @@ new Float:toz = v1 * 2 * (q1 * q3 + q0 * q2) + v2 * 2 * (q2 * q3 - q0 * q1) + v3
 	if (mission_stage[playerid] == MISSION_STAGE_FLIGHT) {
 		hp = anticheat_GetVehicleHealth(vehicleid);
 		GetVehicleVelocityUnsafe(vehicleid, &vvel);
-		missions_send_tracker_data(playerid, vehicleid, hp, vpos, &vvel, vparams->engine, pitch, roll);
+		missions_send_tracker_data(playerid, vehicleid, hp, vpos, &vvel, engineState, pitch, roll);
 	}
 }
 
@@ -916,13 +908,13 @@ void veh_timed_1s_update()
 {
 	struct dbvehicle *v;
 	struct vec3 vpos, *ppos = &vpos;
-	struct VEHICLEPARAMS vparams;
 	struct PLAYERKEYS pkeys;
 	int playerid, vehicleid, vehiclemodel, n = playercount;
 	unsigned long timestamp = time_timestamp();
 	unsigned long ctrla = timestamp - 30000;
 	struct PLAYERMODELSTATS *model_stats;
 	int aircraftindex;
+	int engineState;
 
 	while (n--) {
 		playerid = players[n];
@@ -959,26 +951,23 @@ void veh_timed_1s_update()
 		if (vehicleid == lastvehicle[playerid]) {
 			GetVehiclePosUnsafe(vehicleid, &vpos);
 
-			common_GetVehicleParamsEx(vehicleid, &vparams);
+			engineState = GetVehicleEngineState(vehicleid);
 
-			if (vparams.engine && v != NULL) {
+			if (engineState && v != NULL) {
 				common_GetPlayerKeys(playerid, &pkeys);
-				veh_consume_fuel(playerid, vehicleid,
-					pkeys.keys & KEY_SPRINT, &vparams, v);
+				veh_consume_fuel(playerid, vehicleid, pkeys.keys & KEY_SPRINT, v);
 			}
 
 			model_stats = NULL;
 			if (game_is_air_vehicle(vehiclemodel)) {
-				veh_timed_1s_update_a(playerid, vehicleid, &vpos, &vparams);
+				veh_timed_1s_update_a(playerid, vehicleid, &vpos, engineState);
 
 				aircraftindex = aircraftmodelindex[vehiclemodel - VEHICLE_MODEL_MIN];
 				if (aircraftindex != -1) {
 					model_stats = player_model_stats[playerid] + aircraftindex;
 				}
 
-				if (vparams.engine && !isafk[playerid] &&
-					lastcontrolactivity[playerid] > ctrla)
-				{
+				if (engineState && !isafk[playerid] && lastcontrolactivity[playerid] > ctrla) {
 					score_flight_time[playerid]++;
 					if (model_stats != NULL) {
 						model_stats->flighttime++;

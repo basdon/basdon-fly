@@ -172,6 +172,12 @@ void PlayerPlaySound(int playerid, int soundid)
 	SAMP_SendRPCToPlayer(RPC_PlaySound, &bs, playerid, 2);
 }
 
+static
+int IsVehicleStreamedIn(int vehicleid, int forplayerid)
+{
+	return player[forplayerid]->vehicleStreamedIn[vehicleid];
+}
+
 /*
 TODO: make a GetVehicleParamsExForPlayer? Where objective is set in case they're on a mission but not in their vehicle.
 */
@@ -221,6 +227,49 @@ void SetVehicleObjectiveForPlayer(int vehicleid, int playerid, char objective)
 		bs.ptrData = &rpcdata;
 		bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
 		SAMP_SendRPCToPlayer(RPC_SetVehicleParams, &bs, playerid, 2);
+	}
+}
+
+/*
+Crashes when vehicle is not created.
+*/
+static
+char GetVehicleEngineState(int vehicleid)
+{
+	return samp_pNetGame->vehiclePool->vehicles[vehicleid]->params.engine;
+}
+
+/*
+Crashes when vehicle is not created.
+
+XXX: this resets any player-specific state back to the global state.
+TODO: it should at least persist player specific objective state by checking the missions.
+*/
+static
+void SetVehicleEngineState(int vehicleid, char engine)
+{
+	struct RPCDATA_SetVehicleParamsEx rpcdata;
+	struct BitStream bs;
+	struct SampVehicleParams *params;
+	int playerid, n;
+
+	params = &samp_pNetGame->vehiclePool->vehicles[vehicleid]->params;
+	if (params->engine == engine) {
+		return;
+	}
+
+	params->engine = engine;
+
+	rpcdata.vehicleid = (short) vehicleid;
+	rpcdata.params = *params;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+
+	for (n = playercount; n; ) {
+		playerid = players[--n];
+		if (IsVehicleStreamedIn(vehicleid, playerid)) {
+			SAMP_SendRPCToPlayer(RPC_SetVehicleParamsEx, &bs, playerid, 2);
+		}
 	}
 }
 

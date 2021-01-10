@@ -36,19 +36,48 @@ struct SampVehicle {
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, vel, 0xC + 0x40);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, params, 0xEF);
 
+struct SampPlayer {
+	char _pad0[0x155];
+	char playerStreamedIn[1000];
+	char vehicleStreamedIn[2000];
+	char _padD0D[0x24F5-0xD0D];
+	char actorStreamedIn[1000];
+	char _pad28DD[0x2967-0x28DD];
+	short playerid;
+	char _pad2969[0x2BA9-0x2969];
+	char currentState;
+	/*Incomplete.*/
+};
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, playerStreamedIn, 0x155);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleStreamedIn, 0x53D);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, actorStreamedIn, 0x24F5);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, playerid, 0x2967);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, currentState, 0x2BA9);
+
 struct SampVehiclePool {
 	char _pad0[8212];
 	int created[2000];
 	struct SampVehicle *vehicles[2000];
+	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, created, 0x2014);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, vehicles, 0x3F54);
 
+struct SampPlayerPool {
+	int _pad0[37503];
+	int created[1000];
+	struct SampPlayer *players[1000];
+	/*Incomplete.*/
+};
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, created, 0x249FC);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, players, 0x2599C);
+
 struct SampNetGame {
 	void *pGameMode;
 	void *pFilterScripts;
-	void *pPlayerPool;
+	struct SampPlayerPool *playerPool;
 	struct SampVehiclePool *vehiclePool;
+	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, vehiclePool, 0xC);
 

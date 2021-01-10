@@ -34,12 +34,10 @@ static AMX_NATIVE n_GetServerTickRate;
 static AMX_NATIVE n_GetVehicleDamageStatus;
 static AMX_NATIVE n_GetVehicleHealth_;
 static AMX_NATIVE n_GetVehicleModel;
-static AMX_NATIVE n_GetVehicleParamsEx;
 static AMX_NATIVE n_GetVehiclePoolSize;
 static AMX_NATIVE n_GivePlayerMoney_;
 static AMX_NATIVE n_GivePlayerWeapon;
 static AMX_NATIVE n_IsValidVehicle;
-static AMX_NATIVE n_IsVehicleStreamedIn;
 static AMX_NATIVE n_Kick_;
 static AMX_NATIVE n_MoveObject;
 static AMX_NATIVE n_PlayerPlaySound;
@@ -82,8 +80,6 @@ static AMX_NATIVE n_SetPlayerTime;
 static AMX_NATIVE n_SetPlayerWeather;
 static AMX_NATIVE n_SetSpawnInfo;
 static AMX_NATIVE n_SetVehicleHealth;
-static AMX_NATIVE n_SetVehicleParamsEx;
-static AMX_NATIVE n_SetVehicleParamsForPlayer;
 static AMX_NATIVE n_SetVehiclePos;
 static AMX_NATIVE n_SetVehicleToRespawn;
 static AMX_NATIVE n_SetVehicleZAngle;
@@ -254,12 +250,6 @@ static cell tmpfloat;
 	(NC_PARS_(1)nc_params[1]=VEHICLEID,\
 	n_GetVehicleModel(amx,nc_params))
 
-#define NC_GetVehicleParamsEx(VID,ENGINE,LIGHTS,ALARM,DOORS,BONNET,BOOT,OBJ) \
-	(NC_PARS_(8)nc_params[1]=VID,nc_params[2]=ENGINE,\
-	nc_params[3]=LIGHTS,nc_params[4]=ALARM,nc_params[5]=DOORS,\
-	nc_params[6]=BONNET,nc_params[7]=BOOT,nc_params[8]=OBJ,\
-	n_GetVehicleParamsEx(amx,nc_params))
-
 #define NC_GetVehiclePoolSize() (NC_PARS_(0)\
 	n_GetVehiclePoolSize(amx,nc_params))
 
@@ -269,9 +259,6 @@ static cell tmpfloat;
 
 #define NC_IsValidVehicle(VEHICLEID) (NC_PARS_(1)nc_params[1]=VEHICLEID,\
 	n_IsValidVehicle(amx,nc_params))
-
-#define NC_IsVehicleStreamedIn(VEHICLEID,PLAYERID) (NC_PARS_(2)nc_params[1]=VEHICLEID,nc_params[2]=PLAYERID,\
-	n_IsVehicleStreamedIn(amx,nc_params))
 
 #define NC_Kick(PLAYERID) __USE__natives_Kick__
 
@@ -383,12 +370,6 @@ static cell tmpfloat;
 #define NC_SetVehicleHealth(VEHICLEID,HP) \
 	(NC_PARS_(2)nc_params[1]=VEHICLEID,nc_paramf[2]=HP,\
 	n_SetVehicleHealth(amx,nc_params))
-
-#define NC_SetVehicleParamsEx(VID,ENGINE,LIGHTS,ALARM,DOORS,BONNET,BOOT,OBJ) \
-	(NC_PARS_(8)nc_params[1]=VID,nc_params[2]=ENGINE,\
-	nc_params[3]=LIGHTS,nc_params[4]=ALARM,nc_params[5]=DOORS,\
-	nc_params[6]=BONNET,nc_params[7]=BOOT,nc_params[8]=OBJ,\
-	n_SetVehicleParamsEx(amx,nc_params))
 
 #define NC_SetVehicleToRespawn(VEHICLEID) \
 	(NC_PARS_(1)nc_params[1]=VEHICLEID,\
@@ -545,12 +526,10 @@ int natives_find()
 		N(GetVehicleDamageStatus),
 		N_(GetVehicleHealth),
 		N(GetVehicleModel),
-		N(GetVehicleParamsEx),
 		N(GetVehiclePoolSize),
 		N_(GivePlayerMoney),
 		N(GivePlayerWeapon),
 		N(IsValidVehicle),
-		N(IsVehicleStreamedIn),
 		N_(Kick),
 		N(MoveObject),
 		N(PlayerPlaySound),
@@ -593,8 +572,6 @@ int natives_find()
 		N(SetPlayerWeather),
 		N(SetSpawnInfo),
 		N(SetVehicleHealth),
-		N(SetVehicleParamsEx),
-		N(SetVehicleParamsForPlayer),
 		N(SetVehiclePos),
 		N(SetVehicleToRespawn),
 		N(SetVehicleZAngle),

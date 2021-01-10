@@ -11,17 +11,6 @@ struct PLAYERKEYS {
 };
 EXPECT_SIZE(struct PLAYERKEYS, 3 * sizeof(cell));
 
-struct VEHICLEPARAMS {
-	int engine;
-	int lights;
-	int alarm;
-	int doors_locked;
-	int bonnet;
-	int boot;
-	int objective;
-};
-EXPECT_SIZE(struct VEHICLEPARAMS, 7 * sizeof(cell));
-
 struct VEHICLEDAMAGE {
 	unsigned int panels;
 	unsigned int doors;
@@ -236,10 +225,6 @@ float common_dist_sq(struct vec3 a, struct vec3 b);
 */
 float common_xy_dist_sq(struct vec3 a, struct vec3 b);
 /**
-Sets the state of the engine for given vehicle id.
-*/
-void common_set_vehicle_engine(int vehicleid, int enginestatus);
-/**
 Alternative for GetPlayerKeys to get it directly into a PLAYERKEYS struct.
 
 Will use buf32.
@@ -264,12 +249,6 @@ Uses buf32.
 */
 int common_GetVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d);
 /**
-Gets vehicle params of given vehicle into given VEHICLEPARAMS struct.
-
-Uses buf32.
-*/
-int common_GetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p);
-/**
 Callback-like for DestroyVehicle and OnVehicleSpawn (without recreation) events.
 
 In the case of OnVehicleSpawn WITH recreation, DestroyVehicle is used, which
@@ -279,12 +258,6 @@ In the case of DestroyVehicle, this function is
 called _before_ dbvehicle <-> gamevehicle links are cleared.
 */
 void common_on_vehicle_respawn_or_destroy(int vehicleid, struct dbvehicle *veh);
-/**
-Sets vehicle params of given vehicle into given VEHICLEPARAMS struct.
-
-Uses buf32.
-*/
-int common_SetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p);
 /**
 Convenience method to set a vehicle's pos to given vec3 struct.
 

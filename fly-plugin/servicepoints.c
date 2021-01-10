@@ -93,7 +93,6 @@ Servicepoint /refuel command.
 static
 int svp_cmd_refuel(CMDPARAMS)
 {
-	struct VEHICLEPARAMS vparams;
 	struct dbvehicle *veh;
 	struct vec3 vpos;
 	int vehicleid, driverid, budget, svpid, cost, refuelpct;
@@ -107,8 +106,7 @@ int svp_cmd_refuel(CMDPARAMS)
 		return 1;
 	}
 
-	common_GetVehicleParamsEx(vehicleid, &vparams);
-	if (vparams.engine) {
+	if (GetVehicleEngineState(vehicleid)) {
 		SendClientMessage(playerid, COL_WARN, WARN"The engine must be turned off first. Press n or check out /helpkeys");
 		return 1;
 	}

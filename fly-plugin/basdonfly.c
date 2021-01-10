@@ -282,6 +282,8 @@ they were already driver of another vehicle (does not trigger OnPlayerStateChang
 */
 static int lastvehicle_asdriver[MAX_PLAYERS];
 
+static struct SampPlayer *player[MAX_PLAYERS];
+
 /**
 amx
 */

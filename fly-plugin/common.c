@@ -77,16 +77,6 @@ float common_xy_dist_sq(struct vec3 a, struct vec3 b)
 	return dx * dx + dy * dy;
 }
 
-void common_set_vehicle_engine(int vehicleid, int enginestatus)
-{
-	struct VEHICLEPARAMS params;
-	common_GetVehicleParamsEx(vehicleid, &params);
-	if (params.engine != enginestatus) {
-		params.engine = enginestatus;
-		common_SetVehicleParamsEx(vehicleid, &params);
-	}
-}
-
 void common_GetPlayerKeys(int playerid, struct PLAYERKEYS *keys)
 {
 	NC_PARS(4);
@@ -135,35 +125,10 @@ int common_GetVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d)
 	return res;
 }
 
-int common_GetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p)
-{
-	int res;
-	NC_PARS(8);
-	nc_params[1] = vehicleid;
-	nc_params[2] = buf32a;
-	nc_params[3] = buf32a + 0x4;
-	nc_params[4] = buf32a + 0x8;
-	nc_params[5] = buf32a + 0xC;
-	nc_params[6] = buf32a + 0x10;
-	nc_params[7] = buf32a + 0x14;
-	nc_params[8] = buf32a + 0x18;
-	res = NC(n_GetVehicleParamsEx);
-	memcpy(p, buf32, sizeof(struct VEHICLEPARAMS));
-	return res;
-}
-
 void common_on_vehicle_respawn_or_destroy(int vehicleid, struct dbvehicle *veh)
 {
 	missions_on_vehicle_destroyed_or_respawned(veh);
 	nav_reset_for_vehicle(vehicleid);
-}
-
-int common_SetVehicleParamsEx(int vehicleid, struct VEHICLEPARAMS *p)
-{
-	NC_PARS(8);
-	nc_params[1] = vehicleid;
-	memcpy(nc_params + 2, p, sizeof(struct VEHICLEPARAMS));
-	return NC(n_SetVehicleParamsEx);
 }
 
 int common_SetVehiclePos(int vehicleid, struct vec3 *pos)

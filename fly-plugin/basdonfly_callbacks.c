@@ -358,6 +358,8 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 {
 	const int playerid = PARAM(1);
 
+	player[playerid] = samp_pNetGame->playerPool->players[playerid];
+
 #ifdef DEV
 	SendClientMessage(playerid, COL_WARN, "DEVELOPMENT BUILD");
 #endif /*DEV*/
