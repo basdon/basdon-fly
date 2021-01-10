@@ -43,7 +43,6 @@ Last timestamp when a player had some sort of control activity.
 */
 static unsigned long lastcontrolactivity[MAX_PLAYERS];
 
-int lastvehicle[MAX_PLAYERS];
 /**
 Each player's total ODO value (m).
 */
@@ -938,7 +937,7 @@ void veh_timed_1s_update()
 		}
 
 
-		if (vehicleid == lastvehicle[playerid]) {
+		if (vehicleid == lastvehicle_asdriver[playerid]) {
 			GetVehiclePosUnsafe(vehicleid, &vpos);
 
 			engineState = GetVehicleEngineState(vehicleid);
@@ -967,7 +966,6 @@ void veh_timed_1s_update()
 
 			veh_update_odo(playerid, vehicleid, vpos, model_stats);
 		}
-
 	}
 }
 
