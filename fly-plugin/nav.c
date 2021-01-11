@@ -406,7 +406,7 @@ void nav_navigate_to_airport(int playerid, int vehicleid, int vehiclemodel, stru
 	rw = ap->runways;
 	mindist = 0x7F800000;
 	closestrw = NULL;
-	GetVehiclePos(vehicleid, &vpos);
+	GetVehiclePosUnsafe(vehicleid, &vpos);
 
 	/* if plane, try VOR if available, prioritizing ILS runways */
 	if (game_is_plane(vehiclemodel)) {
