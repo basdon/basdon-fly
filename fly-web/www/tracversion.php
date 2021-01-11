@@ -52,6 +52,7 @@ $mapping = [];
 if (isset($_GET['rel'])) {
 	$selectedrelease = intval($_GET['rel']);
 	$releaseids[] = $selectedrelease;
+	$release_repo = $selectedrelease < 1609459200 ? 'fly-plugin' : 'basdon-fly';
 } else {
 	$page = get_page();
 	$db_querycount += 2;
