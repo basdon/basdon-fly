@@ -312,10 +312,10 @@ void login_cb_create_session_guest(void *data)
 		no real problem, but time will not be registered
 	}
 	*/
-	sprintf(msg144, "%s[%d] joined as a guest, welcome!", pdata[playerid]->name, playerid);
-	SendClientMessageToAll(COL_JOIN, msg144);
 	SendClientMessage(playerid, COL_INFO, INFO"You are now playing as a guest. You can use /register at any time to save your stats.");
 	login_login_player(playerid, LOGGED_GUEST);
+	sprintf(msg144, "%s[%d] joined as a guest, welcome!", pdata[playerid]->name, playerid);
+	SendClientMessageToAll(COL_JOIN, msg144);
 }
 
 /**
@@ -341,9 +341,9 @@ void login_cb_create_session_new_member(void *data)
 		no real problem, but time will not be registered
 	}
 	*/
+	login_login_player(playerid, LOGGED_IN);
 	sprintf(msg144, "%s[%d] just registered an account, welcome!", pdata[playerid]->name, playerid);
 	SendClientMessageToAll(COL_JOIN, msg144);
-	login_login_player(playerid, LOGGED_IN);
 }
 
 /**
@@ -369,9 +369,9 @@ void login_cb_create_session_existing_member(void *data)
 		no real problem, but time will not be registered
 	}
 	*/
+	login_login_player(playerid, LOGGED_IN);
 	sprintf(msg144, "%s[%d] just logged in, welcome back!", pdata[playerid]->name, playerid);
 	SendClientMessageToAll(COL_JOIN, msg144);
-	login_login_player(playerid, LOGGED_IN);
 }
 
 /**
