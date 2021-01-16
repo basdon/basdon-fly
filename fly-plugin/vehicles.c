@@ -933,7 +933,7 @@ void veh_timed_1s_update()
 		if (veh) {
 			vehiclemodel = veh->model;
 		} else {
-			vehiclemodel = NC_GetVehicleModel(vehicleid);
+			vehiclemodel = GetVehicleModel(vehicleid);
 		}
 
 
@@ -1030,7 +1030,7 @@ void veh_on_player_state_change(int playerid, int from, int to)
 		if (veh != NULL) {
 			vehiclemodel = veh->model;
 		} else {
-			vehiclemodel = NC_GetVehicleModel(vehicleid);
+			vehiclemodel = GetVehicleModel(vehicleid);
 		}
 
 		if (veh != NULL && !game_is_air_vehicle(veh->model)) {

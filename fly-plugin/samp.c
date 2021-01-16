@@ -199,6 +199,18 @@ char GetPlayerState(int playerid)
 	return player[playerid]->currentState;
 }
 
+static
+short GetVehicleModel(int vehicleid)
+{
+	struct SampVehicle *vehicle;
+
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+		return vehicle->model;
+	}
+	return 0;
+}
+
 /*
 TODO: make a GetVehicleParamsExForPlayer? Where objective is set in case they're on a mission but not in their vehicle.
 */
@@ -510,7 +522,7 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 		lastvehicle_asdriver[playerid] = vehicleid; /*So hook_OnDriverSync doesn't detect warping.*/
 	}
 	svp_update_mapicons(playerid, pos.x, pos.y);
-	missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(NC_GetVehicleModel(vehicleid));
+	missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(GetVehicleModel(vehicleid));
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 	zones_update(playerid, pos);
 

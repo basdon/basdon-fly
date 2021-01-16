@@ -71,7 +71,7 @@ int cmd_admin_tocar(CMDPARAMS)
 	seat = 0;
 	if (cmd_get_int_param(cmdtext, &parseidx, &vehicleid)) {
 		cmd_get_int_param(cmdtext, &parseidx, &seat);
-		if (NC_GetVehicleModel(vehicleid)) {
+		if (GetVehicleModel(vehicleid)) {
 			natives_PutPlayerInVehicle(playerid, vehicleid, seat);
 		} else {
 			SendClientMessage(playerid, COL_WARN, WARN"Invalid vehicle id");
@@ -82,7 +82,7 @@ int cmd_admin_tocar(CMDPARAMS)
 		min_distance_sq = float_pinf;
 		common_GetPlayerPos(playerid, &player_pos);
 		for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
-			if (NC_GetVehicleModel(vehicleid) == modelid) {
+			if (GetVehicleModel(vehicleid) == modelid) {
 				GetVehiclePosUnsafe(vehicleid, &vehicle_pos);
 				dx = player_pos.x - vehicle_pos.x;
 				dy = player_pos.y - vehicle_pos.y;
@@ -125,7 +125,7 @@ int cmd_admin_tomsp(CMDPARAMS)
 
 	vehicleid = GetPlayerVehicleID(playerid);
 	if (vehicleid) {
-		msptype_mask = missions_get_vehicle_model_msptype_mask(NC_GetVehicleModel(vehicleid));
+		msptype_mask = missions_get_vehicle_model_msptype_mask(GetVehicleModel(vehicleid));
 	} else {
 		msptype_mask = -1;
 	}
@@ -406,7 +406,7 @@ rand2nd:
 			*col2 = NC_random(256);
 		}
 		if (a != NULL || b != NULL) {
-			game_random_carcol(NC_GetVehicleModel(vehicleid), a, b);
+			game_random_carcol(GetVehicleModel(vehicleid), a, b);
 		}
 		NC_PARS(3);
 		nc_params[1] = vehicleid;

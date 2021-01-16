@@ -1805,7 +1805,7 @@ void missions_on_player_state_change(int playerid, int from, int to)
 	if (to == PLAYER_STATE_ONFOOT || from == PLAYER_STATE_ONFOOT) {
 		vehicleid = GetPlayerVehicleID(playerid);
 		if (vehicleid) {
-			missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(NC_GetVehicleModel(vehicleid));
+			missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(GetVehicleModel(vehicleid));
 		} else {
 			missions_available_msptype_mask[playerid] = -1;
 		}

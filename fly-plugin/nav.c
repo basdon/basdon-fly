@@ -171,7 +171,7 @@ int nav_check_can_do_cmd(int playerid, int navtype, int *vehicleid)
 	int vehiclemodel;
 
 	*vehicleid = GetPlayerVehicleID(playerid);
-	vehiclemodel = NC_GetVehicleModel(*vehicleid);
+	vehiclemodel = GetVehicleModel(*vehicleid);
 	if (navtype == NAV_ADF) {
 		if (!game_is_air_vehicle(vehiclemodel)) {
 			SendClientMessage(playerid, COL_WARN, WARN"You're not in an ADF capable vehicle");

@@ -29,11 +29,14 @@ struct SampVehicle {
 	struct vec3 pos;
 	char _padC[0x40];
 	struct vec3 vel;
-	char _pad58[0xEF-0x58];
+	char _pad58[0x82-0x58];
+	short model;
+	char _pad82[0xEF-0x84];
 	struct SampVehicleParams params;
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, vel, 0xC + 0x40);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, model, 0x82);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, params, 0xEF);
 
 struct SampPlayer {

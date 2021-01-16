@@ -191,7 +191,7 @@ int zones_cmd_loc(CMDPARAMS)
 	b += sprintf(b, "%s ", zonenames[zone_last_region[target]]);
 	vehicleid = GetPlayerVehicleID(target);
 	if (vehicleid) {
-		model = NC_GetVehicleModel(vehicleid);
+		model = GetVehicleModel(vehicleid);
 		GetVehicleVelocityUnsafe(vehicleid, &vvel);
 		sprintf(b, "travelling at %.0f KPH in a %s (%.0f FT)",
 			VEL_TO_KPH * sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z),

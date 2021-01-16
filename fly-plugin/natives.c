@@ -30,7 +30,6 @@ static AMX_NATIVE n_GetPlayerScore;
 static AMX_NATIVE n_GetServerTickRate;
 static AMX_NATIVE n_GetVehicleDamageStatus;
 static AMX_NATIVE n_GetVehicleHealth_;
-static AMX_NATIVE n_GetVehicleModel;
 static AMX_NATIVE n_GetVehiclePoolSize;
 static AMX_NATIVE n_GivePlayerMoney_;
 static AMX_NATIVE n_GivePlayerWeapon;
@@ -230,10 +229,6 @@ static cell tmpfloat;
 	n_GetServerTickRate(amx,nc_params))
 
 #define NC_GetVehicleHealth __USE__anticheat_GetVehicleHealth__
-
-#define NC_GetVehicleModel(VEHICLEID) \
-	(NC_PARS_(1)nc_params[1]=VEHICLEID,\
-	n_GetVehicleModel(amx,nc_params))
 
 #define NC_GetVehiclePoolSize() (NC_PARS_(0)\
 	n_GetVehiclePoolSize(amx,nc_params))
@@ -501,7 +496,6 @@ int natives_find()
 		N(GetServerTickRate),
 		N(GetVehicleDamageStatus),
 		N_(GetVehicleHealth),
-		N(GetVehicleModel),
 		N(GetVehiclePoolSize),
 		N_(GivePlayerMoney),
 		N(GivePlayerWeapon),

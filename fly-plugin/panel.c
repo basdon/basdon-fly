@@ -513,7 +513,7 @@ void panel_update_odo_fl_hp_gear(int playerid, int vehicleid, int is_update)
 		}
 	}
 
-	if (vehicleflags[NC_GetVehicleModel(vehicleid) - VEHICLE_MODEL_MIN] & RETRACTABLE_GEAR) {
+	if (vehicleflags[GetVehicleModel(vehicleid) - VEHICLE_MODEL_MIN] & RETRACTABLE_GEAR) {
 		gear_state = vehicle_gear_state[vehicleid];
 		if (time_timestamp() - vehicle_gear_change_time[vehicleid] < 1500) {
 			gear_state = 2;
@@ -973,7 +973,7 @@ void panel_on_player_state_change(int playerid, int from, int to)
 		/*Don't want to add them twice in case of seat warping (//tocar)*/
 		if (from != PLAYER_STATE_DRIVER && from != PLAYER_STATE_PASSENGER) {
 			vehicleid = GetPlayerVehicleID(playerid);
-			if (!game_is_air_vehicle(NC_GetVehicleModel(vehicleid))) {
+			if (!game_is_air_vehicle(GetVehicleModel(vehicleid))) {
 				return;
 			}
 
@@ -1008,7 +1008,7 @@ void panel_on_player_was_afk(int playerid)
 
 	vehicleid = GetPlayerVehicleID(playerid);
 	if (vehicleid) {
-		vehiclemodel = NC_GetVehicleModel(vehicleid);
+		vehiclemodel = GetVehicleModel(vehicleid);
 		if (game_is_air_vehicle(vehiclemodel)) {
 			panelplayers[numpanelplayers++] = playerid;
 		}
