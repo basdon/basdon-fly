@@ -845,6 +845,12 @@ void panel_timed_update()
 
 		vehicleid = GetPlayerVehicleID(playerid);
 
+		if (!vehicleid) {
+			logprintf("WARN: panel player was not in a vehicle!");
+			panelplayers[n] = panelplayers[--numpanelplayers];
+			continue;
+		}
+
 		GetVehiclePosRotUnsafe(vehicleid, &vpos);
 		kneeboard_update_distance(playerid, &vpos.coords);
 		altitude = (int) vpos.coords.z;
@@ -964,18 +970,21 @@ void panel_on_player_state_change(int playerid, int from, int to)
 	int vehicleid;
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
-		vehicleid = GetPlayerVehicleID(playerid);
-		if (!game_is_air_vehicle(NC_GetVehicleModel(vehicleid))) {
-			return;
-		}
+		/*Don't want to add them twice in case of seat warping (//tocar)*/
+		if (from != PLAYER_STATE_DRIVER && from != PLAYER_STATE_PASSENGER) {
+			vehicleid = GetPlayerVehicleID(playerid);
+			if (!game_is_air_vehicle(NC_GetVehicleModel(vehicleid))) {
+				return;
+			}
 
-		if (to == PLAYER_STATE_DRIVER) {
-			GetVehiclePosRotUnsafe(vehicleid, &vpos);
-			nav_update(vehicleid, &vpos);
-		}
+			if (to == PLAYER_STATE_DRIVER) {
+				GetVehiclePosRotUnsafe(vehicleid, &vpos);
+				nav_update(vehicleid, &vpos);
+			}
 
-		panelplayers[numpanelplayers++] = playerid;
-		panel_reshow(playerid);
+			panelplayers[numpanelplayers++] = playerid;
+			panel_reshow(playerid);
+		}
 	} else if (panel_remove_panel_player(playerid)) {
 		textdraws_hide_consecutive(playerid, NUM_PANEL_TEXTDRAWS, TEXTDRAW_PANEL_BASE);
 		caches[playerid].vor_shown = 0;
