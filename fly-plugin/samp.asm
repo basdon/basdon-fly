@@ -142,6 +142,8 @@ GetVehicleZAngleUnsafe:
 	jmp eax
 
 segment .data
+logprintRetAddr	dd 00h
+
+segment .rdata
 aStreamDistance	db "stream_distance", 00h
 aNewline	db 0Ah, 00h
-logprintRetAddr	dd 00h
