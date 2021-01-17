@@ -689,12 +689,15 @@ void natives_SpawnPlayer(int playerid)
 static int drive_keystates[MAX_PLAYERS];
 static char drive_udkeystate[MAX_PLAYERS];
 
-void hook_OnDriverSync(int playerid, struct SYNCDATA_Driver *data)
+void hook_OnDriverSync(int playerid)
 {
+	struct SYNCDATA_Driver *data;
 	/*TODO reset these keystate variables when player gets into the drive state?*/
 	int oldkeys, newkeys;
 	int storedlastvehicleid;
 	short vehiclemodel;
+
+	data = &player[playerid]->driverSyncData;
 
 	vehiclemodel = GetVehicleModel(data->vehicle_id);
 	/*Suppress secondary fire (my R key, hydra rockets, hunter minigun, ...).*/
@@ -702,12 +705,12 @@ void hook_OnDriverSync(int playerid, struct SYNCDATA_Driver *data)
 		(vehiclemodel == MODEL_HYDRA || vehiclemodel == MODEL_HUNTER ||
 		 vehiclemodel == MODEL_RUSTLER || vehiclemodel == MODEL_SEASPAR))
 	{
-		player[playerid]->driverSyncData.partial_keys &= ~KEY_ACTION;
+		data->partial_keys &= ~KEY_ACTION;
 	}
 	/*Primary fire (my LCTRL key, hunter rockets, ...).*/
 	if ((data->partial_keys & KEY_FIRE) && (vehiclemodel == MODEL_HUNTER))
 	{
-		player[playerid]->driverSyncData.partial_keys &= ~KEY_FIRE;
+		data->partial_keys &= ~KEY_FIRE;
 	}
 
 	newkeys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF;

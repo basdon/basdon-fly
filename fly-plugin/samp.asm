@@ -35,10 +35,7 @@ printf_logprintf:
 ;prot void DriverSyncHook();
 global DriverSyncHook:function
 DriverSyncHook:
-	mov ecx, [esi+0Ch] ; BitStream::ptrData
-	inc ecx ; to skip packet_id
-	mov [esp+4], ecx
-	mov [esp], eax
+	mov [esp], eax ; playerid
 	call hook_OnDriverSync
 	mov eax, 080AEB71h
 	jmp eax
