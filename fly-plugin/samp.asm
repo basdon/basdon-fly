@@ -35,10 +35,11 @@ printf_logprintf:
 ;prot void DriverSyncHook();
 global DriverSyncHook:function
 DriverSyncHook:
-	push dword [esi+0Ch] ; BitStream::ptrData
-	push eax
+	mov ecx, [esi+0Ch] ; BitStream::ptrData
+	inc ecx ; to skip packet_id
+	mov [esp+4], ecx
+	mov [esp], eax
 	call hook_OnDriverSync
-	add esp, 08h
 	mov eax, 080AEB71h
 	jmp eax
 

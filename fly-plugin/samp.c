@@ -628,6 +628,21 @@ void hook_OnDriverSync(int playerid, struct SYNCDATA_Driver *data)
 	/*TODO reset these keystate variables when player gets into the drive state?*/
 	int oldkeys, newkeys;
 	int storedlastvehicleid;
+	short vehiclemodel;
+
+	vehiclemodel = GetVehicleModel(data->vehicle_id);
+	/*Suppress secondary fire (my R key, hydra rockets, hunter minigun, ...).*/
+	if ((data->partial_keys & KEY_ACTION) &&
+		(vehiclemodel == MODEL_HYDRA || vehiclemodel == MODEL_HUNTER ||
+		 vehiclemodel == MODEL_RUSTLER || vehiclemodel == MODEL_SEASPAR))
+	{
+		player[playerid]->driverSyncData.partial_keys &= ~KEY_ACTION;
+	}
+	/*Primary fire (my LCTRL key, hunter rockets, ...).*/
+	if ((data->partial_keys & KEY_FIRE) && (vehiclemodel == MODEL_HUNTER))
+	{
+		player[playerid]->driverSyncData.partial_keys &= ~KEY_FIRE;
+	}
 
 	newkeys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF;
 
@@ -677,6 +692,8 @@ void hook_OnDriverSync(int playerid, struct SYNCDATA_Driver *data)
 		Maybe a player is still sending driversync of the old vehicle
 		after PutPlayerInVehicle was called?)*/
 	}
+
+	/*When wanting to return 0, set CPlayer::updateSyncType to 0.*/
 }
 
 static
