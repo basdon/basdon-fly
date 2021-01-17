@@ -169,7 +169,7 @@ int svp_cmd_refuel(CMDPARAMS)
 	SendClientMessage(playerid, COL_INFO, msg144);
 
 	if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
-		driverid = common_find_player_in_vehicle_seat(vehicleid, 0);
+		driverid = GetPlayerInVehicleSeat(vehicleid, 0);
 		if (driverid == INVALID_PLAYER_ID) {
 			driveruserid = -1;
 		} else {
@@ -264,7 +264,7 @@ int svp_cmd_repair(CMDPARAMS)
 	NC(n_SetVehicleHealth);
 
 	if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
-		driverid = common_find_player_in_vehicle_seat(vehicleid, 0);
+		driverid = GetPlayerInVehicleSeat(vehicleid, 0);
 		if (driverid == INVALID_PLAYER_ID) {
 			driveruserid = -1;
 		} else {

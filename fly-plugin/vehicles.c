@@ -190,7 +190,7 @@ void veh_on_vehicle_stream_in(int vehicleid, int forplayerid)
 	struct dbvehicle *veh;
 
 	veh = gamevehicles[vehicleid].dbvehicle;
-	if (veh_needs_owner_label(veh) &&  common_find_vehicle_driver(vehicleid) == INVALID_PLAYER_ID) {
+	if (veh_needs_owner_label(veh) &&  GetVehicleDriver(vehicleid) == INVALID_PLAYER_ID) {
 		veh_create_owner_label(veh, vehicleid, forplayerid);
 	}
 }
@@ -660,7 +660,7 @@ void veh_on_player_disconnect(int playerid)
 
 	vehicleid = lastvehicle_asdriver[playerid];
 	if (vehicleid && NC_IsValidVehicle(vehicleid)) {
-		driver = common_find_vehicle_driver(vehicleid);
+		driver = GetVehicleDriver(vehicleid);
 		/*driver actually still is playerid at this point*/
 		if (driver == playerid || driver == INVALID_PLAYER_ID) {
 			/*If not respawning here, create ownership label again.*/
@@ -1006,7 +1006,7 @@ void veh_on_driver_changed_vehicle_without_state_change(int playerid, int oldveh
 
 	veh = gamevehicles[oldvehicleid].dbvehicle;
 	if (veh_needs_owner_label(veh)) {
-		old_driver = common_find_vehicle_driver(oldvehicleid);
+		old_driver = GetVehicleDriver(oldvehicleid);
 		if (old_driver == playerid || old_driver == INVALID_PLAYER_ID) {
 			veh_create_owner_label_for_all(veh, oldvehicleid);
 		}
@@ -1056,7 +1056,7 @@ void veh_on_player_state_change(int playerid, int from, int to)
 	if (from == PLAYER_STATE_DRIVER) {
 		vehicleid = lastvehicle_asdriver[playerid];
 		veh = gamevehicles[vehicleid].dbvehicle;
-		if (veh_needs_owner_label(veh) && common_find_vehicle_driver(vehicleid) == INVALID_PLAYER_ID) {
+		if (veh_needs_owner_label(veh) && GetVehicleDriver(vehicleid) == INVALID_PLAYER_ID) {
 			veh_create_owner_label_for_all(veh, vehicleid);
 		}
 	}

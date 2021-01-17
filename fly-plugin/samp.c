@@ -179,6 +179,7 @@ int IsVehicleStreamedIn(int vehicleid, int forplayerid)
 }
 
 static
+__attribute__((unused))
 short GetPlayerVehicleSeat(int playerid)
 {
 	return player[playerid]->vehicleseat;
@@ -209,6 +210,34 @@ short GetVehicleModel(int vehicleid)
 		return vehicle->model;
 	}
 	return 0;
+}
+
+static
+int GetPlayerInVehicleSeat(int vehicleid, int seat)
+{
+	int n, playerid;
+
+	for (n = playercount; n; ) {
+		playerid = players[--n];
+		if (player[playerid]->vehicleid == vehicleid && player[playerid]->vehicleseat == seat) {
+			return playerid;
+		}
+	}
+	return INVALID_PLAYER_ID;
+}
+
+static
+int GetVehicleDriver(int vehicleid)
+{
+	int n, playerid;
+
+	for (n = playercount; n; ) {
+		playerid = players[--n];
+		if (player[playerid]->vehicleid == vehicleid && player[playerid]->vehicleseat == 0) {
+			return playerid;
+		}
+	}
+	return INVALID_PLAYER_ID;
 }
 
 /*

@@ -44,19 +44,6 @@ void common_tp_player(int playerid, struct vec4 pos)
 	NC(n_SetCameraBehindPlayer);
 }
 
-int common_find_player_in_vehicle_seat(int vehicleid, int seat)
-{
-	int n, playerid;
-
-	for (n = playercount; n; ) {
-		playerid = players[--n];
-		if (GetPlayerVehicleID(playerid) == vehicleid && GetPlayerVehicleSeat(playerid) == seat) {
-			return playerid;
-		}
-	}
-	return INVALID_PLAYER_ID;
-}
-
 float common_dist_sq(struct vec3 a, struct vec3 b)
 {
 	float dx, dy, dz;

@@ -147,13 +147,13 @@ float anticheat_GetVehicleHealth(int vehicleid)
 	NC(n_GetVehicleHealth_);
 	hp = *fbuf144;
 	if (hp != hp) {
-		playerid = common_find_vehicle_driver(vehicleid);
+		playerid = GetVehicleDriver(vehicleid);
 		if (playerid == INVALID_PLAYER_ID) {
 			goto resethp;
 		}
 		anticheat_log(playerid, AC_VEH_HP_NAN, "NaN vehicle hp");
 	} else if (hp > 1000.0f) {
-		playerid = common_find_vehicle_driver(vehicleid);
+		playerid = GetVehicleDriver(vehicleid);
 		if (playerid == INVALID_PLAYER_ID) {
 			goto resethp;
 		}

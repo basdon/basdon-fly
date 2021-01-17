@@ -197,14 +197,6 @@ Teleport the player to a coordinate, and set facing angle and reset camera.
 */
 void common_tp_player(int playerid, struct vec4 pos);
 /**
-Try to find the player that is in given seat of given vehicle.
-
-@return player id or INVALID_PLAYER_ID
-*/
-int common_find_player_in_vehicle_seat(int vehicleid, int seat);
-#define common_find_vehicle_driver(VEHICLEID) \
-	common_find_player_in_vehicle_seat(VEHICLEID,0)
-/**
 @return squared xyz distance between given points
 */
 float common_dist_sq(struct vec3 a, struct vec3 b);

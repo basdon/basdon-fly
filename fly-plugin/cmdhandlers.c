@@ -90,7 +90,7 @@ int cmd_admin_tocar(CMDPARAMS)
 				dx = player_pos.x - vehicle_pos.x;
 				dy = player_pos.y - vehicle_pos.y;
 				if (dx * dx + dy * dy < min_distance_sq &&
-					(jack || common_find_player_in_vehicle_seat(vehicleid, seat) == INVALID_PLAYER_ID))
+					(jack || GetPlayerInVehicleSeat(vehicleid, seat) == INVALID_PLAYER_ID))
 				{
 					min_distance_sq = dx * dx + dy * dy;
 					closest_vehicleid = vehicleid;
@@ -98,7 +98,7 @@ int cmd_admin_tocar(CMDPARAMS)
 			}
 		}
 		if (closest_vehicleid != -1) {
-			if (seat == 0 && common_find_player_in_vehicle_seat(closest_vehicleid, 0) != INVALID_PLAYER_ID) {
+			if (seat == 0 && GetPlayerInVehicleSeat(closest_vehicleid, 0) != INVALID_PLAYER_ID) {
 				SendClientMessage(playerid, COL_INFO, INFO"Trying to jack existing driver (won't work)");
 			}
 			natives_PutPlayerInVehicle(playerid, closest_vehicleid, seat);
@@ -199,10 +199,7 @@ int cmd_at400(CMDPARAMS)
 			dy = vehiclepos.y - playerpos.y;
 			dz = vehiclepos.z - playerpos.z;
 			tmpdistance = dx * dx + dy * dy + dz * dz;
-			if (tmpdistance < shortest_distance &&
-				common_find_vehicle_driver(vehicleid)
-					== INVALID_PLAYER_ID)
-			{
+			if (tmpdistance < shortest_distance && GetVehicleDriver(vehicleid) == INVALID_PLAYER_ID) {
 				shortest_distance = tmpdistance;
 				found_vehicle = vehicleid;
 			}
