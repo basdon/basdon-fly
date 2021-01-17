@@ -176,7 +176,6 @@ static
 int cmd_at400(CMDPARAMS)
 {
 	struct vec3 playerpos, vehiclepos;
-	struct dbvehicle *veh;
 	int vehicleid, found_vehicle;
 	float dx, dy, dz, shortest_distance, tmpdistance;
 
@@ -188,11 +187,10 @@ int cmd_at400(CMDPARAMS)
 	found_vehicle = 0;
 	shortest_distance = float_pinf;
 	common_GetPlayerPos(playerid, &playerpos);
-	for (vehicleid = 0; vehicleid < MAX_VEHICLES; vehicleid++) {
-		veh = gamevehicles[vehicleid].dbvehicle;
-		if (veh != NULL &&
-			veh->model == MODEL_AT400 &&
-			veh_is_player_allowed_in_vehicle(playerid, veh))
+	for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
+		if (GetVehicleModel(vehicleid) == MODEL_AT400 &&
+			IsVehicleStreamedIn(vehicleid, playerid) &&
+			veh_is_player_allowed_in_vehicle(playerid, gamevehicles[vehicleid].dbvehicle))
 		{
 			GetVehiclePosUnsafe(vehicleid, &vehiclepos);
 			dx = vehiclepos.x - playerpos.x;
