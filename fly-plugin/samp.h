@@ -80,6 +80,23 @@ struct SYNCDATA_Driver {
 EXPECT_SIZE(struct SYNCDATA_Driver, 2 + 2 + 2 + 2 + 16 + 12 + 12 + 4 + 1 + 1 + 1 + 1 + 1 + 2 + 4);
 EXPECT_SIZE(struct SYNCDATA_Driver, 0x3F);
 
+struct SYNCDATA_Passenger {
+	short vehicle_id;
+	unsigned char seat_id : 6;
+	unsigned char drive_by : 2;
+	unsigned char weapon_id : 6;
+	/*two extra bits for YES/NO keys*/
+	unsigned char additional_keys : 2;
+	char player_hp;
+	char player_armor;
+	short lrkey;
+	short udkey;
+	short partial_keys;
+	struct vec3 pos;
+};
+EXPECT_SIZE(struct SYNCDATA_Passenger, 2 + 1 + 1 + 1 + 1 + 2 + 2 + 2 + 12);
+EXPECT_SIZE(struct SYNCDATA_Passenger, 0x18);
+
 struct SampVehicle {
 	struct vec3 pos;
 	char _padC[0x40];
@@ -97,11 +114,12 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, params, 0xEF);
 #define UPDATE_SYNC_TYPE_NONE 0
 #define UPDATE_SYNC_TYPE_ONFOOT 1
 #define UPDATE_SYNC_TYPE_INCAR 2
+#define UPDATE_SYNC_TYPE_PASSENGER 3
 
 struct SampPlayer {
 	char _pad0[0x27];
 	struct SYNCDATA_Driver driverSyncData;
-	char _pad66[0x7E/**/-0x66];
+	struct SYNCDATA_Passenger passengerSyncData;
 	struct SYNCDATA_Onfoot onfootSyncData;
 	char _padC2[0x155-0xC2];
 	char playerStreamedIn[1000];
@@ -121,6 +139,7 @@ struct SampPlayer {
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, driverSyncData, 0x27);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, passengerSyncData, 0x66);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, onfootSyncData, 0x7E);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, playerStreamedIn, 0x155);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleStreamedIn, 0x53D);

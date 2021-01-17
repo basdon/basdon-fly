@@ -72,6 +72,7 @@ These are moved to variables float_pinf and float_ninf because these are ints.
 #define FLOAT_NINF (0xFF800000)
 */
 static float float_pinf, float_ninf;
+#define M_2PI 6.28318530717958647692f;
 #define M_PI 3.14159265358979323846f
 #define M_PI2 1.57079632679489661923f
 #define DEG_TO_RAD (M_PI / 180.0f)
@@ -389,6 +390,7 @@ static void nav_reset_for_vehicle(int vehicleid);
 #include "timecyc.c"
 #include "vehicles.c"
 #include "prefs.c"
+#include "copilot.c"
 
 #include "cmdhandlers.c"
 #ifdef DEV

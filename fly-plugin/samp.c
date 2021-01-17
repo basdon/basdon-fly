@@ -202,7 +202,6 @@ int IsVehicleStreamedIn(int vehicleid, int forplayerid)
 }
 
 static
-__attribute__((unused))
 short GetPlayerVehicleSeat(int playerid)
 {
 	return player[playerid]->vehicleseat;
@@ -630,6 +629,24 @@ int natives_SetPlayerName(int playerid, char *name)
 ;
 
 /**
+Only use this if the distance from the player's current position is very small.
+Otherwise, use natives_SetPlayerPos.
+*/
+static
+int SetPlayerPosRaw(int playerid, struct vec3 *pos)
+#ifdef SAMP_NATIVES_IMPL
+{
+	NC_PARS(4);
+	nc_params[1] = playerid;
+	nc_paramf[2] = pos->x;
+	nc_paramf[3] = pos->y;
+	nc_paramf[4] = pos->z;
+	return NC(n_SetPlayerPos_);
+}
+#endif
+;
+
+/**
 Done here to do stuff, like streaming maps, anticheat?
 */
 static
@@ -649,12 +666,7 @@ int natives_SetPlayerPos(int playerid, struct vec3 pos)
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 	zones_update(playerid, pos);
 
-	NC_PARS(4);
-	nc_params[1] = playerid;
-	nc_paramf[2] = pos.x;
-	nc_paramf[3] = pos.y;
-	nc_paramf[4] = pos.z;
-	return NC(n_SetPlayerPos_);
+	return SetPlayerPosRaw(playerid, &pos);
 }
 #endif
 ;
@@ -686,9 +698,12 @@ void natives_SpawnPlayer(int playerid)
 /*-----------------------------------------------------------------------------*/
 
 #ifdef SAMP_NATIVES_IMPL
+static int player_keystates[MAX_PLAYERS];
+
 void hook_OnOnfootSync(int playerid)
 {
 	struct SYNCDATA_Onfoot *data;
+	int oldkeys, newkeys;
 	char weapon;
 
 	data = &player[playerid]->onfootSyncData;
@@ -700,13 +715,25 @@ void hook_OnOnfootSync(int playerid)
 		data->partial_keys &= ~KEY_FIRE;
 	}
 
+	/*keystate change*/
+	oldkeys = player_keystates[playerid];
+	/*newkeys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF*/;
+	newkeys = data->partial_keys; /*not needing KEY_YES/KEY_NO for now*/
+	if (oldkeys != newkeys) {
+		if (KEY_JUST_DOWN(KEY_FIRE) && data->weapon_id == 0) {
+			copilot_handle_onfoot_fire(playerid, data->pos);
+		}
+		player_keystates[playerid] = newkeys;
+	}
+
 	/*TODO remove this when all OnPlayerUpdates are replaced*/
 	/*this is 3 because.. see PARAM definition*/
 	nc_params[3] = playerid;
 	B_OnPlayerUpdate(amx, nc_params);
+
+	/*When wanting to return 0, set CPlayer::updateSyncType to 0.*/
 }
 
-static int drive_keystates[MAX_PLAYERS];
 static char drive_udkeystate[MAX_PLAYERS];
 
 void hook_OnDriverSync(int playerid)
@@ -733,19 +760,18 @@ void hook_OnDriverSync(int playerid)
 		data->partial_keys &= ~KEY_FIRE;
 	}
 
-	newkeys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF;
-
 	vehicle_gear_state[data->vehicle_id] = data->landing_gear_state;
 
 	/*keystate change*/
-	oldkeys = drive_keystates[playerid];
+	oldkeys = player_keystates[playerid];
+	newkeys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF;
 	if (oldkeys != newkeys) {
 		if (KEY_JUST_DOWN(KEY_SUBMISSION)) {
 			vehicle_gear_change_time[data->vehicle_id] = time_timestamp();
 		}
 		missions_driversync_keystate_change(playerid, oldkeys, newkeys);
 		veh_on_driver_key_state_change(playerid, oldkeys, newkeys);
-		drive_keystates[playerid] = newkeys;
+		player_keystates[playerid] = newkeys;
 	}
 
 	/*up/down keystate change*/
@@ -786,6 +812,32 @@ void hook_OnDriverSync(int playerid)
 	/*When wanting to return 0, set CPlayer::updateSyncType to 0.*/
 }
 
+void hook_OnPassengerSync(int playerid)
+{
+	struct SYNCDATA_Passenger *data;
+	int oldkeys, newkeys;
+
+	data = &player[playerid]->passengerSyncData;
+
+	/*keystate change*/
+	oldkeys = player_keystates[playerid];
+	/*newkeys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF*/;
+	newkeys = data->partial_keys; /*not needing KEY_YES/KEY_NO for now*/
+	if (oldkeys != newkeys) {
+		if (KEY_JUST_DOWN(KEY_JUMP)) {
+			copilot_handler_passenger_brake(playerid, data->vehicle_id);
+		}
+		player_keystates[playerid] = newkeys;
+	}
+
+	/*TODO remove this when all OnPlayerUpdates are replaced*/
+	/*this is 3 because.. see PARAM definition*/
+	nc_params[3] = playerid;
+	B_OnPlayerUpdate(amx, nc_params);
+
+	/*When wanting to return 0, set CPlayer::updateSyncType to 0.*/
+}
+
 static
 void samp_init()
 {
@@ -812,5 +864,6 @@ void samp_init()
 
 	mem_mkjmp(0x80AC99C, &OnfootSyncHook);
 	mem_mkjmp(0x80AEC4F, &DriverSyncHook);
+	mem_mkjmp(0x80AEA7D, &PassengerSyncHook);
 }
 #endif

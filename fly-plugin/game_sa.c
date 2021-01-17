@@ -89,3 +89,26 @@ void game_random_carcol(int model, int *col1, int *col2)
 		}
 	}
 }
+
+static
+int game_get_air_vehicle_passengerseats(int model)
+{
+	switch (model)
+	{
+	case MODEL_ANDROM:
+	case MODEL_AT400:
+	case MODEL_BEAGLE:
+	case MODEL_CARGOBOB:
+	case MODEL_DODO:
+	case MODEL_LEVIATHN:
+	case MODEL_RAINDANC:
+	case MODEL_SKIMMER:
+	case MODEL_SPARROW:
+	case MODEL_SEASPAR:
+		return 1;
+	case MODEL_MAVERICK:
+	case MODEL_POLMAV:
+		return 3;
+	}
+	return 0;
+}

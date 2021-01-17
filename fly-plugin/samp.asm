@@ -3,6 +3,7 @@ extern samp_pNetGame
 
 extern hook_OnOnfootSync
 extern hook_OnDriverSync
+extern hook_OnPassengerSync
 extern printf
 
 ;prot void InitAfterPoolsCreated();
@@ -47,6 +48,14 @@ DriverSyncHook:
 	mov [esp], eax ; playerid
 	call hook_OnDriverSync
 	mov eax, 080AEB71h
+	jmp eax
+
+;prot void PassengerSyncHook();
+global PassengerSyncHook:function
+PassengerSyncHook:
+	mov [esp], eax ; playerid
+	call hook_OnPassengerSync
+	mov eax, 080AE9D1h
 	jmp eax
 
 ;prot float* samphost_GetPtrStreamDistance();
