@@ -51,6 +51,7 @@ void copilot_handle_onfoot_fire(int playerid, struct vec3 playerpos)
 		copilot_enter_exit_offset[playerid].distance = (char) ((float) sqrt(shortest_distance) * 5.0f);
 		copilot_enter_exit_offset[playerid].dz = (char) (enter_exit_offset.z * 5.0f);
 
+		vehiclemodel = GetVehicleModel(found_vehicle);
 		number_passengerseats = game_get_air_vehicle_passengerseats(vehiclemodel);
 		for (seat = 1; seat < 0x40; seat++) {
 			if (GetPlayerInVehicleSeat(found_vehicle, seat) == INVALID_PLAYER_ID) {
@@ -58,7 +59,7 @@ void copilot_handle_onfoot_fire(int playerid, struct vec3 playerpos)
 				if (seat > number_passengerseats) {
 					GameTextForPlayer(playerid, 5000, 3,
 						"~w~entered as co-pilot~n~"
-						"press ~b~~k~~VEHICLE_BRAKE~~w~ to exit~n~"
+						"press ~b~~k~~VEHICLE_BRAKE~~w~ to exit~n~~n~"
 						"do not press ~r~~k~~VEHICLE_ENTER_EXIT~~w~~n~or your game will crash");
 				}
 				return;
@@ -68,15 +69,21 @@ void copilot_handle_onfoot_fire(int playerid, struct vec3 playerpos)
 }
 
 static
+int copilot_is_player_copiloting(int playerid, int vehicleid)
+{
+	int vehiclemodel;
+
+	vehiclemodel = GetVehicleModel(vehicleid);
+	return GetPlayerVehicleSeat(playerid) > game_get_air_vehicle_passengerseats(vehiclemodel);
+}
+
+static
 void copilot_handler_passenger_brake(int playerid, int vehicleid)
 {
-	int vehiclemodel, number_passengerseats;
 	float enter_exit_angle, enter_exit_distance;
 	struct vec3 pos;
 
-	vehiclemodel = GetVehicleModel(vehicleid);
-	number_passengerseats = game_get_air_vehicle_passengerseats(vehiclemodel);
-	if (GetPlayerVehicleSeat(playerid) > number_passengerseats) {
+	if (copilot_is_player_copiloting(playerid, vehicleid)) {
 		enter_exit_angle = (float) copilot_enter_exit_offset[playerid].angle / 39.0f;
 		enter_exit_distance = (float) copilot_enter_exit_offset[playerid].distance / 5.0f;
 		GetVehiclePosUnsafe(vehicleid, &pos);

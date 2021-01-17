@@ -374,6 +374,7 @@ static void nav_reset_for_vehicle(int vehicleid);
 #include "class.c"
 #include "echo.c"
 #include "game_sa.c"
+#include "copilot.c"
 #include "login.c"
 #include "guestregister.c"
 #include "heartbeat.c"
@@ -390,7 +391,6 @@ static void nav_reset_for_vehicle(int vehicleid);
 #include "timecyc.c"
 #include "vehicles.c"
 #include "prefs.c"
-#include "copilot.c"
 
 #include "cmdhandlers.c"
 #ifdef DEV

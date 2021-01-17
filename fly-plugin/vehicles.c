@@ -1052,10 +1052,13 @@ void veh_on_player_state_change(int playerid, int from, int to)
 			vehpanel_shown[playerid] = 1;
 		}
 
-		if (to == PLAYER_STATE_DRIVER) {
-			veh_on_player_now_driving(playerid, vehicleid, veh);
+		if (!copilot_is_player_copiloting(playerid, vehicleid)) {
 			sprintf(veh_name_buf, "~g~%s", vehnames[vehiclemodel - 400]);
 			GameTextForPlayer(playerid, 2000, 1, veh_name_buf);
+		}
+
+		if (to == PLAYER_STATE_DRIVER) {
+			veh_on_player_now_driving(playerid, vehicleid, veh);
 			veh_destroy_owner_label_for_all(vehicleid);
 		}
 	} else if (vehpanel_shown[playerid]) {
