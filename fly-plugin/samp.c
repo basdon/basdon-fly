@@ -750,7 +750,8 @@ void hook_OnDriverSync(int playerid)
 	/*Suppress secondary fire (my R key, hydra rockets, hunter minigun, ...).*/
 	if ((data->partial_keys & KEY_ACTION) &&
 		(vehiclemodel == MODEL_HYDRA || vehiclemodel == MODEL_HUNTER ||
-		 vehiclemodel == MODEL_RUSTLER || vehiclemodel == MODEL_SEASPAR))
+		 vehiclemodel == MODEL_RUSTLER || vehiclemodel == MODEL_SEASPAR ||
+		 vehiclemodel == MODEL_RCBARON))
 	{
 		data->partial_keys &= ~KEY_ACTION;
 	}
