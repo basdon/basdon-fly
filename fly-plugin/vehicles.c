@@ -729,15 +729,23 @@ void veh_start_or_stop_engine(int playerid, int vehicleid)
 	}
 }
 
-void veh_on_player_key_state_change(int playerid, int oldkeys, int newkeys)
+/**
+Used check if pilots are still controlling the plane, and engine key.
+*/
+static
+void veh_on_driver_key_state_change(int playerid, int oldkeys, int newkeys)
 {
-	/*not checking vehicle... for now*/
+	int vehicleid, vehiclemodel;
+
 	lastcontrolactivity[playerid] = time_timestamp();
 
-	if (newkeys & KEY_NO && !(oldkeys & KEY_NO) && GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
-		veh_start_or_stop_engine(playerid, GetPlayerVehicleID(playerid));
+	if (KEY_JUST_DOWN(KEY_NO)) {
+		vehicleid = GetPlayerVehicleID(playerid);
+		vehiclemodel = GetVehicleModel(vehicleid);
+		if (vehiclemodel != MODEL_BMX && vehiclemodel != MODEL_MTBIKE && vehiclemodel != MODEL_BIKE) {
+			veh_start_or_stop_engine(playerid, vehicleid);
+		}
 	}
-	return;
 }
 
 void veh_on_player_now_driving(int playerid, int vehicleid, struct dbvehicle *veh)

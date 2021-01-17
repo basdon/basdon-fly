@@ -117,10 +117,6 @@ To be called from OnPlayerEnterVehicle
 */
 void veh_on_player_enter_vehicle(int pid, int vid, int ispassenger);
 /**
-Used check if pilots are still controlling the plane and engine key.
-*/
-void veh_on_player_key_state_change(int playerid, int oldkeys, int newkeys);
-/**
 Stuff to do when a player is now driver of a vehicle.
 
 To be called from OnPlayerStateChange with new state being driver, or when

@@ -744,6 +744,7 @@ void hook_OnDriverSync(int playerid)
 			vehicle_gear_change_time[data->vehicle_id] = time_timestamp();
 		}
 		missions_driversync_keystate_change(playerid, oldkeys, newkeys);
+		veh_on_driver_key_state_change(playerid, oldkeys, newkeys);
 		drive_keystates[playerid] = newkeys;
 	}
 
