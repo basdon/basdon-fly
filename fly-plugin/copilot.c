@@ -4,7 +4,10 @@ struct COPILOT_ENTER_EXIT_OFFSET {
 	char dz;
 };
 
+#define COPILOT_HELPTEXT_SHOW_DURATION 5000
+
 static struct COPILOT_ENTER_EXIT_OFFSET copilot_enter_exit_offset[MAX_PLAYERS];
+static int copilot_helptext_showtime[MAX_PLAYERS];
 
 static
 void copilot_handle_onfoot_fire(int playerid, struct vec3 playerpos)
@@ -57,10 +60,11 @@ void copilot_handle_onfoot_fire(int playerid, struct vec3 playerpos)
 			if (GetPlayerInVehicleSeat(found_vehicle, seat) == INVALID_PLAYER_ID) {
 				natives_PutPlayerInVehicle(playerid, found_vehicle, seat);
 				if (seat > number_passengerseats) {
-					GameTextForPlayer(playerid, 5000, 3,
+					GameTextForPlayer(playerid, COPILOT_HELPTEXT_SHOW_DURATION, 3,
 						"~w~entered as co-pilot~n~"
 						"press ~b~~k~~VEHICLE_BRAKE~~w~ to exit~n~~n~"
 						"do not press ~r~~k~~VEHICLE_ENTER_EXIT~~w~~n~or your game will crash");
+					copilot_helptext_showtime[playerid] = time_timestamp();
 				}
 				return;
 			}
@@ -91,5 +95,16 @@ void copilot_handler_passenger_brake(int playerid, int vehicleid)
 		pos.y += (float) sin(enter_exit_angle) * enter_exit_distance;
 		pos.z += copilot_enter_exit_offset[playerid].dz / 5.0f;
 		SetPlayerPosRaw(playerid, &pos);
+	}
+}
+
+static
+void copilot_on_player_state_change(int playerid, int from, int to)
+{
+	/*Hide help text when player exits and it's still shown (so unnecessary but a nice detail).*/
+	if (from == PLAYER_STATE_PASSENGER &&
+		time_timestamp() - copilot_helptext_showtime[playerid] < COPILOT_HELPTEXT_SHOW_DURATION)
+	{
+		HideGameTextForPlayer(playerid);
 	}
 }
