@@ -686,6 +686,26 @@ void natives_SpawnPlayer(int playerid)
 /*-----------------------------------------------------------------------------*/
 
 #ifdef SAMP_NATIVES_IMPL
+void hook_OnOnfootSync(int playerid)
+{
+	struct SYNCDATA_Onfoot *data;
+	char weapon;
+
+	data = &player[playerid]->onfootSyncData;
+
+	weapon = data->weapon_id;
+	if ((data->partial_keys & KEY_FIRE) &&
+		(weapon == WEAPON_NVIS || weapon == WEAPON_IRVIS || weapon == WEAPON_CAMERA))
+	{
+		data->partial_keys &= ~KEY_FIRE;
+	}
+
+	/*TODO remove this when all OnPlayerUpdates are replaced*/
+	/*this is 3 because.. see PARAM definition*/
+	nc_params[3] = playerid;
+	B_OnPlayerUpdate(amx, nc_params);
+}
+
 static int drive_keystates[MAX_PLAYERS];
 static char drive_udkeystate[MAX_PLAYERS];
 
@@ -789,6 +809,7 @@ void samp_init()
 	/**(int*) 0x8150714 = ; *//*sync bounds z max, default 200000.0*/
 	/**(int*) 0x8150718 = ; *//*sync bounds z min, default -1000.0*/
 
+	mem_mkjmp(0x80AC99C, &OnfootSyncHook);
 	mem_mkjmp(0x80AEC4F, &DriverSyncHook);
 }
 #endif

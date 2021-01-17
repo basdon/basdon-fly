@@ -1,6 +1,7 @@
 extern logprintf
 extern samp_pNetGame
 
+extern hook_OnOnfootSync
 extern hook_OnDriverSync
 extern printf
 
@@ -31,6 +32,14 @@ printf_logprintf:
 	call eax
 	push dword [logprintRetAddr]
 	ret
+
+;prot void OnfootSyncHook();
+global OnfootSyncHook:function
+OnfootSyncHook:
+	mov [esp], eax ; playerid
+	call hook_OnOnfootSync
+	mov eax, 080AC8D1h
+	jmp eax
 
 ;prot void DriverSyncHook();
 global DriverSyncHook:function

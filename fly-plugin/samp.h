@@ -25,6 +25,31 @@ struct SampVehicleParams {
 };
 EXPECT_SIZE(struct SampVehicleParams, 0x10);
 
+struct SYNCDATA_Onfoot {
+	short lrkey;
+	short udkey;
+	/*combine with additional_keys*/
+	short partial_keys;
+	struct vec3 pos;
+	float quat_w;
+	float quat_x;
+	float quat_y;
+	float quat_z;
+	char player_hp;
+	char player_armor;
+	unsigned char weapon_id : 6;
+	/*two extra bits for YES/NO keys*/
+	unsigned char additional_keys : 2;
+	char special_action;
+	struct vec3 vel;
+	struct vec3 surfing_offset;
+	short surfing_vehicle_id;
+	short animation_id;
+	short animation_flags;
+};
+EXPECT_SIZE(struct SYNCDATA_Onfoot, 2 + 2 + 2 + 12 + 16 + 1 + 1 + 1 + 1 + 12 + 12 + 2 + 2 + 2);
+EXPECT_SIZE(struct SYNCDATA_Onfoot, 0x44);
+
 struct SYNCDATA_Driver {
 	short vehicle_id;
 	/*when player is not controllable, this is actually from foot controls??*/
@@ -44,9 +69,9 @@ struct SYNCDATA_Driver {
 	float vehicle_hp;
 	char player_hp;
 	char player_armor;
-	char weapon_id : 6;
+	unsigned char weapon_id : 6;
 	/*two extra bits for YES/NO keys*/
-	char additional_keys : 2;
+	unsigned char additional_keys : 2;
 	char siren_state;
 	char landing_gear_state; /*0 down 1 up (or transitioning)*/
 	short trailer_id;
@@ -76,7 +101,9 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, params, 0xEF);
 struct SampPlayer {
 	char _pad0[0x27];
 	struct SYNCDATA_Driver driverSyncData;
-	char _pad66[0x155-0x66];
+	char _pad66[0x7E/**/-0x66];
+	struct SYNCDATA_Onfoot onfootSyncData;
+	char _padC2[0x155-0xC2];
 	char playerStreamedIn[1000];
 	char vehicleStreamedIn[2000];
 	char _padD0D[0x24F5-0xD0D];
@@ -94,6 +121,7 @@ struct SampPlayer {
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, driverSyncData, 0x27);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, onfootSyncData, 0x7E);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, playerStreamedIn, 0x155);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleStreamedIn, 0x53D);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, actorStreamedIn, 0x24F5);
