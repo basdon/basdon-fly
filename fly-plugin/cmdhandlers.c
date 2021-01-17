@@ -266,9 +266,11 @@ The /helpkeys command shows gametext with important keys.
 static
 int cmd_helpkeys(CMDPARAMS)
 {
-	B144("~w~start/stop engine: ~b~~k~~CONVERSATION_NO~~n~"
-		"~w~landing gear: ~b~~k~~TOGGLE_SUBMISSIONS~");
-	NC_GameTextForPlayer(playerid, buf144a, 5000, 3);
+	GameTextForPlayer(playerid, 5000, 3,
+		"~w~start/stop engine: ~b~~k~~CONVERSATION_NO~~n~"
+		"~w~landing gear: ~b~~k~~TOGGLE_SUBMISSIONS~~n~"
+		"~w~enter copilot mode: ~b~~k~~PED_FIREWEAPON~~n~"
+		"~w~exit copilot mode: ~b~~k~~VEHICLE_BRAKE~");
 	return 1;
 }
 
