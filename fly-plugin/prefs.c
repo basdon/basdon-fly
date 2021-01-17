@@ -72,7 +72,7 @@ void prefs_on_dialog_response(int playerid, int response, int idx)
 			zones_update(playerid, pos);
 		} else if (val == PREF_PANEL_NIGHTCOLORS) {
 			if (panel_is_active_for(playerid)) {
-				panel_reshow(playerid);
+				panel_reshow_if_needed(playerid);
 			}
 		}
 		prefs_show_dialog(playerid);

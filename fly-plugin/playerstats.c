@@ -128,7 +128,7 @@ void playerstats_check_for_afk()
 			isafk[playerid] = 1;
 			uncommitted_playtime[playerid] = now - uncommitted_playtime[playerid];
 
-			panel_remove_panel_player(playerid);
+			panel_on_player_now_afk(playerid);
 		}
 	}
 }

@@ -66,6 +66,8 @@ static int col_panel_fg_dark[2] = { 0xFF585858, 0xFF3E5B7F };
 0 none
 1 day colors
 2 night colors
+
+The panel may be shown, but not getting updates (not in panelplayers) in case the player is afk.
 */
 static char shown_panel[MAX_PLAYERS];
 
@@ -84,22 +86,18 @@ Amount of players int he panelplayers array.
 */
 static int numpanelplayers;
 
-/**
-@return 1 if the player was actually a panel player
-*/
 static
-int panel_remove_panel_player(int playerid)
+void panel_remove_panel_player(int playerid)
 {
-	int i = numpanelplayers;
+	int i;
 
-	while (i--) {
+	for (i = numpanelplayers; i > 0; ) {
+		i--;
 		if (panelplayers[i] == playerid) {
 			panelplayers[i]	= panelplayers[--numpanelplayers];
-			shown_panel[playerid] = 0;
-			return 1;
+			return;
 		}
 	}
-	return 0;
 }
 
 /**
@@ -897,7 +895,7 @@ void panel_nav_updated(int vehicleid)
 }
 
 static
-void panel_reshow(int playerid)
+void panel_reshow_if_needed(int playerid)
 {
 	struct vec4 vpos;
 	struct vec3 vvel;
@@ -970,23 +968,27 @@ void panel_on_player_state_change(int playerid, int from, int to)
 	int vehicleid;
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
-		/*Don't want to add them twice in case of seat warping (//tocar)*/
-		if (from != PLAYER_STATE_DRIVER && from != PLAYER_STATE_PASSENGER) {
-			vehicleid = GetPlayerVehicleID(playerid);
-			if (!game_is_air_vehicle(GetVehicleModel(vehicleid))) {
-				return;
-			}
-
-			if (to == PLAYER_STATE_DRIVER) {
-				GetVehiclePosRotUnsafe(vehicleid, &vpos);
-				nav_update(vehicleid, &vpos);
-			}
-
-			panelplayers[numpanelplayers++] = playerid;
-			panel_reshow(playerid);
+		/*The player can be warping from driver to passenger (//tocar).*/
+		vehicleid = GetPlayerVehicleID(playerid);
+		if (!game_is_air_vehicle(GetVehicleModel(vehicleid))) {
+			return;
 		}
-	} else if (panel_remove_panel_player(playerid)) {
-		textdraws_hide_consecutive(playerid, NUM_PANEL_TEXTDRAWS, TEXTDRAW_PANEL_BASE);
+
+		if (to == PLAYER_STATE_DRIVER) {
+			GetVehiclePosRotUnsafe(vehicleid, &vpos);
+			nav_update(vehicleid, &vpos);
+		}
+
+		if (!panel_is_active_for(playerid)) {
+			panelplayers[numpanelplayers++] = playerid;
+		}
+		panel_reshow_if_needed(playerid);
+	} else {
+		if (shown_panel[playerid]) {
+			panel_remove_panel_player(playerid);
+			textdraws_hide_consecutive(playerid, NUM_PANEL_TEXTDRAWS, TEXTDRAW_PANEL_BASE);
+			shown_panel[playerid] = 0;
+		}
 		caches[playerid].vor_shown = 0;
 		caches[playerid].ils_shown = 0;
 	}
@@ -995,13 +997,24 @@ void panel_on_player_state_change(int playerid, int from, int to)
 static
 void panel_day_night_changed()
 {
-	int i;
+	int i, playerid;
 
-	for (i = 0; i < numpanelplayers; i++) {
-		panel_reshow(panelplayers[i]);
+	/*Panel players do not contain afk players, so don't use it here.*/
+	for (i = 0; i < playercount; i++) {
+		playerid = players[i];
+		if (shown_panel[playerid]) {
+			panel_reshow_if_needed(playerid);
+		}
 	}
 }
 
+static
+void panel_on_player_now_afk(int playerid)
+{
+	panel_remove_panel_player(playerid);
+}
+
+static
 void panel_on_player_was_afk(int playerid)
 {
 	int vehicleid, vehiclemodel;
@@ -1020,6 +1033,7 @@ void panel_on_player_connect(int playerid)
 	memset(&caches[playerid], 0xFF, sizeof(struct PANELCACHE));
 	caches[playerid].vor_shown = 0;
 	caches[playerid].ils_shown = 0;
+	shown_panel[playerid] = 0;
 }
 
 static
