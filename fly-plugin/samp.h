@@ -69,6 +69,10 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, vel, 0xC + 0x40);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, model, 0x82);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, params, 0xEF);
 
+#define UPDATE_SYNC_TYPE_NONE 0
+#define UPDATE_SYNC_TYPE_ONFOOT 1
+#define UPDATE_SYNC_TYPE_INCAR 2
+
 struct SampPlayer {
 	char _pad0[0x27];
 	struct SYNCDATA_Driver driverSyncData;
@@ -79,7 +83,8 @@ struct SampPlayer {
 	char actorStreamedIn[1000];
 	char _pad28DD[0x2967-0x28DD];
 	short playerid;
-	char _pad2969[0x2BA9-0x2969];
+	int updateSyncType;
+	char _pad2969[0x2BA9-0x296D];
 	char currentState;
 	char _pad2BAA[0x2C31-0x2BAA];
 	char vehicleseat;
@@ -93,6 +98,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, playerStreamedIn, 0x155);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleStreamedIn, 0x53D);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, actorStreamedIn, 0x24F5);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, playerid, 0x2967);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, updateSyncType, 0x2969);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, currentState, 0x2BA9);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleseat, 0x2C31);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleid, 0x2C32);

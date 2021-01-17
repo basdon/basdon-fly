@@ -16,6 +16,29 @@ void SendRPCToPlayer(int playerid, int rpc, void *rpcdata, int size_bytes, int u
 }
 
 static
+void ForceSendPlayerOnfootSyncNow(int playerid)
+{
+	struct SampPlayer *cplayer;
+	int actual_updateSyncType;
+	int actual_state;
+
+	cplayer = player[playerid];
+
+	actual_updateSyncType = cplayer->updateSyncType;
+	actual_state = cplayer->currentState;
+
+	cplayer->updateSyncType = UPDATE_SYNC_TYPE_ONFOOT;
+	cplayer->currentState = PLAYER_STATE_ONFOOT;
+	/*Three times because it's an unreliable packet[citation needed] but it's important that players receive it.*/
+	((void (*)(struct SampPlayer*)) 0x80C9DB0)(cplayer);
+	((void (*)(struct SampPlayer*)) 0x80C9DB0)(cplayer);
+	((void (*)(struct SampPlayer*)) 0x80C9DB0)(cplayer);
+
+	cplayer->updateSyncType = actual_updateSyncType;
+	cplayer->currentState = actual_state;
+}
+
+static
 void SetPlayerRaceCheckpointNoDir(int playerid, int type, struct vec3 *pos, float radius)
 {
 	struct RPCDATA_SetRaceCheckpoint rpcdata;
@@ -520,6 +543,13 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 /**
 Puts a player in vehicle, updating map, zone, vehiclestuff ...
 
+putting in driverseat: won't work if there already is a driver
+putting in passengerseat: ejects existing passenger in that seat
+putting in invalid passengerseat: nop with cars, works with planes (does not eject existing passenger)
+warping seats/cars: Players still shows in original one,
+                    keypresses are handled in original one. (can make ghost car like this).
+                    A fix is in place in this function to prevent this.
+
 Also resets the vehicle HP to 1000.0 when it's invalid.
 */
 static
@@ -529,6 +559,7 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 	float hp;
 	struct vec3 pos;
 	int oldvehicleid;
+	int playerstate;
 
 	if (seat == 0) {
 		NC_PARS(2);
@@ -543,12 +574,18 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 
 	GetVehiclePos(vehicleid, &pos);
 	maps_stream_for_player(playerid, pos);
-	if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
-		/*hook_OnDriverSync will invoke this already,
-		but that's supposed to be as last-resort (for players that are vehicle warping)*/
-		oldvehicleid = GetPlayerVehicleID(playerid);
-		veh_on_driver_changed_vehicle_without_state_change(playerid, oldvehicleid, vehicleid);
-		lastvehicle_asdriver[playerid] = vehicleid; /*So hook_OnDriverSync doesn't detect warping.*/
+	playerstate = GetPlayerState(playerid);
+	if (playerstate == PLAYER_STATE_DRIVER || playerstate == PLAYER_STATE_PASSENGER) {
+		/*Players will see the player in the original seat/vehicle when warping,
+		so force send an onfoot packet first.*/
+		ForceSendPlayerOnfootSyncNow(playerid);
+		if (playerstate == PLAYER_STATE_DRIVER) {
+			/*hook_OnDriverSync will invoke this already,
+			but that's supposed to be as last-resort (for players that are vehicle warping)*/
+			oldvehicleid = GetPlayerVehicleID(playerid);
+			veh_on_driver_changed_vehicle_without_state_change(playerid, oldvehicleid, vehicleid);
+			lastvehicle_asdriver[playerid] = vehicleid; /*So hook_OnDriverSync doesn't detect warping.*/
+		}
 	}
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(GetVehicleModel(vehicleid));
