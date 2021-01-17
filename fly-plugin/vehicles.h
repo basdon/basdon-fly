@@ -59,10 +59,6 @@ persist, although there won't be any feedback on this.
 */
 struct dbvehicle *veh_create_new_dbvehicle(int model, struct vec4 *pos);
 /**
-Should be called in OnPlayerConnect.
-*/
-void veh_create_player_textdraws(int playerid);
-/**
 Check if given player can modify a vehicle (park, spray, ..).
 Player can modify if they own the vehicle or have admin rights.
 */
@@ -124,7 +120,6 @@ calling PutPlayerInVehicle when the player was already a driver (because
 this won't trigger a OnPlayerStateChange.
 */
 void veh_on_player_now_driving(int playerid, int vehicleid, struct dbvehicle *veh);
-void veh_on_player_state_change(int, int, int);
 void veh_on_vehicle_spawn(struct dbvehicle *veh);
 void veh_on_vehicle_stream_in(int vehicleid, int forplayerid);
 void veh_on_vehicle_stream_out(int vehicleid, int forplayerid);
@@ -140,4 +135,3 @@ To be called every second.
 */
 void veh_timed_1s_update();
 void veh_timed_panel_update();
-void veh_timed_speedo_update();

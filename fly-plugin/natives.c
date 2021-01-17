@@ -8,7 +8,6 @@ static AMX_NATIVE n_ClearAnimations;
 static AMX_NATIVE n_CreateObject;
 static AMX_NATIVE n_CreatePlayer3DTextLabel;
 static AMX_NATIVE n_CreatePlayerObject;
-static AMX_NATIVE n_CreatePlayerTextDraw;
 static AMX_NATIVE n_CreateVehicle_;
 static AMX_NATIVE n_DeletePlayer3DTextLabel;
 static AMX_NATIVE n_DestroyObject;
@@ -37,21 +36,6 @@ static AMX_NATIVE n_IsValidVehicle;
 static AMX_NATIVE n_Kick_;
 static AMX_NATIVE n_MoveObject;
 static AMX_NATIVE n_PlayerPlaySound;
-static AMX_NATIVE n_PlayerTextDrawAlignment;
-static AMX_NATIVE n_PlayerTextDrawBackgroundColor;
-static AMX_NATIVE n_PlayerTextDrawBoxColor;
-static AMX_NATIVE n_PlayerTextDrawColor;
-static AMX_NATIVE n_PlayerTextDrawDestroy;
-static AMX_NATIVE n_PlayerTextDrawFont;
-static AMX_NATIVE n_PlayerTextDrawHide;
-static AMX_NATIVE n_PlayerTextDrawLetterSize;
-static AMX_NATIVE n_PlayerTextDrawSetOutline;
-static AMX_NATIVE n_PlayerTextDrawSetProportional;
-static AMX_NATIVE n_PlayerTextDrawSetShadow;
-static AMX_NATIVE n_PlayerTextDrawSetString;
-static AMX_NATIVE n_PlayerTextDrawShow;
-static AMX_NATIVE n_PlayerTextDrawTextSize;
-static AMX_NATIVE n_PlayerTextDrawUseBox;
 static AMX_NATIVE n_PutPlayerInVehicle_;
 static AMX_NATIVE n_RemoveBuildingForPlayer;
 static AMX_NATIVE n_ResetPlayerMoney_;
@@ -80,21 +64,8 @@ static AMX_NATIVE n_SetVehicleToRespawn;
 static AMX_NATIVE n_SetVehicleZAngle;
 static AMX_NATIVE n_ShowPlayerDialog_;
 static AMX_NATIVE n_SpawnPlayer_;
-static AMX_NATIVE n_TextDrawAlignment;
-static AMX_NATIVE n_TextDrawBoxColor;
-static AMX_NATIVE n_TextDrawColor;
-static AMX_NATIVE n_TextDrawCreate;
-static AMX_NATIVE n_TextDrawFont;
-static AMX_NATIVE n_TextDrawHideForPlayer;
-static AMX_NATIVE n_TextDrawLetterSize;
-static AMX_NATIVE n_TextDrawSetOutline;
-static AMX_NATIVE n_TextDrawSetProportional;
-static AMX_NATIVE n_TextDrawSetShadow;
-static AMX_NATIVE n_TextDrawShowForPlayer;
-static AMX_NATIVE n_TextDrawTextSize;
 static AMX_NATIVE n_UpdateVehicleDamageStatus;
 static AMX_NATIVE n_UsePlayerPedAnims;
-static AMX_NATIVE n_TextDrawUseBox;
 static AMX_NATIVE n_TogglePlayerClock;
 static AMX_NATIVE n_TogglePlayerControllable;
 static AMX_NATIVE n_TogglePlayerSpectating;
@@ -253,47 +224,6 @@ static cell tmpfloat;
 	nc_params[3]=nc_params[4]=nc_params[5]=0,\
 	n_PlayerPlaySound(amx,nc_params))
 
-#define NC_PlayerTextDrawAlignment(PLAYERID,TD,ALIGNMENT) (NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=TD,nc_params[3]=ALIGNMENT,\
-	n_PlayerTextDrawAlignment(amx,nc_params))
-
-#define NC_PlayerTextDrawColor(PLAYERID,TD,COLOR) (NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=TD,nc_params[3]=COLOR,\
-	n_PlayerTextDrawColor(amx,nc_params))
-
-#define NC_PlayerTextDrawFont(PLAYERID,TD,FONT) (NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=TD,nc_params[3]=FONT,\
-	n_PlayerTextDrawFont(amx,nc_params))
-
-#define NC_PlayerTextDrawHide(PLAYERID,TD) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=TD,\
-	n_PlayerTextDrawHide(amx,nc_params))
-
-#define NC_PlayerTextDrawLetterSize(PLAYERID,TD,FX,FY) (NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=TD,\
-	nc_params[3]=FX,nc_params[4]=FY\
-	n_PlayerTextDrawLetterSize(amx,nc_params))
-
-#define NC_PlayerTextDrawOutline(PLAYERID,TD,OUTLINE) (NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=TD,nc_params[3]=OUTLINE,\
-	n_PlayerTextDrawOutline(amx,nc_params))
-
-#define NC_PlayerTextDrawProportional(PLAYERID,TD,PROP) (NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=TD,nc_params[3]=PROP,\
-	n_PlayerTextDrawProportional(amx,nc_params))
-
-#define NC_PlayerTextDrawSetShadow(PLAYERID,TD,SHADOW) (NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=TD,nc_params[3]=SHADOW,\
-	n_PlayerTextDrawSetShadow(amx,nc_params))
-
-#define NC_PlayerTextDrawSetString(PLAYERID,TD,BUF) (NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=TD,nc_params[3]=BUF,\
-	n_PlayerTextDrawSetString(amx,nc_params))
-
-#define NC_PlayerTextDrawShow(PLAYERID,TD) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=TD,\
-	n_PlayerTextDrawShow(amx,nc_params))
-
 #define NC_PutPlayerInVehicle __USE__natives_PutPlayerInVehicle__
 
 #define NC_RemovePlayerMapIcon(PLAYERID,MAPICONID) (NC_PARS_(2)\
@@ -356,14 +286,6 @@ static cell tmpfloat;
 #define NC_ShowPlayerDialog __USE__dialog_ShowPlayerDialog__
 
 #define NC_SpawnPlayer __USE__natives_SpawnPlayer__
-
-#define NC_TextDrawHideForPlayer(PLAYERID,TXT) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=TXT,\
-	n_TextDrawHideForPlayer(amx,nc_params))
-
-#define NC_TextDrawShowForPlayer(PLAYERID,TXT) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=TXT,\
-	n_TextDrawShowForPlayer(amx,nc_params))
 
 #define NC_TogglePlayerClock(PLAYERID,FLAG) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
@@ -474,7 +396,6 @@ int natives_find()
 		N(CreateObject),
 		N(CreatePlayer3DTextLabel),
 		N(CreatePlayerObject),
-		N(CreatePlayerTextDraw),
 		N_(CreateVehicle),
 		N(DeletePlayer3DTextLabel),
 		N(DestroyObject),
@@ -503,21 +424,6 @@ int natives_find()
 		N_(Kick),
 		N(MoveObject),
 		N(PlayerPlaySound),
-		N(PlayerTextDrawAlignment),
-		N(PlayerTextDrawBackgroundColor),
-		N(PlayerTextDrawBoxColor),
-		N(PlayerTextDrawColor),
-		N(PlayerTextDrawDestroy),
-		N(PlayerTextDrawFont),
-		N(PlayerTextDrawHide),
-		N(PlayerTextDrawLetterSize),
-		N(PlayerTextDrawSetOutline),
-		N(PlayerTextDrawSetProportional),
-		N(PlayerTextDrawSetShadow),
-		N(PlayerTextDrawSetString),
-		N(PlayerTextDrawShow),
-		N(PlayerTextDrawTextSize),
-		N(PlayerTextDrawUseBox),
 		N_(PutPlayerInVehicle),
 		N(RemoveBuildingForPlayer),
 		N(RemovePlayerMapIcon),
@@ -548,19 +454,6 @@ int natives_find()
 		N_(SpawnPlayer),
 		N(TogglePlayerClock),
 		N(TogglePlayerSpectating),
-		N(TextDrawAlignment),
-		N(TextDrawBoxColor),
-		N(TextDrawColor),
-		N(TextDrawCreate),
-		N(TextDrawFont),
-		N(TextDrawHideForPlayer),
-		N(TextDrawLetterSize),
-		N(TextDrawSetOutline),
-		N(TextDrawSetProportional),
-		N(TextDrawSetShadow),
-		N(TextDrawShowForPlayer),
-		N(TextDrawTextSize),
-		N(TextDrawUseBox),
 		N(TogglePlayerControllable),
 		N(UpdateVehicleDamageStatus),
 		N(UsePlayerPedAnims),

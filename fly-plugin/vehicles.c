@@ -14,11 +14,14 @@ struct PLAYERMODELSTATS {
 	float odoKM;
 };
 
+static struct TEXTDRAW td_vehpanel_spd = { "vehspd", 10, NULL };
+
 STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
 static struct PLAYERMODELSTATS player_model_stats[MAX_PLAYERS][NUM_AIRCRAFT_MODELS];
 static char player_model_stats_has_row[MAX_PLAYERS];
 static char player_model_stats_loaded[MAX_PLAYERS];
 
+static char vehpanel_shown[MAX_PLAYERS];
 /**
 Linked list of vehicles that need an ODO update in db.
 */
@@ -28,10 +31,6 @@ int numdbvehicles, dbvehiclealloc;
 struct vehicle gamevehicles[MAX_VEHICLES];
 static short owner_label_ids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB of mapping for 100 players, hmmm */
 
-/**
-Holds player textdraw id of the vehicle panel speedo.
-*/
-static int ptxt_speedo[MAX_PLAYERS];
 /**
 Last vehicle position for player (when driver), for ODO purposes.
 
@@ -217,6 +216,8 @@ void veh_on_player_connect(int playerid)
 	memset(player_model_stats[playerid], 0, sizeof(player_model_stats[playerid]));
 	player_model_stats_has_row[playerid] = 0;
 	player_model_stats_loaded[playerid] = 0;
+
+	vehpanel_shown[playerid] = 0;
 }
 
 STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
@@ -476,6 +477,8 @@ void veh_init()
 		numdbvehicles++;
 	}
 	NC_cache_delete(dbcache);
+
+	textdraws_load_from_file("vehpanel", TEXTDRAW_VEHSPD, 1, &td_vehpanel_spd);
 }
 
 int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh)
@@ -588,7 +591,9 @@ void veh_dispose()
 		free(veh);
 	}
 	free(dbvehicles);
-        dbvehicles = NULL;
+	dbvehicles = NULL;
+
+	free(td_vehpanel_spd.rpcdata);
 }
 
 int veh_create(struct dbvehicle *veh)
@@ -1026,6 +1031,7 @@ void veh_on_driver_changed_vehicle_without_state_change(int playerid, int oldveh
 	}
 }
 
+static
 void veh_on_player_state_change(int playerid, int from, int to)
 {
 	struct dbvehicle *veh;
@@ -1041,11 +1047,9 @@ void veh_on_player_state_change(int playerid, int from, int to)
 			vehiclemodel = GetVehicleModel(vehicleid);
 		}
 
-		if (veh != NULL && !game_is_air_vehicle(veh->model)) {
-			NC_PARS(2);
-			nc_params[1] = playerid;
-			nc_params[2] = ptxt_speedo[playerid];
-			NC(n_PlayerTextDrawShow);
+		if (!game_is_air_vehicle(vehiclemodel) && !vehpanel_shown[playerid]) {
+			textdraws_show(playerid, 1, &td_vehpanel_spd);
+			vehpanel_shown[playerid] = 1;
 		}
 
 		if (to == PLAYER_STATE_DRIVER) {
@@ -1054,11 +1058,9 @@ void veh_on_player_state_change(int playerid, int from, int to)
 			GameTextForPlayer(playerid, 2000, 1, veh_name_buf);
 			veh_destroy_owner_label_for_all(vehicleid);
 		}
-	} else {
-		NC_PARS(2);
-		nc_params[1] = playerid;
-		nc_params[2] = ptxt_speedo[playerid];
-		NC(n_PlayerTextDrawHide);
+	} else if (vehpanel_shown[playerid]) {
+		textdraws_hide_consecutive(playerid, 1, TEXTDRAW_VEHSPD);
+		vehpanel_shown[playerid] = 0;
 	}
 
 	if (from == PLAYER_STATE_DRIVER) {
@@ -1070,58 +1072,24 @@ void veh_on_player_state_change(int playerid, int from, int to)
 	}
 }
 
+static
 void veh_timed_speedo_update()
 {
-	struct dbvehicle *veh;
+	struct RPCDATA_TextDrawSetString rpcdata;
+	struct BitStream bs;
 	struct vec3 vvel;
 	int n, playerid, vehicleid;
 
-	n = playercount;
-	while (n--) {
-		if (spawned[playerid = players[n]] &&
-			(vehicleid = GetPlayerVehicleID(playerid)) &&
-			(veh = gamevehicles[vehicleid].dbvehicle) &&
-			!game_is_air_vehicle(veh->model))
-		{
+	bs.ptrData = &rpcdata;
+	for (n = playercount; n; ) {
+		playerid = players[--n];
+		if (vehpanel_shown[playerid] && (vehicleid = GetPlayerVehicleID(playerid))) {
 			GetVehicleVelocityUnsafe(vehicleid, &vvel);
-			sprintf(cbuf64, "%.0f", VEL_TO_KPH * (float) sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z));
-			B144(cbuf64);
-			NC_PARS(3);
-			nc_params[1] = playerid;
-			nc_params[2] = ptxt_speedo[playerid];
-			nc_params[3] = buf144a;
-			NC(n_PlayerTextDrawSetString);
+			rpcdata.textdrawid = td_vehpanel_spd.rpcdata->textdrawid;
+			rpcdata.text_length = sprintf(rpcdata.text, "%.0f",
+				VEL_TO_KPH * (float) sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z));
+			bs.numberOfBitsUsed = (2 + 2 + rpcdata.text_length) * 8;
+			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
 		}
 	}
-}
-
-void veh_create_player_textdraws(int playerid)
-{
-	/*create em first*/
-	NC_PARS(4);
-	nc_params[1] = playerid;
-	nc_paramf[2] = 615.0f;
-	nc_paramf[3] = 380.0f;
-	nc_params[4] = buf144a;
-	B144("0");
-	ptxt_speedo[playerid] = NC(n_CreatePlayerTextDraw);
-
-	/*letter sizes*/
-	nc_params[2] = ptxt_speedo[playerid];
-	nc_paramf[3] = 0.5f;
-	nc_paramf[4] = 1.5f;
-	NC(n_PlayerTextDrawLetterSize);
-
-	NC_PARS(3);
-	/*rest*/
-	nc_params[2] = ptxt_speedo[playerid];
-	nc_params[3] = -1;
-	NC(n_PlayerTextDrawColor);
-	nc_params[3] = 0,
-	NC(n_PlayerTextDrawSetShadow);
-	nc_params[3] = 1,
-	NC(n_PlayerTextDrawSetOutline);
-	nc_params[3] = 3;
-	NC(n_PlayerTextDrawFont);
-	NC(n_PlayerTextDrawAlignment);
 }
