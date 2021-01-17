@@ -64,7 +64,7 @@ static
 int cmd_admin_tocar(CMDPARAMS)
 {
 	struct vec3 vehicle_pos, player_pos;
-	int vehicleid, closest_vehicleid, modelid, seat;
+	int vehicleid, closest_vehicleid, modelid, seat, jack;
 	float dx, dy;
 	float min_distance_sq;
 
@@ -77,7 +77,10 @@ int cmd_admin_tocar(CMDPARAMS)
 			SendClientMessage(playerid, COL_WARN, WARN"Invalid vehicle id");
 		}
 	} else if (cmd_get_vehiclemodel_param(cmdtext, &parseidx, &modelid)) {
-		cmd_get_int_param(cmdtext, &parseidx, &seat);
+		jack = 0;
+		if (cmd_get_int_param(cmdtext, &parseidx, &seat)) {
+			cmd_get_int_param(cmdtext, &parseidx, &jack);
+		}
 		closest_vehicleid = -1;
 		min_distance_sq = float_pinf;
 		common_GetPlayerPos(playerid, &player_pos);
@@ -87,7 +90,7 @@ int cmd_admin_tocar(CMDPARAMS)
 				dx = player_pos.x - vehicle_pos.x;
 				dy = player_pos.y - vehicle_pos.y;
 				if (dx * dx + dy * dy < min_distance_sq &&
-					common_find_player_in_vehicle_seat(vehicleid, seat) == INVALID_PLAYER_ID)
+					(jack || common_find_player_in_vehicle_seat(vehicleid, seat) == INVALID_PLAYER_ID))
 				{
 					min_distance_sq = dx * dx + dy * dy;
 					closest_vehicleid = vehicleid;
@@ -95,12 +98,15 @@ int cmd_admin_tocar(CMDPARAMS)
 			}
 		}
 		if (closest_vehicleid != -1) {
+			if (seat == 0 && common_find_player_in_vehicle_seat(closest_vehicleid, 0) != INVALID_PLAYER_ID) {
+				SendClientMessage(playerid, COL_INFO, INFO"Trying to jack existing driver (won't work)");
+			}
 			natives_PutPlayerInVehicle(playerid, closest_vehicleid, seat);
 		} else {
-			SendClientMessage(playerid, COL_WARN, WARN"None spawned");
+			SendClientMessage(playerid, COL_WARN, WARN"None spawned or available");
 		}
 	} else {
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: //tocar (<vehicleid>|<modelname>) [seat]");
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: //tocar (<vehicleid>|<modelname>) [seat] [jack:1/0]");
 	}
 	return 1;
 }
