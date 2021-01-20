@@ -27,13 +27,13 @@
 			<p>We also have a Discord server, invite link: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}.
 		</p>
 		<p>
-			<strong>Last updates:</strong>
-			<ul>
-				{@foreach $last_update_articles as $update_article}
-					<li><a href="article.php?title={@urlencode $update_article->name}">{$update_article->title}</a></li>
-				{@endforeach}
-			</ul>
+			<strong>Last update posts:</strong> (updates are made constantly, but some get their own news article)
 		</p>
+		<ul>
+			{@foreach $last_update_articles as $update_article}
+				<li><a href="article.php?title={@urlencode $update_article->name}">{$update_article->title}</a></li>
+			{@endforeach}
+		</ul>
 
 		<h3 class="newtableheader">Players</h3>
 		<table border="0" width="100%" class="new center">
