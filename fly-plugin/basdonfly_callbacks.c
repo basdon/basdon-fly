@@ -244,14 +244,11 @@ exit:
 	timecyc_init();
 	veh_init();
 
-	B144("basdon-fly "VERSION);
-	NC_SetGameModeText(buf144a);
-
+	SetGameModeText("Aviation/Piloting/Flying plane server");
 	NC_EnableStuntBonusForAll(0);
 	NC_UsePlayerPedAnims();
 
-	logprintf("  Loaded gamemode basdon-fly "VERSION" in %ldms\n",
-		time_timestamp() - t);
+	logprintf("  Loaded gamemode basdon-fly in %ldms\n", time_timestamp() - t);
 
 	/*must be last*/
 	timecyc_reset();

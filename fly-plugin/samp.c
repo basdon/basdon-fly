@@ -6,6 +6,12 @@ static unsigned char vehicle_gear_state[MAX_VEHICLES];
 static int vehicle_gear_change_time[MAX_VEHICLES];
 
 static
+void SetConsoleVariableString(char *variable_name, char *value)
+{
+	((void (*)(void*,char*,char*))0x80A0110)(*(int**)0x81CA4B8, variable_name, value);
+}
+
+static
 void SendRPCToPlayer(int playerid, int rpc, void *rpcdata, int size_bytes, int unk)
 {
 	struct BitStream bs;
@@ -36,6 +42,12 @@ void ForceSendPlayerOnfootSyncNow(int playerid)
 
 	cplayer->updateSyncType = actual_updateSyncType;
 	cplayer->currentState = actual_state;
+}
+
+static
+void SetGameModeText(char *gamemodetext)
+{
+	SetConsoleVariableString("gamemodetext", gamemodetext);
 }
 
 static

@@ -44,7 +44,6 @@ static AMX_NATIVE n_RemovePlayerMapIcon;
 static AMX_NATIVE n_SHA256_PassHash;
 static AMX_NATIVE n_SendRconCommand;
 static AMX_NATIVE n_SetCameraBehindPlayer;
-static AMX_NATIVE n_SetGameModeText;
 static AMX_NATIVE n_SetPlayerCameraPos;
 static AMX_NATIVE n_SetPlayerCameraLookAt;
 static AMX_NATIVE n_SetPlayerColor;
@@ -242,9 +241,6 @@ static cell tmpfloat;
 	(NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_SetCameraBehindPlayer(amx,nc_params))
 
-#define NC_SetGameModeText(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
-	n_SetGameModeText(amx,nc_params))
-
 #define NC_SetPlayerFacingAngle(PLAYERID,FR) (NC_PARS_(2)\
 	nc_params[1]=PLAYERID,nc_params[2]=FR,\
 	n_SetPlayerFacingAngle(amx,nc_params))
@@ -432,7 +428,6 @@ int natives_find()
 		N(SHA256_PassHash),
 		N(SendRconCommand),
 		N(SetCameraBehindPlayer),
-		N(SetGameModeText),
 		N(SetPlayerCameraPos),
 		N(SetPlayerCameraLookAt),
 		N(SetPlayerColor),
