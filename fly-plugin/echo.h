@@ -6,6 +6,8 @@
 #define PACK_BYE 4
 #define PACK_PING 5
 #define PACK_PONG 6
+#define PACK_STATUS_REQUEST 7
+#define PACK_STATUS 8
 #define PACK_CHAT 10
 #define PACK_ACTION 11
 #define PACK_GENERIC_MESSAGE 12
@@ -56,13 +58,6 @@ Call from OnPlayerText with t 0 or from /me cmd handler with t 1.
 @param t type, either 0 for normal chat or 1 for action
 */
 void echo_on_game_chat_or_action(int t, int playerid, char *text);
-/**
-Send player connection packet to IRC echo.
-
-@param playerid playerid that (dis)connected
-@param reason 3 when OnPlayerConnection, reason when OnPlayerDisconnect
-*/
-void echo_on_player_connection(int playerid, int reason);
 /**
 Handle received UDP packet.
 Call from onUDPReceiveData

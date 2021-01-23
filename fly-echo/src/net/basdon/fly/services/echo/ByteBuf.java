@@ -2,6 +2,7 @@
 // see the LICENSE file for more details
 package net.basdon.fly.services.echo;
 
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 
@@ -39,6 +40,11 @@ ByteBuf(byte[] buf)
 {
 	this.buf = buf;
 	this.pos = 0;
+}
+
+void skip(int len)
+{
+	this.pos += len;
 }
 
 void markAndSkip(int len)
@@ -116,7 +122,7 @@ int writeUTF8(char[] src, int offset, int len)
 	int posBefore = this.pos;
 	ByteBufOutputStream bbos = new ByteBufOutputStream(this);
 	@SuppressWarnings("resource")
-	PrintWriter pw = new PrintWriter(bbos, false, StandardCharsets.UTF_8);
+	PrintWriter pw = new PrintWriter(new OutputStreamWriter(bbos, StandardCharsets.UTF_8), false);
 	pw.write(src, offset, len);
 	pw.flush();
 	return this.pos - posBefore;

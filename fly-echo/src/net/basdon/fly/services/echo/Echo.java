@@ -9,12 +9,19 @@ import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
+import net.basdon.anna.api.Channel;
 import net.basdon.anna.api.ChannelUser;
 import net.basdon.anna.api.IAnna;
+import net.basdon.anna.api.User;
+
+import static java.lang.System.arraycopy;
 
 import static net.basdon.anna.api.Constants.*;
+import static net.basdon.anna.api.Util.*;
 
 public
 class Echo extends Thread
@@ -26,6 +33,8 @@ public static final byte
 	PACK_BYE = 4,
 	PACK_PING = 5,
 	PACK_PONG = 6,
+	PACK_STATUS_REQUEST = 7,
+	PACK_STATUS = 8,
 	PACK_CHAT = 10,
 	PACK_ACTION = 11,
 	PACK_GENERIC_MESSAGE = 12,
@@ -59,7 +68,7 @@ static
 	ADDR_OUT = addr;
 }
 
-private final byte[] buf = new byte[160];
+private final byte[] buf = new byte[512];
 private final char[] channel;
 private final IAnna anna;
 private final int[] last_ping_payloads = new int[10];
@@ -67,6 +76,12 @@ private final long[] last_ping_stamps = new long[10];
 
 private int last_ping_idx;
 private long my_hello_sent_time;
+private boolean need_send_initial_status_message;
+private char[] cached_status_msg;
+private long cached_status_msg_time;
+private HashSet<char[]> users_waiting_for_status_message;
+private boolean status_message_requested_global;
+private boolean send_status_message_response_back_to_game;
 
 public boolean ignore_self;
 public DatagramSocket insocket;
@@ -79,6 +94,7 @@ Echo(IAnna anna, char[] channel)
 {
 	this.anna = anna;
 	this.channel = channel;
+	this.users_waiting_for_status_message = new HashSet<>();
 }
 
 @Override
@@ -95,6 +111,10 @@ void run()
 			try (DatagramSocket socket = new DatagramSocket(PORT_IN)) {
 				this.insocket = socket;
 				this.send_hello();
+				this.need_send_initial_status_message = true;
+				if (this.anna.find_channel(this.channel) != null) {
+					this.send_initial_status_message();
+				}
 				for (;;) {
 					DatagramPacket packet = new DatagramPacket(buf, buf.length);
 					socket.receive(packet);
@@ -129,6 +149,63 @@ void run()
 	}
 }
 
+public
+void send_status_message_to_user(User user)
+{
+	if (System.currentTimeMillis() - this.cached_status_msg_time < 1000) {
+		this.send_status_message_to_user_now(user.nick);
+	} else {
+		this.users_waiting_for_status_message.add(user.nick);
+		byte[] msg = { 'F', 'L', 'Y', PACK_STATUS_REQUEST };
+		this.send(msg, msg.length);
+	}
+}
+
+public
+void on_user_nick_changed(char[] from, char[] to)
+{
+	if (this.users_waiting_for_status_message.remove(from)) {
+		this.users_waiting_for_status_message.add(to);
+	}
+}
+
+public
+void remove_user_from_awaiting_status_message_list(char[] nick)
+{
+	this.users_waiting_for_status_message.remove(nick);
+}
+
+private
+void send_status_message_to_user_now(char[] nick)
+{
+	char[] notice = new char[7 + nick.length + this.cached_status_msg.length];
+	set(notice, 0, 'N','O','T','I','C','E',' ');
+	arraycopy(nick, 0, notice, 7, nick.length);
+	arraycopy(this.cached_status_msg, 0, notice, 7 + nick.length, this.cached_status_msg.length);
+	this.anna.send_raw(notice, 0, notice.length);
+}
+
+private
+void send_status_message_to_awaiting_users()
+{
+	// This is always called from Echo thread.
+	this.anna.sync_exec(() -> {
+		for (char[] user : this.users_waiting_for_status_message) {
+			this.send_status_message_to_user_now(user);
+		}
+		this.users_waiting_for_status_message.clear();
+	});
+}
+
+public
+void request_global_status(boolean send_response_back_to_game)
+{
+	byte[] msg = { 'F', 'L', 'Y', PACK_STATUS_REQUEST };
+	this.send(msg, msg.length);
+	this.status_message_requested_global = true;
+	this.send_status_message_response_back_to_game = send_response_back_to_game;
+}
+
 private
 void handle(DatagramPacket packet)
 throws InterruptedIOException
@@ -151,10 +228,14 @@ invalid_packet:
 		buf[3] = PACK_IMTHERE;
 		send(buf, length);
 		msg("game bridge is up");
+		this.send_status_message((byte) 0);
 		return;
 	case PACK_IMTHERE:
 		long roundtrip = System.currentTimeMillis() - this.my_hello_sent_time;
 		msg("game bridge is up (" + roundtrip + "ms)");
+		return;
+	case PACK_BYE:
+		msg("game bridge is down");
 		return;
 	case PACK_PING:
 		buf[3] = PACK_PONG;
@@ -171,8 +252,39 @@ invalid_packet:
 		}
 		msg("pong (unknown ms: payload mismatch)");
 		return;
-	case PACK_BYE:
-		msg("game bridge is down");
+	case PACK_STATUS_REQUEST:
+		this.send_status_message((byte) 1);
+		return;
+	case PACK_STATUS:
+		if (length < 8) {
+			break;
+		}
+		boolean is_response_to_status_request = stream.readByte() != 0;
+		short statusMsgByteLength = stream.readWord();
+		this.cached_status_msg_time = System.currentTimeMillis();
+		CharBuf charbuf = new CharBuf(statusMsgByteLength + 2);
+		charbuf.writeChar(' ');
+		charbuf.writeChar(':');
+		charbuf.writeUTF8(stream, statusMsgByteLength);
+		this.cached_status_msg = new char[charbuf.pos];
+		arraycopy(charbuf.chars, 0, this.cached_status_msg, 0, charbuf.pos);
+		if (this.status_message_requested_global) {
+			is_response_to_status_request = false;
+		}
+		if (is_response_to_status_request) {
+			this.send_status_message_to_awaiting_users();
+		} else {
+			this.anna.sync_exec(() -> {
+				this.users_waiting_for_status_message.clear();
+				this.status_message_requested_global = false;
+				// Don't send it back in game when a user without a voice has
+				// invoked the &players command.
+				this.ignore_self = !this.send_status_message_response_back_to_game;
+				this.anna.privmsg(this.channel, charbuf.chars, 2, charbuf.pos - 2);
+				this.ignore_self = false;
+				this.send_status_message_response_back_to_game = false;
+			});
+		}
 		return;
 	case PACK_ACTION:
 	case PACK_CHAT:
@@ -274,9 +386,9 @@ invalid_packet:
 		msg.writeString(String.valueOf(playerid));
 		msg.writeChar(')');
 		if (reason == CONN_REASON_GAME_CONNECTED) {
-			msg.writeString("connected to the server");
+			msg.writeString(" connected to the server");
 		} else {
-			msg.writeString("disconnected from the server");
+			msg.writeString(" disconnected from the server");
 			switch (reason) {
 			case CONN_REASON_GAME_TIMEOUT: msg.writeString(" (ping timeout)"); break;
 			case CONN_REASON_GAME_QUIT: msg.writeString(" (quit)"); break;
@@ -429,6 +541,106 @@ void send_generic_message(char[] message, byte type)
 	if (bufLen > 510) {
 		bufLen = 510;
 	}
+	this.send(buf.buf, bufLen);
+}
+
+public
+void send_initial_status_message()
+{
+	if (this.need_send_initial_status_message) {
+		this.need_send_initial_status_message = false;
+		this.send_status_message((byte) 0);
+	}
+}
+
+private
+void send_status_message(byte is_response_to_status_request)
+{
+	String server = this.anna.get_anna_conf().getStr("server.host");
+	Channel channel = this.anna.find_channel(this.channel);
+
+	ByteBuf buf = new ByteBuf(512, PACK_STATUS);
+	buf.writeByte(is_response_to_status_request);
+	buf.markAndSkip(2); // msglen - to be set after writing the msg
+	int msgLen = buf.pos;
+	buf.writeString("IRC status: connected to ");
+	buf.writeASCII(this.channel, 0, this.channel.length);
+	buf.writeString(" on ");
+	if (server == null) {
+		buf.writeString("<unknown server>");
+	} else {
+		buf.writeString(server);
+	}
+	buf.writeString(". ");
+	if (channel == null) {
+		buf.writeString("Failed to get channel users.");
+	} else {
+		char[] user_channel_models = this.anna.get_user_channel_modes();
+		int unfilteredSize = channel.userlist.size();
+		ArrayList<ChannelUser> oppedUsers = new ArrayList<>(unfilteredSize);
+		ArrayList<ChannelUser> voicedUsers = new ArrayList<>(unfilteredSize);
+		ArrayList<ChannelUser> normalUsers = new ArrayList<>(unfilteredSize);
+		int num_users = 0;
+		for (ChannelUser user : channel.userlist) {
+			if (!strcmp(user.nick, 'C','h','a','n','S','e','r','v') &&
+				!strcmp(user.nick, this.anna.get_anna_user().nick))
+			{
+				num_users++;
+				if (has_user_mode_or_higher(user, user_channel_models, '@')) {
+					oppedUsers.add(user);
+				} else if (has_user_mode_or_higher(user, user_channel_models, '+')) {
+					voicedUsers.add(user);
+				} else {
+					normalUsers.add(user);
+				}
+			}
+		}
+		if (num_users == 0) {
+			buf.writeString("No users in channel.");
+		} else {
+			buf.writeString(String.valueOf(num_users));
+			buf.writeString(" user(s):");
+			int num_printedUsers = 0;
+			ArrayList<ChannelUser> list = oppedUsers;
+			int list_elements_count = list.size();
+			for (int i = 0; ; i++) {
+				if (i >= list_elements_count) {
+					if (list == oppedUsers) {
+						list = voicedUsers;
+					} else if (list == voicedUsers) {
+						list = normalUsers;
+					} else {
+						break;
+					}
+					list_elements_count = list.size();
+					i = -1;
+					continue;
+				}
+				ChannelUser user = list.get(i);
+				// Length of the message should be under 2 samp chat lines.
+				// Message should also fit "and xx others." after the limit checked here.
+				if (buf.pos + user.nick.length > 285 - 15) {
+					break;
+				}
+				num_printedUsers++;
+				buf.writeByte(' ');
+				if (user.prefix != 0) {
+					buf.writeByte(user.prefix);
+				}
+				buf.writeASCII(user.nick, 0, user.nick.length);
+			}
+			if (num_users != num_printedUsers) {
+				buf.writeString(" and ");
+				buf.writeString(String.valueOf(num_users - num_printedUsers));
+				buf.writeString(" more");
+			}
+		}
+	}
+	msgLen = buf.pos - msgLen;
+	int bufLen = buf.pos;
+	buf.exchangeMarkAndPos();
+	buf.writeWord(msgLen);
+
 	this.send(buf.buf, bufLen);
 }
 }

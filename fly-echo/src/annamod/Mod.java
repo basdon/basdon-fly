@@ -86,8 +86,10 @@ void config_loaded(Config conf)
 	}
 	this.outtarget = echochan.toCharArray();
 	this.anna.join(this.outtarget);
-	echo = new Echo(anna, this.outtarget);
-	echo.start();
+	if (this.echo == null) {
+		this.echo = new Echo(this.anna, this.outtarget);
+		this.echo.start();
+	}
 }
 
 @Override
@@ -114,13 +116,18 @@ public
 boolean on_command(User user, char[] target, char[] replytarget,
                    char[] msg, char[] cmd, char[] params)
 {
-	ChannelUser cu;
-	if (this.echo != null && strcmp(this.outtarget, target) &&
-			(cu = this.anna.find_user(target, user.nick)) != null &&
-			has_user_mode_or_higher(cu, this.anna.get_user_channel_modes(), 'v'))
-	{
-		this.echo.send_chat_or_action_to_game(
-			PACK_CHAT, cu.prefix, user.nick, msg, 0, msg.length);
+	if (!strcmp(this.outtarget, target)) {
+		return false;
+	}
+
+	boolean may_send = false;
+	ChannelUser cu = this.anna.find_user(target, user.nick);
+	if (this.echo != null && cu != null) {
+		may_send = has_user_mode_or_higher(cu, this.anna.get_user_channel_modes(), 'v');
+		if (may_send) {
+			this.echo.send_chat_or_action_to_game(
+				PACK_CHAT, cu.prefix, user.nick, msg, 0, msg.length);
+		}
 	}
 	if (strcmp(this.outtarget, target)) {
 		if (strcmp(cmd, 'e','c','h','o')) {
@@ -134,6 +141,15 @@ boolean on_command(User user, char[] target, char[] replytarget,
 		if (strcmp(cmd, 'e','c','h','o','-','p','i','n','g')) {
 			if (this.echo != null) {
 				this.echo.send_ping();
+			} else {
+				this.anna.privmsg(target, "echo is not running".toCharArray());
+			}
+			return true;
+		}
+		if (strcmp(cmd, 'p','l','a','y','e','r','s')) {
+			if (this.echo != null) {
+				// TODO: check ping, if server is online
+				this.echo.request_global_status(may_send);
 			} else {
 				this.anna.privmsg(target, "echo is not running".toCharArray());
 			}
@@ -214,6 +230,7 @@ public
 void on_nickchange(User user, char[] oldnick, char[] newnick)
 {
 	if (this.echo != null && this.anna.find_user(this.outtarget, newnick) != null) {
+		this.echo.on_user_nick_changed(oldnick, newnick);
 		StringBuilder s = new StringBuilder(144);
 		s.append("IRC: * ");
 		s.append(oldnick);
@@ -243,7 +260,7 @@ void on_action(User user, char[] target, char[] replytarget, char[] action)
 public
 void on_kick(User user, char[] channel, char[] kickeduser, char[] msg)
 {
-	if (strcmp(this.outtarget, channel)) {
+	if (this.echo != null) {
 		ChannelUser cu = this.anna.find_user(this.outtarget, kickeduser);
 		if (cu != null) {
 			this.echo.send_player_connection(cu, CONN_REASON_IRC_KICK);
@@ -272,7 +289,13 @@ public
 void on_join(User user, char[] channel)
 {
 	if (strcmp(this.outtarget, channel)) {
+		if (user != null && strcmp(user.nick, this.anna.get_anna_user().nick)) {
+			return;
+		}
 		this.send_player_connection(user, CONN_REASON_IRC_JOIN);
+		// Following call must be placed after send_player_connection,
+		// because it'd remove the user from the list of users to send the msg to.
+		this.echo.send_status_message_to_user(user);
 	}
 }
 
@@ -282,8 +305,18 @@ void send_player_connection(User user, byte reason)
 	if (user != null) {
 		ChannelUser cu = this.anna.find_user(this.outtarget, user.nick);
 		if (cu != null) {
+			this.echo.remove_user_from_awaiting_status_message_list(user.nick);
 			this.echo.send_player_connection(cu, reason);
 		}
+	}
+}
+
+@Override
+public
+void on_selfjoin(Channel channel)
+{
+	if (this.echo != null && strcmp(channel.name, this.outtarget)) {
+		this.echo.send_initial_status_message();
 	}
 }
 

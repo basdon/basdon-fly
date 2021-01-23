@@ -6,6 +6,11 @@
 static cell socket_in = SOCKET_INVALID_SOCKET;
 static cell socket_out = SOCKET_INVALID_SOCKET;
 
+static short players_needing_echo_status_message[MAX_PLAYERS];
+static int num_players_needing_echo_status_message;
+static char need_request_echo_status;
+static int last_request_echo_status_time;
+
 int echo_init(void *data)
 {
 	static const char *BUFLO = "127.0.0.1";
@@ -57,6 +62,13 @@ void echo_dispose()
 	}
 }
 
+/**
+Send player connection packet to IRC echo.
+
+@param playerid playerid that (dis)connected
+@param reason 3 when OnPlayerConnection, samp disconnection reason when OnPlayerDisconnect
+*/
+static
 void echo_on_player_connection(int playerid, int reason)
 {
 	int nicklen;
@@ -71,6 +83,62 @@ void echo_on_player_connection(int playerid, int reason)
 			((nicklen & 0xFF) << 24);
 		memcpy(cbuf144 + 8, pd->name, nicklen);
 		NC_ssocket_send(socket_out, buf144a, 8 + nicklen);
+	}
+}
+
+static
+void echo_send_status_request()
+{
+	if (socket_out != SOCKET_INVALID_SOCKET) {
+		buf144[0] = 0x07594C46;
+		NC_ssocket_send(socket_out, buf144a, 4);
+	}
+}
+
+/**
+The /irc command shows irc status
+*/
+static
+int echo_cmd_irc(CMDPARAMS)
+{
+	int i;
+
+	i = 0;
+	while (i < num_players_needing_echo_status_message) {
+		if (players_needing_echo_status_message[i] == playerid) {
+			return 1;
+		}
+		i++;
+	}
+	players_needing_echo_status_message[num_players_needing_echo_status_message++] = playerid;
+	need_request_echo_status = 1;
+	return 1;
+}
+
+static
+void echo_on_player_connect(int playerid)
+{
+	echo_on_player_connection(playerid, ECHO_CONN_REASON_GAME_CONNECTED);
+
+	players_needing_echo_status_message[num_players_needing_echo_status_message++] = playerid;
+	need_request_echo_status = 1;
+}
+
+static
+void echo_on_player_disconnect(int playerid, int reason)
+{
+	int i, popped;
+
+	echo_on_player_connection(playerid, reason);
+
+	i = 0;
+	while (i < num_players_needing_echo_status_message) {
+		if (players_needing_echo_status_message[i] == playerid) {
+			popped = players_needing_echo_status_message[--num_players_needing_echo_status_message];
+			players_needing_echo_status_message[i] = popped;
+			break;
+		}
+		i++;
 	}
 }
 
@@ -120,10 +188,68 @@ void echo_on_game_chat_or_action(int t, int playerid, char *text)
 	}
 }
 
+static
+void echo_send_status_message(char is_response_to_status_request)
+{
+	int i, playerid;
+	short msglen;
+	char *bufstart;
+	char *bufpos;
+
+	if (socket_out != SOCKET_INVALID_SOCKET) {
+		msglen = 0;
+		buf4096[0] = 0x08594C46;
+		cbuf4096[4] = is_response_to_status_request;
+		bufstart = cbuf4096 + 7;
+		bufpos = bufstart;
+		if (playercount) {
+			bufpos += sprintf(bufpos, "%d player(s) online:", playercount);
+			for (i = 0; i < playercount; i++) {
+				if (bufpos - bufstart > 450) {
+					bufpos += sprintf(bufpos, " and %d more", playercount - i);
+					break;
+				}
+				playerid = players[i];
+				bufpos += sprintf(bufpos, " %s(%d)", pdata[playerid]->name, playerid);
+			}
+		} else {
+			bufpos += sprintf(bufpos, "No players online (or none passed login screen).");
+		}
+		msglen = bufpos - bufstart;
+		*(short*) (cbuf4096 + 5) = msglen;
+		NC_ssocket_send(socket_out, buf4096a, 7 + msglen);
+	}
+}
+
+static
+void echo_on_receive_status_message(char *buf, int len)
+{
+#pragma pack(push,1)
+	struct STATUS_MESSAGE {
+		int packet_header;
+		char is_response_to_status_request;
+		short message_length;
+		char message[1]; /*actually arbitrary size*/
+	};
+#pragma pack(pop)
+
+	struct STATUS_MESSAGE *data;
+
+	data = (void*) buf;
+	data->message[len] = 0;
+	if (!data->is_response_to_status_request) {
+		/*Means the IRC brige just got online, so inform everyone.*/
+		SendClientMessageToAll(-1, data->message);
+	} else {
+		SendClientMessageToBatch(players_needing_echo_status_message, num_players_needing_echo_status_message, -1, data->message);
+	}
+	num_players_needing_echo_status_message = 0;
+}
+
 void echo_on_receive(cell socket_handle, cell data_a,
 		     char *data, int len)
 {
-	/*An IRC message can be up to 512 chars*/
+	/*An Echo message can be up to 512 chars*/
 	char msg512[512];
 
 	if (socket_handle == socket_in && len >= 4 &&
@@ -137,12 +263,20 @@ void echo_on_receive(cell socket_handle, cell data_a,
 				data[3] = PACK_IMTHERE;
 				NC_ssocket_send(socket_out, data_a, 8);
 			}
+			echo_send_status_message(0);
 			break;
 		case PACK_IMTHERE:
 			logprintf("IRC bridge is up");
 			/*no point printing this to chat, because this only
 			happens right after the server starts, thus nobody
 			is connected yet*/
+			break;
+		case PACK_BYE:
+			logprintf("IRC bridge is down");
+			if (len == 4) {
+				/*TODO: why is this only sent when len is checked?*/
+				SendClientMessageToAll(COL_IRC, "IRC brige is down");
+			}
 			break;
 		case PACK_PING:
 			if (len == 8) {
@@ -151,12 +285,11 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			}
 			break;
 		/*game doesn't send PING packets, so not checking PONG*/
-		case PACK_BYE:
-			logprintf("IRC bridge is down");
-			if (len == 4) {
-				/*TODO: why is this only sent when len is checked?*/
-				SendClientMessageToAll(COL_IRC, "IRC brige is down");
-			}
+		case PACK_STATUS_REQUEST:
+			echo_send_status_message(1);
+			break;
+		case PACK_STATUS:
+			echo_on_receive_status_message(data, len);
 			break;
 		case PACK_CHAT:
 		case PACK_ACTION:
@@ -265,3 +398,17 @@ void echo_on_receive(cell socket_handle, cell data_a,
 	}
 }
 
+static
+void echo_tick()
+{
+	int time;
+
+	if (need_request_echo_status) {
+		time = time_timestamp();
+		if (time - last_request_echo_status_time > 1000) {
+			need_request_echo_status = 0;
+			last_request_echo_status_time = time;
+			echo_send_status_request();
+		}
+	}
+}

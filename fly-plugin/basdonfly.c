@@ -1,7 +1,3 @@
-#define VERSION "0.1"
-
-
-
 /*define to print airport data when airports are loaded*/
 #undef AIRPORT_PRINT_STATS
 /*define to print map data when maps are loaded*/
@@ -450,6 +446,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 	int newtickcount;
 #endif /*LOG_SLOW_TICKS*/
 
+	echo_tick();
 	timer_tick();
 
 	if (joinpressure > 0) {

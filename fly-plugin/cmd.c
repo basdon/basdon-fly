@@ -57,6 +57,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/getspray", GROUPS_ALL, cmd_getspray },
 	{ 0, "/helpkeys", GROUPS_ALL, cmd_helpkeys },
 	{ 0, "/ils", GROUPS_ALL, nav_cmd_ils },
+	{ 0, "/irc", GROUPS_ALL, echo_cmd_irc },
 	{ 0, "/loc", GROUPS_ALL, zones_cmd_loc },
 	{ 0, "/nearest", GROUPS_ALL, airport_cmd_nearest },
 	{ 0, "/m", GROUPS_ALL, missions_cmd_mission },

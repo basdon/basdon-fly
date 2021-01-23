@@ -362,7 +362,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 
 	class_on_player_connect(playerid);
 	chpw_on_player_connect(playerid);
-	echo_on_player_connection(playerid, ECHO_CONN_REASON_GAME_CONNECTED);
+	echo_on_player_connect(playerid);
 	dialog_on_player_connect(playerid);
 	kneeboard_on_player_connect(playerid);
 	maps_on_player_connect(playerid);
@@ -427,7 +427,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 
 	airport_on_player_disconnect(playerid);
 	chpw_on_player_disconnect(playerid);
-	echo_on_player_connection(playerid, reason);
+	echo_on_player_disconnect(playerid, reason);
 	dialog_on_player_disconnect(playerid);
 	maps_on_player_disconnect(playerid);
 	missions_on_player_disconnect(playerid);
