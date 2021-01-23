@@ -9,7 +9,7 @@ static int kneeboard_last_distance[MAX_PLAYERS];
 
 static char kneeboard_is_shown[MAX_PLAYERS];
 
-#define KNEEBOARD_SHOULD_SHOW(PLAYERID) (spawned[PLAYERID])
+#define KNEEBOARD_SHOULD_SHOW(PLAYERID) (spawned[PLAYERID] && (prefs[PLAYERID] & PREF_SHOW_KNEEBOARD))
 
 static
 void kneeboard_init()
@@ -75,7 +75,7 @@ void kneeboard_update_all(int playerid, struct vec3 *playerpos)
 
 	if (!KNEEBOARD_SHOULD_SHOW(playerid)) {
 		if (kneeboard_is_shown[playerid]) {
-			textdraws_hide_consecutive(playerid, TEXTDRAW_KNEEBOARD_BASE, NUM_KNEEBOARD_TEXTDRAWS);
+			textdraws_hide_consecutive(playerid, NUM_KNEEBOARD_TEXTDRAWS, TEXTDRAW_KNEEBOARD_BASE);
 			kneeboard_is_shown[playerid] = 0;
 		}
 		return;
