@@ -11,11 +11,11 @@ char *prefs_append_pref(char *buf, char *description, int state)
 	buf++;
 	*(buf++) = '\t';
 	if (state) {
-		strcpy(buf, "{00f600}ENABLED");
-		buf += 15;
+		strcpy(buf, ECOL_SUCC"yes");
+		buf += 11;
 	} else {
-		strcpy(buf, "{f60000}DISABLED");
-		buf += 16;
+		strcpy(buf, ECOL_WARN"no");
+		buf += 10;
 	}
 	*(buf++) = '\n';
 	return buf;
