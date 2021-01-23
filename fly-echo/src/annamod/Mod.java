@@ -1,4 +1,4 @@
-// Copyright 2019 basdon.net - this source is licensed under AGPL
+// Copyright 2019-2021 basdon.net - this source is licensed under AGPL
 // see the LICENSE file for more details
 package annamod;
 
@@ -14,7 +14,8 @@ import static java.lang.System.arraycopy;
 import static net.basdon.anna.api.Util.*;
 import static net.basdon.fly.services.echo.Echo.*;
 
-public class Mod implements IMod
+public
+class Mod implements IMod
 {
 private static final String OPT_ECHO_CHAN = "echo.channel";
 private static final Properties defaultprops;
@@ -119,7 +120,7 @@ boolean on_command(User user, char[] target, char[] replytarget,
 			has_user_mode_or_higher(cu, this.anna.get_user_channel_modes(), 'v'))
 	{
 		this.echo.send_chat_or_action_to_game(
-			false, cu.prefix, user.nick, msg, 0, msg.length);
+			PACK_CHAT, cu.prefix, user.nick, msg, 0, msg.length);
 	}
 	if (strcmp(this.outtarget, target)) {
 		if (strcmp(cmd, 'e','c','h','o')) {
@@ -143,7 +144,8 @@ boolean on_command(User user, char[] target, char[] replytarget,
 }
 
 @Override
-public void on_topic(User user, char[] channel, char[] topic)
+public
+void on_topic(User user, char[] channel, char[] topic)
 {
 	if (this.echo != null && strcmp(channel, this.outtarget) &&
 		this.anna.find_channel(channel) != null)
@@ -162,7 +164,8 @@ public void on_topic(User user, char[] channel, char[] topic)
 }
 
 @Override
-public void on_channelmodechange(Channel chan, User user, int changec, char[] signs,
+public
+void on_channelmodechange(Channel chan, User user, int changec, char[] signs,
                                  char[] modes, char[] types, char[][] params, ChannelUser[] users)
 {
 	if (this.echo != null && strcmp(chan.name, this.outtarget)) {
@@ -230,7 +233,7 @@ void on_action(User user, char[] target, char[] replytarget, char[] action)
 			has_user_mode_or_higher(cu, this.anna.get_user_channel_modes(), 'v'))
 		{
 			this.echo.send_chat_or_action_to_game(
-				true, cu.prefix, user.nick,
+				PACK_ACTION, cu.prefix, user.nick,
 				action, 0, action.length);
 		}
 	}
@@ -294,7 +297,7 @@ void on_message(User user, char[] target, char[] replytarget, char[] msg)
 	{
 		if (has_user_mode_or_higher(cu, this.anna.get_user_channel_modes(), 'v')) {
 			this.echo.send_chat_or_action_to_game(
-				false, cu.prefix, user.nick, msg, 0, msg.length);
+				PACK_CHAT, cu.prefix, user.nick, msg, 0, msg.length);
 		} else {
 			for (char[] peep : this.people_without_permission) {
 				if (strcmp(peep, user.nick)) {
@@ -316,24 +319,26 @@ void on_message(User user, char[] target, char[] replytarget, char[] msg)
 }
 
 @Override
-public void on_selfmessage(char[] target, char[] text, int offset, int len)
+public
+void on_selfmessage(char[] target, char[] text, int offset, int len)
 {
 	if (this.echo != null && !this.echo.ignore_self && strcmp(this.outtarget, target)) {
 		User user = anna.get_anna_user();
 		ChannelUser cu = anna.find_user(target, user.nick);
 		char prefix = cu == null ? 0 : cu.prefix;
-		this.echo.send_chat_or_action_to_game(false, prefix, user.nick, text, offset, len);
+		this.echo.send_chat_or_action_to_game(PACK_CHAT, prefix, user.nick, text, offset, len);
 	}
 }
 
 @Override
-public void on_selfaction(char[] target, char[] text)
+public
+void on_selfaction(char[] target, char[] text, int offset, int len)
 {
 	if (this.echo != null && !this.echo.ignore_self) {
 		User user = anna.get_anna_user();
 		ChannelUser cu = anna.find_user(target, user.nick);
 		char prefix = cu == null ? 0 : cu.prefix;
-		this.echo.send_chat_or_action_to_game(true, prefix, user.nick, text, 0, text.length);
+		this.echo.send_chat_or_action_to_game(PACK_ACTION, prefix, user.nick, text, offset, len);
 	}
 }
 }

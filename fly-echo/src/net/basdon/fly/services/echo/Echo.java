@@ -1,4 +1,4 @@
-// Copyright 2019 basdon.net - this source is licensed under AGPL
+// Copyright 2019-2021 basdon.net - this source is licensed under AGPL
 // see the LICENSE file for more details
 package net.basdon.fly.services.echo;
 
@@ -9,20 +9,18 @@ import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 import net.basdon.anna.api.ChannelUser;
-import net.basdon.anna.api.Constants;
 import net.basdon.anna.api.IAnna;
 
 import static net.basdon.anna.api.Constants.*;
-import static net.basdon.anna.api.Util.*;
 
-public class Echo extends Thread
+public
+class Echo extends Thread
 {
 private static final int PORT_IN = 7767, PORT_OUT = 7768;
-private static final byte
+public static final byte
 	PACK_HELLO = 2,
 	PACK_IMTHERE = 3,
 	PACK_BYE = 4,
@@ -64,7 +62,7 @@ static
 private final byte[] buf = new byte[160];
 private final char[] channel;
 private final IAnna anna;
-private final byte[][] last_ping_payloads = new byte[10][];
+private final int[] last_ping_payloads = new int[10];
 private final long[] last_ping_stamps = new long[10];
 
 private int last_ping_idx;
@@ -76,7 +74,8 @@ public DatagramSocket outsocket;
 public int packets_received, bytes_received, invalid_packet_count;
 public long last_packet;
 
-public Echo(IAnna anna, char[] channel)
+public
+Echo(IAnna anna, char[] channel)
 {
 	this.anna = anna;
 	this.channel = channel;
@@ -140,11 +139,14 @@ throws InterruptedIOException
 		return;
 	}
 	int length = packet.getLength();
-	if (length < 4 || buf[0] != 'F' || buf[1] != 'L' || buf[2] != 'Y') {
+	ByteBuf stream = new ByteBuf(buf);
+	if (length < 4 || stream.readWord() != 0x4C46 || stream.readByte() != 'Y') {
 		invalid_packet_count++;
 		return;
 	}
-	switch (buf[3]) {
+	byte packet_id = stream.readByte();
+invalid_packet:
+	switch (packet_id) {
 	case PACK_HELLO:
 		buf[3] = PACK_IMTHERE;
 		send(buf, length);
@@ -159,12 +161,9 @@ throws InterruptedIOException
 		send(buf, length);
 		return;
 	case PACK_PONG:
+		int num = stream.readDword();
 		for (int i = 0; i < this.last_ping_payloads.length; i++) {
-			byte[] cache = this.last_ping_payloads[i];
-			if (cache != null &&
-				buf[4] == cache[4] && buf[5] == cache[5] &&
-				buf[6] == cache[6] && buf[7] == cache[7])
-			{
+			if (num == this.last_ping_payloads[i]) {
 				long time = System.currentTimeMillis() - this.last_ping_stamps[i];
 				msg("pong (" + time + "ms)");
 				return;
@@ -178,121 +177,118 @@ throws InterruptedIOException
 	case PACK_ACTION:
 	case PACK_CHAT:
 	{
-		byte nicklen;
-		int msglen;
-		if (length > 10 &&
-			(nicklen = buf[6]) > 0 && nicklen < 50 &&
-			(msglen = ((buf[7] & 0xFF) | ((buf[8] << 8) & 0xFF00))) > 0 &&
-			/*Arbitrary length limit. Echo spec says 512, but 512 is the limit of an IRC message.*/
-			msglen < 480 &&
-			9 + nicklen + msglen == length)
-		{
-			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
-			StringBuilder sb = new StringBuilder(225);
-			sb.append(new String(buf, 9, nicklen, StandardCharsets.US_ASCII));
-			sb.append('(').append(pid).append(')');
-			if (buf[3] != PACK_ACTION) {
-				sb.append(':');
-			}
-			sb.append(' ');
-			for (int i = 9 + nicklen, j = 0; j < msglen; j++, i++) {
-				char c = (char) buf[i];
-				if (c >= ' ') {
-					sb.append(c);
-				}
-			}
-			if (buf[3] == PACK_ACTION) {
-				this.anna.sync_exec(() -> {
-					this.ignore_self = true;
-					this.anna.action(this.channel, chars(sb));
-					this.ignore_self = false;
-				});
-			} else {
-				this.ignore_self = true;
-				msg(sb.toString());
-				this.ignore_self = false;
-			}
-			return;
+		if (length < 11) {
+			break;
 		}
-		break;
+		short playerid = stream.readWord(); // 5-6
+		byte nicklen = stream.readByte(); // 7
+		if (nicklen < 1 || 49 < nicklen) {
+			break;
+		}
+		short msglen = stream.readWord(); // 8-9
+		/*Arbitrary length limit. Echo spec says 512, but 512 is the limit of an IRC message.*/
+		if (msglen < 1 || 480 < msglen) {
+			break;
+		}
+		if (9 + nicklen + msglen != length) {
+			break;
+		}
+		CharBuf msg = new CharBuf(512);
+		msg.writeUTF8(stream, nicklen);
+		msg.writeChar('(');
+		msg.writeString(String.valueOf(playerid));
+		msg.writeChar(')');
+		if (packet_id != PACK_ACTION) {
+			msg.writeChar(':');
+		}
+		msg.writeChar(' ');
+		msg.writeUTF8Filtered(stream, msglen);
+		this.anna.sync_exec(() -> {
+			this.ignore_self = true;
+			if (packet_id == PACK_ACTION) {
+				this.anna.action(this.channel, msg.chars, 0, msg.pos);
+			} else {
+				this.anna.privmsg(this.channel, msg.chars, 0, msg.pos);
+			}
+			this.ignore_self = false;
+		});
+		return;
 	}
 	case PACK_GENERIC_MESSAGE:
 	{
-		int msglen;
-		if (length > 7 &&
-			(msglen = (buf[5] & 0xFF) | ((buf[6] << 8) & 0xFF00)) <= 450 &&
-			7 + msglen == length)
-		{
-			char[] msg;
-			int i;
-			switch(buf[4]) {
-			case PACK12_FLIGHT_MESSAGE:
-				msg = new char[3 + msglen];
-				msg[0] = Constants.CTRL_COLOR;
-				msg[1] = '0';
-				msg[2] = '7'; // '0' + Constants.COL_ORANGE
-				i = 3;
-				break;
-			case PACK12_TRAC_MESSAGE:
-				msg = new char[3 + msglen];
-				msg[0] = Constants.CTRL_COLOR;
-				msg[1] = '0';
-				msg[2] = '5'; // '0' + Constants.BROWN;
-				i = 3;
-				break;
-			default:
-				return;
-			}
-			for (int j = 7; i < msg.length; j++) {
-				char c = (char) buf[j];
-				if (c >= ' ') {
-					msg[i] = c;
-					i++;
-				}
-			}
-			final int I = i;
-			this.anna.sync_exec(() -> {
-				this.ignore_self = true;
-				this.anna.privmsg(this.channel, msg, 0, I);
-				this.ignore_self = false;
-			});
-			return;
+		if (length < 8) {
+			break;
 		}
-		break;
+		byte type = stream.readByte(); // 4
+		short msglen = stream.readWord(); // 5-6
+		if (msglen < 1 || 450 < msglen) {
+			break;
+		}
+		if (length != 7 + msglen) {
+			break;
+		}
+		CharBuf msg = new CharBuf(3 + msglen);
+		switch(type) {
+		case PACK12_FLIGHT_MESSAGE:
+			msg.writeChar(CTRL_COLOR);
+			msg.writeString(SCOL_ORANGE);
+			break;
+		case PACK12_TRAC_MESSAGE:
+			msg.writeChar(CTRL_COLOR);
+			msg.writeString(SCOL_BROWN);
+			break;
+		default:
+			break invalid_packet;
+		}
+		msg.writeUTF8Filtered(stream, msglen);
+		this.anna.sync_exec(() -> {
+			this.ignore_self = true;
+			this.anna.privmsg(this.channel, msg.chars, 0, msg.pos);
+			this.ignore_self = false;
+		});
+		return;
 	}
 	case PACK_PLAYER_CONNECTION:
-		byte nicklen;
-		if (length > 8 &&
-			(nicklen = buf[7]) > 0 && nicklen < 50 &&
-			8 + nicklen == length)
-		{
-			int reason = buf[6];
-			int pid = (buf[4] & 0xFF) | ((buf[5] & 0xFF) << 8);
-			StringBuilder sb = new StringBuilder(225);
-			sb.append(CTRL_COLOR).append(SCOL_GREY);
-			if (reason == CONN_REASON_GAME_CONNECTED) {
-				sb.append("-> ");
-			} else {
-				sb.append("<- ");
-			}
-			sb.append(new String(buf, 8, nicklen, StandardCharsets.US_ASCII));
-			sb.append('(').append(pid).append(')').append(' ');
-			if (reason == CONN_REASON_GAME_CONNECTED) {
-				sb.append("connected to the server");
-			} else {
-				sb.append("disconnected from the server");
-				switch (reason) {
-				case CONN_REASON_GAME_TIMEOUT: sb.append(" (ping timeout)"); break;
-				case CONN_REASON_GAME_QUIT: sb.append(" (quit)"); break;
-				case CONN_REASON_GAME_KICK: sb.append(" (kicked)"); break;
-				}
-			}
-			this.ignore_self = true;
-			msg(sb.toString());
-			this.ignore_self = false;
-			return;
+		if (length < 9) {
+			break;
 		}
-		break;
+		short playerid = stream.readWord(); // 4-5
+		byte reason = stream.readByte(); // 6
+		byte nicklen = stream.readByte(); // 7
+		if (nicklen < 1 || 50 < nicklen) {
+			break;
+		}
+		if (8 + nicklen != length) {
+			break;
+		}
+		CharBuf msg = new CharBuf(256);
+		msg.writeChar(CTRL_COLOR);
+		msg.writeString(SCOL_GREY);
+		if (reason == CONN_REASON_GAME_CONNECTED) {
+			msg.writeString("-> ");
+		} else {
+			msg.writeString("<- ");
+		}
+		msg.writeUTF8(stream, nicklen);
+		msg.writeChar('(');
+		msg.writeString(String.valueOf(playerid));
+		msg.writeChar(')');
+		if (reason == CONN_REASON_GAME_CONNECTED) {
+			msg.writeString("connected to the server");
+		} else {
+			msg.writeString("disconnected from the server");
+			switch (reason) {
+			case CONN_REASON_GAME_TIMEOUT: msg.writeString(" (ping timeout)"); break;
+			case CONN_REASON_GAME_QUIT: msg.writeString(" (quit)"); break;
+			case CONN_REASON_GAME_KICK: msg.writeString(" (kicked)"); break;
+			}
+		}
+		this.anna.sync_exec(() -> {
+			this.ignore_self = true;
+			this.anna.privmsg(this.channel, msg.chars, 0, msg.pos);
+			this.ignore_self = false;
+		});
+		return;
 	}
 	invalid_packet_count++;
 }
@@ -329,36 +325,32 @@ void msg(String message)
  * @param len length of message
  */
 public
-void send_chat_or_action_to_game(boolean isaction, char prefix, char[] nickname,
+void send_chat_or_action_to_game(byte packet_type, char prefix, char[] nickname,
                                  char[] message, int off, int len)
 {
 	byte nicklen = (byte) Math.min(nickname.length, 49);
 	if (prefix != 0) {
 		nicklen++;
 	}
-	int msglen = Math.min(len, 512);
-	byte[] msg = new byte[9 + nicklen + msglen];
-	msg[0] = 'F';
-	msg[1] = 'L';
-	msg[2] = 'Y';
-	msg[3] = (byte) (isaction ? PACK_ACTION : PACK_CHAT);
-	msg[4] = msg[5] = 0; // as per spec
-	msg[6] = nicklen;
-	msg[7] = (byte) (msglen & 0xFF);
-	msg[8] = (byte) ((msglen >> 8) & 0xFF);
-	int j = 9;
+	int msgLenChars = Math.min(len, 512);
+
+	ByteBuf buf = new ByteBuf(9 + nicklen + msgLenChars * 4, packet_type);
+	buf.writeWord(0); // playerid, 0 as per spec
+	buf.writeByte(nicklen);
+	buf.markAndSkip(2); // msglen - to be set after writing the msg
 	if (prefix != 0) {
-		msg[j] = (byte) prefix;
-		j++;
-		nicklen--; // for for-loop below
+		buf.writeByte(prefix);
 	}
-	for (int i = 0; i < nicklen; i++, j++) {
-		msg[j] = (byte) nickname[i];
+	buf.writeASCII(nickname, 0, nickname.length);
+	int msgLenBytes = buf.writeUTF8(message, off, msgLenChars);
+	int bufLen = buf.pos;
+	buf.exchangeMarkAndPos();
+	buf.writeWord(msgLenBytes);
+
+	if (bufLen > 510) {
+		bufLen = 510;
 	}
-	for (int i = 0; i < msglen; i++, j++) {
-		msg[j] = (byte) message[i + off];
-	}
-	this.send(msg, msg.length);
+	this.send(buf.buf, bufLen);
 }
 
 /**
@@ -374,24 +366,17 @@ void send_player_connection(ChannelUser user, byte reason)
 	if (user.prefix != 0) {
 		nicklen++;
 	}
-	byte[] msg = new byte[8 + nicklen];
-	msg[0] = 'F';
-	msg[1] = 'L';
-	msg[2] = 'Y';
-	msg[3] = PACK_PLAYER_CONNECTION;
-	msg[4] = msg[5] = 0; // as per spec
-	msg[6] = reason;
-	msg[7] = nicklen;
-	int j = 8;
+
+	ByteBuf buf = new ByteBuf(8 + nicklen, PACK_PLAYER_CONNECTION);
+	buf.writeWord(0); // playerid, 0 as per spec
+	buf.writeByte(reason);
+	buf.writeByte(nicklen);
 	if (user.prefix != 0) {
-		msg[j] = (byte) user.prefix;
-		j++;
-		nicklen--; // for for-loop below
+		buf.writeByte(user.prefix);
 	}
-	for (int i = 0; i < nicklen; i++, j++) {
-		msg[j] = (byte) user.nick[i];
-	}
-	this.send(msg, msg.length);
+	buf.writeASCII(user.nick, 0, user.nick.length);
+
+	this.send(buf.buf, buf.pos);
 }
 
 /**
@@ -402,22 +387,19 @@ void send_player_connection(ChannelUser user, byte reason)
 public
 void send_ping()
 {
-	Random r = new Random();
-	byte[] msg = new byte[8];
-	msg[0] = 'F';
-	msg[1] = 'L';
-	msg[2] = 'Y';
-	msg[3] = PACK_PING;
-	for (int i = 4; i < msg.length; i++) {
-		msg[i] = (byte) (r.nextInt(100) + 2);
-	}
+	int randomNumber = new Random().nextInt();
+	randomNumber |= 0x02020202; // as per packet spec, bytes can't contain 0 or 1
+
+	ByteBuf msg = new ByteBuf(8, PACK_PING);
+	msg.writeDword(randomNumber);
+	this.send(msg.buf, msg.buf.length);
+
 	this.last_ping_idx++;
 	if (this.last_ping_idx >= this.last_ping_payloads.length) {
 		this.last_ping_idx = 0;
 	}
-	this.last_ping_payloads[this.last_ping_idx] = msg;
+	this.last_ping_payloads[this.last_ping_idx] = randomNumber;
 	this.last_ping_stamps[this.last_ping_idx] = System.currentTimeMillis();
-	this.send(msg, msg.length);
 }
 
 private
@@ -431,21 +413,22 @@ void send_hello()
 public
 void send_generic_message(char[] message, byte type)
 {
-	int len = message.length;
-	if (len > 450) {
-		len = 450;
+	int msgLenChars = message.length;
+	if (msgLenChars > 450) {
+		msgLenChars = 450;
 	}
-	byte[] msg = new byte[7 + len];
-	msg[0] = 'F';
-	msg[1] = 'L';
-	msg[2] = 'Y';
-	msg[3] = PACK_GENERIC_MESSAGE;
-	msg[4] = type;
-	msg[5] = (byte) (len & 0xFF);
-	msg[6] = (byte) ((len >> 8) & 0xFF);
-	for (int i = 0; i < len; i++) {
-		msg[7 + i] = (byte) message[i];
+
+	ByteBuf buf = new ByteBuf(7 + msgLenChars * 4, PACK_GENERIC_MESSAGE);
+	buf.writeByte(type);
+	buf.markAndSkip(2); // msglen - to be set after writing the msg
+	int msgLenBytes = buf.writeUTF8(message, 0, msgLenChars);
+	int bufLen = buf.pos;
+	buf.exchangeMarkAndPos();
+	buf.writeWord(msgLenBytes);
+
+	if (bufLen > 510) {
+		bufLen = 510;
 	}
-	this.send(msg, msg.length);
+	this.send(buf.buf, bufLen);
 }
 }
