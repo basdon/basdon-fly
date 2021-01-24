@@ -406,17 +406,20 @@ invalid_packet:
 		if (length != 7 + msglen) {
 			break;
 		}
-		CharBuf msg = new CharBuf(3 + msglen);
+		CharBuf msg;
 		switch(type) {
 		case PACK12_FLIGHT_MESSAGE:
+			msg = new CharBuf(3 + msglen);
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_ORANGE);
 			break;
 		case PACK12_TRAC_MESSAGE:
+			msg = new CharBuf(3 + msglen);
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_BROWN);
 			break;
 		case PACK12_PROTIP:
+			msg = new CharBuf(6 + msglen);
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_CYAN);
 			msg.writeChar(',');
