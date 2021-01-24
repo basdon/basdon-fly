@@ -1181,7 +1181,7 @@ void missions_cleanup(int playerid)
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	number_missions_started_stopped[playerid]++;
 
-	common_GetPlayerPos(playerid, &pos);
+	GetPlayerPos(playerid, &pos);
 	kneeboard_update_all(playerid, &pos);
 }
 
@@ -1308,7 +1308,7 @@ int missions_start_flight(void *data)
 	SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &mission->endpoint->pos, MISSION_CP_RAD);
 	HideGameTextForPlayer(playerid);
 	TogglePlayerControllable(playerid, 1);
-	common_GetPlayerPos(playerid, &pos);
+	GetPlayerPos(playerid, &pos);
 	kneeboard_update_all(playerid, &pos);
 
 	csprintf(buf144,
@@ -1397,7 +1397,7 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 		}
 	}
 
-	common_GetPlayerPos(playerid, &player_position);
+	GetPlayerPos(playerid, &player_position);
 	dx = player_position.x - startpoint->pos.x;
 	dy = player_position.y - startpoint->pos.y;
 	if (dx * dx + dy * dy > MISSION_CP_RAD_SQ) {
@@ -1819,7 +1819,7 @@ void missions_on_player_state_change(int playerid, int from, int to)
 			missions_jobmap_hide(playerid); /*sets controllable and mission state*/
 		}
 
-		common_GetPlayerPos(playerid, &pos);
+		GetPlayerPos(playerid, &pos);
 		missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 	}
 
@@ -2028,7 +2028,7 @@ void missions_locate_closest_mission(int playerid)
 	float closest_distance_sq, distance_sq;
 	int vehicleid;
 
-	common_GetPlayerPos(playerid, &pos);
+	GetPlayerPos(playerid, &pos);
 	closest_index = -1;
 	closest_distance_sq = float_pinf;
 	for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {

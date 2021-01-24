@@ -9,7 +9,7 @@ int cmd_dev_cp(CMDPARAMS)
 	if (vehicleid) {
 		GetVehiclePos(vehicleid, &pos);
 	} else {
-		common_GetPlayerPos(playerid, &pos);
+		GetPlayerPos(playerid, &pos);
 	}
 	SetPlayerRaceCheckpointNoDir(playerid, 2, &pos, 8.0f);
 	return 1;
@@ -228,7 +228,7 @@ int cmd_dev_platform(CMDPARAMS)
 	if (devplatformobj != INVALID_OBJECT_ID) {
 		NC_DestroyObject(devplatformobj);
 	}
-	common_GetPlayerPos(playerid, &ppos);
+	GetPlayerPos(playerid, &ppos);
 	NC_PARS(8);
 	nc_params[1] = 3374;
 	nc_paramf[2] = ppos.x;
@@ -287,6 +287,7 @@ The /v cmd to spawn a dev vehicle.
 static
 int cmd_dev_v(CMDPARAMS)
 {
+	struct vec4 pos;
 	int modelid = -1;
 	char msg144[144];
 
@@ -300,14 +301,13 @@ int cmd_dev_v(CMDPARAMS)
 		nc_params[1] = devvehicle;
 		NC(n_DestroyVehicle_);
 	}
-	NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
-	NC_GetPlayerFacingAngle(playerid, buf32_1a);
+	GetPlayerPosRot(playerid, &pos);
 	NC_PARS(9);
 	nc_params[1] = modelid;
-	nc_params[2] = *buf32;
-	nc_params[3] = *buf64;
-	nc_params[4] = *buf144;
-	nc_params[5] = *buf32_1;
+	nc_paramf[2] = pos.coords.x;
+	nc_paramf[3] = pos.coords.y;
+	nc_paramf[4] = pos.coords.z;
+	nc_paramf[5] = pos.r;
 	nc_params[6] = nc_params[7] = nc_params[8] = 126;
 	nc_params[9] = 0;
 	devvehicle = NC(n_CreateVehicle_);

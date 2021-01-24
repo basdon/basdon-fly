@@ -41,7 +41,7 @@ int cmd_admin_goto(CMDPARAMS)
 				SendClientMessage(playerid, COL_WARN, "Target player is offline");
 				return 1;
 			}
-			common_GetPlayerPos(targetplayerid, &pos.coords);
+			GetPlayerPos(targetplayerid, &pos.coords);
 			/*TODO: same interior*/
 			pos.coords.x += 0.3f;
 			pos.coords.y += 0.3f;
@@ -83,7 +83,7 @@ int cmd_admin_tocar(CMDPARAMS)
 		}
 		closest_vehicleid = -1;
 		min_distance_sq = float_pinf;
-		common_GetPlayerPos(playerid, &player_pos);
+		GetPlayerPos(playerid, &player_pos);
 		for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
 			if (GetVehicleModel(vehicleid) == modelid) {
 				GetVehiclePosUnsafe(vehicleid, &vehicle_pos);
@@ -146,7 +146,7 @@ int cmd_admin_tomsp(CMDPARAMS)
 		}
 	} else {
 		closest_distance_sq = float_pinf;
-		common_GetPlayerPos(playerid, &player_pos);
+		GetPlayerPos(playerid, &player_pos);
 		for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {
 			if (missionpoints[mspindex].type & msptype_mask) {
 				dx = player_pos.x - missionpoints[mspindex].pos.x;
@@ -186,7 +186,7 @@ int cmd_at400(CMDPARAMS)
 
 	found_vehicle = 0;
 	shortest_distance = float_pinf;
-	common_GetPlayerPos(playerid, &playerpos);
+	GetPlayerPos(playerid, &playerpos);
 	for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
 		if (GetVehicleModel(vehicleid) == MODEL_AT400 &&
 			IsVehicleStreamedIn(vehicleid, playerid) &&

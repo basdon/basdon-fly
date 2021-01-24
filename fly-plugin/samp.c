@@ -214,6 +214,26 @@ int IsVehicleStreamedIn(int vehicleid, int forplayerid)
 }
 
 static
+void GetPlayerPos(int playerid, struct vec3 *pos)
+{
+	*pos = player[playerid]->pos;
+}
+
+static
+__attribute((unused))
+float GetPlayerFacingAngle(int playerid)
+{
+	return player[playerid]->facingAngle;
+}
+
+static
+void GetPlayerPosRot(int playerid, struct vec4 *pos)
+{
+	pos->coords = player[playerid]->pos;
+	pos->r = player[playerid]->facingAngle;
+}
+
+static
 short GetPlayerVehicleSeat(int playerid)
 {
 	return player[playerid]->vehicleseat;
@@ -695,8 +715,7 @@ void natives_SpawnPlayer(int playerid)
 {
 	/*eject player first if they're in a vehicle*/
 	if (GetPlayerVehicleID(playerid)) {
-		NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
-		NC(n_SetPlayerPos_);
+		NC_ClearAnimations(playerid, 1);
 	}
 	spawn_prespawn(playerid);
 

@@ -61,40 +61,6 @@ float common_xy_dist_sq(struct vec3 a, struct vec3 b)
 	return dx * dx + dy * dy;
 }
 
-void common_GetPlayerKeys(int playerid, struct PLAYERKEYS *keys)
-{
-	NC_PARS(4);
-	nc_params[1] = playerid;
-	nc_params[2] = buf32a;
-	nc_params[3] = buf32a + 4;
-	nc_params[4] = buf32a + 8;
-	NC(n_GetPlayerKeys);
-	memcpy(keys, buf32, sizeof(struct PLAYERKEYS));
-}
-
-int common_GetPlayerPos(int playerid, struct vec3 *pos)
-{
-	int res;
-	res = NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
-	pos->x = *fbuf32;
-	pos->y = *fbuf64;
-	pos->z = *fbuf144;
-	return res;
-}
-
-int common_GetPlayerPosRot(int playerid, struct vec4 *pos)
-{
-	int res;
-	res = NC_GetPlayerPos(playerid, buf32a, buf64a, buf144a);
-	pos->coords.x = *fbuf32;
-	pos->coords.y = *fbuf64;
-	pos->coords.z = *fbuf144;
-	NC_PARS(2);
-	res &= NC(n_GetPlayerFacingAngle);
-	pos->r = *fbuf32;
-	return res;
-}
-
 int common_GetVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d)
 {
 	int res;

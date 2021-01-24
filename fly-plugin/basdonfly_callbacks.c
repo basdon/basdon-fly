@@ -411,7 +411,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 
 	spawn_prespawn(playerid);
 	timecyc_on_player_death(playerid);
-	common_GetPlayerPos(playerid, &pos);
+	GetPlayerPos(playerid, &pos);
 	zones_update(playerid, pos);
 	kneeboard_update_all(playerid, &pos);
 
@@ -542,7 +542,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 
 	spawned[playerid] = 1;
 
-	common_GetPlayerPos(playerid, &pos);
+	GetPlayerPos(playerid, &pos);
 	kneeboard_update_all(playerid, &pos);
 	maps_stream_for_player(playerid, pos);
 	money_on_player_spawn(playerid);

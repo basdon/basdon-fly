@@ -69,10 +69,10 @@ void prefs_on_dialog_response(int playerid, int response, int idx)
 		val = 1 << idx;
 		prefs[playerid] ^= val;
 		if (val == PREF_SHOW_GPS) {
-			common_GetPlayerPos(playerid, &pos);
+			GetPlayerPos(playerid, &pos);
 			zones_update(playerid, pos);
 		} else if (val == PREF_SHOW_KNEEBOARD) {
-			common_GetPlayerPos(playerid, &pos);
+			GetPlayerPos(playerid, &pos);
 			kneeboard_update_all(playerid, &pos);
 		} else if (val == PREF_PANEL_NIGHTCOLORS) {
 			if (panel_is_active_for(playerid)) {

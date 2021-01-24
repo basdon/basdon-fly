@@ -19,12 +19,9 @@ static AMX_NATIVE n_EnableStuntBonusForAll;
 static AMX_NATIVE n_ForceClassSelection;
 static AMX_NATIVE n_GameTextForPlayer;
 static AMX_NATIVE n_GetConsoleVarAsInt;
-static AMX_NATIVE n_GetPlayerFacingAngle;
 static AMX_NATIVE n_GetPlayerIp;
-static AMX_NATIVE n_GetPlayerKeys;
 static AMX_NATIVE n_GetPlayerName;
 static AMX_NATIVE n_GetPlayerPing;
-static AMX_NATIVE n_GetPlayerPos;
 static AMX_NATIVE n_GetPlayerScore;
 static AMX_NATIVE n_GetServerTickRate;
 static AMX_NATIVE n_GetVehicleDamageStatus;
@@ -172,10 +169,6 @@ static cell tmpfloat;
 #define NC_GetConsoleVarAsInt(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
 	n_GetConsoleVarAsInt(amx,nc_params))
 
-#define NC_GetPlayerFacingAngle(PLAYERID,FANGLE) (NC_PARS_(2)\
-	nc_params[1]=PLAYERID,nc_params[2]=FANGLE,\
-	n_GetPlayerFacingAngle(amx,nc_params))
-
 #define NC_GetPlayerIp(PLAYERID,BUF,LEN) (NC_PARS_(3)\
 	nc_params[1]=PLAYERID,nc_params[2]=BUF,nc_params[3]=LEN,\
 	n_GetPlayerIp(amx,nc_params))
@@ -186,11 +179,6 @@ static cell tmpfloat;
 
 #define NC_GetPlayerPing(PLAYERID) (NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_GetPlayerPing(amx,nc_params))
-
-#define NC_GetPlayerPos(PLAYERID,FREFX,FREFY,FREFZ) (NC_PARS_(4)\
-	nc_params[1]=PLAYERID,nc_params[2]=FREFX,nc_params[3]=FREFY,\
-	nc_params[4]=FREFZ,\
-	n_GetPlayerPos(amx,nc_params))
 
 #define NC_GetPlayerScore(PLAYERID) (NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_GetPlayerScore(amx,nc_params))
@@ -404,11 +392,8 @@ int natives_find()
 		N(GameTextForPlayer),
 		N(GetConsoleVarAsInt),
 		N(GetPlayerIp),
-		N(GetPlayerFacingAngle),
-		N(GetPlayerKeys),
 		N(GetPlayerName),
 		N(GetPlayerPing),
-		N(GetPlayerPos),
 		N(GetPlayerScore),
 		N(GetServerTickRate),
 		N(GetVehicleDamageStatus),

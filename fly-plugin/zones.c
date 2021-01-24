@@ -179,7 +179,7 @@ int zones_cmd_loc(CMDPARAMS)
 		SendClientMessage(playerid, COL_WARN, WARN"That player is not online.");
 		return 1;
 	}
-	common_GetPlayerPos(target, &pos);
+	GetPlayerPos(target, &pos);
 	zones_update(target, pos);
 
 	b = buf;

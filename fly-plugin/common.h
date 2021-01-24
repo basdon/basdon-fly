@@ -4,13 +4,6 @@
 /*prototype for commonly used struct*/
 struct dbvehicle;
 
-struct PLAYERKEYS {
-	int keys;
-	int updown;
-	int leftright;
-};
-EXPECT_SIZE(struct PLAYERKEYS, 3 * sizeof(cell));
-
 struct VEHICLEDAMAGE {
 	unsigned int panels;
 	unsigned int doors;
@@ -204,24 +197,6 @@ float common_dist_sq(struct vec3 a, struct vec3 b);
 @return squared xy distance between given points
 */
 float common_xy_dist_sq(struct vec3 a, struct vec3 b);
-/**
-Alternative for GetPlayerKeys to get it directly into a PLAYERKEYS struct.
-
-Will use buf32.
-*/
-void common_GetPlayerKeys(int playerid, struct PLAYERKEYS *keys);
-/**
-Alternative for GetPlayerPos to get it directly into a vec3 struct.
-
-Will use buf32, buf64, buf144.
-*/
-int common_GetPlayerPos(int playerid, struct vec3 *pos);
-/**
-Get a player's position and rotation directly into a vec4 struct.
-
-Will use buf32, buf64, buf144.
-*/
-int common_GetPlayerPosRot(int playerid, struct vec4 *pos);
 /**
 Convenience method for GetVehicleDamageStatus.
 

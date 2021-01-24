@@ -546,17 +546,16 @@ float model_fuel_usage(int modelid)
 
 /**
 Make given vehicle consumer fuel. Should be called every second while the engine is on.
-
-@param throttle whether the player is holding the throttle down
 */
 static
-void veh_consume_fuel(int playerid, int vehicleid, int throttle, struct dbvehicle *veh)
+void veh_consume_fuel(int playerid, int vehicleid, struct dbvehicle *veh)
 {
-	const float consumptionmp = throttle ? 1.0f : 0.2f;
+	float consumptionmp;
 	float fuelcapacity, lastpercentage, newpercentage;
 
 	fuelcapacity = model_fuel_capacity(veh->model);
 	lastpercentage = veh->fuel / fuelcapacity;
+	consumptionmp = (player[playerid]->keys & KEY_SPRINT) ? 1.0f : 0.2f; /*KEY_SPRINT is vehicle acceleration key*/
 	veh->fuel -= model_fuel_usage(veh->model) * consumptionmp;
 	if (veh->fuel < 0.0f) {
 		veh->fuel = 0.0f;
@@ -915,7 +914,6 @@ void veh_timed_1s_update()
 {
 	struct dbvehicle *veh;
 	struct vec3 vpos, *ppos = &vpos;
-	struct PLAYERKEYS pkeys;
 	int playerid, vehicleid, vehiclemodel, n = playercount;
 	unsigned long timestamp = time_timestamp();
 	unsigned long ctrla = timestamp - 30000;
@@ -926,7 +924,7 @@ void veh_timed_1s_update()
 	while (n--) {
 		playerid = players[n];
 
-		common_GetPlayerPos(playerid, ppos);
+		GetPlayerPos(playerid, ppos);
 		svp_update_mapicons(playerid, ppos->x, ppos->y);
 		/*TODO move this elsewhere I guess*/
 		missions_update_missionpoint_indicators(playerid, ppos->x, ppos->y, ppos->z);
@@ -956,8 +954,7 @@ void veh_timed_1s_update()
 			engineState = GetVehicleEngineState(vehicleid);
 
 			if (engineState && veh) {
-				common_GetPlayerKeys(playerid, &pkeys);
-				veh_consume_fuel(playerid, vehicleid, pkeys.keys & KEY_SPRINT, veh);
+				veh_consume_fuel(playerid, vehicleid, veh);
 			}
 
 			model_stats = NULL;

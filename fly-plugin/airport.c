@@ -262,7 +262,7 @@ int airport_cmd_nearest(CMDPARAMS)
 	struct AIRPORT **map;
 	struct APREF *aps = malloc(sizeof(struct APREF) * numairports);
 
-	common_GetPlayerPos(playerid, &playerpos);
+	GetPlayerPos(playerid, &playerpos);
 
 	while (i < numairports) {
 		if (airports[i].enabled) {

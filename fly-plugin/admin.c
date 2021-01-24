@@ -10,7 +10,7 @@ int cmd_admin_getcar(CMDPARAMS)
 	if (!cmd_get_int_param(cmdtext, &parseidx, &vehicleid)) {
 		SendClientMessage(playerid, COL_WARN, WARN" Syntax: //getcar <vehicleid>");
 	} else {
-		common_GetPlayerPosRot(playerid, &ppos);
+		GetPlayerPosRot(playerid, &ppos);
 		if (common_SetVehiclePos(vehicleid, &ppos.coords)) {
 			natives_PutPlayerInVehicle(playerid, vehicleid, 0);
 			NC_SetVehicleZAngle(vehicleid, ppos.r);
@@ -51,7 +51,7 @@ int cmd_admin_makeanewpermanentpublicvehiclehere(CMDPARAMS)
 	int modelid = -1, vehicleid;
 
 	if (cmd_get_vehiclemodel_param(cmdtext, &parseidx, &modelid)) {
-		common_GetPlayerPosRot(playerid, &ppos);
+		GetPlayerPosRot(playerid, &ppos);
 		veh = veh_create_new_dbvehicle(modelid, &ppos);
 		vehicleid = veh_create(veh);
 		if (vehicleid != INVALID_VEHICLE_ID) {
@@ -78,11 +78,11 @@ int cmd_admin_rr(CMDPARAMS)
 	int occupied_vehicles[MAX_PLAYERS];
 	int numov = 0;
 
-	common_GetPlayerPos(playerid, &ppos);
+	GetPlayerPos(playerid, &ppos);
 	for (i = 0; i < playercount; i++) {
 		vehicleid = GetPlayerVehicleID(players[i]);
 		if (vehicleid) {
-			common_GetPlayerPos(players[i], &oppos);
+			GetPlayerPos(players[i], &oppos);
 			if (common_xy_dist_sq(ppos, oppos) < RR_SQ) {
 				occupied_vehicles[numov++] = vehicleid;
 			}

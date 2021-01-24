@@ -560,7 +560,7 @@ void maps_process_tick()
 				currentplayeridx = 0;
 			}
 			playerid = players[currentplayeridx];
-			common_GetPlayerPos(playerid, &ppos);
+			GetPlayerPos(playerid, &ppos);
 			maps_stream_for_player(playerid, ppos);
 		}
 	}
