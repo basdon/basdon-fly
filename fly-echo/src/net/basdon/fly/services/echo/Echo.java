@@ -419,6 +419,8 @@ invalid_packet:
 		case PACK12_PROTIP:
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_CYAN);
+			msg.writeChar(',');
+			msg.writeString(SCOL_BLACK);
 			break;
 		default:
 			break invalid_packet;
