@@ -6,21 +6,6 @@ extern hook_OnDriverSync
 extern hook_OnPassengerSync
 extern printf
 
-;prot void InitAfterPoolsCreated();
-;test *(int*) 0x80AB939 == 0xFFFFD893 /*The logprintf call.*/
-;test *(int*) 0x80AA0E8 == 0x81CA4BC /*The write to pNetGame.*/
-global InitAfterPoolsCreated:function
-InitAfterPoolsCreated:
-	; get netgame
-	mov eax, 081CA4BCh
-	mov eax, [eax]
-	mov [samp_pNetGame], eax
-
-	; the hook replaced a call to logprintf
-	push 080AB93Dh
-	mov eax, 080A91D0h
-	jmp eax
-
 ;prot void printf_logprintf(char *format, ...);
 global printf_logprintf:function
 printf_logprintf:

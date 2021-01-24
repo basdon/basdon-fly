@@ -173,6 +173,8 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	char mysqlcreds[1000], *m;
 	int mysql_errno, usrlen, dblen, pwlen, mysqllen;
 
+	samp_pNetGame = *(struct SampNetGame**) 0x81CA4BC;
+
 	t = time_timestamp();
 
 	memset(spawned, 0, sizeof(spawned));

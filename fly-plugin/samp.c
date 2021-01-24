@@ -873,9 +873,6 @@ void hook_OnPassengerSync(int playerid)
 static
 void samp_init()
 {
-	/*See InitAfterPoolsCreated in asm for more init stuff.*/
-	mem_mkjmp(0x80AB938, &InitAfterPoolsCreated);
-
 	/*Remove filtering in chat messages coming from clients.*/
 	/*OnPlayerText*/
 	mem_protect(0x80B0760, 0x14, PROT_READ | PROT_WRITE | PROT_EXEC);
