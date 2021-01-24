@@ -31,9 +31,11 @@ int protips_timed_broadcast(void *data)
 {
 	char *protip;
 
-	protip = (char*) protips[NC_random(numprotips)];
-	SendClientMessageToAll(COL_INFO_LIGHT, protip);
-	echo_send_generic_message(ECHO_PACK12_PROTIP, protip);
+	if (playercount) {
+		protip = (char*) protips[NC_random(numprotips)];
+		SendClientMessageToAll(COL_INFO_LIGHT, protip);
+		echo_send_generic_message(ECHO_PACK12_PROTIP, protip);
+	}
 	return PROTIPS_INTERVAL;
 }
 
