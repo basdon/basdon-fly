@@ -22,6 +22,10 @@ footer a:link,footer a:visited{
 }
 header h1 {
 	margin:0;
+	font-size:1.1em;
+}
+header h1 a {
+	text-decoration:none;
 }
 header>div,footer>div{
 	padding:5px 10px;
