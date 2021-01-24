@@ -27,6 +27,9 @@ public
 class Echo extends Thread
 {
 private static final int PORT_IN = 7767, PORT_OUT = 7768;
+static final int
+	PING_INTERVAL = 10000,
+	PING_TIMEOUT_THRESHOLD = PING_INTERVAL + PING_INTERVAL / 2;
 public static final byte
 	PACK_HELLO = 2,
 	PACK_IMTHERE = 3,
@@ -68,13 +71,15 @@ static
 	ADDR_OUT = addr;
 }
 
+final IAnna anna;
+
 private final byte[] buf = new byte[512];
 private final char[] channel;
-private final IAnna anna;
 private final int[] last_ping_payloads = new int[10];
 private final long[] last_ping_stamps = new long[10];
 
 private int last_ping_idx;
+private long last_pong_time;
 private long my_hello_sent_time;
 private boolean need_send_initial_status_message;
 private char[] cached_status_msg;
@@ -82,19 +87,23 @@ private long cached_status_msg_time;
 private HashSet<char[]> users_waiting_for_status_message;
 private boolean status_message_requested_global;
 private boolean send_status_message_response_back_to_game;
+private PingThread pingThread;
 
 public boolean ignore_self;
 public DatagramSocket insocket;
 public DatagramSocket outsocket;
 public int packets_received, bytes_received, invalid_packet_count;
 public long last_packet;
+public boolean is_game_down;
 
 public
 Echo(IAnna anna, char[] channel)
 {
 	this.anna = anna;
 	this.channel = channel;
+	this.is_game_down = true;
 	this.users_waiting_for_status_message = new HashSet<>();
+	this.pingThread = new PingThread(this);
 }
 
 @Override
@@ -115,6 +124,7 @@ void run()
 				if (this.anna.find_channel(this.channel) != null) {
 					this.send_initial_status_message();
 				}
+				this.pingThread.start();
 				for (;;) {
 					DatagramPacket packet = new DatagramPacket(buf, buf.length);
 					socket.receive(packet);
@@ -143,15 +153,67 @@ void run()
 		}
 	} catch (InterruptedException e) {
 	} finally {
+		this.pingThread.interrupt();
 		byte[] msg = { 'F', 'L', 'Y', PACK_BYE };
 		this.send(msg, msg.length);
 		this.outsocket.close();
 	}
 }
 
+/**
+ * Call this on the anna thread.
+ */
+void check_ping_timeout()
+{
+	long time_since_last_pong = System.currentTimeMillis() - this.last_pong_time;
+
+	if (this.is_game_down) {
+		if (time_since_last_pong < PING_TIMEOUT_THRESHOLD) {
+			this.is_game_down = false;
+			this.anna.privmsg(this.channel, "Game is back up".toCharArray());
+		}
+		return;
+	}
+
+	if (time_since_last_pong < PING_TIMEOUT_THRESHOLD) {
+		return;
+	}
+
+	this.is_game_down = true;
+	this.users_waiting_for_status_message.clear();
+
+	StringBuilder sb = new StringBuilder(450);
+	sb.append(CTRL_COLOR).append(SCOL_RED);
+	sb.append("Ping timeout, game is down!");
+	Channel channel = this.anna.find_channel(this.channel);
+	if (channel != null) {
+		char[] user_channel_modes = this.anna.get_user_channel_modes();
+		ArrayList<char[]> nickalerts = new ArrayList<>(channel.userlist.size());
+		for (ChannelUser user : channel.userlist) {
+			if (has_user_mode_or_higher(user, user_channel_modes, 'o') &&
+				!strcmp(user.nick, 'C','h','a','n','S','e','r','v') &&
+				!strcmp(user.nick, this.anna.get_anna_user().nick))
+			{
+				nickalerts.add(user.nick);
+			}
+		}
+		for (char[] nick : nickalerts) {
+			if (sb.length() + nick.length > 450) {
+				continue;
+			}
+			sb.append(' ').append(nick);
+		}
+	}
+	this.anna.privmsg(this.channel, chars(sb));
+}
+
 public
 void send_status_message_to_user(User user)
 {
+	if (this.is_game_down) {
+		this.anna.notice(user.nick, (CTRL_COLOR + SCOL_RED + "Game is down").toCharArray());
+		return;
+	}
 	if (System.currentTimeMillis() - this.cached_status_msg_time < 1000) {
 		this.send_status_message_to_user_now(user.nick);
 	} else {
@@ -178,11 +240,7 @@ void remove_user_from_awaiting_status_message_list(char[] nick)
 private
 void send_status_message_to_user_now(char[] nick)
 {
-	char[] notice = new char[7 + nick.length + this.cached_status_msg.length];
-	set(notice, 0, 'N','O','T','I','C','E',' ');
-	arraycopy(nick, 0, notice, 7, nick.length);
-	arraycopy(this.cached_status_msg, 0, notice, 7 + nick.length, this.cached_status_msg.length);
-	this.anna.send_raw(notice, 0, notice.length);
+	this.anna.notice(nick, this.cached_status_msg, 0, this.cached_status_msg.length);
 }
 
 private
@@ -225,32 +283,40 @@ throws InterruptedIOException
 invalid_packet:
 	switch (packet_id) {
 	case PACK_HELLO:
+		this.is_game_down = false;
+		this.users_waiting_for_status_message.clear();
+		this.last_pong_time = System.currentTimeMillis();
 		buf[3] = PACK_IMTHERE;
 		send(buf, length);
 		msg("game bridge is up");
 		this.send_status_message((byte) 0);
 		return;
 	case PACK_IMTHERE:
+		this.is_game_down = false;
+		this.users_waiting_for_status_message.clear();
+		this.last_pong_time = System.currentTimeMillis();
 		long roundtrip = System.currentTimeMillis() - this.my_hello_sent_time;
 		msg("game bridge is up (" + roundtrip + "ms)");
 		return;
 	case PACK_BYE:
+		this.is_game_down = true;
+		this.users_waiting_for_status_message.clear();
 		msg("game bridge is down");
 		return;
-	case PACK_PING:
-		buf[3] = PACK_PONG;
-		send(buf, length);
-		return;
+	/*Game doesn't send pings.*/
 	case PACK_PONG:
+		long time = System.currentTimeMillis();
+		this.last_pong_time = time;
 		int num = stream.readDword();
 		for (int i = 0; i < this.last_ping_payloads.length; i++) {
 			if (num == this.last_ping_payloads[i]) {
-				long time = System.currentTimeMillis() - this.last_ping_stamps[i];
-				msg("pong (" + time + "ms)");
+				long delta = time - this.last_ping_stamps[i];
+				if (delta > 30) {
+					msg("warn: slow ping (" + delta + "ms > 30)");
+				}
 				return;
 			}
 		}
-		msg("pong (unknown ms: payload mismatch)");
 		return;
 	case PACK_STATUS_REQUEST:
 		this.send_status_message((byte) 1);
@@ -262,9 +328,7 @@ invalid_packet:
 		boolean is_response_to_status_request = stream.readByte() != 0;
 		short statusMsgByteLength = stream.readWord();
 		this.cached_status_msg_time = System.currentTimeMillis();
-		CharBuf charbuf = new CharBuf(statusMsgByteLength + 2);
-		charbuf.writeChar(' ');
-		charbuf.writeChar(':');
+		CharBuf charbuf = new CharBuf(statusMsgByteLength);
 		charbuf.writeUTF8(stream, statusMsgByteLength);
 		this.cached_status_msg = new char[charbuf.pos];
 		arraycopy(charbuf.chars, 0, this.cached_status_msg, 0, charbuf.pos);
@@ -280,8 +344,10 @@ invalid_packet:
 				// Don't send it back in game when a user without a voice has
 				// invoked the &players command.
 				this.ignore_self = !this.send_status_message_response_back_to_game;
-				this.anna.privmsg(this.channel, charbuf.chars, 2, charbuf.pos - 2);
+				this.anna.privmsg(this.channel, charbuf.chars, 0, charbuf.pos);
 				this.ignore_self = false;
+				// Setting back to false because it shouldn't be sent back ingame
+				// when receiving an unsollicited one when the server restarts.
 				this.send_status_message_response_back_to_game = false;
 			});
 		}
@@ -496,7 +562,6 @@ void send_player_connection(ChannelUser user, byte reason)
  * Stores the ping id (4 random bytes) so the round-trip time can be calculated when receiving a
  * pong back.
  */
-public
 void send_ping()
 {
 	int randomNumber = new Random().nextInt();

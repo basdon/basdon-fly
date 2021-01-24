@@ -11,6 +11,8 @@ import net.basdon.anna.api.IAnna.Output;
 import net.basdon.fly.services.echo.Echo;
 
 import static java.lang.System.arraycopy;
+
+import static net.basdon.anna.api.Constants.*;
 import static net.basdon.anna.api.Util.*;
 import static net.basdon.fly.services.echo.Echo.*;
 
@@ -42,7 +44,7 @@ String getName()
 public
 String getVersion()
 {
-	return "1a";
+	return "2";
 }
 
 @Override
@@ -138,18 +140,14 @@ boolean on_command(User user, char[] target, char[] replytarget,
 			}
 			return true;
 		}
-		if (strcmp(cmd, 'e','c','h','o','-','p','i','n','g')) {
-			if (this.echo != null) {
-				this.echo.send_ping();
-			} else {
-				this.anna.privmsg(target, "echo is not running".toCharArray());
-			}
-			return true;
-		}
 		if (strcmp(cmd, 'p','l','a','y','e','r','s')) {
 			if (this.echo != null) {
-				// TODO: check ping, if server is online
-				this.echo.request_global_status(may_send);
+				if (this.echo.is_game_down) {
+					String downmsg = CTRL_COLOR + SCOL_RED + "Game is down!";
+					this.anna.privmsg(target, downmsg.toCharArray());
+				} else {
+					this.echo.request_global_status(may_send);
+				}
 			} else {
 				this.anna.privmsg(target, "echo is not running".toCharArray());
 			}

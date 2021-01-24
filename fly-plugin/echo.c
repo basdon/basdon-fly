@@ -1,5 +1,7 @@
 #define ECHO_PORT_OUT 7767
 #define ECHO_PORT_IN 7768
+#define ECHO_PING_INTERVAL 10000
+#define ECHO_PING_TIMEOUT_THRESHOLD (ECHO_PING_INTERVAL + ECHO_PING_INTERVAL / 2)
 
 #define COL_IRC COL_INFO_GENERIC
 
@@ -11,11 +13,16 @@ static int num_players_needing_echo_status_message;
 static char need_request_echo_status;
 static int last_request_echo_status_time;
 
+static int echo_last_ping_received;
+static char echo_is_irc_down;
+
 int echo_init(void *data)
 {
 	static const char *BUFLO = "127.0.0.1";
 
 	int sin, timer_interval = 0;
+
+	echo_is_irc_down = 1;
 
 	if (socket_in == SOCKET_INVALID_SOCKET) {
 		sin = NC_ssocket_create(SOCKET_UDP);
@@ -103,15 +110,19 @@ int echo_cmd_irc(CMDPARAMS)
 {
 	int i;
 
-	i = 0;
-	while (i < num_players_needing_echo_status_message) {
-		if (players_needing_echo_status_message[i] == playerid) {
-			return 1;
+	if (echo_is_irc_down) {
+		SendClientMessage(playerid, COL_WARN, WARN"IRC bridge is down!");
+	} else {
+		i = 0;
+		while (i < num_players_needing_echo_status_message) {
+			if (players_needing_echo_status_message[i] == playerid) {
+				return 1;
+			}
+			i++;
 		}
-		i++;
+		players_needing_echo_status_message[num_players_needing_echo_status_message++] = playerid;
+		need_request_echo_status = 1;
 	}
-	players_needing_echo_status_message[num_players_needing_echo_status_message++] = playerid;
-	need_request_echo_status = 1;
 	return 1;
 }
 
@@ -120,8 +131,12 @@ void echo_on_player_connect(int playerid)
 {
 	echo_on_player_connection(playerid, ECHO_CONN_REASON_GAME_CONNECTED);
 
-	players_needing_echo_status_message[num_players_needing_echo_status_message++] = playerid;
-	need_request_echo_status = 1;
+	if (echo_is_irc_down) {
+		SendClientMessage(playerid, COL_WARN, WARN"IRC bridge is down!");
+	} else {
+		players_needing_echo_status_message[num_players_needing_echo_status_message++] = playerid;
+		need_request_echo_status = 1;
+	}
 }
 
 static
@@ -236,12 +251,12 @@ void echo_on_receive_status_message(char *buf, int len)
 	struct STATUS_MESSAGE *data;
 
 	data = (void*) buf;
-	data->message[len] = 0;
+	data->message[data->message_length] = 0;
 	if (!data->is_response_to_status_request) {
 		/*Means the IRC brige just got online, so inform everyone.*/
-		SendClientMessageToAll(-1, data->message);
+		SendClientMessageToAll(COL_IRC, data->message);
 	} else {
-		SendClientMessageToBatch(players_needing_echo_status_message, num_players_needing_echo_status_message, -1, data->message);
+		SendClientMessageToBatch(players_needing_echo_status_message, num_players_needing_echo_status_message, COL_IRC, data->message);
 	}
 	num_players_needing_echo_status_message = 0;
 }
@@ -257,6 +272,8 @@ void echo_on_receive(cell socket_handle, cell data_a,
 	{
 		switch (data[3]) {
 		case PACK_HELLO:
+			echo_is_irc_down = 0;
+			echo_last_ping_received = time_timestamp();
 			logprintf("IRC bridge is up");
 			SendClientMessageToAll(COL_IRC, "IRC brige is up");
 			if (len == 8) {
@@ -266,20 +283,23 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			echo_send_status_message(0);
 			break;
 		case PACK_IMTHERE:
+			echo_is_irc_down = 0;
+			echo_last_ping_received = time_timestamp();
 			logprintf("IRC bridge is up");
 			/*no point printing this to chat, because this only
 			happens right after the server starts, thus nobody
 			is connected yet*/
 			break;
 		case PACK_BYE:
+			echo_is_irc_down = 1;
+			need_request_echo_status = 0;
+			num_players_needing_echo_status_message = 0;
 			logprintf("IRC bridge is down");
-			if (len == 4) {
-				/*TODO: why is this only sent when len is checked?*/
-				SendClientMessageToAll(COL_IRC, "IRC brige is down");
-			}
+			SendClientMessageToAll(COL_IRC, "IRC brige is down");
 			break;
 		case PACK_PING:
 			if (len == 8) {
+				echo_last_ping_received = time_timestamp();
 				data[3] = PACK_PONG;
 				NC_ssocket_send(socket_out, data_a, 8);
 			}
@@ -402,6 +422,13 @@ static
 void echo_tick()
 {
 	int time;
+
+	if (!echo_is_irc_down && time_timestamp() - echo_last_ping_received > ECHO_PING_TIMEOUT_THRESHOLD) {
+		SendClientMessageToAll(COL_WARN, WARN"IRC bridge ping timeout!");
+		echo_is_irc_down = 1;
+		need_request_echo_status = 0;
+		num_players_needing_echo_status_message = 0;
+	}
 
 	if (need_request_echo_status) {
 		time = time_timestamp();

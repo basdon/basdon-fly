@@ -49,6 +49,10 @@ Simple ping packet. Upon receiving, the other side should send an
 byte 4-7: random value (values 0 and 1 are forbidden)
 </pre>
 
+Currently, pings are only sent from IRC to game at a specified interval. IRC
+knows if game is down if they don't receive pongs, and game will know when IRC
+is down when it hasn't received a ping packet in the designated interval.
+
 {@h4(id=p6) Packet 6: Pong}
 
 Response to a {@#=p5 Ping} packet.
