@@ -49,10 +49,23 @@ if (group_is_owner($usergroups) && isset($_GET['rel'], $_GET['dorelease'])) {
 
 $releaseids = [];
 $mapping = [];
-if (isset($_GET['rel'])) {
+if (isset($_GET['rel'])) { // rel = timestamp of release
 	$selectedrelease = intval($_GET['rel']);
+haverel:
 	$releaseids[] = $selectedrelease;
 	$release_repo = $selectedrelease < 1609459200 ? 'fly-plugin' : 'basdon-fly';
+} else if (isset($_GET['release'])) { // release = full release number (linked from github releases etc)
+	$strtime = $_GET['release'];
+	if (strlen($strtime) == 14) {
+		$year = intval(substr($strtime, 0, 4));
+		$month = intval(substr($strtime, 4, 2));
+		$day = intval(substr($strtime, 6, 2));
+		$hour = intval(substr($strtime, 8, 2));
+		$minute = intval(substr($strtime, 10, 2));
+		$second = intval(substr($strtime, 12, 2));
+		$selectedrelease = mktime($hour, $minute, $second, $month, $day, $year);
+		goto haverel;
+	}
 } else {
 	$page = get_page();
 	$db_querycount += 2;
