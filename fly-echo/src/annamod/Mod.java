@@ -10,8 +10,6 @@ import net.basdon.anna.api.*;
 import net.basdon.anna.api.IAnna.Output;
 import net.basdon.fly.services.echo.Echo;
 
-import static java.lang.System.arraycopy;
-
 import static net.basdon.anna.api.Constants.*;
 import static net.basdon.anna.api.Util.*;
 import static net.basdon.fly.services.echo.Echo.*;
@@ -205,22 +203,49 @@ void on_channelmodechange(Channel chan, User user, int changec, char[] signs,
 		}
 		this.echo.send_generic_message(chars(s), Echo.PACK12_IRC_MODE);
 
-		// Reset no permission message when user gets a new mode (so the message will show
-		// again when the mode has been revoked). Note that the mode itself is not checked,
-		// but sending a message too much won't harm.
-		if (users.length > 0) {
-			for (int i = 0; i < types.length; i++) {
-				if (types[i] == 'u' && signs[i] == '+') {
-					for (char[] nick : this.people_without_permission) {
-						if (strcmp(nick, users[i].nick)) {
-							this.people_without_permission.remove(nick);
-							break;
-						}
+		// If user now has permissions to send messages to irc, let them know.
+		char[] allmodes = this.anna.get_user_channel_modes();
+		for (int i = 0; i < types.length; i++) {
+			if (types[i] == 'u' && signs[i] == '+' &&
+				this.is_mode_higher_or_equal(allmodes, modes[i], 'v'))
+			{
+				for (char[] nick : this.people_without_permission) {
+					if (strcmp(nick, users[i].nick)) {
+						this.people_without_permission.remove(nick);
+						String noticemsg =
+							"Your messages will now be relayed to"
+							+ " in-game chat";
+						this.anna.notice(user.nick, noticemsg.toCharArray());
+						break;
 					}
 				}
 			}
 		}
 	}
+}
+
+/**
+ * TODO: this should really be put in anna core Utils
+ *
+ * @param modes all modes, use {@link IAnna#get_user_channel_modes()}. These should be sorted from
+ *              highest permissions to lowest.
+ * @param mode actual mode (not the prefix)
+ * @param wantedmode mode to check against (not the prefix)
+ */
+private
+boolean is_mode_higher_or_equal(char[] modes, char mode, char wantedmode)
+{
+	boolean minimum_mode_found = false;
+	boolean is_higher = false;
+	for (int i = 0; i < modes.length; i++) {
+		if (modes[i] == mode && !minimum_mode_found) {
+			is_higher = true;
+		}
+		if (modes[i] == wantedmode) {
+			minimum_mode_found = true;
+		}
+	}
+	return is_higher;
 }
 
 @Override
@@ -338,13 +363,9 @@ void on_message(User user, char[] target, char[] replytarget, char[] msg)
 			this.people_without_permission.add(user.nick);
 
 			String noticemsg =
-				" :your message won't be relayed in-game unless you "
-				+ "have a +v channel mode";
-			char[] notice = new char[7 + user.nick.length + 73];
-			set(notice, 0, 'N','O','T','I','C','E',' ');
-			arraycopy(user.nick, 0, notice, 7, user.nick.length);
-			arraycopy(noticemsg.toCharArray(), 0, notice, 7 + user.nick.length, 73);
-			this.anna.send_raw(notice, 0, notice.length);
+				" Your message won't be relayed in-game unless you "
+				+ "have a +v channel mode.";
+			this.anna.notice(user.nick, noticemsg.toCharArray());
 		}
 	}
 }
