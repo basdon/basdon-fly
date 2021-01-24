@@ -22,13 +22,18 @@ static const char *protips[] = {
 	"Pro Tip: All flights while on a mission are recorded, you can watch them on the website!",
 	"Pro Tip: Want to fly as passenger in a plane without seats? Press 'FIRE' (default: lmb) while carrying no weapons to warp into the plane.",
 	"Pro Tip: Want to hide the gps/kneeboard text on your screen? Check out /p(references).",
+	"Pro Tip: The chat is linked to IRC, check out /irc for more info.",
 };
 static const int numprotips = sizeof(protips)/sizeof(protips[0]);
 
 static
 int protips_timed_broadcast(void *data)
 {
-	SendClientMessageToAll(COL_INFO_LIGHT, (char*) protips[NC_random(numprotips)]);
+	char *protip;
+
+	protip = (char*) protips[NC_random(numprotips)];
+	SendClientMessageToAll(COL_INFO_LIGHT, protip);
+	echo_send_generic_message(ECHO_PACK12_PROTIP, protip);
 	return PROTIPS_INTERVAL;
 }
 

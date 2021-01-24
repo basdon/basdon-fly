@@ -157,8 +157,32 @@ void echo_on_player_disconnect(int playerid, int reason)
 	}
 }
 
-void echo_on_flight_finished(char *text)
+/**
+Send flight finish message to IRC echo.
+
+Uses buf4096.
+
+@param type one of the ECHO_PACK12_* constants that is allowed to be sent from the game, as per packet spec.
+*/
+static
+void echo_send_generic_message(char type, char *text)
 {
+#pragma pack(push,1)
+	struct GENERIC_MESSAGE {
+		union {
+			int magic;
+			struct {
+				char _pad0[3];
+				char packet_type;
+			} bytes;
+		} packet_header;
+		char type;
+		short message_length;
+		char message[1]; /*actually arbitrary size*/
+	};
+#pragma pack(pop)
+
+	struct GENERIC_MESSAGE *data;
 	int textlen;
 
 	if (socket_out != SOCKET_INVALID_SOCKET) {
@@ -166,13 +190,12 @@ void echo_on_flight_finished(char *text)
 		if (textlen > 450) {
 			textlen = 450;
 		}
-#if 0x0C != PACK_GENERIC_MESSAGE
-#error generic message packet should be 12
-#endif
-		buf144[0] = 0x0C594C46;
-		cbuf144[4] = PACK12_FLIGHT_MESSAGE;
-		*((short*) (cbuf144 + 5)) = (short) textlen;
-		memcpy(cbuf144 + 7, text, textlen);
+		data = (void*) cbuf144;
+		data->packet_header.magic = 0x594C46;
+		data->packet_header.bytes.packet_type = PACK_GENERIC_MESSAGE;
+		data->type = type;
+		data->message_length = (short) textlen;
+		memcpy(data->message, text, textlen);
 		NC_ssocket_send(socket_out, buf144a, 7 + textlen);
 	}
 }
@@ -366,14 +389,14 @@ void echo_on_receive(cell socket_handle, cell data_a,
 			memcpy(msg512, data + 7, msglen);
 			msg512[msglen] = 0;
 			switch (data[4]) {
-			case PACK12_TRAC_MESSAGE:
+			case ECHO_PACK12_TRAC_MESSAGE:
 				col = COL_INFO_BROWN;
 				break;
-			case PACK12_IRC_MODE:
-			case PACK12_IRC_TOPIC:
+			case ECHO_PACK12_IRC_MODE:
+			case ECHO_PACK12_IRC_TOPIC:
 				col = COL_IRC_MODE;
 				break;
-			case PACK12_IRC_NICK:
+			case ECHO_PACK12_IRC_NICK:
 				col = COL_IRC_ACTION;
 				break;
 			default:

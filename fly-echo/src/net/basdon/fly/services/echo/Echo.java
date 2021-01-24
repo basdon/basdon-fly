@@ -47,7 +47,8 @@ public static final byte
 	PACK12_TRAC_MESSAGE = 1,
 	PACK12_IRC_MODE = 3,
 	PACK12_IRC_TOPIC = 4,
-	PACK12_IRC_NICK = 5;
+	PACK12_IRC_NICK = 5,
+	PACK12_PROTIP = 6;
 private static final InetAddress ADDR_OUT;
 
 public static final byte
@@ -414,6 +415,10 @@ invalid_packet:
 		case PACK12_TRAC_MESSAGE:
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_BROWN);
+			break;
+		case PACK12_PROTIP:
+			msg.writeChar(CTRL_COLOR);
+			msg.writeString(SCOL_CYAN);
 			break;
 		default:
 			break invalid_packet;

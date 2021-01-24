@@ -13,11 +13,12 @@
 #define PACK_GENERIC_MESSAGE 12
 #define PACK_PLAYER_CONNECTION 30
 
-#define PACK12_FLIGHT_MESSAGE 0
-#define PACK12_TRAC_MESSAGE 1
-#define PACK12_IRC_MODE 3
-#define PACK12_IRC_TOPIC 4
-#define PACK12_IRC_NICK 5
+#define ECHO_PACK12_FLIGHT_MESSAGE 0
+#define ECHO_PACK12_TRAC_MESSAGE 1
+#define ECHO_PACK12_IRC_MODE 3
+#define ECHO_PACK12_IRC_TOPIC 4
+#define ECHO_PACK12_IRC_NICK 5
+#define ECHO_PACK12_PROTIP 6
 
 #define ECHO_CONN_REASON_GAME_TIMEOUT 0
 #define ECHO_CONN_REASON_GAME_QUIT 1
@@ -44,12 +45,6 @@ Call periodically, to up sockets in the case they couldn't be started from
 OnGameModeInit.
 */
 int echo_init(void *data);
-/**
-Send flight finish message to IRC echo.
-
-Uses buf4096.
-*/
-void echo_on_flight_finished(char *text);
 /**
 Send game chat or action to IRC echo.
 
