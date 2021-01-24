@@ -1590,7 +1590,7 @@ int missions_after_unload(void *data)
 	money_give(playerid, ptotal);
 
 	i = sprintf(cbuf4096,
-		"%s completed flight #%d from %s (%s) to %s (%s) in %dh%02dm",
+		"%s completed flight #%d from %s (%s) to %s (%s) in %dh%02dm (%s)",
 		pdata[playerid]->name,
 	        miss->id,
 		miss->startpoint->ap->name,
@@ -1598,7 +1598,8 @@ int missions_after_unload(void *data)
 	        miss->endpoint->ap->name,
 	        miss->endpoint->ap->code,
 	        duration_h,
-	        duration_m);
+	        duration_m,
+	        vehnames[miss->veh->model - VEHICLE_MODEL_MIN]);
 	echo_send_generic_message(ECHO_PACK12_FLIGHT_MESSAGE, cbuf4096);
 	num_missionmsg_playerids = 0;
 	for (i = 0; i < playercount; i++) {
