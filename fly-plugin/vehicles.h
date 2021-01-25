@@ -2,7 +2,6 @@
 /* vim: set filetype=c ts=8 noexpandtab: */
 
 #define VEHICLE_RESPAWN_DELAY 300
-#define MAX_SERVICE_MAP_ICONS 4
 
 struct dbvehicle {
 	int id;
@@ -15,8 +14,9 @@ struct dbvehicle {
 	unsigned char col1, col2;
 	float odoKM;
 	float fuel;
-	char *ownerstring;
-	unsigned char ownerstringowneroffset;
+	char *owner_name;
+	char *owner_label_bits_data;
+	short owner_label_bits_length;
 	unsigned char needsodoupdate;
 	/**
 	Vehicleid of the spawned vehicle that reflects this db vehicle.

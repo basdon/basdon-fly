@@ -6,16 +6,13 @@ static AMX_NATIVE n_AddStaticVehicleEx;
 static AMX_NATIVE n_ChangeVehicleColor;
 static AMX_NATIVE n_ClearAnimations;
 static AMX_NATIVE n_CreateObject;
-static AMX_NATIVE n_CreatePlayer3DTextLabel;
 static AMX_NATIVE n_CreatePlayerObject;
 static AMX_NATIVE n_CreateVehicle_;
-static AMX_NATIVE n_DeletePlayer3DTextLabel;
 static AMX_NATIVE n_DestroyObject;
 static AMX_NATIVE n_DestroyPlayerObject;
 static AMX_NATIVE n_DestroyVehicle_;
 static AMX_NATIVE n_DisablePlayerCheckpoint;
 static AMX_NATIVE n_DisablePlayerRaceCheckpoint;
-static AMX_NATIVE n_EnableStuntBonusForAll;
 static AMX_NATIVE n_ForceClassSelection;
 static AMX_NATIVE n_GameTextForPlayer;
 static AMX_NATIVE n_GetConsoleVarAsInt;
@@ -37,7 +34,6 @@ static AMX_NATIVE n_PutPlayerInVehicle_;
 static AMX_NATIVE n_RemoveBuildingForPlayer;
 static AMX_NATIVE n_ResetPlayerMoney_;
 static AMX_NATIVE n_RepairVehicle;
-static AMX_NATIVE n_RemovePlayerMapIcon;
 static AMX_NATIVE n_SHA256_PassHash;
 static AMX_NATIVE n_SendRconCommand;
 static AMX_NATIVE n_SetCameraBehindPlayer;
@@ -46,7 +42,6 @@ static AMX_NATIVE n_SetPlayerCameraLookAt;
 static AMX_NATIVE n_SetPlayerColor;
 static AMX_NATIVE n_SetPlayerFacingAngle;
 static AMX_NATIVE n_SetPlayerHealth;
-static AMX_NATIVE n_SetPlayerMapIcon;
 static AMX_NATIVE n_SetPlayerName_;
 static AMX_NATIVE n_SetPlayerPos_;
 static AMX_NATIVE n_SetPlayerScore;
@@ -61,7 +56,6 @@ static AMX_NATIVE n_SetVehicleZAngle;
 static AMX_NATIVE n_ShowPlayerDialog_;
 static AMX_NATIVE n_SpawnPlayer_;
 static AMX_NATIVE n_UpdateVehicleDamageStatus;
-static AMX_NATIVE n_UsePlayerPedAnims;
 static AMX_NATIVE n_TogglePlayerClock;
 static AMX_NATIVE n_TogglePlayerControllable;
 static AMX_NATIVE n_TogglePlayerSpectating;
@@ -137,10 +131,6 @@ static cell tmpfloat;
 
 #define CreateVehicle __USE__veh_CreateVehicle__
 
-#define NC_DeletePlayer3DTextLabel(PLAYERID,TXTID) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=TXTID,\
-	n_DeletePlayer3DTextLabel(amx,nc_params))
-
 #define NC_DestroyObject(OBJECTID) (NC_PARS_(1)nc_params[1]=OBJECTID,\
 	n_DestroyObject(amx,nc_params))
 
@@ -153,9 +143,6 @@ static cell tmpfloat;
 #define NC_DisablePlayerRaceCheckpoint(PLAYERID) \
 	(NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_DisablePlayerRaceCheckpoint(amx,nc_params))
-
-#define NC_EnableStuntBonusForAll(FLAG) (NC_PARS_(1)nc_params[1]=FLAG,\
-	n_EnableStuntBonusForAll(amx,nc_params))
 
 #define NC_ForceClassSelection(PLAYERID) \
 	(NC_PARS_(1)nc_params[1]=PLAYERID,\
@@ -212,10 +199,6 @@ static cell tmpfloat;
 	n_PlayerPlaySound(amx,nc_params))
 
 #define NC_PutPlayerInVehicle __USE__natives_PutPlayerInVehicle__
-
-#define NC_RemovePlayerMapIcon(PLAYERID,MAPICONID) (NC_PARS_(2)\
-	nc_params[1]=PLAYERID,nc_params[2]=MAPICONID,\
-	n_RemovePlayerMapIcon(amx,nc_params))
 
 #define NC_SHA256_PassHash(INPUT,SALT,DEST,MAXLEN) \
 	(NC_PARS_(4)nc_params[1]=INPUT,nc_params[2]=SALT,\
@@ -282,9 +265,6 @@ static cell tmpfloat;
 #define NC_TogglePlayerSpectating(PLAYERID,FLAG) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
 	n_TogglePlayerSpectating(amx,nc_params))
-
-#define NC_UsePlayerPedAnims() (NC_PARS_(0)\
-	n_UsePlayerPedAnims(amx,nc_params))
 
 /*bcrypt_get_hash fails when argument size does not match*/
 #define NC_bcrypt_get_hash(BUF) (nc_params[0]=4,nc_params[1]=BUF,\
@@ -378,16 +358,13 @@ int natives_find()
 		N(ChangeVehicleColor),
 		N(ClearAnimations),
 		N(CreateObject),
-		N(CreatePlayer3DTextLabel),
 		N(CreatePlayerObject),
 		N_(CreateVehicle),
-		N(DeletePlayer3DTextLabel),
 		N(DestroyObject),
 		N(DestroyPlayerObject),
 		N_(DestroyVehicle),
 		N(DisablePlayerCheckpoint),
 		N(DisablePlayerRaceCheckpoint),
-		N(EnableStuntBonusForAll),
 		N(ForceClassSelection),
 		N(GameTextForPlayer),
 		N(GetConsoleVarAsInt),
@@ -407,7 +384,6 @@ int natives_find()
 		N(PlayerPlaySound),
 		N_(PutPlayerInVehicle),
 		N(RemoveBuildingForPlayer),
-		N(RemovePlayerMapIcon),
 		N(RepairVehicle),
 		N_(ResetPlayerMoney),
 		N(SHA256_PassHash),
@@ -418,7 +394,6 @@ int natives_find()
 		N(SetPlayerColor),
 		N(SetPlayerFacingAngle),
 		N(SetPlayerHealth),
-		N(SetPlayerMapIcon),
 		N_(SetPlayerName),
 		N_(SetPlayerPos),
 		N(SetPlayerScore),
@@ -436,7 +411,6 @@ int natives_find()
 		N(TogglePlayerSpectating),
 		N(TogglePlayerControllable),
 		N(UpdateVehicleDamageStatus),
-		N(UsePlayerPedAnims),
 		N(bcrypt_check),
 		N(bcrypt_get_hash),
 		N(bcrypt_hash),

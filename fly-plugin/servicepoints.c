@@ -16,18 +16,16 @@ struct SERVICEPOINT {
 	struct vec3 pos;
 };
 
-struct PLAYERSERVICEPOINT {
-	struct SERVICEPOINT *svp;
-	int textid;
-};
-
 /**
 Array holding which service points are shown per player.
 */
-static struct PLAYERSERVICEPOINT
-	player_servicepoints[MAX_PLAYERS][MAX_SERVICE_MAP_ICONS];
+static struct SERVICEPOINT *player_servicepoints[MAX_PLAYERS][MAX_SERVICE_MAP_ICONS];
 static int numservicepoints;
 static struct SERVICEPOINT *servicepoints;
+
+#define SVP_TXT "Service Point\n/repair - /refuel"
+static char svp_text_encoded_bits[24];
+static int svp_text_encoded_bitlength;
 
 void svp_dispose()
 {
@@ -62,6 +60,8 @@ void svp_init()
 {
 	struct SERVICEPOINT *svp;
 	int cacheid, rowcount;
+
+	svp_text_encoded_bitlength = EncodeString(svp_text_encoded_bits, SVP_TXT, 32);
 
 	servicepoints = NULL;
 	numservicepoints = 0;
@@ -112,6 +112,8 @@ int svp_cmd_refuel(CMDPARAMS)
 	}
 
 	GetVehiclePosUnsafe(vehicleid, &vpos);
+	/*The created mapicons for the player could be used,
+	but there can only exist 4 at a time.. Maybe that's too little?*/
 	svpid = svp_find_point(vpos);
 	if (svpid == -1) {
 		SendClientMessage(playerid, COL_WARN, WARN"You need to be at a service point to do this!");
@@ -169,7 +171,7 @@ int svp_cmd_refuel(CMDPARAMS)
 	SendClientMessage(playerid, COL_INFO, msg144);
 
 	if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
-		driverid = GetPlayerInVehicleSeat(vehicleid, 0);
+		driverid = GetVehicleDriver(vehicleid);
 		if (driverid == INVALID_PLAYER_ID) {
 			driveruserid = -1;
 		} else {
@@ -225,6 +227,8 @@ int svp_cmd_repair(CMDPARAMS)
 	}
 
 	GetVehiclePosUnsafe(vehicleid, &vpos);
+	/*The created mapicons for the player could be used,
+	but there can only exist 4 at a time.. Maybe that's too little?*/
 	svpid = svp_find_point(vpos);
 	if (svpid == -1) {
 		SendClientMessage(playerid, COL_WARN, WARN"You need to be at a service point to do this!");
@@ -264,7 +268,7 @@ int svp_cmd_repair(CMDPARAMS)
 	NC(n_SetVehicleHealth);
 
 	if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
-		driverid = GetPlayerInVehicleSeat(vehicleid, 0);
+		driverid = GetVehicleDriver(vehicleid);
 		if (driverid == INVALID_PLAYER_ID) {
 			driveruserid = -1;
 		} else {
@@ -300,82 +304,57 @@ int svp_cmd_repair(CMDPARAMS)
 
 void svp_on_player_connect(int playerid)
 {
-	struct PLAYERSERVICEPOINT *psvp = player_servicepoints[playerid];
-	int i;
-
-	for (i = 0; i < MAX_SERVICE_MAP_ICONS; i++) {
-		psvp[i].svp = NULL;
-	}
+	memset(player_servicepoints[playerid], 0, sizeof(player_servicepoints[playerid]));
 }
 
 void svp_update_mapicons(int playerid, float x, float y)
 {
-	static const char* SVP_TXT = "Service Point\n/repair - /refuel";
-
+	struct SERVICEPOINT **psvps;
 	struct SERVICEPOINT *svp;
-	struct PLAYERSERVICEPOINT *psvps = player_servicepoints[playerid], *sp;
 	float dx, dy;
-	int i, selectedpsvp;
+	int i;
 
-	/* remove old, now out of range ones */
-	NC_PARS(2);
+	psvps = player_servicepoints[playerid];
+
+	/*Remove old, now out of range ones.*/
 	for (i = 0; i < MAX_SERVICE_MAP_ICONS; i++) {
-		if ((svp = psvps[i].svp) != NULL) {
+		svp = psvps[i];
+		if (svp) {
 			dx = svp->pos.x - x;
 			dy = svp->pos.y - y;
 			if (dx * dx + dy * dy > SERVICE_MAP_DISTANCE_SQ) {
-				nc_params[1] = playerid;
-				nc_params[2] = psvps[i].textid;
-				NC(n_DeletePlayer3DTextLabel);
-				nc_params[2] = i;
-				NC(n_RemovePlayerMapIcon);
-				psvps[i].svp = NULL;
+				Delete3DTextLabel(playerid, SERVICEPOINT_TEXTLABEL_ID_BASE + i);
+				RemovePlayerMapIcon(playerid, SERVICEPOINT_MAPICON_ID_BASE + i);
+				psvps[i] = NULL;
 			}
 		}
 	}
 
-	/* add new ones */
+	/*Add new ones.*/
 	svp = servicepoints + numservicepoints;
 	while (svp-- != servicepoints) {
 		dx = x - svp->pos.x;
 		dy = y - svp->pos.y;
 		if (dx * dx + dy * dy < SERVICE_MAP_DISTANCE_SQ) {
-			selectedpsvp = -1;
-			for (i = 0; i < MAX_SERVICE_MAP_ICONS; i++) {
-				if (psvps[i].svp == svp) {
+			for (i = 0; ; i++) {
+				if (psvps[i] == svp) {
 					goto alreadyshown;
 				}
-				if (psvps[i].svp == NULL) {
-					selectedpsvp = i;
+				if (!psvps[i]) {
+					psvps[i] = svp;
+					break;
+				}
+				i++;
+				if (i >= MAX_SERVICE_MAP_ICONS) {
+					/*No more map icon slots.*/
+					return;
 				}
 			}
-			if (selectedpsvp == -1) {
-				/*no more map icon slots*/
-				break;
-			}
-			sp = psvps + selectedpsvp;
-			NC_PARS(8);
-			nc_params[1] = playerid;
-			nc_params[2] = selectedpsvp;
-			nc_paramf[3] = svp->pos.x;
-			nc_paramf[4] = svp->pos.y;
-			nc_paramf[5] = svp->pos.z;
-			nc_params[6] = SERVICE_MAP_ICON_TYPE,
-			nc_params[7] = 0;
-			nc_params[8] = MAPICON_LOCAL;
-			NC(n_SetPlayerMapIcon);
-			B144((char*) SVP_TXT);
-			NC_PARS(10);
-			nc_params[2] = buf144a;
-			nc_params[6] = nc_params[5];
-			nc_params[5] = nc_params[4];
-			nc_params[4] = nc_params[3];
-			nc_params[3] = -1;
-			nc_paramf[7] = 50.0f;
-			nc_params[8] = nc_params[9] = INVALID_PLAYER_ID;
-			nc_params[10] = 1;
-			sp->textid = NC(n_CreatePlayer3DTextLabel);
-			sp->svp = svp;
+			SetPlayerMapIcon(playerid, SERVICEPOINT_MAPICON_ID_BASE + i, &svp->pos, SERVICE_MAP_ICON_TYPE, 0, MAPICON_LOCAL);
+			Create3DTextLabel(
+				playerid, SERVICEPOINT_TEXTLABEL_ID_BASE + i, 0xFFFFFFFF, &svp->pos, 50.0f, 1,
+				INVALID_PLAYER_ID, INVALID_VEHICLE_ID, svp_text_encoded_bits, svp_text_encoded_bitlength
+			);
 		}
 alreadyshown:
 		;

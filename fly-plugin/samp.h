@@ -191,9 +191,29 @@ struct SampNetGame {
 	void *pFilterScripts;
 	struct SampPlayerPool *playerPool;
 	struct SampVehiclePool *vehiclePool;
+	int _pad10;
+	void *objectPool;
+	int _pad18[2];
+	void *textLabelPool;
+	void *gangzonePool;
+	void *actorPool;
+	int _pad2C[11];
+	char showNameTags; /*Should be set before anyone connects.*/
+	char _pad59;
+	char _pad5A;
+	char enableStuntBonus; /*EnableStuntBonusForAll()*/
+	int _pad5C;
+	int _pad60;
+	int _pad64;
+	int _pad68;
+	char _pad6C;
+	char usePlayerPedAnims; /*UsePlayerPedAnims()*/
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, vehiclePool, 0xC);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, showNameTags, 0x58);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, enableStuntBonus, 0x5B);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, usePlayerPedAnims, 0x6D);
 
 struct BitStream {
 	int numberOfBitsUsed;
@@ -420,6 +440,38 @@ struct RPCDATA_SetVehicleParamsEx {
 	struct SampVehicleParams params;
 };
 EXPECT_SIZE(struct RPCDATA_SetVehicleParamsEx, 2 + 0x10);
+
+struct RPCDATA_SetPlayerMapIcon {
+	char icon_id;
+	struct vec3 pos;
+	char icon;
+	int color;
+	char style;
+};
+EXPECT_SIZE(struct RPCDATA_SetPlayerMapIcon, 1 + 12 + 1 + 4 + 1);
+
+struct RPCDATA_RemovePlayerMapIcon {
+	char icon_id;
+};
+EXPECT_SIZE(struct RPCDATA_RemovePlayerMapIcon, 1);
+
+/*Base because it lacks the text data.*/
+struct RPCDATA_Create3DTextLabelBase {
+	short label_id;
+	int color;
+	struct vec3 pos; /*Offsets when it's attached.*/
+	float draw_distance;
+	char test_los;
+	short attached_player_id;
+	short attached_vehicle_id;
+	/*Huffman encoded string here (preceded by bit length of encoded string, compressed somehow...).*/
+};
+EXPECT_SIZE(struct RPCDATA_Create3DTextLabelBase, 2 + 4 + 12 + 4 + 1 + 2 + 2);
+
+struct RPCDATA_Delete3DTextLabel {
+	short label_id;
+};
+EXPECT_SIZE(struct RPCDATA_Delete3DTextLabel, 2);
 #pragma pack()
 
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,unk) \
@@ -445,3 +497,7 @@ EXPECT_SIZE(struct RPCDATA_SetVehicleParamsEx, 2 + 0x10);
 #define RPC_DisableRaceCheckpoint 0x81587C7 /*ptr to 0x27(39)*/
 #define RPC_SetVehicleParams 0x815CCFC /*ptr to 0xA1(161)*/
 #define RPC_SetVehicleParamsEx 0x8166226 /*ptr to 0x18(24)*/
+#define RPC_Create3DTextLabel 0x815072C /*ptr to 0x24(36)*/
+#define RPC_SetPlayerMapIcon 0x8162E9F /*ptr to 0x38(56)*/
+#define RPC_RemovePlayerMapIcon 0x815CD22 /*ptr to 0x90(144)*/
+#define RPC_Delete3DTextLabel 0x8159960 /*ptr to 0x3A(58)*/

@@ -1,6 +1,9 @@
 /*See MAX_MISSIONPOINTS_PER_AIRPORT. 15 is enough.
 If an airport has more, they are probably split out enough anyways.*/
 #define MAX_MISSION_INDICATORS (15)
+#define MAX_SERVICE_MAP_ICONS (4)
+/*If this many vehicles are streamed in, there are bigger problems.*/
+#define MAX_VEHICLE_TEXTLABELS (400)
 
 /*ACTOR IDS*/
 
@@ -38,6 +41,11 @@ If an airport has more, they are probably split out enough anyways.*/
 #define TRANSACTION_CHANGEPASS_ABORTED 100003
 #define TRANSACTION_GUESTREGISTER 100004
 
+/*MAPICON IDS*/
+
+#define SERVICEPOINT_MAPICON_ID_BASE (0)
+STATIC_ASSERT(SERVICEPOINT_MAPICON_ID_BASE + MAX_SERVICE_MAP_ICONS < MAX_MAPICONS);
+
 /*OBJECT IDS*/
 
 /*Max amount of objects the mapsystem may use.*/
@@ -67,3 +75,11 @@ If an airport has more, they are probably split out enough anyways.*/
 #define TEXTDRAW_PANEL_BASE (TEXTDRAW_KNEEBOARD_BASE - NUM_PANEL_TEXTDRAWS)
 #define TEXTDRAW_VEHSPD (TEXTDRAW_PANEL_BASE - 1)
 STATIC_ASSERT(TEXTDRAW_VEHSPD > 0);
+
+/*TEXTLABEL IDS*/
+
+/*Ids 0-MAX_PLAYERS are used for player nametags.*/
+
+#define SERVICEPOINT_TEXTLABEL_ID_BASE (0)
+#define VEHICLE_TEXTLABEL_ID_BASE (SERVICEPOINT_TEXTLABEL_ID_BASE + MAX_SERVICE_MAP_ICONS)
+STATIC_ASSERT(VEHICLE_TEXTLABEL_ID_BASE + MAX_VEHICLE_TEXTLABELS < MAX_3DTEXT_LABELS);

@@ -12,6 +12,8 @@
 #undef VOR_PRINT_UPDATES
 /*define to test ils updates/cache busting*/
 #undef ILS_PRINT_UPDATES
+/*define to test vehicle owner label allocation*/
+#undef VEHICLE_PRINT_OWNER_LABEL_ALLOCATIONS
 
 
 
@@ -335,6 +337,7 @@ static struct FAKEAMX fakeamx;
 #include "spawn.h"
 #include "timecyc.h"
 #include "vehicles.h"
+#include <alloca.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>

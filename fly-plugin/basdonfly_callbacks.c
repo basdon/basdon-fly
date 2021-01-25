@@ -247,8 +247,8 @@ exit:
 	veh_init();
 
 	SetGameModeText("Aviation/Piloting/Flying plane server");
-	NC_EnableStuntBonusForAll(0);
-	NC_UsePlayerPedAnims();
+	samp_pNetGame->usePlayerPedAnims = 1;
+	samp_pNetGame->enableStuntBonus = 0;
 
 	logprintf("  Loaded gamemode basdon-fly in %ldms\n", time_timestamp() - t);
 
@@ -266,7 +266,7 @@ int set_minconnectiontime(void *data)
 	minconnectiontime = (int) data;
 	csprintf(buf144, "minconnectiontime %d", minconnectiontime);
 	NC_SendRconCommand(buf144a);
-	return 0; /*no-repeat*/
+	return TIMER_NO_REPEAT;
 }
 
 /* native B_OnIncomingConnection(playerid, ip_address[], port) */

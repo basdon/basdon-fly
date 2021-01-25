@@ -4,8 +4,11 @@
 #define MAX_VEHICLES (2000)
 #define INVALID_VEHICLE_ID ((short) 0xFFFF)
 #define INVALID_3DTEXT_ID ((short) 0xFFFF)
+/*1024 global + 1024 per-player 3dtext labels*/
+#define MAX_3DTEXT_LABELS (2048)
 #define MAX_OBJECTS (1000)
 #define INVALID_OBJECT_ID (0xFFFF)
+#define MAX_MAPICONS (100)
 
 #define MAX_GANG_ZONES (1024)
 
@@ -77,7 +80,7 @@
 #define KEY_HANDBRAKE 128
 #define KEY_AIM KEY_HANDBRAKE
 #define KEY_LOOK_LEFT 256
-#define KEY_LOOK_BEHIND 320
+#define KEY_LOOK_BEHIND (KEY_LOOK_LEFT|KEY_LOOK_RIGHT)
 #define KEY_SUBMISSION 512
 #define KEY_WALK 1024
 #define KEY_ANALOG_UP 2048

@@ -5,6 +5,22 @@ struct SampNetGame *samp_pNetGame;
 static unsigned char vehicle_gear_state[MAX_VEHICLES];
 static int vehicle_gear_change_time[MAX_VEHICLES];
 
+/**
+ * @param max_chars sizeof(dest)
+ * @return amount of _bits_ written.
+ */
+static
+int EncodeString(char *dest, char *source, int max_chars)
+{
+	struct BitStream bs;
+
+	bs.ptrData = dest;
+	bs.numberOfBitsUsed = 0;
+	bs.numberOfBitsAllocated = max_chars * 8;
+	((void (*)(void*,char*,int,struct BitStream*,char))0x808EF80)(*(int**) 0x81AA744, source, max_chars, &bs, 0);
+	return bs.numberOfBitsUsed;
+}
+
 static
 void SetConsoleVariableString(char *variable_name, char *value)
 {
@@ -48,6 +64,73 @@ static
 void SetGameModeText(char *gamemodetext)
 {
 	SetConsoleVariableString("gamemodetext", gamemodetext);
+}
+
+static
+void SetPlayerMapIcon(int playerid, char icon_id, struct vec3 *pos, char icon, int color, char style)
+{
+	struct RPCDATA_SetPlayerMapIcon rpcdata;
+	struct BitStream bs;
+
+	rpcdata.icon_id = icon_id;
+	rpcdata.pos = *pos;
+	rpcdata.icon = icon;
+	rpcdata.color = color;
+	rpcdata.style = style;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	SAMP_SendRPCToPlayer(RPC_SetPlayerMapIcon, &bs, playerid, 2);
+}
+
+static
+void RemovePlayerMapIcon(int playerid, char icon_id)
+{
+	struct RPCDATA_RemovePlayerMapIcon rpcdata;
+	struct BitStream bs;
+
+	rpcdata.icon_id = icon_id;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	SAMP_SendRPCToPlayer(RPC_RemovePlayerMapIcon, &bs, playerid, 2);
+}
+
+static
+void Create3DTextLabel(
+	int playerid, int label_id, int color, struct vec3 *pos, float draw_distance, char test_los,
+	int attached_player_id, int attached_vehicle_id, char *encoded_text_data, int text_bitlength)
+{
+	struct {
+		struct RPCDATA_Create3DTextLabelBase rpcdata;
+		char textdata[1]; /*arbitrary size*/
+	} *data;
+	struct BitStream bs;
+	int text_bytelength;
+
+	text_bytelength = (text_bitlength + 7) / 8;
+	data = alloca(sizeof(data->rpcdata) + text_bytelength);
+	data->rpcdata.label_id = label_id;
+	data->rpcdata.color = color;
+	data->rpcdata.pos = *pos;
+	data->rpcdata.draw_distance = draw_distance;
+	data->rpcdata.test_los = test_los;
+	data->rpcdata.attached_player_id = attached_player_id;
+	data->rpcdata.attached_vehicle_id = attached_vehicle_id;
+	memcpy(data->textdata, encoded_text_data, text_bytelength);
+	bs.ptrData = data;
+	bs.numberOfBitsUsed = sizeof(data->rpcdata) * 8 + text_bitlength;
+	SAMP_SendRPCToPlayer(RPC_Create3DTextLabel, &bs, playerid, 2);
+}
+
+static
+void Delete3DTextLabel(int playerid, int label_id)
+{
+	struct RPCDATA_Delete3DTextLabel rpcdata;
+	struct BitStream bs;
+
+	rpcdata.label_id = label_id;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	SAMP_SendRPCToPlayer(RPC_Delete3DTextLabel, &bs, playerid, 2);
 }
 
 static

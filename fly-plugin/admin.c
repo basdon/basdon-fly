@@ -125,9 +125,7 @@ void admin_show_vehinfo(playerid, veh, enabled, airport)
 		veh->spawnedvehicleid,
 		veh->id,
 		veh->owneruserid,
-		(veh->owneruserid
-			? veh->ownerstring + veh->ownerstringowneroffset
-			: "<PUBLIC>"),
+		(veh->owneruserid ? veh->owner_name : "<PUBLIC>"),
 		enabled,
 		airport);
 	dialog_ShowPlayerDialog(playerid, DIALOG_VEHINFO_VEHINFO,

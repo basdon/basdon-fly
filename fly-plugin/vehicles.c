@@ -29,7 +29,12 @@ static struct vehnode *vehstoupdate;
 static struct dbvehicle **dbvehicles;
 int numdbvehicles, dbvehiclealloc;
 struct vehicle gamevehicles[MAX_VEHICLES];
-static short owner_label_ids[MAX_PLAYERS][MAX_VEHICLES]; /* 200KB of mapping for 100 players, hmmm */
+
+struct VEHICLE_OWNER_LABEL_DATA {
+	short vehicle_id_for_label_id[MAX_VEHICLE_TEXTLABELS]; /*Index is label_id - VEHICLE_TEXTLABEL_ID_BASE.*/
+	short num_maybe_used_labels; /*Example: this can be 4 but this doesn't mean label at index 1 is actually used.*/
+};
+static struct VEHICLE_OWNER_LABEL_DATA ownerlabels[MAX_PLAYERS];
 
 /**
 Last vehicle position for player (when driver), for ODO purposes.
@@ -84,8 +89,8 @@ struct dbvehicle *veh_create_new_dbvehicle(int model, struct vec4 *pos)
 	memcpy(&veh->pos, pos, sizeof(struct vec4));
 	veh->fuel = model_fuel_capacity((short) model);
 	veh->owneruserid = 0;
-	veh->ownerstring = NULL;
-	veh->ownerstringowneroffset = 0;
+	veh->owner_name = NULL;
+	veh->owner_label_bits_data = NULL;
 	veh->spawnedvehicleid = 0;
 	veh->odoKM = 0.0f;
 	veh->needsodoupdate = 0;
@@ -116,30 +121,90 @@ Does not check if the vehicle needs an owner label, use veh_needs_owner_label)
 static
 void veh_create_owner_label(struct dbvehicle *veh, int vehicleid, int playerid)
 {
-	if (owner_label_ids[playerid][vehicleid] == INVALID_3DTEXT_ID) {
-		atoc(buf144, veh->ownerstring, 144);
-		NC_PARS(10);
-		nc_params[1] = playerid;
-		nc_params[2] = buf144a;
-		nc_params[3] = 0xFFFF00FF;
-		nc_paramf[4] = nc_paramf[5] = nc_paramf[6] = 0.0f;
-		nc_paramf[7] = 75.0f;
-		nc_params[8] = INVALID_PLAYER_ID;
-		nc_params[9] = vehicleid;
-		nc_params[10] = 1; /*testLOS*/
-		owner_label_ids[playerid][vehicleid] = (short) NC(n_CreatePlayer3DTextLabel);
+	static struct vec3 *zero_offset = (void*) "\0\0\0\0\0\0\0\0\0\0\0\0";
+
+	short *vehicle_id_for_label_id;
+	int current_num_maybe_used, i, first_available_index;
+
+	vehicle_id_for_label_id = ownerlabels[playerid].vehicle_id_for_label_id;
+
+	first_available_index = -1;
+	current_num_maybe_used = ownerlabels[playerid].num_maybe_used_labels;
+	for (i = 0; i < current_num_maybe_used; i++) {
+		if (!vehicle_id_for_label_id[i]) {
+			if (first_available_index == -1) {
+				first_available_index = i;
+			}
+			continue;
+		}
+		if (vehicle_id_for_label_id[i] == vehicleid) {
+			/*Already created.*/
+			return;
+		}
 	}
+
+	if (first_available_index != -1) {
+		i = first_available_index;
+	} else {
+		ownerlabels[playerid].num_maybe_used_labels++;
+	}
+	vehicle_id_for_label_id[i] = vehicleid;
+	Create3DTextLabel(
+		playerid, VEHICLE_TEXTLABEL_ID_BASE + i, 0xFFFF00FF, zero_offset, 75.0f, 1,
+		INVALID_PLAYER_ID, vehicleid, veh->owner_label_bits_data, veh->owner_label_bits_length
+	);
+
+#ifdef VEHICLE_PRINT_OWNER_LABEL_ALLOCATIONS
+	printf("---\n");
+	printf(
+		"vehicles.c: allocated 3dtext label_id %d (idx %d) for vehicle_id %d for player_id %d\n",
+		VEHICLE_TEXTLABEL_ID_BASE + i, i,
+		vehicleid,
+		playerid
+	);
+	printf("vehicles.c: player has up to %d labels allocated\n", ownerlabels[playerid].num_maybe_used_labels);
+	printf("---\n");
+#endif
 }
 
 /**
 Destroys a vehicle owner 3D text label for given player.
+
+Nop if no owner 3D text label was created for the vehicle for given player.
 */
 static
 void veh_destroy_owner_label(int vehicleid, int playerid)
 {
-	if (owner_label_ids[playerid][vehicleid] != INVALID_3DTEXT_ID) {
-		NC_DeletePlayer3DTextLabel(playerid, owner_label_ids[playerid][vehicleid]);
-		owner_label_ids[playerid][vehicleid] = INVALID_3DTEXT_ID;
+	short *vehicle_id_for_label_id;
+	int i;
+
+	vehicle_id_for_label_id = ownerlabels[playerid].vehicle_id_for_label_id;
+	i = ownerlabels[playerid].num_maybe_used_labels;
+	while (i--) {
+		if (vehicle_id_for_label_id[i] == vehicleid) {
+			Delete3DTextLabel(playerid, VEHICLE_TEXTLABEL_ID_BASE + i);
+			vehicle_id_for_label_id[i] = 0;
+#ifdef VEHICLE_PRINT_OWNER_LABEL_ALLOCATIONS
+			printf("---\n");
+			printf(
+				"vehicles.c: deleted 3dtext label_id %d (idx %d) for vehicle_id %d for player_id %d\n",
+				VEHICLE_TEXTLABEL_ID_BASE + i, i,
+				vehicleid,
+				playerid
+			);
+			printf("vehicles.c: player has up to %d labels allocated\n", ownerlabels[playerid].num_maybe_used_labels);
+#endif
+			i = ownerlabels[playerid].num_maybe_used_labels - 1;
+			while (i >= 0 && !vehicle_id_for_label_id[i]) {
+				ownerlabels[playerid].num_maybe_used_labels = i;
+				i--;
+			}
+#ifdef VEHICLE_PRINT_OWNER_LABEL_ALLOCATIONS
+			printf("vehicles.c: player has up to %d labels allocated\n", ownerlabels[playerid].num_maybe_used_labels);
+			printf("---\n");
+#endif
+			return;
+		}
 	}
 }
 
@@ -202,13 +267,8 @@ void veh_on_vehicle_stream_out(int vehicleid, int forplayerid)
 
 void veh_on_player_connect(int playerid)
 {
-	short *labelid = &owner_label_ids[playerid][0];
-	int i = MAX_VEHICLES;
-
-	while (i--) {
-		*labelid = INVALID_3DTEXT_ID;
-		labelid++;
-	}
+	memset(ownerlabels[playerid].vehicle_id_for_label_id, 0, sizeof(ownerlabels[playerid].vehicle_id_for_label_id));
+	ownerlabels[playerid].num_maybe_used_labels = 0;
 
 	lastvehicle_asdriver[playerid] = 0;
 	playerodoKM[playerid] = 0.0f;
@@ -399,8 +459,10 @@ void veh_save_user_model_stats(int playerid)
 void veh_init()
 {
 	struct dbvehicle *veh;
-	int i, tmp, rowcount, dbcache, vehicleid, *fld = nc_params + 2;
-	char ownername[MAX_PLAYER_NAME + 1];
+	int i, owner_name_len, owner_label_buf_size, rowcount, dbcache, vehicleid, *fld = nc_params + 2;
+	char owner_name[MAX_PLAYER_NAME + 1];
+	char owner_string_tmp[144];
+	char *vehname;
 
 	for (i = 0; i < MAX_VEHICLES; i++) {
 		gamevehicles[i].dbvehicle = NULL;
@@ -445,17 +507,20 @@ void veh_init()
 			NC_PARS(3);
 			nc_params[3] = buf32a;
 			*fld = 10, NC(n_cache_get_field_s);
-			ctoa(ownername, buf32, sizeof(ownername));
-			tmp = 7 + strlen(vehnames[veh->model - 400]);
-			veh->ownerstringowneroffset = tmp;
-			tmp += strlen(ownername) + 1;
-			veh->ownerstring = malloc(tmp * sizeof(char));
-			sprintf(veh->ownerstring,
-				"%s Owner\n%s",
-				vehnames[veh->model - 400],
-				ownername);
+			ctoa(owner_name, buf32, sizeof(owner_name));
+
+			owner_name_len = strlen(owner_name) + 1;
+			veh->owner_name = malloc(owner_name_len);
+			memcpy(veh->owner_name, owner_name, owner_name_len);
+
+			vehname = vehnames[veh->model - VEHICLE_MODEL_MIN];
+			sprintf(owner_string_tmp, "%s Owner\n%s", vehname, owner_name);
+			owner_label_buf_size = owner_name_len + 7 + strlen(vehname);
+			veh->owner_label_bits_data = malloc(owner_label_buf_size * 2);
+			veh->owner_label_bits_length = EncodeString(veh->owner_label_bits_data, owner_string_tmp, owner_label_buf_size * 2);
 		} else {
-			veh->ownerstring = NULL;
+			veh->owner_name = 0;
+			veh->owner_label_bits_data = 0;
 
 			NC_PARS(9);
 			nc_params[1] = veh->model;
@@ -583,9 +648,9 @@ void veh_dispose()
 
 	while (dbvehiclealloc--) {
 		veh = dbvehicles[dbvehiclealloc];
-		if (veh->ownerstring != NULL) {
-			free(veh->ownerstring);
-			veh->ownerstring = NULL;
+		if (veh->owner_name) {
+			free(veh->owner_name);
+			free(veh->owner_label_bits_data);
 		}
 		free(veh);
 	}
@@ -634,7 +699,7 @@ void veh_disallow_player_in_vehicle(int playerid, struct dbvehicle *v)
 	/*when player is already in, this should instantly eject the player*/
 	NC_ClearAnimations(playerid, 1);
 
-	sprintf(msg144, WARN"This vehicle belongs to %s!", v->ownerstring + v->ownerstringowneroffset);
+	sprintf(msg144, WARN"This vehicle belongs to %s!", v->owner_name);
 	SendClientMessage(playerid, COL_WARN, msg144);
 }
 
