@@ -423,7 +423,7 @@ invalid_packet:
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_CYAN);
 			msg.writeChar(',');
-			msg.writeString(SCOL_BLACK);
+			msg.writeString(SCOL_GREY);
 			break;
 		default:
 			break invalid_packet;
