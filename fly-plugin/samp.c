@@ -83,6 +83,7 @@ void SetPlayerMapIcon(int playerid, char icon_id, struct vec3 *pos, char icon, i
 }
 
 static
+__attribute__((unused))
 void RemovePlayerMapIcon(int playerid, char icon_id)
 {
 	struct RPCDATA_RemovePlayerMapIcon rpcdata;

@@ -323,8 +323,6 @@ void svp_update_mapicons(int playerid, float x, float y)
 			dx = svp->pos.x - x;
 			dy = svp->pos.y - y;
 			if (dx * dx + dy * dy > SERVICE_MAP_DISTANCE_SQ) {
-				Delete3DTextLabel(playerid, SERVICEPOINT_TEXTLABEL_ID_BASE + i);
-				RemovePlayerMapIcon(playerid, SERVICEPOINT_MAPICON_ID_BASE + i);
 				psvps[i] = NULL;
 			}
 		}
