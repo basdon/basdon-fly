@@ -239,6 +239,7 @@ exit:
 	maps_init();
 	missions_create_tracker_socket();
 	missions_init(); /*airports_init() must be called first, to initialize missionpoints*/
+	nametags_init();
 	playerstats_init();
 	protips_init();
 	spawn_init(); /*MUST run after airports_init*/
@@ -249,6 +250,7 @@ exit:
 	SetGameModeText("Aviation/Piloting/Flying plane server");
 	samp_pNetGame->usePlayerPedAnims = 1;
 	samp_pNetGame->enableStuntBonus = 0;
+	samp_pNetGame->showNametags = 0;
 
 	logprintf("  Loaded gamemode basdon-fly in %ldms\n", time_timestamp() - t);
 
@@ -370,6 +372,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	maps_on_player_connect(playerid);
 	missions_on_player_connect(playerid);
 	money_set(playerid, 0);
+	nametags_on_player_connect(playerid);
 	panel_on_player_connect(playerid);
 	playerstats_on_player_connect(playerid);
 	pm_on_player_connect(playerid);
@@ -457,6 +460,8 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 			return 1;
 		}
 	}
+
+	nametags_on_player_disconnect(playerid); /*Needs to be after player was removed from players array.*/
 	return 1;
 }
 
@@ -548,6 +553,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 	kneeboard_update_all(playerid, &pos);
 	maps_stream_for_player(playerid, pos);
 	money_on_player_spawn(playerid);
+	nametags_update_for_player(playerid);
 	spawn_on_player_spawn(playerid);
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);

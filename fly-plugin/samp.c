@@ -779,6 +779,7 @@ int natives_SetPlayerPos(int playerid, struct vec3 pos)
 	GameTextForPlayer(playerid, 0, 5, "_");
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
+	nametags_update_for_player(playerid);
 	zones_update(playerid, pos);
 
 	return SetPlayerPosRaw(playerid, &pos);

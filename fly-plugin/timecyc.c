@@ -671,6 +671,13 @@ timer30s:
 	}
 }
 
+static
+int timecyc_get_current_render_distance()
+{
+	/*Could interpolate between current and upcoming, but I suspect it's not linear, and it's not always synced.*/
+	return weather_view_distances[weather.upcoming];
+}
+
 #ifdef DEV
 /**
 Dev /fweather <weather> command to force weather now.

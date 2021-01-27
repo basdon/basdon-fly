@@ -80,6 +80,8 @@ struct vec3 {
 };
 EXPECT_SIZE(struct vec3, 3 * sizeof(cell));
 
+static struct vec3 *vec3_zero = (void*) "\0\0\0\0\0\0\0\0\0\0\0\0";
+
 struct vec4 {
 	struct vec3 coords;
 	float r;
@@ -391,6 +393,7 @@ static void nav_reset_for_vehicle(int vehicleid);
 #include "servicepoints.c"
 #include "spawn.c"
 #include "timecyc.c"
+#include "nametags.c" /*requires timecyc*/
 #include "vehicles.c"
 #include "prefs.c"
 

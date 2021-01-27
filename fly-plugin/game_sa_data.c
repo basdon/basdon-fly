@@ -83,6 +83,15 @@
 #define WEATHER_UNDERWATER 20
 #define WEATHERS 21
 
+const int weather_view_distances[WEATHERS] = {
+	800, 800, 800, 700,
+	455, 455, 1150, 650, 250,
+	1000, 1000, 1000,
+	1500, 1500, 1150, 650,
+	1500, 1500, 150,
+	300
+};
+
 #define MODEL_LANDSTAL (400)
 #define MODEL_BRAVURA (401)
 #define MODEL_BUFFALO (402)

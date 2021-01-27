@@ -121,8 +121,6 @@ Does not check if the vehicle needs an owner label, use veh_needs_owner_label)
 static
 void veh_create_owner_label(struct dbvehicle *veh, int vehicleid, int playerid)
 {
-	static struct vec3 *zero_offset = (void*) "\0\0\0\0\0\0\0\0\0\0\0\0";
-
 	short *vehicle_id_for_label_id;
 	int current_num_maybe_used, i, first_available_index;
 
@@ -150,7 +148,7 @@ void veh_create_owner_label(struct dbvehicle *veh, int vehicleid, int playerid)
 	}
 	vehicle_id_for_label_id[i] = vehicleid;
 	Create3DTextLabel(
-		playerid, VEHICLE_TEXTLABEL_ID_BASE + i, 0xFFFF00FF, zero_offset, 75.0f, 1,
+		playerid, VEHICLE_TEXTLABEL_ID_BASE + i, 0xFFFF00FF, vec3_zero, 75.0f, 1,
 		INVALID_PLAYER_ID, vehicleid, veh->owner_label_bits_data, veh->owner_label_bits_length
 	);
 

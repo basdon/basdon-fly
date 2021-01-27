@@ -144,7 +144,8 @@ struct SampPlayer {
 	char _pad2BAA[0x2C31-0x2BAA];
 	char vehicleseat;
 	short vehicleid;
-	char _pad2C34[0x2C40-0x2C34];
+	int color;
+	char _pad2C38[0x2C40-0x2C38];
 	int interior;
 	/*Incomplete.*/
 };
@@ -166,6 +167,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, updateSyncType, 0x2969);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, currentState, 0x2BA9);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleseat, 0x2C31);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleid, 0x2C32);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, color, 0x2C34);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, interior, 0x2C40);
 
 struct SampVehiclePool {
@@ -198,7 +200,7 @@ struct SampNetGame {
 	void *gangzonePool;
 	void *actorPool;
 	int _pad2C[11];
-	char showNameTags; /*Should be set before anyone connects.*/
+	char showNametags; /*Should be set before anyone connects.*/
 	char _pad59;
 	char _pad5A;
 	char enableStuntBonus; /*EnableStuntBonusForAll()*/
@@ -208,12 +210,18 @@ struct SampNetGame {
 	int _pad68;
 	char _pad6C;
 	char usePlayerPedAnims; /*UsePlayerPedAnims()*/
+	char _pad6E;
+	char _pad6F;
+	char _pad70;
+	char _pad71;
+	float nametagDrawDistance; /*SetNameTagDrawDistance()*/
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, vehiclePool, 0xC);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, showNameTags, 0x58);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, showNametags, 0x58);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, enableStuntBonus, 0x5B);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, usePlayerPedAnims, 0x6D);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, nametagDrawDistance, 0x72);
 
 struct BitStream {
 	int numberOfBitsUsed;
