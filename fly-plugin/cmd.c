@@ -12,6 +12,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/*m", GROUPS_ALL, cmd_dev_STARm },
 	{ 0, "/cp", GROUPS_ALL, cmd_dev_cp },
 	{ 0, "/crashme", GROUPS_ALL, cmd_dev_crashme },
+	{ 0, "//drvc", GROUPS_ALL, cmd_dev_disableremotevehiclecollisions },
 	{ 0, "/fweather", GROUPS_ALL, timecyc_cmd_dev_fweather },
 	{ 0, "/gt", GROUPS_ALL, cmd_dev_gt },
 	{ 0, "/jetpack", GROUPS_ALL, cmd_dev_jetpack },

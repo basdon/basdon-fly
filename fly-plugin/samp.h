@@ -509,3 +509,4 @@ EXPECT_SIZE(struct RPCDATA_Delete3DTextLabel, 2);
 #define RPC_SetPlayerMapIcon 0x8162E9F /*ptr to 0x38(56)*/
 #define RPC_RemovePlayerMapIcon 0x815CD22 /*ptr to 0x90(144)*/
 #define RPC_Delete3DTextLabel 0x8159960 /*ptr to 0x3A(58)*/
+#define RPC_DisableRemoteVehicleCollisions 0x815CD80 /*ptr to 0xA7(167)*/

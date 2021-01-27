@@ -44,6 +44,22 @@ int cmd_dev_crashme(CMDPARAMS)
 }
 
 /**
+The //drvc command calls DisableRemoteVehicleCollisions
+*/
+static
+int cmd_dev_disableremotevehiclecollisions(CMDPARAMS)
+{
+	int disable;
+
+	if (cmd_get_int_param(cmdtext, &parseidx, &disable)) {
+		DisableRemoteVehicleCollisions(playerid, disable);
+	} else {
+		SendClientMessage(playerid, COL_WARN, WARN"Syntax: //drvc <disable>");
+	}
+	return 1;
+}
+
+/**
 The /jetpack command gives player a jetpack.
 */
 static

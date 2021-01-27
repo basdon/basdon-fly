@@ -134,6 +134,17 @@ void Delete3DTextLabel(int playerid, int label_id)
 }
 
 static
+void DisableRemoteVehicleCollisions(int playerid, char disable)
+{
+	struct BitStream bs;
+
+	disable <<= 7;
+	bs.ptrData = &disable;
+	bs.numberOfBitsUsed = 1;
+	SAMP_SendRPCToPlayer(RPC_DisableRemoteVehicleCollisions, &bs, playerid, 2);
+}
+
+static
 void SetPlayerRaceCheckpointNoDir(int playerid, int type, struct vec3 *pos, float radius)
 {
 	struct RPCDATA_SetRaceCheckpoint rpcdata;
