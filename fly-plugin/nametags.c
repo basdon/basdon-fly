@@ -101,7 +101,7 @@ void nametags_update_for_player(int forplayerid)
 					}
 					Create3DTextLabel(
 						forplayerid, NAMETAG_TEXTLABEL_ID_BASE + playerid, player[playerid]->color, &d,
-						float_pinf, 0, INVALID_PLAYER_ID, INVALID_VEHICLE_ID, bitbuf, bitbuf_bitlength
+						float_pinf, 1, INVALID_PLAYER_ID, INVALID_VEHICLE_ID, bitbuf, bitbuf_bitlength
 					);
 				}
 				nametag_created[forplayerid][playerid] = 1;
