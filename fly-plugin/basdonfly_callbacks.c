@@ -120,6 +120,9 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 	case DIALOG_VEHINFO_ASSIGNAP:
 		admin_dlg_vehinfo_assign_response(pid, res, listitem);
 		goto ret;
+	case DIALOG_PREFERENCES_NAMETAGDISTANCE:
+		prefs_on_dialog_response_nametagdist(pid, res, inputtext);
+		goto ret;
 	}
 
 ret:

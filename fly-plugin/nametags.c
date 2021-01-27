@@ -1,4 +1,5 @@
-#define NAMETAG_UPDATE_INTERVAL 1000
+#define NAMETAGS_UPDATE_INTERVAL 1000
+#define NAMETAGS_DEFAULT_MAX_DISTANCE 5000
 
 static char nametag_created[MAX_PLAYERS][MAX_PLAYERS];
 
@@ -14,20 +15,25 @@ duplicating the states is an easy stupid way to do that.*/
 #define NAMETAG_NUM_CYCLES 6
 static char nametags_current_cycle;
 
-#define NAMETAG_MAX_DISTANCE (4000.0f)
-
 static
 void nametags_update_for_player(int forplayerid)
 {
 	struct SampPlayer *forplayer;
 	struct vec3 *playerpos, forplayerpos, d;
 	int playerid, i, bitbuf_bitlength, current_render_dist, vehiclemodel;
-	float dist, lerp_dist;
+	float dist, lerp_dist, max_dist_sq;
 	char buf[128];
 	char bitbuf[150];
 
 	forplayer = player[forplayerid];
 	forplayerpos = forplayer->pos;
+
+	if (nametags_max_distance[forplayerid] > 50000) {
+		max_dist_sq = float_pinf;
+	} else {
+		max_dist_sq = nametags_max_distance[forplayerid];
+		max_dist_sq *= max_dist_sq;
+	}
 	
 	current_render_dist = timecyc_get_current_render_distance() - 80 /*leeway.. this should be big enough..*/;
 	if (current_render_dist < 400) {
@@ -53,7 +59,7 @@ void nametags_update_for_player(int forplayerid)
 		if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
 			vehiclemodel = GetVehicleModel(GetPlayerVehicleID(playerid));
 			if (game_is_air_vehicle(vehiclemodel)) {
-				if (dist > NAMETAG_MAX_DISTANCE * NAMETAG_MAX_DISTANCE) {
+				if (dist > max_dist_sq) {
 					goto hide;
 				}
 				d.z = playerpos->z - forplayerpos.z;
@@ -77,11 +83,10 @@ void nametags_update_for_player(int forplayerid)
 					break;
 				}
 				bitbuf_bitlength = EncodeString(bitbuf, buf, sizeof(bitbuf));
-				nametag_created[forplayerid][playerid] = 1;
 				if (forplayer->playerStreamedIn[playerid] && dist < current_render_dist) {
 					Create3DTextLabel(
 						forplayerid, NAMETAG_TEXTLABEL_ID_BASE + playerid, player[playerid]->color, vec3_zero,
-						NAMETAG_MAX_DISTANCE, 1, playerid, INVALID_VEHICLE_ID, bitbuf, bitbuf_bitlength
+						nametags_max_distance[forplayerid], 1, playerid, INVALID_VEHICLE_ID, bitbuf, bitbuf_bitlength
 					);
 				} else {
 					/*So.. labels don't render if they're out of render distance (which means that's affected by weather)...
@@ -96,21 +101,22 @@ void nametags_update_for_player(int forplayerid)
 					}
 					Create3DTextLabel(
 						forplayerid, NAMETAG_TEXTLABEL_ID_BASE + playerid, player[playerid]->color, &d,
-						NAMETAG_MAX_DISTANCE, 1, INVALID_PLAYER_ID, INVALID_VEHICLE_ID, bitbuf, bitbuf_bitlength
+						float_pinf, 0, INVALID_PLAYER_ID, INVALID_VEHICLE_ID, bitbuf, bitbuf_bitlength
 					);
 				}
+				nametag_created[forplayerid][playerid] = 1;
 				continue;
 			}
 		}
 
-		if (forplayer->playerStreamedIn[playerid]) {
+		if (forplayer->playerStreamedIn[playerid] && dist < max_dist_sq) {
 			sprintf(buf, "%s (%d)", pdata[playerid]->name, playerid);
 			bitbuf_bitlength = EncodeString(bitbuf, buf, sizeof(bitbuf));
-			nametag_created[forplayerid][playerid] = 1;
 			Create3DTextLabel(
 				forplayerid, NAMETAG_TEXTLABEL_ID_BASE + playerid, player[playerid]->color, vec3_zero,
-				NAMETAG_MAX_DISTANCE, 1, playerid, INVALID_VEHICLE_ID, bitbuf, bitbuf_bitlength
+				nametags_max_distance[forplayerid], 1, playerid, INVALID_VEHICLE_ID, bitbuf, bitbuf_bitlength
 			);
+			nametag_created[forplayerid][playerid] = 1;
 		} else {
 hide:
 			if (nametag_created[forplayerid][playerid]) {
@@ -127,7 +133,7 @@ int nametags_update(void *data)
 	int forplayerid;
 
 	if (playercount < 2) {
-		return NAMETAG_UPDATE_INTERVAL;
+		return NAMETAGS_UPDATE_INTERVAL;
 	}
 
 	nametags_next_updating_playeridx++;
@@ -144,19 +150,20 @@ int nametags_update(void *data)
 	}
 
 	/*Calculate delay so that nametags for everyone will update about once a second.*/
-	return NAMETAG_UPDATE_INTERVAL / playercount;
+	return NAMETAGS_UPDATE_INTERVAL / playercount;
 }
 
 static
 void nametags_init()
 {
-	timer_set(NAMETAG_UPDATE_INTERVAL, nametags_update, NULL);
+	timer_set(NAMETAGS_UPDATE_INTERVAL, nametags_update, NULL);
 }
 
 static
 void nametags_on_player_connect(int forplayerid)
 {
 	memset(nametag_created[forplayerid], 0, sizeof(nametag_created[forplayerid]));
+	nametags_max_distance[forplayerid] = NAMETAGS_DEFAULT_MAX_DISTANCE;
 }
 
 static

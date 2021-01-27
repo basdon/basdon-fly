@@ -63,7 +63,7 @@ void playerstats_commit_to_db(int playerid, int isdisconnecting)
 		"UPDATE usr "
 		"SET lastseengame=UNIX_TIMESTAMP(),onlinetime=onlinetime+%d,"
 		"playtime=playtime+%d,"
-		"score=%d,cash=%d,distance=%f,flighttime=%d,prefs=%d "
+		"score=%d,cash=%d,distance=%f,flighttime=%d,prefs=%d,nametagdist=%d "
 		"WHERE i=%d",
 		isdisconnecting ? 0 : 30,
 		playtime_to_add,
@@ -72,6 +72,7 @@ void playerstats_commit_to_db(int playerid, int isdisconnecting)
 		playerodoKM[playerid],
 		score_flight_time[playerid],
 		prefs[playerid],
+		nametags_max_distance[playerid],
 		userid[playerid]);
 	NC_mysql_tquery_nocb(buf4096a);
 

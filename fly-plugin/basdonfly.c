@@ -357,6 +357,8 @@ static void missions_update_missionpoint_indicators(int playerid, float player_x
 static int missions_get_vehicle_model_msptype_mask(int model);
 static void nav_reset_for_vehicle(int vehicleid);
 
+static unsigned short nametags_max_distance[MAX_PLAYERS];
+
 #include "memstuff.c"
 #include "natives.c"
 #include "samp.c"

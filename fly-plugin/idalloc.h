@@ -30,6 +30,7 @@ If an airport has more, they are probably split out enough anyways.*/
 #define DIALOG_GUESTREGISTER_CONFIRMPASS 1013
 #define DIALOG_VEHINFO_VEHINFO 1014
 #define DIALOG_VEHINFO_ASSIGNAP 1015
+#define DIALOG_PREFERENCES_NAMETAGDISTANCE 1016
 /*Dialog transactions.*/
 /*don't use an id that is used in a dialog id (unless they relate), use 32768+*/
 /*max transaction id is int max*/

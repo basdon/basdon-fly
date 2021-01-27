@@ -28,7 +28,7 @@ static
 void prefs_show_dialog(int playerid)
 {
 	int p = prefs[playerid];
-	char buf[255], *bp = buf;
+	char buf[2048], *bp = buf;
 
 	/* must be same order as in Prefs_DoActionForRow */
 	bp = prefs_append_pref(bp, "Accepting PMs", p & PREF_ENABLE_PM);
@@ -38,6 +38,12 @@ void prefs_show_dialog(int playerid)
 	bp = prefs_append_pref(bp, "Auto engage nav when working", p & PREF_WORK_AUTONAV);
 	bp = prefs_append_pref(bp, "Aviation panel night colors ("
 		EQ(PANEL_NIGHT_COLORS_FROM_HR)"h-"EQ(PANEL_NIGHT_COLORS_TO_HR)"h)", p & PREF_PANEL_NIGHTCOLORS);
+	bp += sprintf(bp, "Name tag draw distance:\t");
+	if (nametags_max_distance[playerid] > 50000) {
+		bp += sprintf(bp, "unlimited\n");
+	} else {
+		bp += sprintf(bp, "%d\n", nametags_max_distance[playerid]);
+	}
 	*(--bp) = 0;
 
 	dialog_ShowPlayerDialog(
@@ -58,28 +64,57 @@ void prefs_on_player_connect(int playerid)
 }
 
 static
+void prefs_on_dialog_response_nametagdist(int playerid, int response, char *inputtext)
+{
+	unsigned int dist;
+
+	if (response) {
+		dist = (unsigned int) atoi(inputtext);
+		if (dist > 50000) {
+			nametags_max_distance[playerid] = 60000;
+		} else {
+			nametags_max_distance[playerid] = (unsigned short) dist;
+		}
+	}
+	prefs_show_dialog(playerid);
+}
+
+static
 void prefs_on_dialog_response(int playerid, int response, int idx)
 {
 	struct vec3 pos;
 	int val;
 
-	/*must be same order the calls to prefs_append_pref in
-	prefs_cmd_preferences*/
-	if (response && 0 <= idx && idx <= 5) {
-		val = 1 << idx;
-		prefs[playerid] ^= val;
-		if (val == PREF_SHOW_GPS) {
-			GetPlayerPos(playerid, &pos);
-			zones_update(playerid, pos);
-		} else if (val == PREF_SHOW_KNEEBOARD) {
-			GetPlayerPos(playerid, &pos);
-			kneeboard_update_all(playerid, &pos);
-		} else if (val == PREF_PANEL_NIGHTCOLORS) {
-			if (panel_is_active_for(playerid)) {
-				panel_reshow_if_needed(playerid);
+	if (response) {
+		if (0 <= idx && idx <= 5) {
+			/*must be same order the calls to prefs_append_pref in
+			prefs_cmd_preferences*/
+			val = 1 << idx;
+			prefs[playerid] ^= val;
+			if (val == PREF_SHOW_GPS) {
+				GetPlayerPos(playerid, &pos);
+				zones_update(playerid, pos);
+			} else if (val == PREF_SHOW_KNEEBOARD) {
+				GetPlayerPos(playerid, &pos);
+				kneeboard_update_all(playerid, &pos);
+			} else if (val == PREF_PANEL_NIGHTCOLORS) {
+				if (panel_is_active_for(playerid)) {
+					panel_reshow_if_needed(playerid);
+				}
 			}
+			prefs_show_dialog(playerid);
+		} else if (idx == 6) {
+			dialog_ShowPlayerDialog(
+				playerid,
+				DIALOG_PREFERENCES_NAMETAGDISTANCE,
+				DIALOG_STYLE_INPUT,
+				"Name tag draw distance",
+				"Set the new name tag draw distance in units.\n"
+				"Use -1 or any value above 50000 for unlimited.",
+				"Change",
+				"Cancel",
+				DIALOG_PREFERENCES);
 		}
-		prefs_show_dialog(playerid);
 	}
 }
 

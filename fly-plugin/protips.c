@@ -23,6 +23,7 @@ static const char *protips[] = {
 	"Pro Tip: Want to fly as passenger in a plane without seats? Press 'FIRE' (default: lmb) while carrying no weapons to warp into the plane.",
 	"Pro Tip: Want to hide the gps/kneeboard text on your screen? Check out /p(references).",
 	"Pro Tip: The chat is linked to IRC, check out /irc for more info.",
+	"Pro Tip: Adjust the draw distance of player name tags using /p(references).",
 };
 static const int numprotips = sizeof(protips)/sizeof(protips[0]);
 

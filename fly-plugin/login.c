@@ -509,6 +509,7 @@ void login_cb_load_account_data(void *data)
 	falng = (*f = 5, NC(n_cache_get_field_i));
 	lastfal = (*f = 6, NC(n_cache_get_field_i));
 	pdata[playerid]->groups = (*f = 7, NC(n_cache_get_field_i));
+	nametags_max_distance[playerid] = (unsigned short) (*f = 8, NC(n_cache_get_field_i));
 
 	score_update_score(playerid);
 
@@ -568,7 +569,7 @@ void login_cb_verify_password(void *data)
 		NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
 		sprintf(cbuf4096_,
 			"SELECT cash,distance,flighttime,playtime,prefs,"
-			"falng,lastfal,groups "
+			"falng,lastfal,groups,nametagdist "
 			"FROM usr "
 			"WHERE i=%d",
 			unconfirmed_userid[playerid]);
