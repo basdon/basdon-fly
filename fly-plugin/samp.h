@@ -122,7 +122,7 @@ struct SampPlayer {
 	struct SYNCDATA_Passenger passengerSyncData;
 	struct SYNCDATA_Onfoot onfootSyncData;
 	char _padC2[0x155-0xC2];
-	char playerStreamedIn[1000];
+	char playerStreamedIn[1000]; /*Does this get reset when player disconnects?*/
 	char vehicleStreamedIn[2000];
 	char _padD0D[0x24F5-0xD0D];
 	char actorStreamedIn[1000];

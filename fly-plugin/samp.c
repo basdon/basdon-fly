@@ -135,6 +135,14 @@ void Delete3DTextLabel(int playerid, int label_id)
 }
 
 static
+__attribute__((unused))
+int IsPlayerStreamedIn(int forplayerid, int playerid)
+{
+	return playeronlineflag[playerid] && player[forplayerid]->playerStreamedIn[playerid];
+}
+
+static
+__attribute__((unused)) /*unused in prod builds*/
 void DisableRemoteVehicleCollisions(int playerid, char disable)
 {
 	struct BitStream bs;
