@@ -84,7 +84,7 @@ WAVE waveyness
 17: clear skies
 18: light clouds
 19: sandstorms
-20: green smog
+20: green smog (don't use this - water looks lime toxic green when using 16 bit color depth)
 
 default:
 6 28.5% clear
@@ -102,6 +102,15 @@ weighted:
 2  5.7%
 1  2.8%
 35
+
+changed 2020 Jan 27:
+9 26.4%
+9 26.4%
+9 26.4%
+5 14.7%
+1  2.9%
+1  2.9%
+34
 
 wind * 34kts
 
@@ -162,7 +171,7 @@ DE | 18, 18, 18, 17, 17, 17, 17, 17, 17, 17, 19, 19, 19, 17
 
 #define WEATHER_INITIAL 255
 
-#define NEXT_WEATHER_POSSIBILITIES (35)
+#define NEXT_WEATHER_POSSIBILITIES (34)
 
 static const char weather_mapping[NEXT_WEATHER_POSSIBILITIES] = {
 	/* 9x clear */
@@ -189,7 +198,8 @@ static const char weather_mapping[NEXT_WEATHER_POSSIBILITIES] = {
 	WEATHER_SF_SUNNY, /* VD  455 */
 	WEATHER_LV_SUNNY, /* VD 1000 */
 
-	/* 8x overcast */
+	/* 9x overcast */
+	WEATHER_LA_CLOUDY,
 	WEATHER_LA_CLOUDY,
 	WEATHER_SF_CLOUDY,
 	WEATHER_LV_CLOUDY,
@@ -200,7 +210,7 @@ static const char weather_mapping[NEXT_WEATHER_POSSIBILITIES] = {
 	WEATHER_LV_CLOUDY,
 	WEATHER_CS_CLOUDY,
 
-	/* 6x thunderstorms */
+	/* 5x thunderstorms */
 	WEATHER_SF_RAINY,
 	WEATHER_CS_RAINY,
 
@@ -208,11 +218,9 @@ static const char weather_mapping[NEXT_WEATHER_POSSIBILITIES] = {
 	WEATHER_CS_RAINY,
 
 	WEATHER_SF_RAINY,
-	WEATHER_CS_RAINY,
 
-	/* 2x thick fog */
+	/* 1x thick fog */
 	WEATHER_SF_FOGGY,
-	WEATHER_UNDERWATER,
 
 	/* 1x sandstorms */
 	WEATHER_DE_SANDSTORMS,
@@ -247,12 +255,11 @@ static const char *weather_descriptions[WEATHERS] = {
 	WTH_DESC_CLEAR,
 	WTH_DESC_LIGHT_CLOUDS,
 	WTH_DESC_SANDSTORMS,
-	WTH_DESC_THICK_FOG,
 };
 
 static const float weather_winds[WEATHERS] = {
 	0.0f, 0.25f, 0.0f, 0.2f, 0.7f, 0.25f, 0.0f, 0.7f, 1.0f, 0.0f, 0.2f,
-	0.0f, 0.4f, 0.0f, 0.3f, 0.7f, 1.0f, 0.0f, 0.3f, 1.5f, 0.0f
+	0.0f, 0.4f, 0.0f, 0.3f, 0.7f, 1.0f, 0.0f, 0.3f, 1.5f
 };
 
 #define WIND_MULTIPLIER 34.0f
@@ -291,7 +298,6 @@ static const char *weather_visibilities[WEATHERS] = {
 	SCALE_VERYHIGH,
 	SCALE_VERYHIGH,
 	SCALE_VERYLOW,
-	SCALE_VERYLOW,
 };
 
 static const char *weather_waves[WEATHERS] = {
@@ -318,7 +324,6 @@ static const char *weather_waves[WEATHERS] = {
 	SCALE_VERYLOW,
 	SCALE_MODERATE,
 	SCALE_HIGH,
-	SCALE_VERYLOW,
 };
 
 static struct {

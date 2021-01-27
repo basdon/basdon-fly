@@ -80,7 +80,6 @@
 #define WEATHER_DE_EXTRASUNNY 17
 #define WEATHER_DE_SUNNY 18
 #define WEATHER_DE_SANDSTORMS 19
-#define WEATHER_UNDERWATER 20
 #define WEATHERS 21
 
 const int weather_view_distances[WEATHERS] = {
@@ -89,7 +88,6 @@ const int weather_view_distances[WEATHERS] = {
 	1000, 1000, 1000,
 	1500, 1500, 1150, 650,
 	1500, 1500, 150,
-	300
 };
 
 #define MODEL_LANDSTAL (400)

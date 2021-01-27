@@ -1857,7 +1857,6 @@ void missions_on_weather_changed(int weather)
 		bonusvalue = MISSION_WEATHERBONUS_RAINY;
 		break;
 	case WEATHER_SF_FOGGY:
-	case WEATHER_UNDERWATER:
 		bonusvalue = MISSION_WEATHERBONUS_FOGGY;
 		break;
 	case WEATHER_DE_SANDSTORMS:
