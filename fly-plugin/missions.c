@@ -2229,6 +2229,6 @@ int missions_format_kneeboard_info_text(int playerid, char *dest)
 			activemission[playerid]->startpoint->ap->name,
 			activemission[playerid]->endpoint->ap->name);
 	} else {
-		return sprintf(dest, "%s", "~w~Not on a job, type ~y~/w~w~ to start working.");
+		return sprintf(dest, "%s", "~w~Not on a job, type ~y~/w~w~ to find a missionpoint.");
 	}
 }
