@@ -301,6 +301,7 @@ invalid_packet:
 		return;
 	case PACK_BYE:
 		this.is_game_down = true;
+		this.last_pong_time = 0; // Or check_ping_timeout will think the server is back online.
 		this.users_waiting_for_status_message.clear();
 		msg("game bridge is down");
 		return;
