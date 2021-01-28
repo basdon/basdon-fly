@@ -404,7 +404,7 @@ void nav_navigate_to_airport(int playerid, int vehicleid, int vehiclemodel, stru
 	float dx, dy, dz, dist, mindist;
 
 	rw = ap->runways;
-	mindist = 0x7F800000;
+	mindist = float_pinf;
 	closestrw = NULL;
 	GetVehiclePosUnsafe(vehicleid, &vpos);
 
