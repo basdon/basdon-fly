@@ -173,7 +173,7 @@ int cmd_admin_tomsp(CMDPARAMS)
 }
 
 static
-int cmd_at400(CMDPARAMS)
+int handle_cmd_at400_androm(CMDPARAMS, int vehiclemodel)
 {
 	struct vec3 playerpos, vehiclepos;
 	int vehicleid, found_vehicle;
@@ -188,7 +188,7 @@ int cmd_at400(CMDPARAMS)
 	shortest_distance = float_pinf;
 	GetPlayerPos(playerid, &playerpos);
 	for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
-		if (GetVehicleModel(vehicleid) == MODEL_AT400 &&
+		if (GetVehicleModel(vehicleid) == vehiclemodel &&
 			IsVehicleStreamedIn(vehicleid, playerid) &&
 			veh_is_player_allowed_in_vehicle(playerid, gamevehicles[vehicleid].dbvehicle))
 		{
@@ -203,11 +203,23 @@ int cmd_at400(CMDPARAMS)
 			}
 		}
 	}
-	if (found_vehicle && shortest_distance < 25.0f * 25.0f) {
+	if (found_vehicle && shortest_distance < 22.0f * 22.0f) {
 		natives_PutPlayerInVehicle(playerid, found_vehicle, 0);
 	}
 
 	return 1;
+}
+
+static
+int cmd_androm(CMDPARAMS)
+{
+	return handle_cmd_at400_androm(CMDARGS, MODEL_ANDROM);
+}
+
+static
+int cmd_at400(CMDPARAMS)
+{
+	return handle_cmd_at400_androm(CMDARGS, MODEL_AT400);
 }
 
 /**

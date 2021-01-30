@@ -1,4 +1,5 @@
 #define CMDPARAMS const int playerid,const char *cmdtext,int parseidx
+#define CMDARGS playerid,cmdtext,parseidx
 
 /*
 Gets next int parameter in cmdtext after parseidx.
