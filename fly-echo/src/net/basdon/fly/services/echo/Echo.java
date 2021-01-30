@@ -48,7 +48,8 @@ public static final byte
 	PACK12_IRC_MODE = 3,
 	PACK12_IRC_TOPIC = 4,
 	PACK12_IRC_NICK = 5,
-	PACK12_PROTIP = 6;
+	PACK12_PROTIP = 6,
+	PACK12_METAR = 7;
 private static final InetAddress ADDR_OUT;
 
 public static final byte
@@ -420,6 +421,7 @@ invalid_packet:
 			msg.writeString(SCOL_BROWN);
 			break;
 		case PACK12_PROTIP:
+		case PACK12_METAR:
 			msg = new CharBuf(6 + msglen);
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_CYAN);
