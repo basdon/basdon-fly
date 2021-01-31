@@ -434,7 +434,9 @@ int timecyc_next_weather(void *unused)
 	missions_on_weather_changed(newweather);
 	timecyc_fmt_metar_msg(msg144, "forecast", newweather);
 	SendClientMessageToAll(COL_METAR, msg144);
-	echo_send_generic_message(ECHO_PACK12_METAR, msg144);
+	if (playercount) {
+		echo_send_generic_message(ECHO_PACK12_METAR, msg144);
+	}
 
 	return WEATHER_TIMER_INTERVAL + NC_random(WEATHER_TIMER_DEVIATION);
 }
