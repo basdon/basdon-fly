@@ -57,7 +57,7 @@ Building
 	fly-echo: javac, anna (https://github.com/yugecin/anna)
 	fly-flighttracker: javac, anna (https://github.com/yugecin/anna)
 	fly-plugin: a Linux system with gcc, nasm
-	fly-web: sed, php with extensions pdo_mysql,gd
+	fly-web: sed, php with extensions pdo_mysql,gd,mbstring
 
 	For fly-echo and fly-flighttracker to be built, the environment
 	variable $ANNA_DIR needs to be set to the location where the
