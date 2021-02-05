@@ -79,8 +79,8 @@ void ctoai(char *dstsrc);
 #define COL_JOIN 0x1b8ae4ff
 #define COL_QUIT 0x1674Bcff
 #define COL_METAR COL_INFO_LIGHT
-#define COL_IRC_MODE 0x00ffffff
-#define COL_IRC_ACTION 0xff00ffff
+#define COL_IRC_MODE 0x22ffffff
+#define COL_IRC_ACTION 0xff66ffff
 
 #define GROUP_BANNED (1)
 #define GROUP_GUEST (2)

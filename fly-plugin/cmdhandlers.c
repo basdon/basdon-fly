@@ -303,7 +303,7 @@ int cmd_me(struct COMMANDCONTEXT cmdctx)
 		to++;
 	}
 	if (hascontent) {
-		SendClientMessageToAll(-1, msg);
+		SendClientMessageToAll(COL_IRC_ACTION, msg);
 		echo_on_game_chat_or_action(1, cmdctx.playerid, cmdctx.cmdtext + 4);
 	} else {
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /me <action>");
