@@ -320,6 +320,7 @@ static struct FAKEAMX fakeamx;
 
 #include <assert.h>
 #include "idalloc.h"
+#include "sounds.h"
 /*This file is generated during build.*/
 #include "__sampasm.h"
 #include "common.h"

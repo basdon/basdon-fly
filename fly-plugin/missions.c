@@ -2068,18 +2068,18 @@ void missions_driversync_udkeystate_change(int playerid, short udkey)
 	if (mission_stage[playerid] == MISSION_STAGE_HELP) {
 		if (udkey < 0) {
 			mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid] - 1, -1);
-			PlayerPlaySound(playerid, 1053);
+			PlayerPlaySound(playerid, MISSION_HELP_MOVE_UP_SOUND);
 		} else if (udkey > 0) {
 			mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid] + 1, 1);
-			PlayerPlaySound(playerid, 1052);
+			PlayerPlaySound(playerid, MISSION_HELP_MOVE_DOWN_SOUND);
 		}
 	} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
 		if (udkey < 0) {
 			mission_map_update_selection_ensure_available(playerid, mission_map_option[playerid] - 1, -1);
-			PlayerPlaySound(playerid, 1053);
+			PlayerPlaySound(playerid, MISSION_JOBMAP_MOVE_UP_SOUND);
 		} else if (udkey > 0) {
 			mission_map_update_selection_ensure_available(playerid, mission_map_option[playerid] + 1, 1);
-			PlayerPlaySound(playerid, 1052);
+			PlayerPlaySound(playerid, MISSION_JOBMAP_MOVE_DOWN_SOUND);
 		}
 	}
 }
@@ -2090,20 +2090,20 @@ void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 	if (mission_stage[playerid] == MISSION_STAGE_HELP) {
 		/*Since player is set to not be controllable, these use on-foot controls even though the player is in-vehicle.*/
 		if (KEY_JUST_DOWN(KEY_VEHICLE_ENTER_EXIT)) {
-			PlayerPlaySound(playerid, 1084);
+			PlayerPlaySound(playerid, MISSION_HELP_CANCEL_SOUND);
 			missions_jobhelp_hide(playerid); /*sets controllable and mission state*/
 		} else if (KEY_JUST_DOWN(KEY_SPRINT)) {
-			PlayerPlaySound(playerid, 1083);
+			PlayerPlaySound(playerid, MISSION_HELP_ACCEPT_SOUND);
 			missions_jobhelp_hide(playerid); /*sets controllable and mission state*/
 			missions_locate_closest_mission(playerid);
 		}
 	} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
 		/*Since player is set to not be controllable, these use on-foot controls even though the player is in-vehicle.*/
 		if (KEY_JUST_DOWN(KEY_VEHICLE_ENTER_EXIT)) {
-			PlayerPlaySound(playerid, 1084);
+			PlayerPlaySound(playerid, MISSION_JOBMAP_CANCEL_SOUND);
 			missions_jobmap_hide(playerid); /*sets controllable and mission state*/
 		} else if (KEY_JUST_DOWN(KEY_SPRINT)) {
-			PlayerPlaySound(playerid, 1083);
+			PlayerPlaySound(playerid, MISSION_JOBMAP_ACCEPT_SOUND);
 			missions_jobmap_hide(playerid); /*sets controllable and mission state*/
 			missions_start_mission_from_map(playerid);
 		}

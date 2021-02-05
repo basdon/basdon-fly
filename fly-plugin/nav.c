@@ -1,8 +1,3 @@
-/*SOUND_ROULETTE_ADD_CASH*/
-#define SOUND_NAV_SET 1083
-/*SOUND_ROULETTE_REMOVE_CASH*/
-#define SOUND_NAV_DEL 1084
-
 /*TODO remove this*/
 static void panel_nav_updated(int vehicleid);
 
@@ -213,7 +208,7 @@ int nav_cmd_adf(struct COMMANDCONTEXT cmdctx)
 	if (!cmd_get_str_param(&cmdctx, beacon)) {
 		if (nav[vehicleid] != NULL) {
 			nav_disable(vehicleid);
-			PlayerPlaySound(cmdctx.playerid, SOUND_NAV_DEL);
+			PlayerPlaySound(cmdctx.playerid, NAV_DEL_SOUND);
 			return 1;
 		}
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /adf [beacon] - see /beacons or /nearest");
@@ -238,7 +233,7 @@ int nav_cmd_adf(struct COMMANDCONTEXT cmdctx)
 	while (len--) {
 		if (strcmp(beacon, ap->code) == 0) {
 			nav_enable(vehicleid, &ap->pos, NULL);
-			PlayerPlaySound(cmdctx.playerid, SOUND_NAV_SET);
+			PlayerPlaySound(cmdctx.playerid, NAV_SET_SOUND);
 			return 1;
 		}
 		ap++;
@@ -274,7 +269,7 @@ int nav_cmd_vor(struct COMMANDCONTEXT cmdctx)
 	if (!cmd_get_str_param(&cmdctx, beaconpar)) {
 		if (nav[vehicleid] != NULL) {
 			nav_disable(vehicleid);
-			PlayerPlaySound(cmdctx.playerid, SOUND_NAV_DEL);
+			PlayerPlaySound(cmdctx.playerid, NAV_DEL_SOUND);
 			return 1;
 		}
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /vor [beacon][runway] - see /beacons or /nearest");
@@ -334,7 +329,7 @@ haveairport:
 	while (rw != ap->runwaysend) {
 		if (rw->type == RUNWAY_TYPE_RUNWAY && strcmp(rw->id, b) == 0) {
 			nav_enable(vehicleid, NULL, rw);
-			PlayerPlaySound(cmdctx.playerid, SOUND_NAV_SET);
+			PlayerPlaySound(cmdctx.playerid, NAV_SET_SOUND);
 			return 1;
 		}
 		rw++;
@@ -386,10 +381,8 @@ int nav_cmd_ils(struct COMMANDCONTEXT cmdctx)
 		return 1;
 	}
 	np->ilsx = np->ilsz = INVALID_ILS_VALUE;
-#if SOUND_NAV_SET != 1083 || SOUND_NAV_DEL != 1084
-#error "edit the soundid in line below"
-#endif
-	PlayerPlaySound(cmdctx.playerid, SOUND_NAV_DEL - (np->ils ^= 1));
+	np->ils = !np->ils;
+	PlayerPlaySound(cmdctx.playerid, np->ils ? NAV_SET_SOUND : NAV_DEL_SOUND);
 
 	GetVehiclePosRotUnsafe(vehicleid, &vpos);
 	nav_update(vehicleid, &vpos);
