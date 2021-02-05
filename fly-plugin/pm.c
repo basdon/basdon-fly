@@ -53,7 +53,7 @@ void pm_send(int from, int to, char *msg)
 	sprintf(msg288, "** %s(%d): %s", pdata[from]->name, from, msg);
 	SendClientMessage(to, COL_PRIVMSG, msg288);
 
-	NC_PlayerPlaySound0(to, 1139 /*SOUND_CHECKPOINT_RED*/);
+	PlayerPlaySound(to, 1139 /*SOUND_CHECKPOINT_RED*/);
 	if (lastpmtarget[to] == LAST_PMTARGET_NOBODY) {
 		SendClientMessage(to, COL_PRIVMSG_HINT, INFO"Use /r to quickly reply to the message.");
 	}

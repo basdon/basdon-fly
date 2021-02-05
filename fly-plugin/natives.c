@@ -29,7 +29,6 @@ static AMX_NATIVE n_GivePlayerWeapon;
 static AMX_NATIVE n_IsValidVehicle;
 static AMX_NATIVE n_Kick_;
 static AMX_NATIVE n_MoveObject;
-static AMX_NATIVE n_PlayerPlaySound;
 static AMX_NATIVE n_PutPlayerInVehicle_;
 static AMX_NATIVE n_RemoveBuildingForPlayer;
 static AMX_NATIVE n_ResetPlayerMoney_;
@@ -186,17 +185,6 @@ static cell tmpfloat;
 	n_IsValidVehicle(amx,nc_params))
 
 #define NC_Kick(PLAYERID) __USE__natives_Kick__
-
-#define NC_PlayerPlaySound(PLAYERID,SOUNDID,FX,FY,FZ) \
-	(NC_PARS_(5)nc_params[1]=PLAYERID,nc_params[2]=SOUNDID,\
-	nc_params[3]=FX,nc_params[4]=FY,nc_params[5]=FZ,\
-	n_PlayerPlaySound(amx,nc_params))
-
-/*same but at location 0, 0, 0*/
-#define NC_PlayerPlaySound0(PLAYERID,SOUNDID) \
-	(NC_PARS_(5)nc_params[1]=PLAYERID,nc_params[2]=SOUNDID,\
-	nc_params[3]=nc_params[4]=nc_params[5]=0,\
-	n_PlayerPlaySound(amx,nc_params))
 
 #define NC_PutPlayerInVehicle __USE__natives_PutPlayerInVehicle__
 
@@ -381,7 +369,6 @@ int natives_find()
 		N(IsValidVehicle),
 		N_(Kick),
 		N(MoveObject),
-		N(PlayerPlaySound),
 		N_(PutPlayerInVehicle),
 		N(RemoveBuildingForPlayer),
 		N(RepairVehicle),

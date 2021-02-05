@@ -213,7 +213,7 @@ int nav_cmd_adf(struct COMMANDCONTEXT cmdctx)
 	if (!cmd_get_str_param(&cmdctx, beacon)) {
 		if (nav[vehicleid] != NULL) {
 			nav_disable(vehicleid);
-			NC_PlayerPlaySound0(cmdctx.playerid, SOUND_NAV_DEL);
+			PlayerPlaySound(cmdctx.playerid, SOUND_NAV_DEL);
 			return 1;
 		}
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /adf [beacon] - see /beacons or /nearest");
@@ -238,7 +238,7 @@ int nav_cmd_adf(struct COMMANDCONTEXT cmdctx)
 	while (len--) {
 		if (strcmp(beacon, ap->code) == 0) {
 			nav_enable(vehicleid, &ap->pos, NULL);
-			NC_PlayerPlaySound0(cmdctx.playerid, SOUND_NAV_SET);
+			PlayerPlaySound(cmdctx.playerid, SOUND_NAV_SET);
 			return 1;
 		}
 		ap++;
@@ -274,7 +274,7 @@ int nav_cmd_vor(struct COMMANDCONTEXT cmdctx)
 	if (!cmd_get_str_param(&cmdctx, beaconpar)) {
 		if (nav[vehicleid] != NULL) {
 			nav_disable(vehicleid);
-			NC_PlayerPlaySound0(cmdctx.playerid, SOUND_NAV_DEL);
+			PlayerPlaySound(cmdctx.playerid, SOUND_NAV_DEL);
 			return 1;
 		}
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /vor [beacon][runway] - see /beacons or /nearest");
@@ -334,7 +334,7 @@ haveairport:
 	while (rw != ap->runwaysend) {
 		if (rw->type == RUNWAY_TYPE_RUNWAY && strcmp(rw->id, b) == 0) {
 			nav_enable(vehicleid, NULL, rw);
-			NC_PlayerPlaySound0(cmdctx.playerid, SOUND_NAV_SET);
+			PlayerPlaySound(cmdctx.playerid, SOUND_NAV_SET);
 			return 1;
 		}
 		rw++;
@@ -389,7 +389,7 @@ int nav_cmd_ils(struct COMMANDCONTEXT cmdctx)
 #if SOUND_NAV_SET != 1083 || SOUND_NAV_DEL != 1084
 #error "edit the soundid in line below"
 #endif
-	NC_PlayerPlaySound0(cmdctx.playerid, SOUND_NAV_DEL - (np->ils ^= 1));
+	PlayerPlaySound(cmdctx.playerid, SOUND_NAV_DEL - (np->ils ^= 1));
 
 	GetVehiclePosRotUnsafe(vehicleid, &vpos);
 	nav_update(vehicleid, &vpos);

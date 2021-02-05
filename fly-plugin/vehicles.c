@@ -637,7 +637,7 @@ void veh_consume_fuel(int playerid, int vehicleid, struct dbvehicle *veh)
 	} else {
 		return;
 	}
-	NC_PlayerPlaySound0(playerid, FUEL_WARNING_SOUND);
+	PlayerPlaySound(playerid, FUEL_WARNING_SOUND);
 }
 
 void veh_dispose()

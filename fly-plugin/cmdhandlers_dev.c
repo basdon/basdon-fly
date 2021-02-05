@@ -343,7 +343,7 @@ int cmd_dev_sound(struct COMMANDCONTEXT cmdctx)
 	if (!cmd_get_int_param(&cmdctx, &soundid)) {
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /sound <soundid>");
 	} else {
-		NC_PlayerPlaySound0(cmdctx.playerid, soundid);
+		PlayerPlaySound(cmdctx.playerid, soundid);
 	}
 	return 1;
 }
