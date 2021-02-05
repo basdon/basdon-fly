@@ -124,8 +124,8 @@ The /preferences command.
 Shows a dialog with preferences which the player can modify.
 */
 static
-int prefs_cmd_preferences(CMDPARAMS)
+int prefs_cmd_preferences(struct COMMANDCONTEXT cmdctx)
 {
-	prefs_show_dialog(playerid);
+	prefs_show_dialog(cmdctx.playerid);
 	return 1;
 }

@@ -225,18 +225,18 @@ The /changepassword command allows one to change their password.
 Must only be available to registered users.
 */
 static
-int chpw_cmd_changepassword(CMDPARAMS)
+int chpw_cmd_changepassword(struct COMMANDCONTEXT cmdctx)
 {
-	if (pwdata[playerid]) {
+	if (pwdata[cmdctx.playerid]) {
 		return 1;
 	}
 
-	chpw_show_dialog(playerid, 0, 0);
+	chpw_show_dialog(cmdctx.playerid, 0, 0);
 
 	/*load current password while user is filling in dialog*/
-	sprintf(cbuf4096_, "SELECT pw FROM usr WHERE i=%d", userid[playerid]);
+	sprintf(cbuf4096_, "SELECT pw FROM usr WHERE i=%d", userid[cmdctx.playerid]);
 	common_mysql_tquery(cbuf4096_,
-		chpw_cb_current_password_loaded, V_MK_PLAYER_CC(playerid));
+		chpw_cb_current_password_loaded, V_MK_PLAYER_CC(cmdctx.playerid));
 	return 1;
 }
 

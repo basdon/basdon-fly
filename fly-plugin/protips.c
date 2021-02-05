@@ -29,12 +29,18 @@ static const char *protips[] = {
 static const int numprotips = sizeof(protips)/sizeof(protips[0]);
 
 static
+char *protips_get_random_protip()
+{
+	return (char*) protips[NC_random(numprotips)];
+}
+
+static
 int protips_timed_broadcast(void *data)
 {
 	char *protip;
 
 	if (playercount) {
-		protip = (char*) protips[NC_random(numprotips)];
+		protip = protips_get_random_protip();
 		SendClientMessageToAll(COL_INFO_LIGHT, protip);
 		echo_send_generic_message(ECHO_PACK12_PROTIP, protip);
 	}
@@ -45,11 +51,4 @@ static
 void protips_init()
 {
 	timer_set(PROTIPS_INTERVAL, protips_timed_broadcast, NULL);
-}
-
-static
-int protips_cmd_protip(CMDPARAMS)
-{
-	SendClientMessage(playerid, COL_INFO_LIGHT, (char*) protips[NC_random(numprotips)]);
-	return 1;
 }

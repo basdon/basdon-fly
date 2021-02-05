@@ -251,7 +251,7 @@ Airports are sorted by distance from player. Choosing an airport shows an
 additional dialog with information about the selected airport.
 */
 static
-int airport_cmd_nearest(CMDPARAMS)
+int airport_cmd_nearest(struct COMMANDCONTEXT cmdctx)
 {
 	int i = 0;
 	int num = 0;
@@ -262,7 +262,7 @@ int airport_cmd_nearest(CMDPARAMS)
 	struct AIRPORT **map;
 	struct APREF *aps = malloc(sizeof(struct APREF) * numairports);
 
-	GetPlayerPos(playerid, &playerpos);
+	GetPlayerPos(cmdctx.playerid, &playerpos);
 
 	while (i < numairports) {
 		if (airports[i].enabled) {
@@ -275,16 +275,16 @@ int airport_cmd_nearest(CMDPARAMS)
 		i++;
 	}
 	if (num == 0) {
-		SendClientMessage(playerid, COL_WARN, WARN"No airports!");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"No airports!");
 		return 1;
 	}
 	qsort(aps, num, sizeof(struct APREF), sortaprefs);
-	map = nearest_airports_map[playerid];
+	map = nearest_airports_map[cmdctx.playerid];
 	if (map == NULL) {
 		map = malloc(sizeof(struct AIRPORT*) * num);
-		nearest_airports_map[playerid] = map;
+		nearest_airports_map[cmdctx.playerid] = map;
 	}
-	i = nearest_airports_map_size[playerid] = num;
+	i = nearest_airports_map_size[cmdctx.playerid] = num;
 	b = buf;
 	while (i--) {
 		*map = ap = airports + aps[i].index;
@@ -298,7 +298,7 @@ int airport_cmd_nearest(CMDPARAMS)
 	}
 
 	dialog_ShowPlayerDialog(
-		playerid,
+		cmdctx.playerid,
 		DIALOG_AIRPORT_NEAREST,
 		DIALOG_STYLE_TABLIST,
 		"Nearest airports",
@@ -375,7 +375,7 @@ freereturn:
 The /beacons command, shows a dialog with list of all airport beacons.
 */
 static
-int airport_cmd_beacons(CMDPARAMS)
+int airport_cmd_beacons(struct COMMANDCONTEXT cmdctx)
 {
 	char buf[4096], *b = buf;
 	struct AIRPORT *ap = airports;
@@ -391,7 +391,7 @@ int airport_cmd_beacons(CMDPARAMS)
 		strcpy(buf, " None!");
 	}
 	dialog_ShowPlayerDialog(
-		playerid,
+		cmdctx.playerid,
 		DIALOG_DUMMY,
 		DIALOG_STYLE_MSGBOX,
 		"Beacons",

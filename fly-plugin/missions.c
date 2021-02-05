@@ -1922,10 +1922,12 @@ The /cancelmission cmd, stops current mission for the player, for a fee.
 Aliases: /s
 */
 static
-int missions_cmd_cancelmission(CMDPARAMS)
+int missions_cmd_cancelmission(struct COMMANDCONTEXT cmdctx)
 {
 	struct MISSION *mission;
+	int playerid;
 
+	playerid = cmdctx.playerid;
 	if ((mission = activemission[playerid]) != NULL) {
 		if (mission_stage[playerid] == MISSION_STAGE_LOAD || mission_stage[playerid] == MISSION_STAGE_UNLOAD) {
 			NC_TogglePlayerControllable(playerid, 1);
@@ -1947,12 +1949,14 @@ The /mission cmd, starts a new mission
 Aliases: /w /m
 */
 static
-int missions_cmd_mission(CMDPARAMS)
+int missions_cmd_mission(struct COMMANDCONTEXT cmdctx)
 {
 	struct vec3 vel;
 	struct dbvehicle *veh;
 	int vehicleid;
+	int playerid;
 
+	playerid = cmdctx.playerid;
 	switch (mission_stage[playerid]) {
 	case MISSION_STAGE_NOMISSION:
 		if (active_msp_index[playerid] != -1) {
@@ -2006,11 +2010,11 @@ int missions_cmd_mission(CMDPARAMS)
 }
 
 static
-int missions_cmd_stoplocate(CMDPARAMS)
+int missions_cmd_stoplocate(struct COMMANDCONTEXT cmdctx)
 {
-	if (locating_msp_index[playerid] != -1) {
-		locating_msp_index[playerid] = -1;
-		DisablePlayerRaceCheckpoint(playerid);
+	if (locating_msp_index[cmdctx.playerid] != -1) {
+		locating_msp_index[cmdctx.playerid] = -1;
+		DisablePlayerRaceCheckpoint(cmdctx.playerid);
 	}
 	return 1;
 }

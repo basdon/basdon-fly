@@ -66,24 +66,24 @@ The /pm cmd. /cmd <id|playername> <message>
 Sends a pm to given player.
 */
 static
-int pm_cmd_pm(CMDPARAMS)
+int pm_cmd_pm(struct COMMANDCONTEXT cmdctx)
 {
 	int targetid;
 
-	if (!cmd_get_player_param(cmdtext, &parseidx, &targetid)) {
+	if (!cmd_get_player_param(&cmdctx, &targetid)) {
 synerr:
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /pm [id/name] [message]");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /pm [id/name] [message]");
 		return 1;
 	}
 	if (targetid == INVALID_PLAYER_ID) {
-		SendClientMessage(playerid, COL_WARN, WARN"That player is not online.");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"That player is not online.");
 		return 1;
 	}
-	while (cmdtext[parseidx] == ' ') {
-		parseidx++;
+	while (cmdctx.cmdtext[cmdctx.parseidx] == ' ') {
+		cmdctx.parseidx++;
 	}
-	if (cmdtext[parseidx]) {
-		pm_send(playerid, targetid, (char*) cmdtext + parseidx);
+	if (cmdctx.cmdtext[cmdctx.parseidx]) {
+		pm_send(cmdctx.playerid, targetid, cmdctx.cmdtext + cmdctx.parseidx);
 	} else {
 		goto synerr;
 	}
@@ -96,26 +96,26 @@ The /r cmd. /r <message>
 Sends a reply pm to the player that last sent a pm to the invoker.
 */
 static
-int pm_cmd_r(CMDPARAMS)
+int pm_cmd_r(struct COMMANDCONTEXT cmdctx)
 {
-	while (cmdtext[parseidx] == ' ') {
-		parseidx++;
+	while (cmdctx.cmdtext[cmdctx.parseidx] == ' ') {
+		cmdctx.parseidx++;
 	}
 
-	if (cmdtext[parseidx]) {
-		switch (lastpmtarget[playerid]) {
+	if (cmdctx.cmdtext[cmdctx.parseidx]) {
+		switch (lastpmtarget[cmdctx.playerid]) {
 		case LAST_PMTARGET_NOBODY:
-			SendClientMessage(playerid, COL_WARN, WARN"Nobody has sent you a PM yet! Use /pm [id/name] [message]");
+			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Nobody has sent you a PM yet! Use /pm [id/name] [message]");
 			return 1;
 		case LAST_PMTARGET_INVALID:
-			SendClientMessage(playerid, COL_WARN, WARN"The person who last sent you a PM left");
+			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"The person who last sent you a PM left");
 			return 1;
 		default:
-			pm_send(playerid, lastpmtarget[playerid], (char*) cmdtext + parseidx);
+			pm_send(cmdctx.playerid, lastpmtarget[cmdctx.playerid], cmdctx.cmdtext + cmdctx.parseidx);
 			return 1;
 		}
 	}
 
-	SendClientMessage(playerid, COL_WARN, WARN"Syntax: /r [message]");
+	SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /r [message]");
 	return 1;
 }

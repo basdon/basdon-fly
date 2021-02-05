@@ -1,21 +1,21 @@
 static
-int cmd_admin_streamdistance(CMDPARAMS)
+int cmd_admin_streamdistance(struct COMMANDCONTEXT cmdctx)
 {
 	int newdistance;
 	float *stream_distance;
 	char msg144[144];
 
 	stream_distance = samphost_GetPtrStreamDistance();
-	if (cmd_get_int_param(cmdtext, &parseidx, &newdistance)) {
+	if (cmd_get_int_param(&cmdctx, &newdistance)) {
 		*stream_distance = (float) newdistance;
 	}
 	sprintf(msg144, "stream_distance=%.0f", *stream_distance);
-	SendClientMessage(playerid, -1, msg144);
+	SendClientMessage(cmdctx.playerid, -1, msg144);
 	return 1;
 }
 
 static
-int cmd_admin_goto(CMDPARAMS)
+int cmd_admin_goto(struct COMMANDCONTEXT cmdctx)
 {
 	int oldparseidx;
 	int targetplayerid;
@@ -24,21 +24,21 @@ int cmd_admin_goto(CMDPARAMS)
 
 	pos.r = 0.0f;
 
-	oldparseidx = parseidx;
-	if (cmd_get_int_param(cmdtext, &parseidx, &x) &&
-		cmd_get_int_param(cmdtext, &parseidx, &y) &&
-		cmd_get_int_param(cmdtext, &parseidx, &z))
+	oldparseidx = cmdctx.parseidx;
+	if (cmd_get_int_param(&cmdctx, &x) &&
+		cmd_get_int_param(&cmdctx, &y) &&
+		cmd_get_int_param(&cmdctx, &z))
 	{
 		/*TODO: accept interior id as param*/
 		pos.coords.x = (float) x;
 		pos.coords.y = (float) y;
 		pos.coords.z = (float) z;
 	} else {
-		parseidx = oldparseidx;
+		cmdctx.parseidx = oldparseidx;
 
-		if (cmd_get_player_param(cmdtext, &parseidx, &targetplayerid)) {
+		if (cmd_get_player_param(&cmdctx, &targetplayerid)) {
 			if (targetplayerid == INVALID_PLAYER_ID) {
-				SendClientMessage(playerid, COL_WARN, "Target player is offline");
+				SendClientMessage(cmdctx.playerid, COL_WARN, "Target player is offline");
 				return 1;
 			}
 			GetPlayerPos(targetplayerid, &pos.coords);
@@ -46,22 +46,22 @@ int cmd_admin_goto(CMDPARAMS)
 			pos.coords.x += 0.3f;
 			pos.coords.y += 0.3f;
 		} else {
-			SendClientMessage(playerid, COL_WARN, WARN"Syntax: //goto (<x> <y> <z>|<playerid/name>)");
+			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: //goto (<x> <y> <z>|<playerid/name>)");
 			return 1;
 		}
 	}
 
-	if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
-		common_SetVehiclePos(GetPlayerVehicleID(playerid), &pos.coords);
+	if (GetPlayerState(cmdctx.playerid) == PLAYER_STATE_DRIVER) {
+		common_SetVehiclePos(GetPlayerVehicleID(cmdctx.playerid), &pos.coords);
 	} else {
-		common_tp_player(playerid, pos);
+		common_tp_player(cmdctx.playerid, pos);
 	}
 
 	return 1;
 }
 
 static
-int cmd_admin_tocar(CMDPARAMS)
+int cmd_admin_tocar(struct COMMANDCONTEXT cmdctx)
 {
 	struct vec3 vehicle_pos, player_pos;
 	int vehicleid, closest_vehicleid, modelid, seat, jack;
@@ -69,21 +69,21 @@ int cmd_admin_tocar(CMDPARAMS)
 	float min_distance_sq;
 
 	seat = 0;
-	if (cmd_get_int_param(cmdtext, &parseidx, &vehicleid)) {
-		cmd_get_int_param(cmdtext, &parseidx, &seat);
+	if (cmd_get_int_param(&cmdctx, &vehicleid)) {
+		cmd_get_int_param(&cmdctx, &seat);
 		if (GetVehicleModel(vehicleid)) {
-			natives_PutPlayerInVehicle(playerid, vehicleid, seat);
+			natives_PutPlayerInVehicle(cmdctx.playerid, vehicleid, seat);
 		} else {
-			SendClientMessage(playerid, COL_WARN, WARN"Invalid vehicle id");
+			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Invalid vehicle id");
 		}
-	} else if (cmd_get_vehiclemodel_param(cmdtext, &parseidx, &modelid)) {
+	} else if (cmd_get_vehiclemodel_param(&cmdctx, &modelid)) {
 		jack = 0;
-		if (cmd_get_int_param(cmdtext, &parseidx, &seat)) {
-			cmd_get_int_param(cmdtext, &parseidx, &jack);
+		if (cmd_get_int_param(&cmdctx, &seat)) {
+			cmd_get_int_param(&cmdctx, &jack);
 		}
 		closest_vehicleid = -1;
 		min_distance_sq = float_pinf;
-		GetPlayerPos(playerid, &player_pos);
+		GetPlayerPos(cmdctx.playerid, &player_pos);
 		for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
 			if (GetVehicleModel(vehicleid) == modelid) {
 				GetVehiclePosUnsafe(vehicleid, &vehicle_pos);
@@ -99,14 +99,14 @@ int cmd_admin_tocar(CMDPARAMS)
 		}
 		if (closest_vehicleid != -1) {
 			if (seat == 0 && GetPlayerInVehicleSeat(closest_vehicleid, 0) != INVALID_PLAYER_ID) {
-				SendClientMessage(playerid, COL_INFO, INFO"Trying to jack existing driver (won't work)");
+				SendClientMessage(cmdctx.playerid, COL_INFO, INFO"Trying to jack existing driver (won't work)");
 			}
-			natives_PutPlayerInVehicle(playerid, closest_vehicleid, seat);
+			natives_PutPlayerInVehicle(cmdctx.playerid, closest_vehicleid, seat);
 		} else {
-			SendClientMessage(playerid, COL_WARN, WARN"None spawned or available");
+			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"None spawned or available");
 		}
 	} else {
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: //tocar (<vehicleid>|<modelname>) [seat] [jack:1/0]");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: //tocar (<vehicleid>|<modelname>) [seat] [jack:1/0]");
 	}
 	return 1;
 }
@@ -119,7 +119,7 @@ Teleport to a missionpoint.
 Either closest missionpoint for matching vehicle (or any if not in vehicle), or to given id.
 */
 static
-int cmd_admin_tomsp(CMDPARAMS)
+int cmd_admin_tomsp(struct COMMANDCONTEXT cmdctx)
 {
 	struct vec3 *closest_pos, player_pos;
 	int mspid;
@@ -129,7 +129,7 @@ int cmd_admin_tomsp(CMDPARAMS)
 	int msptype_mask;
 	int mspindex;
 
-	vehicleid = GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (vehicleid) {
 		msptype_mask = missions_get_vehicle_model_msptype_mask(GetVehicleModel(vehicleid));
 	} else {
@@ -137,7 +137,7 @@ int cmd_admin_tomsp(CMDPARAMS)
 	}
 
 	closest_pos = NULL;
-	if (cmd_get_int_param(cmdtext, &parseidx, &mspid)) {
+	if (cmd_get_int_param(&cmdctx, &mspid)) {
 		for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {
 			if (missionpoints[mspindex].id == mspid) {
 				closest_pos = &missionpoints[mspindex].pos;
@@ -146,7 +146,7 @@ int cmd_admin_tomsp(CMDPARAMS)
 		}
 	} else {
 		closest_distance_sq = float_pinf;
-		GetPlayerPos(playerid, &player_pos);
+		GetPlayerPos(cmdctx.playerid, &player_pos);
 		for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {
 			if (missionpoints[mspindex].type & msptype_mask) {
 				dx = player_pos.x - missionpoints[mspindex].pos.x;
@@ -163,34 +163,34 @@ int cmd_admin_tomsp(CMDPARAMS)
 		if (vehicleid) {
 			common_SetVehiclePos(vehicleid, closest_pos);
 		} else {
-			natives_SetPlayerPos(playerid, *closest_pos);
+			natives_SetPlayerPos(cmdctx.playerid, *closest_pos);
 		}
 	} else {
-		SendClientMessage(playerid, COL_WARN, WARN"Can't find compatible mission point");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Can't find compatible mission point");
 	}
 
 	return 1;
 }
 
 static
-int handle_cmd_at400_androm(CMDPARAMS, int vehiclemodel)
+int handle_cmd_at400_androm(struct COMMANDCONTEXT cmdctx, int vehiclemodel)
 {
 	struct vec3 playerpos, vehiclepos;
 	int vehicleid, found_vehicle;
 	float dx, dy, dz, shortest_distance, tmpdistance;
 
-	vehicleid = GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (vehicleid) {
 		return 1;
 	}
 
 	found_vehicle = 0;
 	shortest_distance = float_pinf;
-	GetPlayerPos(playerid, &playerpos);
+	GetPlayerPos(cmdctx.playerid, &playerpos);
 	for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
 		if (GetVehicleModel(vehicleid) == vehiclemodel &&
-			IsVehicleStreamedIn(vehicleid, playerid) &&
-			veh_is_player_allowed_in_vehicle(playerid, gamevehicles[vehicleid].dbvehicle))
+			IsVehicleStreamedIn(vehicleid, cmdctx.playerid) &&
+			veh_is_player_allowed_in_vehicle(cmdctx.playerid, gamevehicles[vehicleid].dbvehicle))
 		{
 			GetVehiclePosUnsafe(vehicleid, &vehiclepos);
 			dx = vehiclepos.x - playerpos.x;
@@ -204,31 +204,31 @@ int handle_cmd_at400_androm(CMDPARAMS, int vehiclemodel)
 		}
 	}
 	if (found_vehicle && shortest_distance < 22.0f * 22.0f) {
-		natives_PutPlayerInVehicle(playerid, found_vehicle, 0);
+		natives_PutPlayerInVehicle(cmdctx.playerid, found_vehicle, 0);
 	}
 
 	return 1;
 }
 
 static
-int cmd_androm(CMDPARAMS)
+int cmd_androm(struct COMMANDCONTEXT cmdctx)
 {
-	return handle_cmd_at400_androm(CMDARGS, MODEL_ANDROM);
+	return handle_cmd_at400_androm(cmdctx, MODEL_ANDROM);
 }
 
 static
-int cmd_at400(CMDPARAMS)
+int cmd_at400(struct COMMANDCONTEXT cmdctx)
 {
-	return handle_cmd_at400_androm(CMDARGS, MODEL_AT400);
+	return handle_cmd_at400_androm(cmdctx, MODEL_AT400);
 }
 
 /**
 The /camera command gives the player a camera.
 */
 static
-int cmd_camera(CMDPARAMS)
+int cmd_camera(struct COMMANDCONTEXT cmdctx)
 {
-	NC_GivePlayerWeapon(playerid, WEAPON_CAMERA, 3036);
+	NC_GivePlayerWeapon(cmdctx.playerid, WEAPON_CAMERA, 3036);
 	return 1;
 }
 
@@ -236,9 +236,9 @@ int cmd_camera(CMDPARAMS)
 The /chute command gives the player a parachute.
 */
 static
-int cmd_chute(CMDPARAMS)
+int cmd_chute(struct COMMANDCONTEXT cmdctx)
 {
-	NC_GivePlayerWeapon(playerid, WEAPON_PARACHUTE, 1);
+	NC_GivePlayerWeapon(cmdctx.playerid, WEAPON_PARACHUTE, 1);
 	return 1;
 }
 
@@ -246,10 +246,10 @@ int cmd_chute(CMDPARAMS)
 The /engine command starts or stops the engine of the vehicle the player is currently driving.
 */
 static
-int cmd_engine(CMDPARAMS)
+int cmd_engine(struct COMMANDCONTEXT cmdctx)
 {
-	if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
-		veh_start_or_stop_engine(playerid, GetPlayerVehicleID(playerid));
+	if (GetPlayerState(cmdctx.playerid) == PLAYER_STATE_DRIVER) {
+		veh_start_or_stop_engine(cmdctx.playerid, GetPlayerVehicleID(cmdctx.playerid));
 	}
 	return 1;
 }
@@ -258,16 +258,16 @@ int cmd_engine(CMDPARAMS)
 The /getspray command gets the colors of the vehicle the player is in.
 */
 static
-int cmd_getspray(CMDPARAMS)
+int cmd_getspray(struct COMMANDCONTEXT cmdctx)
 {
 	struct dbvehicle *veh;
 	int vehicleid;
 	char msg144[144];
 
-	vehicleid = GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (vehicleid && (veh = gamevehicles[vehicleid].dbvehicle)) {
 		sprintf(msg144, "colors: %d, %d", veh->col1, veh->col2);
-		SendClientMessage(playerid, -1, msg144);
+		SendClientMessage(cmdctx.playerid, -1, msg144);
 	}
 	return 1;
 }
@@ -276,9 +276,9 @@ int cmd_getspray(CMDPARAMS)
 The /helpkeys command shows gametext with important keys.
 */
 static
-int cmd_helpkeys(CMDPARAMS)
+int cmd_helpkeys(struct COMMANDCONTEXT cmdctx)
 {
-	GameTextForPlayer(playerid, 5000, 3,
+	GameTextForPlayer(cmdctx.playerid, 5000, 3,
 		"~w~start/stop engine: ~b~~k~~CONVERSATION_NO~~n~"
 		"~w~landing gear: ~b~~k~~TOGGLE_SUBMISSIONS~~n~"
 		"~w~enter copilot mode: ~b~~k~~PED_FIREWEAPON~~n~"
@@ -287,14 +287,14 @@ int cmd_helpkeys(CMDPARAMS)
 }
 
 static
-int cmd_me(CMDPARAMS)
+int cmd_me(struct COMMANDCONTEXT cmdctx)
 {
 	char *to, *from;
 	int hascontent = 0;
 	char msg[150 + MAX_PLAYER_NAME];
 
-	from = (char*) cmdtext + 3;
-	to = msg + sprintf(msg, "* %s", pdata[playerid]->name);
+	from = cmdctx.cmdtext + 3;
+	to = msg + sprintf(msg, "* %s", pdata[cmdctx.playerid]->name);
 	while ((*to = *from)) {
 		if (*from != ' ') {
 			hascontent = 1;
@@ -304,25 +304,25 @@ int cmd_me(CMDPARAMS)
 	}
 	if (hascontent) {
 		SendClientMessageToAll(-1, msg);
-		echo_on_game_chat_or_action(1, playerid, (char*) cmdtext + 4);
+		echo_on_game_chat_or_action(1, cmdctx.playerid, cmdctx.cmdtext + 4);
 	} else {
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /me <action>");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /me <action>");
 	}
 	return 1;
 }
 
 static
-int cmd_park(CMDPARAMS)
+int cmd_park(struct COMMANDCONTEXT cmdctx)
 {
 	struct dbvehicle *veh;
 	int vehicleid;
 	float lastrot;
 
-	vehicleid = GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (vehicleid) {
 		veh = gamevehicles[vehicleid].dbvehicle;
-		if (!veh_can_player_modify_veh(playerid, veh)) {
-			SendClientMessage(playerid, COL_WARN, WARN"You are not allowed to park this vehicle");
+		if (!veh_can_player_modify_veh(cmdctx.playerid, veh)) {
+			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"You are not allowed to park this vehicle");
 			return 1;
 		}
 		lastrot = veh->pos.r;
@@ -347,8 +347,18 @@ int cmd_park(CMDPARAMS)
 			veh->pos.r,
 			veh->id);
 		NC_mysql_tquery_nocb(buf144a);
-		SendClientMessage(playerid, COL_SUCC, SUCC"Vehicle parked!");
+		SendClientMessage(cmdctx.playerid, COL_SUCC, SUCC"Vehicle parked!");
 	}
+	return 1;
+}
+
+/**
+The /protip command sends a random protip.
+*/
+static
+int cmd_protip(struct COMMANDCONTEXT cmdctx)
+{
+	SendClientMessage(cmdctx.playerid, COL_INFO_LIGHT, protips_get_random_protip());
 	return 1;
 }
 
@@ -357,14 +367,14 @@ int cmd_park(CMDPARAMS)
 			"($"EQ(MISSION_CANCEL_FINE)")."
 
 static
-int cmd_reclass(CMDPARAMS)
+int cmd_reclass(struct COMMANDCONTEXT cmdctx)
 {
-	if (missions_is_player_on_mission(playerid)) {
-		SendClientMessage(playerid, COL_WARN, NO_RECLASSSPAWN);
+	if (missions_is_player_on_mission(cmdctx.playerid)) {
+		SendClientMessage(cmdctx.playerid, COL_WARN, NO_RECLASSSPAWN);
 	} else {
-		spawned[playerid] = 0;
-		NC_ForceClassSelection(playerid);
-		NC_TogglePlayerSpectating(playerid, 1);
+		spawned[cmdctx.playerid] = 0;
+		NC_ForceClassSelection(cmdctx.playerid);
+		NC_TogglePlayerSpectating(cmdctx.playerid, 1);
 		nc_params[2] = 0;
 		NC(n_TogglePlayerSpectating);
 	}
@@ -372,12 +382,12 @@ int cmd_reclass(CMDPARAMS)
 }
 
 static
-int cmd_respawn(CMDPARAMS)
+int cmd_respawn(struct COMMANDCONTEXT cmdctx)
 {
-	if (missions_is_player_on_mission(playerid)) {
-		SendClientMessage(playerid, COL_WARN, NO_RECLASSSPAWN);
+	if (missions_is_player_on_mission(cmdctx.playerid)) {
+		SendClientMessage(cmdctx.playerid, COL_WARN, NO_RECLASSSPAWN);
 	} else {
-		natives_SpawnPlayer(playerid);
+		natives_SpawnPlayer(cmdctx.playerid);
 	}
 	return 1;
 }
@@ -390,26 +400,26 @@ random color combination is chosen when both colors are set to -1. These colors
 are the colors as defined by the game itself.
 */
 static
-int cmd_spray(CMDPARAMS)
+int cmd_spray(struct COMMANDCONTEXT cmdctx)
 {
 	struct dbvehicle *veh;
 	int vehicleid, *col1, *col2, *a, *b;
 
-	vehicleid = GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (vehicleid) {
 		veh = gamevehicles[vehicleid].dbvehicle;
-		if (!veh_can_player_modify_veh(playerid, veh)) {
-			SendClientMessage(playerid, COL_WARN, WARN"You are not allowed to respray this vehicle");
+		if (!veh_can_player_modify_veh(cmdctx.playerid, veh)) {
+			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"You are not allowed to respray this vehicle");
 			return 1;
 		}
 		a = b = NULL;
 		col1 = nc_params + 2;
 		col2 = nc_params + 3;
-		if (cmd_get_int_param(cmdtext, &parseidx, col1)) {
+		if (cmd_get_int_param(&cmdctx, col1)) {
 			if (*col1 == -1) {
 				a = col1;
 			}
-			if (!cmd_get_int_param(cmdtext, &parseidx, col2)) {
+			if (!cmd_get_int_param(&cmdctx, col2)) {
 				goto rand2nd;
 			}
 			if (*col2 == -1) {
@@ -444,11 +454,11 @@ rand2nd:
 The /tickrate command to print the server's current tick rate.
 */
 static
-int cmd_tickrate(CMDPARAMS)
+int cmd_tickrate(struct COMMANDCONTEXT cmdctx)
 {
 	char msg144[144];
 
 	sprintf(msg144, "%d", (int) NC_GetServerTickRate());
-	SendClientMessage(playerid, -1, msg144);
+	SendClientMessage(cmdctx.playerid, -1, msg144);
 	return 1;
 }

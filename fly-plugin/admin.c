@@ -2,20 +2,20 @@
 The //getcar cmd teleports a vehicle to the player's location.
 */
 static
-int cmd_admin_getcar(CMDPARAMS)
+int cmd_admin_getcar(struct COMMANDCONTEXT cmdctx)
 {
 	struct vec4 ppos;
 	int vehicleid;
 
-	if (!cmd_get_int_param(cmdtext, &parseidx, &vehicleid)) {
-		SendClientMessage(playerid, COL_WARN, WARN" Syntax: //getcar <vehicleid>");
+	if (!cmd_get_int_param(&cmdctx, &vehicleid)) {
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN" Syntax: //getcar <vehicleid>");
 	} else {
-		GetPlayerPosRot(playerid, &ppos);
+		GetPlayerPosRot(cmdctx.playerid, &ppos);
 		if (common_SetVehiclePos(vehicleid, &ppos.coords)) {
-			natives_PutPlayerInVehicle(playerid, vehicleid, 0);
+			natives_PutPlayerInVehicle(cmdctx.playerid, vehicleid, 0);
 			NC_SetVehicleZAngle(vehicleid, ppos.r);
 		} else {
-			SendClientMessage(playerid, COL_WARN, WARN" Invalid vehicleid");
+			SendClientMessage(cmdctx.playerid, COL_WARN, WARN" Invalid vehicleid");
 		}
 	}
 	return 1;
@@ -25,11 +25,11 @@ int cmd_admin_getcar(CMDPARAMS)
 The //respawn cmd respawns the vehicle the player is in.
 */
 static
-int cmd_admin_respawn(CMDPARAMS)
+int cmd_admin_respawn(struct COMMANDCONTEXT cmdctx)
 {
 	int vehicleid;
 
-	vehicleid = GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (vehicleid) {
 		NC_SetVehicleToRespawn(vehicleid);
 	}
@@ -44,21 +44,21 @@ sufficient self-reflection time while typing the command to be sure that
 the user really wants to create a new permanent public vehicle.
 */
 static
-int cmd_admin_makeanewpermanentpublicvehiclehere(CMDPARAMS)
+int cmd_admin_makeanewpermanentpublicvehiclehere(struct COMMANDCONTEXT cmdctx)
 {
 	struct dbvehicle *veh;
 	struct vec4 ppos;
 	int modelid = -1, vehicleid;
 
-	if (cmd_get_vehiclemodel_param(cmdtext, &parseidx, &modelid)) {
-		GetPlayerPosRot(playerid, &ppos);
+	if (cmd_get_vehiclemodel_param(&cmdctx, &modelid)) {
+		GetPlayerPosRot(cmdctx.playerid, &ppos);
 		veh = veh_create_new_dbvehicle(modelid, &ppos);
 		vehicleid = veh_create(veh);
 		if (vehicleid != INVALID_VEHICLE_ID) {
-			natives_PutPlayerInVehicle(playerid, veh->spawnedvehicleid, 0);
+			natives_PutPlayerInVehicle(cmdctx.playerid, veh->spawnedvehicleid, 0);
 		}
 	} else {
-		SendClientMessage(playerid, COL_WARN, WARN"gimme a modelid or modelname");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"gimme a modelid or modelname");
 	}
 	return 1;
 }
@@ -67,7 +67,7 @@ int cmd_admin_makeanewpermanentpublicvehiclehere(CMDPARAMS)
 The //rr commands respawns all unoccupied vehicles in a close range.
 */
 static
-int cmd_admin_rr(CMDPARAMS)
+int cmd_admin_rr(struct COMMANDCONTEXT cmdctx)
 {
 	static const float RR_SQ = 150.0f * 150.0f;
 
@@ -78,7 +78,7 @@ int cmd_admin_rr(CMDPARAMS)
 	int occupied_vehicles[MAX_PLAYERS];
 	int numov = 0;
 
-	GetPlayerPos(playerid, &ppos);
+	GetPlayerPos(cmdctx.playerid, &ppos);
 	for (i = 0; i < playercount; i++) {
 		vehicleid = GetPlayerVehicleID(players[i]);
 		if (vehicleid) {
@@ -242,9 +242,9 @@ The //vehinfo cmd shows vehicle info
 Also allows editing enabled state and linked airport.
 */
 static
-int cmd_admin_vehinfo(CMDPARAMS)
+int cmd_admin_vehinfo(struct COMMANDCONTEXT cmdctx)
 {
-	admin_vehinfo_show(playerid);
+	admin_vehinfo_show(cmdctx.playerid);
 	return 1;
 }
 

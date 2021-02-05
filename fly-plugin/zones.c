@@ -164,19 +164,19 @@ showtext:
 }
 
 static
-int zones_cmd_loc(CMDPARAMS)
+int zones_cmd_loc(struct COMMANDCONTEXT cmdctx)
 {
 	int target, vehicleid, model;
 	struct vec3 pos;
 	struct vec3 vvel;
 	char buf[144], *b;
 
-	if (!cmd_get_player_param(cmdtext, &parseidx, &target)) {
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /loc [id/part of name]");
+	if (!cmd_get_player_param(&cmdctx, &target)) {
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /loc [id/part of name]");
 		return 1;
 	}
 	if (target == INVALID_PLAYER_ID) {
-		SendClientMessage(playerid, COL_WARN, WARN"That player is not online.");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"That player is not online.");
 		return 1;
 	}
 	GetPlayerPos(target, &pos);
@@ -201,6 +201,6 @@ int zones_cmd_loc(CMDPARAMS)
 		sprintf(b, "on foot (%.0f FT)", pos.z);
 	}
 
-	SendClientMessage(playerid, COL_INFO_GENERIC, buf);
+	SendClientMessage(cmdctx.playerid, COL_INFO_GENERIC, buf);
 	return 1;
 }

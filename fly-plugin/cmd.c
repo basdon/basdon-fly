@@ -2,7 +2,7 @@ struct COMMAND {
 	int hash;
 	const char *cmd;
 	const int groups;
-	int (*handler)(const int, const char*, int);
+	int (*handler)(struct COMMANDCONTEXT ctx);
 };
 
 /* see sharedsymbols.h for GROUPS_ definitions */
@@ -72,7 +72,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/pm", GROUPS_ALL, pm_cmd_pm },
 	{ 0, "/prefs", GROUPS_ALL, prefs_cmd_preferences },
 	{ 0, "/preferences", GROUPS_ALL, prefs_cmd_preferences },
-	{ 0, "/protip", GROUPS_ALL, protips_cmd_protip },
+	{ 0, "/protip", GROUPS_ALL, cmd_protip },
 	{ 0, "/r", GROUPS_ALL, pm_cmd_r },
 	{ 0, "/reclass", GROUPS_ALL, cmd_reclass },
 	{ 0, "/register", GROUP_GUEST, guestreg_cmd_register },
@@ -153,16 +153,22 @@ void cmd_init()
 Checks incoming command and calls handler if one found and group matched.
 */
 static
-int cmd_check(const int playerid, const char *cmdtext)
+int cmd_check(const int playerid, char *cmdtext)
 {
+	struct COMMANDCONTEXT cmdctx;
 	struct COMMAND *c = cmds;
-	int parseidx, hash;
+	int hash;
 
 	hash = cmd_hash(cmdtext);
 
 	while (c != cmds_end) {
-		if (hash == c->hash && (pdata[playerid]->groups & c->groups) && cmd_is(cmdtext, c->cmd, &parseidx)) {
-			return c->handler(playerid, cmdtext, parseidx);
+		if (hash == c->hash &&
+			(pdata[playerid]->groups & c->groups) &&
+			cmd_is(cmdtext, c->cmd, &cmdctx.parseidx))
+		{
+			cmdctx.playerid = playerid;
+			cmdctx.cmdtext = cmdtext;
+			return c->handler(cmdctx);
 		}
 		c++;
 	}

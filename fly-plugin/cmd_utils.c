@@ -1,5 +1,8 @@
-#define CMDPARAMS const int playerid,const char *cmdtext,int parseidx
-#define CMDARGS playerid,cmdtext,parseidx
+struct COMMANDCONTEXT {
+	int playerid;
+	char *cmdtext;
+	int parseidx;
+};
 
 /*
 Gets next int parameter in cmdtext after parseidx.
@@ -10,9 +13,9 @@ On match, parseidx is the index right after the value, so either space or \0.
 @return non-zero on success, with int in value parameter.
 */
 static
-int cmd_get_int_param(const char *cmdtext, int *parseidx, int *value)
+int cmd_get_int_param(struct COMMANDCONTEXT *cmdctx, int *value)
 {
-	char *pc = (char*) cmdtext + *parseidx;
+	char *pc = cmdctx->cmdtext + cmdctx->parseidx;
 	int val = 0, sign = 1;
 
 	/*not using atoi since parseidx needs to be updated*/
@@ -33,7 +36,7 @@ nextchar:
 	val = val * 10 + *pc - '0';
 	pc++;
 	if (*pc == 0 || *pc == ' ') {
-		*parseidx = pc - cmdtext;
+		cmdctx->parseidx = pc - cmdctx->cmdtext;
 		*value = sign * val;
 		return 1;
 	}
@@ -50,10 +53,10 @@ If a valid player id was given but id is not taken, INVALID_PLAYER_ID is used.
 @return non-zero on success, with playerid in playerid parameter.
 */
 static
-int cmd_get_player_param(const char *cmdtext, int *parseidx, int *playerid)
+int cmd_get_player_param(struct COMMANDCONTEXT *cmdctx, int *playerid)
 {
 	char name[MAX_PLAYER_NAME + 1], val;
-	char *pc = (char*) cmdtext + *parseidx;
+	char *pc = cmdctx->cmdtext + cmdctx->parseidx;
 	char *n = name, *nend = name + sizeof(name);
 	int maybe_id = 0, isnumeric = 1, i;
 
@@ -99,7 +102,7 @@ nextchar:
 	goto nextchar;
 
 gotvalue:
-	*parseidx = pc - cmdtext;
+	cmdctx->parseidx = pc - cmdctx->cmdtext;
 	*playerid = INVALID_PLAYER_ID;
 	if (isnumeric) {
 		if (IsPlayerConnected(maybe_id)) {
@@ -128,9 +131,9 @@ On match, parseidx is the index right after the value, so either space or \0.
 @return non-zero on success, with filled in buffer.
 */
 static
-int cmd_get_str_param(const char* cmdtext, int *parseidx, char *buf)
+int cmd_get_str_param(struct COMMANDCONTEXT *cmdctx, char *buf)
 {
-	char *pc = (char*) cmdtext + *parseidx;
+	char *pc = cmdctx->cmdtext + cmdctx->parseidx;
 	char *b = buf;
 
 	while (*pc == ' ') {
@@ -142,7 +145,7 @@ int cmd_get_str_param(const char* cmdtext, int *parseidx, char *buf)
 	}
 	if (b - buf > 0) {
 		*b = 0;
-		*parseidx = pc - cmdtext;
+		cmdctx->parseidx = pc - cmdctx->cmdtext;
 		return 1;
 	}
 	return 0;
@@ -160,19 +163,19 @@ Note: underscores can be used for vehicle names that have spaces.
 @return non-zero on success, with filled in modelid parameter.
 */
 static
-int cmd_get_vehiclemodel_param(const char *cmdtext, int *parseidx, int *modelid)
+int cmd_get_vehiclemodel_param(struct COMMANDCONTEXT *cmdctx, int *modelid)
 {
 	int i, matchindex, minimum_pos, startpos, pos;
 	char *b;
 
-	if (cmd_get_int_param(cmdtext, parseidx, modelid)) {
+	if (cmd_get_int_param(cmdctx, modelid)) {
 		if (VEHICLE_MODEL_MIN <= *modelid && *modelid <= VEHICLE_MODEL_MAX) {
 			return 1;
 		}
 		return 0;
 	}
 
-	if (cmd_get_str_param(cmdtext, parseidx, cbuf144)) {
+	if (cmd_get_str_param(cmdctx, cbuf144)) {
 		/*Lowercase, replace _ with space.*/
 		b = cbuf144;
 		while (*b) {

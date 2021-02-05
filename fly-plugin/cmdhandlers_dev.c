@@ -2,16 +2,16 @@
 The /cp command creates a checkpoint on top of the player.
 */
 static
-int cmd_dev_cp(CMDPARAMS)
+int cmd_dev_cp(struct COMMANDCONTEXT cmdctx)
 {
 	struct vec3 pos;
-	int vehicleid = GetPlayerVehicleID(playerid);
+	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (vehicleid) {
 		GetVehiclePos(vehicleid, &pos);
 	} else {
-		GetPlayerPos(playerid, &pos);
+		GetPlayerPos(cmdctx.playerid, &pos);
 	}
-	SetPlayerRaceCheckpointNoDir(playerid, 2, &pos, 8.0f);
+	SetPlayerRaceCheckpointNoDir(cmdctx.playerid, 2, &pos, 8.0f);
 	return 1;
 }
 
@@ -19,16 +19,16 @@ int cmd_dev_cp(CMDPARAMS)
 The /gt command shows gametext for the player.
 */
 static
-int cmd_dev_gt(CMDPARAMS)
+int cmd_dev_gt(struct COMMANDCONTEXT cmdctx)
 {
 	int style;
-	if (cmd_get_int_param(cmdtext, &parseidx, &style) &&
-		cmd_get_str_param(cmdtext, &parseidx, cbuf4096))
+	if (cmd_get_int_param(&cmdctx, &style) &&
+		cmd_get_str_param(&cmdctx, cbuf4096))
 	{
 		B144(cbuf4096);
-		NC_GameTextForPlayer(playerid, buf144a, 4000, style);
+		NC_GameTextForPlayer(cmdctx.playerid, buf144a, 4000, style);
 	} else {
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /gt <style> <text>");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /gt <style> <text>");
 	}
 	return 1;
 }
@@ -37,9 +37,9 @@ int cmd_dev_gt(CMDPARAMS)
 The /crashme command crashes the player.
 */
 static
-int cmd_dev_crashme(CMDPARAMS)
+int cmd_dev_crashme(struct COMMANDCONTEXT cmdctx)
 {
-	CrashPlayer(playerid);
+	CrashPlayer(cmdctx.playerid);
 	return 1;
 }
 
@@ -47,14 +47,14 @@ int cmd_dev_crashme(CMDPARAMS)
 The //drvc command calls DisableRemoteVehicleCollisions
 */
 static
-int cmd_dev_disableremotevehiclecollisions(CMDPARAMS)
+int cmd_dev_disableremotevehiclecollisions(struct COMMANDCONTEXT cmdctx)
 {
 	int disable;
 
-	if (cmd_get_int_param(cmdtext, &parseidx, &disable)) {
-		DisableRemoteVehicleCollisions(playerid, disable);
+	if (cmd_get_int_param(&cmdctx, &disable)) {
+		DisableRemoteVehicleCollisions(cmdctx.playerid, disable);
 	} else {
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: //drvc <disable>");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: //drvc <disable>");
 	}
 	return 1;
 }
@@ -63,9 +63,9 @@ int cmd_dev_disableremotevehiclecollisions(CMDPARAMS)
 The /jetpack command gives player a jetpack.
 */
 static
-int cmd_dev_jetpack(CMDPARAMS)
+int cmd_dev_jetpack(struct COMMANDCONTEXT cmdctx)
 {
-	NC_SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USEJETPACK);
+	NC_SetPlayerSpecialAction(cmdctx.playerid, SPECIAL_ACTION_USEJETPACK);
 	return 1;
 }
 
@@ -73,11 +73,11 @@ int cmd_dev_jetpack(CMDPARAMS)
 The SLASH*m <amount> command to give or take money.
 */
 static
-int cmd_dev_STARm(CMDPARAMS)
+int cmd_dev_STARm(struct COMMANDCONTEXT cmdctx)
 {
 	int i;
-	if (cmd_get_int_param(cmdtext, &parseidx, &i)) {
-		money_give(playerid, i);
+	if (cmd_get_int_param(&cmdctx, &i)) {
+		money_give(cmdctx.playerid, i);
 	}
 	return 1;
 }
@@ -86,27 +86,27 @@ int cmd_dev_STARm(CMDPARAMS)
 Command to test SendClientMessage message splitting.
 */
 static
-int cmd_dev_testmsgsplit(CMDPARAMS)
+int cmd_dev_testmsgsplit(struct COMMANDCONTEXT cmdctx)
 {
 	/*72:	"------------------------------------------------------------------------"*/
 
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, -1,
 		"shorter than 144-----------------------------------------------------end");
 
-	SendClientMessage(playerid, 0, "");
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, 0, "");
+	SendClientMessage(cmdctx.playerid, -1,
 		"exactly 144-------------------------------------------------------------"
 		"---------------------------------------------------------------------end");
 
-	SendClientMessage(playerid, 0, "");
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, 0, "");
+	SendClientMessage(cmdctx.playerid, -1,
 		"145---------------------------------------------------------------------"
 		"----------------------------------------------------------------------en"
 
 		"d");
 
-	SendClientMessage(playerid, 0, "");
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, 0, "");
+	SendClientMessage(cmdctx.playerid, -1,
 		"512---------------------------------------------------------------------"
 		"------------------------------------------------------------------------"
 
@@ -118,8 +118,8 @@ int cmd_dev_testmsgsplit(CMDPARAMS)
 
 		"------------------------------------------end");
 
-	SendClientMessage(playerid, 0, "");
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, 0, "");
+	SendClientMessage(cmdctx.playerid, -1,
 		"600 this should cut off-------------------------------------------------"
 		"------------------------------------------------------------------------"
 
@@ -134,8 +134,8 @@ int cmd_dev_testmsgsplit(CMDPARAMS)
 
 		"---------------------end");
 
-	SendClientMessage(playerid, 0, "");
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, 0, "");
+	SendClientMessage(cmdctx.playerid, -1,
 		"512 one color change----------------------------------------------------"
 		"------------------------------------------------------------------------"
 
@@ -147,8 +147,8 @@ int cmd_dev_testmsgsplit(CMDPARAMS)
 
 		"------------------------------------------end");
 
-	SendClientMessage(playerid, 0, "");
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, 0, "");
+	SendClientMessage(cmdctx.playerid, -1,
 		"512 three color changes-------------------------------------------------"
 		"-------------------------------{ff0000}---------------------------------"
 
@@ -160,43 +160,43 @@ int cmd_dev_testmsgsplit(CMDPARAMS)
 
 		"------------------------------------------end");
 
-	SendClientMessage(playerid, 0, "");
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, 0, "");
+	SendClientMessage(cmdctx.playerid, -1,
 		"200 skip bogus color code-------{ff0000}------{cdefgh}---{zzzzzz}------"
 		"--{abc}--{00000ff}-----------------------------------------------------"
 
 		"-----------------------------------------------end");
 
-	SendClientMessage(playerid, 0, "");
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, 0, "");
+	SendClientMessage(cmdctx.playerid, -1,
 		"200}color brace out of bounds check------------------------------------"
 		"-----------------------------------------------------------------------"
 
 		"-----------------------------------------------end");
 
-	SendClientMessage(playerid, 0, "");
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, 0, "");
+	SendClientMessage(cmdctx.playerid, -1,
 		"200 color change on boundary no space----------------------------------"
 		"-------------------------------------------------------------------{ff0"
 
 		"000}-------------------------------------------end");
 
-	SendClientMessage(playerid, 0, "");
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, 0, "");
+	SendClientMessage(cmdctx.playerid, -1,
 		"200 split words---------------------------------------------------------"
 		"------------------------------------------------------------------ quick"
 
 		" brown -----------------------------------------end");
 
-	SendClientMessage(playerid, 0, "");
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, 0, "");
+	SendClientMessage(cmdctx.playerid, -1,
 		"200 split words---------------------------------------------------------"
 		"----------------------------------------------------------------- quick "
 
 		"brown fox jumps over the lazy dog---------------end");
 
-	SendClientMessage(playerid, 0, "");
-	SendClientMessage(playerid, -1,
+	SendClientMessage(cmdctx.playerid, 0, "");
+	SendClientMessage(cmdctx.playerid, -1,
 		"200 split words---------------------------------------------------------"
 		"-------------------------------------------------------------------- qui"
 
@@ -209,21 +209,21 @@ int cmd_dev_testmsgsplit(CMDPARAMS)
 Command to test parameter parsing in plugin code.
 */
 static
-int cmd_dev_testparpl(CMDPARAMS)
+int cmd_dev_testparpl(struct COMMANDCONTEXT cmdctx)
 {
 	int i;
 	char buf[144];
 
-	if (cmd_get_int_param(cmdtext, &parseidx, &i)) {
+	if (cmd_get_int_param(&cmdctx, &i)) {
 		printf("int %d\n", i);
 	}
-	if (cmd_get_player_param(cmdtext, &parseidx, &i)) {
+	if (cmd_get_player_param(&cmdctx, &i)) {
 		printf("player %d\n", i);
 	}
-	if (cmd_get_str_param(cmdtext, &parseidx, buf)) {
+	if (cmd_get_str_param(&cmdctx, buf)) {
 		printf("str -%s-\n", buf);
 	}
-	if (cmd_get_int_param(cmdtext, &parseidx, &i)) {
+	if (cmd_get_int_param(&cmdctx, &i)) {
 		printf("int %d\n", i);
 	}
 	return 1;
@@ -237,14 +237,14 @@ Creates a haystack object at the player's position.
 Useful to make a platform to stand on for taking pictures.
 */
 static
-int cmd_dev_platform(CMDPARAMS)
+int cmd_dev_platform(struct COMMANDCONTEXT cmdctx)
 {
 	struct vec3 ppos;
 
 	if (devplatformobj != INVALID_OBJECT_ID) {
 		NC_DestroyObject(devplatformobj);
 	}
-	GetPlayerPos(playerid, &ppos);
+	GetPlayerPos(cmdctx.playerid, &ppos);
 	NC_PARS(8);
 	nc_params[1] = 3374;
 	nc_paramf[2] = ppos.x;
@@ -255,7 +255,7 @@ int cmd_dev_platform(CMDPARAMS)
 	devplatformobj = NC(n_CreateObject);
 	nc_paramf[4] += 4.0f;
 	NC_PARS(4);
-	nc_params[1] = playerid;
+	nc_params[1] = cmdctx.playerid;
 	NC(n_SetPlayerPos_);
 	return 1;
 }
@@ -264,9 +264,9 @@ int cmd_dev_platform(CMDPARAMS)
 The /kill command kills the player.
 */
 static
-int cmd_dev_kill(CMDPARAMS)
+int cmd_dev_kill(struct COMMANDCONTEXT cmdctx)
 {
-	NC_SetPlayerHealth(playerid, 0.0f);
+	NC_SetPlayerHealth(cmdctx.playerid, 0.0f);
 	return 1;
 }
 
@@ -274,10 +274,10 @@ int cmd_dev_kill(CMDPARAMS)
 The /kickme commands kicks the player.
 */
 static
-int cmd_dev_kickme(CMDPARAMS)
+int cmd_dev_kickme(struct COMMANDCONTEXT cmdctx)
 {
-	SendClientMessage(playerid, -1, "you're kicked, bye");
-	natives_Kick(playerid, "requested \n''\n \0 ok", NULL, -1);
+	SendClientMessage(cmdctx.playerid, -1, "you're kicked, bye");
+	natives_Kick(cmdctx.playerid, "requested \n''\n \0 ok", NULL, -1);
 	return 1;
 }
 
@@ -285,10 +285,10 @@ int cmd_dev_kickme(CMDPARAMS)
 Toggle owner group on yourself.
 */
 static
-int cmd_dev_owner(CMDPARAMS)
+int cmd_dev_owner(struct COMMANDCONTEXT cmdctx)
 {
-	pdata[playerid]->groups ^= GROUP_OWNER;
-	pdata[playerid]->groups |= GROUP_MEMBER;
+	pdata[cmdctx.playerid]->groups ^= GROUP_OWNER;
+	pdata[cmdctx.playerid]->groups |= GROUP_MEMBER;
 	return 1;
 }
 
@@ -301,14 +301,14 @@ static int devvehicle = INVALID_VEHICLE_ID;
 The /v cmd to spawn a dev vehicle.
 */
 static
-int cmd_dev_v(CMDPARAMS)
+int cmd_dev_v(struct COMMANDCONTEXT cmdctx)
 {
 	struct vec4 pos;
 	int modelid = -1;
 	char msg144[144];
 
-	if (!cmd_get_vehiclemodel_param(cmdtext, &parseidx, &modelid)) {
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /v <modelid|modelname>");
+	if (!cmd_get_vehiclemodel_param(&cmdctx, &modelid)) {
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /v <modelid|modelname>");
 		return 1;
 	}
 
@@ -317,7 +317,7 @@ int cmd_dev_v(CMDPARAMS)
 		nc_params[1] = devvehicle;
 		NC(n_DestroyVehicle_);
 	}
-	GetPlayerPosRot(playerid, &pos);
+	GetPlayerPosRot(cmdctx.playerid, &pos);
 	NC_PARS(9);
 	nc_params[1] = modelid;
 	nc_paramf[2] = pos.coords.x;
@@ -327,9 +327,9 @@ int cmd_dev_v(CMDPARAMS)
 	nc_params[6] = nc_params[7] = nc_params[8] = 126;
 	nc_params[9] = 0;
 	devvehicle = NC(n_CreateVehicle_);
-	natives_PutPlayerInVehicle(playerid, devvehicle, 0);
+	natives_PutPlayerInVehicle(cmdctx.playerid, devvehicle, 0);
 	sprintf(msg144, "%d - %s - %s", modelid, vehmodelnames[modelid - 400], vehnames[modelid - 400]);
-	SendClientMessage(playerid, -1, msg144);
+	SendClientMessage(cmdctx.playerid, -1, msg144);
 	return 1;
 }
 
@@ -337,13 +337,13 @@ int cmd_dev_v(CMDPARAMS)
 The /sound <soundid> command plays a sound.
 */
 static
-int cmd_dev_sound(CMDPARAMS)
+int cmd_dev_sound(struct COMMANDCONTEXT cmdctx)
 {
 	int soundid;
-	if (!cmd_get_int_param(cmdtext, &parseidx, &soundid)) {
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /sound <soundid>");
+	if (!cmd_get_int_param(&cmdctx, &soundid)) {
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /sound <soundid>");
 	} else {
-		NC_PlayerPlaySound0(playerid, soundid);
+		NC_PlayerPlaySound0(cmdctx.playerid, soundid);
 	}
 	return 1;
 }
@@ -352,13 +352,13 @@ int cmd_dev_sound(CMDPARAMS)
 The /vdamage command prints vehicle damage status.
 */
 static
-int cmd_dev_vdamage(CMDPARAMS)
+int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 {
 	struct VEHICLEDAMAGE vdmg;
 	int vehicleid;
 	char msg144[144];
 
-	vehicleid = GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	common_GetVehicleDamageStatus(vehicleid, &vdmg);
 	sprintf(msg144, "panels %X doors %X lights %02X tires %02X", vdmg.panels, vdmg.doors, vdmg.lights, vdmg.tires);
 	SendClientMessageToAll(-1, msg144);
@@ -369,9 +369,9 @@ int cmd_dev_vdamage(CMDPARAMS)
 The /vehrespawn command respawns the player's vehicle.
 */
 static
-int cmd_dev_vehrespawn(CMDPARAMS)
+int cmd_dev_vehrespawn(struct COMMANDCONTEXT cmdctx)
 {
-	int vehicleid = GetPlayerVehicleID(playerid);
+	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	NC_SetVehicleToRespawn(vehicleid);
 	return 1;
 }
@@ -382,17 +382,17 @@ When hp_percent present, set the hp.
 Prints the hp of the player's vehicle.
 */
 static
-int cmd_dev_vhp(CMDPARAMS)
+int cmd_dev_vhp(struct COMMANDCONTEXT cmdctx)
 {
 	int vehicleid;
 	int set_hp;
 
-	vehicleid = GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (!vehicleid) {
 		return 1;
 	}
 
-	if (cmd_get_int_param(cmdtext, &parseidx, &set_hp)) {
+	if (cmd_get_int_param(&cmdctx, &set_hp)) {
 		NC_SetVehicleHealth(vehicleid, set_hp);
 	}
 
@@ -401,7 +401,7 @@ int cmd_dev_vhp(CMDPARAMS)
 	nc_params[2] = buf32a;
 	NC(n_GetVehicleHealth_);
 	sprintf(cbuf32, "hp %f", *fbuf32);
-	SendClientMessage(playerid, -1, cbuf32);
+	SendClientMessage(cmdctx.playerid, -1, cbuf32);
 	return 1;
 }
 
@@ -411,32 +411,32 @@ When fl_percent present, set the fuel leven (in percentage).
 Prints the fl of the player's vehicle.
 */
 static
-int cmd_dev_vfl(CMDPARAMS)
+int cmd_dev_vfl(struct COMMANDCONTEXT cmdctx)
 {
 	struct dbvehicle *veh;
 	int vehicleid;
 	int fl_pct;
 	float capacity;
 
-	vehicleid = GetPlayerVehicleID(playerid);
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (!vehicleid) {
 		return 1;
 	}
 
 	veh = gamevehicles[vehicleid].dbvehicle;
 	if (!veh) {
-		SendClientMessage(playerid, COL_WARN, WARN"unknown vehicle");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"unknown vehicle");
 		return 1;
 	}
 
 	capacity = model_fuel_capacity(veh->model);
 
-	if (cmd_get_int_param(cmdtext, &parseidx, &fl_pct)) {
+	if (cmd_get_int_param(&cmdctx, &fl_pct)) {
 		veh->fuel = capacity * fl_pct / 100.0f;
 	}
 
 	sprintf(cbuf32, "fl %f/%f (%.1f%%)", veh->fuel, capacity, veh->fuel / capacity);
-	SendClientMessage(playerid, -1, cbuf32);
+	SendClientMessage(cmdctx.playerid, -1, cbuf32);
 	return 1;
 }
 
@@ -444,9 +444,9 @@ int cmd_dev_vfl(CMDPARAMS)
 The /vphnan command sets player's vehicle to NaN hp.
 */
 static
-int cmd_dev_vhpnan(CMDPARAMS)
+int cmd_dev_vhpnan(struct COMMANDCONTEXT cmdctx)
 {
-	int vehicleid = GetPlayerVehicleID(playerid);
+	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	NC_SetVehicleHealth(vehicleid, 0x7F800100);
 	return 1;
 }
@@ -455,9 +455,9 @@ int cmd_dev_vhpnan(CMDPARAMS)
 The /vphninf command sets player's vehicle to negative infinite hp.
 */
 static
-int cmd_dev_vhpninf(CMDPARAMS)
+int cmd_dev_vhpninf(struct COMMANDCONTEXT cmdctx)
 {
-	int vehicleid = GetPlayerVehicleID(playerid);
+	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	NC_SetVehicleHealth(vehicleid, float_ninf);
 	return 1;
 }
@@ -466,9 +466,9 @@ int cmd_dev_vhpninf(CMDPARAMS)
 The /vphpinf command sets player's vehicle to positive infinite hp.
 */
 static
-int cmd_dev_vhppinf(CMDPARAMS)
+int cmd_dev_vhppinf(struct COMMANDCONTEXT cmdctx)
 {
-	int vehicleid = GetPlayerVehicleID(playerid);
+	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	NC_SetVehicleHealth(vehicleid, float_pinf);
 	return 1;
 }

@@ -447,7 +447,7 @@ The /metar command shows information about the current weather.
 Alias /weather.
 */
 static
-int timecyc_cmd_metar(CMDPARAMS)
+int timecyc_cmd_metar(struct COMMANDCONTEXT cmdctx)
 {
 	char msg144[144];
 
@@ -456,7 +456,7 @@ int timecyc_cmd_metar(CMDPARAMS)
 	} else {
 		timecyc_fmt_metar_msg(msg144, "report", weather.current);
 	}
-	SendClientMessage(playerid, COL_METAR, msg144);
+	SendClientMessage(cmdctx.playerid, COL_METAR, msg144);
 	return 1;
 }
 
@@ -691,16 +691,16 @@ int timecyc_get_current_render_distance()
 Dev /fweather <weather> command to force weather now.
 */
 static
-int timecyc_cmd_dev_fweather(CMDPARAMS)
+int timecyc_cmd_dev_fweather(struct COMMANDCONTEXT cmdctx)
 {
 	int w;
 
-	if (cmd_get_int_param(cmdtext, &parseidx, &w)) {
+	if (cmd_get_int_param(&cmdctx, &w)) {
 		weather.current = weather.locked = weather.upcoming = w;
-		timecyc_sync(playerid);
+		timecyc_sync(cmdctx.playerid);
 		SendClientMessageToAll(-1, "forced weather");
 	} else {
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /fweather <weather>");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /fweather <weather>");
 	}
 	return 1;
 }
@@ -709,7 +709,7 @@ int timecyc_cmd_dev_fweather(CMDPARAMS)
 Dev /timecyc to see current timecyc data.
 */
 static
-int timecyc_cmd_dev_timecyc(CMDPARAMS)
+int timecyc_cmd_dev_timecyc(struct COMMANDCONTEXT cmdctx)
 {
 	char msg144[144];
 
@@ -721,8 +721,8 @@ int timecyc_cmd_dev_timecyc(CMDPARAMS)
 		weather.current,
 		weather.upcoming,
 		weather.locked,
-		timecycstate[playerid]);
-	SendClientMessage(playerid, -1, msg144);
+		timecycstate[cmdctx.playerid]);
+	SendClientMessage(cmdctx.playerid, -1, msg144);
 	return 1;
 }
 
@@ -730,15 +730,15 @@ int timecyc_cmd_dev_timecyc(CMDPARAMS)
 Dev /tweather <weather> command to change weather to given id, with transition.
 */
 static
-int timecyc_cmd_dev_tweather(CMDPARAMS)
+int timecyc_cmd_dev_tweather(struct COMMANDCONTEXT cmdctx)
 {
 	int w;
 
-	if (cmd_get_int_param(cmdtext, &parseidx, &w)) {
+	if (cmd_get_int_param(&cmdctx, &w)) {
 		timecyc_set_weather(w);
 		SendClientMessageToAll(-1, "changing weather");
 	} else {
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /tweather <weather>");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /tweather <weather>");
 	}
 	return 1;
 }
@@ -747,18 +747,18 @@ int timecyc_cmd_dev_tweather(CMDPARAMS)
 Sets the time of the world.
 */
 static
-int cmd_dev_timex(CMDPARAMS)
+int cmd_dev_timex(struct COMMANDCONTEXT cmdctx)
 {
 	int h, m;
 
-	if (!cmd_get_int_param(cmdtext, &parseidx, &h) ||
-		!cmd_get_int_param(cmdtext, &parseidx, &m))
+	if (!cmd_get_int_param(&cmdctx, &h) ||
+		!cmd_get_int_param(&cmdctx, &m))
 	{
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /timex <h> <m>");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /timex <h> <m>");
 	} else {
 		time_h = h;
 		time_m = m;
-		NC_SetPlayerTime(playerid, h, m);
+		NC_SetPlayerTime(cmdctx.playerid, h, m);
 		panel_day_night_changed();
 	}
 	return 1;
@@ -768,7 +768,7 @@ int cmd_dev_timex(CMDPARAMS)
 Dev /nweather to change the weather, as if it's called by the timer.
 */
 static
-int timecyc_cmd_dev_nweather(CMDPARAMS)
+int timecyc_cmd_dev_nweather(struct COMMANDCONTEXT cmdctx)
 {
 	SendClientMessageToAll(-1, "changing weather");
 	timecyc_next_weather(NULL);

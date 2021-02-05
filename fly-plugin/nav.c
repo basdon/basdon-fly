@@ -200,23 +200,23 @@ Example: /adf ls
 When no beacon, disable nav
 */
 static
-int nav_cmd_adf(CMDPARAMS)
+int nav_cmd_adf(struct COMMANDCONTEXT cmdctx)
 {
 	struct AIRPORT *ap;
 	int vehicleid, len;
 	char beacon[144], *bp;
 
-	if (!nav_check_can_do_cmd(playerid, NAV_ADF, &vehicleid)) {
+	if (!nav_check_can_do_cmd(cmdctx.playerid, NAV_ADF, &vehicleid)) {
 		return 1;
 	}
 
-	if (!cmd_get_str_param(cmdtext, &parseidx, beacon)) {
+	if (!cmd_get_str_param(&cmdctx, beacon)) {
 		if (nav[vehicleid] != NULL) {
 			nav_disable(vehicleid);
-			NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL);
+			NC_PlayerPlaySound0(cmdctx.playerid, SOUND_NAV_DEL);
 			return 1;
 		}
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /adf [beacon] - see /beacons or /nearest");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /adf [beacon] - see /beacons or /nearest");
 		return 1;
 	}
 
@@ -238,13 +238,13 @@ int nav_cmd_adf(CMDPARAMS)
 	while (len--) {
 		if (strcmp(beacon, ap->code) == 0) {
 			nav_enable(vehicleid, &ap->pos, NULL);
-			NC_PlayerPlaySound0(playerid, SOUND_NAV_SET);
+			NC_PlayerPlaySound0(cmdctx.playerid, SOUND_NAV_SET);
 			return 1;
 		}
 		ap++;
 	}
 unkbeacon:
-	SendClientMessage(playerid, COL_WARN, WARN"Unknown beacon - see /beacons or /nearest");
+	SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Unknown beacon - see /beacons or /nearest");
 	return 1;
 }
 
@@ -258,7 +258,7 @@ When no beacon, disable nav
 When no or invalid runway, print a list of valid runways
 */
 static
-int nav_cmd_vor(CMDPARAMS)
+int nav_cmd_vor(struct COMMANDCONTEXT cmdctx)
 {
 	struct AIRPORT *ap;
 	struct RUNWAY *rw;
@@ -267,20 +267,20 @@ int nav_cmd_vor(CMDPARAMS)
 	int combinedparameter;
 	int len;
 
-	if (!nav_check_can_do_cmd(playerid, NAV_VOR, &vehicleid)) {
+	if (!nav_check_can_do_cmd(cmdctx.playerid, NAV_VOR, &vehicleid)) {
 		return 1;
 	}
 
-	if (!cmd_get_str_param(cmdtext, &parseidx, beaconpar)) {
+	if (!cmd_get_str_param(&cmdctx, beaconpar)) {
 		if (nav[vehicleid] != NULL) {
 			nav_disable(vehicleid);
-			NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL);
+			NC_PlayerPlaySound0(cmdctx.playerid, SOUND_NAV_DEL);
 			return 1;
 		}
-		SendClientMessage(playerid, COL_WARN, WARN"Syntax: /vor [beacon][runway] - see /beacons or /nearest");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /vor [beacon][runway] - see /beacons or /nearest");
 		return 1;
 	}
-	combinedparameter = !cmd_get_str_param(cmdtext, &parseidx, runwaypar);
+	combinedparameter = !cmd_get_str_param(&cmdctx, runwaypar);
 
 	b = beaconpar;
 	bp = beacon;
@@ -319,7 +319,7 @@ havebeacon:
 		ap++;
 	}
 unkbeacon:
-	SendClientMessage(playerid, COL_WARN, WARN"Unknown beacon - see /beacons or /nearest");
+	SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Unknown beacon - see /beacons or /nearest");
 	return 1;
 haveairport:
 	if (b[0] < '0' || '9' < b[0] ||
@@ -334,7 +334,7 @@ haveairport:
 	while (rw != ap->runwaysend) {
 		if (rw->type == RUNWAY_TYPE_RUNWAY && strcmp(rw->id, b) == 0) {
 			nav_enable(vehicleid, NULL, rw);
-			NC_PlayerPlaySound0(playerid, SOUND_NAV_SET);
+			NC_PlayerPlaySound0(cmdctx.playerid, SOUND_NAV_SET);
 			return 1;
 		}
 		rw++;
@@ -353,11 +353,11 @@ tellrws:
 		rw++;
 	}
 	if (len) {
-		SendClientMessage(playerid, COL_WARN, beaconpar);
+		SendClientMessage(cmdctx.playerid, COL_WARN, beaconpar);
 		return 1;
 	}
 
-	SendClientMessage(playerid, COL_WARN, WARN"There are no VOR capable runways at this beacon");
+	SendClientMessage(cmdctx.playerid, COL_WARN, WARN"There are no VOR capable runways at this beacon");
 	return 1;
 }
 
@@ -368,28 +368,28 @@ Syntax: /ils
 Only toggles ils when VOR is already active and the runway has ILS capabilities.
 */
 static
-int nav_cmd_ils(CMDPARAMS)
+int nav_cmd_ils(struct COMMANDCONTEXT cmdctx)
 {
 	struct vec4 vpos;
 	struct NAVDATA *np;
 	int vehicleid;
 
-	if (!nav_check_can_do_cmd(playerid, NAV_ILS, &vehicleid)) {
+	if (!nav_check_can_do_cmd(cmdctx.playerid, NAV_ILS, &vehicleid)) {
 		return 1;
 	}
 	if ((np = nav[vehicleid]) == NULL || np->vor == NULL) {
-		SendClientMessage(playerid, COL_WARN, WARN"ILS can only be activated when VOR is already active");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"ILS can only be activated when VOR is already active");
 		return 1;
 	}
 	if ((np->vor->nav & NAV_ILS) != NAV_ILS) {
-		SendClientMessage(playerid, COL_WARN, WARN"The selected runway does not have ILS capabilities");
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"The selected runway does not have ILS capabilities");
 		return 1;
 	}
 	np->ilsx = np->ilsz = INVALID_ILS_VALUE;
 #if SOUND_NAV_SET != 1083 || SOUND_NAV_DEL != 1084
 #error "edit the soundid in line below"
 #endif
-	NC_PlayerPlaySound0(playerid, SOUND_NAV_DEL - (np->ils ^= 1));
+	NC_PlayerPlaySound0(cmdctx.playerid, SOUND_NAV_DEL - (np->ils ^= 1));
 
 	GetVehiclePosRotUnsafe(vehicleid, &vpos);
 	nav_update(vehicleid, &vpos);
