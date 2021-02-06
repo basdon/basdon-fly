@@ -16,6 +16,10 @@ void *pwdata[MAX_PLAYERS];
 The userid of the user that the player is trying to login for.
 */
 static int unconfirmed_userid[MAX_PLAYERS];
+/**
+Time since last seen of the user account that the player is trying to log in as.
+*/
+static int unconfirmed_timesincelastseen[MAX_PLAYERS];
 
 /**
 Failed login attempts.
@@ -346,6 +350,21 @@ void login_cb_create_session_new_member(void *data)
 	SendClientMessageToAll(COL_JOIN, msg144);
 }
 
+static
+void login_append_last_connected(int playerid, char *dest)
+{
+	int timespan;
+
+	timespan = unconfirmed_timesincelastseen[playerid];
+	if (timespan < 60 * 60) {
+		sprintf(dest, "%d minutes ago", timespan / 60);
+	} else if (timespan < 60 * 60 * 24 * 2) {
+		sprintf(dest, "%d hours ago", timespan / (60 * 60));
+	} else {
+		sprintf(dest, "%d days ago", timespan / (60 * 60 * 24));
+	}
+}
+
 /**
 Callback for query that creates a session for an existing member.
 */
@@ -353,7 +372,7 @@ static
 void login_cb_create_session_existing_member(void *data)
 {
 	int playerid;
-	char msg144[144];
+	char msg144[144], *msgptr;
 
 	playerid = PLAYER_CC_GETID(data);
 	if (!PLAYER_CC_CHECK(data, playerid)) {
@@ -370,7 +389,8 @@ void login_cb_create_session_existing_member(void *data)
 	}
 	*/
 	login_login_player(playerid, LOGGED_IN);
-	sprintf(msg144, "%s[%d] just logged in, welcome back!", pdata[playerid]->name, playerid);
+	msgptr = msg144 + sprintf(msg144, "%s[%d] just logged in, welcome back! Last connected: ", pdata[playerid]->name, playerid);
+	login_append_last_connected(playerid, msgptr);
 	SendClientMessageToAll(COL_JOIN, msg144);
 }
 
@@ -684,6 +704,7 @@ asguest:
 		}
 		memcpy(pwdata[playerid], password, PW_HASH_LENGTH);
 		unconfirmed_userid[playerid] = (nc_params[2] = 2, NC(n_cache_get_field_i));
+		unconfirmed_timesincelastseen[playerid] = (nc_params[2] = 3, NC(n_cache_get_field_i));
 		login_show_dialog_login(playerid, 0);
 	}
 }
@@ -699,18 +720,14 @@ void login_query_check_user_exists(int playerid, cb_t callback)
 	B144("~b~Contacting login server...");
 	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
 	sprintf(cbuf4096_,
-	        "SELECT "
-	        "(SELECT count(u) "
+		"SELECT a.c,b.pw,b.i,b.ls FROM "
+		"(SELECT count(u) c "
 			"FROM fal "
-			"WHERE stamp>UNIX_TIMESTAMP()-1800 AND ip='%s'),"
-	        "(SELECT pw "
+			"WHERE stamp>UNIX_TIMESTAMP()-1800 AND ip='%s') a,"
+		"(SELECT pw,i,UNIX_TIMESTAMP()-lastseengame ls "
 			"FROM usr "
-			"WHERE name='%s'),"
-	        "(SELECT i "
-			"FROM usr "
-			"WHERE name='%s')",
+			"WHERE name='%s') b",
 		pdata[playerid]->ip,
-		pdata[playerid]->name,
 		pdata[playerid]->name);
 	common_mysql_tquery(cbuf4096_, callback, V_MK_PLAYER_CC(playerid));
 }
