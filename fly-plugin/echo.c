@@ -200,6 +200,13 @@ void echo_send_generic_message(char type, char *text)
 	}
 }
 
+static
+void SendClientMessageToAllAndIRC(char irc_generic_msg_type, int game_color, char *msg)
+{
+	SendClientMessageToAll(game_color, msg);
+	echo_send_generic_message(irc_generic_msg_type, msg);
+}
+
 void echo_on_game_chat_or_action(int t, int playerid, char *text)
 {
 	int nicklen, msglen;

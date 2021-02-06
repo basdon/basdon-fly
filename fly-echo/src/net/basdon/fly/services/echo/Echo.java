@@ -45,6 +45,7 @@ public static final byte
 public static final byte
 	PACK12_FLIGHT_MESSAGE = 0,
 	PACK12_TRAC_MESSAGE = 1,
+	PACK12_LOGIN = 2,
 	PACK12_IRC_MODE = 3,
 	PACK12_IRC_TOPIC = 4,
 	PACK12_IRC_NICK = 5,
@@ -419,6 +420,11 @@ invalid_packet:
 			msg = new CharBuf(3 + msglen);
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_BROWN);
+			break;
+		case PACK12_LOGIN:
+			msg = new CharBuf(3 + msglen);
+			msg.writeChar(CTRL_COLOR);
+			msg.writeString(SCOL_BLUE);
 			break;
 		case PACK12_PROTIP:
 		case PACK12_METAR:

@@ -125,7 +125,7 @@ Types:
 <pre>
 0: flight message, sent from game to irc when a player finishes a flight
 1: trac, sent from web to game and irc when a trac ticket/comment was made
-2: reserved
+2: login message, sent from game to irc
 3: IRC mode change message, sent from irc to game
 4: IRC topic change message, sent from irc to game
 5: IRC nick change message, sent from irc to game
@@ -163,3 +163,7 @@ IRC:
 9: join
 </pre>
 
+Note: connection messages coming from the game are just that: connection
+messages. The player may not be the person registered to the account under the
+name they currently have. A login message will be sent from game to irc when the
+player actually logs in (see {@#=p12 generic message} type 2).

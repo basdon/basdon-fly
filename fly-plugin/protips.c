@@ -37,12 +37,8 @@ char *protips_get_random_protip()
 static
 int protips_timed_broadcast(void *data)
 {
-	char *protip;
-
 	if (playercount) {
-		protip = protips_get_random_protip();
-		SendClientMessageToAll(COL_INFO_LIGHT, protip);
-		echo_send_generic_message(ECHO_PACK12_PROTIP, protip);
+		SendClientMessageToAllAndIRC(ECHO_PACK12_PROTIP, COL_INFO_LIGHT, protips_get_random_protip());
 	}
 	return PROTIPS_INTERVAL;
 }

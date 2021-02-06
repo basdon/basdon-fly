@@ -319,7 +319,7 @@ void login_cb_create_session_guest(void *data)
 	SendClientMessage(playerid, COL_INFO, INFO"You are now playing as a guest. You can use /register at any time to save your stats.");
 	login_login_player(playerid, LOGGED_GUEST);
 	sprintf(msg144, "%s[%d] joined as a guest, welcome!", pdata[playerid]->name, playerid);
-	SendClientMessageToAll(COL_JOIN, msg144);
+	SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
 }
 
 /**
@@ -347,7 +347,7 @@ void login_cb_create_session_new_member(void *data)
 	*/
 	login_login_player(playerid, LOGGED_IN);
 	sprintf(msg144, "%s[%d] just registered an account, welcome!", pdata[playerid]->name, playerid);
-	SendClientMessageToAll(COL_JOIN, msg144);
+	SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
 }
 
 static
@@ -391,7 +391,7 @@ void login_cb_create_session_existing_member(void *data)
 	login_login_player(playerid, LOGGED_IN);
 	msgptr = msg144 + sprintf(msg144, "%s[%d] just logged in, welcome back! Last connected: ", pdata[playerid]->name, playerid);
 	login_append_last_connected(playerid, msgptr);
-	SendClientMessageToAll(COL_JOIN, msg144);
+	SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
 }
 
 /**
@@ -401,6 +401,7 @@ static
 void login_cb_create_guest_usr(void *data)
 {
 	int playerid;
+	char msg144[144];
 
 	playerid = PLAYER_CC_GETID(data);
 	if (!PLAYER_CC_CHECK(data, playerid)) {
@@ -415,6 +416,8 @@ void login_cb_create_guest_usr(void *data)
 		SendClientMessage(playerid, COL_WARN, WARN"An error occurred while creating a guest session.");
 		SendClientMessage(playerid, COL_WARN, WARN"You can play, but you won't be able to save your stats later.");
 		login_login_player(playerid, LOGGED_GUEST);
+		sprintf(msg144, "%s[%d] joined as a guest, welcome!", pdata[playerid]->name, playerid);
+		SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
 		return;
 	}
 	login_create_session(playerid, login_cb_create_session_guest);
@@ -486,8 +489,12 @@ failure).
 static
 void login_spawn_as_guest_WITHOUT_ACCOUNT(int playerid)
 {
+	char msg144[144];
+
 	if (login_give_guest_name(playerid)) {
 		login_login_player(playerid, LOGGED_GUEST);
+		sprintf(msg144, "%s[%d] joined as a guest (login error), welcome!", pdata[playerid]->name, playerid);
+		SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
 	}
 }
 
