@@ -16,6 +16,8 @@
 #define LIMIT_DIALOG_INFO (4096)
 /* button len limit is not defined, using 32 */
 #define LIMIT_DIALOG_BUTTON (32)
+/*Pagesize is 10 with /fontsize 5, 16 with /fontsize -3.*/
+/*#define DIALOG_LIST_PAGESIZE 16*/
 
 #define DIALOG_STYLE_MSGBOX 0
 #define DIALOG_STYLE_INPUT 1

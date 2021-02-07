@@ -26,9 +26,15 @@
 		<p>
 			<p>We also have a Discord server, invite link: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}.
 		</p>
-		<p>
-			<strong>Last update posts:</strong> (updates are made constantly, but some get their own news article)
-		</p>
+
+		<h3><strong>Changelog:</strong></h3>
+		<ul>
+			{@foreach $last_changelog_entries as $change}
+				<li><strong>{@unsafe $change->stamp}</strong>: {$change->entry}</li>
+			{@endforeach}
+		</ul>
+		<p><a href="changelog.php">More...</a></p>
+		<strong>Last update posts:</strong>
 		<ul>
 			{@foreach $last_update_articles as $update_article}
 				<li><a href="article.php?title={@urlencode $update_article->name}">{$update_article->title}</a></li>

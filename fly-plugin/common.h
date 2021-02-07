@@ -51,7 +51,6 @@ void ctoai(char *dstsrc);
 	PLAYERID=PLAYER_CC_GETID(VALUE);\
 	if(!PLAYER_CC_CHECK(VALUE,PLAYERID))return;
 
-
 #define ECOL_INFO "{3498db}"
 #define ECOL_WARN "{e84c3d}"
 #define ECOL_SUCC "{2cc36b}"
@@ -59,10 +58,11 @@ void ctoai(char *dstsrc);
 #define ECOL_DIALOG_TEXT "{a9c4e4}"
 #define ECOL_DIALOG_BUTTON "{c8c8c8}"
 #define ECOL_MISSION "{ff9900}"
+#define ECOL_SAMP_GREY "{a9c4e4}"
 
 #define WARN "! "
 #define INFO "* "
-#define SUCC "" /*the + might confuse people*/
+#define SUCC "" /*This used to be a plus symbol, but that might confuse people.*/
 
 #define COL_SAMP_GREEN 0x88aa62ff /*as in username error message*/
 #define COL_SAMP_GREY 0xa9c4e4ff /*as in 'Connected to..'*/
@@ -81,6 +81,8 @@ void ctoai(char *dstsrc);
 #define COL_METAR COL_INFO_LIGHT
 #define COL_IRC_MODE 0x22ffffff
 #define COL_IRC_ACTION 0xff66ffff
+
+#define COL_CHANGELOG COL_INFO_BROWN
 
 #define GROUP_BANNED (1)
 #define GROUP_GUEST (2)

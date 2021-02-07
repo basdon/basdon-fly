@@ -376,6 +376,7 @@ static unsigned short nametags_max_distance[MAX_PLAYERS];
 
 #include "score.c"
 #include "admin.c"
+#include "changelog.c"
 #include "zones.c"
 #include "anticheat.c"
 #include "changepassword.c"

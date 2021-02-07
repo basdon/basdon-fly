@@ -31,6 +31,9 @@ If an airport has more, they are probably split out enough anyways.*/
 #define DIALOG_VEHINFO_VEHINFO 1014
 #define DIALOG_VEHINFO_ASSIGNAP 1015
 #define DIALOG_PREFERENCES_NAMETAGDISTANCE 1016
+/*Dialogs that uses multiple ids to distinguish between current 'page'.*/
+#define DIALOG_CHANGELOG_PAGE_0 20000
+#define DIALOG_CHANGELOG_NUM_PAGES 100
 /*Dialog transactions.*/
 /*don't use an id that is used in a dialog id (unless they relate), use 32768+*/
 /*max transaction id is int max*/
@@ -41,6 +44,7 @@ If an airport has more, they are probably split out enough anyways.*/
 #define TRANSACTION_CHANGEPASS 100002
 #define TRANSACTION_CHANGEPASS_ABORTED 100003
 #define TRANSACTION_GUESTREGISTER 100004
+#define TRANSACTION_CHANGELOG 100005
 
 /*MAPICON IDS*/
 

@@ -347,3 +347,9 @@ modelstats -- flighttime/odo per player per model
   t593
   o593
 </pre>
+
+<pre>
+chg -- changelogs
+  stamp - date (char 11)
+  entry - summary (char(128))
+</pre>

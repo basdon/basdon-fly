@@ -233,6 +233,16 @@ int cmd_camera(struct COMMANDCONTEXT cmdctx)
 }
 
 /**
+The /changelog command shows a dialog with changelog entries.
+*/
+static
+int cmd_changelog(struct COMMANDCONTEXT cmdctx)
+{
+	changelog_show_dialog(cmdctx.playerid, 0);
+	return 1;
+}
+
+/**
 The /chute command gives the player a parachute.
 */
 static

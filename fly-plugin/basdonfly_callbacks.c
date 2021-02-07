@@ -125,6 +125,12 @@ cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 		goto ret;
 	}
 
+	if (dialogid >= DIALOG_CHANGELOG_PAGE_0 &&
+		dialogid < DIALOG_CHANGELOG_PAGE_0 + DIALOG_CHANGELOG_NUM_PAGES)
+	{
+		changelog_on_dialog_response(pid, res, dialogid, listitem);
+	}
+
 ret:
 	dialog_pop_queue(pid);
 	return 1;
@@ -237,6 +243,7 @@ exit:
 	/*mysql_set_charset "Windows-1252"*/
 
 	airports_init();
+	changelog_init();
 	class_init();
 	heartbeat_create_session();
 	maps_init();
@@ -367,6 +374,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 		return 1;
 	}
 
+	changelog_on_player_connect(playerid);
 	class_on_player_connect(playerid);
 	chpw_on_player_connect(playerid);
 	echo_on_player_connect(playerid);
