@@ -18,12 +18,17 @@ To check if the next OnDialogResponse is actually a response to the last dialog
 we've showed.
 */
 static int showndialog[MAX_PLAYERS];
+/**
+time_timestamp() of when the last dialog was sent to the player.
+*/
+static int last_dialog_sendtime[MAX_PLAYERS];
 
 static
 void dialog_on_player_connect(int playerid)
 {
 	dialog_queue[playerid] = NULL;
 	dialog_transaction[playerid] = TRANSACTION_NONE;
+	last_dialog_sendtime[playerid] = time_timestamp();
 	showndialog[playerid] = 0;
 	/*to hide any open dialogs, send with any negative id*/
 	NC_PARS(7);
@@ -54,11 +59,16 @@ void dialog_on_player_disconnect(int playerid)
 static
 int dialog_on_response(int playerid, int dialogid)
 {
-	int ret = 1;
+	int ret, diff_last_sent;
+
+	ret = 1;
 	dialog_transaction[playerid] = TRANSACTION_NONE;
 	if (dialogid != showndialog[playerid]) {
-#ifndef DEV
-		sprintf(cbuf144, "expected %d got %d", showndialog[playerid], dialogid);
+		diff_last_sent = time_timestamp() - last_dialog_sendtime[playerid];
+		sprintf(cbuf144, "expected %d got %d (last dialog sent %dms ago)", showndialog[playerid], dialogid, diff_last_sent);
+#ifdef DEV
+		printf("anticheat wrong dialogid: %s\n", cbuf144);
+#else
 		anticheat_log(playerid, AC_WRONG_DIALOGID, cbuf144);
 #endif
 		ret = 0;
@@ -193,6 +203,7 @@ int dialog_ShowPlayerDialog(
 	dialog_transaction[playerid] = transactionid;
 
 	showndialog[playerid] = dialogid;
+	last_dialog_sendtime[playerid] = time_timestamp();
 	atoc(buf64, caption, LIMIT_DIALOG_CAPTION);
 	atoc(buf4096, info, LIMIT_DIALOG_INFO);
 	atoc(buf32, button1, LIMIT_DIALOG_BUTTON);
