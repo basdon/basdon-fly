@@ -2020,7 +2020,7 @@ int missions_cmd_stoplocate(struct COMMANDCONTEXT cmdctx)
 }
 
 static
-void missions_locate_closest_mission(int playerid)
+void missions_locate_closest_mission(int playerid, int point_type_mask)
 {
 	struct MISSIONPOINT *msp;
 	struct dbvehicle *veh;
@@ -2030,12 +2030,16 @@ void missions_locate_closest_mission(int playerid)
 	float dx, dy;
 	float closest_distance_sq, distance_sq;
 	int vehicleid;
+	int msptypemask;
 
 	GetPlayerPos(playerid, &pos);
 	closest_index = -1;
 	closest_distance_sq = float_pinf;
 	for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {
-		if (missionpoints[mspindex].type & missions_available_msptype_mask[playerid]) {
+		msptypemask = missionpoints[mspindex].type;
+		if ((msptypemask & missions_available_msptype_mask[playerid]) &&
+			(msptype_mask_to_point_mask(msptypemask) & point_type_mask))
+		{
 			dx = missionpoints[mspindex].pos.x - pos.x;
 			dy = missionpoints[mspindex].pos.y - pos.y;
 			distance_sq = dx * dx + dy * dy;
@@ -2095,7 +2099,7 @@ void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 		} else if (KEY_JUST_DOWN(KEY_SPRINT)) {
 			PlayerPlaySound(playerid, MISSION_HELP_ACCEPT_SOUND);
 			missions_jobhelp_hide(playerid); /*sets controllable and mission state*/
-			missions_locate_closest_mission(playerid);
+			missions_locate_closest_mission(playerid, (1 << mission_help_option[playerid]));
 		}
 	} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
 		/*Since player is set to not be controllable, these use on-foot controls even though the player is in-vehicle.*/
