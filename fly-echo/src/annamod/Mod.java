@@ -215,7 +215,7 @@ void on_channelmodechange(Channel chan, User user, int changec, char[] signs,
 						String noticemsg =
 							"Your messages will now be relayed to"
 							+ " in-game chat";
-						this.anna.notice(user.nick, noticemsg.toCharArray());
+						this.anna.notice(nick, noticemsg.toCharArray());
 						break;
 					}
 				}
