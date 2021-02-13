@@ -9,6 +9,8 @@ single runway at the airport.
 
 This island was mapped by player Adalarva.
 
+{@infomsg {@em "Flying to Catalina is like waiting for a download to finish."} - Lucy 2021}
+
 {@h3 Vehicle spawns}
 
 <?php readfile('../gen/apvehiclelist_'.$code.'.html') ?>

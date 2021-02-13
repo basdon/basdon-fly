@@ -144,6 +144,15 @@ s_{@stub}_<p class="msg warning">This article is a stub.</p>_
 		b nexttag
 	}
 
+	/{@infomsg/ {
+		H
+		g
+		s/\(.*\)\n.*$/\1\n<\/p>/
+		x
+		s/.*\n\(.*\){@infomsg\(.*\)/\1<p class="msg info">\2/
+		b nexttag
+	}
+
 	/{@agalleryimg/ {
 		s_{@agalleryimg \([^;]*\);\(.*\)}_<img class="gallery" src="<?=$STATICPATH?>/articles/\1" title="\2" alt="\2"/>_
 		b nexttag
