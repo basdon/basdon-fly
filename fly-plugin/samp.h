@@ -25,6 +25,60 @@ struct SampVehicleParams {
 };
 EXPECT_SIZE(struct SampVehicleParams, 0x10);
 
+#define DOOR_STATE_OPENED 0x1
+#define DOOR_STATE_DAMAGED 0x2
+#define DOOR_STATE_REMOVED 0x4
+
+#define PANEL_STATE_DAMAGED 0x1
+#define PANEL_STATE_VERYDAMAGED 0x2
+#define PANEL_STATE_REMOVED 0x3
+
+#define LIGHT_STATE_BROKEN_FRONT_LEFT 0x1
+#define LIGHT_STATE_BROKEN_FRONT_RIGHT 0x4
+#define LIGHT_STATE_BROKEN_BACK 0x40
+
+#define TIRE_STATE_POPPED_BACK_RIGHT 0x1
+#define TIRE_STATE_POPPED_FRONT_RIGHT 0x2
+#define TIRE_STATE_POPPED_BACK_LEFT 0x4
+#define TIRE_STATE_POPPED_FRONT_LEFT 0x8
+
+struct SampVehicleDamageStatus {
+	union {
+		unsigned int raw;
+		struct {
+			unsigned char passenger;
+			unsigned char driver;
+			unsigned char trunk;
+			unsigned char hood;
+		} structured;
+	} doors;
+	union {
+		unsigned int raw;
+		struct {
+			unsigned char front_left : 4;
+			unsigned char front_right : 4;
+			unsigned char read_left : 4;
+			unsigned char read_right : 4;
+			unsigned char windshield : 4;
+			unsigned char front_bumper : 4;
+			unsigned char rear_bumper : 4;
+			unsigned char unk : 4;
+		} structured;
+	} panels;
+	char broken_lights;
+	union {
+		unsigned char raw;
+		struct {
+			unsigned char back_right : 1;
+			unsigned char front_right : 1;
+			unsigned char back_left : 1;
+			unsigned char front_left : 1;
+			unsigned char padding : 4;
+		} structured;
+	} popped_tires;
+};
+EXPECT_SIZE(struct SampVehicleDamageStatus, 4 + 4 + 1 + 1);
+
 struct SYNCDATA_Onfoot {
 	short lrkey;
 	short udkey;
@@ -103,12 +157,15 @@ struct SampVehicle {
 	struct vec3 vel;
 	char _pad58[0x82-0x58];
 	short model;
-	char _pad82[0xEF-0x84];
+	char _pad84[0xAA-0x84];
+	struct SampVehicleDamageStatus damageStatus;
+	char _padB4[0xEF-0xB4];
 	struct SampVehicleParams params;
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, vel, 0xC + 0x40);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, model, 0x82);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, damageStatus, 0xAA);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, params, 0xEF);
 
 #define UPDATE_SYNC_TYPE_NONE 0

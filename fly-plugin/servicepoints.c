@@ -262,10 +262,9 @@ int svp_cmd_repair(struct COMMANDCONTEXT cmdctx)
 	hp += fixamount;
 	money_take(playerid, cost);
 
-	NC_PARS(1);
-	nc_params[1] = vehicleid;
-	NC(n_RepairVehicle);
+	RepairVehicle(vehicleid);
 	NC_PARS(2);
+	nc_params[1] = vehicleid;
 	nc_paramf[2] = hp;
 	NC(n_SetVehicleHealth);
 

@@ -397,6 +397,39 @@ int GetVehicleDriver(int vehicleid)
 	return INVALID_PLAYER_ID;
 }
 
+static
+__attribute__((unused))
+int GetVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *damage_status)
+{
+	struct SampVehicle *vehicle;
+
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+		*damage_status = vehicle->damageStatus;
+		return 1;
+	}
+	return 0;
+}
+
+/*XXX: hasn't really been tested thoroughly for correct functioning.*/
+static
+void UpdateVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *damage_status)
+{
+	struct SampVehicle *vehicle;
+
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+		((void (*)(struct SampVehicle*,short,unsigned int,unsigned int,unsigned char,unsigned char))0x814BB90)(
+			vehicle,
+			INVALID_PLAYER_ID, /*The player that caused this update, so gamemode/filterscripts can block it (not applicable here).*/
+			damage_status->panels.raw,
+			damage_status->doors.raw,
+			damage_status->broken_lights,
+			damage_status->popped_tires.raw
+		);
+	}
+}
+
 /*
 TODO: make a GetVehicleParamsExForPlayer? Where objective is set in case they're on a mission but not in their vehicle.
 */
@@ -408,6 +441,19 @@ void GetVehicleParamsEx(int vehicleid, struct SampVehicleParams *params)
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
 	if (vehicle) {
 		*params = vehicle->params;
+	}
+}
+
+/*XXX: untested!*/
+static
+__attribute__((unused))
+void SetVehicleParamsEx(int vehicleid, struct SampVehicleParams *params)
+{
+	struct SampVehicle *vehicle;
+
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+		((int (*)(struct SampVehicle*,struct SampVehicleParams*))0x814C7A0)(vehicle, params);
 	}
 }
 
@@ -495,6 +541,34 @@ void SetVehicleEngineState(int vehicleid, char engine)
 			SAMP_SendRPCToPlayer(RPC_SetVehicleParamsEx, &bs, playerid, 2);
 		}
 	}
+}
+
+/**
+In the PAWN API, this function would also set the health of the vehicle to 1000.0f. Not here.
+*/
+static
+void RepairVehicle(int vehicleid)
+{
+	struct SampVehicleDamageStatus damagestatus;
+	int vehiclemodel;
+
+	vehiclemodel = GetVehicleModel(vehicleid);
+	if (vehiclemodel == MODEL_RUSTLER ||
+		vehiclemodel == MODEL_CROPDUST ||
+		vehiclemodel == MODEL_STUNT ||
+		vehiclemodel == MODEL_SHAMAL ||
+		vehiclemodel == MODEL_HYDRA ||
+		vehiclemodel == MODEL_NEVADA)
+	{
+		/*This somehow fixes ghost doors that can happen with some planes. Thanks to Nati_Mage.*/
+		damagestatus.doors.raw = PANEL_STATE_VERYDAMAGED << 16;
+	} else {
+		damagestatus.doors.raw = 0;
+	}
+	damagestatus.panels.raw = 0;
+	damagestatus.broken_lights = 0;
+	damagestatus.popped_tires.raw = 0;
+	UpdateVehicleDamageStatus(vehicleid, &damagestatus);
 }
 
 /**

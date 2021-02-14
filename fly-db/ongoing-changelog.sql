@@ -4,3 +4,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Feb 14', 'Added Iguazu City map/destination');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Feb 14', 'Fixed a "ghost door" issue with certain planes after /fix');

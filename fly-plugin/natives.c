@@ -31,7 +31,6 @@ static AMX_NATIVE n_MoveObject;
 static AMX_NATIVE n_PutPlayerInVehicle_;
 static AMX_NATIVE n_RemoveBuildingForPlayer;
 static AMX_NATIVE n_ResetPlayerMoney_;
-static AMX_NATIVE n_RepairVehicle;
 static AMX_NATIVE n_SHA256_PassHash;
 static AMX_NATIVE n_SendRconCommand;
 static AMX_NATIVE n_SetCameraBehindPlayer;
@@ -369,7 +368,6 @@ int natives_find()
 		N(MoveObject),
 		N_(PutPlayerInVehicle),
 		N(RemoveBuildingForPlayer),
-		N(RepairVehicle),
 		N_(ResetPlayerMoney),
 		N(SHA256_PassHash),
 		N(SendRconCommand),
