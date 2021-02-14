@@ -5,7 +5,6 @@ static AMX_NATIVE n_AddPlayerClass;
 static AMX_NATIVE n_AddStaticVehicleEx;
 static AMX_NATIVE n_ChangeVehicleColor;
 static AMX_NATIVE n_ClearAnimations;
-static AMX_NATIVE n_CreateObject;
 static AMX_NATIVE n_CreatePlayerObject;
 static AMX_NATIVE n_CreateVehicle_;
 static AMX_NATIVE n_DestroyObject;
@@ -345,7 +344,6 @@ int natives_find()
 		N(AddStaticVehicleEx),
 		N(ChangeVehicleColor),
 		N(ClearAnimations),
-		N(CreateObject),
 		N(CreatePlayerObject),
 		N_(CreateVehicle),
 		N(DestroyObject),

@@ -229,8 +229,6 @@ int cmd_dev_testparpl(struct COMMANDCONTEXT cmdctx)
 	return 1;
 }
 
-static int devplatformobj = INVALID_OBJECT_ID;
-
 /**
 Creates a haystack object at the player's position.
 
@@ -239,24 +237,23 @@ Useful to make a platform to stand on for taking pictures.
 static
 int cmd_dev_platform(struct COMMANDCONTEXT cmdctx)
 {
-	struct vec3 ppos;
+	struct RPCDATA_CreateObject rpcdata;
+	struct BitStream bs;
 
-	if (devplatformobj != INVALID_OBJECT_ID) {
-		NC_DestroyObject(devplatformobj);
-	}
-	GetPlayerPos(cmdctx.playerid, &ppos);
-	NC_PARS(8);
-	nc_params[1] = 3374;
-	nc_paramf[2] = ppos.x;
-	nc_paramf[3] = ppos.y;
-	nc_paramf[4] = ppos.z;
-	nc_params[5] = nc_params[6] = nc_params[7] = 0;
-	nc_params[8] = 0x43960000;
-	devplatformobj = NC(n_CreateObject);
-	nc_paramf[4] += 4.0f;
-	NC_PARS(4);
-	nc_params[1] = cmdctx.playerid;
-	NC(n_SetPlayerPos_);
+	GetPlayerPos(cmdctx.playerid, (struct vec3*) &rpcdata.x);
+	rpcdata.objectid = 995; /*999 is rotating radar id, 998 and lower may be other reserved things.*/
+	rpcdata.modelid = 3374;
+	rpcdata.rx = rpcdata.ry = rpcdata.rz = 0.0f;
+	rpcdata.drawdistance = 2000.0f;
+	rpcdata.no_camera_col = 0;
+	rpcdata.attached_object_id = rpcdata.attached_vehicle_id = -1;
+	rpcdata.num_materials = 0;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	SAMP_SendRPCToPlayer(RPC_CreateObject, &bs, cmdctx.playerid, 2);
+
+	rpcdata.z += 4.0f;
+	SetPlayerPosRaw(cmdctx.playerid, (struct vec3*) &rpcdata.x);
 	return 1;
 }
 

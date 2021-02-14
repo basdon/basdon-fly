@@ -1296,6 +1296,8 @@ struct REGION {
 #define ZONE_OCTA_BEACH 178
 #define ZONE_CATA 179
 #define ZONE_CATA_CITY 179
+#define ZONE_IGZU 180
+#define ZONE_IGZU_CITY 180
 
 /* see info.zon and american.gxt */
 static char *zonenames[] = {
@@ -1479,6 +1481,7 @@ static char *zonenames[] = {
 	"Mountain",
 	"Beach",
 	"Catalina City",
+	"Iguazu City",
 };
 
 static struct REGION regions[] = {
@@ -1494,6 +1497,7 @@ static struct REGION regions[] = {
 	R(-2997.47f, -2892.97f, -242.99f, -1213.91f, -1115.58f, 900.0f, ZONE_WHET),
 	R(11740.0f, 5875.0f, -242.99f, 13718.0f, 7471.5f, 900.0f, ZONE_OCTA),
 	R(-35585.12f, -2906.60f, -242.99f, -32640.87f, -228.24f, 900.0f, ZONE_CATA),
+	R(-4780.9155f, 25763.7539f, -242.99f, -2509.3086f, 29620.2578f, 900.0f, ZONE_IGZU),
 	#undef R
 };
 
@@ -1914,6 +1918,9 @@ static struct ZONE zones[] = {
 	/* start CATA region zones */
 	{ -34629.93f, -1822.11f, 0.0f, -33286.82f, -848.27f, 200.0f, ZONE_CATA_CITY },
 	/* end CATA region zones */
+	/* start IGZU region zones */
+	{ -4560.1260f, 26908.4668f, 0.0f, -3113.8081f, 28430.4473f, 200.0f, ZONE_IGZU_CITY },
+	/* end IGZU region zones */
 };
 
 static int regioncount = sizeof(regions)/sizeof(regions[0]);

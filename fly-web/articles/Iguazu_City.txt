@@ -1,0 +1,53 @@
+<?php $code='IGZU'; ?>
+
+<div class="articleright">
+  <?php readfile('../gen/apfactsheet_'.$code.'.html') ?>
+</div>
+
+Iguazú City is an island far north of San Fierro.
+
+This island was mapped by player Adalarva.
+
+{@h3 Vehicle spawns}
+
+<?php readfile('../gen/apvehiclelist_'.$code.'.html') ?>
+
+{@h3 Service points}
+
+Iguazú has two service points, one at the airport and one at a gas station in
+the city.
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=\
+    igzu_sp_ap.jpg;Airport service point;Airport service point}
+  <small>Airport service point</small>
+}
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=\
+    igzu_sp_gas.jpg;Gas station service point;Gas station service point}
+  <small>Airport service point</small>
+}
+
+{@rem island map is either empty, or it contains the h3 header @}
+<?php readfile('../gen/islandmap_'.$code.'.html') ?>
+
+{@h3 Aerodrome Chart}
+
+<?php readfile('../gen/aerodromechart_'.$code.'.html') ?>
+
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php include('../articles/airport-dyn-stats.php') ?>
+
+{@h3 Gallery}
+
+{@agalleryimg igzu_trees.jpg;Octavia Island by dawn}
+{@agalleryimg igzu_cargo.jpg;Beach}
+{@agalleryimg igzu_ap_overview.jpg;Airport gates}
+{@agalleryimg igzu_rw13.jpg;Runway 09}
+{@agalleryimg igzu_ap_inside.jpg;Beach lighthouse}
+{@agalleryimg igzu_ap_entrance.jpg;Residential area}
+{@agalleryimg igzu_gate_e.jpg;Residential area}
+{@agalleryimg igzu_tower.jpg;Octavia Island by dawn}
+{@agalleryimg igzu_city.jpg;Cargo area}
+{@agalleryimg igzu_fromabove.jpg;Residential area}

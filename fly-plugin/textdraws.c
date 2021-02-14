@@ -128,6 +128,22 @@ ret:
 	return;
 }
 
+/**
+Will allocate memory.
+*/
+static
+void textdraws_initialize_from(struct TEXTDRAW *template, struct TEXTDRAW *td, short textdrawid)
+{
+	int allocated_size;
+
+	/*-1 because struct includes a 1-sized char array for the text*/
+	allocated_size = sizeof(struct RPCDATA_ShowTextDraw) - 1 + template->allocated_text_length;
+	td->rpcdata = malloc(allocated_size);
+	td->allocated_text_length = template->allocated_text_length;
+	memcpy(td->rpcdata, template->rpcdata, allocated_size);
+	td->rpcdata->textdrawid = textdrawid;
+}
+
 static
 void textdraws_show(int playerid, int num, ...)
 {

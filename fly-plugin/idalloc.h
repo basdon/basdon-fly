@@ -66,9 +66,23 @@ STATIC_ASSERT(SERVICEPOINT_MAPICON_ID_BASE + MAX_SERVICE_MAP_ICONS < MAX_MAPICON
 /*TEXTDRAW IDS*/
 
 /*Ids 0-2047 are global TDs, ids 2048-2303 are player TDs.*/
-/*Drawing order is .. questionable and TBD.*/
+/*Drawing order: higher id gets drawn over lower id, but globals are drawn before player[citation needed].*/
 
-/*TODO lower these ids again when all textdraws are converted*/
+/*TODO make some order in this chaos.*/
+
+/*Missionmap: need consecutive ids (that makes it easier to show them using textdraws_show)*/
+#define NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS (6)
+#define TEXTDRAW_MISSIONMAP_LOCATIONS_BASE 2298
+#define TEXTDRAW_MISSIONMAP_ISLAND_IGZU 2298
+/*Textdraws above this line are compied from the template textdraws in the text file.*/
+#define TEXTDRAW_MISSIONMAP_LOCATIONS_BASE_FROMFILE 2299
+#define NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS_INFILE (5)
+#define TEXTDRAW_MISSIONMAP_ISLAND_CATA 2299
+#define TEXTDRAW_MISSIONMAP_ISLAND_OCTA 2300
+#define TEXTDRAW_MISSIONMAP_ISLAND_MAINLAND 2301
+#define TEXTDRAW_MISSIONMAP_LOCATION_TO 2302
+#define TEXTDRAW_MISSIONMAP_LOCATION_FROM 2303
+
 #define TEXTDRAW_MISSIONHELP_BASE (1000)
 /*Missionmap: using same base as missionhelp, since they can't show at the same time anyways.*/
 #define TEXTDRAW_MISSIONMAP_BASE TEXTDRAW_MISSIONHELP_BASE

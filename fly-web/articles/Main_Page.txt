@@ -115,6 +115,10 @@
 					{@article=Catalina_City {@plainsimg=articles/cata.jpg;CATA}}<br/>
 					{@article Catalina_City}
 				</div>
+				<div>
+					{@article=Iguazu_City {@plainsimg=articles/igzu.jpg;IGZU}}<br/>
+					{@article Iguazu_City}
+				</div>
 			</td>
 		</tr>
 		<tr>
