@@ -2142,6 +2142,7 @@ void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 		}
 	} else if (KEY_JUST_DOWN(KEY_YES) && active_msp_index[playerid] != -1) {
 		if (mission_stage[playerid] == MISSION_STAGE_NOMISSION) {
+			HideGameTextForPlayer(playerid); /*The key or /w help text might still be showing.*/
 			missions_jobmap_show(playerid); /*sets controllable and mission state*/
 		} else if (mission_stage[playerid] == MISSION_STAGE_FLIGHT &&
 			active_msp_index[playerid] == activemission[playerid]->endpoint - missionpoints)
