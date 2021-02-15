@@ -7,3 +7,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Feb 14', 'Fixed a "ghost door" issue with certain planes after /fix');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Feb 15', 'Added 2 rustlers at Area 69');
