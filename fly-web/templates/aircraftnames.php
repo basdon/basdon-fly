@@ -5,7 +5,7 @@ function aircraft_name($model)
 		'417'=>'Leviathan',
 		'425'=>'Hunter',
 		'460'=>'Skimmer',
-		'467'=>'Rustler',
+		'476'=>'Rustler',
 		'469'=>'Sparrow',
 		'487'=>'Maverick',
 		'488'=>'News Chopper',
