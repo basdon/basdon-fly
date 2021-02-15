@@ -270,13 +270,12 @@ The /getspray command gets the colors of the vehicle the player is in.
 static
 int cmd_getspray(struct COMMANDCONTEXT cmdctx)
 {
-	struct dbvehicle *veh;
-	int vehicleid;
+	int vehicleid, col1, col2;
 	char msg144[144];
 
 	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
-	if (vehicleid && (veh = gamevehicles[vehicleid].dbvehicle)) {
-		sprintf(msg144, "colors: %d, %d", veh->col1, veh->col2);
+	if (vehicleid && GetVehicleColor(vehicleid, &col1, &col2)) {
+		sprintf(msg144, "colors: %d, %d", col1, col2);
 		SendClientMessage(cmdctx.playerid, -1, msg144);
 	}
 	return 1;
@@ -413,7 +412,7 @@ static
 int cmd_spray(struct COMMANDCONTEXT cmdctx)
 {
 	struct dbvehicle *veh;
-	int vehicleid, *col1, *col2, *a, *b;
+	int vehicleid, col1, col2, *a, *b;
 
 	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (vehicleid) {
@@ -423,32 +422,28 @@ int cmd_spray(struct COMMANDCONTEXT cmdctx)
 			return 1;
 		}
 		a = b = NULL;
-		col1 = nc_params + 2;
-		col2 = nc_params + 3;
-		if (cmd_get_int_param(&cmdctx, col1)) {
-			if (*col1 == -1) {
-				a = col1;
+		if (cmd_get_int_param(&cmdctx, &col1)) {
+			if (col1 == -1) {
+				a = &col1;
 			}
-			if (!cmd_get_int_param(&cmdctx, col2)) {
+			if (!cmd_get_int_param(&cmdctx, &col2)) {
 				goto rand2nd;
 			}
-			if (*col2 == -1) {
-				b = col2;
+			if (col2 == -1) {
+				b = &col2;
 			}
 		} else {
-			*col1 = NC_random(256);
+			col1 = NC_random(256);
 rand2nd:
-			*col2 = NC_random(256);
+			col2 = NC_random(256);
 		}
 		if (a != NULL || b != NULL) {
 			game_random_carcol(GetVehicleModel(vehicleid), a, b);
 		}
-		NC_PARS(3);
-		nc_params[1] = vehicleid;
-		NC(n_ChangeVehicleColor);
+		SetVehicleColor(vehicleid, col1, col2);
 		if (veh != NULL) {
-			veh->col1 = (unsigned char) *col1;
-			veh->col2 = (unsigned char) *col2;
+			veh->col1 = (unsigned char) col1;
+			veh->col2 = (unsigned char) col2;
 			csprintf(buf144,
 				"UPDATE veh SET col1=%d,col2=%d WHERE i=%d",
 				veh->col1,

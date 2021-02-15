@@ -155,17 +155,27 @@ struct SampVehicle {
 	struct vec3 pos;
 	char _padC[0x40];
 	struct vec3 vel;
-	char _pad58[0x82-0x58];
+	int field_58;
+	int field_5C;
+	int field_60;
+	short vehicleid;
+	char _pad66[0x82-0x66];
 	short model;
 	char _pad84[0xAA-0x84];
 	struct SampVehicleDamageStatus damageStatus;
-	char _padB4[0xEF-0xB4];
+	char _padB4[0xC6-0xB4];
+	int col1;
+	int col2;
+	char _padCE[0xEF-0xCE];
 	struct SampVehicleParams params;
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, vel, 0xC + 0x40);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, vehicleid, 0x64);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, model, 0x82);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, damageStatus, 0xAA);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, col1, 0xC6);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, col2, 0xCA);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, params, 0xEF);
 
 #define UPDATE_SYNC_TYPE_NONE 0

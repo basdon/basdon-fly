@@ -572,6 +572,42 @@ void RepairVehicle(int vehicleid)
 }
 
 /**
+This is named ChangeVehicleColor in the PAWN API.
+*/
+static
+void SetVehicleColor(int vehicleid, int col1, int col2)
+{
+	struct SampVehicle *vehicle;
+
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+		((void (*)(struct SampVehicle*,short,int,int))0x814C510)(
+			vehicle,
+			INVALID_PLAYER_ID, /*The player that caused this update, so gamemode/filterscripts can block it (not applicable here).*/
+			col1,
+			col2
+		);
+	}
+}
+
+/**
+This does not exist in the PAWN API.
+*/
+static
+int GetVehicleColor(int vehicleid, int *col1, int *col2)
+{
+	struct SampVehicle *vehicle;
+
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+		*col1 = vehicle->col1;
+		*col2 = vehicle->col2;
+		return 1;
+	}
+	return 0;
+}
+
+/**
 In the PAWN API, text is actually the 2nd parameter. Placing it at the end here, for code style reasons.
 */
 static

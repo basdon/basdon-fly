@@ -694,12 +694,9 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 	but it doesn't matter, it just needs to change*/
 	gamevehicles[vehicleid].reincarnation++;
 
-	NC_PARS(3);
-	nc_params[1] = vehicleid;
-	nc_params[2] = veh->col1;
-	nc_params[3] = veh->col2;
-	NC(n_ChangeVehicleColor);
+	SetVehicleColor(vehicleid, veh->col1, veh->col2);
 	NC_PARS(4);
+	nc_params[1] = vehicleid;
 	nc_paramf[2] = veh->pos.coords.x;
 	nc_paramf[3] = veh->pos.coords.y;
 	nc_paramf[4] = veh->pos.coords.z;

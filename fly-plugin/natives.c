@@ -3,7 +3,6 @@ custom code and shouldn't be used directly.*/
 
 static AMX_NATIVE n_AddPlayerClass;
 static AMX_NATIVE n_AddStaticVehicleEx;
-static AMX_NATIVE n_ChangeVehicleColor;
 static AMX_NATIVE n_ClearAnimations;
 static AMX_NATIVE n_CreatePlayerObject;
 static AMX_NATIVE n_CreateVehicle_;
@@ -341,7 +340,6 @@ int natives_find()
 	struct NATIVE natives[] = {
 		N(AddPlayerClass),
 		N(AddStaticVehicleEx),
-		N(ChangeVehicleColor),
 		N(ClearAnimations),
 		N(CreatePlayerObject),
 		N_(CreateVehicle),
