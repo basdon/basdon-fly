@@ -19,7 +19,13 @@ then
 		if cp ../fly-plugin/out/basdonfly-dev.so plugins/basdonfly.so &&
 			cat servercfg-common.cfg servercfg-rcon_password.cfg servercfg-dev-*.cfg > server.cfg
 		then
+			if [ -f "mysql_log.txt" ]
+			then
+				initial_mysql_log_wc=$(wc -c mysql_log.txt)
+			fi
 			./samp03svr
+			[ -f "mysql_log.txt" ] && [ "$initial_mysql_log_wc" != "$(wc -c mysql_log.txt)" ] &&
+				echo "" && echo "" && echo "WARN: mysql_log.txt changed!"
 		fi
 		popd > /dev/null
 	fi
