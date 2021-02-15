@@ -10,3 +10,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Feb 15', 'Added 2 rustlers at Area 69');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Feb 15', 'Slightly changed the mission help/mission map menus');

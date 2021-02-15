@@ -940,7 +940,7 @@ void missions_init()
 
 	textdraws_load_from_file("jobhelp", TEXTDRAW_MISSIONHELP_BASE, NUM_HELP_TEXTDRAWS,
 		/*remember to free their rpcdata in missions_dispose*/
-		&td_jobhelp_keyhelp, &td_jobhelp_header, &td_jobhelp_optsbg,
+		&td_jobhelp_keyhelp, &td_jobhelp_optsbg, &td_jobhelp_header,
 		&td_jobhelp_text, &td_jobhelp_greenbtnbg, &td_jobhelp_bluebtnbg,
 		&td_jobhelp_redbtnbg, &td_jobhelp_optselbg, &td_jobhelp_enexgreen,
 		&td_jobhelp_txtgreen, &td_jobhelp_actiongreen, &td_jobhelp_enexblue,
@@ -954,7 +954,7 @@ void missions_init()
 	/*Num +1 for the opt1multiline, which is just loaded for measurements.*/
 	textdraws_load_from_file("jobmap", TEXTDRAW_MISSIONMAP_BASE, NUM_MAP_TEXTDRAWS + 1,
 		/*remember to free their rpcdata in missions_dispose*/
-		&td_jobmap_keyhelp, &td_jobmap_header, &td_jobmap_optsbg, &td_jobmap_mapbg,
+		&td_jobmap_keyhelp, &td_jobmap_optsbg, &td_jobmap_header, &td_jobmap_mapbg,
 		&td_jobmap_opt1bg, &td_jobmap_opt2bg, &td_jobmap_opt3bg,
 		&td_jobmap_opt4bg, &td_jobmap_opt5bg, &td_jobmap_opt6bg, &td_jobmap_opt7bg,
 		&td_jobmap_opt8bg, &td_jobmap_opt9bg, &td_jobmap_optselbg, &td_jobmap_opt1,
