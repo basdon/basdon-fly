@@ -28,9 +28,12 @@ static
 void prefs_show_dialog(int playerid)
 {
 	int p = prefs[playerid];
-	char buf[2048], *bp = buf;
+	char buf[2048], *bp;
 
-	/* must be same order as in Prefs_DoActionForRow */
+	/*Pressing enter on a setting will change it and reshow the dialog, but the selection goes back to
+	the first entry when the dialog is shown. Thus, when pressing enter one too many times, one might
+	change the first entry without wanting to. Show a dummy entry as first to prevent this.*/
+	bp = buf + sprintf(buf, ECOL_SAMP_GREY"dummy entry\t\n");
 	bp = prefs_append_pref(bp, "Accepting PMs", p & PREF_ENABLE_PM);
 	bp = prefs_append_pref(bp, "Mission Messages", p & PREF_SHOW_MISSION_MSGS);
 	bp = prefs_append_pref(bp, "Show GPS", p & PREF_SHOW_GPS);
@@ -86,24 +89,27 @@ void prefs_on_dialog_response(int playerid, int response, int idx)
 	int val;
 
 	if (response) {
-		if (0 <= idx && idx <= 5) {
-			/*must be same order the calls to prefs_append_pref in
-			prefs_cmd_preferences*/
-			val = 1 << idx;
-			prefs[playerid] ^= val;
-			if (val == PREF_SHOW_GPS) {
-				GetPlayerPos(playerid, &pos);
-				zones_update(playerid, pos);
-			} else if (val == PREF_SHOW_KNEEBOARD) {
-				GetPlayerPos(playerid, &pos);
-				kneeboard_update_all(playerid, &pos);
-			} else if (val == PREF_PANEL_NIGHTCOLORS) {
-				if (panel_is_active_for(playerid)) {
-					panel_reshow_if_needed(playerid);
+		if (idx < 7) {
+			/*0 is the dummy entry*/
+			if (idx > 0) {
+				/*must be same order the calls to prefs_append_pref in
+				prefs_cmd_preferences*/
+				val = 1 << (idx - 1);
+				prefs[playerid] ^= val;
+				if (val == PREF_SHOW_GPS) {
+					GetPlayerPos(playerid, &pos);
+					zones_update(playerid, pos);
+				} else if (val == PREF_SHOW_KNEEBOARD) {
+					GetPlayerPos(playerid, &pos);
+					kneeboard_update_all(playerid, &pos);
+				} else if (val == PREF_PANEL_NIGHTCOLORS) {
+					if (panel_is_active_for(playerid)) {
+						panel_reshow_if_needed(playerid);
+					}
 				}
 			}
 			prefs_show_dialog(playerid);
-		} else if (idx == 6) {
+		} else if (idx == 7) {
 			dialog_ShowPlayerDialog(
 				playerid,
 				DIALOG_PREFERENCES_NAMETAGDISTANCE,
