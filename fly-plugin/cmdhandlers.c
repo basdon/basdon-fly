@@ -20,7 +20,9 @@ int cmd_admin_goto(struct COMMANDCONTEXT cmdctx)
 	int oldparseidx;
 	int targetplayerid;
 	int x, y, z;
+	int i;
 	struct vec4 pos;
+	char input_apcode[128];
 
 	pos.r = 0.0f;
 
@@ -36,6 +38,21 @@ int cmd_admin_goto(struct COMMANDCONTEXT cmdctx)
 	} else {
 		cmdctx.parseidx = oldparseidx;
 
+		if (cmd_get_str_param(&cmdctx, input_apcode) &&
+			!input_apcode[4] && input_apcode[3] && input_apcode[2] && input_apcode[1] && input_apcode[0])
+		{
+			*((int*) &input_apcode) &= ~0x20202020;
+			for (i = 0; i < numairports; i++) {
+				if (!strcmp(airports[i].code, input_apcode)) {
+					pos.coords = airports[i].pos;
+					pos.coords.z += 1.0f;
+					goto havecoords;
+				}
+			}
+		}
+
+		cmdctx.parseidx = oldparseidx;
+
 		if (cmd_get_player_param(&cmdctx, &targetplayerid)) {
 			if (targetplayerid == INVALID_PLAYER_ID) {
 				SendClientMessage(cmdctx.playerid, COL_WARN, "Target player is offline");
@@ -46,11 +63,12 @@ int cmd_admin_goto(struct COMMANDCONTEXT cmdctx)
 			pos.coords.x += 0.3f;
 			pos.coords.y += 0.3f;
 		} else {
-			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: //goto (<x> <y> <z>|<playerid/name>)");
+			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: //goto (<x> <y> <z>|<airport code/playerid/name>)");
 			return 1;
 		}
 	}
 
+havecoords:
 	if (GetPlayerState(cmdctx.playerid) == PLAYER_STATE_DRIVER) {
 		common_SetVehiclePos(GetPlayerVehicleID(cmdctx.playerid), &pos.coords);
 	} else {
