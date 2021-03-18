@@ -13,3 +13,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Feb 15', 'Slightly changed the mission help/mission map menus');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Mar 18', 'Fixed nametags not disappearing after player disconnect');

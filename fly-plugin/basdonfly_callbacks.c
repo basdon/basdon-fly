@@ -468,7 +468,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 		if (players[i] == playerid) {
 			players[i] = players[playercount - 1];
 			playercount--;
-			return 1;
+			break;
 		}
 	}
 
