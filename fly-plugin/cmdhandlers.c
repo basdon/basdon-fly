@@ -79,6 +79,30 @@ havecoords:
 }
 
 static
+int cmd_admin_gotorel(struct COMMANDCONTEXT cmdctx)
+{
+	int x, y, z;
+	struct vec4 pos;
+
+	GetPlayerPosRot(cmdctx.playerid, &pos);
+	x = y = z = 0;
+	if (cmd_get_int_param(&cmdctx, &x) && cmd_get_int_param(&cmdctx, &y)) {
+		cmd_get_int_param(&cmdctx, &z);
+	}
+	pos.coords.x += (float) x;
+	pos.coords.y += (float) y;
+	pos.coords.z += (float) z;
+
+	if (GetPlayerState(cmdctx.playerid) == PLAYER_STATE_DRIVER) {
+		common_SetVehiclePos(GetPlayerVehicleID(cmdctx.playerid), &pos.coords);
+	} else {
+		common_tp_player(cmdctx.playerid, pos);
+	}
+
+	return 1;
+}
+
+static
 int cmd_admin_tocar(struct COMMANDCONTEXT cmdctx)
 {
 	struct vec3 vehicle_pos, player_pos;

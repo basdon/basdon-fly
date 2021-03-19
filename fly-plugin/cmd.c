@@ -37,6 +37,7 @@ static struct COMMAND cmds[] = {
 	{ 0, "/vhppinf", GROUPS_ALL, cmd_dev_vhppinf },
 #endif /*DEV*/
 	{ 0, "//goto", GROUPS_ADMIN, cmd_admin_goto },
+	{ 0, "//gotorel", GROUPS_ADMIN, cmd_admin_gotorel },
 	{ 0, "//streamdistance", GROUP_OWNER, cmd_admin_streamdistance },
 	{ 0, "//tocar", GROUPS_ADMIN, cmd_admin_tocar },
 	{ 0, "//tomsp", GROUPS_ADMIN, cmd_admin_tomsp },
