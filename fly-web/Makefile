@@ -10,8 +10,8 @@ TEMPLATE_OBJECTS_PART := $(patsubst templates/%.tpl, gen/%.php, $(TEMPLATE_SOURC
 ARTICLE_SOURCES := $(wildcard articles/*.txt)
 ARTICLE_OBJECTS := $(patsubst articles/%.txt, gen/article_%.html, $(ARTICLE_SOURCES))
 
-.PHONY: templates aerodromcharts apfactsheets apvehicelist articles ensureplayergraph islandmaps flightmapjs clean cleantemplates cleanarticles
-default: templates aerodromecharts apfactsheets apvehiclelist articles ensureplayergraph islandmaps flightmapjs
+.PHONY: templates aerodromcharts apfactsheets apvehicelist articles ensureplayergraph islandmaps flightmapjs clean cleantemplates cleanarticles airportlist navinfotable
+default: templates aerodromecharts apfactsheets apvehiclelist articles ensureplayergraph islandmaps flightmapjs airportlist navinfotable
 
 cleantemplates:
 	rm -f gen/_*.php
@@ -65,6 +65,12 @@ ensureplayergraph:
 	@# but it can be deleted with a 'clean'.
 	@# Generate one here if it doesn't exist.
 	[ -f "gen/playergraph.png" ] || (cd cli && php genplayergraph.php)
+
+airportlist:
+	cd cli && php genairportlist.php
+
+navinfotable:
+	cd cli && php gennavinfotable.php
 
 clean:
 	rm -f gen/*

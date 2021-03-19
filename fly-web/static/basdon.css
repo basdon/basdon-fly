@@ -233,3 +233,52 @@ p.msg.success {
 		display: none;
 	}
 }
+.airportlist{
+	padding:0.5em;
+	text-align:center
+}
+.airportlist div{
+	display:inline-block;
+	padding:.5em;
+	margin:.5em;
+	font-size:0.8em;
+	text-align:center;
+	border:1px solid #161A21;
+	background:#FAEBD7
+}
+.airportlist img{
+	width:100px;
+	border:1px solid #000
+}
+.navinfo{
+	text-align: center;
+}
+.article .navinfo {
+	text-align: unset
+}
+.navinfo table{
+	font-size:.8em;
+	margin:.5em;
+	display:inline-block
+}
+.article .navinfo table{
+	display:block;
+	margin:1em
+}
+.navinfo table.box{
+	border:1px solid #161A21;
+	border-collapse:collapse
+}
+.navinfo table.box img{
+	border:1px solid #000;
+	vertical-align:middle
+}
+.navinfo table.box tr{
+	background:#FAEBD7
+}
+.navinfo table.box td{
+	padding:.3em
+}
+.article .navinfo table.box td+td{
+	width:100%
+}

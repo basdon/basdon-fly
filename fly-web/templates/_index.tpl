@@ -4,25 +4,31 @@
 	<title>home :: basdon.net aviation server</title>
 	{@render defaulthead.tpl}
 	<style>
-		p.showcase{
-			background:#f6f6ff;
-			border:1px solid #b5cdff;
-			margin:auto;
+		#showcase{
+			margin-top:1em;
 			text-align:center;
 		}
-		p.showcase a{
+		#showcase a{
 			display:inline-block;
+			background:#f6f6ff;
+			border:1px solid #b5cdff;
+			font-size:.8em;
+			padding:.5em;
 			margin:.5em;
 		}
-		p.showcase a+a{
-		}
-		p.showcase img{
+		#showcase img{
 			width: 175px;
 		}
 		@media(max-width:800px){
-			p.showcase img{
+			#showcase img{
 				width:100px;
 			}
+		}
+		h3.title{
+			border:0;
+			text-align:center;
+			font-size:1.3em;
+			font-weight:bold
 		}
 	</style>
 </head>
@@ -37,17 +43,20 @@
 			The main activity is to grab a plane or helicopter and enjoy flying around, either freely or by accepting missions towards various destinations. 
 			Start your flight and have fun!
 		</p>
-		<p class="showcase">
+		<h3 class="title">Our destinations</h3>
+		<div class="airportlist">
+			<?php readfile('../gen/airportlist.html'); ?>
+		</div>
+		<h3 class="title">Nagivation features</h3>
+		<div class="navinfo">
+			<?php readfile('../gen/navinfotable.html'); ?>
+		</div>
+		<h3 class="title">Screenshots</h3>
+		<p id="showcase">
 			<a href="{@unsafe $STATICPATH}/showcase-dipa.jpg"><img src="{@unsafe $STATICPATH}/showcase-dipa.jpg" title="dipa taxiing"></a>
 			<a href="{@unsafe $STATICPATH}/showcase-jobmap.jpg"><img src="{@unsafe $STATICPATH}/showcase-jobmap.jpg" title="mission map"></a>
-			<a href="article.php?title=OCTA"><img src="{@unsafe $STATICPATH}/articles/octa_rnw09.png" title="OCTA"></a>
-			<a href="{@unsafe $STATICPATH}/showcase-spitfire.png"><img src="{@unsafe $STATICPATH}/showcase-spitfire.png" title="spitfire"></a>
-			<a href="article.php?title=IGZU"><img src="{@unsafe $STATICPATH}/articles/igzu_ap_overview.jpg" title="IGZU"></a>
 			<a href="{@unsafe $STATICPATH}/showcase-spitfire2.png"><img src="{@unsafe $STATICPATH}/showcase-spitfire2.png" title="spitfire"></a>
-			<a href="article.php?title=OCTA"><img src="{@unsafe $STATICPATH}/gen/islandmap_OCTA.png" title="OCTA"></a>
-			<a href="article.php?title=CATA"><img src="{@unsafe $STATICPATH}/articles/cata_square.jpg" title="CATA"></a>
 			<a href="flight.php?id=2572"><img src="{@unsafe $STATICPATH}/showcase-map.png" title="flight map"></a>
-			<a href="article.php?title=BNSA"><img src="{@unsafe $STATICPATH}/articles/bnsa.jpg" title="BNSA"></a>
 		</p>
 
 		<h2>Server Info</h2>
