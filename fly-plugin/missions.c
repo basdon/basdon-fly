@@ -140,11 +140,12 @@ static struct TEXTDRAW td_jobmap_opt7 = { "opt7", JOBMAP_ENTRY_MAX_TEXT_LENGTH, 
 static struct TEXTDRAW td_jobmap_opt8 = { "opt8", JOBMAP_ENTRY_MAX_TEXT_LENGTH, NULL };
 static struct TEXTDRAW td_jobmap_opt9 = { "opt9", JOBMAP_ENTRY_MAX_TEXT_LENGTH, NULL };
 /*Island/location texts*/
-STATIC_ASSERT(NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS == 6);
+STATIC_ASSERT(NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS == 7);
 static struct TEXTDRAW td_jobmap_island_mainland = { "mapsqfull", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobmap_island_octa = { "mapsqmintopleft", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobmap_island_cata = { "mapsqminbotright", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobmap_island_igzu = { NULL, TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_island_bnsa = { NULL, TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 STATIC_ASSERT(AIRPORT_CODE_LEN == 4); /*mapmin/mapmax text alloc depend on airport code being 4 chars at most*/
 static struct TEXTDRAW td_jobmap_from = { "mapmin", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobmap_to = { "mapmax", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
@@ -487,13 +488,13 @@ void missions_jobmap_show(int playerid)
 		&td_jobmap_opt2, &td_jobmap_opt3, &td_jobmap_opt4, &td_jobmap_opt5, &td_jobmap_opt6,
 		&td_jobmap_opt7, &td_jobmap_opt8, &td_jobmap_opt9);
 
-#if NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS - 1 != 5
+#if NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS - 1 != 6
 #error
 #endif
 	/*Showing all but "to" textdraws.*/
 	textdraws_show(playerid, NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS - 1,
 		&td_jobmap_island_mainland, &td_jobmap_island_octa, &td_jobmap_island_cata,
-		&td_jobmap_island_igzu, &td_jobmap_from);
+		&td_jobmap_island_igzu, &td_jobmap_island_bnsa, &td_jobmap_from);
 
 	mission_map_update_selection_ensure_available(playerid, mission_map_option[playerid], 1);
 
@@ -825,6 +826,7 @@ void missions_dispose()
 	free(td_jobmap_island_octa.rpcdata);
 	free(td_jobmap_island_cata.rpcdata);
 	free(td_jobmap_island_igzu.rpcdata);
+	free(td_jobmap_island_bnsa.rpcdata);
 	free(td_jobmap_from.rpcdata);
 	free(td_jobmap_to.rpcdata);
 }
@@ -844,7 +846,7 @@ void missions_init_jobmap_islands()
 	struct ZONE *zone;
 	int zoneindex, maxzoneindex;
 	int regionindex;
-	int octa_region_found, cata_region_found, igzu_region_found;
+	int octa_region_found, cata_region_found, igzu_region_found, bnsa_region_found;
 	float min_x, min_y, max_x, max_y;
 
 	map_text_x_base = td_jobmap_from.rpcdata->x;
@@ -875,6 +877,7 @@ void missions_init_jobmap_islands()
 	octa_region_found = 0;
 	cata_region_found = 0;
 	igzu_region_found = 0;
+	bnsa_region_found = 0;
 	for (regionindex = 0; regionindex < regioncount; regionindex++) {
 		switch (regions[regionindex].zone.id) {
 		case ZONE_OCTA:
@@ -889,6 +892,15 @@ void missions_init_jobmap_islands()
 			igzu_region_found = 1;
 			txtdraw = td_jobmap_island_igzu.rpcdata;
 			break;
+		case ZONE_BNSA:
+			bnsa_region_found = 1;
+			txtdraw = td_jobmap_island_bnsa.rpcdata;
+			/*bnsa is too small, so using region coords*/
+			min_x = regions[regionindex].zone.min_x;
+			min_y = regions[regionindex].zone.min_y;
+			max_x = regions[regionindex].zone.max_x;
+			max_y = regions[regionindex].zone.max_y;
+			goto have_coords;
 		default:
 			continue;
 		}
@@ -911,6 +923,7 @@ void missions_init_jobmap_islands()
 				max_y = zone->max_y;
 			}
 		}
+have_coords:
 		assert(min_x < max_x);
 		assert(min_y < max_y);
 
@@ -922,6 +935,7 @@ void missions_init_jobmap_islands()
 	assert(octa_region_found);
 	assert(cata_region_found);
 	assert(igzu_region_found);
+	assert(bnsa_region_found);
 }
 
 static
@@ -972,6 +986,7 @@ void missions_init()
 		&td_jobmap_island_cata, &td_jobmap_island_octa,
 		&td_jobmap_island_mainland, &td_jobmap_from, &td_jobmap_to);
 	textdraws_initialize_from(&td_jobmap_island_cata, &td_jobmap_island_igzu, TEXTDRAW_MISSIONMAP_ISLAND_IGZU);
+	textdraws_initialize_from(&td_jobmap_island_cata, &td_jobmap_island_bnsa, TEXTDRAW_MISSIONMAP_ISLAND_BNSA);
 
 	missions_init_jobmap_islands();
 

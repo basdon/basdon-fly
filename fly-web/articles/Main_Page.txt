@@ -119,6 +119,10 @@
 					{@article=Iguazu_City {@plainsimg=articles/igzu.jpg;IGZU}}<br/>
 					{@article Iguazu_City}
 				</div>
+				<div>
+					{@article=BNS_Atlantic {@plainsimg=articles/bnsa.jpg;BNSA}}<br/>
+					{@article BNS_Atlantic}
+				</div>
 			</td>
 		</tr>
 		<tr>
