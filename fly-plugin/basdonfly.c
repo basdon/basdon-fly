@@ -332,7 +332,6 @@ static struct FAKEAMX fakeamx;
 #include "game_sa.h"
 #include "guestregister.h"
 #include "login.h"
-#include "maps.h"
 #include "missions.h"
 #include "playerdata.h"
 #include "playerstats.h"
@@ -477,7 +476,6 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 
 		/*timer100*/
 		anticheat_decrease_flood();
-		maps_process_tick();
 		panel_timed_update();
 		veh_timed_speedo_update();
 		playerstats_check_for_afk();

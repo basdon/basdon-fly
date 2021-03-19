@@ -2,6 +2,8 @@
 #define MAP_MAX_FILENAME (34) /*see db col*/
 #define MAX_REMOVED_OBJECTS 1000
 
+#define MAPSTREAMING_UPDATE_INTERVAL 1000
+
 #pragma pack(1)
 struct MAP_FILE_HEADER {
 	int spec_version;
@@ -332,6 +334,10 @@ int maps_timer_rotate_radar(void *data)
 	the radar going back and forth instead of full circles*/
 }
 
+/**
+Initialize mapping system. Loads maps from db and reads their files.
+*/
+static
 void maps_init()
 {
 	octavia_island_actor_mapidx = -1;
@@ -551,7 +557,6 @@ int maps_recreate_textured_objects(int playerid)
 	player_object = player_objects[playerid];
 
 	for (i = 0; i < MAX_MAPSYSTEM_OBJECTS; i++) {
-		/*TODO: there should be an rpc to only change texture and not have to recreate the objects*/
 		/*TODO: check if the materials are textures and not only text (don't need to recreate for text)*/
 		if (player_object[i] && player_object[i]->num_materials && time_of_creating_object[i] != time) {
 			time_of_creating_object[i] = time;
@@ -571,6 +576,7 @@ int maps_recreate_textured_objects(int playerid)
 	return num_rpcs_sent;
 }
 
+static
 void maps_stream_for_player(int playerid, struct vec3 pos)
 {
 	float dx, dy, distance;
@@ -603,11 +609,14 @@ void maps_stream_for_player(int playerid, struct vec3 pos)
 		}
 	}
 
-	if (num_rpcs_sent < 200) {
+	if (num_rpcs_sent < 200 && !isafk[playerid]) {
 		maps_recreate_textured_objects(playerid);
 	}
 }
 
+/**
+@return amount of objects that would be created when the player would be teleported to given pos
+*/
 int maps_calculate_objects_to_create_for_player_at_position(int playerid, struct vec3 pos)
 {
 	float dx, dy, distance;
@@ -631,26 +640,30 @@ int maps_calculate_objects_to_create_for_player_at_position(int playerid, struct
 	return amount_of_objects;
 }
 
-/*TODO recheck this*/
-void maps_process_tick()
+static
+int maps_process_tick(void *data)
 {
-	static int currentplayeridx = 0;
-	int increment = 1 + playercount / 10;
+	static int next_updating_playeridx = 0;
+
 	int playerid;
 	struct vec3 ppos;
 
-	if (playercount > 0) {
-		while (increment--) {
-			if (++currentplayeridx >= playercount) {
-				currentplayeridx = 0;
-			}
-			playerid = players[currentplayeridx];
-			GetPlayerPos(playerid, &ppos);
-			maps_stream_for_player(playerid, ppos);
-		}
+	if (!playercount) {
+		return MAPSTREAMING_UPDATE_INTERVAL;
 	}
+
+	if (++next_updating_playeridx >= playercount) {
+		next_updating_playeridx = 0;
+	}
+
+	playerid = players[next_updating_playeridx];
+	GetPlayerPos(playerid, &ppos);
+	maps_stream_for_player(playerid, ppos);
+
+	return MAPSTREAMING_UPDATE_INTERVAL / playercount;
 }
 
+static
 void maps_on_player_connect(int playerid)
 {
 	int i;
@@ -666,6 +679,7 @@ void maps_on_player_connect(int playerid)
 	map_radar_object_for_player[playerid] = 0;
 }
 
+static
 void maps_on_player_disconnect(int playerid)
 {
 	int mapidx;

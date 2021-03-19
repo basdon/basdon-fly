@@ -249,7 +249,6 @@ exit:
 	maps_init();
 	missions_create_tracker_socket();
 	missions_init(); /*airports_init() must be called first, to initialize missionpoints*/
-	nametags_init();
 	playerstats_init();
 	protips_init();
 	spawn_init(); /*MUST run after airports_init*/
@@ -268,7 +267,10 @@ exit:
 	timecyc_reset();
 	timer_reset();
 
+	/*Delays here are semi random so they don't start ticking at the same time.. But they'll probably converge anyways*/
 	timer_set(0, echo_init, NULL);
+	timer_set(250, maps_process_tick, NULL);
+	timer_set(500, nametags_update, NULL);
 	return 1;
 }
 

@@ -3,7 +3,6 @@
 
 static char nametag_created[MAX_PLAYERS][MAX_PLAYERS];
 
-static int nametags_next_updating_playeridx;
 /*Since nametags update every second, but cycle should be every other second,
 duplicating the states is an easy stupid way to do that.*/
 #define NAMETAG_CYCLE_DISTANCE_1 0
@@ -130,33 +129,28 @@ hide:
 static
 int nametags_update(void *data)
 {
+	static int next_updating_playeridx = 0;
+
 	int forplayerid;
 
 	if (playercount < 2) {
 		return NAMETAGS_UPDATE_INTERVAL;
 	}
 
-	nametags_next_updating_playeridx++;
-	if (nametags_next_updating_playeridx >= playercount) {
-		nametags_next_updating_playeridx = 0;
+	if (++next_updating_playeridx >= playercount) {
+		next_updating_playeridx = 0;
 		nametags_current_cycle++;
 		if (nametags_current_cycle >= NAMETAG_NUM_CYCLES) {
 			nametags_current_cycle = 0;
 		}
 	}
-	forplayerid = players[nametags_next_updating_playeridx];
+	forplayerid = players[next_updating_playeridx];
 	if (!isafk[forplayerid]) {
 		nametags_update_for_player(forplayerid);
 	}
 
 	/*Calculate delay so that nametags for everyone will update about once a second.*/
 	return NAMETAGS_UPDATE_INTERVAL / playercount;
-}
-
-static
-void nametags_init()
-{
-	timer_set(NAMETAGS_UPDATE_INTERVAL, nametags_update, NULL);
 }
 
 static
