@@ -3,6 +3,28 @@
 <head>
 	<title>home :: basdon.net aviation server</title>
 	{@render defaulthead.tpl}
+	<style>
+		p.showcase{
+			background:#f6f6ff;
+			border:1px solid #b5cdff;
+			margin:auto;
+			text-align:center;
+		}
+		p.showcase a{
+			display:inline-block;
+			margin:.5em;
+		}
+		p.showcase a+a{
+		}
+		p.showcase img{
+			width: 175px;
+		}
+		@media(max-width:800px){
+			p.showcase img{
+				width:100px;
+			}
+		}
+	</style>
 </head>
 <body>
 	{@render skip.tpl}
@@ -15,17 +37,33 @@
 			The main activity is to grab a plane or helicopter and enjoy flying around, either freely or by accepting missions towards various destinations. 
 			Start your flight and have fun!
 		</p>
+		<p class="showcase">
+			<a href="{@unsafe $STATICPATH}/showcase-dipa.jpg"><img src="{@unsafe $STATICPATH}/showcase-dipa.jpg" title="dipa taxiing"></a>
+			<a href="{@unsafe $STATICPATH}/showcase-jobmap.jpg"><img src="{@unsafe $STATICPATH}/showcase-jobmap.jpg" title="mission map"></a>
+			<a href="article.php?title=OCTA"><img src="{@unsafe $STATICPATH}/articles/octa_rnw09.png" title="OCTA"></a>
+			<a href="{@unsafe $STATICPATH}/showcase-spitfire.png"><img src="{@unsafe $STATICPATH}/showcase-spitfire.png" title="spitfire"></a>
+			<a href="article.php?title=IGZU"><img src="{@unsafe $STATICPATH}/articles/igzu_ap_overview.jpg" title="IGZU"></a>
+			<a href="{@unsafe $STATICPATH}/showcase-spitfire2.png"><img src="{@unsafe $STATICPATH}/showcase-spitfire2.png" title="spitfire"></a>
+			<a href="article.php?title=OCTA"><img src="{@unsafe $STATICPATH}/gen/islandmap_OCTA.png" title="OCTA"></a>
+			<a href="article.php?title=CATA"><img src="{@unsafe $STATICPATH}/articles/cata_square.jpg" title="CATA"></a>
+			<a href="flight.php?id=2572"><img src="{@unsafe $STATICPATH}/showcase-map.png" title="flight map"></a>
+			<a href="article.php?title=BNSA"><img src="{@unsafe $STATICPATH}/articles/bnsa.jpg" title="BNSA"></a>
+		</p>
 
 		<h2>Server Info</h2>
 		<p>
 			Join by adding <a href="samp://basdon.net:7777">basdon.net:7777</a> to your list of servers and clicking 'connect' (<a href="article.php?title=How_To_Join">How to join</a>). Our server is running using the latest official release: 0.3.7.
 		</p>
 		<p>
-			Our IRC channels are #basdon (for general talk) and #basdon.echo (with relayed server chat) on the irc.tl network: <a href="irc://chat.irc.tl">chat.irc.tl</a>{@globe}. Chatlogs can be found at <a href="https://static.basdon.net/chatlogs">https://static.basdon.net/chatlogs</a>.
+			Discord server invite link: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}.
 		</p>
 		<p>
-			<p>We also have a Discord server, invite link: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}.
+			IRC: basdon is present on the irc.tl network (<a href="irc://chat.irc.tl">chat.irc.tl</a>{@globe}), our channels are:
 		</p>
+		<ul>
+			<li>#basdon for general talk (<a href="{@unsafe $STATICPATH}/chatlogs/basdon/?C=M;O=D">#basdon chatlogs</a>)</li>
+			<li>#basdon.echo with relayed server chat (<a href="{@unsafe $STATICPATH}/chatlogs/basdon.echo/?C=M;O=D">#basdon.echo chatlogs</a>)</li>
+		</ul>
 
 		<h3><strong>Changelog:</strong></h3>
 		<ul>
@@ -34,12 +72,6 @@
 			{@endforeach}
 		</ul>
 		<p><a href="changelog.php">More...</a></p>
-		<strong>Last update posts:</strong>
-		<ul>
-			{@foreach $last_update_articles as $update_article}
-				<li><a href="article.php?title={@urlencode $update_article->name}">{$update_article->title}</a></li>
-			{@endforeach}
-		</ul>
 
 		<h3 class="newtableheader">Players</h3>
 		<table border="0" width="100%" class="new center">
@@ -48,7 +80,7 @@
 			</thead>
 			<tbody>
 				<tr><td style="padding:0"><img style="width:100%;border-bottom:1px solid #000" src="{@unsafe $STATICPATH}/gen/playergraph.png" /></td></tr>
-				<tr><td><strong>Online now</strong></td></tr>
+				<tr><td><strong>Online now ({@unsafe count($onlineplayers)})</strong></td></tr>
 				<tr>
 					<td>
 						{@if count($onlineplayers)}
@@ -60,7 +92,7 @@
 						{@endif}
 					</td>
 				</tr>
-				<tr><td><strong>Online last 48h</strong></td></tr>
+				<tr><td><strong>Online last 48h ({@unsafe count($last48)})</strong></td></tr>
 				<tr>
 					<td>
 						{@if count($last48)}

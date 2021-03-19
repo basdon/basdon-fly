@@ -37,7 +37,6 @@ $membercount = $db->query('SELECT COUNT(i) c FROM usr WHERE groups&'.$GROUP_GUES
 $flightcount = $db->query('SELECT COUNT(id) c FROM flg');
 $latestmember = $db->query('SELECT name,i FROM usr WHERE groups&'.$GROUP_GUEST.'=0 ORDER BY i DESC LIMIT 1');
 $combinedstats = $db->query('SELECT SUM(onlinetime/3600) o,SUM(flighttime/3600) f,SUM(distance) d,SUM(cash) c FROM usr');
-$last_update_articles = $db->query('SELECT name,title FROM art WHERE cat=8 ORDER BY name DESC LIMIT 5');
 $last_changelog_entries = $db->query('SELECT stamp,entry FROM chg ORDER BY id DESC LIMIT 5');
 
 if ($onlineplayers !== false && ($onlineplayers = $onlineplayers->fetchAll()) !== false) {
