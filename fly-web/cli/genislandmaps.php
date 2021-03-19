@@ -114,10 +114,10 @@ foreach($db->query('SELECT filename FROM map WHERE ap=\''.$aptid.'\'')->fetchAll
 	}
 }
 
-if (count($zones) < 100) {
+if (count($zones) < 100 && $minx > -4000 && $maxx < 4000 && $miny > -4000 && $maxy < 4000) {
 	// LSA and SFA have only a few zones to hide removed buildings from the minimap,
 	// but those obviously aren't islands.
-	// Assume it's not an island and skip if there are too little amount of zones
+	// Skip if there are too little amount of zones and it's within mainland boundaries.
 	goto nomapforthisap;
 }
 
