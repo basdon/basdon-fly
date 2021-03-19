@@ -19,3 +19,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Mar 19', 'Added BNS Atlantic map/destination (military)');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Mar 19', 'Semi-fixed retextured objects sometimes being too bright/dark');
