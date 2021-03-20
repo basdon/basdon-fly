@@ -43,6 +43,7 @@
 			The main activity is to grab a plane or helicopter and enjoy flying around, either freely or by accepting missions towards various destinations. 
 			Start your flight and have fun!
 		</p>
+		<p style="text-align:center;font-size:1.5em;margin:.5em">basdon.net:7777<br/><span style="font-size:80%"><a href="https://files.sa-mp.com/sa-mp-0.3.7-R4-install.exe">SA-MP 0.3.7</a></span></p>
 		<h3 class="title">Our destinations</h3>
 		<div class="airportlist">
 			<?php readfile('../gen/airportlist.html'); ?>
