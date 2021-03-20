@@ -14,7 +14,7 @@
 				<p><strong>Programming</strong>: robin_be</p>
 			</li>
 			<li>
-				<p><strong>Mapping</strong>: adalarda, robin_be.</p>
+				<p><strong>Mapping</strong>: adalarda, spitfire, robin_be.</p>
 				<p><small>See the airport articles (<a href="article.php?category=Airports">Category: Airports</a>) to see who mapped what airport. If not mentioned, it's probably robin_be.</small></p>
 			</li>
 			<li>
