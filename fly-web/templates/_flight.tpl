@@ -31,7 +31,7 @@ try{
 	                 JOIN apt _b ON _f.tapt=_b.i 
 	                 JOIN veh _v ON _f.vehicle=_v.i 
 	                 JOIN msp _m ON _f.fmsp = _m.i 
-	                 JOIN msp _n ON _f.fmsp = _n.i 
+	                 JOIN msp _n ON _f.tmsp = _n.i 
 	                 LEFT OUTER JOIN usr _o ON _v.ownerplayer=_o.i 
 	                 WHERE id=' . $id);
 	if ($r === false || ($r = $r->fetchAll()) === false || empty($r)) {
