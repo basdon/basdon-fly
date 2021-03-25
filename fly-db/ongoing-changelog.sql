@@ -22,3 +22,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Mar 19', 'Semi-fixed retextured objects sometimes being too bright/dark');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Mar 25', 'Fixed new players not being able to register on connect');

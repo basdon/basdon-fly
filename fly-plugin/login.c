@@ -656,7 +656,7 @@ Callback for login_query_check_user_exists
 static
 void login_cb_check_user_exists(void *data)
 {
-	int playerid, failedattempts;
+	int playerid, failedattempts, num_rows;
 	char password[PW_HASH_LENGTH];
 
 	playerid = PLAYER_CC_GETID(data);
@@ -667,7 +667,8 @@ void login_cb_check_user_exists(void *data)
 	dialog_end_transaction(playerid, TRANSACTION_LOGIN);
 	HideGameTextForPlayer(playerid);
 
-	if (!NC_cache_get_row_count()) {
+	num_rows = NC_cache_get_row_count();
+	if (!num_rows) {
 		logprintf("login_cb_check_user_exists: empty response");
 		dialog_ShowPlayerDialog(
 			playerid, DIALOG_DUMMY, DIALOG_STYLE_MSGBOX,
@@ -680,8 +681,7 @@ void login_cb_check_user_exists(void *data)
 
 	NC_PARS(2);
 	nc_params[1] = 0;
-	nc_params[3] = buf144a;
-	failedattempts = (nc_params[2] = 0, NC(n_cache_get_field_i));
+	failedattempts = (nc_params[2] = 3, NC(n_cache_get_field_i));
 	
 	if (failedattempts > MAX_ALLOWED_FAILED_LOGINS_IN_30_MINUTES) {
 asguest:
@@ -700,19 +700,22 @@ asguest:
 		failedlogins[playerid] = failedattempts;
 	}
 
-	/*user doesn't exist when password is NULL*/
-	(nc_params[2] = 1, NC(n_cache_get_field_s));
-	ctoa(password, buf144, sizeof(password));
-	if (strcmp(password, "NULL") == 0) {
-		login_show_dialog_register_step1(playerid, 0);
-	} else {
+	if (num_rows == 2) {
+		NC_PARS(3);
+		nc_params[1] = 1;
+		nc_params[2] = 0;
+		nc_params[3] = buf144a;
+		NC(n_cache_get_field_s);
+		ctoa(password, buf144, sizeof(password));
 		if (pwdata[playerid] == NULL) {
 			pwdata[playerid] = malloc(PW_HASH_LENGTH);
 		}
 		memcpy(pwdata[playerid], password, PW_HASH_LENGTH);
-		unconfirmed_userid[playerid] = (nc_params[2] = 2, NC(n_cache_get_field_i));
-		unconfirmed_timesincelastseen[playerid] = (nc_params[2] = 3, NC(n_cache_get_field_i));
+		unconfirmed_userid[playerid] = (nc_params[2] = 1, NC(n_cache_get_field_i));
+		unconfirmed_timesincelastseen[playerid] = (nc_params[2] = 2, NC(n_cache_get_field_i));
 		login_show_dialog_login(playerid, 0);
+	} else {
+		login_show_dialog_register_step1(playerid, 0);
 	}
 }
 
@@ -722,21 +725,17 @@ Execute query to check if a user exists. Shows gametext.
 Callback will be called with CC
 */
 static
-void login_query_check_user_exists(int playerid, cb_t callback)
+void login_query_check_user_exists(int playerid)
 {
 	B144("~b~Contacting login server...");
 	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
 	sprintf(cbuf4096_,
-		"SELECT a.c,b.pw,b.i,b.ls FROM "
-		"(SELECT count(u) c "
-			"FROM fal "
-			"WHERE stamp>UNIX_TIMESTAMP()-1800 AND ip='%s') a,"
-		"(SELECT pw,i,UNIX_TIMESTAMP()-lastseengame ls "
-			"FROM usr "
-			"WHERE name='%s') b",
+		"(SELECT 0,-1,0,count(u) FROM fal WHERE stamp>UNIX_TIMESTAMP()-1800 AND ip='%s')"
+		" UNION ALL "
+		"(SELECT pw,i,UNIX_TIMESTAMP()-lastseengame,0 FROM usr WHERE name='%s')",
 		pdata[playerid]->ip,
 		pdata[playerid]->name);
-	common_mysql_tquery(cbuf4096_, callback, V_MK_PLAYER_CC(playerid));
+	common_mysql_tquery(cbuf4096_, login_cb_check_user_exists, V_MK_PLAYER_CC(playerid));
 }
 
 void login_dlg_login_or_namechange(int playerid, int response, char *inputtext)
@@ -777,8 +776,7 @@ void login_dlg_namechange(int playerid, int response, char *inputtext)
 		} else {
 			unconfirmed_userid[playerid] = -1;
 			dialog_ensure_transaction(playerid, TRANSACTION_LOGIN);
-			login_query_check_user_exists(playerid,
-				login_cb_check_user_exists);
+			login_query_check_user_exists(playerid);
 		}
 	} else {
 		/*cancel should not go back to login dialog,
@@ -872,7 +870,7 @@ int login_on_player_connect(int playerid)
 		}
 	}
 
-	login_query_check_user_exists(playerid, login_cb_check_user_exists);
+	login_query_check_user_exists(playerid);
 	return 1;
 }
 
