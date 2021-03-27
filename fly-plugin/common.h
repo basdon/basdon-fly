@@ -84,6 +84,16 @@ void ctoai(char *dstsrc);
 
 #define COL_CHANGELOG COL_INFO_BROWN
 
+/*A panel is a menu (like created with SCM OP 08D4). These are all ABGR.*/
+#define COL_PANEL_BACKGROUND 0xBE000000
+#define COL_PANEL_TITLE 0xFFE1E1E1
+#define COL_PANEL_ROW_HEADER 0xFFC4C4C4
+#define COL_PANEL_ROW_NORMAL 0xFF5D4F41
+#define COL_PANEL_ROW_SELECTED 0xFFD1B196
+#define COL_PANEL_ROW_DISABLED 0xFF838383
+/*Inactive is when this panel is not currently interactive.*/
+#define COL_PANEL_ROW_INACTIVE 0xFF6C4B31
+
 #define GROUP_BANNED (1)
 #define GROUP_GUEST (2)
 #define GROUP_MEMBER (4)

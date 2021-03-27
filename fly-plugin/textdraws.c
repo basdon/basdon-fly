@@ -144,6 +144,36 @@ void textdraws_initialize_from(struct TEXTDRAW *template, struct TEXTDRAW *td, s
 	td->rpcdata->textdrawid = textdrawid;
 }
 
+#ifdef DEV
+static
+void textdraws_assert_text_length_within_bounds(struct TEXTDRAW *td)
+{
+	int i;
+
+	if (td->rpcdata->text_length > td->allocated_text_length) {
+		printf("ERR: textdraw '%s' text length %d exceed allocated length %d\n",
+			td->name,
+			td->rpcdata->text_length,
+			td->allocated_text_length);
+		printf("text is: ");
+		for (i = 0; i < td->allocated_text_length; i++) {
+			printf("%c", td->rpcdata->text[i]);
+		}
+		printf("\n");
+		assert(0);
+	}
+}
+#endif
+
+static
+void textdraws_strcpy(struct TEXTDRAW *textdraw, char* str)
+{
+	textdraw->rpcdata->text_length = sprintf(textdraw->rpcdata->text, "%s", str);
+#ifdef DEV
+	textdraws_assert_text_length_within_bounds(textdraw);
+#endif
+}
+
 static
 void textdraws_show(int playerid, int num, ...)
 {
@@ -155,20 +185,7 @@ void textdraws_show(int playerid, int num, ...)
 	while (num--) {
 		td = va_arg(va, struct TEXTDRAW*);
 #ifdef DEV
-		if (td->rpcdata->text_length > td->allocated_text_length) {
-			printf("ERR: textdraw '%s' text length %d exceed allocated length %d\n",
-				td->name,
-				td->rpcdata->text_length,
-				td->allocated_text_length);
-			printf("text is: ");
-#define i td->rpcdata->preview_model
-			for (i = 0; i < td->allocated_text_length; i++) {
-				printf("%c", td->rpcdata->text[i]);
-			}
-			printf("\n");
-			assert(0);
-#undef i
-		}
+		textdraws_assert_text_length_within_bounds(td);
 #endif
 		bs.ptrData = td->rpcdata;
 		bs.numberOfBitsUsed = (sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->rpcdata->text_length) * 8;

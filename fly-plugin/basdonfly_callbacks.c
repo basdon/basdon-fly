@@ -143,6 +143,7 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 	unsigned long starttime;
 
 	missions_dispose();
+	jobmap_dispose();
 	airports_destroy();
 	echo_dispose();
 	heartbeat_end_session();
@@ -248,6 +249,7 @@ exit:
 	heartbeat_create_session();
 	maps_init();
 	missions_create_tracker_socket();
+	jobmap_init();
 	missions_init(); /*airports_init() must be called first, to initialize missionpoints*/
 	playerstats_init();
 	protips_init();
@@ -384,6 +386,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	kneeboard_on_player_connect(playerid);
 	maps_on_player_connect(playerid);
 	missions_on_player_connect(playerid);
+	jobmap_on_player_connect(playerid);
 	money_set(playerid, 0);
 	nametags_on_player_connect(playerid);
 	panel_on_player_connect(playerid);
@@ -449,6 +452,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	dialog_on_player_disconnect(playerid);
 	maps_on_player_disconnect(playerid);
 	missions_on_player_disconnect(playerid);
+	jobmap_on_player_disconnect(playerid);
 	panel_remove_panel_player(playerid);
 	playerstats_on_player_disconnect(playerid);
 	pm_on_player_disconnect(playerid);

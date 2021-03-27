@@ -25,3 +25,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Mar 25', 'Fixed new players not being able to register on connect');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Mar 27', 'Redesigned the mission map, removed random preselection of destinations');

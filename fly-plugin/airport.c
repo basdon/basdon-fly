@@ -189,16 +189,12 @@ have_airport:
 			assert(((void) "too many missionpoints", 0));
 		}
 
-		/*missionlocations are filled in mission.c, they should still be zero initialized though.
-		(They are filled based on if they are null.)*/
-		memset(msp->missionlocations, 0, sizeof(msp->missionlocations));
 		msp->ap = ap;
 		msp->id = (unsigned short) (*field = 1, NC(n_cache_get_field_i));
 		msp->pos.x = (*field = 2, NCF(n_cache_get_field_f));
 		msp->pos.y = (*field = 3, NCF(n_cache_get_field_f));
 		msp->pos.z = (*field = 4, NCF(n_cache_get_field_f));
 		msp->type = (*field = 5, NC(n_cache_get_field_i));
-		msp->has_player_browsing_missions = 0;
 		ap->missiontypes |= msp->type;
 		if (msp->type & PASSENGER_MISSIONTYPES) {
 			msp->point_type = MISSION_POINT_PASSENGERS;

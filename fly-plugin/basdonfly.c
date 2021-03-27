@@ -125,7 +125,7 @@ struct RUNWAY {
 };
 
 /**
-See {@link missions_get_gethicle_model_msptype_mask} for vehicle assignments
+See {@link missions_get_vehicle_model_msptype_mask} for vehicle assignments
 */
 #define NUM_MISSION_TYPES 11
 static char *mission_type_names[NUM_MISSION_TYPES] = {
@@ -159,9 +159,6 @@ TODO
 */
 /*TODO cargo water*/
 };
-
-/*Amount of preset mission locations each mission point should have (so excluding the last one, which is 'random destination'.*/
-#define NUM_PRESET_MISSION_LOCATIONS (8)
 
 #define PASSENGER_MISSIONTYPES \
 	(MISSION_TYPE_PASSENGER_S | MISSION_TYPE_PASSENGER_M | \
@@ -199,15 +196,6 @@ struct MISSIONPOINT {
 	char point_type;
 	char name[MAX_MSP_NAME + 1];
 	struct AIRPORT *ap;
-	/**
-	The last one is actually unused because it's the 'random' destination.
-	*/
-	struct MISSIONPOINT *missionlocations[NUM_PRESET_MISSION_LOCATIONS];
-	/**
-	Mission type is {@code 1 << this}
-	*/
-	int missiontypeindices[NUM_PRESET_MISSION_LOCATIONS];
-	char has_player_browsing_missions;
 };
 
 static struct MISSIONPOINT *missionpoints;
@@ -389,6 +377,7 @@ static unsigned short nametags_max_distance[MAX_PLAYERS];
 #include "maps.c"
 #include "nav.c"
 #include "panel.c"
+#include "jobmap.c"
 #include "missions.c"
 #include "playerdata.c"
 #include "playerstats.c"
