@@ -99,21 +99,13 @@ static struct TEXTDRAW td_jobhelp_txtred = { "txtred", TEXTDRAW_ALLOC_AS_NEEDED,
 static struct TEXTDRAW td_jobhelp_actionred = { "actionred", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 
 /**
-@return 0 on failure (when player is not in a missionpoint)
+Must only be called if the player has a valid active missionpoint.
 */
 static
-int missions_get_current_msp_and_mission_type(int playerid, struct MISSIONPOINT **msp, unsigned int *mission_type)
+void missions_get_current_msp_and_mission_type(int playerid, struct MISSIONPOINT **msp, unsigned int *mission_type)
 {
-	register int active_msp_idx;
-
-	active_msp_idx = active_msp_index[playerid];
-	if (active_msp_idx != -1) {
-		*msp = &missionpoints[active_msp_idx];
-		*mission_type = missions_available_msptype_mask[playerid] & (*msp)->type;
-		return 1;
-	} else {
-		return 0;
-	}
+	*msp = &missionpoints[active_msp_index[playerid]];
+	*mission_type = missions_available_msptype_mask[playerid] & (*msp)->type;
 }
 
 static
@@ -1683,17 +1675,16 @@ void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 		} else if (KEY_JUST_DOWN(KEY_SPRINT)) {
 			PlayerPlaySound(playerid, MISSION_JOBMAP_ACCEPT_SOUND);
 			selected_airport = jobmap_do_accept_button(playerid);
-			if (selected_airport) {
+			if (selected_airport && active_msp_index[playerid] != -1) {
 				missions_hide_jobmap_set_stage_set_controllable(playerid);
-				if (missions_get_current_msp_and_mission_type(playerid, &frommsp, &mission_type)) {
-					tomsp = missions_get_random_msp(selected_airport, mission_type);
-					if (tomsp) {
-						missions_start_mission(playerid, frommsp, tomsp, mission_type);
-					} else {
-						logprintf("failed to get random msp from airport id %d on jobmap (mission type %08x)",
-							selected_airport->id, mission_type);
-						SendClientMessage(playerid, COL_WARN, WARN"Something went wrong, try again");
-					}
+				missions_get_current_msp_and_mission_type(playerid, &frommsp, &mission_type);
+				tomsp = missions_get_random_msp(selected_airport, mission_type);
+				if (tomsp) {
+					missions_start_mission(playerid, frommsp, tomsp, mission_type);
+				} else {
+					logprintf("failed to get random msp from airport id %d on jobmap (mission type %08x)",
+						selected_airport->id, mission_type);
+					SendClientMessage(playerid, COL_WARN, WARN"Something went wrong, try again");
 				}
 			}
 		}
