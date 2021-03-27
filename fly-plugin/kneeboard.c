@@ -9,7 +9,11 @@ static int kneeboard_last_distance[MAX_PLAYERS];
 
 static char kneeboard_is_shown[MAX_PLAYERS];
 
-#define KNEEBOARD_SHOULD_SHOW(PLAYERID) (spawned[PLAYERID] && (prefs[PLAYERID] & PREF_SHOW_KNEEBOARD))
+#define KNEEBOARD_HIDE_REASON_JOBMAP 1
+static unsigned char kneeboard_should_hide[MAX_PLAYERS];
+
+#define KNEEBOARD_SHOULD_SHOW(PLAYERID) \
+	(spawned[PLAYERID] && (prefs[PLAYERID] & PREF_SHOW_KNEEBOARD) && !kneeboard_should_hide[playerid])
 
 static
 void kneeboard_init()
@@ -24,6 +28,7 @@ void kneeboard_on_player_connect(int playerid)
 {
 	kneeboard_is_shown[playerid] = 0;
 	kneeboard_last_distance[playerid] = -1;
+	kneeboard_should_hide[playerid] = 0;
 }
 
 /**
@@ -98,4 +103,30 @@ void kneeboard_update_all(int playerid, struct vec3 *playerpos)
 		textdraws_show(playerid, NUM_KNEEBOARD_TEXTDRAWS, &td_kb_header, &td_kb_info, &td_kb_distance);
 		kneeboard_is_shown[playerid] = 1;
 	}
+}
+
+/**
+@param hide_reason one of KNEEBOARD_HIDE_REASON_* values
+*/
+static
+void kneeboard_hide(int playerid, unsigned char hide_reason)
+{
+	struct vec3 pos;
+
+	kneeboard_should_hide[playerid] |= hide_reason;
+	GetPlayerPos(playerid, &pos);
+	kneeboard_update_all(playerid, &pos);
+}
+
+/**
+@param hide_reason one of KNEEBOARD_HIDE_REASON_* values
+*/
+static
+void kneeboard_unhide(int playerid, unsigned char hide_reason)
+{
+	struct vec3 pos;
+
+	kneeboard_should_hide[playerid] &= ~hide_reason;
+	GetPlayerPos(playerid, &pos);
+	kneeboard_update_all(playerid, &pos);
 }

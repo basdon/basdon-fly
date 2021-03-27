@@ -70,6 +70,8 @@ void jobmap_hide(int playerid)
 	textdraws_hide_consecutive(playerid, NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS, TEXTDRAW_MISSIONMAP_LOCATIONS_BASE);
 	free(jobmapdatas[playerid].entries);
 	jobmapdatas[playerid].entries = NULL;
+	kneeboard_unhide(playerid, KNEEBOARD_HIDE_REASON_JOBMAP);
+	panel_unhide(playerid, PANEL_HIDE_REASON_JOBMAP);
 }
 
 static
@@ -455,6 +457,9 @@ void jobmap_show(int playerid, unsigned int mission_type, struct MISSIONPOINT *m
 		&td_jobmap_island_igzu, &td_jobmap_island_bnsa, &td_jobmap_from, &td_jobmap_to);
 
 	jobmap_update_selection_textdraws(playerid, jobmapdata);
+
+	kneeboard_hide(playerid, KNEEBOARD_HIDE_REASON_JOBMAP);
+	panel_hide(playerid, PANEL_HIDE_REASON_JOBMAP);
 }
 
 static

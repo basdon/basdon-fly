@@ -77,6 +77,9 @@ static float fl_hp_boxwidth_base, fl_hp_boxwidth_dev;
 static float vorbar_x_base, vorbar_x_dev;
 static float vorbar_lsx_inrange, vorbar_lsx_outrange;
 
+#define PANEL_HIDE_REASON_JOBMAP 1
+static unsigned char panel_should_hide[MAX_PLAYERS];
+
 /**
 Players that should receive panel updates.
 */
@@ -962,6 +965,25 @@ void panel_reshow_if_needed(int playerid)
 		&td_panel_gear);
 }
 
+static
+void panel_add_panel_player_if_applicable(int playerid)
+{
+	int vehicleid, vehiclemodel;
+
+	if (!panel_should_hide[playerid]) {
+		vehicleid = GetPlayerVehicleID(playerid);
+		if (vehicleid) {
+			vehiclemodel = GetVehicleModel(vehicleid);
+			if (game_is_air_vehicle(vehiclemodel)) {
+				if (!panel_is_active_for(playerid)) {
+					panelplayers[numpanelplayers++] = playerid;
+					panel_reshow_if_needed(playerid);
+				}
+			}
+		}
+	}
+}
+
 void panel_on_player_state_change(int playerid, int from, int to)
 {
 	struct vec4 vpos;
@@ -971,7 +993,7 @@ void panel_on_player_state_change(int playerid, int from, int to)
 		/*The player can be warping from driver to passenger (//tocar).*/
 		vehicleid = GetPlayerVehicleID(playerid);
 		if (!game_is_air_vehicle(GetVehicleModel(vehicleid))) {
-			return;
+			goto hide;
 		}
 
 		if (to == PLAYER_STATE_DRIVER) {
@@ -984,6 +1006,7 @@ void panel_on_player_state_change(int playerid, int from, int to)
 		}
 		panel_reshow_if_needed(playerid);
 	} else {
+hide:
 		if (shown_panel[playerid]) {
 			panel_remove_panel_player(playerid);
 			textdraws_hide_consecutive(playerid, NUM_PANEL_TEXTDRAWS, TEXTDRAW_PANEL_BASE);
@@ -992,6 +1015,31 @@ void panel_on_player_state_change(int playerid, int from, int to)
 		caches[playerid].vor_shown = 0;
 		caches[playerid].ils_shown = 0;
 	}
+}
+
+/**
+@param hide_reason one of PANEL_HIDE_REASON_* values
+*/
+static
+void panel_hide(int playerid, unsigned char hide_reason)
+{
+	panel_should_hide[playerid] |= hide_reason;
+	/*TODO: this is duplicate code from on_state_change*/
+	if (shown_panel[playerid]) {
+		panel_remove_panel_player(playerid);
+		textdraws_hide_consecutive(playerid, NUM_PANEL_TEXTDRAWS, TEXTDRAW_PANEL_BASE);
+		shown_panel[playerid] = 0;
+	}
+}
+
+/**
+@param hide_reason one of PANEL_HIDE_REASON_* values
+*/
+static
+void panel_unhide(int playerid, unsigned char hide_reason)
+{
+	panel_should_hide[playerid] &= ~hide_reason;
+	panel_add_panel_player_if_applicable(playerid);
 }
 
 static
@@ -1017,15 +1065,7 @@ void panel_on_player_now_afk(int playerid)
 static
 void panel_on_player_was_afk(int playerid)
 {
-	int vehicleid, vehiclemodel;
-
-	vehicleid = GetPlayerVehicleID(playerid);
-	if (vehicleid) {
-		vehiclemodel = GetVehicleModel(vehicleid);
-		if (game_is_air_vehicle(vehiclemodel)) {
-			panelplayers[numpanelplayers++] = playerid;
-		}
-	}
+	panel_add_panel_player_if_applicable(playerid);
 }
 
 void panel_on_player_connect(int playerid)
