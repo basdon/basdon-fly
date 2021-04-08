@@ -30,7 +30,6 @@ Set a timer.
 
 Don't forget to free data if needed when applicable.
 
-@param timer_cb zero to stop the timer or a value that will be the new interval
 @param data data to pass to timer_cb on hit
 */
 static
