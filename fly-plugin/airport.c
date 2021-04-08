@@ -1,13 +1,3 @@
-
-/**
-Map of airports corresponding to nearest airports from /nearest cmd.
-*/
-static struct AIRPORT **nearest_airports_map[MAX_PLAYERS];
-/**
-Amount of airports in the nearest_airports_map array.
-*/
-static short nearest_airports_map_size[MAX_PLAYERS];
-
 /**
 Clears all data and frees all allocated memory.
 */
@@ -65,12 +55,6 @@ void airports_init()
 	struct MISSIONPOINT *msp;
 	int cacheid, rowcount, lastap, *field = nc_params + 2;
 	int i, j, airportid;
-
-	/*init indexmap*/
-	i = MAX_PLAYERS;
-	while (i--) {
-		nearest_airports_map[i] = NULL;
-	}
 
 	/*load airports*/
 	atoc(buf144, "SELECT i,c,n,e,x,y,z,flags FROM apt ORDER BY i ASC", 144);
@@ -222,12 +206,78 @@ mixed_missionpoints:
 #endif
 }
 
+#pragma pack(push,1)
+/**To be used when the 'nearest' dialog is shown, so dialog response can be mapped to the data that was shown.*/
+struct NEAREST_AIRPORT_DATA {
+	int num_nearest;
+	/**Actually arbitrary size.*/
+	struct AIRPORT *nearest[1];
+};
+#pragma pack(pop)
+
+/**
+Call when getting a response from DIALOG_AIRPORT_NEAREST, to show info dialog.
+*/
+static
+void cb_airport_nearest_dialog_response(int playerid, struct DIALOG_RESPONSE response)
+{
+	register struct NEAREST_AIRPORT_DATA *data;
+	struct DIALOG_INFO dialog;
+	struct AIRPORT *ap;
+	struct RUNWAY *rnw;
+	int helipads;
+	char *info;
+	char hasrunways;
+
+	data = response.data;
+	if (response.aborted || !response.response ||
+		response.listitem < 0 || response.listitem >= data->num_nearest)
+	{
+		goto freereturn;
+	}
+	ap = data->nearest[response.listitem];
+
+	dialog_init_info(&dialog);
+	sprintf(dialog.caption, "%s - %s", ap->code, ap->name);
+	info = dialog.info;
+	info += sprintf(info, "Elevation:\t%.0f FT", ap->pos.z);
+	rnw = ap->runways;
+	hasrunways = 0;
+	helipads = 0;
+	while (rnw != ap->runwaysend) {
+		if (rnw->type == RUNWAY_TYPE_HELIPAD) {
+			helipads++;
+		} else {
+			if (!hasrunways) {
+				hasrunways = 1;
+				info += sprintf(info, "\nRunways:\t%s", rnw->id);
+			} else {
+				info += sprintf(info, "\n\t\t%s", rnw->id);
+			}
+			if (rnw->nav == (NAV_VOR | NAV_ILS)) {
+				info += sprintf(info, " (VOR+ILS)");
+			} else if (rnw->nav) {
+				info += sprintf(info, " (VOR)");
+			}
+		}
+		rnw++;
+	}
+	info += sprintf(info, "\nHelipads:\t%d", helipads);
+
+	dialog.transactionid = DLG_TID_AIRPORT_NEAREST_DETAIL;
+	dialog.button1 = "Close";
+	dialog_show(playerid, &dialog);
+
+freereturn:
+	free(response.data);
+}
+
 /**
 Structure used for sorting airports by distance for the /nearest list dialog.
 */
 struct APREF {
 	float distance;
-	int index;
+	struct AIRPORT *ap;
 };
 
 /**
@@ -237,7 +287,7 @@ static
 int sortaprefs(const void *_a, const void *_b)
 {
 	struct APREF *a = (struct APREF*) _a, *b = (struct APREF*) _b;
-	return (int) (10.0f * (b->distance - a->distance));
+	return (int) (10.0f * (a->distance - b->distance));
 }
 
 /**
@@ -249,23 +299,27 @@ additional dialog with information about the selected airport.
 static
 int airport_cmd_nearest(struct COMMANDCONTEXT cmdctx)
 {
-	int i = 0;
-	int num = 0;
+	register struct AIRPORT *ap;
+	struct NEAREST_AIRPORT_DATA *data;
+	struct DIALOG_INFO dialog;
+	int i;
+	int num;
 	struct vec3 playerpos;
 	float dx, dy;
-	char buf[4096], *b;
-	struct AIRPORT *ap;
-	struct AIRPORT **map;
-	struct APREF *aps = malloc(sizeof(struct APREF) * numairports);
+	struct APREF *aps;
+	char *info;
 
 	GetPlayerPos(cmdctx.playerid, &playerpos);
-
+	/**Kinda stupid this extra checks is needed to exclude disabled airports.
+	TODO Probably happens on a lot of places, separate disabled/enabled airports at load thx.*/
+	aps = alloca(sizeof(struct APREF) * numairports);
+	num = i = 0;
 	while (i < numairports) {
 		if (airports[i].enabled) {
 			dx = airports[i].pos.x - playerpos.x;
 			dy = airports[i].pos.y - playerpos.y;
-			aps[num].distance = sqrt(dx * dx + dy * dy);
-			aps[num].index = i;
+			aps[num].distance = (float) sqrt(dx * dx + dy * dy);
+			aps[num].ap = &airports[i];
 			num++;
 		}
 		i++;
@@ -275,96 +329,34 @@ int airport_cmd_nearest(struct COMMANDCONTEXT cmdctx)
 		return 1;
 	}
 	qsort(aps, num, sizeof(struct APREF), sortaprefs);
-	map = nearest_airports_map[cmdctx.playerid];
-	if (map == NULL) {
-		map = malloc(sizeof(struct AIRPORT*) * num);
-		nearest_airports_map[cmdctx.playerid] = map;
-	}
-	i = nearest_airports_map_size[cmdctx.playerid] = num;
-	b = buf;
-	while (i--) {
-		*map = ap = airports + aps[i].index;
-		map++;
+	/**This is one ptr too much, but that's fine. Don't feel like putting that extra -1.*/
+	data = malloc(sizeof(struct NEAREST_AIRPORT_DATA) + sizeof(struct AIRPORT*) * num);
+	dialog.handler.data = data;
+	data->num_nearest = num;
+
+	dialog_init_info(&dialog);
+	info = dialog.info;
+	for (i = 0; i < num; i++) {
 		if (aps[i].distance < 1000.0f) {
-			b += sprintf(b, "\n%.0f", aps[i].distance);
+			info += sprintf(info, "%.0f", aps[i].distance);
 		} else {
-			b += sprintf(b, "\n%.1fK", aps[i].distance / 1000.0f);
+			info += sprintf(info, "%.1fK", aps[i].distance / 1000.0f);
 		}
-		b += sprintf(b, "\t%s\t[%s]", ap->name, ap->code);
+		ap = aps[i].ap;
+		data->nearest[i] = ap;
+		info += sprintf(info, "\t%s\t[%s]\n", ap->name, ap->code);
 	}
 
-	dialog_ShowPlayerDialog(
-		cmdctx.playerid,
-		DIALOG_AIRPORT_NEAREST,
-		DIALOG_STYLE_TABLIST,
-		"Nearest airports",
-		buf + 1,
-		"Info",
-		"Close",
-		-1);
-
-	free(aps);
+	dialog.transactionid = DLG_TID_AIRPORT_NEAREST;
+	dialog.style = DIALOG_STYLE_TABLIST;
+	dialog.handler.options = DLG_OPT_NOTIFY_ABORTED;
+	dialog.handler.callback = cb_airport_nearest_dialog_response;
+	dialog.handler.data = data;
+	dialog.caption = "Nearest airports";
+	dialog.button1 = "Info";
+	dialog.button2 = "Close";
+	dialog_show(cmdctx.playerid, &dialog);
 	return 1;
-}
-
-/**
-Call when getting a response from DIALOG_AIRPORT_NEAREST, to show info dialog.
-*/
-static
-void airport_nearest_dialog_response(int playerid, int response, int idx)
-{
-	struct AIRPORT *ap;
-	struct RUNWAY *rnw;
-	int helipads = 0;
-	char title[64], info[4096], *b;
-	char szRunways[] = "Runways:";
-
-	if (nearest_airports_map[playerid] == NULL) {
-		return;
-	}
-	if (!response ||
-		idx < 0 ||
-		nearest_airports_map_size[playerid] <= idx)
-	{
-		goto freereturn;
-	}
-	ap = nearest_airports_map[playerid][idx];
-
-	sprintf(title, "%s - %s", ap->code, ap->name);
-
-	b = info;
-	b += sprintf(b, "\nElevation:\t%.0f FT", ap->pos.z);
-	rnw = ap->runways;
-	while (rnw != ap->runwaysend) {
-		if (rnw->type == RUNWAY_TYPE_HELIPAD) {
-			helipads++;
-		} else {
-			b += sprintf(b, "\n%s\t%s", szRunways, rnw->id);
-			if (rnw->nav == (NAV_VOR | NAV_ILS)) {
-				b += sprintf(b, " (VOR+ILS)");
-			} else if (rnw->nav) {
-				b += sprintf(b, " (VOR)");
-			}
-			szRunways[0] = '\t';
-			szRunways[1] = 0;
-		}
-		rnw++;
-	}
-	b += sprintf(b, "\nHelipads:\t%d", helipads);
-
-	dialog_ShowPlayerDialog(
-		playerid,
-		DIALOG_DUMMY,
-		DIALOG_STYLE_MSGBOX,
-		title,
-		info + 1,
-		"Close",
-		NULL,
-		-1);
-
-freereturn:
-	free(nearest_airports_map[playerid]);
-	nearest_airports_map[playerid] = NULL;
 }
 
 /**
@@ -373,39 +365,26 @@ The /beacons command, shows a dialog with list of all airport beacons.
 static
 int airport_cmd_beacons(struct COMMANDCONTEXT cmdctx)
 {
-	char buf[4096], *b = buf;
+	struct DIALOG_INFO dialog;
+	char *info;
 	struct AIRPORT *ap = airports;
 	int count = numairports;
 
-	while (count-- > 0) {
-		if (ap->enabled) {
-			b += sprintf(b, " %s", ap->code);
+	dialog_init_info(&dialog);
+	if (numairports) {
+		info = dialog.info;
+		while (count-- > 0) {
+			if (ap->enabled) {
+				info += sprintf(info, " %s", ap->code);
+			}
+			ap++;
 		}
-		ap++;
+	} else {
+		strcpy(dialog.info, " None!");
 	}
-	if (b == buf) {
-		strcpy(buf, " None!");
-	}
-	dialog_ShowPlayerDialog(
-		cmdctx.playerid,
-		DIALOG_DUMMY,
-		DIALOG_STYLE_MSGBOX,
-		"Beacons",
-		buf + 1,
-		"Close",
-		NULL,
-		-1);
+	dialog.transactionid = DLG_TID_AIRPORT_BEACONS;
+	dialog.caption = "Beacons";
+	dialog.button1 = "Close";
+	dialog_show(cmdctx.playerid, &dialog);
 	return 1;
-}
-
-/**
-Cleanup stored stuff for player when they disconnect.
-*/
-static
-void airport_on_player_disconnect(int playerid)
-{
-	if (nearest_airports_map[playerid] != NULL) {
-		free(nearest_airports_map[playerid]);
-		nearest_airports_map[playerid] = NULL;
-	}
 }

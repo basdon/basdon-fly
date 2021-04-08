@@ -33,6 +33,30 @@ void ctoai(char *dstsrc)
 	while ((*dstsrc++ = (char) *src++));
 }
 
+static
+int stricmp(char *a, char *b)
+{
+	register int x;
+	register char _a, _b;
+
+	for (;;) {
+		_a = *a;
+		if ('A' <= _a && _a <= 'Z') {
+			_a |= 0x20;
+		}
+		_b = *b;
+		if ('A' <= _b && _b <= 'Z') {
+			_b |= 0x20;
+		}
+		x = _a - _b;
+		if (x || !_a) {
+			return x;
+		}
+		a++;
+		b++;
+	}
+}
+
 void common_tp_player(int playerid, struct vec4 pos)
 {
 	natives_SetPlayerPos(playerid, pos.coords);

@@ -41,12 +41,10 @@ void ctoai(char *dstsrc);
 #define Q_USE_EQ_INSTEAD(X) #X
 #define EQ(X) Q_USE_EQ_INSTEAD(X)
 
-#define MK_PLAYER_CC(PLAYERID) \
-	((_cc[PLAYERID] & 0x003FFFFF) | (PLAYERID << 22))
+#define MK_PLAYER_CC(PLAYERID) ((_cc[PLAYERID] & 0xFFFF) | (PLAYERID << 16))
 #define V_MK_PLAYER_CC(PLAYERID) ((void*) MK_PLAYER_CC(PLAYERID))
-#define PLAYER_CC_GETID(VALUE) (((unsigned int) VALUE >> 22) & 0x3FF)
-#define PLAYER_CC_CHECK(VALUE,PLAYERID) \
-	(_cc[PLAYERID] == ((unsigned int) VALUE & 0x003FFFFF))
+#define PLAYER_CC_GETID(VALUE) (((unsigned int) VALUE >> 16) & 0xFFFF)
+#define PLAYER_CC_CHECK(VALUE,PLAYERID) (_cc[PLAYERID] == (unsigned short) ((unsigned int) VALUE & 0xFFFF))
 #define PLAYER_CC_GET_CHECK_RETURN(VALUE,PLAYERID) \
 	PLAYERID=PLAYER_CC_GETID(VALUE);\
 	if(!PLAYER_CC_CHECK(VALUE,PLAYERID))return;

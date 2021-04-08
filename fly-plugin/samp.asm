@@ -4,6 +4,7 @@ extern samp_pNetGame
 extern hook_OnOnfootSync
 extern hook_OnDriverSync
 extern hook_OnPassengerSync
+extern hook_dialog_on_response
 extern printf
 
 ;prot void printf_logprintf(char *format, ...);
@@ -41,6 +42,22 @@ PassengerSyncHook:
 	mov [esp], eax ; playerid
 	call hook_OnPassengerSync
 	mov eax, 080AE9D1h
+	jmp eax
+
+;prot void OnDialogResponseHook();
+global OnDialogResponseHook:function
+OnDialogResponseHook:
+	lea eax, [ebp-0258h]
+	mov [esp+010h], eax ; inputtext
+	movzx eax, word [ebp-013Ch]
+	mov [esp+0Ch], eax ; listitem
+	movzx eax, byte [ebp-0259h]
+	mov [esp+08h], eax ; response
+	movzx eax, word [ebp-013Ah]
+	mov [esp+04h], eax ; dialogid
+	mov [esp], ebx ; playerid
+	call hook_dialog_on_response
+	mov eax, 080B2A8Dh
 	jmp eax
 
 ;prot float* samphost_GetPtrStreamDistance();

@@ -79,12 +79,14 @@ void spawn_dispose()
 	}
 }
 
-void spawn_on_dialog_response(int playerid, int response, int idx)
+static
+void spawn_cb_dlg_spawn(int playerid, struct DIALOG_RESPONSE response)
 {
-	int klass = classidx[playerid];
+	int klass;
 
-	if (response && 0 <= idx && idx < numspawns[klass]) {
-		common_tp_player(playerid, spawns[klass][idx]);
+	klass = classidx[playerid];
+	if (response.response && 0 <= response.listitem && response.listitem < numspawns[klass]) {
+		common_tp_player(playerid, spawns[klass][response.listitem]);
 	}
 }
 
@@ -113,19 +115,26 @@ void spawn_prespawn(int playerid)
 
 void spawn_on_player_spawn(int playerid)
 {
-	int klass = classidx[playerid];
+	struct DIALOG_INFO dialog;
+	int klass;
 
+	klass = classidx[playerid];
 	/*TODO: spawn preference*/
 	if (numspawns[klass] > 1) {
-		dialog_ShowPlayerDialog(
-			playerid, DIALOG_SPAWN_SELECTION,
-			DIALOG_STYLE_LIST, "Spawn selection",
-			spawn_list_text[klass],
-			"Spawn", "Cancel", -1);
+		dialog_init_info(&dialog);
+		dialog.transactionid = DLG_TID_SPAWN;
+		dialog.style = DIALOG_STYLE_LIST;
+		dialog.caption = "Spawn selection";
+		dialog.info = spawn_list_text[klass];
+		dialog.button1 = "Spawn";
+		dialog.button2 = "Cancel";
+		dialog.handler.callback = spawn_cb_dlg_spawn;
+		dialog_show(playerid, &dialog);
 	}
 
 	if (NC_GetPlayerScore(playerid) < 10) {
 		SendClientMessage(playerid, COL_INFO_LIGHT, INFO"Use /reclass to change to a different class.");
 		SendClientMessage(playerid, COL_INFO_LIGHT, INFO"Use /respawn to go to a different spawn place.");
+		/*TODO: tell about help/info cmds here when they're made*/
 	}
 }

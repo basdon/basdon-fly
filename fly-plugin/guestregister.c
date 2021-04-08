@@ -2,7 +2,7 @@ struct REGISTERDATA {
 	char newname[MAX_PLAYER_NAME];
 	char oldname[MAX_PLAYER_NAME];
 	char bcrypt[PW_HASH_LENGTH];
-	cell sha256[PW_HASH_LENGTH];
+	char sha256[SHA256BUFSIZE];
 	/**
 	Flag specifying if bcrypt is done.
 	*/
@@ -26,6 +26,10 @@ struct CBDATA {
 	int player_cc;
 	struct REGISTERDATA *data;
 };
+
+/*TODO cleanup*/
+static void guestreg_dlg_change_name(int playerid, struct DIALOG_RESPONSE response);
+static void guestreg_dlg_register_firstpass(int playerid, struct DIALOG_RESPONSE response);
 
 /**
 Check if the given name is a valid name given by player.
@@ -65,11 +69,13 @@ void guestreg_rollback_name(int playerid, struct REGISTERDATA *rd)
 Shows the dialog to change username.
 */
 static
-void guestreg_show_dialog_namechange(int playerid,
-	int show_invalid_name_error, int show_username_taken_error)
+void guestreg_show_dialog_namechange(int playerid, int show_invalid_name_error, int show_username_taken_error)
 {
-	char data[512], *d = data;
+	struct DIALOG_INFO dialog;
+	char *d;
 
+	dialog_init_info(&dialog);
+	d = dialog.info;
 	if (show_invalid_name_error) {
 		d += sprintf(d,
 			ECOL_WARN"Invalid username!\n\n"
@@ -86,12 +92,13 @@ void guestreg_show_dialog_namechange(int playerid,
 		"cannot start with a @ symbol.\n"
 		"Your current username is: %s",
 		pdata[playerid]->name);
-
-	dialog_ShowPlayerDialog(playerid,
-		DIALOG_GUESTREGISTER_CHANGENAME, DIALOG_STYLE_INPUT,
-		(char*) REGISTER_CAPTION, data,
-		"Change name", "Cancel",
-		TRANSACTION_GUESTREGISTER);
+	dialog.transactionid = DLG_TID_GUESTREGISTER;
+	dialog.style = DIALOG_STYLE_INPUT;
+	dialog.caption = REGISTER_CAPTION;
+	dialog.button1 = "Change name";
+	dialog.button2 = "Cancel";
+	dialog.handler.callback = guestreg_dlg_change_name;
+	dialog_show(playerid, &dialog);
 }
 
 /**
@@ -100,10 +107,13 @@ Show dialog to enter or confirm password to complete guest registration.
 @param step 0 for enter password or 1 for confirm password
 */
 static
-void guestreg_show_dialog_password(int playerid, int step, int pw_mismatch)
+void guestreg_show_dialog_password(int playerid, int step, int pw_mismatch, void (*cb)(int playerid, struct DIALOG_RESPONSE))
 {
-	char data[512], *d = data;
+	struct DIALOG_INFO dialog;
+	char *d;
 
+	dialog_init_info(&dialog);
+	d = dialog.info;
 	if (pw_mismatch) {
 		d += sprintf(d,
 			ECOL_WARN"Passwords do not match!\n\n");
@@ -114,16 +124,14 @@ void guestreg_show_dialog_password(int playerid, int step, int pw_mismatch)
 	d += sprintf(d, step == 1 ? ECOL_INFO"\n" : ECOL_DIALOG_TEXT"\n");
 	d += sprintf(d, "* confirm your password");
 	if (step == 1) d += sprintf(d, " <<<<");
-
-#if DIALOG_GUESTREGISTER_CONFIRMPASS != DIALOG_GUESTREGISTER_FIRSTPASS + 1
-#error incorrect dialog id order
-#endif
-
-	dialog_ShowPlayerDialog(playerid,
-		DIALOG_GUESTREGISTER_FIRSTPASS + step, DIALOG_STYLE_PASSWORD,
-		(char*) REGISTER_CAPTION, data,
-		"Next", "Cancel",
-		TRANSACTION_GUESTREGISTER);
+	dialog.transactionid = DLG_TID_GUESTREGISTER;
+	dialog.style = DIALOG_STYLE_PASSWORD;
+	dialog.caption = REGISTER_CAPTION;
+	dialog.button1 = "Next";
+	dialog.button2 = "Cancel";
+	dialog.handler.options = DLG_OPT_NO_SANITIZE_INPUTTEXT;
+	dialog.handler.callback = cb;
+	dialog_show(playerid, &dialog);
 }
 
 /**
@@ -141,7 +149,7 @@ void guestreg_cb_registered(void *data)
 	}
 
 	HideGameTextForPlayer(playerid);
-	dialog_end_transaction(playerid, TRANSACTION_GUESTREGISTER);
+	dialog_end_transaction(playerid, DLG_TID_GUESTREGISTER);
 	SendClientMessage(playerid, COL_SUCC, SUCC"Your account has been registered and your stats are saved, welcome!");
 	sprintf(msg144, "Guest %s[%d] just registered their account, welcome!", pdata[playerid]->name, playerid);
 	SendClientMessageToAll(COL_JOIN, msg144);
@@ -195,12 +203,12 @@ void guestreg_cb_check_username_exists(void *data)
 	}
 
 	if (natives_SetPlayerName(playerid, d->newname) == 1) {
-		guestreg_show_dialog_password(playerid, 0, 0);
+		guestreg_show_dialog_password(playerid, 0, 0, guestreg_dlg_register_firstpass);
 		return;
 	}
 
 	SendClientMessage(playerid, COL_WARN, WARN"Failed to change your name.");
-	dialog_end_transaction(playerid, TRANSACTION_GUESTREGISTER);
+	dialog_end_transaction(playerid, DLG_TID_GUESTREGISTER);
 }
 
 /**
@@ -253,17 +261,18 @@ int guestreg_cmd_register(struct COMMANDCONTEXT cmdctx)
 	return 1;
 }
 
-void guestreg_dlg_change_name(int playerid, int response, char *inputtext)
+static
+void guestreg_dlg_change_name(int playerid, struct DIALOG_RESPONSE response)
 {
 	struct REGISTERDATA *rd;
 	struct CBDATA *cd;
 
 	/* Change name | Cancel */
-	if (!response) {
+	if (!response.response) {
 		return;
 	}
 
-	if (!guestreg_is_name_valid(inputtext)) {
+	if (!guestreg_is_name_valid(response.inputtext)) {
 		guestreg_show_dialog_namechange(playerid, 1, 0);
 		return;
 	}
@@ -271,11 +280,11 @@ void guestreg_dlg_change_name(int playerid, int response, char *inputtext)
 	B144("~b~Checking username...");
 	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
 
-	dialog_ensure_transaction(playerid, TRANSACTION_GUESTREGISTER);
+	dialog_ensure_transaction(playerid, DLG_TID_GUESTREGISTER);
 
 	rd = malloc(sizeof(struct REGISTERDATA));
 	strcpy(rd->oldname, pdata[playerid]->name);
-	strcpy(rd->newname, inputtext);
+	strcpy(rd->newname, response.inputtext);
 	rd->aborted = 0;
 	rd->bcryptdone = 0;
 	rd->confirmed = 0;
@@ -285,55 +294,23 @@ void guestreg_dlg_change_name(int playerid, int response, char *inputtext)
 	cd->player_cc = MK_PLAYER_CC(playerid);
 	cd->data = rd;
 
-	sprintf(cbuf4096_, "SELECT i FROM usr WHERE name='%s'", inputtext);
-	common_mysql_tquery(cbuf4096_,	guestreg_cb_check_username_exists, cd);
+	sprintf(cbuf4096_, "SELECT i FROM usr WHERE name='%s'", response.inputtext);
+	common_mysql_tquery(cbuf4096_, guestreg_cb_check_username_exists, cd);
 }
 
-void guestreg_dlg_register_firstpass(int playerid,
-	int response, cell inputtexta, cell *inputtext)
-{
-	struct REGISTERDATA *rd;
-	struct CBDATA *cd;
-
-	rd = (struct REGISTERDATA*) pwdata[playerid];
-	/* Next | Cancel */
-	if (response) {
-		NC_PARS(4);
-		nc_params[1] = nc_params[2] = inputtexta;
-		nc_params[3] = buf144a;
-		nc_params[4] = PW_HASH_LENGTH;
-		NC(n_SHA256_PassHash);
-		memcpy(rd->sha256, buf144, 256);
-
-		cd = malloc(sizeof(struct CBDATA));
-		cd->player_cc = MK_PLAYER_CC(playerid);
-		cd->data = rd;
-		common_bcrypt_hash(inputtexta, guestreg_cb_password_hashed, cd);
-
-		guestreg_show_dialog_password(playerid, 1, 0);
-	} else {
-		guestreg_rollback_name(playerid, rd);
-		free(pwdata[playerid]);
-		pwdata[playerid] = NULL;
-	}
-}
-
-void guestreg_dlg_register_confirmpass(int playerid,
-	int response, cell inputtexta, cell *inputtext)
+static
+void guestreg_dlg_register_confirmpass(int playerid, struct DIALOG_RESPONSE response)
 {
 	/*TODO duplicate code (changepassword)*/
 	struct REGISTERDATA *rd, *oldrd;
+	char tmp_hash_buf[SHA256BUFSIZE];
 
 	rd = (struct REGISTERDATA*) pwdata[playerid];
 	pwdata[playerid] = NULL;
 	/* Next | Cancel */
-	if (response) {
-		NC_PARS(4);
-		nc_params[1] = nc_params[2] = inputtexta;
-		nc_params[3] = buf144a;
-		nc_params[4] = PW_HASH_LENGTH;
-		NC(n_SHA256_PassHash);
-		if (memcmp(cbuf144, rd->sha256, 256)) {
+	if (response.response) {
+		SAMP_SHA256(tmp_hash_buf, response.inputtext);
+		if (memcmp(tmp_hash_buf, rd->sha256, SHA256BUFSIZE)) {
 			oldrd = rd;
 			rd = malloc(sizeof(struct REGISTERDATA));
 			memcpy(rd, oldrd, sizeof(struct REGISTERDATA));
@@ -343,12 +320,11 @@ void guestreg_dlg_register_confirmpass(int playerid,
 				oldrd->aborted = 1;
 			}
 			pwdata[playerid] = rd;
-			guestreg_show_dialog_password(playerid, 0, 1);
+			guestreg_show_dialog_password(playerid, 0, 1, guestreg_dlg_register_firstpass);
 		} else {
 			B144("~b~Registering...");
 			NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
-			dialog_ensure_transaction(playerid,
-				TRANSACTION_GUESTREGISTER);
+			dialog_ensure_transaction(playerid, DLG_TID_GUESTREGISTER);
 
 			if (rd->bcryptdone) {
 				guestreg_do_register(playerid, rd);
@@ -363,5 +339,30 @@ void guestreg_dlg_register_confirmpass(int playerid,
 		} else {
 			rd->aborted = 1;
 		}
+	}
+}
+
+static
+void guestreg_dlg_register_firstpass(int playerid, struct DIALOG_RESPONSE response)
+{
+	struct REGISTERDATA *rd;
+	struct CBDATA *cd;
+
+	rd = (struct REGISTERDATA*) pwdata[playerid];
+	/* Next | Cancel */
+	if (response.response) {
+		SAMP_SHA256(rd->sha256, response.inputtext);
+
+		cd = malloc(sizeof(struct CBDATA));
+		cd->player_cc = MK_PLAYER_CC(playerid);
+		cd->data = rd;
+		atoc(buf144, response.inputtext, 144);
+		common_bcrypt_hash(buf144a, guestreg_cb_password_hashed, cd);
+
+		guestreg_show_dialog_password(playerid, 1, 0, guestreg_dlg_register_confirmpass);
+	} else {
+		guestreg_rollback_name(playerid, rd);
+		free(pwdata[playerid]);
+		pwdata[playerid] = NULL;
 	}
 }

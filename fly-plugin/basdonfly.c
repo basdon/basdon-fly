@@ -40,6 +40,9 @@ EXPECT_SIZE(int, 4);
 EXPECT_SIZE(cell, 4);
 EXPECT_SIZE(float, 4);
 
+#define PW_HASH_LENGTH (65) /*Including zero term. This is for bcrypt.*/
+#define SHA256BUFSIZE (65) /*Including zero term as well.*/
+
 #define SLEEP (5)
 #define JOINPRESSURE_INC (SLEEP * 200)
 #define JOINPRESSURE_DEC (SLEEP)
@@ -255,9 +258,11 @@ static int prefs[MAX_PLAYERS];
 /**
 Connection count per player id. Incremented every time playerid connects.
 
-Used to check if a player is still valid between long-running tasks.
+A db query can be going on while a player disconnects and a new player connects in the same slot,
+so a simple IsPlayerConnected check will not be sufficient if the result of the query is still
+applicable to the player that holds the playerid. This is the value that should be checked against.
 */
-static int _cc[MAX_PLAYERS];
+static unsigned short _cc[MAX_PLAYERS];
 static int joinpressure = 0;
 static int minconnectiontime = 0;
 
@@ -315,10 +320,8 @@ static struct FAKEAMX fakeamx;
 #include "admin.h"
 #include "anticheat.h"
 #include "class.h"
-#include "changepassword.h"
 #include "echo.h"
 #include "game_sa.h"
-#include "guestregister.h"
 #include "login.h"
 #include "missions.h"
 #include "playerdata.h"
@@ -407,12 +410,20 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
+	char sha256buf[SHA256BUFSIZE + 1];
+
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 #undef logprintf
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 
 	*(int*) &float_pinf = 0x7F800000;
 	*(int*) &float_ninf = 0xFF800000;
+
+	sha256buf[SHA256BUFSIZE - 1] = 0x33;
+	sha256buf[SHA256BUFSIZE] = 0x33;
+	SAMP_SHA256(sha256buf, "input");
+	assert(sha256buf[SHA256BUFSIZE] == 0x33); /*if fails, the func writes more than expected*/
+	assert(sha256buf[SHA256BUFSIZE - 1] == 0); /*if fails, the func doesn't end writing with a zero term*/
 
 #ifdef DEV
 	sampasm_sanitycheck();

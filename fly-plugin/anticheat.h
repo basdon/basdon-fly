@@ -22,9 +22,10 @@
 #define AC_VEH_HP_MISSION_INCREASE 6
 #define AC_MISSION_TOOFAST 7
 #define AC_DIALOG_SMELLY_INPUT 8
+#define AC_DIALOG_LONG_INPUT 9
 
 /**
-Decreate flood count for all players.
+Decrease flood count for all players.
 
 To be called from timer 100.
 */

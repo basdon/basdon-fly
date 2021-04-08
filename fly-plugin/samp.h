@@ -203,7 +203,9 @@ struct SampPlayer {
 	short lrkey;
 	short udkey;
 	int keys;
-	char _pad2951[0x2967-0x2951];
+	char _pad2951[0x295D-0x2951];
+	short lastSentDialogID;
+	char _pad295F[0x2967-0x295F];
 	short playerid;
 	int updateSyncType;
 	char _pad2969[0x2BA9-0x296D];
@@ -229,6 +231,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, facingAngle, 0x2939);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, lrkey, 0x2949);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, udkey, 0x294B);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, keys, 0x294D);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, lastSentDialogID, 0x295D);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, playerid, 0x2967);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, updateSyncType, 0x2969);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, currentState, 0x2BA9);
@@ -577,3 +580,4 @@ EXPECT_SIZE(struct RPCDATA_Delete3DTextLabel, 2);
 #define RPC_RemovePlayerMapIcon 0x815CD22 /*ptr to 0x90(144)*/
 #define RPC_Delete3DTextLabel 0x8159960 /*ptr to 0x3A(58)*/
 #define RPC_DisableRemoteVehicleCollisions 0x815CD80 /*ptr to 0xA7(167)*/
+#define RPC_ShowDialog 0x815CD7C /*ptr to 0x3D(61)*/

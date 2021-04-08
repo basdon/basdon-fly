@@ -38,8 +38,8 @@ login_on_player_connect
 
 login_cb_check_user_exists
 	-> login_spawn_as_guest (when too many failed attempts)
-	-> login_dlg_login_or_namechange (when user exists)
-	-> login_dlg_register_firstpass (when usr doesn't exist)
+	-> login_cb_dlg_login_or_namechange (when user exists)
+	-> login_cb_dlg_register_firstpass (when usr doesn't exist)
 
 login_spawn_as_guest
 	-> login_cb_create_guest_usr
@@ -47,36 +47,46 @@ login_spawn_as_guest
 		-> login_cb_create_session_guest
 			-> login_login_player
 
-login_dlg_register_firstpass
+login_cb_dlg_register_firstpass
 	-> login_login_player (on play as guest)
 	-> login_dlg_register_confirmpass (to confirm pass)
 
 login_dlg_register_confirmpass
-	-> login_dlg_register_firstpass (on cancel or no match)
+	-> login_cb_dlg_register_firstpass (on cancel or no match)
 	-> login_cb_register_password_hashed
 		-> login_cb_member_user_created
 			-> login_spawn_as_guest (when creating user failed)
 			-> login_cb_create_session_new_member
 
-login_dlg_login_or_namechange
-	-> login_dlg_namechange (on cancel response)
+login_cb_dlg_login_or_namechange
+	-> login_cb_dlg_namechange (on cancel response)
 	-> login_cb_verify_password
 
 login_cb_verify_password
-	-> login_dlg_login_or_namechange (on wrong password)
+	-> login_cb_dlg_login_or_namechange (on wrong password)
 	-> login_cb_load_account_data
 
 login_cb_load_account_data
 	-> login_spawn_as_guest (when empty response)
 	-> login_cb_create_session_existing_member
 
-login_dlg_namechange
+login_cb_dlg_namechange
 	-> login_spawn_as_guest (on cancel)
-	-> login_dlg_login_or_namechange (on empty response)
-	-> login_dlg_namechange (on invalid name)
+	-> login_cb_dlg_login_or_namechange (on empty response)
+	-> login_cb_dlg_namechange (on invalid name)
 	-> login_query_check_user_exists
 		-> login_cb_check_user_exists
 */
+
+/*TODO cleanup this mess*/
+static void login_show_dialog_login(int playerid, int show_invalid_pw_error);
+static int login_change_name_from_input(int playerid, char *inputtext);
+static void login_show_dialog_change_name(int playerid, int show_invalid_name_error);
+static void login_spawn_as_guest(int playerid);
+static void login_query_check_user_exists(int playerid);
+static void login_cb_verify_password(void *data);
+static void login_show_dialog_register_step1(int playerid, int pw_mismatch);
+static void login_cb_register_password_hashed(void *data);
 
 /**
 Callback for insert failed login query, to update the last failed login
@@ -122,6 +132,27 @@ void login_format_register_dialog(char *d, int step, int pw_mismatch)
 	if (step == 1) d += sprintf(d, " <<<<");
 }
 
+static
+void login_cb_dlg_namechange(int playerid, struct DIALOG_RESPONSE response)
+{
+	if (response.response) {
+		if (!response.inputtext[0] || !stricmp(pdata[playerid]->name, response.inputtext)) {
+			/*Edge case: if empty string or same name as current, go back to login dialog.*/
+			login_show_dialog_login(playerid, 0);
+		} else if (!login_change_name_from_input(playerid, response.inputtext)) {
+			login_show_dialog_change_name(playerid, 1);
+		} else {
+			unconfirmed_userid[playerid] = -1;
+			dialog_ensure_transaction(playerid, DLG_TID_LOGIN);
+			login_query_check_user_exists(playerid);
+		}
+	} else {
+		/*cancel should not go back to login dialog,
+		otherwise spamming escape will keep you in a loop*/
+		login_spawn_as_guest(playerid);
+	}
+}
+
 /**
 Shows name change dialog.
 
@@ -130,18 +161,44 @@ Shows name change dialog.
 static
 void login_show_dialog_change_name(int playerid, int show_invalid_name_error)
 {
-	static const char *CHANGE_NAME_TEXT =
-		ECOL_WARN"Invalid name or name is taken (press tab).\n"
+	struct DIALOG_INFO dialog;
+
+	dialog_init_info(&dialog);
+	dialog.transactionid = DLG_TID_LOGIN;
+	dialog.style = DIALOG_STYLE_INPUT;
+	dialog.caption = NAMECHANGE_CAPTION;
+	dialog.info =
+		(ECOL_WARN"Invalid name or name is taken (press tab).\n"
 		"\n"ECOL_DIALOG_TEXT
 		"Enter your new name (3-20 length, 0-9a-zA-Z=()[]$@._).\n"
-		"Names starting with @ are reserved for guests.";
+		"Names starting with @ are reserved for guests.") + 60 * (show_invalid_name_error ^ 1);
+	dialog.button1 = "Change";
+	dialog.button2 = "Play as guest";
+	dialog.handler.callback = login_cb_dlg_namechange;
+	dialog_show(playerid, &dialog);
+}
 
-	dialog_ShowPlayerDialog(
-		playerid, DIALOG_LOGIN_NAMECHANGE,
-		DIALOG_STYLE_INPUT, NAMECHANGE_CAPTION,
-		(char*) CHANGE_NAME_TEXT + 60 * (show_invalid_name_error ^ 1),
-		"Change", "Play as guest",
-		TRANSACTION_LOGIN);
+static
+void login_cb_dlg_login_or_namechange(int playerid, struct DIALOG_RESPONSE response)
+{
+	if (response.response) {
+		B144("~b~Logging in...");
+		NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+		if (pwdata[playerid]) {
+			atoc(buf144, response.inputtext, 144);
+			atoc(buf4096, pwdata[playerid], 144);
+			common_bcrypt_check(
+				buf144a,
+				buf4096a,
+				login_cb_verify_password,
+				V_MK_PLAYER_CC(playerid));
+			dialog_ensure_transaction(playerid, DLG_TID_LOGIN);
+		} else {
+			logprintf("login_cb_dlg_login_or_namechange: no password");
+		}
+	} else {
+		login_show_dialog_change_name(playerid, 0);
+	}
 }
 
 /**
@@ -152,33 +209,59 @@ Shows the login dialog.
 static
 void login_show_dialog_login(int playerid, int show_invalid_pw_error)
 {
-	static const char *LOGIN_TEXT =
-		ECOL_WARN"Incorrect password!\n"
+	struct DIALOG_INFO dialog;
+
+	dialog_init_info(&dialog);
+	dialog.transactionid = DLG_TID_LOGIN;
+	dialog.style = DIALOG_STYLE_PASSWORD;
+	dialog.caption = LOGIN_CAPTION;
+	dialog.info =
+		(ECOL_WARN"Incorrect password!\n"
 		"\n"ECOL_DIALOG_TEXT
 		"Welcome! This account is registered.\n"
-		"Please sign in or change your name.";
-
-	dialog_ShowPlayerDialog(
-		playerid, DIALOG_LOGIN_LOGIN_OR_NAMECHANGE,
-		DIALOG_STYLE_PASSWORD, LOGIN_CAPTION,
-		(char*) LOGIN_TEXT + 37 * (show_invalid_pw_error ^ 1),
-		"Login", "Change name",
-		TRANSACTION_LOGIN);
+		"Please sign in or change your name.") + 37 * (show_invalid_pw_error ^ 1);
+	dialog.button1 = "Login";
+	dialog.button2 = "Change name";
+	dialog.handler.options = DLG_OPT_NO_SANITIZE_INPUTTEXT;
+	dialog.handler.callback = login_cb_dlg_login_or_namechange;
+	dialog_show(playerid, &dialog);
 }
 
-/**
-Shows the register dialog box for the first step (enter password).
-*/
 static
-void login_show_dialog_register_step1(int playerid, int pw_mismatch)
+void login_cb_dlg_register_confirmpass(int playerid, struct DIALOG_RESPONSE response)
 {
-	char data[512];
+	char tmp_hash_buf[SHA256BUFSIZE];
+	register int cmpres;
 
-	login_format_register_dialog(data, 0, pw_mismatch);
-	dialog_ShowPlayerDialog(
-		playerid, DIALOG_REGISTER_FIRSTPASS, DIALOG_STYLE_PASSWORD,
-		REGISTER_CAPTION, data, "Next", "Play as guest",
-		TRANSACTION_LOGIN);
+	/*Confirm | Cancel*/
+	if (response.response) {
+		if (!pwdata[playerid]) {
+			logprintf("login_cb_dlg_register_confirmpass: confirmed pw without entering one!");
+			return;
+		}
+		SAMP_SHA256(tmp_hash_buf, response.inputtext);
+		cmpres = memcmp(tmp_hash_buf, pwdata[playerid], SHA256BUFSIZE);
+		free(pwdata[playerid]);
+		pwdata[playerid] = NULL;
+		if (cmpres) {
+			login_show_dialog_register_step1(playerid, 1);
+		} else {
+			B144("~b~Making your account...");
+			NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+			dialog_ensure_transaction(playerid, DLG_TID_LOGIN);
+			atoc(buf144, response.inputtext, 144);
+			common_bcrypt_hash(
+				buf144a,
+				login_cb_register_password_hashed,
+				V_MK_PLAYER_CC(playerid));
+		}
+	} else {
+		if (pwdata[playerid]) {
+			free(pwdata[playerid]);
+			pwdata[playerid] = NULL;
+		}
+		login_show_dialog_register_step1(playerid, 0);
+	}
 }
 
 /**
@@ -187,13 +270,54 @@ Shows the register dialog box for the first step (confirm password).
 static
 void login_show_dialog_register_step2(int playerid)
 {
-	char data[512];
+	struct DIALOG_INFO dialog;
 
-	login_format_register_dialog(data, 1, 0);
-	dialog_ShowPlayerDialog(
-		playerid, DIALOG_REGISTER_CONFIRMPASS, DIALOG_STYLE_PASSWORD,
-		REGISTER_CAPTION, data, "Confirm", "Cancel",
-		TRANSACTION_LOGIN);
+	dialog_init_info(&dialog);
+	login_format_register_dialog(dialog.info, 1, 0);
+	dialog.transactionid = DLG_TID_LOGIN;
+	dialog.style = DIALOG_STYLE_PASSWORD;
+	dialog.caption = REGISTER_CAPTION;
+	dialog.button1 = "Confirm";
+	dialog.button2 = "Cancel";
+	dialog.handler.options = DLG_OPT_NO_SANITIZE_INPUTTEXT;
+	dialog.handler.callback = login_cb_dlg_register_confirmpass;
+	dialog_show(playerid, &dialog);
+}
+
+static
+void login_cb_dlg_register_firstpass(int playerid, struct DIALOG_RESPONSE response)
+{
+	/*Next | Play as guest*/
+	if (response.response) {
+		if (pwdata[playerid]) {
+			free(pwdata[playerid]);
+		}
+		pwdata[playerid] = malloc(SHA256BUFSIZE);
+		SAMP_SHA256(pwdata[playerid], response.inputtext);
+		login_show_dialog_register_step2(playerid);
+	} else {
+		login_spawn_as_guest(playerid);
+	}
+}
+
+/**
+Shows the register dialog box for the first step (enter password).
+*/
+static
+void login_show_dialog_register_step1(int playerid, int pw_mismatch)
+{
+	struct DIALOG_INFO dialog;
+
+	dialog_init_info(&dialog);
+	login_format_register_dialog(dialog.info, 0, pw_mismatch);
+	dialog.transactionid = DLG_TID_LOGIN;
+	dialog.style = DIALOG_STYLE_PASSWORD;
+	dialog.caption = REGISTER_CAPTION;
+	dialog.button1 = "Next";
+	dialog.button2 = "Play as guest";
+	dialog.handler.options = DLG_OPT_NO_SANITIZE_INPUTTEXT;
+	dialog.handler.callback = login_cb_dlg_register_firstpass;
+	dialog_show(playerid, &dialog);
 }
 
 /**
@@ -336,7 +460,7 @@ void login_cb_create_session_new_member(void *data)
 		return;
 	}
 
-	dialog_end_transaction(playerid, TRANSACTION_LOGIN);
+	dialog_end_transaction(playerid, DLG_TID_LOGIN);
 	HideGameTextForPlayer(playerid);
 	sessionid[playerid] = NC_cache_insert_id();
 	/*
@@ -379,7 +503,7 @@ void login_cb_create_session_existing_member(void *data)
 		return;
 	}
 
-	dialog_end_transaction(playerid, TRANSACTION_LOGIN);
+	dialog_end_transaction(playerid, DLG_TID_LOGIN);
 	HideGameTextForPlayer(playerid);
 	sessionid[playerid] = NC_cache_insert_id();
 	/*
@@ -423,6 +547,12 @@ void login_cb_create_guest_usr(void *data)
 	login_create_session(playerid, login_cb_create_session_guest);
 }
 
+/**
+Give the user a name prefixed with an '@' symbol, indicating they're a guest.
+
+@return 0 on failure and player will be kicked
+*/
+static
 int login_give_guest_name(int playerid)
 {
 	struct playerdata *p;
@@ -504,6 +634,7 @@ Callback when player logged in and account load query is done.
 static
 void login_cb_load_account_data(void *data)
 {
+	struct DIALOG_INFO *dialog;
 	int playerid, *f = nc_params + 2, falng, lastfal;
 
 	playerid = PLAYER_CC_GETID(data);
@@ -514,12 +645,12 @@ void login_cb_load_account_data(void *data)
 	if (!NC_cache_get_row_count()) {
 		HideGameTextForPlayer(playerid);
 		logprintf("login_cb_load_account_data: empty response");
-		dialog_ShowPlayerDialog(
-			playerid, DIALOG_DUMMY, DIALOG_STYLE_MSGBOX,
-			LOGIN_CAPTION, ECOL_WARN"An error occurred, "
-			"you will be spawned as a guest",
-			"Ok", "",
-			-1);
+		dialog = alloca(sizeof(struct DIALOG_INFO));
+		dialog_init_info(dialog);
+		dialog->info = ECOL_WARN"An error occurred, you will be spawned as a guest";
+		dialog->caption = LOGIN_CAPTION;
+		dialog->button1 = "Ok";
+		dialog_show(playerid, dialog);
 		login_spawn_as_guest_WITHOUT_ACCOUNT(playerid);
 		return;
 	}
@@ -550,14 +681,16 @@ void login_cb_load_account_data(void *data)
 	if (lastfal > falng) {
 		csprintf(buf4096, "UPDATE usr SET falng=%d WHERE i=%d", lastfal, unconfirmed_userid[playerid]);
 		NC_mysql_tquery_nocb(buf4096a);
-		dialog_ShowPlayerDialog(
-			playerid, DIALOG_DUMMY, DIALOG_STYLE_MSGBOX,
-			"Failed logins",
+		dialog = alloca(sizeof(struct DIALOG_INFO));
+		dialog_init_info(dialog);
+		dialog->transactionid = DLG_TID_LOGIN;
+		dialog->caption = "Failed logins";
+		dialog->info =
 			ECOL_WARN"There were one or more failed logins "
-				"since your last visit.\n"
-				"Check the website for more details.",
-			"Ok", "",
-			TRANSACTION_LOGIN);
+			"since your last visit.\n"
+			"Check the website for more details.";
+		dialog->button1 = "Ok";
+		dialog_show(playerid, dialog);
 	}
 }
 
@@ -656,6 +789,7 @@ Callback for login_query_check_user_exists
 static
 void login_cb_check_user_exists(void *data)
 {
+	struct DIALOG_INFO *dialog;
 	int playerid, failedattempts, num_rows;
 	char password[PW_HASH_LENGTH];
 
@@ -664,18 +798,18 @@ void login_cb_check_user_exists(void *data)
 		return;
 	}
 
-	dialog_end_transaction(playerid, TRANSACTION_LOGIN);
+	dialog_end_transaction(playerid, DLG_TID_LOGIN);
 	HideGameTextForPlayer(playerid);
 
 	num_rows = NC_cache_get_row_count();
 	if (!num_rows) {
 		logprintf("login_cb_check_user_exists: empty response");
-		dialog_ShowPlayerDialog(
-			playerid, DIALOG_DUMMY, DIALOG_STYLE_MSGBOX,
-			LOGIN_CAPTION, ECOL_WARN"An error occurred, "
-			"you will be spawned as a guest",
-			"Ok", "",
-			-1);
+		dialog = alloca(sizeof(struct DIALOG_INFO));
+		dialog_init_info(dialog);
+		dialog->caption = LOGIN_CAPTION;
+		dialog->info = ECOL_WARN"An error occurred, you will be spawned as a guest";
+		dialog->button1 = "Ok";
+		dialog_show(playerid, dialog);
 		goto asguest;
 	}
 
@@ -738,117 +872,19 @@ void login_query_check_user_exists(int playerid)
 	common_mysql_tquery(cbuf4096_, login_cb_check_user_exists, V_MK_PLAYER_CC(playerid));
 }
 
-void login_dlg_login_or_namechange(int playerid, int response, char *inputtext)
-{
-	/*Login | Change name*/
-	if (response) {
-		B144("~b~Logging in...");
-		NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
-		if (pwdata[playerid] == NULL) {
-			logprintf("login_dlg_login_or_namechange: no password");
-		} else {
-			atoc(buf144, inputtext, 144);
-			atoc(buf4096, pwdata[playerid], 144);
-			common_bcrypt_check(
-				buf144a,
-				buf4096a,
-				login_cb_verify_password,
-				V_MK_PLAYER_CC(playerid));
-			dialog_ensure_transaction(playerid, TRANSACTION_LOGIN);
-		}
-	} else {
-		login_show_dialog_change_name(playerid, 0);
-	}
-}
-
-void login_dlg_namechange(int playerid, int response, char *inputtext)
-{
-	/*Change | Play as guest*/
-	if (response) {
-		if (!inputtext[0] ||
-			strcmp(pdata[playerid]->name, inputtext) == 0)
-		{
-			/*edge case: if empty string or same name as current,
-			go back to login dialog*/
-			login_show_dialog_login(playerid, 0);
-		} else if (!login_change_name_from_input(playerid, inputtext)) {
-			login_show_dialog_change_name(playerid, 1);
-		} else {
-			unconfirmed_userid[playerid] = -1;
-			dialog_ensure_transaction(playerid, TRANSACTION_LOGIN);
-			login_query_check_user_exists(playerid);
-		}
-	} else {
-		/*cancel should not go back to login dialog,
-		otherwise spamming escape will keep you in a loop*/
-		login_spawn_as_guest(playerid);
-	}
-}
-
-void login_dlg_register_confirmpass(
-	int playerid, int response, cell inputaddr, char *inputtext)
-{
-	int res;
-
-	/*Confirm | Cancel*/
-	if (response) {
-		if (pwdata[playerid] == NULL) {
-			logprintf("login: confirmed pw without entering one!");
-			return;
-		}
-		NC_PARS(4);
-		nc_params[1] = nc_params[2] = inputaddr;
-		nc_params[3] = buf144a;
-		nc_params[4] = PW_HASH_LENGTH;
-		NC(n_SHA256_PassHash);
-		res = memcmp(cbuf144, pwdata[playerid], 256);
-		free(pwdata[playerid]);
-		pwdata[playerid] = NULL;
-		if (res) {
-			login_show_dialog_register_step1(playerid, 1);
-		} else {
-			B144("~b~Making your account...");
-			NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
-			dialog_ensure_transaction(playerid, TRANSACTION_LOGIN);
-			common_bcrypt_hash(
-				inputaddr,
-				login_cb_register_password_hashed,
-				V_MK_PLAYER_CC(playerid));
-		}
-	} else {
-		if (pwdata[playerid] != NULL) {
-			free(pwdata[playerid]);
-			pwdata[playerid] = NULL;
-		}
-		login_show_dialog_register_step1(playerid, 0);
-	}
-}
-
-void login_dlg_register_firstpass(int playerid, int response, cell inputaddr)
-{
-	/*Next | Play as guest*/
-	if (response) {
-		NC_PARS(4);
-		nc_params[1] = nc_params[2] = inputaddr;
-		nc_params[3] = buf144a;
-		nc_params[4] = PW_HASH_LENGTH;
-		NC(n_SHA256_PassHash);
-		if (pwdata[playerid] != NULL) {
-			free(pwdata[playerid]);
-		}
-		pwdata[playerid] = malloc(4 * PW_HASH_LENGTH);
-		memcpy(pwdata[playerid], buf144, 4 * PW_HASH_LENGTH);
-		login_show_dialog_register_step2(playerid);
-	} else {
-		login_spawn_as_guest(playerid);
-	}
-}
-
+/**
+@return 0 when player has unacceptable name
+*/
+static
 int login_on_player_connect(int playerid)
 {
 	struct playerdata *pd;
 
-	pwdata[playerid] = NULL;
+	if (pwdata[playerid]) {
+		free(pwdata[playerid]);
+		pwdata[playerid] = NULL;
+	}
+	loggedstatus[playerid] = LOGGED_NO;
 	userid[playerid] = -1;
 	unconfirmed_userid[playerid] = -1;
 	sessionid[playerid] = -1;

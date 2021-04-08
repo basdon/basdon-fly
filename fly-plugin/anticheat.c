@@ -103,23 +103,19 @@ void anticheat_on_player_connect(int playerid)
 
 void anticheat_log(int playerid, int eventtype, char *info)
 {
-	char buf[512], *b = info;
+	char buf[2200]; /*Entry has maxlen 2048 in the db.*/
+	char *b;
 
 	if (kick_update_delay[playerid]) {
 		/*player already kicked*/	
 		return;
 	}
 
-	while (*b != 0) {
-		if (*b == '\'') {
-			*b = 255;
-		}
-		b++;
-	}
+#ifdef DEV
+	printf("anticheat_log: type %d msg %s\n", eventtype, info);
+#endif
 
-	b = buf;
-	b += sprintf(b, "INSERT INTO acl(t,j,u,l,type,e) "
-			"VALUES(UNIX_TIMESTAMP(),");
+	b = buf + sprintf(buf, "INSERT INTO acl(t,j,u,l,type,e) VALUES(UNIX_TIMESTAMP(),");
 	if (pdata[playerid] == NULL) {
 		/*this should not happen, but better to be safe when dealing
 		with strange behaviors that trigger anticheat*/
@@ -131,7 +127,17 @@ void anticheat_log(int playerid, int eventtype, char *info)
 			userid[playerid],
 			loggedstatus[playerid]);
 	}
-	sprintf(b, ",%d,'%s')", eventtype, info);
+	b += sprintf(b, ",%d,'", eventtype);
+	while (*info) {
+		if (*info == '\'') {
+			*(b++) = '\\';
+		}
+		*(b++) = *info;
+		info++;
+	}
+	*(b++) = '\'';
+	*(b++) = ')';
+	*b = 0;
 	atoc(buf4096, buf, sizeof(buf));
 	NC_mysql_tquery_nocb(buf4096a);
 }

@@ -21,118 +21,7 @@ cell AMX_NATIVE_CALL B_OnCallbackHit(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
 {
-	const int pid = PARAM(1), dialogid = PARAM(2);
-	const int res = PARAM(3), listitem = PARAM(4);
-	char inputtext[128], dirtyinputtext[128], c;
-	int is_inputtext_dirty, i, j;
-	cell *ia;
-
-	if (anticheat_flood(pid, AC_FLOOD_AMOUNT_DIALOG) ||
-		!dialog_on_response(pid, dialogid))
-	{
-		dialog_pop_queue(pid);
-		return 0;
-	}
-
-	if (dialogid == DIALOG_DUMMY) {
-		goto ret;
-	}
-
-	amx_GetAddr(amx, PARAM(5), &ia);
-	/*sanitize input if dialog is not one of the password dialogs*/
-	if (*ia == 0) {
-		inputtext[0] = 0;
-	} else if (dialogid == DIALOG_LOGIN_LOGIN_OR_NAMECHANGE ||
-		dialogid == DIALOG_CHANGEPASS_PREVPASS ||
-		dialogid == DIALOG_CHANGEPASS_NEWPASS ||
-		dialogid == DIALOG_CHANGEPASS_CONFIRMPASS ||
-		dialogid == DIALOG_GUESTREGISTER_FIRSTPASS ||
-		dialogid == DIALOG_GUESTREGISTER_CONFIRMPASS)
-	{
-		ctoa(inputtext, ia, sizeof(inputtext));
-	} else {
-		ctoa(dirtyinputtext, ia, sizeof(dirtyinputtext));
-		is_inputtext_dirty = 0;
-		for (i = 0, j = 0; i < sizeof(dirtyinputtext); i++) {
-			c = dirtyinputtext[i];
-			if (c == '%') {
-				is_inputtext_dirty = 1;
-				inputtext[j++] = '#';
-			} else if (c < ' ' && c != 0) {
-				is_inputtext_dirty = 1;
-				dirtyinputtext[i] = '~';
-			} else {
-				inputtext[j++] = c;
-				if (!c) {
-					break;
-				}
-			}
-		}
-		if (is_inputtext_dirty) {
-			anticheat_log(pid, AC_DIALOG_SMELLY_INPUT,
-				dirtyinputtext);
-		}
-	}
-
-	switch (dialogid) {
-	case DIALOG_SPAWN_SELECTION:
-		spawn_on_dialog_response(pid, res, listitem);
-		goto ret;
-	case DIALOG_PREFERENCES:
-		prefs_on_dialog_response(pid, res, listitem);
-		goto ret;
-	case DIALOG_AIRPORT_NEAREST:
-		airport_nearest_dialog_response(pid, res, listitem);
-		goto ret;
-	case DIALOG_REGISTER_FIRSTPASS:
-		login_dlg_register_firstpass(pid, res, PARAM(5));
-		goto ret;
-	case DIALOG_REGISTER_CONFIRMPASS:
-		login_dlg_register_confirmpass(pid, res, PARAM(5), inputtext);
-		goto ret;
-	case DIALOG_LOGIN_LOGIN_OR_NAMECHANGE:
-		login_dlg_login_or_namechange(pid, res, inputtext);
-		goto ret;
-	case DIALOG_LOGIN_NAMECHANGE:
-		login_dlg_namechange(pid, res, inputtext);
-		goto ret;
-	case DIALOG_CHANGEPASS_PREVPASS:
-		chpw_dlg_previous_password(pid, res, PARAM(5), ia);
-		goto ret;
-	case DIALOG_CHANGEPASS_NEWPASS:
-		chpw_dlg_new_password(pid, res, PARAM(5), ia);
-		goto ret;
-	case DIALOG_CHANGEPASS_CONFIRMPASS:
-		chpw_dlg_confirm_password(pid, res, PARAM(5), ia);
-		goto ret;
-	case DIALOG_GUESTREGISTER_CHANGENAME:
-		guestreg_dlg_change_name(pid, res, inputtext);
-		goto ret;
-	case DIALOG_GUESTREGISTER_FIRSTPASS:
-		guestreg_dlg_register_firstpass(pid, res, PARAM(5), ia);
-		goto ret;
-	case DIALOG_GUESTREGISTER_CONFIRMPASS:
-		guestreg_dlg_register_confirmpass(pid, res, PARAM(5), ia);
-		goto ret;
-	case DIALOG_VEHINFO_VEHINFO:
-		admin_dlg_vehinfo_response(pid, res, listitem);
-		goto ret;
-	case DIALOG_VEHINFO_ASSIGNAP:
-		admin_dlg_vehinfo_assign_response(pid, res, listitem);
-		goto ret;
-	case DIALOG_PREFERENCES_NAMETAGDISTANCE:
-		prefs_on_dialog_response_nametagdist(pid, res, inputtext);
-		goto ret;
-	}
-
-	if (dialogid >= DIALOG_CHANGELOG_PAGE_0 &&
-		dialogid < DIALOG_CHANGELOG_PAGE_0 + DIALOG_CHANGELOG_NUM_PAGES)
-	{
-		changelog_on_dialog_response(pid, res, dialogid, listitem);
-	}
-
-ret:
-	dialog_pop_queue(pid);
+	/*TODO: remove*/
 	return 1;
 }
 
@@ -246,6 +135,7 @@ exit:
 	airports_init();
 	changelog_init();
 	class_init();
+	dialog_init();
 	heartbeat_create_session();
 	maps_init();
 	missions_create_tracker_socket();
@@ -446,7 +336,6 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	const int playerid = PARAM(1), reason = PARAM(2);
 	int i;
 
-	airport_on_player_disconnect(playerid);
 	chpw_on_player_disconnect(playerid);
 	echo_on_player_disconnect(playerid, reason);
 	dialog_on_player_disconnect(playerid);
@@ -650,7 +539,7 @@ cell AMX_NATIVE_CALL B_OnQueryError(AMX *amx, cell *params)
 	amx_GetAddr(amx, PARAM(4), &addr);
 	ctoa(cbuf4096, addr, 4096);
 
-	logprintf("query err %d %s %s", errorid, cbuf144, cbuf4096);
+	logprintf("query err %d >>>\n%s\n===\n%s\n<<<", errorid, cbuf144, cbuf4096);
 	return 1;
 }
 

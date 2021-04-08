@@ -18,6 +18,8 @@
 #define LIMIT_DIALOG_BUTTON (32)
 /*Pagesize is 10 with /fontsize 5, 16 with /fontsize -3.*/
 /*#define DIALOG_LIST_PAGESIZE 16*/
+/*128 actual characters, so 129 including zero term.*/
+#define LIMIT_DIALOG_INPUTTEXT (128)
 
 #define DIALOG_STYLE_MSGBOX 0
 #define DIALOG_STYLE_INPUT 1

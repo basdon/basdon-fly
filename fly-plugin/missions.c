@@ -1075,6 +1075,7 @@ Called from timer callback for mission unload checkpoint.
 static
 int missions_after_unload(void *data)
 {
+	struct DIALOG_INFO dialog;
 	struct MISSION_UNLOAD_DATA *mission_cb_data;
 	int playerid;
 	struct MISSION *miss;
@@ -1082,7 +1083,7 @@ int missions_after_unload(void *data)
 	int ptax, psatisfaction, pdistance, pbonus = 0, ptotal, pdamage, pcheat;
 	int totaltime, duration_h, duration_m, extra_damage_taken;
 	int i;
-	char *dlg, *dlgbase;
+	char *dialoginfo;
 	short missionmsg_playerids[MAX_PLAYERS];
 	int num_missionmsg_playerids;
 
@@ -1199,8 +1200,9 @@ int missions_after_unload(void *data)
 		miss->id);
 	NC_mysql_tquery_nocb(buf4096a);
 
-	dlg = dlgbase = malloc(4096); /*TODO: something :)*/
-	dlg += sprintf(dlg,
+	dialog_init_info(&dialog);
+	dialoginfo = dialog.info;
+	dialoginfo += sprintf(dialoginfo,
 	             "{ffffff}Flight:\t\t\t"ECOL_MISSION"#%d\n"
 	             "{ffffff}Origin:\t\t\t"ECOL_MISSION"%s\n"
 	             "{ffffff}Destination:\t\t"ECOL_MISSION"%s\n"
@@ -1219,63 +1221,42 @@ int missions_after_unload(void *data)
 		     miss->fuelburned,
 	             paymp);
 	if (miss->missiontype & PASSENGER_MISSIONTYPES) {
-		dlg += sprintf(dlg,
+		dialoginfo += sprintf(dialoginfo,
 		             "{ffffff}Passenger Satisfaction:\t"
 			     ""ECOL_MISSION"%d%%\n",
 		             miss->passenger_satisfaction);
 	}
-	*dlg++ = '\n';
-	*dlg++ = '\n';
+	*dialoginfo++ = '\n';
+	*dialoginfo++ = '\n';
 	if (ptax) {
-		dlg += missions_append_pay(dlg,
-			"{ffffff}Airport Tax:\t\t",
-			ptax);
+		dialoginfo += missions_append_pay(dialoginfo, "{ffffff}Airport Tax:\t\t", ptax);
 	}
 	if (miss->weatherbonus) {
-		dlg += missions_append_pay(dlg,
-			"{ffffff}Weather bonus:\t\t",
-			miss->weatherbonus);
+		dialoginfo += missions_append_pay(dialoginfo, "{ffffff}Weather bonus:\t\t", miss->weatherbonus);
 	}
-	dlg += missions_append_pay(dlg, "{ffffff}Distance Pay:\t\t", pdistance);
+	dialoginfo += missions_append_pay(dialoginfo, "{ffffff}Distance Pay:\t\t", pdistance);
 	if (miss->missiontype & PASSENGER_MISSIONTYPES) {
 		if (psatisfaction > 0) {
-			dlg += missions_append_pay(dlg,
-				"{ffffff}Satisfaction Bonus:\t",
-				psatisfaction);
+			dialoginfo += missions_append_pay(dialoginfo, "{ffffff}Satisfaction Bonus:\t", psatisfaction);
 		} else {
-			dlg += missions_append_pay(dlg,
-				"{ffffff}Satisfaction Penalty:\t",
-				psatisfaction);
+			dialoginfo += missions_append_pay(dialoginfo, "{ffffff}Satisfaction Penalty:\t", psatisfaction);
 		}
 	}
 	if (pdamage) {
-		dlg += missions_append_pay(dlg,
-			"{ffffff}Damage Penalty:\t",
-			pdamage);
+		dialoginfo += missions_append_pay(dialoginfo, "{ffffff}Damage Penalty:\t", pdamage);
 	}
 	if (pcheat) {
-		dlg += missions_append_pay(dlg,
-			"{ffffff}Cheat Penalty:\t\t",
-			pcheat);
+		dialoginfo += missions_append_pay(dialoginfo, "{ffffff}Cheat Penalty:\t\t", pcheat);
 	}
 	if (pbonus) {
-		dlg += missions_append_pay(dlg,
-			"{ffffff}Bonus:\t\t\t",
-			pbonus);
+		dialoginfo += missions_append_pay(dialoginfo, "{ffffff}Bonus:\t\t\t", pbonus);
 	}
-	dlg += missions_append_pay(dlg,
-		"\n\n\t{ffffff}Total Pay: ",
-		ptotal);
-	*--dlg = 0;
-	dialog_ShowPlayerDialog(
-		playerid,
-		DIALOG_DUMMY,
-		DIALOG_STYLE_MSGBOX,
-		"Flight Overview",
-		dlgbase,
-		"Close", "",
-		TRANSACTION_MISSION_OVERVIEW);
-	free(dlgbase);
+	dialoginfo += missions_append_pay(dialoginfo, "\n\n\t{ffffff}Total Pay: ", ptotal);
+	*--dialoginfo = 0;
+	dialog.transactionid = DLG_TID_MISSION_OVERVIEW;
+	dialog.caption = "Flight Overview";
+	dialog.button1 = "Close";
+	dialog_show(playerid, &dialog);
 
 	missions_cleanup(playerid);
 

@@ -21,6 +21,15 @@ int EncodeString(char *dest, char *source, int max_chars)
 	return bs.numberOfBitsUsed;
 }
 
+/**
+Result is the hexadec string representation, so out buf should be at least 65 size.
+*/
+static
+void SAMP_SHA256(char *out_buf, char *input)
+{
+	((void (*)(char*,char*,char*,int))0x80ED230)(input, /*salt*/"", out_buf, 65);
+}
+
 static
 void SetConsoleVariableString(char *variable_name, char *value)
 {
@@ -342,13 +351,26 @@ short GetPlayerVehicleSeat(int playerid)
 	return player[playerid]->vehicleseat;
 }
 
-/*
+/**
 @return 0 when not in vehicle
 */
 static
 short GetPlayerVehicleID(int playerid)
 {
 	return player[playerid]->vehicleid;
+}
+
+/**
+@return 0 when not in vehicle. The result of veh can still be NULL.
+*/
+static
+short GetPlayerVehicle(int playerid, struct dbvehicle **veh)
+{
+	short vehicleid;
+
+	vehicleid = GetPlayerVehicleID(playerid);
+	*veh = gamevehicles[vehicleid].dbvehicle;
+	return vehicleid;
 }
 
 static
@@ -1108,5 +1130,6 @@ void samp_init()
 	mem_mkjmp(0x80AC99C, &OnfootSyncHook);
 	mem_mkjmp(0x80AEC4F, &DriverSyncHook);
 	mem_mkjmp(0x80AEA7D, &PassengerSyncHook);
+	mem_mkjmp(0x80B2BA2, &OnDialogResponseHook);
 }
 #endif
