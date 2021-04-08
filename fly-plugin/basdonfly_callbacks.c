@@ -17,14 +17,6 @@ cell AMX_NATIVE_CALL B_OnCallbackHit(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native B_OnDialogResponse() */
-static
-cell AMX_NATIVE_CALL B_OnDialogResponse(AMX *amx, cell *params)
-{
-	/*TODO: remove*/
-	return 1;
-}
-
 /* native B_OnGameModeExit() */
 static
 cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
@@ -371,14 +363,6 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native B_OnPlayerEnterRaceCP(playerid) */
-static
-cell AMX_NATIVE_CALL B_OnPlayerEnterRaceCP(AMX *amx, cell *params)
-{
-	/*TODO: When actually using this, check if it's needed to call DisablePlayerRaceCheckpoint in OnPlayerConnect.*/
-	return 1;
-}
-
 /* native B_OnPlayerEnterVehicle(playerid, vehicleid, ispassenger) */
 static
 cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
@@ -387,15 +371,6 @@ cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 	const int ispassenger = PARAM(3);
 
 	veh_on_player_enter_vehicle(playerid, vehicleid, ispassenger);
-
-	return 1;
-}
-
-/* native B_OnPlayerKeyStateChange(playerid, oldkeys, newkeys) */
-static
-cell AMX_NATIVE_CALL B_OnPlayerKeyStateChange(AMX *amx, cell *params)
-{
-	/*const int playerid = PARAM(1), newkeys = PARAM(2), oldkeys = PARAM(3);*/
 
 	return 1;
 }

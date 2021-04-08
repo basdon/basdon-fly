@@ -489,7 +489,6 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 AMX_NATIVE_INFO PluginNatives[] =
 {
 	REGISTERNATIVE(B_OnCallbackHit),
-	REGISTERNATIVE(B_OnDialogResponse),
 	REGISTERNATIVE(B_OnGameModeExit),
 	REGISTERNATIVE(B_OnGameModeInit),
 	REGISTERNATIVE(B_OnIncomingConnection),
@@ -497,9 +496,7 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnPlayerConnect),
 	REGISTERNATIVE(B_OnPlayerDeath),
 	REGISTERNATIVE(B_OnPlayerDisconnect),
-	REGISTERNATIVE(B_OnPlayerEnterRaceCP),
 	REGISTERNATIVE(B_OnPlayerEnterVehicle),
-	REGISTERNATIVE(B_OnPlayerKeyStateChange),
 	REGISTERNATIVE(B_OnPlayerRequestClass),
 	REGISTERNATIVE(B_OnPlayerRequestSpawn),
 	REGISTERNATIVE(B_OnPlayerSpawn),

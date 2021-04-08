@@ -5,4 +5,6 @@
 *.jpg binary
 *.png binary
 *.tpl linguist-language=HTML
+*.pwn linguist-language=PAWN
+*.p linguist-language=PAWN
 /fly-plugin/vendor/* linguist-vendored

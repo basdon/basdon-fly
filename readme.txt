@@ -216,7 +216,5 @@ it in the background.
 Notes
 -----
 
-The gamemode script is server/gamemodes/basdon.amx, which was produced from the
-fly-gm (https://github.com/basdon/fly-gm) repository. The gamemode
-script is a stub and is deprecated, and will be removed soon. The fly-gm
-repository is not merged in this one for that reason.
+The gamemode script is a stub and is deprecated, and might be removed in
+the future.

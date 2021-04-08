@@ -111,7 +111,7 @@ void ctoai(char *dstsrc);
 #define STACK_HEAP_SIZE 1024
 
 struct FAKEAMX {
-	char _cod[4472];
+	char _cod[3512];
 	union {
 		char _dat;
 		cell emptystring;
