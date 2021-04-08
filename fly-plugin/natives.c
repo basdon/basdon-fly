@@ -12,7 +12,6 @@ static AMX_NATIVE n_DestroyVehicle_;
 static AMX_NATIVE n_DisablePlayerCheckpoint;
 static AMX_NATIVE n_DisablePlayerRaceCheckpoint;
 static AMX_NATIVE n_ForceClassSelection;
-static AMX_NATIVE n_GameTextForPlayer;
 static AMX_NATIVE n_GetConsoleVarAsInt;
 static AMX_NATIVE n_GetPlayerIp;
 static AMX_NATIVE n_GetPlayerName;
@@ -142,11 +141,6 @@ static cell tmpfloat;
 #define NC_ForceClassSelection(PLAYERID) \
 	(NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_ForceClassSelection(amx,nc_params))
-
-#define NC_GameTextForPlayer(PLAYERID,BUF,LENGTH,STYLE) \
-	(NC_PARS_(4)nc_params[1]=PLAYERID,nc_params[2]=BUF,\
-	nc_params[3]=LENGTH,nc_params[4]=STYLE,\
-	n_GameTextForPlayer(amx,nc_params))
 
 #define NC_GetConsoleVarAsInt(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
 	n_GetConsoleVarAsInt(amx,nc_params))
@@ -346,7 +340,6 @@ int natives_find()
 		N(DisablePlayerCheckpoint),
 		N(DisablePlayerRaceCheckpoint),
 		N(ForceClassSelection),
-		N(GameTextForPlayer),
 		N(GetConsoleVarAsInt),
 		N(GetPlayerIp),
 		N(GetPlayerName),

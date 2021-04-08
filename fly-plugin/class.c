@@ -126,12 +126,7 @@ void class_on_player_request_class(int playerid, int _classid)
 	nc_paramf[2] = 236.0f;
 	NC(n_SetPlayerFacingAngle);
 
-	NC_PARS(4);
-	atoc(buf32, (char*) CLASS_NAMES[class_index], 32);
-	nc_params[2] = buf32a;
-	nc_params[3] = 0x800000;
-	nc_params[4] = 3;
-	NC(n_GameTextForPlayer);
+	GameTextForPlayer(playerid, 0x800000, 3, (char*) CLASS_NAMES[class_index]);
 }
 
 int class_on_player_request_spawn(int playerid)

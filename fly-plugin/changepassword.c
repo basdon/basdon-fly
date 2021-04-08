@@ -168,8 +168,7 @@ void chpw_cb_dlg_confirm_password(int playerid, struct DIALOG_RESPONSE response)
 			}
 			chpw_show_dialog(playerid, 1, 1, chpw_cb_dlg_new_password);
 		} else {
-			B144("~b~Updating...");
-			NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+			GameTextForPlayer(playerid, 0x800000, 3, "~b~Updating...");
 			dialog_ensure_transaction(playerid, DLG_TID_CHANGEPASS);
 
 			if (d->bcryptdone) {
@@ -293,8 +292,7 @@ void chpw_cb_dlg_previous_password(int playerid, struct DIALOG_RESPONSE response
 	/* Next | Cancel */
 	if (response.response) {
 		dialog_ensure_transaction(playerid, DLG_TID_CHANGEPASS);
-		B144("~b~Validating...");
-		NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+		GameTextForPlayer(playerid, 0x800000, 3, "~b~Validating...");
 
 		if (pwdata[playerid] == NULL) {
 			/*pw hasn't loaded yet, store response (c string)*/

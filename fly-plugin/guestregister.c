@@ -277,8 +277,7 @@ void guestreg_dlg_change_name(int playerid, struct DIALOG_RESPONSE response)
 		return;
 	}
 
-	B144("~b~Checking username...");
-	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+	GameTextForPlayer(playerid, 0x800000, 3, "~b~Checking username...");
 
 	dialog_ensure_transaction(playerid, DLG_TID_GUESTREGISTER);
 
@@ -322,8 +321,7 @@ void guestreg_dlg_register_confirmpass(int playerid, struct DIALOG_RESPONSE resp
 			pwdata[playerid] = rd;
 			guestreg_show_dialog_password(playerid, 0, 1, guestreg_dlg_register_firstpass);
 		} else {
-			B144("~b~Registering...");
-			NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+			GameTextForPlayer(playerid, 0x800000, 3, "~b~Registering...");
 			dialog_ensure_transaction(playerid, DLG_TID_GUESTREGISTER);
 
 			if (rd->bcryptdone) {

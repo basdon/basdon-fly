@@ -761,8 +761,7 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 			SendClientMessageToAll(COL_WARN, msg);
 		}
 
-		B144("~r~You've been kicked.");
-		NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+		GameTextForPlayer(playerid, 0x800000, 3, "~r~You've been kicked.");
 		kick_update_delay[playerid] = 2;
 
 		if (reason != NULL) {

@@ -25,8 +25,7 @@ int cmd_dev_gt(struct COMMANDCONTEXT cmdctx)
 	if (cmd_get_int_param(&cmdctx, &style) &&
 		cmd_get_str_param(&cmdctx, cbuf4096))
 	{
-		B144(cbuf4096);
-		NC_GameTextForPlayer(cmdctx.playerid, buf144a, 4000, style);
+		GameTextForPlayer(cmdctx.playerid, 4000, style, cbuf4096);
 	} else {
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /gt <style> <text>");
 	}

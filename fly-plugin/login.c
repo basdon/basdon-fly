@@ -182,8 +182,7 @@ static
 void login_cb_dlg_login_or_namechange(int playerid, struct DIALOG_RESPONSE response)
 {
 	if (response.response) {
-		B144("~b~Logging in...");
-		NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+		GameTextForPlayer(playerid, 0x800000, 3, "~b~Logging in...");
 		if (pwdata[playerid]) {
 			atoc(buf144, response.inputtext, 144);
 			atoc(buf4096, pwdata[playerid], 144);
@@ -246,8 +245,7 @@ void login_cb_dlg_register_confirmpass(int playerid, struct DIALOG_RESPONSE resp
 		if (cmpres) {
 			login_show_dialog_register_step1(playerid, 1);
 		} else {
-			B144("~b~Making your account...");
-			NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+			GameTextForPlayer(playerid, 0x800000, 3, "~b~Making your account...");
 			dialog_ensure_transaction(playerid, DLG_TID_LOGIN);
 			atoc(buf144, response.inputtext, 144);
 			common_bcrypt_hash(
@@ -532,8 +530,7 @@ void login_cb_create_guest_usr(void *data)
 		return;
 	}
 
-	B144("~b~Creating game session...");
-	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+	GameTextForPlayer(playerid, 0x800000, 3, "~b~Creating game session...");
 	unconfirmed_userid[playerid] = NC_cache_insert_id();
 	if (unconfirmed_userid[playerid] == -1) {
 		HideGameTextForPlayer(playerid);
@@ -603,8 +600,7 @@ void login_spawn_as_guest(int playerid)
 		/*user is kicked at this point*/
 		return;
 	}
-	B144("~b~Creating guest account...");
-	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+	GameTextForPlayer(playerid, 0x800000, 3, "~b~Creating guest account...");
 	login_create_user(playerid, "", GROUP_GUEST, login_cb_create_guest_usr);
 }
 
@@ -674,8 +670,7 @@ void login_cb_load_account_data(void *data)
 	csprintf(buf4096, "UPDATE usr SET lastseengame=UNIX_TIMESTAMP() WHERE i=%d LIMIT 1", unconfirmed_userid[playerid]);
 	NC_mysql_tquery_nocb(buf4096a);
 
-	B144("~b~Creating game session...");
-	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+	GameTextForPlayer(playerid, 0x800000, 3, "~b~Creating game session...");
 	login_create_session(playerid, login_cb_create_session_existing_member);
 
 	if (lastfal > falng) {
@@ -725,8 +720,7 @@ void login_cb_verify_password(void *data)
 
 		login_show_dialog_login(playerid, 1);
 	} else {
-		B144("~b~Loading account...");
-		NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+		GameTextForPlayer(playerid, 0x800000, 3, "~b~Loading account...");
 		sprintf(cbuf4096_,
 			"SELECT cash,distance,flighttime,playtime,prefs,"
 			"falng,lastfal,groups,nametagdist "
@@ -760,8 +754,7 @@ void login_cb_member_user_created(void *data)
 		login_spawn_as_guest_WITHOUT_ACCOUNT(playerid);
 		return;
 	}
-	B144("~b~Creating game session...");
-	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+	GameTextForPlayer(playerid, 0x800000, 3, "~b~Creating game session...");
 	login_create_session(playerid, login_cb_create_session_new_member);
 }
 
@@ -861,8 +854,7 @@ Callback will be called with CC
 static
 void login_query_check_user_exists(int playerid)
 {
-	B144("~b~Contacting login server...");
-	NC_GameTextForPlayer(playerid, buf144a, 0x800000, 3);
+	GameTextForPlayer(playerid, 0x800000, 3, "~b~Checking username...");
 	sprintf(cbuf4096_,
 		"(SELECT 0,-1,0,count(u) FROM fal WHERE stamp>UNIX_TIMESTAMP()-1800 AND ip='%s')"
 		" UNION ALL "
