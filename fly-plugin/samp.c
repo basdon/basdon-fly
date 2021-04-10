@@ -1129,6 +1129,7 @@ void samp_init()
 	mem_mkjmp(0x80AC99C, &OnfootSyncHook);
 	mem_mkjmp(0x80AEC4F, &DriverSyncHook);
 	mem_mkjmp(0x80AEA7D, &PassengerSyncHook);
+	mem_mkjmp(0x80B1712, &OnPlayerCommandTextHook);
 	mem_mkjmp(0x80B2BA2, &OnDialogResponseHook);
 }
 #endif

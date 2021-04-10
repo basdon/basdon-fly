@@ -199,40 +199,6 @@ cell AMX_NATIVE_CALL B_OnIncomingConnection(AMX *amx, cell *params)
 	return 1;
 }
 
-/* native B_OnPlayerCommandText(playerid, cmdtext[]) */
-static
-cell AMX_NATIVE_CALL B_OnPlayerCommandText(AMX *amx, cell *params)
-{
-	const int playerid = PARAM(1);
-	char cmdtext[145];
-	cell *addr;
-
-	if (!ISPLAYING(playerid)) {
-		SendClientMessage(playerid, COL_WARN, NOLOG);
-		return 1;
-	}
-
-	if (!spawned[playerid]) {
-		SendClientMessage(playerid, COL_WARN, WARN"You can't use commands when not spawned.");
-		return 1;
-	}
-
-	amx_GetAddr(amx, PARAM(2), &addr);
-	ctoa(cmdtext, addr, sizeof(cmdtext));
-
-	common_mysql_escape_string(cmdtext, cbuf144, 144 * sizeof(cell));
-	csprintf(buf4096,
-		"INSERT INTO cmdlog(player,loggedstatus,stamp,cmd) "
-		"VALUES(IF(%d<1,NULL,%d),%d,UNIX_TIMESTAMP(),'%s')",
-		userid[playerid],
-		userid[playerid],
-		loggedstatus[playerid],
-		cbuf144);
-	NC_mysql_tquery_nocb(buf4096a);
-
-	return cmd_check(playerid, cmdtext);
-}
-
 /* native B_OnPlayerConnect(playerid) */
 static
 cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)

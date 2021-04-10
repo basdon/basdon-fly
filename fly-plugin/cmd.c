@@ -94,7 +94,8 @@ static struct COMMAND cmds[] = {
 	{ 0, "/vor", GROUPS_ALL, CMD_VOR_SYNTAX, CMD_VOR_DESC, cmd_vor },
 	{ 0, "/w", GROUPS_ALL, CMD_W_SYNTAX, CMD_W_DESC, cmd_w },
 	{ 0, "/weather", GROUPS_ALL, CMD_METAR_SYNTAX, CMD_METAR_DESC, cmd_metar },
-}, *cmds_end = cmds + sizeof(cmds)/sizeof(cmds[0]);
+	{ 0, 0, 0, 0, 0, 0 },
+};
 
 /*
 Hashes command part of command text (case-insensitive).
@@ -149,28 +150,49 @@ Precalcs all command hashes.
 static
 void cmd_init()
 {
-	struct COMMAND *c = cmds;
+	register struct COMMAND *cmd;
 
-	while (c != cmds_end) {
-		c->hash = cmd_hash(c->cmd);
-		c++;
+	cmd = cmds;
+	while (cmd->cmd) {
+		cmd->hash = cmd_hash(cmd->cmd);
+		cmd++;
 	}
 }
 
-/*
-Checks incoming command and calls handler if one found and group matched.
+/**
+Called from hooked commandtext response packet handler.
 */
-static
-int cmd_check(const int playerid, char *cmdtext)
+void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 {
+	register struct COMMAND *cmd;
 	struct COMMANDCONTEXT cmdctx;
-	struct COMMAND *cmd = cmds;
 	int hash;
 	char syntaxmsg[144];
 
+	if (!ISPLAYING(playerid)) {
+		SendClientMessage(playerid, COL_WARN, WARN"Log in first.");
+		return;
+	}
+
+	if (!spawned[playerid]) {
+		SendClientMessage(playerid, COL_WARN, WARN"You can't use commands when not spawned.");
+		return;
+	}
+
+	common_mysql_escape_string(cmdtext, cbuf144, 144 * sizeof(cell));
+	csprintf(buf4096,
+		"INSERT INTO cmdlog(player,loggedstatus,stamp,cmd) "
+		"VALUES(IF(%d<1,NULL,%d),%d,UNIX_TIMESTAMP(),'%s')",
+		userid[playerid],
+		userid[playerid],
+		loggedstatus[playerid],
+		cbuf144);
+	NC_mysql_tquery_nocb(buf4096a);
+
 	hash = cmd_hash(cmdtext);
 
-	while (cmd != cmds_end) {
+	cmd = cmds;
+	while (cmd->cmd) {
 		if (hash == cmd->hash &&
 			(pdata[playerid]->groups & cmd->groups) &&
 			cmd_is(cmdtext, cmd->cmd, &cmdctx.parseidx))
@@ -181,10 +203,9 @@ int cmd_check(const int playerid, char *cmdtext)
 				sprintf(syntaxmsg, "Syntax: %s %s", cmd->cmd, cmd->syntax);
 				SendClientMessage(playerid, COL_WARN, syntaxmsg);
 			}
-			return 1;
+			return;
 		}
 		cmd++;
 	}
 	SendClientMessage(playerid, -1, "SERVER: Unknown command.");
-	return 1;
 }

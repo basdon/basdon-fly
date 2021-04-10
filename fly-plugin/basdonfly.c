@@ -492,7 +492,6 @@ AMX_NATIVE_INFO PluginNatives[] =
 	REGISTERNATIVE(B_OnGameModeExit),
 	REGISTERNATIVE(B_OnGameModeInit),
 	REGISTERNATIVE(B_OnIncomingConnection),
-	REGISTERNATIVE(B_OnPlayerCommandText),
 	REGISTERNATIVE(B_OnPlayerConnect),
 	REGISTERNATIVE(B_OnPlayerDeath),
 	REGISTERNATIVE(B_OnPlayerDisconnect),

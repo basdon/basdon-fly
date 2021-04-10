@@ -44,12 +44,6 @@ export OnIncomingConnection(playerid, ip_address[], port)
 #emit RETN
 }
 
-export OnPlayerCommandText(playerid, cmdtext[])
-{
-#emit SYSREQ.C B_OnPlayerCommandText
-#emit RETN
-}
-
 export OnPlayerConnect(playerid)
 {
 #emit SYSREQ.C B_OnPlayerConnect

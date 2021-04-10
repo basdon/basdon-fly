@@ -4,6 +4,7 @@ extern samp_pNetGame
 extern hook_OnOnfootSync
 extern hook_OnDriverSync
 extern hook_OnPassengerSync
+extern hook_cmd_on_cmdtext
 extern hook_dialog_on_response
 extern printf
 
@@ -42,6 +43,15 @@ PassengerSyncHook:
 	mov [esp], eax ; playerid
 	call hook_OnPassengerSync
 	mov eax, 080AE9D1h
+	jmp eax
+
+;prot void OnPlayerCommandTextHook();
+global OnPlayerCommandTextHook
+OnPlayerCommandTextHook:
+	mov [esp], ebx ; playerid
+	mov [esp+04h], edi ; cmdtext
+	call hook_cmd_on_cmdtext
+	mov eax, 080B15FDh
 	jmp eax
 
 ;prot void OnDialogResponseHook();
