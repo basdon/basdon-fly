@@ -88,20 +88,19 @@ void svp_init()
 }
 
 /**
-Servicepoint /refuel command.
+To be called from the /refuel command.
 */
 static
-int svp_cmd_refuel(struct COMMANDCONTEXT cmdctx)
+int svp_refuel(int playerid)
 {
 	struct dbvehicle *veh;
 	struct vec3 vpos;
-	int playerid, vehicleid, driverid, budget, svpid, cost, refuelpct;
+	int vehicleid, driverid, budget, svpid, cost, refuelpct;
 	int driveruserid;
 	float capacity, refuelamount;
 	char buf1[10];
 	char msg144[144];
 
-	playerid = cmdctx.playerid;
 	vehicleid = veh_GetPlayerVehicle(playerid, NULL, &veh);
 	if (!vehicleid || veh == NULL) {
 		return CMD_OK;
@@ -209,20 +208,17 @@ int svp_cmd_refuel(struct COMMANDCONTEXT cmdctx)
 }
 
 /**
-Servicepoint /repair command.
-
-Aliases: /fix
+To be called from the /repair or /fix command.
 */
 static
-int svp_cmd_repair(struct COMMANDCONTEXT cmdctx)
+int svp_repair(int playerid)
 {
 	struct dbvehicle *veh;
 	struct vec3 vpos;
-	int playerid, vehicleid, driverid, driveruserid, budget, svpid, cost;
+	int vehicleid, driverid, driveruserid, budget, svpid, cost;
 	float hp, fixamount;
 	char msg144[144];
 
-	playerid = cmdctx.playerid;
 	vehicleid = veh_GetPlayerVehicle(playerid, NULL, &veh);
 	if (!vehicleid) {
 		return CMD_OK;

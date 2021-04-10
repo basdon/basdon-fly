@@ -127,15 +127,3 @@ void prefs_on_player_connect(int playerid)
 {
 	prefs[playerid] = DEFAULTPREFS;
 }
-
-/**
-The /preferences command.
-
-Shows a dialog with preferences which the player can modify.
-*/
-static
-int prefs_cmd_preferences(struct COMMANDCONTEXT cmdctx)
-{
-	prefs_show_dialog(cmdctx.playerid);
-	return CMD_OK;
-}

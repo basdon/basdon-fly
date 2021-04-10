@@ -326,23 +326,20 @@ void chpw_cb_dlg_previous_password(int playerid, struct DIALOG_RESPONSE response
 }
 
 /**
-The /changepassword command allows one to change their password.
-
-Must only be available to registered users.
+Starts the changing password process.
 */
 static
-int chpw_cmd_changepassword(struct COMMANDCONTEXT cmdctx)
+void chpw_engage(int playerid)
 {
-	if (pwdata[cmdctx.playerid]) {
-		return 1;
+	if (pwdata[playerid]) {
+		return;
 	}
 
-	chpw_show_dialog(cmdctx.playerid, 0, 0, chpw_cb_dlg_previous_password);
+	chpw_show_dialog(playerid, 0, 0, chpw_cb_dlg_previous_password);
 
 	/*load current password while user is filling in dialog*/
-	sprintf(cbuf4096_, "SELECT pw FROM usr WHERE i=%d", userid[cmdctx.playerid]);
-	common_mysql_tquery(cbuf4096_, chpw_cb_current_password_loaded, V_MK_PLAYER_CC(cmdctx.playerid));
-	return 1;
+	sprintf(cbuf4096_, "SELECT pw FROM usr WHERE i=%d", userid[playerid]);
+	common_mysql_tquery(cbuf4096_, chpw_cb_current_password_loaded, V_MK_PLAYER_CC(playerid));
 }
 
 static

@@ -1,6 +1,19 @@
-/**
-The /cp command creates a checkpoint on top of the player.
-*/
+#define CMD__M_SYNTAX "<amount>"
+#define CMD__M_DESC "Gives or takes money"
+static
+int cmd_dev__m(struct COMMANDCONTEXT cmdctx)
+{
+	int i;
+
+	if (cmd_get_int_param(&cmdctx, &i)) {
+		money_give(cmdctx.playerid, i);
+		return CMD_OK;
+	}
+	return CMD_SYNTAX_ERR;
+}
+
+#define CMD_CP_SYNTAX ""
+#define CMD_CP_DESC "Spawns a checkpoint"
 static
 int cmd_dev_cp(struct COMMANDCONTEXT cmdctx)
 {
@@ -17,24 +30,8 @@ int cmd_dev_cp(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-/**
-The /gt command shows gametext for the player.
-*/
-static
-int cmd_dev_gt(struct COMMANDCONTEXT cmdctx)
-{
-	int style;
-
-	if (cmd_get_int_param(&cmdctx, &style) && cmd_get_str_param(&cmdctx, cbuf4096)) {
-		GameTextForPlayer(cmdctx.playerid, 4000, style, cbuf4096);
-		return CMD_OK;
-	}
-	return CMD_SYNTAX_ERR;
-}
-
-/**
-The /crashme command crashes the player.
-*/
+#define CMD_CRASHME_SYNTAX ""
+#define CMD_CRASHME_DESC "Crashes your game"
 static
 int cmd_dev_crashme(struct COMMANDCONTEXT cmdctx)
 {
@@ -42,9 +39,8 @@ int cmd_dev_crashme(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-/**
-The //drvc command calls DisableRemoteVehicleCollisions
-*/
+#define CMD_DRVC_SYNTAX ""
+#define CMD_DRVC_DESC "calls DisableRemoteVehicleCollisions"
 static
 int cmd_dev_disableremotevehiclecollisions(struct COMMANDCONTEXT cmdctx)
 {
@@ -57,9 +53,39 @@ int cmd_dev_disableremotevehiclecollisions(struct COMMANDCONTEXT cmdctx)
 	return CMD_SYNTAX_ERR;
 }
 
-/**
-The /jetpack command gives player a jetpack.
-*/
+#define CMD_FWEATHER_SYNTAX "<weatherid>"
+#define CMD_FWEATHER_DESC "Force weather now"
+static
+int cmd_dev_fweather(struct COMMANDCONTEXT cmdctx)
+{
+	int w;
+
+	if (cmd_get_int_param(&cmdctx, &w)) {
+		weather.current = weather.locked = weather.upcoming = w;
+		timecyc_sync(cmdctx.playerid);
+		SendClientMessageToAll(-1, "forced weather");
+		return CMD_OK;
+	}
+	return CMD_SYNTAX_ERR;
+}
+
+#define CMD_GT_SYNTAX "<style> <text>"
+#define CMD_GT_DESC "Shows game text"
+static
+int cmd_dev_gt(struct COMMANDCONTEXT cmdctx)
+{
+	int style;
+	char textbuf[1024];
+
+	if (cmd_get_int_param(&cmdctx, &style) && cmd_get_str_param(&cmdctx, textbuf)) {
+		GameTextForPlayer(cmdctx.playerid, 4000, style, textbuf);
+		return CMD_OK;
+	}
+	return CMD_SYNTAX_ERR;
+}
+
+#define CMD_JETPACK_SYNTAX ""
+#define CMD_JETPACK_DESC "Gives a jetpack"
 static
 int cmd_dev_jetpack(struct COMMANDCONTEXT cmdctx)
 {
@@ -67,23 +93,86 @@ int cmd_dev_jetpack(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-/**
-The SLASH*m <amount> command to give or take money.
-*/
+#define CMD_KICKME_SYNTAX ""
+#define CMD_KICKME_DESC "Kicks you"
 static
-int cmd_dev_STARm(struct COMMANDCONTEXT cmdctx)
+int cmd_dev_kickme(struct COMMANDCONTEXT cmdctx)
 {
-	int i;
-	if (cmd_get_int_param(&cmdctx, &i)) {
-		money_give(cmdctx.playerid, i);
+	SendClientMessage(cmdctx.playerid, -1, "you're kicked, bye");
+	natives_Kick(cmdctx.playerid, "requested \n''\n \0 ok", NULL, -1);
+	return CMD_OK;
+}
+
+#define CMD_KILL_SYNTAX ""
+#define CMD_KILL_DESC "Kills you"
+static
+int cmd_dev_kill(struct COMMANDCONTEXT cmdctx)
+{
+	NC_SetPlayerHealth(cmdctx.playerid, 0.0f);
+	return CMD_OK;
+}
+
+#define CMD_NWEATHER_SYNTAX ""
+#define CMD_NWEATHER_DESC "Trigger transitioning to next weather (as if it's called by the timer)"
+static
+int cmd_dev_nweather(struct COMMANDCONTEXT cmdctx)
+{
+	SendClientMessageToAll(-1, "changing weather");
+	timecyc_next_weather(NULL);
+	return CMD_OK;
+}
+
+#define CMD_OWNER_SYNTAX ""
+#define CMD_OWNER_DESC "Toggles owner group on your account"
+static
+int cmd_dev_owner(struct COMMANDCONTEXT cmdctx)
+{
+	pdata[cmdctx.playerid]->groups ^= GROUP_OWNER;
+	pdata[cmdctx.playerid]->groups |= GROUP_MEMBER;
+	return CMD_OK;
+}
+
+#define CMD_PLATFORM_SYNTAX ""
+#define CMD_PLATFORM_DESC "Create a haystack object at player's position (useful to take pictures)"
+static
+int cmd_dev_platform(struct COMMANDCONTEXT cmdctx)
+{
+	struct RPCDATA_CreateObject rpcdata;
+	struct BitStream bs;
+
+	GetPlayerPos(cmdctx.playerid, (struct vec3*) &rpcdata.x);
+	rpcdata.objectid = OBJECT_DEV_PLATFORM;
+	rpcdata.modelid = 3374;
+	rpcdata.rx = rpcdata.ry = rpcdata.rz = 0.0f;
+	rpcdata.drawdistance = 2000.0f;
+	rpcdata.no_camera_col = 0;
+	rpcdata.attached_object_id = rpcdata.attached_vehicle_id = -1;
+	rpcdata.num_materials = 0;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	SAMP_SendRPCToPlayer(RPC_CreateObject, &bs, cmdctx.playerid, 2);
+
+	rpcdata.z += 4.0f;
+	SetPlayerPosRaw(cmdctx.playerid, (struct vec3*) &rpcdata.x);
+	return CMD_OK;
+}
+
+#define CMD_SOUND_SYNTAX "<soundid>"
+#define CMD_SOUND_DESC "Plays a sound"
+static
+int cmd_dev_sound(struct COMMANDCONTEXT cmdctx)
+{
+	int soundid;
+
+	if (cmd_get_int_param(&cmdctx, &soundid)) {
+		PlayerPlaySound(cmdctx.playerid, soundid);
 		return CMD_OK;
 	}
 	return CMD_SYNTAX_ERR;
 }
 
-/**
-Command to test SendClientMessage message splitting.
-*/
+#define CMD_TESTMSGSPLIT_SYNTAX ""
+#define CMD_TESTMSGSPLIT_DESC "Test SendClientMessage message splitting"
 static
 int cmd_dev_testmsgsplit(struct COMMANDCONTEXT cmdctx)
 {
@@ -204,9 +293,8 @@ int cmd_dev_testmsgsplit(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-/**
-Command to test parameter parsing in plugin code.
-*/
+#define CMD_TESTPARPL_SYNTAX ""
+#define CMD_TESTPARPL_DESC "Test parameter parsing"
 static
 int cmd_dev_testparpl(struct COMMANDCONTEXT cmdctx)
 {
@@ -228,64 +316,59 @@ int cmd_dev_testparpl(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-/**
-Creates a haystack object at the player's position.
-
-Useful to make a platform to stand on for taking pictures.
-*/
+#define CMD_TIMECYC_SYNTAX ""
+#define CMD_TIMECYC_DESC "Prints current timecyc data"
 static
-int cmd_dev_platform(struct COMMANDCONTEXT cmdctx)
+int cmd_dev_timecyc(struct COMMANDCONTEXT cmdctx)
 {
-	struct RPCDATA_CreateObject rpcdata;
-	struct BitStream bs;
+	char msg144[144];
 
-	GetPlayerPos(cmdctx.playerid, (struct vec3*) &rpcdata.x);
-	rpcdata.objectid = 995; /*999 is rotating radar id, 998 and lower may be other reserved things.*/
-	rpcdata.modelid = 3374;
-	rpcdata.rx = rpcdata.ry = rpcdata.rz = 0.0f;
-	rpcdata.drawdistance = 2000.0f;
-	rpcdata.no_camera_col = 0;
-	rpcdata.attached_object_id = rpcdata.attached_vehicle_id = -1;
-	rpcdata.num_materials = 0;
-	bs.ptrData = &rpcdata;
-	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
-	SAMP_SendRPCToPlayer(RPC_CreateObject, &bs, cmdctx.playerid, 2);
-
-	rpcdata.z += 4.0f;
-	SetPlayerPosRaw(cmdctx.playerid, (struct vec3*) &rpcdata.x);
+	sprintf(msg144,
+		"%02d:%02d current %d upcoming %d locked %d "
+		"syncstate %d\n",
+		time_h,
+		time_m,
+		weather.current,
+		weather.upcoming,
+		weather.locked,
+		timecycstate[cmdctx.playerid]);
+	SendClientMessage(cmdctx.playerid, -1, msg144);
 	return CMD_OK;
 }
 
-/**
-The /kill command kills the player.
-*/
+#define CMD_TIMEX_SYNTAX "<h> <m>"
+#define CMD_TIMEX_DESC "Changes your time"
 static
-int cmd_dev_kill(struct COMMANDCONTEXT cmdctx)
+int cmd_dev_timex(struct COMMANDCONTEXT cmdctx)
 {
-	NC_SetPlayerHealth(cmdctx.playerid, 0.0f);
-	return CMD_OK;
+	int h, m;
+
+	if (cmd_get_int_param(&cmdctx, &h)) {
+		m = 0;
+		cmd_get_int_param(&cmdctx, &m);
+		time_h = h;
+		time_m = m;
+		NC_SetPlayerTime(cmdctx.playerid, h, m);
+		panel_day_night_changed();
+		return CMD_OK;
+	}
+	return CMD_SYNTAX_ERR;
 }
 
-/**
-The /kickme commands kicks the player.
-*/
-static
-int cmd_dev_kickme(struct COMMANDCONTEXT cmdctx)
-{
-	SendClientMessage(cmdctx.playerid, -1, "you're kicked, bye");
-	natives_Kick(cmdctx.playerid, "requested \n''\n \0 ok", NULL, -1);
-	return CMD_OK;
-}
 
-/**
-Toggle owner group on yourself.
-*/
+#define CMD_TWEATHER_SYNTAX "<weatherid>"
+#define CMD_TWEATHER_DESC "Transition weather to given id"
 static
-int cmd_dev_owner(struct COMMANDCONTEXT cmdctx)
+int cmd_dev_tweather(struct COMMANDCONTEXT cmdctx)
 {
-	pdata[cmdctx.playerid]->groups ^= GROUP_OWNER;
-	pdata[cmdctx.playerid]->groups |= GROUP_MEMBER;
-	return CMD_OK;
+	int w;
+
+	if (cmd_get_int_param(&cmdctx, &w)) {
+		timecyc_set_weather(w);
+		SendClientMessageToAll(-1, "changing weather");
+		return CMD_OK;
+	}
+	return CMD_SYNTAX_ERR;
 }
 
 /**
@@ -293,9 +376,8 @@ Dev vehicle id spawned by the /v command.
 */
 static int devvehicle = INVALID_VEHICLE_ID;
 
-/**
-The /v cmd to spawn a dev vehicle.
-*/
+#define CMD_V_SYNTAX "<modelid|modelname>"
+#define CMD_V_DESC "Spawns a dev vehicle"
 static
 int cmd_dev_v(struct COMMANDCONTEXT cmdctx)
 {
@@ -328,24 +410,8 @@ int cmd_dev_v(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-/**
-The /sound <soundid> command plays a sound.
-*/
-static
-int cmd_dev_sound(struct COMMANDCONTEXT cmdctx)
-{
-	int soundid;
-
-	if (cmd_get_int_param(&cmdctx, &soundid)) {
-		PlayerPlaySound(cmdctx.playerid, soundid);
-		return CMD_OK;
-	}
-	return CMD_SYNTAX_ERR;
-}
-
-/**
-The /vdamage command prints vehicle damage status.
-*/
+#define CMD_VDAMAGE_SYNTAX ""
+#define CMD_VDAMAGE_DESC "Prints vehicle damage status"
 static
 int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 {
@@ -360,51 +426,8 @@ int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-/**
-The /vehrespawn command respawns the player's vehicle.
-*/
-static
-int cmd_dev_vehrespawn(struct COMMANDCONTEXT cmdctx)
-{
-	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
-	NC_SetVehicleToRespawn(vehicleid);
-	return CMD_OK;
-}
-
-/**
-/vhp [set_hp]
-When hp_percent present, set the hp.
-Prints the hp of the player's vehicle.
-*/
-static
-int cmd_dev_vhp(struct COMMANDCONTEXT cmdctx)
-{
-	int vehicleid;
-	int set_hp;
-
-	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
-	if (!vehicleid) {
-		return CMD_OK;
-	}
-
-	if (cmd_get_int_param(&cmdctx, &set_hp)) {
-		NC_SetVehicleHealth(vehicleid, set_hp);
-	}
-
-	NC_PARS(2);
-	nc_params[1] = vehicleid;
-	nc_params[2] = buf32a;
-	NC(n_GetVehicleHealth_);
-	sprintf(cbuf32, "hp %f", *fbuf32);
-	SendClientMessage(cmdctx.playerid, -1, cbuf32);
-	return CMD_OK;
-}
-
-/**
-/vfl [fl_percent]
-When fl_percent present, set the fuel leven (in percentage).
-Prints the fl of the player's vehicle.
-*/
+#define CMD_VFL_SYNTAX "[fl_percent]"
+#define CMD_VFL_DESC "(Optionally sets then) gets vehicle fuel level"
 static
 int cmd_dev_vfl(struct COMMANDCONTEXT cmdctx)
 {
@@ -435,9 +458,34 @@ int cmd_dev_vfl(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-/**
-The /vphnan command sets player's vehicle to NaN hp.
-*/
+#define CMD_VHP_SYNTAX "[hp]"
+#define CMD_VHP_DESC "(Optionally sets then) gets vehicle hp"
+static
+int cmd_dev_vhp(struct COMMANDCONTEXT cmdctx)
+{
+	int vehicleid;
+	int set_hp;
+
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
+	if (!vehicleid) {
+		return CMD_OK;
+	}
+
+	if (cmd_get_int_param(&cmdctx, &set_hp)) {
+		NC_SetVehicleHealth(vehicleid, set_hp);
+	}
+
+	NC_PARS(2);
+	nc_params[1] = vehicleid;
+	nc_params[2] = buf32a;
+	NC(n_GetVehicleHealth_);
+	sprintf(cbuf32, "hp %f", *fbuf32);
+	SendClientMessage(cmdctx.playerid, -1, cbuf32);
+	return CMD_OK;
+}
+
+#define CMD_VHPNAN_SYNTAX ""
+#define CMD_VHPNAN_DESC "Sets vehicle to NaN hp"
 static
 int cmd_dev_vhpnan(struct COMMANDCONTEXT cmdctx)
 {
@@ -446,9 +494,8 @@ int cmd_dev_vhpnan(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-/**
-The /vphninf command sets player's vehicle to negative infinite hp.
-*/
+#define CMD_VHPNINF_SYNTAX ""
+#define CMD_VHPNINF_DESC "Sets vehicle to negative infinite hp"
 static
 int cmd_dev_vhpninf(struct COMMANDCONTEXT cmdctx)
 {
@@ -457,9 +504,8 @@ int cmd_dev_vhpninf(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-/**
-The /vphpinf command sets player's vehicle to positive infinite hp.
-*/
+#define CMD_VHPPINF_SYNTAX ""
+#define CMD_VHPPINF_DESC "Sets vehicle to positive infinite hp"
 static
 int cmd_dev_vhppinf(struct COMMANDCONTEXT cmdctx)
 {

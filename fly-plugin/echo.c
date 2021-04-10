@@ -102,28 +102,24 @@ void echo_send_status_request()
 	}
 }
 
-/**
-The /irc command shows irc status
-*/
 static
-int echo_cmd_irc(struct COMMANDCONTEXT cmdctx)
+void echo_request_status_for_player(int playerid)
 {
 	int i;
 
 	if (echo_is_irc_down) {
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"IRC bridge is down!");
+		SendClientMessage(playerid, COL_WARN, WARN"IRC bridge is down!");
 	} else {
 		i = 0;
 		while (i < num_players_needing_echo_status_message) {
-			if (players_needing_echo_status_message[i] == cmdctx.playerid) {
-				return 1;
+			if (players_needing_echo_status_message[i] == playerid) {
+				return;
 			}
 			i++;
 		}
-		players_needing_echo_status_message[num_players_needing_echo_status_message++] = cmdctx.playerid;
+		players_needing_echo_status_message[num_players_needing_echo_status_message++] = playerid;
 		need_request_echo_status = 1;
 	}
-	return 1;
 }
 
 static

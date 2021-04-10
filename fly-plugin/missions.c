@@ -1463,17 +1463,13 @@ void missions_send_tracker_data(
 }
 
 /**
-The /cancelmission cmd, stops current mission for the player, for a fee.
-
-Aliases: /s
+To be called from the /s command handler.
 */
 static
-int missions_cmd_cancelmission(struct COMMANDCONTEXT cmdctx)
+void missions_process_cancel_request_by_player(int playerid)
 {
 	struct MISSION *mission;
-	int playerid;
 
-	playerid = cmdctx.playerid;
 	if ((mission = activemission[playerid]) != NULL) {
 		if (mission_stage[playerid] == MISSION_STAGE_LOAD || mission_stage[playerid] == MISSION_STAGE_UNLOAD) {
 			NC_TogglePlayerControllable(playerid, 1);
@@ -1486,35 +1482,30 @@ int missions_cmd_cancelmission(struct COMMANDCONTEXT cmdctx)
 	} else {
 		SendClientMessage(playerid, COL_WARN, WARN"You're not on an active mission.");
 	}
-	return CMD_OK;
 }
 
 /**
-The /mission cmd, starts a new mission
-
-Aliases: /w /m
+To be called from the /w command handler.
 */
 static
-int missions_cmd_mission(struct COMMANDCONTEXT cmdctx)
+void missions_engage_help_or_map(int playerid)
 {
 	struct vec3 vel;
 	struct dbvehicle *veh;
 	int vehicleid;
-	int playerid;
 
-	playerid = cmdctx.playerid;
 	switch (mission_stage[playerid]) {
 	case MISSION_STAGE_NOMISSION:
 		if (active_msp_index[playerid] != -1) {
 			missions_show_jobmap_set_stage_set_controllable(playerid);
-			return CMD_OK;
+			break;
 		}
 
 		vehicleid = GetPlayerVehicleID(playerid);
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (!veh || GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
 			SendClientMessage(playerid, COL_WARN, WARN"Get in a vehicle first!");
-			return CMD_OK;
+			break;
 		}
 
 		/*Checking speed for two reasons:
@@ -1524,13 +1515,13 @@ int missions_cmd_mission(struct COMMANDCONTEXT cmdctx)
 		/*Ignoring z velocity because it would be annoying with skimmers riding heavy waves.*/
 		if (vel.x * vel.x + vel.y * vel.y > MAX_SPEED_SQ) {
 			SendClientMessage(playerid, COL_WARN, WARN"Stop the vehicle first!");
-			return CMD_OK;
+			break;
 		}
 
 		missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(veh->model);
 		if (missions_available_msptype_mask[playerid] == 0) {
 			SendClientMessage(playerid, COL_WARN, WARN"This vehicle can't do any missions!");
-			return CMD_OK;
+			break;
 		}
 
 		/*For SOME reason, when many enexes are shown, the preview can be messed up
@@ -1540,29 +1531,26 @@ int missions_cmd_mission(struct COMMANDCONTEXT cmdctx)
 		But that would add too much delay (and complexity), so I'm just letting it be messed up atm..*/
 
 		missions_jobhelp_show(playerid, msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]));
-		return CMD_OK;
+		break;
 	case MISSION_STAGE_FLIGHT:
 		if (active_msp_index[playerid] == activemission[playerid]->endpoint - missionpoints) {
 			missions_start_unload(playerid);
-			return 1;
+			break;
 		}
 		SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &activemission[playerid]->endpoint->pos, MISSION_CP_RAD);
 		SendClientMessage(playerid, COL_WARN,
 			WARN"You're already working! Use /s to stop your current work first ($"EQ(MISSION_CANCEL_FINE)" fee).");
-		return CMD_OK;
+		break;
 	}
-
-	return CMD_OK;
 }
 
 static
-int missions_cmd_stoplocate(struct COMMANDCONTEXT cmdctx)
+void missions_stoplocate(int playerid)
 {
-	if (locating_msp_index[cmdctx.playerid] != -1) {
-		locating_msp_index[cmdctx.playerid] = -1;
-		DisablePlayerRaceCheckpoint(cmdctx.playerid);
+	if (locating_msp_index[playerid] != -1) {
+		locating_msp_index[playerid] = -1;
+		DisablePlayerRaceCheckpoint(playerid);
 	}
-	return CMD_OK;
 }
 
 static

@@ -290,14 +290,8 @@ int sortaprefs(const void *_a, const void *_b)
 	return (int) (10.0f * (a->distance - b->distance));
 }
 
-/**
-The /nearest command, shows a list dialog with airports.
-
-Airports are sorted by distance from player. Choosing an airport shows an
-additional dialog with information about the selected airport.
-*/
 static
-int airport_cmd_nearest(struct COMMANDCONTEXT cmdctx)
+int airport_show_nearest_dialog(int playerid)
 {
 	register struct AIRPORT *ap;
 	struct NEAREST_AIRPORT_DATA *data;
@@ -309,7 +303,7 @@ int airport_cmd_nearest(struct COMMANDCONTEXT cmdctx)
 	struct APREF *aps;
 	char *info;
 
-	GetPlayerPos(cmdctx.playerid, &playerpos);
+	GetPlayerPos(playerid, &playerpos);
 	/**Kinda stupid this extra checks is needed to exclude disabled airports.
 	TODO Probably happens on a lot of places, separate disabled/enabled airports at load thx.*/
 	aps = alloca(sizeof(struct APREF) * numairports);
@@ -325,7 +319,7 @@ int airport_cmd_nearest(struct COMMANDCONTEXT cmdctx)
 		i++;
 	}
 	if (num == 0) {
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"No airports!");
+		SendClientMessage(playerid, COL_WARN, WARN"No airports!");
 		return 1;
 	}
 	qsort(aps, num, sizeof(struct APREF), sortaprefs);
@@ -355,36 +349,6 @@ int airport_cmd_nearest(struct COMMANDCONTEXT cmdctx)
 	dialog.caption = "Nearest airports";
 	dialog.button1 = "Info";
 	dialog.button2 = "Close";
-	dialog_show(cmdctx.playerid, &dialog);
-	return 1;
-}
-
-/**
-The /beacons command, shows a dialog with list of all airport beacons.
-*/
-static
-int airport_cmd_beacons(struct COMMANDCONTEXT cmdctx)
-{
-	struct DIALOG_INFO dialog;
-	char *info;
-	struct AIRPORT *ap = airports;
-	int count = numairports;
-
-	dialog_init_info(&dialog);
-	if (numairports) {
-		info = dialog.info;
-		while (count-- > 0) {
-			if (ap->enabled) {
-				info += sprintf(info, " %s", ap->code);
-			}
-			ap++;
-		}
-	} else {
-		strcpy(dialog.info, " None!");
-	}
-	dialog.transactionid = DLG_TID_AIRPORT_BEACONS;
-	dialog.caption = "Beacons";
-	dialog.button1 = "Close";
-	dialog_show(cmdctx.playerid, &dialog);
+	dialog_show(playerid, &dialog);
 	return 1;
 }

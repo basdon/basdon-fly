@@ -246,21 +246,6 @@ void guestreg_cb_password_hashed(void *data)
 	}
 }
 
-/**
-The /register command allows guests to register their account.
-*/
-static
-int guestreg_cmd_register(struct COMMANDCONTEXT cmdctx)
-{
-	if (sessionid[cmdctx.playerid] == -1 || userid[cmdctx.playerid] == -1) {
-		SendClientMessage(cmdctx.playerid, COL_WARN,
-			WARN"Your guest session is not linked to a guest account. Please reconnect if you want to register.");
-	} else {
-		guestreg_show_dialog_namechange(cmdctx.playerid, 0, 0);
-	}
-	return CMD_OK;
-}
-
 static
 void guestreg_dlg_change_name(int playerid, struct DIALOG_RESPONSE response)
 {
