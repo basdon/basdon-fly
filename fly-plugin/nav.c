@@ -202,17 +202,16 @@ int nav_cmd_adf(struct COMMANDCONTEXT cmdctx)
 	char beacon[144], *bp;
 
 	if (!nav_check_can_do_cmd(cmdctx.playerid, NAV_ADF, &vehicleid)) {
-		return 1;
+		return CMD_OK;
 	}
 
 	if (!cmd_get_str_param(&cmdctx, beacon)) {
 		if (nav[vehicleid] != NULL) {
 			nav_disable(vehicleid);
 			PlayerPlaySound(cmdctx.playerid, NAV_DEL_SOUND);
-			return 1;
+			return CMD_OK;
 		}
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /adf [beacon] - see /beacons or /nearest");
-		return 1;
+		return CMD_SYNTAX_ERR;
 	}
 
 	bp = beacon;
@@ -240,7 +239,7 @@ int nav_cmd_adf(struct COMMANDCONTEXT cmdctx)
 	}
 unkbeacon:
 	SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Unknown beacon - see /beacons or /nearest");
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -263,17 +262,16 @@ int nav_cmd_vor(struct COMMANDCONTEXT cmdctx)
 	int len;
 
 	if (!nav_check_can_do_cmd(cmdctx.playerid, NAV_VOR, &vehicleid)) {
-		return 1;
+		return CMD_OK;
 	}
 
 	if (!cmd_get_str_param(&cmdctx, beaconpar)) {
 		if (nav[vehicleid] != NULL) {
 			nav_disable(vehicleid);
 			PlayerPlaySound(cmdctx.playerid, NAV_DEL_SOUND);
-			return 1;
+			return CMD_OK;
 		}
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /vor [beacon][runway] - see /beacons or /nearest");
-		return 1;
+		return CMD_SYNTAX_ERR;
 	}
 	combinedparameter = !cmd_get_str_param(&cmdctx, runwaypar);
 
@@ -353,7 +351,7 @@ tellrws:
 	}
 
 	SendClientMessage(cmdctx.playerid, COL_WARN, WARN"There are no VOR capable runways at this beacon");
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -370,15 +368,15 @@ int nav_cmd_ils(struct COMMANDCONTEXT cmdctx)
 	int vehicleid;
 
 	if (!nav_check_can_do_cmd(cmdctx.playerid, NAV_ILS, &vehicleid)) {
-		return 1;
+		return CMD_OK;
 	}
 	if ((np = nav[vehicleid]) == NULL || np->vor == NULL) {
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"ILS can only be activated when VOR is already active");
-		return 1;
+		return CMD_OK;
 	}
 	if ((np->vor->nav & NAV_ILS) != NAV_ILS) {
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"The selected runway does not have ILS capabilities");
-		return 1;
+		return CMD_OK;
 	}
 	np->ilsx = np->ilsz = INVALID_ILS_VALUE;
 	np->ils = !np->ils;
@@ -387,7 +385,7 @@ int nav_cmd_ils(struct COMMANDCONTEXT cmdctx)
 	GetVehiclePosRotUnsafe(vehicleid, &vpos);
 	nav_update(vehicleid, &vpos);
 	panel_nav_updated(vehicleid);
-	return 1;
+	return CMD_OK;
 }
 
 void nav_navigate_to_airport(int playerid, int vehicleid, int vehiclemodel, struct AIRPORT *ap)

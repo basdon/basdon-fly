@@ -104,12 +104,12 @@ int svp_cmd_refuel(struct COMMANDCONTEXT cmdctx)
 	playerid = cmdctx.playerid;
 	vehicleid = veh_GetPlayerVehicle(playerid, NULL, &veh);
 	if (!vehicleid || veh == NULL) {
-		return 1;
+		return CMD_OK;
 	}
 
 	if (GetVehicleEngineState(vehicleid)) {
 		SendClientMessage(playerid, COL_WARN, WARN"The engine must be turned off first. Press n (/helpkeys) or use /engine");
-		return 1;
+		return CMD_OK;
 	}
 
 	GetVehiclePosUnsafe(vehicleid, &vpos);
@@ -118,7 +118,7 @@ int svp_cmd_refuel(struct COMMANDCONTEXT cmdctx)
 	svpid = svp_find_point(vpos);
 	if (svpid == -1) {
 		SendClientMessage(playerid, COL_WARN, WARN"You need to be at a service point to do this!");
-		return 1;
+		return CMD_OK;
 	}
 
 	capacity = model_fuel_capacity(veh->model);
@@ -132,7 +132,7 @@ int svp_cmd_refuel(struct COMMANDCONTEXT cmdctx)
 		        capacity,
 			100.0f * veh->fuel / capacity);
 		SendClientMessage(playerid, COL_WARN, msg144);
-		return 1;
+		return CMD_OK;
 	}
 
 	cost = FUEL_BASE_COST + FUEL_PCT_COST * refuelpct;
@@ -205,7 +205,7 @@ int svp_cmd_refuel(struct COMMANDCONTEXT cmdctx)
 	}
 
 	missions_on_vehicle_refueled(vehicleid, refuelamount);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -225,7 +225,7 @@ int svp_cmd_repair(struct COMMANDCONTEXT cmdctx)
 	playerid = cmdctx.playerid;
 	vehicleid = veh_GetPlayerVehicle(playerid, NULL, &veh);
 	if (!vehicleid) {
-		return 1;
+		return CMD_OK;
 	}
 
 	GetVehiclePosUnsafe(vehicleid, &vpos);
@@ -234,13 +234,13 @@ int svp_cmd_repair(struct COMMANDCONTEXT cmdctx)
 	svpid = svp_find_point(vpos);
 	if (svpid == -1) {
 		SendClientMessage(playerid, COL_WARN, WARN"You need to be at a service point to do this!");
-		return 1;
+		return CMD_OK;
 	}
 
 	hp = anticheat_GetVehicleHealth(vehicleid);
 	if (hp > 999.9f) {
 		SendClientMessage(playerid, COL_WARN, WARN"Your vehicle doesn't need to be repaired!");
-		return 1;
+		return CMD_OK;
 	}
 
 	fixamount = 1000.0f - hp;
@@ -250,7 +250,7 @@ int svp_cmd_repair(struct COMMANDCONTEXT cmdctx)
 		fixamount = (float) ((budget - FIX_BASE_COST) / FIX_HP_COST);
 		if (fixamount <= 0.0f) {
 			SendClientMessage(playerid, COL_WARN, WARN"You can't afford the repair fee!");
-			return 1;
+			return CMD_OK;
 		}
 		cost = FIX_BASE_COST + FIX_HP_COST * (int) fixamount;
 		sprintf(msg144, INFO"Your vehicle has been partially repaired for $%d", cost);
@@ -300,7 +300,7 @@ int svp_cmd_repair(struct COMMANDCONTEXT cmdctx)
 	}
 
 	missions_on_vehicle_repaired(vehicleid, fixamount, hp);
-	return 1;
+	return CMD_OK;
 }
 
 void svp_on_player_connect(int playerid)

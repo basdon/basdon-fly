@@ -1,3 +1,6 @@
+#define CMD_SYNTAX_ERR 0
+#define CMD_OK 1
+
 struct COMMANDCONTEXT {
 	int playerid;
 	char *cmdtext;

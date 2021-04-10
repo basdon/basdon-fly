@@ -5,14 +5,16 @@ static
 int cmd_dev_cp(struct COMMANDCONTEXT cmdctx)
 {
 	struct vec3 pos;
-	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
+	int vehicleid;
+
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (vehicleid) {
 		GetVehiclePos(vehicleid, &pos);
 	} else {
 		GetPlayerPos(cmdctx.playerid, &pos);
 	}
 	SetPlayerRaceCheckpointNoDir(cmdctx.playerid, 2, &pos, 8.0f);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -22,14 +24,12 @@ static
 int cmd_dev_gt(struct COMMANDCONTEXT cmdctx)
 {
 	int style;
-	if (cmd_get_int_param(&cmdctx, &style) &&
-		cmd_get_str_param(&cmdctx, cbuf4096))
-	{
+
+	if (cmd_get_int_param(&cmdctx, &style) && cmd_get_str_param(&cmdctx, cbuf4096)) {
 		GameTextForPlayer(cmdctx.playerid, 4000, style, cbuf4096);
-	} else {
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /gt <style> <text>");
+		return CMD_OK;
 	}
-	return 1;
+	return CMD_SYNTAX_ERR;
 }
 
 /**
@@ -39,7 +39,7 @@ static
 int cmd_dev_crashme(struct COMMANDCONTEXT cmdctx)
 {
 	CrashPlayer(cmdctx.playerid);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -52,10 +52,9 @@ int cmd_dev_disableremotevehiclecollisions(struct COMMANDCONTEXT cmdctx)
 
 	if (cmd_get_int_param(&cmdctx, &disable)) {
 		DisableRemoteVehicleCollisions(cmdctx.playerid, disable);
-	} else {
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: //drvc <disable>");
+		return CMD_OK;
 	}
-	return 1;
+	return CMD_SYNTAX_ERR;
 }
 
 /**
@@ -65,7 +64,7 @@ static
 int cmd_dev_jetpack(struct COMMANDCONTEXT cmdctx)
 {
 	NC_SetPlayerSpecialAction(cmdctx.playerid, SPECIAL_ACTION_USEJETPACK);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -77,8 +76,9 @@ int cmd_dev_STARm(struct COMMANDCONTEXT cmdctx)
 	int i;
 	if (cmd_get_int_param(&cmdctx, &i)) {
 		money_give(cmdctx.playerid, i);
+		return CMD_OK;
 	}
-	return 1;
+	return CMD_SYNTAX_ERR;
 }
 
 /**
@@ -201,7 +201,7 @@ int cmd_dev_testmsgsplit(struct COMMANDCONTEXT cmdctx)
 
 		"ck brown----------------------------------------end");
 
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -225,7 +225,7 @@ int cmd_dev_testparpl(struct COMMANDCONTEXT cmdctx)
 	if (cmd_get_int_param(&cmdctx, &i)) {
 		printf("int %d\n", i);
 	}
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -253,7 +253,7 @@ int cmd_dev_platform(struct COMMANDCONTEXT cmdctx)
 
 	rpcdata.z += 4.0f;
 	SetPlayerPosRaw(cmdctx.playerid, (struct vec3*) &rpcdata.x);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -263,7 +263,7 @@ static
 int cmd_dev_kill(struct COMMANDCONTEXT cmdctx)
 {
 	NC_SetPlayerHealth(cmdctx.playerid, 0.0f);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -274,7 +274,7 @@ int cmd_dev_kickme(struct COMMANDCONTEXT cmdctx)
 {
 	SendClientMessage(cmdctx.playerid, -1, "you're kicked, bye");
 	natives_Kick(cmdctx.playerid, "requested \n''\n \0 ok", NULL, -1);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -285,7 +285,7 @@ int cmd_dev_owner(struct COMMANDCONTEXT cmdctx)
 {
 	pdata[cmdctx.playerid]->groups ^= GROUP_OWNER;
 	pdata[cmdctx.playerid]->groups |= GROUP_MEMBER;
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -304,8 +304,7 @@ int cmd_dev_v(struct COMMANDCONTEXT cmdctx)
 	char msg144[144];
 
 	if (!cmd_get_vehiclemodel_param(&cmdctx, &modelid)) {
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /v <modelid|modelname>");
-		return 1;
+		return CMD_SYNTAX_ERR;
 	}
 
 	if (devvehicle != INVALID_VEHICLE_ID) {
@@ -326,7 +325,7 @@ int cmd_dev_v(struct COMMANDCONTEXT cmdctx)
 	natives_PutPlayerInVehicle(cmdctx.playerid, devvehicle, 0);
 	sprintf(msg144, "%d - %s - %s", modelid, vehmodelnames[modelid - 400], vehnames[modelid - 400]);
 	SendClientMessage(cmdctx.playerid, -1, msg144);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -336,12 +335,12 @@ static
 int cmd_dev_sound(struct COMMANDCONTEXT cmdctx)
 {
 	int soundid;
-	if (!cmd_get_int_param(&cmdctx, &soundid)) {
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /sound <soundid>");
-	} else {
+
+	if (cmd_get_int_param(&cmdctx, &soundid)) {
 		PlayerPlaySound(cmdctx.playerid, soundid);
+		return CMD_OK;
 	}
-	return 1;
+	return CMD_SYNTAX_ERR;
 }
 
 /**
@@ -358,7 +357,7 @@ int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 	common_GetVehicleDamageStatus(vehicleid, &vdmg);
 	sprintf(msg144, "panels %X doors %X lights %02X tires %02X", vdmg.panels, vdmg.doors, vdmg.lights, vdmg.tires);
 	SendClientMessageToAll(-1, msg144);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -369,7 +368,7 @@ int cmd_dev_vehrespawn(struct COMMANDCONTEXT cmdctx)
 {
 	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	NC_SetVehicleToRespawn(vehicleid);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -385,7 +384,7 @@ int cmd_dev_vhp(struct COMMANDCONTEXT cmdctx)
 
 	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (!vehicleid) {
-		return 1;
+		return CMD_OK;
 	}
 
 	if (cmd_get_int_param(&cmdctx, &set_hp)) {
@@ -398,7 +397,7 @@ int cmd_dev_vhp(struct COMMANDCONTEXT cmdctx)
 	NC(n_GetVehicleHealth_);
 	sprintf(cbuf32, "hp %f", *fbuf32);
 	SendClientMessage(cmdctx.playerid, -1, cbuf32);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -416,13 +415,13 @@ int cmd_dev_vfl(struct COMMANDCONTEXT cmdctx)
 
 	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (!vehicleid) {
-		return 1;
+		return CMD_OK;
 	}
 
 	veh = gamevehicles[vehicleid].dbvehicle;
 	if (!veh) {
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"unknown vehicle");
-		return 1;
+		return CMD_OK;
 	}
 
 	capacity = model_fuel_capacity(veh->model);
@@ -433,7 +432,7 @@ int cmd_dev_vfl(struct COMMANDCONTEXT cmdctx)
 
 	sprintf(cbuf32, "fl %f/%f (%.1f%%)", veh->fuel, capacity, veh->fuel / capacity);
 	SendClientMessage(cmdctx.playerid, -1, cbuf32);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -444,7 +443,7 @@ int cmd_dev_vhpnan(struct COMMANDCONTEXT cmdctx)
 {
 	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	NC_SetVehicleHealth(vehicleid, 0x7F800100);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -455,7 +454,7 @@ int cmd_dev_vhpninf(struct COMMANDCONTEXT cmdctx)
 {
 	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	NC_SetVehicleHealth(vehicleid, float_ninf);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -466,5 +465,5 @@ int cmd_dev_vhppinf(struct COMMANDCONTEXT cmdctx)
 {
 	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	NC_SetVehicleHealth(vehicleid, float_pinf);
-	return 1;
+	return CMD_OK;
 }

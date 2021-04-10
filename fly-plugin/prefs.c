@@ -137,5 +137,5 @@ static
 int prefs_cmd_preferences(struct COMMANDCONTEXT cmdctx)
 {
 	prefs_show_dialog(cmdctx.playerid);
-	return 1;
+	return CMD_OK;
 }

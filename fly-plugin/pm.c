@@ -71,23 +71,20 @@ int pm_cmd_pm(struct COMMANDCONTEXT cmdctx)
 	int targetid;
 
 	if (!cmd_get_player_param(&cmdctx, &targetid)) {
-synerr:
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /pm [id/name] [message]");
-		return 1;
+		return CMD_SYNTAX_ERR;
 	}
 	if (targetid == INVALID_PLAYER_ID) {
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"That player is not online.");
-		return 1;
+		return CMD_OK;
 	}
 	while (cmdctx.cmdtext[cmdctx.parseidx] == ' ') {
 		cmdctx.parseidx++;
 	}
 	if (cmdctx.cmdtext[cmdctx.parseidx]) {
 		pm_send(cmdctx.playerid, targetid, cmdctx.cmdtext + cmdctx.parseidx);
-	} else {
-		goto synerr;
+		return CMD_OK;
 	}
-	return 1;
+	return CMD_SYNTAX_ERR;
 }
 
 /**
@@ -106,16 +103,14 @@ int pm_cmd_r(struct COMMANDCONTEXT cmdctx)
 		switch (lastpmtarget[cmdctx.playerid]) {
 		case LAST_PMTARGET_NOBODY:
 			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Nobody has sent you a PM yet! Use /pm [id/name] [message]");
-			return 1;
+			return CMD_OK;
 		case LAST_PMTARGET_INVALID:
 			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"The person who last sent you a PM left");
-			return 1;
+			return CMD_OK;
 		default:
 			pm_send(cmdctx.playerid, lastpmtarget[cmdctx.playerid], cmdctx.cmdtext + cmdctx.parseidx);
-			return 1;
+			return CMD_OK;
 		}
 	}
-
-	SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /r [message]");
-	return 1;
+	return CMD_SYNTAX_ERR;
 }

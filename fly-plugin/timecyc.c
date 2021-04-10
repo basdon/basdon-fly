@@ -457,7 +457,7 @@ int timecyc_cmd_metar(struct COMMANDCONTEXT cmdctx)
 		timecyc_fmt_metar_msg(msg144, "report", weather.current);
 	}
 	SendClientMessage(cmdctx.playerid, COL_METAR, msg144);
-	return 1;
+	return CMD_OK;
 }
 
 void timecyc_init()
@@ -699,10 +699,9 @@ int timecyc_cmd_dev_fweather(struct COMMANDCONTEXT cmdctx)
 		weather.current = weather.locked = weather.upcoming = w;
 		timecyc_sync(cmdctx.playerid);
 		SendClientMessageToAll(-1, "forced weather");
-	} else {
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /fweather <weather>");
+		return CMD_OK;
 	}
-	return 1;
+	return CMD_SYNTAX_ERR;
 }
 
 /**
@@ -723,7 +722,7 @@ int timecyc_cmd_dev_timecyc(struct COMMANDCONTEXT cmdctx)
 		weather.locked,
 		timecycstate[cmdctx.playerid]);
 	SendClientMessage(cmdctx.playerid, -1, msg144);
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -737,10 +736,9 @@ int timecyc_cmd_dev_tweather(struct COMMANDCONTEXT cmdctx)
 	if (cmd_get_int_param(&cmdctx, &w)) {
 		timecyc_set_weather(w);
 		SendClientMessageToAll(-1, "changing weather");
-	} else {
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /tweather <weather>");
+		return CMD_OK;
 	}
-	return 1;
+	return CMD_SYNTAX_ERR;
 }
 
 /**
@@ -751,17 +749,14 @@ int cmd_dev_timex(struct COMMANDCONTEXT cmdctx)
 {
 	int h, m;
 
-	if (!cmd_get_int_param(&cmdctx, &h) ||
-		!cmd_get_int_param(&cmdctx, &m))
-	{
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /timex <h> <m>");
-	} else {
+	if (cmd_get_int_param(&cmdctx, &h) || cmd_get_int_param(&cmdctx, &m)) {
 		time_h = h;
 		time_m = m;
 		NC_SetPlayerTime(cmdctx.playerid, h, m);
 		panel_day_night_changed();
+		return CMD_OK;
 	}
-	return 1;
+	return CMD_SYNTAX_ERR;
 }
 
 /**
@@ -772,6 +767,6 @@ int timecyc_cmd_dev_nweather(struct COMMANDCONTEXT cmdctx)
 {
 	SendClientMessageToAll(-1, "changing weather");
 	timecyc_next_weather(NULL);
-	return 1;
+	return CMD_OK;
 }
 #endif /*DEV*/

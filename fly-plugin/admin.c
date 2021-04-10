@@ -7,9 +7,7 @@ int cmd_admin_getcar(struct COMMANDCONTEXT cmdctx)
 	struct vec4 ppos;
 	int vehicleid;
 
-	if (!cmd_get_int_param(&cmdctx, &vehicleid)) {
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN" Syntax: //getcar <vehicleid>");
-	} else {
+	if (cmd_get_int_param(&cmdctx, &vehicleid)) {
 		GetPlayerPosRot(cmdctx.playerid, &ppos);
 		if (common_SetVehiclePos(vehicleid, &ppos.coords)) {
 			natives_PutPlayerInVehicle(cmdctx.playerid, vehicleid, 0);
@@ -17,8 +15,9 @@ int cmd_admin_getcar(struct COMMANDCONTEXT cmdctx)
 		} else {
 			SendClientMessage(cmdctx.playerid, COL_WARN, WARN" Invalid vehicleid");
 		}
+		return CMD_OK;
 	}
-	return 1;
+	return CMD_SYNTAX_ERR;
 }
 
 /**
@@ -33,7 +32,7 @@ int cmd_admin_respawn(struct COMMANDCONTEXT cmdctx)
 	if (vehicleid) {
 		NC_SetVehicleToRespawn(vehicleid);
 	}
-	return 1;
+	return CMD_OK;
 }
 
 /**
@@ -57,10 +56,9 @@ int cmd_admin_makeanewpermanentpublicvehiclehere(struct COMMANDCONTEXT cmdctx)
 		if (vehicleid != INVALID_VEHICLE_ID) {
 			natives_PutPlayerInVehicle(cmdctx.playerid, veh->spawnedvehicleid, 0);
 		}
-	} else {
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"gimme a modelid or modelname");
+		return CMD_OK;
 	}
-	return 1;
+	return CMD_SYNTAX_ERR;
 }
 
 /**
@@ -100,13 +98,13 @@ int cmd_admin_rr(struct COMMANDCONTEXT cmdctx)
 skip_occupied:
 		;
 	}
-	return 1;
+	return CMD_OK;
 }
 
 static void admin_engage_vehinfo_dialog(int);
 
 static
-void admin_cb_dialog_vehinfo_assignap_response(int playerid, struct DIALOG_RESPONSE response)
+void admin_cb_dlg_vehinfo_assignap_response(int playerid, struct DIALOG_RESPONSE response)
 {
 	char *q;
 
@@ -126,7 +124,7 @@ void admin_cb_dialog_vehinfo_assignap_response(int playerid, struct DIALOG_RESPO
 }
 
 static
-void admin_cb_dialog_vehinfo_response(int playerid, struct DIALOG_RESPONSE response)
+void admin_cb_dlg_vehinfo_response(int playerid, struct DIALOG_RESPONSE response)
 {
 	struct DIALOG_INFO dialog;
 	int i;
@@ -145,7 +143,7 @@ void admin_cb_dialog_vehinfo_response(int playerid, struct DIALOG_RESPONSE respo
 		dialog.button1 = "Assign";
 		dialog.button2 = "Cancel";
 		dialog.handler.data = response.data; /*This should this be the veh (db) id.*/
-		dialog.handler.callback = admin_cb_dialog_vehinfo_assignap_response;
+		dialog.handler.callback = admin_cb_dlg_vehinfo_assignap_response;
 		dialog_show(playerid, &dialog);
 	}
 }
@@ -166,7 +164,7 @@ void admin_show_vehinfo_dialog(playerid, veh, enabled, airport)
 		"Vehicle Db Id\t%d\n"
 		"Owner\t%d (%s)\n"
 		"Enabled\t%s\n"
-		/*change listitem in admin_cb_dialog_vehinfo_response when these lines change*/
+		/*change listitem in admin_cb_dlg_vehinfo_response when these lines change*/
 		"Linked airport\t%s\n",
 		vehmodelnames[veh->model - 400],
 		veh->spawnedvehicleid,
@@ -180,7 +178,7 @@ void admin_show_vehinfo_dialog(playerid, veh, enabled, airport)
 	dialog.caption = "vehinfo";
 	dialog.button1 = "Close";
 	dialog.handler.data = (void*) veh->id;
-	dialog.handler.callback = admin_cb_dialog_vehinfo_response;
+	dialog.handler.callback = admin_cb_dlg_vehinfo_response;
 	dialog_show(playerid, &dialog);
 }
 
@@ -264,5 +262,5 @@ static
 int cmd_admin_vehinfo(struct COMMANDCONTEXT cmdctx)
 {
 	admin_engage_vehinfo_dialog(cmdctx.playerid);
-	return 1;
+	return CMD_OK;
 }

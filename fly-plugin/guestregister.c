@@ -258,7 +258,7 @@ int guestreg_cmd_register(struct COMMANDCONTEXT cmdctx)
 	} else {
 		guestreg_show_dialog_namechange(cmdctx.playerid, 0, 0);
 	}
-	return 1;
+	return CMD_OK;
 }
 
 static

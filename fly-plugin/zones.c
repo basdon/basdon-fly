@@ -172,12 +172,11 @@ int zones_cmd_loc(struct COMMANDCONTEXT cmdctx)
 	char buf[144], *b;
 
 	if (!cmd_get_player_param(&cmdctx, &target)) {
-		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"Syntax: /loc [id/part of name]");
-		return 1;
+		return CMD_SYNTAX_ERR;
 	}
 	if (target == INVALID_PLAYER_ID) {
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"That player is not online.");
-		return 1;
+		return CMD_OK;
 	}
 	GetPlayerPos(target, &pos);
 	zones_update(target, pos);
@@ -202,5 +201,5 @@ int zones_cmd_loc(struct COMMANDCONTEXT cmdctx)
 	}
 
 	SendClientMessage(cmdctx.playerid, COL_INFO_GENERIC, buf);
-	return 1;
+	return CMD_OK;
 }
