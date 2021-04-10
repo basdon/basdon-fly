@@ -1,8 +1,9 @@
 struct COMMAND {
 	int hash;
+	/**This points to its aliased cmd or itself.*/
 	struct COMMAND *alias_of;
 	const char *cmd;
-	const char *alias_for_cmd;
+	const char *aliased_cmd;
 	const int groups;
 	const char *syntax;
 	const char *description;
@@ -67,6 +68,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/fix", "/repair", 0, 0, 0, 0 },
 	{ 0, 0, "/getspray", 0, GROUPS_ALL, CMD_GETSPRAY_SYNTAX, CMD_GETSPRAY_DESC, cmd_getspray },
 	{ 0, 0, "/helpkeys", 0, GROUPS_ALL, CMD_HELPKEYS_SYNTAX, CMD_HELPKEYS_DESC, cmd_helpkeys },
+	{ 0, 0, "/helpcmd", 0, GROUPS_ALL, CMD_HELPCMD_SYNTAX, CMD_HELPCMD_DESC, cmd_helpcmd },
 	{ 0, 0, "/ils", 0, GROUPS_ALL, CMD_ILS_SYNTAX, CMD_ILS_DESC, cmd_ils },
 	{ 0, 0, "/irc", 0, GROUPS_ALL, CMD_IRC_SYNTAX, CMD_IRC_DESC, cmd_irc },
 	{ 0, 0, "/loc", 0, GROUPS_ALL, CMD_LOC_SYNTAX, CMD_LOC_DESC, cmd_loc },
@@ -165,21 +167,56 @@ void cmd_init()
 	/*Set up aliases.*/
 	cmd = cmds;
 	while (cmd->cmd) {
-		if (cmd->alias_for_cmd) {
-			hash = cmd_hash(cmd->alias_for_cmd);
+		if (cmd->aliased_cmd) {
+			hash = cmd_hash(cmd->aliased_cmd);
 			aliased = cmds;
 			for (;;) {
 				assert(aliased->cmd); /*Aliased command doesn't exist.*/
-				if (aliased->hash == hash && !strcmp(aliased->cmd, cmd->cmd)) {
-					assert(!aliased->alias_for_cmd); /*Can't alias to an alias.*/
+				if (aliased->hash == hash && !strcmp(aliased->cmd, cmd->aliased_cmd)) {
+					assert(!aliased->aliased_cmd); /*Can't alias to an alias.*/
 					cmd->alias_of = aliased;
 					break;
 				}
 				aliased++;
 			}
 		}
+		assert(cmd->alias_of->description[0]); /*Every command should have a description.*/
 		cmd++;
 	}
+}
+
+/**
+@param cmdtext the cmdtext line, may have arguments in it
+@param parseidx passed so it can be used for further parsing the cmdtext line
+@param out_cmd will be set to the cmd that matched. This can be an alias of the real cmd that should be used.
+@param out_real_cmd will be set to the effective cmd. This may be the same as out_cmd if out_cmd wasn't an alias.
+*/
+static
+int cmd_get_by_name_check_permissions(
+	int playerid,
+	char *cmdtext,
+	int *out_parseidx,
+	struct COMMAND **out_cmd,
+	struct COMMAND **out_real_cmd)
+{
+	register struct COMMAND *cmd, *real_cmd;
+	int hash;
+
+	hash = cmd_hash(cmdtext);
+	cmd = cmds;
+	while (cmd->cmd) {
+		if (hash == cmd->hash && cmd_is(cmdtext, cmd->cmd, out_parseidx)) {
+			real_cmd = cmd->alias_of;
+			if (pdata[playerid]->groups & real_cmd->groups) {
+				*out_cmd = cmd;
+				*out_real_cmd = real_cmd;
+				return 1;
+			}
+			break;
+		}
+		cmd++;
+	}
+	return 0;
 }
 
 /**
@@ -187,9 +224,8 @@ Called from hooked commandtext response packet handler.
 */
 void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 {
-	register struct COMMAND *cmd, *real_cmd;
+	struct COMMAND *cmd, *real_cmd;
 	struct COMMANDCONTEXT cmdctx;
-	int hash;
 	char syntaxmsg[144];
 
 	if (!ISPLAYING(playerid)) {
@@ -212,24 +248,40 @@ void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 		cbuf144);
 	NC_mysql_tquery_nocb(buf4096a);
 
-	hash = cmd_hash(cmdtext);
-
-	cmd = cmds;
-	while (cmd->cmd) {
-		if (hash == cmd->hash && cmd_is(cmdtext, cmd->cmd, &cmdctx.parseidx)) {
-			real_cmd = cmd->alias_of; /*This points to its aliased cmd or itself.*/
-			if (!(pdata[playerid]->groups & real_cmd->groups)) {
-				break;
-			}
-			cmdctx.playerid = playerid;
-			cmdctx.cmdtext = cmdtext;
-			if (!real_cmd->handler(cmdctx)) {
-				sprintf(syntaxmsg, "Syntax: %s %s", cmd->cmd, real_cmd->syntax);
-				SendClientMessage(playerid, COL_WARN, syntaxmsg);
-			}
-			return;
+	if (cmd_get_by_name_check_permissions(playerid, cmdtext, &cmdctx.parseidx, &cmd, &real_cmd)) {
+		cmdctx.playerid = playerid;
+		cmdctx.cmdtext = cmdtext;
+		if (real_cmd->handler(cmdctx) == CMD_SYNTAX_ERR) {
+			sprintf(syntaxmsg, "Syntax: %s %s", cmd->cmd, real_cmd->syntax);
+			SendClientMessage(playerid, COL_WARN, syntaxmsg);
 		}
-		cmd++;
+	} else {
+		SendClientMessage(playerid, -1, "SERVER: Unknown command.");
 	}
-	SendClientMessage(playerid, -1, "SERVER: Unknown command.");
+}
+
+/**
+Prints a cmd's syntax and description for a player.
+
+@param cmdname should start with the forward slash
+*/
+static
+void cmd_show_help_for(int playerid, char *cmdname)
+{
+	struct COMMAND *cmd, *real_cmd;
+	int unused_parseidx;
+	char msg[144];
+
+	if (cmd_get_by_name_check_permissions(playerid, cmdname, &unused_parseidx, &cmd, &real_cmd)) {
+		if (real_cmd == cmd) {
+			sprintf(msg, INFO"%s: %s", real_cmd->cmd, real_cmd->description);
+		} else {
+			sprintf(msg, INFO"%s (alias of %s): %s", cmd->cmd, real_cmd->cmd, real_cmd->description);
+		}
+		SendClientMessage(playerid, COL_INFO, msg);
+		sprintf(msg, INFO"Syntax: %s %s", real_cmd->cmd, real_cmd->syntax);
+		SendClientMessage(playerid, COL_INFO, msg);
+	} else {
+		SendClientMessage(playerid, COL_WARN, WARN"That command doesn't exist or is not available to you.");
+	}
 }

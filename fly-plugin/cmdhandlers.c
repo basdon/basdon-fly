@@ -521,6 +521,31 @@ int cmd_getspray(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+static void cmd_show_help_for(int,char*);
+
+#define CMD_HELPCMD_SYNTAX "<cmdname>"
+#define CMD_HELPCMD_DESC "Shows info about a command"
+static
+int cmd_helpcmd(struct COMMANDCONTEXT cmdctx)
+{
+	char cmdname_buf[144];
+	char *cmdname;
+
+	if (!cmd_get_str_param(&cmdctx, cmdname_buf + 1)) {
+		return CMD_SYNTAX_ERR;
+	}
+
+	if (cmdname_buf[1] == '/') {
+		cmdname = cmdname_buf + 1;
+	} else {
+		cmdname_buf[0] = '/';
+		cmdname = cmdname_buf;
+	}
+
+	cmd_show_help_for(cmdctx.playerid, cmdname);
+	return CMD_OK;
+}
+
 #define CMD_HELPKEYS_SYNTAX ""
 #define CMD_HELPKEYS_DESC "Shows some important key bindings"
 static
@@ -1032,7 +1057,7 @@ tellrws:
 }
 
 #define CMD_W_SYNTAX ""
-#define CMD_W_DESC ""
+#define CMD_W_DESC "Starts a mission or guides you to a mission point"
 static
 int cmd_w(struct COMMANDCONTEXT cmdctx)
 {
