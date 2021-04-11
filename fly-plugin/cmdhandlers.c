@@ -540,20 +540,17 @@ static
 int cmd_helpcmd(struct COMMANDCONTEXT cmdctx)
 {
 	char cmdname_buf[144];
-	char *cmdname;
 
 	if (!cmd_get_str_param(&cmdctx, cmdname_buf + 1)) {
 		return CMD_SYNTAX_ERR;
 	}
 
 	if (cmdname_buf[1] == '/') {
-		cmdname = cmdname_buf + 1;
+		cmd_show_help_for(cmdctx.playerid, cmdname_buf + 1);
 	} else {
 		cmdname_buf[0] = '/';
-		cmdname = cmdname_buf;
+		cmd_show_help_for(cmdctx.playerid, cmdname_buf);
 	}
-
-	cmd_show_help_for(cmdctx.playerid, cmdname);
 	return CMD_OK;
 }
 
