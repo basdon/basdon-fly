@@ -11,6 +11,10 @@
 /fly-web/static/fdr/*.flight
 /fly-web/static/chatlogs/**/*.html
 /maps/*.map
+!/maps/a69.map
+!/maps/lsa.map
+!/maps/lva.map
+!/maps/sfa.map
 /server/**
 !/server/gamemodes/
 !/server/gamemodes/**
