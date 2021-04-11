@@ -13,7 +13,6 @@ then
 		then
 			nohup ./samp03svr &
 		fi
-		popd > /dev/null
 	else
 		echo "RUNNING WITH DEV CONFIG"
 		if cp ../fly-plugin/out/basdonfly-dev.so plugins/basdonfly.so &&
@@ -27,9 +26,9 @@ then
 			[ -f "mysql_log.txt" ] && [ "$initial_mysql_log_wc" != "$(wc -c mysql_log.txt)" ] &&
 				echo "" && echo "" && echo "WARN: mysql_log.txt changed!"
 		fi
-		popd > /dev/null
 	fi
 else
 	echo "rcon_password changme" > servercfg-rcon_password.cfg
 	echo "Please change the rcon password in server/servercfg-rcon_password.cfg and run again"
 fi
+popd > /dev/null
