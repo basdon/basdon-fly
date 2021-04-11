@@ -15,6 +15,12 @@ Elements may be NULL is associated value in numspawns is zero.
 */
 static char *spawn_list_text[NUMCLASSES];
 
+/**
+Loads spawn locations from database, creates spawn list texts.
+
+Must run after airports_init
+*/
+static
 void spawn_init()
 {
 	int querycacheid, row, rows, ap, klass = NUMCLASSES;
@@ -64,6 +70,10 @@ nospawns:
 	}
 }
 
+/**
+Frees memory.
+*/
+static
 void spawn_dispose()
 {
 	int i = NUMCLASSES;
@@ -90,6 +100,15 @@ void spawn_cb_dlg_spawn(int playerid, struct DIALOG_RESPONSE response)
 	}
 }
 
+/**
+Set player spawn info before a player spawns.
+
+To be called from OnPlayerRequestClass and OnPlayerDeath.
+
+Otherwise players get teleported right after spawn, causing updates like map
+streaming and zones twice right after each other.
+*/
+static
 void spawn_prespawn(int playerid)
 {
 	int spawnidx, klass = classidx[playerid];
@@ -113,6 +132,14 @@ void spawn_prespawn(int playerid)
 	NC(n_SetSpawnInfo);
 }
 
+/**
+Call on spawn to show a dialog of spawn locations to teleport to.
+
+spawn_prespawn should've been called before, which should've set the player's
+spawninfo before spawning, so player should already have spawned at a location
+of their choice (as set in preferences) by this time.
+*/
+static
 void spawn_on_player_spawn(int playerid)
 {
 	struct DIALOG_INFO dialog;

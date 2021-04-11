@@ -148,8 +148,12 @@ void playerstats_on_player_disconnect(int playerid)
 	playerstats_commit_to_db(playerid, 1);
 }
 
+/*TODO remove this (forward declaration)*/
+static void timecyc_on_player_was_afk(int playerid);
+
 void playerstats_on_player_update(int playerid)
 {
+
 	unsigned long now = time_timestamp();
 
 	if (isafk[playerid]) {

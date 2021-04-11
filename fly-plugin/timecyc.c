@@ -441,6 +441,10 @@ int timecyc_next_weather(void *unused)
 	return WEATHER_TIMER_INTERVAL + NC_random(WEATHER_TIMER_DEVIATION);
 }
 
+/**
+Starts the time and weather system.
+*/
+static
 void timecyc_init()
 {
 	time_h = 7;
@@ -523,16 +527,19 @@ void timecyc_sync(int playerid)
 	}
 }
 
+static
 void timecyc_on_player_connect(int playerid)
 {
 	timecycstate[playerid] = SYNC_STATE_NONE;
 }
 
+static
 void timecyc_on_player_death(int playerid)
 {
 	NC_TogglePlayerClock(playerid, 0);
 }
 
+static
 void timecyc_on_player_request_class(int playerid)
 {
 	NC_TogglePlayerClock(playerid, 0);
@@ -540,6 +547,7 @@ void timecyc_on_player_request_class(int playerid)
 	NC_SetPlayerWeather(playerid, 1);
 }
 
+static
 void timecyc_on_player_update(int playerid)
 {
 	switch (timecycstate[playerid]) {
@@ -563,11 +571,16 @@ void timecyc_on_player_update(int playerid)
 	}
 }
 
+static
 void timecyc_on_player_was_afk(int playerid)
 {
 	timecyc_sync(playerid);
 }
 
+/**
+Syncs timecyc's tick function.
+*/
+static
 void timecyc_reset()
 {
 	lasttime = time_timestamp();
@@ -580,8 +593,7 @@ Note: SA-MP syncs time for people with SetPlayerTime set every 5 minutes, so by
 doing it here that's being prevented.
 */
 static
-void
-timecyc_sync_clocks()
+void timecyc_sync_clocks()
 {
 	int i, playerid;
 
@@ -604,6 +616,10 @@ timecyc_sync_clocks()
 	}
 }
 
+/**
+Let the clock tick. This will also call most timed functions. TODO: move those timed function calls somewhere else
+*/
+static
 void timecyc_tick()
 {
 	unsigned long nowtime;

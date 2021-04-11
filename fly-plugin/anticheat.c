@@ -46,6 +46,12 @@ void anticheat_infraction(int playerid, int type)
 	}
 }
 
+/**
+Decrease flood count for all players.
+
+To be called every 100ms
+*/
+static
 void anticheat_decrease_flood()
 {
 	int playerid, n = playercount;
@@ -60,6 +66,12 @@ void anticheat_decrease_flood()
 	}
 }
 
+/**
+Decrease all infractions for all players based on each infraction's decrement.
+
+To be called in timer5000.
+*/
+static
 void anticheat_decrease_infractions()
 {
 	int playerid, j, i = playercount;
@@ -79,18 +91,7 @@ void anticheat_decrease_infractions()
 	}
 }
 
-int anticheat_flood(int playerid, int amount)
-{
-	static char *EXCESS_FLOOD = "excess flood";
-
-	if ((floodcount[playerid] += amount) >= AC_FLOOD_LIMIT) {
-		anticheat_log(playerid, AC_FLOOD, EXCESS_FLOOD);
-		natives_Kick(playerid, EXCESS_FLOOD, NULL, -1);
-		return 1;
-	}
-	return 0;
-}
-
+static
 void anticheat_on_player_connect(int playerid)
 {
 	int n = INFRACTIONTYPES;
@@ -101,6 +102,13 @@ void anticheat_on_player_connect(int playerid)
 	floodcount[playerid] = 0;
 }
 
+/**
+Log some anticheat related thing. Uses buf4096 after info is copied.
+
+@param eventtype one of AC_ definitions
+@param info primitively escaped into db query
+*/
+static
 void anticheat_log(int playerid, int eventtype, char *info)
 {
 	char buf[2200]; /*Entry has maxlen 2048 in the db.*/
@@ -142,6 +150,30 @@ void anticheat_log(int playerid, int eventtype, char *info)
 	NC_mysql_tquery_nocb(buf4096a);
 }
 
+/**
+Add given flood amount to given player's flood value.
+
+Player will be kicked on excess flood.
+
+@returns non-zero if player is kicked as result
+*/
+static
+int anticheat_flood(int playerid, int amount)
+{
+	if ((floodcount[playerid] += amount) >= AC_FLOOD_LIMIT) {
+		anticheat_log(playerid, AC_FLOOD, "excess flood");
+		natives_Kick(playerid, "excess flood", NULL, -1);
+		return 1;
+	}
+	return 0;
+}
+
+/**
+Gets vehicle hp, after checking for unnacceptable values and handling offenders.
+
+Only works on valid vehicles!
+*/
+static
 float anticheat_GetVehicleHealth(int vehicleid)
 {
 	float hp;
@@ -180,6 +212,13 @@ resethp:
 	return 1000.0f;
 }
 
+/**
+Call when a player is in a vehicle it can not be in.
+
+Should be called at most once per second, player will be kicked when it happens
+too often.
+*/
+static
 void anticheat_disallowed_vehicle_1s(int playerid)
 {
 	anticheat_log(playerid, AC_UNAUTH_VEHICLE_ACCESS,
@@ -187,20 +226,26 @@ void anticheat_disallowed_vehicle_1s(int playerid)
 	anticheat_infraction(playerid, AC_IF_DISALLOWED_VEHICLE);
 }
 
+/**
+@return non-zero when player is kicked as result
+*/
+static
 int anticheat_on_player_command(int playerid)
 {
-
 	if (anticheat_flood(playerid, AC_FLOOD_AMOUNT_CMD)) {
-		return 0;
+		return 1;
 	}
 	if (floodcount[playerid] > AC_FLOOD_WARN_THRESHOLD) {
 		SendClientMessage(playerid, COL_WARN, WARN"Don't spam!");
 	}
-	return 1;
+	return 0;
 }
 
-void anticheat_on_player_enter_vehicle(
-	int playerid, int vehicleid, int ispassenger)
+/**
+Ensures the vehicle's health is valid
+*/
+static
+void anticheat_on_player_enter_vehicle(int playerid, int vehicleid, int ispassenger)
 {
 	if (!ispassenger) {
 		NC_PARS(2);
@@ -214,6 +259,7 @@ void anticheat_on_player_enter_vehicle(
 	}
 }
 
+static
 int anticheat_on_player_text(int playerid)
 {
 	if (anticheat_flood(playerid, AC_FLOOD_AMOUNT_CHAT)) {

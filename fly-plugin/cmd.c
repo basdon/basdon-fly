@@ -232,6 +232,10 @@ void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 	struct COMMANDCONTEXT cmdctx;
 	char syntaxmsg[144];
 
+	if (anticheat_on_player_command(playerid)) {
+		return;
+	}
+
 	if (!ISPLAYING(playerid)) {
 		SendClientMessage(playerid, COL_WARN, WARN"Log in first.");
 		return;

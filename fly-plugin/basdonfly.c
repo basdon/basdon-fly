@@ -100,6 +100,31 @@ EXPECT_SIZE(struct quat, 4 * sizeof(cell));
 #include "a_samp.h"
 #include "samp.h"
 
+/*anticheat*/
+
+#define AC_IF_DISALLOWED_VEHICLE 0
+#define INFRACTIONTYPES 1
+
+#define AC_FLOOD_DECLINE_PER_100 3
+#define AC_FLOOD_AMOUNT_DIALOG 10
+#define AC_FLOOD_AMOUNT_CHAT 30
+#define AC_FLOOD_AMOUNT_CMD 30
+#define AC_FLOOD_LIMIT 100
+#define AC_FLOOD_WARN_THRESHOLD \
+	(AC_FLOOD_LIMIT - AC_FLOOD_AMOUNT_CHAT - AC_FLOOD_AMOUNT_CHAT / 2)
+
+/*ac log event type*/
+#define AC_GENERIC 0
+#define AC_VEH_HP_NAN 1
+#define AC_VEH_HP_HIGH 2
+#define AC_WRONG_DIALOGID 3
+#define AC_UNAUTH_VEHICLE_ACCESS 4
+#define AC_FLOOD 5
+#define AC_VEH_HP_MISSION_INCREASE 6
+#define AC_MISSION_TOOFAST 7
+#define AC_DIALOG_SMELLY_INPUT 8
+#define AC_DIALOG_LONG_INPUT 9
+
 /*airportstuff*/
 
 #define MAX_AIRPORT_NAME (24)
@@ -225,6 +250,41 @@ struct AIRPORT {
 static struct AIRPORT *airports;
 static int numairports;
 
+/*login stuff*/
+
+#define LOGGED_NO 0
+#define LOGGED_IN 1
+#define LOGGED_GUEST 2
+
+#define ISPLAYING(PLAYERID) (loggedstatus[PLAYERID])
+
+#define MONEY_DEFAULT_AMOUNT 15000
+
+/**
+User id of player, -1 if no valid session (should be extremely rare)
+
+When user is going through the login process,
+use unconfirmed_userid instead (= don't set userid while the user is not logged in).
+
+Starts from 1
+*/
+static int userid[MAX_PLAYERS];
+/**
+Player's session id, -1 if no valid session (should be extremely rare)
+
+Starts from 1
+*/
+static int sessionid[MAX_PLAYERS];
+/**
+Logged-in status of each player (one of the LOGGED_ definitions).
+*/
+static int loggedstatus[MAX_PLAYERS];
+/**
+Some data saved to use in the progress of login in, registering, or changing pw.
+TODO: split this for login/register/changepw, let each file have their own
+*/
+static void *pwdata[MAX_PLAYERS];
+
 /*navs*/
 
 #define NAV_NONE 0
@@ -246,6 +306,65 @@ static int numairports;
 	PREF_SHOW_KNEEBOARD | PREF_WORK_AUTONAV | PREF_PANEL_NIGHTCOLORS)
 
 static int prefs[MAX_PLAYERS];
+
+/*class stuff*/
+#define CLASS_PILOT 1
+#define CLASS_RESCUE 2
+#define CLASS_ARMY 4
+#define CLASS_AID 8
+#define CLASS_TRUCKER 16
+
+#define NUMCLASSES /*5*/ 4
+
+#define SPAWN_WEAPON_1 WEAPON_CAMERA
+#define SPAWN_AMMO_1 3036
+#define SPAWN_WEAPON_2_3 0
+#define SPAWN_AMMO_2_3 0
+
+/**
+From class index (SAMP) to class id (CLASS_ constants)
+*/
+static const int CLASSMAPPING[] = {
+	CLASS_PILOT,
+	CLASS_RESCUE,
+	CLASS_ARMY,
+	CLASS_AID,
+	/*CLASS_TRUCKER,*/
+};
+/**
+Skin ID per class.
+*/
+static const int CLASS_SKINS[] = {
+	61,
+	275,
+	287,
+	287,
+	/*133,*/
+};
+
+static const char *CLASS_NAMES[] = {
+	"~p~Pilot",
+	"~b~~h~~h~Rescue worker",
+	"~g~~h~Army",
+	"~r~~h~~h~Aid worker",
+	/*"~y~Trucker",*/
+};
+
+static const int CLASS_COLORS[] = {
+	0xa86efcff,
+	0x7087ffff,
+	0x519c42ff,
+	0xff3740ff,
+	/*0xe2c063ff,*/
+};
+/**
+Class id of players (CLASS_ constants).
+*/
+static int classid[MAX_PLAYERS];
+/**
+Class index of players (SA-MP's classid).
+*/
+static int classidx[MAX_PLAYERS];
 
 /*randomstuff*/
 
@@ -309,7 +428,18 @@ amx data segment
 */
 static struct FAKEAMX fakeamx;
 
+/*game things*/
 #include "game_sa_data.c"
+
+#define PLANE 0x1
+#define HELI 0x2
+#define RETRACTABLE_GEAR 0x4
+
+static unsigned int vehicleflags[VEHICLE_MODEL_TOTAL];
+/**
+Some mapping, every air vehicle has a unique value 0-22, -1 for others
+*/
+static char aircraftmodelindex[VEHICLE_MODEL_TOTAL];
 
 #include <assert.h>
 #include "idalloc.h"
@@ -317,18 +447,10 @@ static struct FAKEAMX fakeamx;
 /*This file is generated during build.*/
 #include "__sampasm.h"
 #include "common.h"
-#include "admin.h"
-#include "anticheat.h"
-#include "class.h"
 #include "echo.h"
-#include "game_sa.h"
-#include "login.h"
 #include "missions.h"
 #include "playerdata.h"
 #include "playerstats.h"
-#include "servicepoints.h"
-#include "spawn.h"
-#include "timecyc.h"
 #include "vehicles.h"
 #include <alloca.h>
 #include <math.h>
@@ -359,6 +481,7 @@ static unsigned short nametags_max_distance[MAX_PLAYERS];
 #include "time.c"
 #include "timer.c"
 #include "echo.c"
+#include "anticheat.c"
 #include "money.c"
 #include "dialog.c"
 #include "airport.c"
@@ -368,7 +491,6 @@ static unsigned short nametags_max_distance[MAX_PLAYERS];
 #include "admin.c"
 #include "changelog.c"
 #include "zones.c"
-#include "anticheat.c"
 #include "changepassword.c"
 #include "class.c"
 #include "game_sa.c"

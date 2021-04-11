@@ -226,6 +226,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 		return 1;
 	}
 
+	anticheat_on_player_connect(playerid);
 	changelog_on_player_connect(playerid);
 	class_on_player_connect(playerid);
 	chpw_on_player_connect(playerid);
@@ -336,6 +337,7 @@ cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 	const int playerid = PARAM(1), vehicleid = PARAM(2);
 	const int ispassenger = PARAM(3);
 
+	anticheat_on_player_enter_vehicle(playerid, vehicleid, ispassenger);
 	veh_on_player_enter_vehicle(playerid, vehicleid, ispassenger);
 
 	return 1;

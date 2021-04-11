@@ -1,6 +1,4 @@
-unsigned int vehicleflags[VEHICLE_MODEL_TOTAL];
-char aircraftmodelindex[VEHICLE_MODEL_TOTAL];
-
+static
 void game_sa_init()
 {
 	memset(vehicleflags, 0, sizeof(vehicleflags));
@@ -54,21 +52,42 @@ void game_sa_init()
 	aircraftmodelindex[MODEL_DODO - VEHICLE_MODEL_MIN] = 22;
 }
 
+/**
+Check if the given vehicle model is an air vehicle (plane or helicopter).
+*/
+static
 int game_is_air_vehicle(int model)
 {
 	return model && (vehicleflags[model - VEHICLE_MODEL_MIN] & (HELI | PLANE));
 }
 
+/**
+Check if the given vehicle model is a helicopter.
+*/
+static
 int game_is_heli(int model)
 {
 	return model && (vehicleflags[model - VEHICLE_MODEL_MIN] & HELI);
 }
 
+/**
+Check if the given vehicle model is a plane.
+*/
+static
 int game_is_plane(int model)
 {
 	return model && (vehicleflags[model - VEHICLE_MODEL_MIN] & PLANE);
 }
 
+/**
+Gives a random 'normal' random vehicle colors combination for given model.
+
+Data is from game's carcols.dat.
+
+@param col1 ptr to int or NULL if primary color is not needed
+@param col2 ptr to int or NULL if secondary color is not needed
+*/
+static
 void game_random_carcol(int model, int *col1, int *col2)
 {
 	char amount;

@@ -27,6 +27,10 @@ static struct SERVICEPOINT *servicepoints;
 static char svp_text_encoded_bits[24];
 static int svp_text_encoded_bitlength;
 
+/**
+Free memory
+*/
+static
 void svp_dispose()
 {
 	if (servicepoints != NULL) {
@@ -56,6 +60,10 @@ int svp_find_point(struct vec3 pos)
 	return -1;
 }
 
+/**
+Load servicepoints from the db.
+*/
+static
 void svp_init()
 {
 	struct SERVICEPOINT *svp;
@@ -299,11 +307,22 @@ int svp_repair(int playerid)
 	return CMD_OK;
 }
 
+/**
+Reset servicepoint map icon streaming for new player.
+*/
+static
 void svp_on_player_connect(int playerid)
 {
 	memset(player_servicepoints[playerid], 0, sizeof(player_servicepoints[playerid]));
 }
 
+/**
+Updates the service point mapicons (and 3D text) for given playerid.
+
+@param x x-position of the player
+@param y y-position of the player
+*/
+static
 void svp_update_mapicons(int playerid, float x, float y)
 {
 	struct SERVICEPOINT **psvps;

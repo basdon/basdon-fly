@@ -4,15 +4,6 @@
 #define BCRYPT_COST 12
 
 /**
-The userid of the LOGGED IN player.
-When not logged in yet, use unconfirmed_userid instead
-*/
-int userid[MAX_PLAYERS];
-int sessionid[MAX_PLAYERS];
-int loggedstatus[MAX_PLAYERS];
-void *pwdata[MAX_PLAYERS];
-
-/**
 The userid of the user that the player is trying to login for.
 */
 static int unconfirmed_userid[MAX_PLAYERS];

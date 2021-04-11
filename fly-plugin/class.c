@@ -5,41 +5,7 @@
 #define VINEWOOD_CAM_LAT_Y -787.6342f
 #define VINEWOOD_CAM_LAT_Z 82.1637f
 
-const int CLASSMAPPING[] = {
-	CLASS_PILOT,
-	CLASS_RESCUE,
-	CLASS_ARMY,
-	CLASS_AID,
-	/*CLASS_TRUCKER,*/
-};
-
-const int CLASS_SKINS[] = {
-	61,
-	275,
-	287,
-	287,
-	/*133,*/
-};
-
-static const char *CLASS_NAMES[] = {
-	"~p~Pilot",
-	"~b~~h~~h~Rescue worker",
-	"~g~~h~Army",
-	"~r~~h~~h~Aid worker",
-	/*"~y~Trucker",*/
-};
-
-static const int CLASS_COLORS[] = {
-	0xa86efcff,
-	0x7087ffff,
-	0x519c42ff,
-	0xff3740ff,
-	/*0xe2c063ff,*/
-};
-
-int classid[MAX_PLAYERS];
-int classidx[MAX_PLAYERS];
-
+static
 void class_init()
 {
 	int i;
@@ -60,6 +26,7 @@ void class_init()
 	}
 }
 
+static
 void class_on_player_connect(int playerid)
 {
 	classid[playerid] = CLASSMAPPING[classidx[playerid] = 0];
@@ -69,6 +36,7 @@ void class_on_player_connect(int playerid)
 	NC(n_SetPlayerColor);
 }
 
+static
 void class_on_player_request_class(int playerid, int _classid)
 {
 	int class_index;
@@ -129,6 +97,7 @@ void class_on_player_request_class(int playerid, int _classid)
 	GameTextForPlayer(playerid, 0x800000, 3, (char*) CLASS_NAMES[class_index]);
 }
 
+static
 int class_on_player_request_spawn(int playerid)
 {
 	if (classid[playerid] == CLASS_TRUCKER) {
