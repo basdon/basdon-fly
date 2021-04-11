@@ -273,6 +273,13 @@ void dialog_show(int playerid, struct DIALOG_INFO *dialog)
 	assert(!(dialog->handler.options & DLG_OPT_NOTIFY_ABORTED) || dialog->handler.callback);
 #endif
 
+	if (!dialog->caption[0]) {
+		logprintf("WARN: dialog_show invoked with an empty dialog caption "
+				"(transactionid %d), dropping", dialog->transactionid);
+		SendClientMessage(playerid, COL_WARN, WARN"Error, please notify robin");
+		return;
+	}
+
 	if (data->transactionid != DLG_TID_NONE && data->transactionid != dialog->transactionid) {
 		dialog_append_to_queue(playerid, dialog);
 		return;
