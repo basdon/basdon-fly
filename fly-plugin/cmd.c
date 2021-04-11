@@ -64,6 +64,10 @@ static struct COMMAND cmds[] = {
 		cmd_changepassword },
 	{ 0, 0, "/changelog", 0, GROUPS_ALL, CMD_CHANGELOG_SYNTAX, CMD_CHANGELOG_DESC, cmd_changelog },
 	{ 0, 0, "/chute", 0, GROUPS_ALL, CMD_CHUTE_SYNTAX, CMD_CHUTE_DESC, cmd_chute },
+	{ 0, 0, "/cmdlist", "/cmds", 0, 0, 0, 0 },
+	{ 0, 0, "/cmds", 0, GROUPS_ALL, CMD_CMDS_SYNTAX, CMD_CMDS_DESC, cmd_cmds },
+	{ 0, 0, "/commandlist", "/cmds", 0, 0, 0, 0 },
+	{ 0, 0, "/commands", "/cmds", 0, 0, 0, 0 },
 	{ 0, 0, "/engine", 0, GROUPS_ALL, CMD_ENGINE_SYNTAX, CMD_ENGINE_DESC, cmd_engine },
 	{ 0, 0, "/fix", "/repair", 0, 0, 0, 0 },
 	{ 0, 0, "/getspray", 0, GROUPS_ALL, CMD_GETSPRAY_SYNTAX, CMD_GETSPRAY_DESC, cmd_getspray },
@@ -256,7 +260,7 @@ void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 			SendClientMessage(playerid, COL_WARN, syntaxmsg);
 		}
 	} else {
-		SendClientMessage(playerid, -1, "SERVER: Unknown command.");
+		SendClientMessage(playerid, -1, "SERVER: Unknown command, check /cmds");
 	}
 }
 
@@ -284,4 +288,150 @@ void cmd_show_help_for(int playerid, char *cmdname)
 	} else {
 		SendClientMessage(playerid, COL_WARN, WARN"That command doesn't exist or is not available to you.");
 	}
+}
+
+#define CMDLIST_NUM_ENTRIES_PER_PAGE 17
+
+STATIC_ASSERT(CMDLIST_NUM_ENTRIES_PER_PAGE * 150 < LIMIT_DIALOG_INFO);
+
+struct CMDLIST_DATA {
+	short page;
+	unsigned char num_entries;
+	char has_next_page_entry;
+	struct COMMAND *entries[CMDLIST_NUM_ENTRIES_PER_PAGE];
+};
+
+static void cmd_show_cmdlist(int playerid, struct CMDLIST_DATA *data);
+
+static
+void cmd_engage_cmdlist(int playerid)
+{
+	cmd_show_cmdlist(playerid, NULL);
+}
+
+static
+void cmd_cb_dlg_cmdlist_detail(int playerid, struct DIALOG_RESPONSE response)
+{
+	if (!response.aborted && response.response) {
+		cmd_show_cmdlist(playerid, response.data);
+	} else {
+		free(response.data);
+	}
+}
+
+static
+void cmd_cb_dlg_cmdlist(int playerid, struct DIALOG_RESPONSE response)
+{
+	register struct COMMAND *cmd, *alias;
+	struct DIALOG_INFO *dialog;
+	struct CMDLIST_DATA *data;
+	char *b, have_alias_already;
+
+	if (response.aborted || !response.response) {
+		free(response.data);
+		return;
+	}
+
+	data = response.data;
+	if (data->page) {
+		response.listitem--;
+	}
+	if (response.listitem < 0) {
+		data->page--;
+		data->num_entries = 0;
+		cmd_show_cmdlist(playerid, data);
+	} else if (response.listitem >= CMDLIST_NUM_ENTRIES_PER_PAGE) {
+		data->page++;
+		data->num_entries = 0;
+		cmd_show_cmdlist(playerid, data);
+	} else if (response.listitem < data->num_entries) {
+		dialog = alloca(sizeof(struct DIALOG_INFO));
+		dialog_init_info(dialog);
+		b = dialog->info;
+		cmd = data->entries[response.listitem];
+		/*Not showing alias here (like /helpcmd would) because it's put below.*/
+		b += sprintf(b, "%s: %s\nSyntax: %s %s",
+			cmd->cmd, cmd->alias_of->description, cmd->cmd, cmd->alias_of->syntax);
+		cmd = cmd->alias_of;
+		have_alias_already = 0;
+		alias = cmds;
+		while (alias->cmd) {
+			if (alias->alias_of == cmd && alias != cmd) {
+				if (!have_alias_already) {
+					b += sprintf(b, "\n\nAliases of %s:", cmd->cmd);
+					have_alias_already = 1;
+				}
+				b += sprintf(b, "\n\t%s", alias->cmd);
+			}
+			alias++;
+		}
+		dialog->transactionid = DLG_TID_CMDLIST;
+		dialog->caption = "Command details";
+		dialog->button1 = "Back";
+		dialog->button2 = "Close";
+		dialog->handler.options = DLG_OPT_NOTIFY_ABORTED;
+		dialog->handler.data = data;
+		dialog->handler.callback = cmd_cb_dlg_cmdlist_detail;
+		dialog_show(playerid, dialog);
+	}
+}
+
+static
+void cmd_show_cmdlist(int playerid, struct CMDLIST_DATA *data)
+{
+	register struct COMMAND *cmd;
+	struct DIALOG_INFO dialog;
+	char *b;
+	int first_cmd_idx, idx;
+
+	idx = 0;
+	if (!data) {
+		data = malloc(sizeof(struct CMDLIST_DATA));
+		data->page = 0;
+		data->num_entries = 0;
+	}
+	if (!data->num_entries) {
+		first_cmd_idx = data->page * CMDLIST_NUM_ENTRIES_PER_PAGE;
+		data->has_next_page_entry = 0;
+		cmd = cmds;
+		while (cmd->cmd) {
+			if (pdata[playerid]->groups & cmd->alias_of->groups) {
+				if (idx > first_cmd_idx) {
+					if (data->num_entries == CMDLIST_NUM_ENTRIES_PER_PAGE) {
+						data->has_next_page_entry = 1;
+						break;
+					}
+					data->entries[data->num_entries++] = cmd;
+				}
+				idx++;
+			}
+			cmd++;
+		}
+	}
+
+	dialog_init_info(&dialog);
+	b = dialog.info;
+	if (data->page) {
+		b += sprintf(b, " \t"ECOL_SAMP_GREY"< previous page\n");
+	}
+	for (idx = 0; idx < data->num_entries; idx++) {
+		cmd = data->entries[idx];
+		if (cmd->alias_of == cmd) {
+			b += sprintf(b, "%s\t%s\n", cmd->cmd, cmd->description);
+		} else {
+			b += sprintf(b, "%s\t%s (alias of %s)\n", cmd->cmd, cmd->alias_of->description, cmd->alias_of->cmd);
+		}
+	}
+	if (data->has_next_page_entry) {
+		sprintf(b, " \t"ECOL_SAMP_GREY"next page >\n");
+	}
+	dialog.transactionid = DLG_TID_CMDLIST;
+	dialog.style = DIALOG_STYLE_TABLIST;
+	sprintf(dialog.caption, "Command list page %d", data->page + 1);
+	dialog.button1 = "Select";
+	dialog.button2 = "Close";
+	dialog.handler.data = data;
+	dialog.handler.options = DLG_OPT_NOTIFY_ABORTED;
+	dialog.handler.callback = cmd_cb_dlg_cmdlist;
+	dialog_show(playerid, &dialog);
 }

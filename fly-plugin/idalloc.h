@@ -28,6 +28,7 @@ If an airport has more, they are probably split out enough anyways.*/
 #define DLG_TID_PREFERENCES 8000
 #define DLG_TID_PREFERENCES_NAMETAGDISTANCE 8001
 #define DLG_TID_SPAWN 9000
+#define DLG_TID_CMDLIST 10000
 
 /*MAPICON IDS*/
 

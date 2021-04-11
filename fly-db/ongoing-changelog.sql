@@ -28,3 +28,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Mar 27', 'Redesigned the mission map, removed random preselection of destinations');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Apr 11', 'Added /cmds (/commandlist /commands /cmdlist) and /helpcmd');

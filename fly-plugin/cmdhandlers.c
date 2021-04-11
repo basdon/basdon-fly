@@ -494,6 +494,17 @@ int cmd_chute(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+static void cmd_engage_cmdlist(int playerid);
+
+#define CMD_CMDS_SYNTAX ""
+#define CMD_CMDS_DESC "Shows all commands available to you"
+static
+int cmd_cmds(struct COMMANDCONTEXT cmdctx)
+{
+	cmd_engage_cmdlist(cmdctx.playerid);
+	return CMD_OK;
+}
+
 #define CMD_ENGINE_SYNTAX ""
 #define CMD_ENGINE_DESC "Toggles the engine of your vehicle"
 static

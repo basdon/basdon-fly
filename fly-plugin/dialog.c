@@ -26,7 +26,8 @@ struct DIALOG_INFO {
 	int transactionid;
 	/**See DIALOG_STYLE_* constants.*/
 	char style;
-	/**The title at the top of the dialog.*/
+	/**The title at the top of the dialog.
+	When empty, the dialog won't show.*/
 	char *caption;
 	/**The text to display in the main dialog.
 	Use \n to start a new line and \t to tabulate.
