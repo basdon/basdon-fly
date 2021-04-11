@@ -995,7 +995,7 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 		return;
 	}
 
-	vhp = anticheat_GetVehicleHealth(vehicleid);
+	vhp = GetVehicleHealth(vehicleid);
 
 	dx = startpoint->pos.x - endpoint->pos.x;
 	dy = startpoint->pos.y - endpoint->pos.y;
@@ -1300,7 +1300,7 @@ void missions_start_unload(int playerid)
 	cbdata = malloc(sizeof(struct MISSION_UNLOAD_DATA));
 	cbdata->number_missions_started_stopped = number_missions_started_stopped[playerid];
 	cbdata->player_cc = MK_PLAYER_CC(playerid);
-	cbdata->vehiclehp = anticheat_GetVehicleHealth(vehicleid);
+	cbdata->vehiclehp = GetVehicleHealth(vehicleid);
 
 	textdraws_hide_consecutive(playerid, 1, TEXTDRAW_JOBSATISFACTION);
 	GameTextForPlayer(playerid, 0x8000000, 3, "~p~Unloading");
@@ -1334,7 +1334,7 @@ void missions_on_player_state_change(int playerid, int from, int to)
 		default:
 			DisablePlayerRaceCheckpoint(playerid);
 			vehicleid = GetPlayerVehicleID(playerid);
-			if (vehicleid && anticheat_GetVehicleHealth(vehicleid) < 250.0f) {
+			if (vehicleid && GetVehicleHealth(vehicleid) < 250.0f) {
 				missions_end_unfinished(playerid, MISSION_STATE_CRASHED);
 			} else {
 				missions_end_unfinished(playerid, MISSION_STATE_DIED);

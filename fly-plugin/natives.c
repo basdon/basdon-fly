@@ -19,7 +19,6 @@ static AMX_NATIVE n_GetPlayerPing;
 static AMX_NATIVE n_GetPlayerScore;
 static AMX_NATIVE n_GetServerTickRate;
 static AMX_NATIVE n_GetVehicleDamageStatus;
-static AMX_NATIVE n_GetVehicleHealth_;
 static AMX_NATIVE n_GetVehiclePoolSize;
 static AMX_NATIVE n_GivePlayerMoney_;
 static AMX_NATIVE n_GivePlayerWeapon;
@@ -44,7 +43,6 @@ static AMX_NATIVE n_SetPlayerSpecialAction;
 static AMX_NATIVE n_SetPlayerTime;
 static AMX_NATIVE n_SetPlayerWeather;
 static AMX_NATIVE n_SetSpawnInfo;
-static AMX_NATIVE n_SetVehicleHealth;
 static AMX_NATIVE n_SetVehiclePos;
 static AMX_NATIVE n_SetVehicleToRespawn;
 static AMX_NATIVE n_SetVehicleZAngle;
@@ -162,8 +160,6 @@ static cell tmpfloat;
 #define NC_GetServerTickRate() (NC_PARS_(0)\
 	n_GetServerTickRate(amx,nc_params))
 
-#define NC_GetVehicleHealth __USE__anticheat_GetVehicleHealth__
-
 #define NC_GetVehiclePoolSize() (NC_PARS_(0)\
 	n_GetVehiclePoolSize(amx,nc_params))
 
@@ -215,10 +211,6 @@ static cell tmpfloat;
 #define NC_SetPlayerWeather(PLAYERID,WEATHER) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=WEATHER,\
 	n_SetPlayerWeather(amx,nc_params))
-
-#define NC_SetVehicleHealth(VEHICLEID,HP) \
-	(NC_PARS_(2)nc_params[1]=VEHICLEID,nc_paramf[2]=HP,\
-	n_SetVehicleHealth(amx,nc_params))
 
 #define NC_SetVehicleToRespawn(VEHICLEID) \
 	(NC_PARS_(1)nc_params[1]=VEHICLEID,\
@@ -347,7 +339,6 @@ int natives_find()
 		N(GetPlayerScore),
 		N(GetServerTickRate),
 		N(GetVehicleDamageStatus),
-		N_(GetVehicleHealth),
 		N(GetVehiclePoolSize),
 		N_(GivePlayerMoney),
 		N(GivePlayerWeapon),
@@ -372,7 +363,6 @@ int natives_find()
 		N(SetPlayerTime),
 		N(SetPlayerWeather),
 		N(SetSpawnInfo),
-		N(SetVehicleHealth),
 		N(SetVehiclePos),
 		N(SetVehicleToRespawn),
 		N(SetVehicleZAngle),

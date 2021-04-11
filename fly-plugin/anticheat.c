@@ -171,19 +171,20 @@ int anticheat_flood(int playerid, int amount)
 /**
 Gets vehicle hp, after checking for unnacceptable values and handling offenders.
 
-Only works on valid vehicles!
+@return 0.0f if the vehicle is not valid.
 */
 static
-float anticheat_GetVehicleHealth(int vehicleid)
+float GetVehicleHealth(int vehicleid)
 {
+	struct SampVehicle *vehicle;
 	float hp;
 	int playerid;
 
-	NC_PARS(2);
-	nc_params[1] = vehicleid;
-	nc_params[2] = buf144a;
-	NC(n_GetVehicleHealth_);
-	hp = *fbuf144;
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (!vehicle) {
+		return 0.0f;
+	}
+	hp = vehicle->health;
 	if (hp != hp) {
 		playerid = GetVehicleDriver(vehicleid);
 		if (playerid == INVALID_PLAYER_ID) {
@@ -205,10 +206,7 @@ float anticheat_GetVehicleHealth(int vehicleid)
 	CrashPlayer(playerid);
 	natives_Kick(playerid, "invalid vehicle hp", NULL, -1);
 resethp:
-	NC_PARS(2);
-	nc_params[1] = vehicleid;
-	nc_paramf[2] = 1000.0f;
-	NC(n_SetVehicleHealth);
+	SAMP_SetVehicleHealth(vehicle, 1000.0f);
 	return 1000.0f;
 }
 
@@ -247,14 +245,16 @@ Ensures the vehicle's health is valid
 static
 void anticheat_on_player_enter_vehicle(int playerid, int vehicleid, int ispassenger)
 {
+	register struct SampVehicle *vehicle;
+	register float hp;
+
 	if (!ispassenger) {
-		NC_PARS(2);
-		nc_params[1] = vehicleid;
-		nc_params[2] = buf32a;
-		NC(n_GetVehicleHealth_);
-		if (*fbuf32 != *fbuf32 || *fbuf32 < 0.0f || 1000.0f < *fbuf32) {
-			*fbuf32 = 1000.0f;
-			NC(n_SetVehicleHealth);
+		vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+		if (vehicle) {
+			hp = vehicle->health;
+			if (hp != hp || hp < 0.0f || 1000.0f < hp) {
+				SAMP_SetVehicleHealth(vehicle, 1000.0f);
+			}
 		}
 	}
 }

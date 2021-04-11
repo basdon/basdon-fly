@@ -419,6 +419,34 @@ int GetVehicleDriver(int vehicleid)
 	return INVALID_PLAYER_ID;
 }
 
+/**
+Use GetVehicleHealth, defined in anticheat.c
+*/
+static
+float GetVehicleHealthRaw(int vehicleid)
+{
+	struct SampVehicle *vehicle;
+
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+		return vehicle->health;
+	}
+	return 0;
+}
+
+#define SAMP_SetVehicleHealth(VEHICLE,HP) ((void (*)(struct SampVehicle*,float))0x814B860)(VEHICLE,HP);
+
+static
+void SetVehicleHealth(int vehicleid, float hp)
+{
+	struct SampVehicle *vehicle;
+
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+		SAMP_SetVehicleHealth(vehicle, hp);
+	}
+}
+
 static
 __attribute__((unused))
 int GetVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *damage_status)
@@ -816,24 +844,28 @@ warping seats/cars: Players still shows in original one,
                     A fix is in place in this function to prevent this.
 
 Also resets the vehicle HP to 1000.0 when it's invalid.
+
+@return 0 on failure
 */
 static
 int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 #ifdef SAMP_NATIVES_IMPL
 {
-	float hp;
+	register struct SampVehicle *vehicle;
+	register float hp;
 	struct vec3 pos;
 	int oldvehicleid;
 	int playerstate;
 
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (!vehicle) {
+		return 0;
+	}
+
 	if (seat == 0) {
-		NC_PARS(2);
-		nc_params[1] = vehicleid;
-		nc_params[2] = buf32a;
-		NC(n_GetVehicleHealth_);
-		hp = *fbuf32;
-		if (hp != hp || hp < 0.0f || 1000.0f < hp) {
-			NC_SetVehicleHealth(vehicleid, 1000.0f);
+		hp = vehicle->health;
+		if (hp != hp || hp < 0.0f || hp > 1000.0f) {
+			SAMP_SetVehicleHealth(vehicle, 1000.0f);
 		}
 	}
 

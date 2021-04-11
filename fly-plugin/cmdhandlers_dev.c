@@ -472,14 +472,10 @@ int cmd_dev_vhp(struct COMMANDCONTEXT cmdctx)
 	}
 
 	if (cmd_get_int_param(&cmdctx, &set_hp)) {
-		NC_SetVehicleHealth(vehicleid, set_hp);
+		SetVehicleHealth(vehicleid, set_hp);
 	}
 
-	NC_PARS(2);
-	nc_params[1] = vehicleid;
-	nc_params[2] = buf32a;
-	NC(n_GetVehicleHealth_);
-	sprintf(cbuf32, "hp %f", *fbuf32);
+	sprintf(cbuf32, "hp %f", GetVehicleHealthRaw(vehicleid));
 	SendClientMessage(cmdctx.playerid, -1, cbuf32);
 	return CMD_OK;
 }
@@ -489,8 +485,11 @@ int cmd_dev_vhp(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_vhpnan(struct COMMANDCONTEXT cmdctx)
 {
-	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
-	NC_SetVehicleHealth(vehicleid, 0x7F800100);
+	float hp;
+
+	*((int*) &hp) = 0x7F800100;
+	assert(hp != hp);
+	SetVehicleHealth(GetPlayerVehicleID(cmdctx.playerid), hp);
 	return CMD_OK;
 }
 
@@ -499,8 +498,7 @@ int cmd_dev_vhpnan(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_vhpninf(struct COMMANDCONTEXT cmdctx)
 {
-	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
-	NC_SetVehicleHealth(vehicleid, float_ninf);
+	SetVehicleHealth(GetPlayerVehicleID(cmdctx.playerid), float_ninf);
 	return CMD_OK;
 }
 
@@ -509,7 +507,6 @@ int cmd_dev_vhpninf(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_vhppinf(struct COMMANDCONTEXT cmdctx)
 {
-	int vehicleid = GetPlayerVehicleID(cmdctx.playerid);
-	NC_SetVehicleHealth(vehicleid, float_pinf);
+	SetVehicleHealth(GetPlayerVehicleID(cmdctx.playerid), float_pinf);
 	return CMD_OK;
 }

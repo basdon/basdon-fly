@@ -161,7 +161,8 @@ struct SampVehicle {
 	short vehicleid;
 	char _pad66[0x82-0x66];
 	short model;
-	char _pad84[0xAA-0x84];
+	char _pad84[0xA6-0x84];
+	float health;
 	struct SampVehicleDamageStatus damageStatus;
 	char _padB4[0xC6-0xB4];
 	int col1;
@@ -173,6 +174,7 @@ struct SampVehicle {
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, vel, 0xC + 0x40);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, vehicleid, 0x64);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, model, 0x82);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, health, 0xA6);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, damageStatus, 0xAA);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, col1, 0xC6);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, col2, 0xCA);

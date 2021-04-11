@@ -420,7 +420,7 @@ void panel_update_odo_fl_hp_gear(int playerid, int vehicleid, int is_update)
 		odo = 0;
 	}
 
-	health = anticheat_GetVehicleHealth(vehicleid) - 250.0f;
+	health = GetVehicleHealth(vehicleid) - 250.0f;
 	if (health < 0.0f) {
 		hp_pct = 0;
 	} else {

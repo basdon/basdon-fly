@@ -968,7 +968,7 @@ new Float:toz = v1 * 2 * (q1 * q3 + q0 * q2) + v2 * 2 * (q2 * q3 - q0 * q1) + v3
 	}
 
 	if (mission_stage[playerid] == MISSION_STAGE_FLIGHT) {
-		hp = anticheat_GetVehicleHealth(vehicleid);
+		hp = GetVehicleHealth(vehicleid);
 		GetVehicleVelocityUnsafe(vehicleid, &vvel);
 		missions_send_tracker_data(playerid, vehicleid, hp, vpos, &vvel, engineState, pitch, roll);
 	}

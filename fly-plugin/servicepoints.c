@@ -241,7 +241,7 @@ int svp_repair(int playerid)
 		return CMD_OK;
 	}
 
-	hp = anticheat_GetVehicleHealth(vehicleid);
+	hp = GetVehicleHealth(vehicleid);
 	if (hp > 999.9f) {
 		SendClientMessage(playerid, COL_WARN, WARN"Your vehicle doesn't need to be repaired!");
 		return CMD_OK;
@@ -267,10 +267,7 @@ int svp_repair(int playerid)
 	money_take(playerid, cost);
 
 	RepairVehicle(vehicleid);
-	NC_PARS(2);
-	nc_params[1] = vehicleid;
-	nc_paramf[2] = hp;
-	NC(n_SetVehicleHealth);
+	SetVehicleHealth(vehicleid, hp);
 
 	if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
 		driverid = GetVehicleDriver(vehicleid);
