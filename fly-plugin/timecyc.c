@@ -326,14 +326,6 @@ static const char *weather_waves[WEATHERS] = {
 	SCALE_HIGH,
 };
 
-static struct {
-	unsigned char current;
-	unsigned char upcoming;
-	unsigned char locked;
-	unsigned char _pad;
-} weather;
-EXPECT_SIZE(weather, 4);
-
 /** In-game hours */
 int time_h;
 /** In-game minutes */

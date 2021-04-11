@@ -31,3 +31,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Apr 11', 'Added /cmds (/commandlist /commands /cmdlist) and /helpcmd');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Apr 11', 'Fix not getting a weather bonus if the weather is already bad when starting a mission');

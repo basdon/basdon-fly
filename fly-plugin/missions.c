@@ -98,6 +98,39 @@ static struct TEXTDRAW td_jobhelp_enexred = { "enexred", TEXTDRAW_ALLOC_AS_NEEDE
 static struct TEXTDRAW td_jobhelp_txtred = { "txtred", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobhelp_actionred = { "actionred", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 
+static
+int missions_get_weatherbonus_for_weather(int weather)
+{
+	switch (weather) {
+	case WEATHER_SF_RAINY:
+	case WEATHER_CS_RAINY:
+		return MISSION_WEATHERBONUS_RAINY + NC_random(MISSION_WEATHERBONUS_DEVIATION);
+	case WEATHER_SF_FOGGY:
+		return MISSION_WEATHERBONUS_FOGGY + NC_random(MISSION_WEATHERBONUS_DEVIATION);
+	case WEATHER_DE_SANDSTORMS:
+		return MISSION_WEATHERBONUS_SANDSTORM + NC_random(MISSION_WEATHERBONUS_DEVIATION);
+	default:
+		return 0;
+	}
+}
+
+static
+int missions_get_initial_weatherbonus()
+{
+	register int a, b, c;
+
+	a = missions_get_weatherbonus_for_weather(weather.current);
+	b = missions_get_weatherbonus_for_weather(weather.upcoming);
+	c = missions_get_weatherbonus_for_weather(weather.locked);
+	if (b > a) {
+		a = b;
+	}
+	if (c > a) {
+		return c;
+	}
+	return a;
+}
+
 /**
 Must only be called if the player has a valid active missionpoint.
 */
@@ -1018,7 +1051,7 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 	mission->damagetaken = 0;
 	mission->lastfuel = veh->fuel;
 	mission->fuelburned = 0.0f;
-	mission->weatherbonus = 0;
+	mission->weatherbonus = missions_get_initial_weatherbonus();
 
 	csprintf(buf144, "UPDATE msp SET o=o+1 WHERE i=%d", startpoint->id);
 	NC_mysql_tquery_nocb(buf144a);
@@ -1395,27 +1428,16 @@ void missions_on_vehicle_stream_in(int vehicleid, int forplayerid)
 
 void missions_on_weather_changed(int weather)
 {
-	int bonusvalue, i;
+	register struct MISSION *mission;
+	register int i;
+	int bonusvalue;
 
-	switch (weather) {
-	case WEATHER_SF_RAINY:
-	case WEATHER_CS_RAINY:
-		bonusvalue = MISSION_WEATHERBONUS_RAINY;
-		break;
-	case WEATHER_SF_FOGGY:
-		bonusvalue = MISSION_WEATHERBONUS_FOGGY;
-		break;
-	case WEATHER_DE_SANDSTORMS:
-		bonusvalue = MISSION_WEATHERBONUS_SANDSTORM;
-		break;
-	default:
-		return;
-	}
-	bonusvalue += NC_random(MISSION_WEATHERBONUS_DEVIATION);
+	bonusvalue = missions_get_weatherbonus_for_weather(weather);
 	i = playercount;
 	while (i--) {
-		if (activemission[players[i]] != NULL) {
-			activemission[players[i]]->weatherbonus += bonusvalue;
+		mission = activemission[players[i]];
+		if (mission && mission->weatherbonus < bonusvalue) {
+			mission->weatherbonus = bonusvalue;
 		}
 	}
 }

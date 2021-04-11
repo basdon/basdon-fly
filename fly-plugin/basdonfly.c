@@ -307,6 +307,16 @@ static void *pwdata[MAX_PLAYERS];
 
 static int prefs[MAX_PLAYERS];
 
+/*timecyc*/
+
+static struct {
+	unsigned char current;
+	unsigned char upcoming;
+	unsigned char locked;
+	unsigned char _pad;
+} weather;
+EXPECT_SIZE(weather, 4);
+
 /*class stuff*/
 #define CLASS_PILOT 1
 #define CLASS_RESCUE 2
