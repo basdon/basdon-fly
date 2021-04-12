@@ -17,7 +17,9 @@ int EncodeString(char *dest, char *source, int max_chars)
 	bs.ptrData = dest;
 	bs.numberOfBitsUsed = 0;
 	bs.numberOfBitsAllocated = max_chars * 8;
+#ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(void*,char*,int,struct BitStream*,char))0x808EF80)(*(int**) 0x81AA744, source, max_chars, &bs, 0);
+#endif
 	return bs.numberOfBitsUsed;
 }
 
@@ -27,13 +29,17 @@ Result is the hexadec string representation, so out buf should be at least 65 si
 static
 void SAMP_SHA256(char *out_buf, char *input)
 {
+#ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(char*,char*,char*,int))0x80ED230)(input, /*salt*/"", out_buf, 65);
+#endif
 }
 
 static
 void SetConsoleVariableString(char *variable_name, char *value)
 {
+#ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(void*,char*,char*))0x80A0110)(*(int**)0x81CA4B8, variable_name, value);
+#endif
 }
 
 static
@@ -61,9 +67,11 @@ void ForceSendPlayerOnfootSyncNow(int playerid)
 	cplayer->updateSyncType = UPDATE_SYNC_TYPE_ONFOOT;
 	cplayer->currentState = PLAYER_STATE_ONFOOT;
 	/*Three times because it's an unreliable packet[citation needed] but it's important that players receive it.*/
+#ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(struct SampPlayer*)) 0x80C9DB0)(cplayer);
 	((void (*)(struct SampPlayer*)) 0x80C9DB0)(cplayer);
 	((void (*)(struct SampPlayer*)) 0x80C9DB0)(cplayer);
+#endif
 
 	cplayer->updateSyncType = actual_updateSyncType;
 	cplayer->currentState = actual_state;
@@ -434,7 +442,11 @@ float GetVehicleHealthRaw(int vehicleid)
 	return 0;
 }
 
+#ifndef NO_CAST_IMM_FUNCPTR
 #define SAMP_SetVehicleHealth(VEHICLE,HP) ((void (*)(struct SampVehicle*,float))0x814B860)(VEHICLE,HP);
+#else
+#define SAMP_SetVehicleHealth(VEHICLE,HP)
+#endif
 
 static
 void SetVehicleHealth(int vehicleid, float hp)
@@ -469,6 +481,7 @@ void UpdateVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *da
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
 	if (vehicle) {
+#ifndef NO_CAST_IMM_FUNCPTR
 		((void (*)(struct SampVehicle*,short,unsigned int,unsigned int,unsigned char,unsigned char))0x814BB90)(
 			vehicle,
 			INVALID_PLAYER_ID, /*The player that caused this update, so gamemode/filterscripts can block it (not applicable here).*/
@@ -477,6 +490,7 @@ void UpdateVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *da
 			damage_status->broken_lights,
 			damage_status->popped_tires.raw
 		);
+#endif
 	}
 }
 
@@ -503,7 +517,9 @@ void SetVehicleParamsEx(int vehicleid, struct SampVehicleParams *params)
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
 	if (vehicle) {
+#ifndef NO_CAST_IMM_FUNCPTR
 		((int (*)(struct SampVehicle*,struct SampVehicleParams*))0x814C7A0)(vehicle, params);
+#endif
 	}
 }
 
@@ -631,12 +647,14 @@ void SetVehicleColor(int vehicleid, int col1, int col2)
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
 	if (vehicle) {
+#ifndef NO_CAST_IMM_FUNCPTR
 		((void (*)(struct SampVehicle*,short,int,int))0x814C510)(
 			vehicle,
 			INVALID_PLAYER_ID, /*The player that caused this update, so gamemode/filterscripts can block it (not applicable here).*/
 			col1,
 			col2
 		);
+#endif
 	}
 }
 
@@ -731,6 +749,7 @@ void CrashPlayer(int playerid)
 }
 #endif
 
+#ifndef SAMP_C_SKIP_MIXED_NATIVES /*This is just used to make testing easier, but should be maybe removed at some point...*/
 
 /*-----------------------------------------------------------------------------*/
 
@@ -1165,3 +1184,5 @@ void samp_init()
 	mem_mkjmp(0x80B2BA2, &OnDialogResponseHook);
 }
 #endif
+
+#endif /*SAMP_C_SKIP_MIXED_NATIVES*/

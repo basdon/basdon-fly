@@ -29,7 +29,6 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/owner", 0, GROUPS_ALL, CMD_OWNER_SYNTAX, CMD_OWNER_DESC, cmd_dev_owner },
 	{ 0, 0, "/platform", 0, GROUPS_ALL, CMD_PLATFORM_SYNTAX, CMD_PLATFORM_DESC, cmd_dev_platform },
 	{ 0, 0, "/sound", 0, GROUPS_ALL, CMD_SOUND_SYNTAX, CMD_SOUND_DESC, cmd_dev_sound },
-	{ 0, 0, "/testmsgsplit", 0, GROUPS_ALL, CMD_TESTMSGSPLIT_SYNTAX, CMD_TESTMSGSPLIT_DESC, cmd_dev_testmsgsplit },
 	{ 0, 0, "/testparpl", 0, GROUPS_ALL, CMD_TESTPARPL_SYNTAX, CMD_TESTPARPL_DESC, cmd_dev_testparpl },
 	{ 0, 0, "/timecyc", 0, GROUPS_ALL, CMD_TIMECYC_SYNTAX, CMD_TIMECYC_DESC, cmd_dev_timecyc },
 	{ 0, 0, "/timex", 0, GROUPS_ALL, CMD_TIMEX_SYNTAX, CMD_TIMEX_DESC, cmd_dev_timex },
