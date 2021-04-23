@@ -542,6 +542,7 @@ This should fix the issue with textured objects being either too bright or too d
 @return amount of RPCs sent
 */
 static
+__attribute__((unused))
 int maps_recreate_textured_objects(int playerid)
 {
 	struct BitStream bitstream;
@@ -558,6 +559,7 @@ int maps_recreate_textured_objects(int playerid)
 
 	for (i = 0; i < MAX_MAPSYSTEM_OBJECTS; i++) {
 		/*TODO: check if the materials are textures and not only text (don't need to recreate for text)*/
+		/*TODO: this should only be needed for textured materials with custom material color*/
 		if (player_object[i] && player_object[i]->num_materials && time_of_creating_object[i] != time) {
 			time_of_creating_object[i] = time;
 			tmp_saved_objdata_size = player_object[i]->objectid;
@@ -609,9 +611,11 @@ void maps_stream_for_player(int playerid, struct vec3 pos)
 		}
 	}
 
+	/*This is disabled until it only recreates/retextures objects that use custom material colors
 	if (num_rpcs_sent < 200 && !isafk[playerid]) {
 		maps_recreate_textured_objects(playerid);
 	}
+	*/
 }
 
 /**
