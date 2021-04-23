@@ -34,3 +34,9 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Apr 11', 'Fix not getting a weather bonus if the weather is already bad when starting a mission');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Apr 23', 'Changed OCTA taxi lights to an object model without collision');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Apr 23', 'New destination: Sandy Dunes (DUNE)');
