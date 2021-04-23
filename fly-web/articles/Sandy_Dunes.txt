@@ -1,0 +1,44 @@
+<?php $code='DUNE'; ?>
+
+<div class="articleright">
+  <?php readfile('../gen/apfactsheet_'.$code.'.html') ?>
+</div>
+
+{@stub}
+
+This map was mapped by player spitfire, edited by robin_be.
+
+{@h3 Vehicle spawns}
+
+<?php readfile('../gen/apvehiclelist_'.$code.'.html') ?>
+
+{@h3 Service points}
+
+Sandy Dunes has one service point.
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=\
+    dune_svp.jpg;service point;service point}
+  <small>Sandy Dunes Airport service point</small>
+}
+
+{@rem island map is either empty, or it contains the h3 header @}
+<?php readfile('../gen/islandmap_'.$code.'.html') ?>
+
+{@h3 Aerodrome Chart}
+
+<?php readfile('../gen/aerodromechart_'.$code.'.html') ?>
+
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php include('../articles/airport-dyn-stats.php') ?>
+
+{@h3 Gallery}
+
+{@agalleryimg dune_a.jpg;Sandy Dunes}
+{@agalleryimg dune_b.jpg;Sandy Dunes}
+{@agalleryimg dune_c.jpg;Sandy Dunes}
+{@agalleryimg dune_e.jpg;Sandy Dunes}
+{@agalleryimg dune_f.jpg;Sandy Dunes}
+{@agalleryimg dune.jpg;Sandy Dunes}
+{@agalleryimg dune_h.jpg;Sandy Dunes}
+{@agalleryimg dune_i.jpg;Sandy Dunes}
