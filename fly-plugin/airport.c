@@ -51,8 +51,9 @@ static
 void airports_init()
 {
 	struct AIRPORT *ap;
-	struct RUNWAY *rnw;
+	struct RUNWAY *rnw, *prev_rnw;
 	struct MISSIONPOINT *msp;
+	float dx, dy;
 	int cacheid, rowcount, lastap, *field = nc_params + 2;
 	int i, j, airportid;
 
@@ -89,9 +90,9 @@ void airports_init()
 	}
 	NC_cache_delete(cacheid);
 
-	/*TODO make this into one big arraw aswell?*/
+	/*TODO make this into one big array aswell?*/
 	/*load runways*/
-	B144("SELECT a,x,y,z,n,type,h,s FROM rnw ORDER BY a ASC");
+	B144("SELECT a,x,y,z,n,type,h,s,i FROM rnw ORDER BY a ASC, i ASC");
 	cacheid = NC_mysql_query(buf144a);
 	rowcount = NC_cache_get_row_count();
 	if (!rowcount) {
@@ -118,6 +119,7 @@ void airports_init()
 		ap->runwaysend = ap->runways + i;
 		nc_params[1] = rowcount;
 		nc_params[3] = buf32a;
+		prev_rnw = NULL;
 		while (i--) {
 			NC_PARS(2);
 			nc_params[1] = rowcount;
@@ -128,11 +130,22 @@ void airports_init()
 			rnw->type = (*field = 5, NC(n_cache_get_field_i));
 			rnw->heading = (*field = 6, NCF(n_cache_get_field_f));
 			rnw->headingr = (360.0f - rnw->heading + 90.0f) * DEG_TO_RAD;
+			rnw->other_end = NULL;
+			rnw->length = 0;
+			rnw->identifier = (*field = 8, NC(n_cache_get_field_i));
 			NC_PARS(3);
 			*field = 7; NC(n_cache_get_field_s);
 			sprintf(rnw->id, "%02.0f", (float) ceil(rnw->heading / 10.0f));
 			rnw->id[2] = (char) buf32[0];
 			rnw->id[3] = 0;
+			if (prev_rnw && prev_rnw->identifier == rnw->identifier) {
+				prev_rnw->other_end = rnw;
+				rnw->other_end = prev_rnw;
+				dx = rnw->pos.x - prev_rnw->pos.x;
+				dy = rnw->pos.y - prev_rnw->pos.y;
+				rnw->length = prev_rnw->length = (unsigned short) sqrt(dx * dx + dy * dy);
+			}
+			prev_rnw = rnw;
 			rnw++;
 			rowcount--;
 		}
@@ -250,9 +263,9 @@ void cb_airport_nearest_dialog_response(int playerid, struct DIALOG_RESPONSE res
 		} else {
 			if (!hasrunways) {
 				hasrunways = 1;
-				info += sprintf(info, "\nRunways:\t%s", rnw->id);
+				info += sprintf(info, "\nRunways:\t%s (%dm)", rnw->id, rnw->length);
 			} else {
-				info += sprintf(info, "\n\t\t%s", rnw->id);
+				info += sprintf(info, "\n\t\t%s (%dm)", rnw->id, rnw->length);
 			}
 			if (rnw->nav == (NAV_VOR | NAV_ILS)) {
 				info += sprintf(info, " (VOR+ILS)");

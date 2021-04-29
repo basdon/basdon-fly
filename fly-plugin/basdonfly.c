@@ -145,11 +145,17 @@ struct RUNWAY {
 	char id[AIRPORT_CODE_LEN];
 	float heading, headingr;
 	struct vec3 pos;
-	int nav;
+	unsigned char nav;
 	/**
 	Should be one of the RUNWAY_TYPE_ constants.
 	*/
 	int type;
+	/**not applicable for helipads*/
+	struct RUNWAY *other_end;
+	/**not applicable for helipads*/
+	unsigned short length;
+	/*identifier of the runway, to link two ends together*/
+	unsigned char identifier;
 };
 
 /**
