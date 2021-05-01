@@ -105,8 +105,7 @@ void airports_init()
 
 		/*look 'ahead' to see how many runways there are*/
 		i = rowcount - 1;
-		while (i > 0) {
-			i--;
+		while (i-- > 0) {
 			nc_params[1] = i;
 			if (NC(n_cache_get_field_i) != lastap) {
 				break;
