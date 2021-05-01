@@ -25,9 +25,9 @@ static struct NAVDATA {
 /*value for ILS when it's out of range*/
 #define INVALID_ILS_VALUE 100
 /*maximum distance from where to start showing ILS*/
-#define ILS_MAX_DIST (3000.0f)
+#define ILS_MAX_DIST (15000.0f)
 /*extra offset where ILS values are out of range, but ILS is still shown*/
-#define ILS_GREYZONE (80.0f)
+#define ILS_GREYZONE (500.0f)
 /*amount of horizontal/vertical X tokens*/
 #define ILS_SIZE 9
 
@@ -51,34 +51,33 @@ void nav_disable(int vehicleid)
 /**
 Calculates ILS values.
 
-@param ilsx output
-@param ilsz output
-@param dist horizontal distance of player to beacon
-@param z player z
-@param targetz beacon z position
-@param dx how far player is off of beacon target.
+@param dist distance to the runway as if player is on the line of the runway
+@param horiz_dev horizontal deviation to runway (basically the VORbar value)
 */
 static
-void nav_calc_ils_values(
-	signed char *ilsx, signed char *ilsz, const float dist,
-	const float z, const float targetz, const float dx)
+void nav_calc_ils_values(struct NAVDATA *n, struct vec3 *player_pos, float dist, const float horiz_dev)
 {
-	float xdev = 5.0f + dist * (90.0f - 5.0f) / 1500.0f;
-	float zdev = 2.0f + dist * (100.0f - 2.0f) / 1250.0f;
-	float ztarget = targetz + dist * 0.2f;
-	float dz = z - ztarget;
+	float xdev;
+	float zdev;
+	float ztarget;
+	float dz;
 	int tmp;
 
+	xdev = 10.0f + dist * 100.0f / 5000.0f;
+	zdev = 10.0f + dist * 100.0f / 5000.0f;
+	ztarget = n->vor->pos.z + dist * 0.15f;
+	dz = player_pos->z - ztarget;
+
 	if (dz < -zdev - ILS_GREYZONE || dz > zdev + ILS_GREYZONE ||
-		dx < -xdev - ILS_GREYZONE || dx > xdev + ILS_GREYZONE)
+		horiz_dev < -xdev - ILS_GREYZONE || horiz_dev > xdev + ILS_GREYZONE)
 	{
-		*ilsx = *ilsz = INVALID_ILS_VALUE;
-		return;
+		n->ilsx = n->ilsz = INVALID_ILS_VALUE;
+	} else {
+		tmp = (int) (ILS_SIZE * dz / (zdev * 2.0f)) + ILS_SIZE / 2;
+		n->ilsz = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2 - 1);
+		tmp = (int) (-ILS_SIZE * horiz_dev / (xdev * 2.0f)) + ILS_SIZE / 2;
+		n->ilsx = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2 - 1);
 	}
-	tmp = (int) (ILS_SIZE * dz / (zdev * 2.0f)) + ILS_SIZE / 2;
-	*ilsz = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2 - 1);
-	tmp = (int) (-ILS_SIZE * dx / (xdev * 2.0f)) + ILS_SIZE / 2;
-	*ilsx = CLAMP(tmp, -ILS_SIZE, ILS_SIZE * 2 - 1);
 }
 
 static
@@ -97,7 +96,7 @@ void nav_update(int vehicleid, struct vec4 *pos)
 	if (n->beacon != NULL) {
 		beacon = n->beacon;
 	} else if (n->vor != NULL) {
-		beacon = &n->vor->pos;
+		beacon = &n->vor->touchdown_pos;
 	} else {
 		return;
 	}
@@ -111,11 +110,15 @@ void nav_update(int vehicleid, struct vec4 *pos)
 		n->dist = (n->dist / 100) * 100;
 	}
 	n->alt = (int) (pos->coords.z - beacon->z);
+	n->ilsx = n->ilsz = INVALID_ILS_VALUE;
 	if (n->vor != NULL) {
 		crs = (360.0f - heading) - n->vor->heading;
 		vorangle = (float) atan2(dy, dx) - n->vor->headingr;
 		horizontaldeviation = dist * (float) sin(vorangle);
 		n->vorvalue = (int) horizontaldeviation;
+		if (n->ils && dist < ILS_MAX_DIST && (dist *= (float) cos(vorangle)) >= 0.0f) {
+			nav_calc_ils_values(n, &pos->coords, dist, horizontaldeviation);
+		}
 	} else {
 		crs = (float) atan2(dy, dx) * 180.0f / M_PI;
 		heading += 90.0f;
@@ -124,11 +127,6 @@ void nav_update(int vehicleid, struct vec4 *pos)
 		}
 		crs = heading - crs;
 		n->vorvalue = INVALID_VOR_VALUE;
-	}
-	if ((n->vor == NULL || !n->ils) || (dist > ILS_MAX_DIST || (dist *= (float) cos(vorangle)) <= 0.0f)) {
-		n->ilsx = n->ilsz = INVALID_ILS_VALUE;
-	} else {
-		nav_calc_ils_values(&n->ilsx, &n->ilsz, dist, pos->coords.z, beacon->z, horizontaldeviation);
 	}
 	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);
 }

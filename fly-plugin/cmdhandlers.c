@@ -583,7 +583,7 @@ int cmd_ils(struct COMMANDCONTEXT cmdctx)
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"ILS can only be activated when VOR is already active");
 		return CMD_OK;
 	}
-	if ((np->vor->nav & NAV_ILS) != NAV_ILS) {
+	if ((np->vor->nav & NAV_ILS) != NAV_ILS || !np->vor->other_end) {
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"The selected runway does not have ILS capabilities");
 		return CMD_OK;
 	}

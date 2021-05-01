@@ -40,3 +40,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Apr 23', 'New destination: Sandy Dunes (DUNE)');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 May 01', 'Significantly increased the range of ILS & lowered its glidescope');
