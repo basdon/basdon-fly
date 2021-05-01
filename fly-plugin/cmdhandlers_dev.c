@@ -157,6 +157,98 @@ int cmd_dev_platform(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+static
+void dev_show_runway_labels(int playerid)
+{
+	struct RUNWAY *rnw;
+	char text[32], text_bits[32];
+	int bitlen;
+	int id, ap;
+
+	id = 0;
+	for (ap = 0; ap < numairports; ap++) {
+		rnw = airports[ap].runways;
+		while (rnw != airports[ap].runwaysend) {
+			sprintf(text, "%s%s\ntouchdown", airports[ap].code, rnw->id);
+			bitlen = EncodeString(text_bits, text, sizeof(text_bits));
+			Create3DTextLabel(
+				playerid, DEBUG_RUNWAY_LABEL_ID_BASE + id, -1, &rnw->touchdown_pos, 1500.0f, 0,
+				INVALID_PLAYER_ID, INVALID_VEHICLE_ID, text_bits, bitlen
+			);
+			id++;
+			sprintf(text, "%s%s\nend", airports[ap].code, rnw->id);
+			bitlen = EncodeString(text_bits, text, sizeof(text_bits));
+			Create3DTextLabel(
+				playerid, DEBUG_RUNWAY_LABEL_ID_BASE + id, -1, &rnw->pos, 1500.0f, 0,
+				INVALID_PLAYER_ID, INVALID_VEHICLE_ID, text_bits, bitlen
+			);
+			id++;
+			rnw++;
+		}
+	}
+}
+
+#define CMD_RNW_SYNTAX "show|hide|<runwaycode>"
+#define CMD_RNW_DESC "Modify runway positions"
+static
+int cmd_dev_rnw(struct COMMANDCONTEXT cmdctx)
+{
+	struct RUNWAY *rnw;
+	char arg1[144];
+	int ap;
+	int id;
+
+	if (!cmd_get_str_param(&cmdctx, arg1)) {
+		return CMD_SYNTAX_ERR;
+	} else if (!strcmp(arg1, "show")) {
+		dev_show_runway_labels(cmdctx.playerid);
+		return CMD_OK;
+	} else  if (!strcmp(arg1, "hide")) {
+		id = 0;
+		for (ap = 0; ap < numairports; ap++) {
+			rnw = airports[ap].runways;
+			while (rnw != airports[ap].runwaysend) {
+				Delete3DTextLabel(cmdctx.playerid, DEBUG_RUNWAY_LABEL_ID_BASE + id);
+				id++;
+				Delete3DTextLabel(cmdctx.playerid, DEBUG_RUNWAY_LABEL_ID_BASE + id);
+				id++;
+				rnw++;
+			}
+		}
+		return CMD_OK;
+	} else {
+		if (strlen(arg1) > 4) {
+			id = 0;
+			for (ap = 0; ap < numairports; ap++) {
+				if (*(int*) &airports[ap].code == *(int*) arg1) {
+					rnw = airports[ap].runways;
+					while (rnw != airports[ap].runwaysend) {
+						if (!strcmp(arg1 + 4, rnw->id)) {
+							GetPlayerPos(cmdctx.playerid, &rnw->pos);
+							printf("UPDATE rnw SET x=%.4f,y=%.4f,z=%.4f WHERE id=%d;\n", rnw->pos.x, rnw->pos.y, rnw->pos.z, rnw->dbid);
+							airports_calculate_runway_length_and_touchdown_points();
+							dev_show_runway_labels(cmdctx.playerid);
+							return CMD_OK;
+						}
+						id += 2;
+						rnw++;
+					}
+					SendClientMessage(cmdctx.playerid, COL_WARN, WARN"runway not found");
+					return CMD_OK;
+				} else {
+					rnw = airports[ap].runways;
+					while (rnw != airports[ap].runwaysend) {
+						id += 2;
+						rnw++;
+					}
+				}
+			}
+		}
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"airport not found");
+		return CMD_SYNTAX_ERR;
+	}
+}
+
 #define CMD_SOUND_SYNTAX "<soundid>"
 #define CMD_SOUND_DESC "Plays a sound"
 static

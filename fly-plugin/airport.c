@@ -44,6 +44,34 @@ void airports_print_stats()
 }
 #endif
 
+static
+void airports_calculate_runway_length_and_touchdown_points()
+{
+	struct RUNWAY *rnw;
+	float t, dx, dy;
+	int i;
+
+	for (i = 0; i < numairports; i++) {
+		rnw = airports[i].runways;
+		while (rnw != airports[i].runwaysend) {
+			if (rnw->other_end) {
+				dx = rnw->pos.x - rnw->other_end->pos.x;
+				dy = rnw->pos.y - rnw->other_end->pos.y;
+				rnw->length = (unsigned short) sqrt(dx * dx + dy * dy);
+				if (rnw->length > 500) {
+					t = 115.0f / rnw->length;
+				} else {
+					t = 115.0f / 500.0f;
+				}
+				rnw->touchdown_pos.x = rnw->pos.x + (rnw->other_end->pos.x - rnw->pos.x) * t;
+				rnw->touchdown_pos.y = rnw->pos.y + (rnw->other_end->pos.y - rnw->pos.y) * t;
+				rnw->touchdown_pos.z = rnw->pos.z + (rnw->other_end->pos.z - rnw->pos.z) * t;
+			}
+			rnw++;
+		}
+	}
+}
+
 /**
 Loads airports/runways/missionpoints (and init other things).
 */
@@ -53,7 +81,6 @@ void airports_init()
 	struct AIRPORT *ap;
 	struct RUNWAY *rnw, *prev_rnw;
 	struct MISSIONPOINT *msp;
-	float dx, dy;
 	int cacheid, rowcount, lastap, *field = nc_params + 2;
 	int i, j, airportid;
 
@@ -92,7 +119,7 @@ void airports_init()
 
 	/*TODO make this into one big array aswell?*/
 	/*load runways*/
-	B144("SELECT a,x,y,z,n,type,h,s,i FROM rnw ORDER BY a ASC, i ASC");
+	B144("SELECT a,x,y,z,n,type,h,s,i,id FROM rnw ORDER BY a ASC, i ASC");
 	cacheid = NC_mysql_query(buf144a);
 	rowcount = NC_cache_get_row_count();
 	if (!rowcount) {
@@ -122,6 +149,7 @@ void airports_init()
 		while (i--) {
 			NC_PARS(2);
 			nc_params[1] = rowcount;
+			rnw->dbid = (*field = 9, NCF(n_cache_get_field_f));
 			rnw->pos.x = (*field = 1, NCF(n_cache_get_field_f));
 			rnw->pos.y = (*field = 2, NCF(n_cache_get_field_f));
 			rnw->pos.z = (*field = 3, NCF(n_cache_get_field_f));
@@ -140,9 +168,6 @@ void airports_init()
 			if (prev_rnw && prev_rnw->identifier == rnw->identifier) {
 				prev_rnw->other_end = rnw;
 				rnw->other_end = prev_rnw;
-				dx = rnw->pos.x - prev_rnw->pos.x;
-				dy = rnw->pos.y - prev_rnw->pos.y;
-				rnw->length = prev_rnw->length = (unsigned short) sqrt(dx * dx + dy * dy);
 			}
 			prev_rnw = rnw;
 			rnw++;
@@ -150,6 +175,7 @@ void airports_init()
 		}
 	}
 	NC_cache_delete(cacheid);
+	airports_calculate_runway_length_and_touchdown_points();
 
 	/*load missionpoints*/
 	/*They _HAVE_ to be ordered by airport.*/

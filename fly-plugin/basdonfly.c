@@ -142,9 +142,11 @@ EXPECT_SIZE(struct quat, 4 * sizeof(cell));
 #define RUNWAY_TYPE_HELIPAD (2)
 
 struct RUNWAY {
+	int dbid;
 	char id[AIRPORT_CODE_LEN];
 	float heading, headingr;
 	struct vec3 pos;
+	struct vec3 touchdown_pos;
 	unsigned char nav;
 	/**
 	Should be one of the RUNWAY_TYPE_ constants.

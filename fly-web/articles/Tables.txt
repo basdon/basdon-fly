@@ -53,6 +53,7 @@ apt -- airports
 
 <pre>
 rnw -- runways
+  id - rowid
   a - airport (apt.i)
   i - runway id (matches on end to the other)
   s - specifier (as in L/C/R/H(helipad)/nothing)

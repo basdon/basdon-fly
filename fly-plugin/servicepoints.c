@@ -69,7 +69,7 @@ void svp_init()
 	struct SERVICEPOINT *svp;
 	int cacheid, rowcount;
 
-	svp_text_encoded_bitlength = EncodeString(svp_text_encoded_bits, SVP_TXT, 32);
+	svp_text_encoded_bitlength = EncodeString(svp_text_encoded_bits, SVP_TXT, sizeof(svp_text_encoded_bits));
 
 	servicepoints = NULL;
 	numservicepoints = 0;
