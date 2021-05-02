@@ -43,3 +43,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 May 01', 'Significantly increased the range of ILS & lowered its glidescope');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 May 02', 'Added a number to ILS which shows the projected landing position using the current descend rate');

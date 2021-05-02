@@ -18,6 +18,10 @@ static struct NAVDATA {
 	ILS z value, [-ILS_SIZE,ILS_SIZE*2] where [0,ILS_SIZE] is 'on target'
 	*/
 	signed char ilsz;
+	/**Only used when ILS is active.
+	positive means that the touchdown point will be later than desired,
+	negative means the touchdown point will be sooner than desired.*/
+	char glidescope_number;
 } *nav[MAX_VEHICLES];
 
 /*value for VOR when it's out of range*/
@@ -81,7 +85,36 @@ void nav_calc_ils_values(struct NAVDATA *n, struct vec3 *player_pos, float dist,
 }
 
 static
-void nav_update(int vehicleid, struct vec4 *pos)
+void nav_calc_ils_glidescope_number(struct NAVDATA *n, float crs, float dist, struct vec3 *velocity)
+{
+	float horiz_speed, glidescope_angle;
+	int num;
+
+	horiz_speed = (float) cos(crs);
+	if (horiz_speed < 0) {
+		n->glidescope_number = 127;
+	} else {
+		horiz_speed *= (float) sqrt(velocity->x * velocity->x + velocity->y * velocity->y);
+		glidescope_angle = (float) atan2(-velocity->z, horiz_speed);
+		if (glidescope_angle <= 0.0174f) { /*1deg*/
+			n->glidescope_number = 127;
+		} else if (glidescope_angle >= 1.5533f) { /*89deg*/
+			n->glidescope_number = -128;
+		} else {
+			num = (int) (n->alt / (float) tan(glidescope_angle) - dist) / 50;
+			if (num > 127) {
+				n->glidescope_number = 127;
+			} else if (num < -128) {
+				n->glidescope_number = -128;
+			} else {
+				n->glidescope_number = (char) num;
+			}
+		}
+	}
+}
+
+static
+void nav_update(int vehicleid, struct vec4 *pos, struct vec3 *velocity)
 {
 	struct NAVDATA *n = nav[vehicleid];
 	float dx, dy;
@@ -118,6 +151,7 @@ void nav_update(int vehicleid, struct vec4 *pos)
 		n->vorvalue = (int) horizontaldeviation;
 		if (n->ils && dist < ILS_MAX_DIST && (dist *= (float) cos(vorangle)) >= 0.0f) {
 			nav_calc_ils_values(n, &pos->coords, dist, horizontaldeviation);
+			nav_calc_ils_glidescope_number(n, crs * M_PI / 180.0f, dist, velocity);
 		}
 	} else {
 		crs = (float) atan2(dy, dx) * 180.0f / M_PI;
@@ -134,6 +168,7 @@ void nav_update(int vehicleid, struct vec4 *pos)
 static
 void nav_enable(int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 {
+	struct vec3 vvel;
 	struct vec4 vpos;
 	struct NAVDATA *navdata;
 
@@ -147,7 +182,8 @@ void nav_enable(int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 	navdata->ils = 0;
 
 	GetVehiclePosRotUnsafe(vehicleid, &vpos);
-	nav_update(vehicleid, &vpos);
+	GetVehicleVelocityUnsafe(vehicleid, &vvel);
+	nav_update(vehicleid, &vpos, &vvel);
 	panel_nav_updated(vehicleid);
 }
 

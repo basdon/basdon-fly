@@ -573,6 +573,7 @@ static
 int cmd_ils(struct COMMANDCONTEXT cmdctx)
 {
 	struct vec4 vpos;
+	struct vec3 vvel;
 	struct NAVDATA *np;
 	int vehicleid;
 
@@ -592,7 +593,8 @@ int cmd_ils(struct COMMANDCONTEXT cmdctx)
 	PlayerPlaySound(cmdctx.playerid, np->ils ? NAV_SET_SOUND : NAV_DEL_SOUND);
 
 	GetVehiclePosRotUnsafe(vehicleid, &vpos);
-	nav_update(vehicleid, &vpos);
+	GetVehicleVelocityUnsafe(vehicleid, &vvel);
+	nav_update(vehicleid, &vpos, &vvel);
 	panel_nav_updated(vehicleid);
 	return CMD_OK;
 }

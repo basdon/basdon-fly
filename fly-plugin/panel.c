@@ -586,7 +586,7 @@ void panel_update_nav_text_inactive(int playerid, struct RPCDATA_ShowTextDraw *t
 static
 void panel_update_nav(int playerid, int vehicleid, int is_update)
 {
-	#define ILS_TEXT_LEN 124
+	#define ILS_TEXT_LEN 141
 
 	static const unsigned char ILS_Z_OFFSETS[] = { 8, 15, 22, 29, 61, 93, 100, 107, 114 };
 
@@ -751,7 +751,10 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 
 	/*ils*/
 	if (navdata && navdata->ils) {
-		ilscachevalue = ((unsigned char) navdata->ilsx << 8) | (unsigned char) navdata->ilsz;
+		ilscachevalue =
+			((unsigned char) navdata->glidescope_number << 16) |
+			((unsigned char) navdata->ilsx << 8) |
+			(unsigned char) navdata->ilsz;
 		if (caches[playerid].nav_ils != ilscachevalue || !caches[playerid].ils_shown) {
 			caches[playerid].nav_ils = ilscachevalue;
 
@@ -763,11 +766,10 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 				ilstype_new = 1;
 				td_panel_ils.rpcdata->flags |= TEXTDRAW_FLAG_PROPORTIONAL;
 				ils_len = 19;
-				strcpy(ils_buf, "~r~~h~no ILS signal");
+				memcpy(ils_buf, "~r~~h~no ILS signal", ils_len + 1);
 			} else {
 				ilstype_new = 2;
 				td_panel_ils.rpcdata->flags &= ~TEXTDRAW_FLAG_PROPORTIONAL;
-				ils_len = ILS_TEXT_LEN;
 				strcpy(ils_buf,
 					"~r~_~n~"
 					"~w~X~n~"
@@ -781,7 +783,8 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 					"~w~X~n~"
 					"~w~X~n~"
 					"~w~X~n~"
-					"~r~_");
+					"~r~_~n~"
+					"~g~~h~____");
 
 				if (navdata->ilsx < 0) {
 					ils_buf[38] = '0' + (-navdata->ilsx);
@@ -797,6 +800,28 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 					ils_buf[123] = '0' + (navdata->ilsz - ILS_SIZE + 1);
 				} else {
 					ils_buf[ILS_Z_OFFSETS[navdata->ilsz]] = 'r';
+				}
+
+				if (navdata->glidescope_number > 0) {
+					ils_buf[128] = 'b';
+				} else if (navdata->glidescope_number < 0) {
+					ils_buf[128] = 'y';
+				}
+				if (navdata->glidescope_number == 127) {
+					ils_buf[133] = 'O';
+					ils_buf[134] = 'O';
+					ils_buf[135] = 'B';
+					ils_buf[136] = 0;
+					ils_len = 136;
+				} else if (navdata->glidescope_number == -128) {
+					ils_buf[133] = '-';
+					ils_buf[134] = 'O';
+					ils_buf[135] = 'O';
+					ils_buf[136] = 'B';
+					ils_buf[137] = 0;
+					ils_len = 137;
+				} else {
+					ils_len = 133 + sprintf(ils_buf + 133, "%d", navdata->glidescope_number);
 				}
 			}
 
@@ -859,7 +884,7 @@ void panel_timed_update()
 		GetVehicleVelocityUnsafe(vehicleid, &vvel);
 		speed = (int) (VEL_TO_KTS * (float) sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z));
 		if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
-			nav_update(vehicleid, &vpos);
+			nav_update(vehicleid, &vpos, &vvel);
 		}
 
 		panel_update_hdg_alt_spd(playerid, heading, altitude, speed, 1);
@@ -987,6 +1012,7 @@ void panel_add_panel_player_if_applicable(int playerid)
 void panel_on_player_state_change(int playerid, int from, int to)
 {
 	struct vec4 vpos;
+	struct vec3 vvel;
 	int vehicleid;
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
@@ -998,7 +1024,8 @@ void panel_on_player_state_change(int playerid, int from, int to)
 
 		if (to == PLAYER_STATE_DRIVER) {
 			GetVehiclePosRotUnsafe(vehicleid, &vpos);
-			nav_update(vehicleid, &vpos);
+			GetVehicleVelocityUnsafe(vehicleid, &vvel);
+			nav_update(vehicleid, &vpos, &vvel);
 		}
 
 		if (!panel_is_active_for(playerid)) {
