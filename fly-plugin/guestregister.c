@@ -152,7 +152,7 @@ void guestreg_cb_registered(void *data)
 	dialog_end_transaction(playerid, DLG_TID_GUESTREGISTER);
 	SendClientMessage(playerid, COL_SUCC, SUCC"Your account has been registered and your stats are saved, welcome!");
 	sprintf(msg144, "Guest %s[%d] just registered their account, welcome!", pdata[playerid]->name, playerid);
-	SendClientMessageToAll(COL_JOIN, msg144);
+	SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
 }
 
 /**
