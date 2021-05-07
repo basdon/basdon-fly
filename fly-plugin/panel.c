@@ -752,7 +752,7 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 	/*ils*/
 	if (navdata && navdata->ils) {
 		ilscachevalue =
-			((unsigned char) navdata->glidescope_number << 16) |
+			((unsigned char) navdata->glideslope_number << 16) |
 			((unsigned char) navdata->ilsx << 8) |
 			(unsigned char) navdata->ilsz;
 		if (caches[playerid].nav_ils != ilscachevalue || !caches[playerid].ils_shown) {
@@ -802,18 +802,18 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 					ils_buf[ILS_Z_OFFSETS[navdata->ilsz]] = 'r';
 				}
 
-				if (navdata->glidescope_number > 0) {
+				if (navdata->glideslope_number > 0) {
 					ils_buf[128] = 'b';
-				} else if (navdata->glidescope_number < 0) {
+				} else if (navdata->glideslope_number < 0) {
 					ils_buf[128] = 'y';
 				}
-				if (navdata->glidescope_number == 127) {
+				if (navdata->glideslope_number == 127) {
 					ils_buf[133] = 'O';
 					ils_buf[134] = 'O';
 					ils_buf[135] = 'B';
 					ils_buf[136] = 0;
 					ils_len = 136;
-				} else if (navdata->glidescope_number == -128) {
+				} else if (navdata->glideslope_number == -128) {
 					ils_buf[133] = '-';
 					ils_buf[134] = 'O';
 					ils_buf[135] = 'O';
@@ -821,7 +821,7 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 					ils_buf[137] = 0;
 					ils_len = 137;
 				} else {
-					ils_len = 133 + sprintf(ils_buf + 133, "%d", navdata->glidescope_number);
+					ils_len = 133 + sprintf(ils_buf + 133, "%d", navdata->glideslope_number);
 				}
 			}
 
