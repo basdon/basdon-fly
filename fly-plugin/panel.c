@@ -78,6 +78,7 @@ static float vorbar_x_base, vorbar_x_dev;
 static float vorbar_lsx_inrange, vorbar_lsx_outrange;
 
 #define PANEL_HIDE_REASON_JOBMAP 1
+#define PANEL_HIDE_REASON_HELP 2
 static unsigned char panel_should_hide[MAX_PLAYERS];
 
 /**
@@ -1016,6 +1017,10 @@ void panel_on_player_state_change(int playerid, int from, int to)
 	int vehicleid;
 
 	if (to == PLAYER_STATE_DRIVER || to == PLAYER_STATE_PASSENGER) {
+		if (panel_should_hide[playerid]) {
+			return;
+		}
+
 		/*The player can be warping from driver to passenger (//tocar).*/
 		vehicleid = GetPlayerVehicleID(playerid);
 		if (!game_is_air_vehicle(GetVehicleModel(vehicleid))) {

@@ -494,6 +494,15 @@ int cmd_chute(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+#define CMD_CLOSE_SYNTAX ""
+#define CMD_CLOSE_DESC "Closes the current open help screen"
+static
+int cmd_close(struct COMMANDCONTEXT cmdctx)
+{
+	help_hide(cmdctx.playerid);
+	return CMD_OK;
+}
+
 static void cmd_engage_cmdlist(int playerid);
 
 #define CMD_CMDS_SYNTAX ""
@@ -529,6 +538,15 @@ int cmd_getspray(struct COMMANDCONTEXT cmdctx)
 		sprintf(msg144, "colors: %d, %d", col1, col2);
 		SendClientMessage(cmdctx.playerid, -1, msg144);
 	}
+	return CMD_OK;
+}
+
+#define CMD_HELP_SYNTAX ""
+#define CMD_HELP_DESC "Shows you help pages"
+static
+int cmd_help(struct COMMANDCONTEXT cmdctx)
+{
+	help_show_main(cmdctx.playerid);
 	return CMD_OK;
 }
 

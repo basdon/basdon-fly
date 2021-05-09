@@ -505,6 +505,7 @@ static unsigned short nametags_max_distance[MAX_PLAYERS];
 #include "airport.c"
 #include "protips.c"
 
+#include "ui.c"
 #include "score.c"
 #include "admin.c"
 #include "changelog.c"
@@ -531,6 +532,7 @@ static unsigned short nametags_max_distance[MAX_PLAYERS];
 #include "nametags.c" /*requires timecyc*/
 #include "vehicles.c"
 #include "prefs.c"
+#include "help.c"
 
 #include "cmdhandlers.c"
 #ifdef DEV

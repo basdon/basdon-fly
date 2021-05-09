@@ -79,7 +79,7 @@ Tracker socket handle.
 static int tracker;
 
 /*Help menu textdraws*/
-#define NUM_HELP_TEXTDRAWS (17)
+#define NUM_JOBHELP_TEXTDRAWS (17)
 static struct TEXTDRAW td_jobhelp_keyhelp = { "keyhelp", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobhelp_header = { "header", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobhelp_optsbg = { "optsbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
@@ -147,6 +147,7 @@ void missions_hide_jobmap_set_stage_set_controllable(int playerid)
 	jobmap_hide(playerid);
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	TogglePlayerControllable(playerid, 1);
+	ui_closed(playerid, ui_mission_map);
 }
 
 /**
@@ -158,10 +159,13 @@ void missions_show_jobmap_set_stage_set_controllable(int playerid)
 	struct MISSIONPOINT *msp;
 	unsigned int mission_type;
 
-	missions_get_current_msp_and_mission_type(playerid, &msp, &mission_type);
-	jobmap_show(playerid, mission_type, msp);
-	mission_stage[playerid] = MISSION_STAGE_JOBMAP;
-	TogglePlayerControllable(playerid, 0);
+	if (ui_try_show(playerid, ui_mission_map)) {
+		HideGameTextForPlayer(playerid); /*The key or /w help text might still be showing.*/
+		missions_get_current_msp_and_mission_type(playerid, &msp, &mission_type);
+		jobmap_show(playerid, mission_type, msp);
+		mission_stage[playerid] = MISSION_STAGE_JOBMAP;
+		TogglePlayerControllable(playerid, 0);
+	}
 }
 
 /**
@@ -273,7 +277,8 @@ void missions_jobhelp_hide(int playerid)
 {
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	TogglePlayerControllable(playerid, 1);
-	textdraws_hide_consecutive(playerid, NUM_HELP_TEXTDRAWS, TEXTDRAW_MISSIONHELP_BASE);
+	textdraws_hide_consecutive(playerid, NUM_JOBHELP_TEXTDRAWS, TEXTDRAW_MISSIONHELP_BASE);
+	ui_closed(playerid, ui_mission_help);
 }
 
 /**
@@ -313,6 +318,10 @@ Also sets the player's {@link mission_stage} and sets player uncontrollable.
 static
 void missions_jobhelp_show(int playerid, int point_mask)
 {
+	if (!ui_try_show(playerid, ui_mission_help)) {
+		return;
+	}
+
 	mission_stage[playerid] = MISSION_STAGE_HELP;
 	TogglePlayerControllable(playerid, 0);
 
@@ -564,7 +573,7 @@ void missions_init()
 	/*textdraws*/
 	textdraws_load_from_file("jobsatisfaction", TEXTDRAW_JOBSATISFACTION, 1, &td_satisfaction);
 
-	textdraws_load_from_file("jobhelp", TEXTDRAW_MISSIONHELP_BASE, NUM_HELP_TEXTDRAWS,
+	textdraws_load_from_file("jobhelp", TEXTDRAW_MISSIONHELP_BASE, NUM_JOBHELP_TEXTDRAWS,
 		/*remember to free their rpcdata in missions_dispose*/
 		&td_jobhelp_keyhelp, &td_jobhelp_optsbg, &td_jobhelp_header,
 		&td_jobhelp_text, &td_jobhelp_greenbtnbg, &td_jobhelp_bluebtnbg,
@@ -1681,7 +1690,6 @@ void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 		}
 	} else if (KEY_JUST_DOWN(KEY_YES) && active_msp_index[playerid] != -1) {
 		if (mission_stage[playerid] == MISSION_STAGE_NOMISSION) {
-			HideGameTextForPlayer(playerid); /*The key or /w help text might still be showing.*/
 			missions_show_jobmap_set_stage_set_controllable(playerid);
 		} else if (mission_stage[playerid] == MISSION_STAGE_FLIGHT &&
 			active_msp_index[playerid] == activemission[playerid]->endpoint - missionpoints)

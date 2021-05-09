@@ -64,6 +64,7 @@ static struct COMMAND cmds[] = {
 		cmd_changepassword },
 	{ 0, 0, "/changelog", 0, GROUPS_ALL, CMD_CHANGELOG_SYNTAX, CMD_CHANGELOG_DESC, cmd_changelog },
 	{ 0, 0, "/chute", 0, GROUPS_ALL, CMD_CHUTE_SYNTAX, CMD_CHUTE_DESC, cmd_chute },
+	{ 0, 0, "/close", 0, GROUPS_ALL, CMD_CLOSE_SYNTAX, CMD_CLOSE_DESC, cmd_close },
 	{ 0, 0, "/cmdlist", "/cmds", 0, 0, 0, 0 },
 	{ 0, 0, "/cmds", 0, GROUPS_ALL, CMD_CMDS_SYNTAX, CMD_CMDS_DESC, cmd_cmds },
 	{ 0, 0, "/commandlist", "/cmds", 0, 0, 0, 0 },
@@ -71,6 +72,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/engine", 0, GROUPS_ALL, CMD_ENGINE_SYNTAX, CMD_ENGINE_DESC, cmd_engine },
 	{ 0, 0, "/fix", "/repair", 0, 0, 0, 0 },
 	{ 0, 0, "/getspray", 0, GROUPS_ALL, CMD_GETSPRAY_SYNTAX, CMD_GETSPRAY_DESC, cmd_getspray },
+	{ 0, 0, "/help", 0, GROUPS_ALL, CMD_HELP_SYNTAX, CMD_HELP_DESC, cmd_help },
 	{ 0, 0, "/helpkeys", 0, GROUPS_ALL, CMD_HELPKEYS_SYNTAX, CMD_HELPKEYS_DESC, cmd_helpkeys },
 	{ 0, 0, "/helpcmd", 0, GROUPS_ALL, CMD_HELPCMD_SYNTAX, CMD_HELPCMD_DESC, cmd_helpcmd },
 	{ 0, 0, "/ils", 0, GROUPS_ALL, CMD_ILS_SYNTAX, CMD_ILS_DESC, cmd_ils },
@@ -290,7 +292,7 @@ void cmd_show_help_for(int playerid, char *cmdname)
 		sprintf(msg, INFO"Syntax: %s %s", real_cmd->cmd, real_cmd->syntax);
 		SendClientMessage(playerid, COL_INFO, msg);
 	} else {
-		SendClientMessage(playerid, COL_WARN, WARN"That command doesn't exist or is not available to you.");
+		SendClientMessage(playerid, COL_WARN, WARN"That command doesn't exist or is not available to you, check /cmds");
 	}
 }
 

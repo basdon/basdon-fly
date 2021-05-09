@@ -28,6 +28,7 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 	airports_destroy();
 	echo_dispose();
 	heartbeat_end_session();
+	help_dispose();
 	missions_destroy_tracker_socket();
 	spawn_dispose();
 	svp_dispose();
@@ -129,6 +130,7 @@ exit:
 	class_init();
 	dialog_init();
 	heartbeat_create_session();
+	help_init();
 	maps_init();
 	missions_create_tracker_socket();
 	jobmap_init();
@@ -232,6 +234,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	chpw_on_player_connect(playerid);
 	echo_on_player_connect(playerid);
 	dialog_on_player_connect(playerid);
+	help_on_player_connect(playerid);
 	kneeboard_on_player_connect(playerid);
 	maps_on_player_connect(playerid);
 	missions_on_player_connect(playerid);
@@ -245,6 +248,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	score_on_player_connect(playerid);
 	svp_on_player_connect(playerid);
 	timecyc_on_player_connect(playerid);
+	ui_on_player_connect(playerid);
 	veh_on_player_connect(playerid);
 	zones_on_player_connect(playerid);
 

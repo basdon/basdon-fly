@@ -10,6 +10,7 @@ static int kneeboard_last_distance[MAX_PLAYERS];
 static char kneeboard_is_shown[MAX_PLAYERS];
 
 #define KNEEBOARD_HIDE_REASON_JOBMAP 1
+#define KNEEBOARD_HIDE_REASON_HELP 2
 static unsigned char kneeboard_should_hide[MAX_PLAYERS];
 
 #define KNEEBOARD_SHOULD_SHOW(PLAYERID) \

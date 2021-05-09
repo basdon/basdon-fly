@@ -42,19 +42,17 @@ static struct TEXTDRAW td_helpbox_template = { "58B6E0", 0, NULL };
 Load textdraws from a textdraw file.
 
 @param filename the file name, excluding path/extension.
-@param base_textdraw_id the textdraw id for the first textdraw, the next ones will have consequtive ids
+@param base_textdraw_id the textdraw id for the first textdraw, the next ones will have consecutive ids
 */
-static
-void textdraws_load_from_file(char *filename, int base_textdraw_id, int numtextdraws, ...)
+void textdraws_load_from_file_a(char *filename, int base_textdraw_id, int numtextdraws, struct TEXTDRAW **tds)
 {
-	union TEXT_FILE_ENTRY entry;
 	struct TEXTDRAW *td;
+	union TEXT_FILE_ENTRY entry;
 	FILE *fs;
 	char fullfilepath[100];
 	int magic;
 	int i;
 	int allocated_size;
-	va_list va;
 
 	sprintf(fullfilepath, "../textdraws/%s.text", filename);
 	fs = fopen(fullfilepath, "rb");
@@ -75,9 +73,8 @@ void textdraws_load_from_file(char *filename, int base_textdraw_id, int numtextd
 	}
 
 	while (fread(&entry, sizeof(entry), 1, fs)) {
-		va_start(va, numtextdraws);
 		for (i = 0; i < numtextdraws; i++) {
-			td = va_arg(va, struct TEXTDRAW*);
+			td = tds[i];
 			if (strcmp(td->name, entry.name) == 0) {
 				if (td->allocated_text_length == TEXTDRAW_ALLOC_AS_NEEDED) {
 					/*+1 for zero terminator*/
@@ -91,13 +88,11 @@ void textdraws_load_from_file(char *filename, int base_textdraw_id, int numtextd
 				break;
 			}
 		}
-		va_end(va);
 	}
 
 ret:
-	va_start(va, numtextdraws);
 	for (i = 0; i < numtextdraws; i++) {
-		td = va_arg(va, struct TEXTDRAW*);
+		td = tds[i];
 		if (td->rpcdata == NULL) {
 			logprintf("WARN: textdraw '%s' not found in '%s'", td->name, fullfilepath);
 			td->allocated_text_length = 700;
@@ -120,12 +115,32 @@ ret:
 			memcpy(&td->rpcdata->preview_model, "basdon.net robin_be", 20);
 		}
 	}
-	va_end(va);
 
 	if (fs) {
 		fclose(fs);
 	}
-	return;
+}
+
+/**
+Load textdraws from a textdraw file.
+
+@param filename the file name, excluding path/extension.
+@param base_textdraw_id the textdraw id for the first textdraw, the next ones will have consequtive ids
+*/
+static
+void textdraws_load_from_file(char *filename, int base_textdraw_id, int numtextdraws, ...)
+{
+	struct TEXTDRAW **tds, **tdp;
+	va_list va;
+	int i;
+
+	tds = tdp = alloca(numtextdraws * sizeof(tds));
+	va_start(va, numtextdraws);
+	for (i = 0; i < numtextdraws; i++) {
+		tdp[i] = va_arg(va, struct TEXTDRAW*);
+	}
+	va_end(va);
+	textdraws_load_from_file_a(filename, base_textdraw_id, numtextdraws, tds);
 }
 
 /**
@@ -192,6 +207,23 @@ void textdraws_show(int playerid, int num, ...)
 		SAMP_SendRPCToPlayer(RPC_ShowTextDraw, &bs, playerid, 2);
 	}
 	va_end(va);
+}
+
+static
+void textdraws_show_a(int playerid, int num, struct TEXTDRAW **tds)
+{
+	struct BitStream bs;
+	struct TEXTDRAW *td;
+
+	while (num--) {
+		td = tds[num];
+#ifdef DEV
+		textdraws_assert_text_length_within_bounds(td);
+#endif
+		bs.ptrData = td->rpcdata;
+		bs.numberOfBitsUsed = (sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->rpcdata->text_length) * 8;
+		SAMP_SendRPCToPlayer(RPC_ShowTextDraw, &bs, playerid, 2);
+	}
 }
 
 /**
