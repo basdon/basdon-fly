@@ -76,7 +76,9 @@ void help_hide(int playerid)
 static
 void help_show(int playerid, int num_tds, struct TEXTDRAW **tds)
 {
-	SendClientMessage(playerid, COL_INFO_LIGHT, "Tip: press F7 or hold F10 to hide the samp UI while reading help pages");
+	if (!current_help_tds_shown[playerid]) {
+		SendClientMessage(playerid, COL_INFO_LIGHT, "Tip: press F7 or hold F10 to hide the samp UI while reading help pages");
+	}
 	textdraws_show_a(playerid, num_tds, tds);
 	if (current_help_tds_shown[playerid] > num_tds) {
 		textdraws_hide_consecutive(playerid, TEXTDRAW_HELP_BASE + num_tds, current_help_tds_shown[playerid] - num_tds);
