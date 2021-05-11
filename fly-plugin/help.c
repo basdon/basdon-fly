@@ -65,7 +65,7 @@ static
 void help_hide(int playerid)
 {
 	if (current_help_tds_shown[playerid]) {
-		textdraws_hide_consecutive(playerid, TEXTDRAW_HELP_BASE, current_help_tds_shown[playerid]);
+		textdraws_hide_consecutive(playerid, current_help_tds_shown[playerid], TEXTDRAW_HELP_BASE);
 		current_help_tds_shown[playerid] = 0;
 		ui_closed(playerid, ui_help);
 		panel_unhide(playerid, PANEL_HIDE_REASON_HELP);
@@ -76,12 +76,15 @@ void help_hide(int playerid)
 static
 void help_show(int playerid, int num_tds, struct TEXTDRAW **tds)
 {
+	register int num_to_hide;
+
 	if (!current_help_tds_shown[playerid]) {
 		SendClientMessage(playerid, COL_INFO_LIGHT, "Tip: press F7 or hold F10 to hide the samp UI while reading help pages");
 	}
 	textdraws_show_a(playerid, num_tds, tds);
-	if (current_help_tds_shown[playerid] > num_tds) {
-		textdraws_hide_consecutive(playerid, TEXTDRAW_HELP_BASE + num_tds, current_help_tds_shown[playerid] - num_tds);
+	num_to_hide = current_help_tds_shown[playerid] - num_tds;
+	if (num_to_hide > 0) {
+		textdraws_hide_consecutive(playerid, num_to_hide, TEXTDRAW_HELP_BASE + num_tds);
 	}
 	current_help_tds_shown[playerid] = num_tds;
 	panel_hide(playerid, PANEL_HIDE_REASON_HELP);
