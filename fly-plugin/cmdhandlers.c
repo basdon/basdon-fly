@@ -546,7 +546,20 @@ int cmd_getspray(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_help(struct COMMANDCONTEXT cmdctx)
 {
-	help_show_main(cmdctx.playerid);
+	if (ui_try_show(cmdctx.playerid, ui_help)) {
+		help_show(cmdctx.playerid, NUM_HELPMAIN_TDS, tds_helpmain);
+	}
+	return CMD_OK;
+}
+
+#define CMD_HELPADF_SYNTAX ""
+#define CMD_HELPADF_DESC "Shows you help about ADF"
+static
+int cmd_helpadf(struct COMMANDCONTEXT cmdctx)
+{
+	if (ui_try_show(cmdctx.playerid, ui_help)) {
+		help_show(cmdctx.playerid, NUM_HELPADF_TDS, tds_helpadf);
+	}
 	return CMD_OK;
 }
 
