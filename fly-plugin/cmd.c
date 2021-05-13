@@ -82,6 +82,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/helpnav", 0, GROUPS_ALL, CMD_HELPNAV_SYNTAX, CMD_HELPNAV_DESC, cmd_helpnav },
 	{ 0, 0, "/helpvor", 0, GROUPS_ALL, CMD_HELPVOR_SYNTAX, CMD_HELPVOR_DESC, cmd_helpvor },
 	{ 0, 0, "/ils", 0, GROUPS_ALL, CMD_ILS_SYNTAX, CMD_ILS_DESC, cmd_ils },
+	{ 0, 0, "/info", "/help", 0, 0, 0, 0 },
 	{ 0, 0, "/irc", 0, GROUPS_ALL, CMD_IRC_SYNTAX, CMD_IRC_DESC, cmd_irc },
 	{ 0, 0, "/loc", 0, GROUPS_ALL, CMD_LOC_SYNTAX, CMD_LOC_DESC, cmd_loc },
 	{ 0, 0, "/nearest", 0, GROUPS_ALL, CMD_NEAREST_SYNTAX, CMD_NEAREST_DESC, cmd_nearest },
