@@ -48,7 +48,9 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 				$__rawmsgs[] = 'Cannot set summary to empty';
 				goto reject;
 			}
-			$changes[] = 'summary: "'.$old->summary.'" => "'.$_POST['summary'].'"';
+			$old_summary = htmlspecialchars($old->summary, ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE);
+			$new_summary = htmlspecialchars($_POST['summary'], ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE);
+			$changes[] = 'summary: "'.$old_summary.'" => "'.$new_summary.'"';
 		}
 
 		// THESE MUST BE IN SYNC WITH tracversion.php WHEN MAKING A RELEASE!
