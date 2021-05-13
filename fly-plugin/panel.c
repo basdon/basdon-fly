@@ -1106,6 +1106,7 @@ void panel_on_player_connect(int playerid)
 	caches[playerid].vor_shown = 0;
 	caches[playerid].ils_shown = 0;
 	shown_panel[playerid] = 0;
+	panel_should_hide[playerid] = 0;
 }
 
 static
