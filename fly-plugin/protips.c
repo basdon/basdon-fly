@@ -23,7 +23,7 @@ static const char *protips[] = {
 	"Pro Tip: Always try to land on the back wheels.",
 	"Pro Tip: Use /reclass to change into a different class.",
 	"Pro Tip: All flights while on a mission are recorded, you can watch them on the website!",
-	"Pro Tip: Want to fly as passenger in a plane without seats? Press 'FIRE' (default: lmb) while carrying no weapons to warp into the plane.",
+	"Pro Tip: Want to fly as passenger in a plane without seats? Press 'FIRE' (default: lmb) while carrying no weapons to warp into the plane. See /helpcopilot",
 	"Pro Tip: Want to hide the gps/kneeboard text on your screen? Check out /p(references).",
 	"Pro Tip: The chat is linked to IRC, check out /irc for more info.",
 	"Pro Tip: Adjust the draw distance of player name tags using /p(references).",
