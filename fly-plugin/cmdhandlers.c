@@ -609,6 +609,17 @@ int cmd_helpkeys(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+#define CMD_HELPNAV_SYNTAX ""
+#define CMD_HELPNAV_DESC "Shows you help about navigation systems in basdon"
+static
+int cmd_helpnav(struct COMMANDCONTEXT cmdctx)
+{
+	if (ui_try_show(cmdctx.playerid, ui_help)) {
+		help_show(cmdctx.playerid, NUM_HELPNAV_TDS, tds_helpnav);
+	}
+	return CMD_OK;
+}
+
 #define CMD_HELPVOR_SYNTAX ""
 #define CMD_HELPVOR_DESC "Shows you help about VOR navigation"
 static

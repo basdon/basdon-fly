@@ -84,6 +84,17 @@ static struct TEXTDRAW *tds_helpils[NUM_HELPILS_TDS] = {
 	&td_helpils_C, &td_helpils_D,
 };
 
+static struct TEXTDRAW td_helpnav_0 = { "bg",         TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpnav_1 = { "title",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpnav_2 = { "1",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpnav_3 = { "2",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpnav_4 = { "close",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+#define NUM_HELPNAV_TDS 5
+STATIC_ASSERT(NUM_HELPNAV_TDS <= NUM_HELP_TEXTDRAWS);
+static struct TEXTDRAW *tds_helpnav[NUM_HELPNAV_TDS] = {
+	&td_helpnav_0, &td_helpnav_1, &td_helpnav_2, &td_helpnav_3, &td_helpnav_4,
+};
+
 static int current_help_tds_shown[MAX_PLAYERS];
 
 static
@@ -93,6 +104,7 @@ void help_init()
 	textdraws_load_from_file_a("helpadf", TEXTDRAW_HELP_BASE, NUM_HELPADF_TDS, tds_helpadf);
 	textdraws_load_from_file_a("helpvor", TEXTDRAW_HELP_BASE, NUM_HELPVOR_TDS, tds_helpvor);
 	textdraws_load_from_file_a("helpils", TEXTDRAW_HELP_BASE, NUM_HELPILS_TDS, tds_helpils);
+	textdraws_load_from_file_a("helpnav", TEXTDRAW_HELP_BASE, NUM_HELPNAV_TDS, tds_helpnav);
 }
 
 static
@@ -111,6 +123,9 @@ void help_dispose()
 	}
 	for (i = 0; i < NUM_HELPILS_TDS; i++) {
 		free(tds_helpils[i]->rpcdata);
+	}
+	for (i = 0; i < NUM_HELPNAV_TDS; i++) {
+		free(tds_helpnav[i]->rpcdata);
 	}
 }
 
