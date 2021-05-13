@@ -503,6 +503,17 @@ int cmd_close(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+#define CMD_CREDITS_SYNTAX ""
+#define CMD_CREDITS_DESC "Shows some credits for basdon"
+static
+int cmd_credits(struct COMMANDCONTEXT cmdctx)
+{
+	if (ui_try_show(cmdctx.playerid, ui_help)) {
+		help_show(cmdctx.playerid, NUM_CREDITS_TDS, tds_credits);
+	}
+	return CMD_OK;
+}
+
 static void cmd_engage_cmdlist(int playerid);
 
 #define CMD_CMDS_SYNTAX ""

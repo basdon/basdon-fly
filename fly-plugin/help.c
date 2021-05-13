@@ -95,6 +95,23 @@ static struct TEXTDRAW *tds_helpnav[NUM_HELPNAV_TDS] = {
 	&td_helpnav_0, &td_helpnav_1, &td_helpnav_2, &td_helpnav_3, &td_helpnav_4,
 };
 
+static struct TEXTDRAW td_credits_0 = { "bg",         TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_credits_1 = { "title",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_credits_2 = { "sections",   TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_credits_3 = { "prog",       TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_credits_4 = { "mapp",       TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_credits_5 = { "beta",       TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_credits_6 = { "bran",       TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_credits_7 = { "spec",       TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_credits_8 = { "insp",       TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_credits_9 = { "close",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+#define NUM_CREDITS_TDS 10
+STATIC_ASSERT(NUM_CREDITS_TDS <= NUM_HELP_TEXTDRAWS);
+static struct TEXTDRAW *tds_credits[NUM_CREDITS_TDS] = {
+	&td_credits_0, &td_credits_1, &td_credits_2, &td_credits_3, &td_credits_4, &td_credits_5,
+	&td_credits_6, &td_credits_7, &td_credits_8, &td_credits_9,
+};
+
 static int current_help_tds_shown[MAX_PLAYERS];
 
 static
@@ -105,6 +122,7 @@ void help_init()
 	textdraws_load_from_file_a("helpvor", TEXTDRAW_HELP_BASE, NUM_HELPVOR_TDS, tds_helpvor);
 	textdraws_load_from_file_a("helpils", TEXTDRAW_HELP_BASE, NUM_HELPILS_TDS, tds_helpils);
 	textdraws_load_from_file_a("helpnav", TEXTDRAW_HELP_BASE, NUM_HELPNAV_TDS, tds_helpnav);
+	textdraws_load_from_file_a("credits", TEXTDRAW_HELP_BASE, NUM_CREDITS_TDS, tds_credits);
 }
 
 static
@@ -126,6 +144,9 @@ void help_dispose()
 	}
 	for (i = 0; i < NUM_HELPNAV_TDS; i++) {
 		free(tds_helpnav[i]->rpcdata);
+	}
+	for (i = 0; i < NUM_CREDITS_TDS; i++) {
+		free(tds_credits[i]->rpcdata);
 	}
 }
 

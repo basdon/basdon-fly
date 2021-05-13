@@ -70,6 +70,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/cmds", 0, GROUPS_ALL, CMD_CMDS_SYNTAX, CMD_CMDS_DESC, cmd_cmds },
 	{ 0, 0, "/commandlist", "/cmds", 0, 0, 0, 0 },
 	{ 0, 0, "/commands", "/cmds", 0, 0, 0, 0 },
+	{ 0, 0, "/credits", 0, GROUPS_ALL, CMD_CREDITS_SYNTAX, CMD_CREDITS_DESC, cmd_credits },
 	{ 0, 0, "/engine", 0, GROUPS_ALL, CMD_ENGINE_SYNTAX, CMD_ENGINE_DESC, cmd_engine },
 	{ 0, 0, "/fix", "/repair", 0, 0, 0, 0 },
 	{ 0, 0, "/getspray", 0, GROUPS_ALL, CMD_GETSPRAY_SYNTAX, CMD_GETSPRAY_DESC, cmd_getspray },
