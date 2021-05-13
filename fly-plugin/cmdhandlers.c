@@ -585,6 +585,17 @@ int cmd_helpcmd(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+#define CMD_HELPILS_SYNTAX ""
+#define CMD_HELPILS_DESC "Shows you help about ILS navigation"
+static
+int cmd_helpils(struct COMMANDCONTEXT cmdctx)
+{
+	if (ui_try_show(cmdctx.playerid, ui_help)) {
+		help_show(cmdctx.playerid, NUM_HELPILS_TDS, tds_helpils);
+	}
+	return CMD_OK;
+}
+
 #define CMD_HELPKEYS_SYNTAX ""
 #define CMD_HELPKEYS_DESC "Shows some important key bindings"
 static

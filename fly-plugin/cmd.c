@@ -75,6 +75,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/help", 0, GROUPS_ALL, CMD_HELP_SYNTAX, CMD_HELP_DESC, cmd_help },
 	{ 0, 0, "/helpadf", 0, GROUPS_ALL, CMD_HELPADF_SYNTAX, CMD_HELPADF_DESC, cmd_helpadf },
 	{ 0, 0, "/helpcmd", 0, GROUPS_ALL, CMD_HELPCMD_SYNTAX, CMD_HELPCMD_DESC, cmd_helpcmd },
+	{ 0, 0, "/helpils", 0, GROUPS_ALL, CMD_HELPILS_SYNTAX, CMD_HELPILS_DESC, cmd_helpils },
 	{ 0, 0, "/helpkeys", 0, GROUPS_ALL, CMD_HELPKEYS_SYNTAX, CMD_HELPKEYS_DESC, cmd_helpkeys },
 	{ 0, 0, "/helpvor", 0, GROUPS_ALL, CMD_HELPVOR_SYNTAX, CMD_HELPVOR_DESC, cmd_helpvor },
 	{ 0, 0, "/ils", 0, GROUPS_ALL, CMD_ILS_SYNTAX, CMD_ILS_DESC, cmd_ils },
