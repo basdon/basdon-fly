@@ -2,6 +2,8 @@
 
 static const char *protips[] = {
 	/*max length:*/
+	/*(note: this is the max lengths before it would get split.
+	 * Ideally protips should only be the length of one client message, but it can be more.*/
 	/*--------------------------------------------------------------------------------------------------------------------------------------------*/
 #ifndef MISSION_CANCEL_FINE
 #error need MISSION_CANCE_FINE
@@ -9,8 +11,8 @@ static const char *protips[] = {
 	"Pro Tip: Don't like the aviation panel night colors? Disable it in /p(references).",
 	"Pro Tip: Use /w(ork) to find a mission. /s(top) to cancel your mission ($"EQ(MISSION_CANCEL_FINE)" fee).",
 	"Pro Tip: Use /nearest to get a list of all airports, sorted by proximity!",
-	"Pro Tip: Enable navigation with /adf [beacon] or /vor [beacon][runway]",
-	"Pro Tip: ILS can be toggled using /ils when VOR is already active.",
+	"Pro Tip: Enable navigation with /adf [beacon] or /vor [beacon][runway], see /helpnav",
+	"Pro Tip: ILS can be toggled using /ils when VOR is already active, see /helpils",
 	"Pro Tip: Press the 'CONVERSATION - NO' key (default: n, /helpkeys) to turn off your engine and preserve fuel.",
 	"Pro Tip: Confused about key bindings? Check out /helpkeys",
 	"Pro Tip: Check /p(references) to tweak your personal preferences while playing on this server.",
@@ -25,6 +27,7 @@ static const char *protips[] = {
 	"Pro Tip: Want to hide the gps/kneeboard text on your screen? Check out /p(references).",
 	"Pro Tip: The chat is linked to IRC, check out /irc for more info.",
 	"Pro Tip: Adjust the draw distance of player name tags using /p(references).",
+	"Pro Tip: Check out our fancy /help!",
 };
 static const int numprotips = sizeof(protips)/sizeof(protips[0]);
 
