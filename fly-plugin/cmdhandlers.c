@@ -607,6 +607,17 @@ int cmd_helpcmd(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+#define CMD_HELPCOPILOT_SYNTAX "<cmdname>"
+#define CMD_HELPCOPILOT_DESC "Shows info about a the 'copiloting' feature"
+static
+int cmd_helpcopilot(struct COMMANDCONTEXT cmdctx)
+{
+	if (ui_try_show(cmdctx.playerid, ui_help)) {
+		help_show(cmdctx.playerid, NUM_HELPCOPILOT_TDS, tds_helpcopilot);
+	}
+	return CMD_OK;
+}
+
 #define CMD_HELPILS_SYNTAX ""
 #define CMD_HELPILS_DESC "Shows you help about ILS navigation"
 static

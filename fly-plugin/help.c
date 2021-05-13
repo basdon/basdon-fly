@@ -109,6 +109,19 @@ static struct TEXTDRAW *tds_helpnav[NUM_HELPNAV_TDS] = {
 	&td_helpnav_0, &td_helpnav_1, &td_helpnav_2, &td_helpnav_3, &td_helpnav_4,
 };
 
+static struct TEXTDRAW td_helpcopilot_0 = { "bg",         TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpcopilot_1 = { "title",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpcopilot_2 = { "1",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpcopilot_3 = { "2",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpcopilot_4 = { "3",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpcopilot_5 = { "close",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+#define NUM_HELPCOPILOT_TDS 6
+STATIC_ASSERT(NUM_HELPCOPILOT_TDS <= NUM_HELP_TEXTDRAWS);
+static struct TEXTDRAW *tds_helpcopilot[NUM_HELPCOPILOT_TDS] = {
+	&td_helpcopilot_0, &td_helpcopilot_1, &td_helpcopilot_2, &td_helpcopilot_3, &td_helpcopilot_4,
+	&td_helpcopilot_5,
+};
+
 static struct TEXTDRAW td_helpmission_0 = { "bg",         TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_helpmission_1 = { "title",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_helpmission_2 = { "1",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
@@ -155,6 +168,7 @@ void help_init()
 	textdraws_load_from_file_a("helpils", TEXTDRAW_HELP_BASE, NUM_HELPILS_TDS, tds_helpils);
 	textdraws_load_from_file_a("helpnav", TEXTDRAW_HELP_BASE, NUM_HELPNAV_TDS, tds_helpnav);
 	textdraws_load_from_file_a("helpmission", TEXTDRAW_HELP_BASE, NUM_HELPMISSION_TDS, tds_helpmission);
+	textdraws_load_from_file_a("helpcopilot", TEXTDRAW_HELP_BASE, NUM_HELPCOPILOT_TDS, tds_helpcopilot);
 	textdraws_load_from_file_a("credits", TEXTDRAW_HELP_BASE, NUM_CREDITS_TDS, tds_credits);
 
 	/*Set mission cancel fee amount in missionhelp textdraw.*/
@@ -201,6 +215,9 @@ void help_dispose()
 	}
 	for (i = 0; i < NUM_HELPMISSION_TDS; i++) {
 		free(tds_helpmission[i]->rpcdata);
+	}
+	for (i = 0; i < NUM_HELPCOPILOT_TDS; i++) {
+		free(tds_helpcopilot[i]->rpcdata);
 	}
 	for (i = 0; i < NUM_CREDITS_TDS; i++) {
 		free(tds_credits[i]->rpcdata);
