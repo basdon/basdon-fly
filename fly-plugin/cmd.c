@@ -60,6 +60,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/at400", 0, GROUPS_ALL, CMD_AT400_SYNTAX, CMD_AT400_DESC, cmd_at400 },
 	{ 0, 0, "/beacons", 0, GROUPS_ALL, CMD_BEACONS_SYNTAX, CMD_BEACONS_DESC, cmd_beacons },
 	{ 0, 0, "/camera", 0, GROUPS_ALL, CMD_CAMERA_SYNTAX, CMD_CAMERA_DESC, cmd_camera },
+	{ 0, 0, "/cancelmission", "/s", 0, 0, 0, 0 },
 	{ 0, 0, "/cancelwork", "/s", 0, 0, 0, 0 },
 	{ 0, 0, "/changepassword", 0, GROUPS_REGISTERED, CMD_CHANGEPASSWORD_SYNTAX, CMD_CHANGEPASSWORD_DESC,
 		cmd_changepassword },
