@@ -563,6 +563,17 @@ int cmd_help(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+#define CMD_HELPACCOUNT_SYNTAX ""
+#define CMD_HELPACCOUNT_DESC "Shows you account-related help"
+static
+int cmd_helpaccount(struct COMMANDCONTEXT cmdctx)
+{
+	if (ui_try_show(cmdctx.playerid, ui_help)) {
+		help_show(cmdctx.playerid, NUM_HELPACCOUNT_TDS, tds_helpaccount);
+	}
+	return CMD_OK;
+}
+
 #define CMD_HELPADF_SYNTAX ""
 #define CMD_HELPADF_DESC "Shows you help about ADF navigation"
 static

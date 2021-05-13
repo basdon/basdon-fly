@@ -75,6 +75,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/fix", "/repair", 0, 0, 0, 0 },
 	{ 0, 0, "/getspray", 0, GROUPS_ALL, CMD_GETSPRAY_SYNTAX, CMD_GETSPRAY_DESC, cmd_getspray },
 	{ 0, 0, "/help", 0, GROUPS_ALL, CMD_HELP_SYNTAX, CMD_HELP_DESC, cmd_help },
+	{ 0, 0, "/helpaccount", 0, GROUPS_ALL, CMD_HELPACCOUNT_SYNTAX, CMD_HELPACCOUNT_DESC, cmd_helpaccount },
 	{ 0, 0, "/helpadf", 0, GROUPS_ALL, CMD_HELPADF_SYNTAX, CMD_HELPADF_DESC, cmd_helpadf },
 	{ 0, 0, "/helpcmd", 0, GROUPS_ALL, CMD_HELPCMD_SYNTAX, CMD_HELPCMD_DESC, cmd_helpcmd },
 	{ 0, 0, "/helpils", 0, GROUPS_ALL, CMD_HELPILS_SYNTAX, CMD_HELPILS_DESC, cmd_helpils },

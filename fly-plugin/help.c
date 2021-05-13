@@ -10,6 +10,20 @@ static struct TEXTDRAW *tds_helpmain[NUM_HELPMAIN_TDS] = {
 	&td_helpmain_0, &td_helpmain_1, &td_helpmain_2, &td_helpmain_3, &td_helpmain_4, &td_helpmain_5,
 };
 
+static struct TEXTDRAW td_helpaccount_0 = { "bg",         TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpaccount_1 = { "title",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpaccount_2 = { "1",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpaccount_3 = { "2",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpaccount_4 = { "3",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpaccount_5 = { "4",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpaccount_6 = { "close",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+#define NUM_HELPACCOUNT_TDS 7
+STATIC_ASSERT(NUM_HELPACCOUNT_TDS <= NUM_HELP_TEXTDRAWS);
+static struct TEXTDRAW *tds_helpaccount[NUM_HELPACCOUNT_TDS] = {
+	&td_helpaccount_0, &td_helpaccount_1, &td_helpaccount_2, &td_helpaccount_3, &td_helpaccount_4,
+	&td_helpaccount_5, &td_helpaccount_6,
+};
+
 static struct TEXTDRAW td_helpadf_0 = { "bg",         TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_helpadf_1 = { "title",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_helpadf_2 = { "1",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
@@ -118,6 +132,7 @@ static
 void help_init()
 {
 	textdraws_load_from_file_a("helpmain", TEXTDRAW_HELP_BASE, NUM_HELPMAIN_TDS, tds_helpmain);
+	textdraws_load_from_file_a("helpaccount", TEXTDRAW_HELP_BASE, NUM_HELPACCOUNT_TDS, tds_helpaccount);
 	textdraws_load_from_file_a("helpadf", TEXTDRAW_HELP_BASE, NUM_HELPADF_TDS, tds_helpadf);
 	textdraws_load_from_file_a("helpvor", TEXTDRAW_HELP_BASE, NUM_HELPVOR_TDS, tds_helpvor);
 	textdraws_load_from_file_a("helpils", TEXTDRAW_HELP_BASE, NUM_HELPILS_TDS, tds_helpils);
