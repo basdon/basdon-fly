@@ -6,6 +6,7 @@ $__rawmsgs = [];
 
 require('../inc/conf.php');
 include('../inc/db.php');
+include('../inc/funcs.php');
 
 $GROUP_BANNED = 1;
 $GROUP_GUEST = 2;

@@ -44,7 +44,7 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 			setcookie($COOKIENAME, $__sesid, $expire, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
 
 			if (isset($_GET['ret'])) {
-				header('Location: '.$BASEPATH.'/'.$_GET['ret']);
+				header('Location: '.$BASEPATH.'/'.header_value($_GET['ret']));
 			} else {
 				header('Location: '.$BASEPATH.'/');
 			}
