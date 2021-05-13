@@ -47,11 +47,12 @@ $__clientip = $_SERVER['REMOTE_ADDR'];
 
 $usergroups = $GROUP_GUEST;
 $userid = -1;
-if (isset($_COOKIE[$COOKIENAME]) && strlen($__sesid = $_COOKIE[$COOKIENAME]) == 32) {
+if (isset($_COOKIE[$COOKIENAME]) && strlen($_COOKIE[$COOKIENAME]) == 32) {
 	++$db_querycount;
 	$s = $db->prepare('SELECT stay,u.i,u.name,u.groups,lastfal,falnw,falng FROM webses w JOIN usr u ON w.usr=u.i WHERE id=?');
-	$s->bindValue(1, $__sesid);
+	$s->bindValue(1, $_COOKIE[$COOKIENAME]);
 	if ($s->execute() && ($r = $s->fetchAll()) && count($r)) {
+		$__sesid = $_COOKIE[$COOKIENAME];
 		$loggeduser = $r[0];
 		$loggeduser->logoutkey = md5($SECRET1 . $__sesid);
 		$loggeduser->hasfailedlogins = $loggeduser->falnw < $loggeduser->lastfal;
