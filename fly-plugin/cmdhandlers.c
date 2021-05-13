@@ -553,7 +553,7 @@ int cmd_help(struct COMMANDCONTEXT cmdctx)
 }
 
 #define CMD_HELPADF_SYNTAX ""
-#define CMD_HELPADF_DESC "Shows you help about ADF"
+#define CMD_HELPADF_DESC "Shows you help about ADF navigation"
 static
 int cmd_helpadf(struct COMMANDCONTEXT cmdctx)
 {
@@ -595,6 +595,17 @@ int cmd_helpkeys(struct COMMANDCONTEXT cmdctx)
 		"~w~landing gear: ~b~~k~~TOGGLE_SUBMISSIONS~~n~"
 		"~w~enter copilot mode: ~b~~k~~PED_FIREWEAPON~~n~"
 		"~w~exit copilot mode: ~b~~k~~VEHICLE_BRAKE~");
+	return CMD_OK;
+}
+
+#define CMD_HELPVOR_SYNTAX ""
+#define CMD_HELPVOR_DESC "Shows you help about VOR navigation"
+static
+int cmd_helpvor(struct COMMANDCONTEXT cmdctx)
+{
+	if (ui_try_show(cmdctx.playerid, ui_help)) {
+		help_show(cmdctx.playerid, NUM_HELPVOR_TDS, tds_helpvor);
+	}
 	return CMD_OK;
 }
 

@@ -33,6 +33,35 @@ static struct TEXTDRAW *tds_helpadf[NUM_HELPADF_TDS] = {
 	&td_helpadf_C, &td_helpadf_D, &td_helpadf_E,
 };
 
+static struct TEXTDRAW td_helpvor_0 = { "bg",         TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_1 = { "title",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_2 = { "1",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_3 = { "2",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_4 = { "3",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_5 = { "disexp",     TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_6 = { "disarr",     TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_7 = { "altexp",     TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_8 = { "altarr",     TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_9 = { "crsexp",     TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_A = { "crsarr",     TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_B = { "navtxt",     TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_C = { "navdis",     TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_D = { "navalt",     TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_E = { "navcrs",     TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_F = { "close",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_G = { "vorbar1",    TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_H = { "vorbar2",    TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_I = { "vorbarind1", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpvor_J = { "vorbarind2", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+#define NUM_HELPVOR_TDS 20
+STATIC_ASSERT(NUM_HELPVOR_TDS <= NUM_HELP_TEXTDRAWS);
+static struct TEXTDRAW *tds_helpvor[NUM_HELPVOR_TDS] = {
+	&td_helpvor_0, &td_helpvor_1, &td_helpvor_2, &td_helpvor_3, &td_helpvor_4, &td_helpvor_5,
+	&td_helpvor_6, &td_helpvor_7, &td_helpvor_8, &td_helpvor_9, &td_helpvor_A, &td_helpvor_B,
+	&td_helpvor_C, &td_helpvor_D, &td_helpvor_E, &td_helpvor_F, &td_helpvor_G, &td_helpvor_H,
+	&td_helpvor_I, &td_helpvor_J,
+};
+
 static int current_help_tds_shown[MAX_PLAYERS];
 
 static
@@ -40,6 +69,7 @@ void help_init()
 {
 	textdraws_load_from_file_a("helpmain", TEXTDRAW_HELP_BASE, NUM_HELPMAIN_TDS, tds_helpmain);
 	textdraws_load_from_file_a("helpadf", TEXTDRAW_HELP_BASE, NUM_HELPADF_TDS, tds_helpadf);
+	textdraws_load_from_file_a("helpvor", TEXTDRAW_HELP_BASE, NUM_HELPVOR_TDS, tds_helpvor);
 }
 
 static
@@ -52,6 +82,9 @@ void help_dispose()
 	}
 	for (i = 0; i < NUM_HELPADF_TDS; i++) {
 		free(tds_helpadf[i]->rpcdata);
+	}
+	for (i = 0; i < NUM_HELPVOR_TDS; i++) {
+		free(tds_helpvor[i]->rpcdata);
 	}
 }
 
