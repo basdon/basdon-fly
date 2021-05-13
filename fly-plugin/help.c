@@ -109,6 +109,20 @@ static struct TEXTDRAW *tds_helpnav[NUM_HELPNAV_TDS] = {
 	&td_helpnav_0, &td_helpnav_1, &td_helpnav_2, &td_helpnav_3, &td_helpnav_4,
 };
 
+static struct TEXTDRAW td_helpmission_0 = { "bg",         TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpmission_1 = { "title",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpmission_2 = { "1",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpmission_3 = { "2",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpmission_4 = { "3",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpmission_5 = { "4",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpmission_6 = { "close",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+#define NUM_HELPMISSION_TDS 7
+STATIC_ASSERT(NUM_HELPMISSION_TDS <= NUM_HELP_TEXTDRAWS);
+static struct TEXTDRAW *tds_helpmission[NUM_HELPMISSION_TDS] = {
+	&td_helpmission_0, &td_helpmission_1, &td_helpmission_2, &td_helpmission_3, &td_helpmission_4,
+	&td_helpmission_5, &td_helpmission_6,
+};
+
 static struct TEXTDRAW td_credits_0 = { "bg",         TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_credits_1 = { "title",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_credits_2 = { "sections",   TEXTDRAW_ALLOC_AS_NEEDED, NULL };
@@ -131,13 +145,35 @@ static int current_help_tds_shown[MAX_PLAYERS];
 static
 void help_init()
 {
+	register int len;
+	char *t;
+
 	textdraws_load_from_file_a("helpmain", TEXTDRAW_HELP_BASE, NUM_HELPMAIN_TDS, tds_helpmain);
 	textdraws_load_from_file_a("helpaccount", TEXTDRAW_HELP_BASE, NUM_HELPACCOUNT_TDS, tds_helpaccount);
 	textdraws_load_from_file_a("helpadf", TEXTDRAW_HELP_BASE, NUM_HELPADF_TDS, tds_helpadf);
 	textdraws_load_from_file_a("helpvor", TEXTDRAW_HELP_BASE, NUM_HELPVOR_TDS, tds_helpvor);
 	textdraws_load_from_file_a("helpils", TEXTDRAW_HELP_BASE, NUM_HELPILS_TDS, tds_helpils);
 	textdraws_load_from_file_a("helpnav", TEXTDRAW_HELP_BASE, NUM_HELPNAV_TDS, tds_helpnav);
+	textdraws_load_from_file_a("helpmission", TEXTDRAW_HELP_BASE, NUM_HELPMISSION_TDS, tds_helpmission);
 	textdraws_load_from_file_a("credits", TEXTDRAW_HELP_BASE, NUM_CREDITS_TDS, tds_credits);
+
+	/*Set mission cancel fee amount in missionhelp textdraw.*/
+	t = td_helpmission_4.rpcdata->text;
+	for (;;) {
+		if (*t == '$') {
+			t++;
+			len = sprintf(t, ""EQ(MISSION_CANCEL_FINE)"~w~.");
+			td_helpmission_4.rpcdata->text_length = t - td_helpmission_4.rpcdata->text + len;
+#ifdef DEV
+			assert(td_helpmission_4.rpcdata->text[td_helpmission_4.rpcdata->text_length] == 0);
+			textdraws_assert_text_length_within_bounds(&td_helpmission_4);
+#endif
+			break;
+		} else if (*t == 0) {
+			assert(0);
+		}
+		t++;
+	}
 }
 
 static
@@ -147,6 +183,9 @@ void help_dispose()
 
 	for (i = 0; i < NUM_HELPMAIN_TDS; i++) {
 		free(tds_helpmain[i]->rpcdata);
+	}
+	for (i = 0; i < NUM_HELPACCOUNT_TDS; i++) {
+		free(tds_helpaccount[i]->rpcdata);
 	}
 	for (i = 0; i < NUM_HELPADF_TDS; i++) {
 		free(tds_helpadf[i]->rpcdata);
@@ -159,6 +198,9 @@ void help_dispose()
 	}
 	for (i = 0; i < NUM_HELPNAV_TDS; i++) {
 		free(tds_helpnav[i]->rpcdata);
+	}
+	for (i = 0; i < NUM_HELPMISSION_TDS; i++) {
+		free(tds_helpmission[i]->rpcdata);
 	}
 	for (i = 0; i < NUM_CREDITS_TDS; i++) {
 		free(tds_credits[i]->rpcdata);

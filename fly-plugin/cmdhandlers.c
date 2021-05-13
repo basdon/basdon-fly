@@ -631,6 +631,17 @@ int cmd_helpkeys(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+#define CMD_HELPMISSION_SYNTAX ""
+#define CMD_HELPMISSION_DESC "Shows you help about the mission system"
+static
+int cmd_helpmission(struct COMMANDCONTEXT cmdctx)
+{
+	if (ui_try_show(cmdctx.playerid, ui_help)) {
+		help_show(cmdctx.playerid, NUM_HELPMISSION_TDS, tds_helpmission);
+	}
+	return CMD_OK;
+}
+
 #define CMD_HELPNAV_SYNTAX ""
 #define CMD_HELPNAV_DESC "Shows you help about navigation systems in basdon"
 static
