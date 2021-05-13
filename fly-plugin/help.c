@@ -3,11 +3,13 @@ static struct TEXTDRAW td_helpmain_1 = { "title",      TEXTDRAW_ALLOC_AS_NEEDED,
 static struct TEXTDRAW td_helpmain_2 = { "1",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_helpmain_3 = { "2",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_helpmain_4 = { "3",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_helpmain_5 = { "close",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-#define NUM_HELPMAIN_TDS 6
+static struct TEXTDRAW td_helpmain_5 = { "4",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpmain_6 = { "close",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+#define NUM_HELPMAIN_TDS 7
 STATIC_ASSERT(NUM_HELPMAIN_TDS <= NUM_HELP_TEXTDRAWS);
 static struct TEXTDRAW *tds_helpmain[NUM_HELPMAIN_TDS] = {
 	&td_helpmain_0, &td_helpmain_1, &td_helpmain_2, &td_helpmain_3, &td_helpmain_4, &td_helpmain_5,
+	&td_helpmain_6,
 };
 
 static struct TEXTDRAW td_helpaccount_0 = { "bg",         TEXTDRAW_ALLOC_AS_NEEDED, NULL };
