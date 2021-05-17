@@ -85,6 +85,7 @@ static
 void radio_on_msg(int playerid, char *msg)
 {
 	char radiomsg[200];
+	char macrobuf[10];
 	char m, *p;
 	int hash;
 	int macrolen;
@@ -101,7 +102,7 @@ void radio_on_msg(int playerid, char *msg)
 			for (;;) {
 				m = *msg;
 				if (m < '0' || m > '9' || macrolen > 5) {
-					if (IsPlayerConnected(mention)) {
+					if (macrolen && IsPlayerConnected(mention)) {
 						p += sprintf(p, "%s", pdata[mention]->name);
 						goto macro_ok;
 					}
@@ -113,12 +114,16 @@ void radio_on_msg(int playerid, char *msg)
 			}
 			*p = '@';
 		} else if (m == '#') {
-			hash = strhashcode(msg);
 			macrolen = 0;
 			for (;;) {
 				m = *msg;
-				if (m <= ' ' || macrolen == 4) {
+				if (((m < 'a' || m > 'z') && (m < 'A' || m > 'Z')) || macrolen == 4) {
 					if (macrolen) {
+						/*Need to copy to a zero term buf because the macro may end in , or any other symbol,
+						and strhashcode would include that in the hash.*/
+						memcpy(macrobuf, msg - macrolen, macrolen);
+						macrobuf[macrolen] = 0;
+						hash = strhashcode(macrobuf);
 						for (i = 0; radio_macros[i].macro; i++) {
 							if (radio_macros[i].hash == hash &&
 								!strincmp(radio_macros[i].macro, msg - macrolen, macrolen))
