@@ -526,6 +526,7 @@ static unsigned short nametags_max_distance[MAX_PLAYERS];
 #include "playerdata.c"
 #include "playerstats.c"
 #include "pm.c"
+#include "radio.c"
 #include "servicepoints.c"
 #include "spawn.c"
 #include "timecyc.c"

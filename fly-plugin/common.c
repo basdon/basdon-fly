@@ -57,6 +57,51 @@ int stricmp(char *a, char *b)
 	}
 }
 
+static
+int strincmp(char *a, char *b, int n)
+{
+	register int x;
+	register char _a, _b;
+
+	while (n--) {
+		_a = *a;
+		if ('A' <= _a && _a <= 'Z') {
+			_a |= 0x20;
+		}
+		_b = *b;
+		if ('A' <= _b && _b <= 'Z') {
+			_b |= 0x20;
+		}
+		x = _a - _b;
+		if (x || !_a) {
+			return x;
+		}
+		a++;
+		b++;
+	}
+	return 0;
+}
+
+/*
+Hashes text until a character <= space is found (case-insensitive).
+*/
+static
+int strhashcode(char *text)
+{
+	register int val;
+	int result = 0;
+
+	/* same as hashCode in Java (but case insensitive) */
+	while ((val = *text) > ' ') {
+		text++;
+		if ('A' <= val && val <= 'Z') {
+			val |= 0x20;
+		}
+		result = 31 * result + val;
+	}
+	return result;
+}
+
 void common_tp_player(int playerid, struct vec4 pos)
 {
 	natives_SetPlayerPos(playerid, pos.coords);

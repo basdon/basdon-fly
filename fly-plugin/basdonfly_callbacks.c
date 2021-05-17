@@ -137,6 +137,7 @@ exit:
 	missions_init(); /*airports_init() must be called first, to initialize missionpoints*/
 	playerstats_init();
 	protips_init();
+	radio_init();
 	spawn_init(); /*MUST run after airports_init*/
 	svp_init();
 	timecyc_init();
@@ -448,6 +449,11 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 
 	amx_GetAddr(amx, PARAM(2), &addr);
 	ctoa(buf, addr, sizeof(buf));
+
+	if (buf[0] == '#') {
+		radio_on_msg(playerid, buf + 1);
+		return 0;
+	}
 
 	echo_on_game_chat_or_action(0, playerid, buf);
 	return 1;

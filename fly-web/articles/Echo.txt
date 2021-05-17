@@ -131,6 +131,7 @@ Types:
 5: IRC nick change message, sent from irc to game
 6: protip, sent from game to irc
 7: metar weather report, sent from game to irc
+8: radio message, sent from game to irc
 </pre>
 
 {@h4(id=p30) Packet 30: Player connection}

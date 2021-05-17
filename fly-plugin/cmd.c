@@ -119,27 +119,6 @@ static struct COMMAND cmds[] = {
 };
 
 /*
-Hashes command part of command text (case-insensitive).
-End delimiter for the command part is either a zero terminator, or anything
-with a value below the space character.
-*/
-static
-int cmd_hash(const char *cmdtext)
-{
-	int val, pos = 0, result = 0;
-
-	/* same as hashCode in Java (but case insensitive) */
-	while (cmdtext[pos] != 0 && cmdtext[pos] > ' ') {
-		val = cmdtext[pos++];
-		if ('A' <= val && val <= 'Z') {
-			val |= 0x20;
-		}
-		result = 31 * result + val;
-	}
-	return result;
-}
-
-/*
 Check if the command in cmdtext is same as cmd (case insensensitive).
 Parseidx is not written to if it didn't match.
 On match, parseidx is the index right after the command, so either space or \0.
@@ -177,7 +156,7 @@ void cmd_init()
 	/*Hash, set alias to itself.*/
 	cmd = cmds;
 	while (cmd->cmd) {
-		cmd->hash = cmd_hash(cmd->cmd);
+		cmd->hash = strhashcode((char*) cmd->cmd);
 		cmd->alias_of = cmd;
 		cmd++;
 	}
@@ -186,7 +165,7 @@ void cmd_init()
 	cmd = cmds;
 	while (cmd->cmd) {
 		if (cmd->aliased_cmd) {
-			hash = cmd_hash(cmd->aliased_cmd);
+			hash = strhashcode((char*) cmd->aliased_cmd);
 			aliased = cmds;
 			for (;;) {
 				assert(aliased->cmd); /*Aliased command doesn't exist.*/
@@ -220,7 +199,7 @@ int cmd_get_by_name_check_permissions(
 	register struct COMMAND *cmd, *real_cmd;
 	int hash;
 
-	hash = cmd_hash(cmdtext);
+	hash = strhashcode(cmdtext);
 	cmd = cmds;
 	while (cmd->cmd) {
 		if (hash == cmd->hash && cmd_is(cmdtext, cmd->cmd, out_parseidx)) {

@@ -50,7 +50,8 @@ public static final byte
 	PACK12_IRC_TOPIC = 4,
 	PACK12_IRC_NICK = 5,
 	PACK12_PROTIP = 6,
-	PACK12_METAR = 7;
+	PACK12_METAR = 7,
+	PACK12_RADIO = 8;
 private static final InetAddress ADDR_OUT;
 
 public static final byte
@@ -428,6 +429,10 @@ invalid_packet:
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_CYAN);
 			msg.writeChar(',');
+			msg.writeString(SCOL_GREY);
+			break;
+		case PACK12_RADIO:
+			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_GREY);
 			break;
 		default:
