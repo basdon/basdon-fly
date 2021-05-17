@@ -24,7 +24,7 @@ static int numservicepoints;
 static struct SERVICEPOINT *servicepoints;
 
 #define SVP_TXT "Service Point\n/repair - /refuel"
-static char svp_text_encoded_bits[24];
+static char svp_text_encoded_bits[32];
 static int svp_text_encoded_bitlength;
 
 /**
