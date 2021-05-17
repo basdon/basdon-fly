@@ -333,7 +333,7 @@ invalid_packet:
 		short statusMsgByteLength = stream.readWord();
 		this.cached_status_msg_time = System.currentTimeMillis();
 		CharBuf charbuf = new CharBuf(statusMsgByteLength);
-		charbuf.writeUTF8(stream, statusMsgByteLength);
+		charbuf.writeCP1252(stream, statusMsgByteLength);
 		this.cached_status_msg = new char[charbuf.pos];
 		arraycopy(charbuf.chars, 0, this.cached_status_msg, 0, charbuf.pos);
 		if (this.status_message_requested_global) {
@@ -376,7 +376,7 @@ invalid_packet:
 			break;
 		}
 		CharBuf msg = new CharBuf(512);
-		msg.writeUTF8(stream, nicklen);
+		msg.writeCP1252(stream, nicklen);
 		msg.writeChar('(');
 		msg.writeString(String.valueOf(playerid));
 		msg.writeChar(')');
@@ -384,7 +384,7 @@ invalid_packet:
 			msg.writeChar(':');
 		}
 		msg.writeChar(' ');
-		msg.writeUTF8Filtered(stream, msglen);
+		msg.writeCP1252Filtered(stream, msglen);
 		this.anna.sync_exec(() -> {
 			this.ignore_self = true;
 			if (packet_id == PACK_ACTION) {
@@ -409,26 +409,22 @@ invalid_packet:
 		if (length != 7 + msglen) {
 			break;
 		}
-		CharBuf msg;
+		CharBuf msg = new CharBuf(512);
 		switch(type) {
 		case PACK12_FLIGHT_MESSAGE:
-			msg = new CharBuf(3 + msglen);
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_ORANGE);
 			break;
 		case PACK12_TRAC_MESSAGE:
-			msg = new CharBuf(3 + msglen);
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_BROWN);
 			break;
 		case PACK12_LOGIN:
-			msg = new CharBuf(3 + msglen);
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_BLUE);
 			break;
 		case PACK12_PROTIP:
 		case PACK12_METAR:
-			msg = new CharBuf(6 + msglen);
 			msg.writeChar(CTRL_COLOR);
 			msg.writeString(SCOL_CYAN);
 			msg.writeChar(',');
@@ -437,7 +433,7 @@ invalid_packet:
 		default:
 			break invalid_packet;
 		}
-		msg.writeUTF8Filtered(stream, msglen);
+		msg.writeCP1252Filtered(stream, msglen);
 		this.anna.sync_exec(() -> {
 			this.ignore_self = true;
 			this.anna.privmsg(this.channel, msg.chars, 0, msg.pos);
@@ -466,7 +462,7 @@ invalid_packet:
 		} else {
 			msg.writeString("<- ");
 		}
-		msg.writeUTF8(stream, nicklen);
+		msg.writeCP1252(stream, nicklen);
 		msg.writeChar('(');
 		msg.writeString(String.valueOf(playerid));
 		msg.writeChar(')');
