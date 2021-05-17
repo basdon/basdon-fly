@@ -159,9 +159,9 @@ void spawn_on_player_spawn(int playerid)
 		dialog_show(playerid, &dialog);
 	}
 
-	if (NC_GetPlayerScore(playerid) < 10) {
+	if (NC_GetPlayerScore(playerid) < 20) {
 		SendClientMessage(playerid, COL_INFO_LIGHT, INFO"Use /reclass to change to a different class.");
 		SendClientMessage(playerid, COL_INFO_LIGHT, INFO"Use /respawn to go to a different spawn place.");
-		/*TODO: tell about help/info cmds here when they're made*/
+		SendClientMessage(playerid, COL_INFO_LIGHT, INFO"Use /help to learn more about the features of this server.");
 	}
 }
