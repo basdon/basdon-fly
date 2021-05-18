@@ -922,6 +922,15 @@ int cmd_r(struct COMMANDCONTEXT cmdctx)
 	return CMD_SYNTAX_ERR;
 }
 
+#define CMD_RADIOMACROS_SYNTAX ""
+#define CMD_RADIOMACROS_DESC "Shows you all the available radio macros (see also /radiohelp)"
+static
+int cmd_radiomacros(struct COMMANDCONTEXT cmdctx)
+{
+	radio_show_macros_dialog(cmdctx.playerid);
+	return CMD_OK;
+}
+
 #define NO_RECLASSSPAWN WARN"You cannot reclass/respawn while on a mission. "\
 			"Use /s to cancel your current mission for a fee "\
 			"($"EQ(MISSION_CANCEL_FINE)")."

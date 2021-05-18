@@ -118,7 +118,29 @@ void radio_init()
 }
 
 static
-void radio_on_msg(int playerid, char *msg)
+void radio_show_macros_dialog(int playerid)
+{
+	register struct RADIO_MACRO *macro;
+	struct DIALOG_INFO dialog;
+	char *b;
+
+	dialog_init_info(&dialog);
+	b = dialog.info;
+	b += sprintf(b, "%s", "Macro\tReplacement");
+	macro = radio_macros;
+	while (macro->macro) {
+		b += sprintf(b, "\n#%s\t%s", macro->macro, macro->replacement_or_description);
+		macro++;
+	}
+	dialog.transactionid = DLG_TID_RADIOMACROS;
+	dialog.style = DIALOG_STYLE_TABLIST_HEADERS;
+	dialog.caption = "Radio macros";
+	dialog.button1 = "Ok";
+	dialog_show(playerid, &dialog);
+}
+
+static
+void radio_send_radio_msg(int playerid, char *msg)
 {
 	register struct RADIO_MACRO *macro;
 	char radiomsg[200];

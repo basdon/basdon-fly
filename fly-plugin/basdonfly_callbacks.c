@@ -451,7 +451,7 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 	ctoa(buf, addr, sizeof(buf));
 
 	if (buf[0] == '#') {
-		radio_on_msg(playerid, buf + 1);
+		radio_send_radio_msg(playerid, buf + 1);
 		return 0;
 	}
 

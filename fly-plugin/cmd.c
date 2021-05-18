@@ -101,6 +101,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/preferences", "/prefs", 0, 0, 0, 0 },
 	{ 0, 0, "/protip", 0, GROUPS_ALL, CMD_PROTIP_SYNTAX, CMD_PROTIP_DESC, cmd_protip },
 	{ 0, 0, "/r", 0, GROUPS_ALL, CMD_R_SYNTAX, CMD_R_DESC, cmd_r },
+	{ 0, 0, "/radiomacros", 0, GROUPS_ALL, CMD_RADIOMACROS_SYNTAX, CMD_RADIOMACROS_DESC, cmd_radiomacros },
 	{ 0, 0, "/reclass", 0, GROUPS_ALL, CMD_RECLASS_SYNTAX, CMD_RECLASS_DESC, cmd_reclass },
 	{ 0, 0, "/register", 0, GROUP_GUEST, CMD_REGISTER_SYNTAX, CMD_REGISTER_DESC, cmd_register },
 	{ 0, 0, "/repair", 0, GROUPS_ALL, CMD_REPAIR_SYNTAX, CMD_REPAIR_DESC, cmd_repair },
