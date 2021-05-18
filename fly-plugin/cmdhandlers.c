@@ -664,6 +664,17 @@ int cmd_helpnav(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+#define CMD_HELPRADIO_SYNTAX ""
+#define CMD_HELPRADIO_DESC "Shows you help about the radio system"
+static
+int cmd_helpradio(struct COMMANDCONTEXT cmdctx)
+{
+	if (ui_try_show(cmdctx.playerid, ui_help)) {
+		help_show(cmdctx.playerid, NUM_HELPRADIO_TDS, tds_helpradio);
+	}
+	return CMD_OK;
+}
+
 #define CMD_HELPVOR_SYNTAX ""
 #define CMD_HELPVOR_DESC "Shows you help about VOR navigation"
 static
