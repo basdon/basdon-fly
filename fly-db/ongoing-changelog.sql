@@ -49,3 +49,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 May 13', 'Added /help /helpnav /helpadf /helpvor /helpils /helpmissions /helpaccount /helpcopilot /info /credits');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 May 18', 'Added a radio system, chat msgs prefixed with # are sent as a radio msg - see /helpradio and /radiomacros');
