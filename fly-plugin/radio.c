@@ -1,62 +1,98 @@
 struct RADIO_MACRO {
 	int hash;
 	char *macro;
-	char *replacement;
+	/**Description when {@link replacement_generator} is not null, replacement otherwise.*/
+	char *replacement_or_description;
+	int (*replacement_generator)(int playerid, char *str);
 };
 
+static
+int radio_append_mission_origin(int playerid, char *str)
+{
+	struct MISSION *mission;
+
+	mission = activemission[playerid];
+	if (mission) {
+		return sprintf(str, "%s (%s) %s",
+			mission->startpoint->ap->name,
+			mission->startpoint->ap->code,
+			mission->startpoint->name
+		);
+	}
+	return sprintf(str, "%s", "(no mission origin)");
+}
+
+static
+int radio_append_mission_destination(int playerid, char *str)
+{
+	struct MISSION *mission;
+
+	mission = activemission[playerid];
+	if (mission) {
+		return sprintf(str, "%s (%s) %s",
+			mission->endpoint->ap->name,
+			mission->endpoint->ap->code,
+			mission->endpoint->name
+		);
+	}
+	return sprintf(str, "%s", "(no mission destination)");
+}
+
 static struct RADIO_MACRO radio_macros[] = {
-	{ 0, "l", "Landing" },
-	{ 0, "l2", "Landed" },
-	{ 0, "t", "Taking off" },
-	{ 0, "t2", "Took off" },
-	{ 0, "ab", "Airborn" },
-	{ 0, "rf", "Refueling" },
-	{ 0, "ga", "Go around" },
-	{ 0, "ga2", "Going around" },
-	{ 0, "tx", "Taxiing" },
-	{ 0, "er", "En route" },
-	{ 0, "ap", "Airport" },
-	{ 0, "app", "Approach" },
-	{ 0, "sf", "Short final" },
-	{ 0, "d", "Destination" },
-	{ 0, "r", "Roger that" },
-	{ 0, "c", "Copy that" },
-	{ 0, "a", "Affirmative" },
-	{ 0, "n", "Negative" },
-	{ 0, "mm", "Mayday, Mayday!" },
-	{ 0, "fl", "Flight level" },
-	{ 0, "cp", "Do you copy?" },
-	{ 0, "st", "What's your status?" },
-	{ 0, "ty", "Thank you" },
-	{ 0, "yw", "You're welcome" },
-	{ 0, "lof", "Low on fuel" },
-	{ 0, "rw", "Runway" },
+	{ 0, "l", "Landing", 0 },
+	{ 0, "l2", "Landed", 0 },
+	{ 0, "t", "Taking off", 0 },
+	{ 0, "t2", "Took off", 0 },
+	{ 0, "ab", "Airborn", 0 },
+	{ 0, "rf", "Refueling", 0 },
+	{ 0, "ga", "Go around", 0 },
+	{ 0, "ga2", "Going around", 0 },
+	{ 0, "tx", "Taxiing", 0 },
+	{ 0, "er", "En route", 0 },
+	{ 0, "ap", "Airport", 0 },
+	{ 0, "app", "Approach", 0 },
+	{ 0, "sf", "Short final", 0 },
+	{ 0, "d", "Destination", 0 },
+	{ 0, "r", "Roger that", 0 },
+	{ 0, "c", "Copy that", 0 },
+	{ 0, "a", "Affirmative", 0 },
+	{ 0, "n", "Negative", 0 },
+	{ 0, "mm", "Mayday, Mayday!", 0 },
+	{ 0, "fl", "Flight level", 0 },
+	{ 0, "cp", "Do you copy?", 0 },
+	{ 0, "st", "What's your status?", 0 },
+	{ 0, "ty", "Thank you", 0 },
+	{ 0, "yw", "You're welcome", 0 },
+	{ 0, "lof", "Low on fuel", 0 },
+	{ 0, "rw", "Runway", 0 },
+	{ 0, "mo", "(current mission origin)", radio_append_mission_origin },
+	{ 0, "md", "(current mission destination)", radio_append_mission_destination },
 #if MAX_AIRPORTS != 20
 #error need more lines here
 #endif
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
 /*end*/
-	{ 0, 0, 0 },
+	{ 0, 0, 0, 0 },
 };
 
 static
@@ -72,7 +108,7 @@ void radio_init()
 			j++;
 		}
 		radio_macros[j].macro = airports[i].code;
-		radio_macros[j].replacement = airports[i].name;
+		radio_macros[j].replacement_or_description = airports[i].name;
 	}
 
 	/*Hash macros.*/
@@ -84,13 +120,13 @@ void radio_init()
 static
 void radio_on_msg(int playerid, char *msg)
 {
+	register struct RADIO_MACRO *macro;
 	char radiomsg[200];
 	char macrobuf[10];
 	char m, *p;
 	int hash;
 	int macrolen;
 	int mention;
-	int i;
 
 	p = radiomsg;
 	p += sprintf(p, "(RADIO:%s(%d)) ", pdata[playerid]->name, playerid);
@@ -124,13 +160,19 @@ void radio_on_msg(int playerid, char *msg)
 						memcpy(macrobuf, msg - macrolen, macrolen);
 						macrobuf[macrolen] = 0;
 						hash = strhashcode(macrobuf);
-						for (i = 0; radio_macros[i].macro; i++) {
-							if (radio_macros[i].hash == hash &&
-								!strincmp(radio_macros[i].macro, msg - macrolen, macrolen))
+						macro = radio_macros;
+						while (macro->macro) {
+							if (macro->hash == hash &&
+								!strincmp(macro->macro, msg - macrolen, macrolen))
 							{
-								p += sprintf(p, "%s", radio_macros[i].replacement);
+								if (macro->replacement_generator) {
+									p += macro->replacement_generator(playerid, p);
+								} else {
+									p += sprintf(p, "%s", macro->replacement_or_description);
+								}
 								goto macro_ok;
 							}
+							macro++;
 						}
 					}
 					break;

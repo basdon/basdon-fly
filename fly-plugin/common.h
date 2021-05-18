@@ -79,7 +79,7 @@ void ctoai(char *dstsrc);
 #define COL_METAR COL_INFO_LIGHT
 #define COL_IRC_MODE 0x22ffffff
 #define COL_IRC_ACTION 0xff66ffff
-#define COL_RADIO 0x999999ff
+#define COL_RADIO 0xccccccff
 
 #define COL_CHANGELOG COL_INFO_BROWN
 
