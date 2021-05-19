@@ -170,12 +170,11 @@ void radio_send_radio_msg(int playerid, char *msg)
 				macrolen++;
 				msg++;
 			}
-			*p = '@';
 		} else if (m == '#') {
 			macrolen = 0;
 			for (;;) {
 				m = *msg;
-				if (((m < 'a' || m > 'z') && (m < 'A' || m > 'Z')) || macrolen == 4) {
+				if (!m || ((m < 'a' || m > 'z') && (m < 'A' || m > 'Z')) || macrolen == 4) {
 					if (macrolen) {
 						/*Need to copy to a zero term buf because the macro may end in , or any other symbol,
 						and strhashcode would include that in the hash.*/
@@ -202,14 +201,14 @@ void radio_send_radio_msg(int playerid, char *msg)
 				macrolen++;
 				msg++;
 			}
-			*p = '#';
 		} else {
 			*p = m;
 			p++;
 			continue;
 		}
-		memcpy(p + 1, msg - macrolen, macrolen);
-		p += macrolen + 1;
+		macrolen++; /*to include the prefix*/
+		memcpy(p, msg - macrolen, macrolen);
+		p += macrolen;
 macro_ok:
 		;
 	}
