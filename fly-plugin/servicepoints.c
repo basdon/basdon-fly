@@ -134,7 +134,7 @@ int svp_refuel(int playerid)
 	if (refuelpct <= 0) {
 		sprintf(msg144,
 		        WARN"Refueling is not needed yet! "
-			"Capacity: %.0f/%.0f (%.0f'/.)",
+			"Capacity: %.0f/%.0f (%.0f%%)",
 		        veh->fuel,
 		        capacity,
 			100.0f * veh->fuel / capacity);
@@ -149,7 +149,7 @@ int svp_refuel(int playerid)
 		if (refuelpct < 1.0f) {
 			sprintf(msg144,
 			        WARN"You can't pay the refuel fee! "
-				"Capacity: %.0f/%.0f (%.0f'/.)",
+				"Capacity: %.0f/%.0f (%.0f%%)",
 			        veh->fuel,
 			        capacity,
 				100.0f * veh->fuel / capacity);
@@ -168,8 +168,8 @@ int svp_refuel(int playerid)
 	veh->fuel += refuelamount;
 
 	sprintf(msg144,
-		INFO"Your vehicle has been %s refueled for $%d (+%d'/.) "
-		"capacity: %.0f/%.0f (%.0f'/.)",
+		INFO"Your vehicle has been %s refueled for $%d (+%d%%) "
+		"capacity: %.0f/%.0f (%.0f%%)",
 	        buf1,
 	        cost,
 		refuelpct,
