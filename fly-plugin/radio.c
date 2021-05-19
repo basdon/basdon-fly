@@ -129,7 +129,7 @@ void radio_show_macros_dialog(int playerid)
 	b += sprintf(b, "%s", "Macro\tReplacement");
 	macro = radio_macros;
 	while (macro->macro) {
-		b += sprintf(b, "\n#%s\t%s", macro->macro, macro->replacement_or_description);
+		b += sprintf(b, "\n%%%s\t%s", macro->macro, macro->replacement_or_description);
 		macro++;
 	}
 	dialog.transactionid = DLG_TID_RADIOMACROS;
@@ -170,7 +170,7 @@ void radio_send_radio_msg(int playerid, char *msg)
 				macrolen++;
 				msg++;
 			}
-		} else if (m == '#') {
+		} else if (m == '%') {
 			macrolen = 0;
 			for (;;) {
 				m = *msg;
