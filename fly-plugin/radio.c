@@ -174,7 +174,7 @@ void radio_send_radio_msg(int playerid, char *msg)
 			macrolen = 0;
 			for (;;) {
 				m = *msg;
-				if (!m || ((m < 'a' || m > 'z') && (m < 'A' || m > 'Z')) || macrolen == 4) {
+				if (!m || ((m < 'a' || m > 'z') && (m < 'A' || m > 'Z') && (m < '0' || m > '9')) || macrolen == 4) {
 					if (macrolen) {
 						/*Need to copy to a zero term buf because the macro may end in , or any other symbol,
 						and strhashcode would include that in the hash.*/
