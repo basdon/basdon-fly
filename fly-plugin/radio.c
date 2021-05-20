@@ -65,6 +65,8 @@ static struct RADIO_MACRO radio_macros[] = {
 	{ 0, "yw", "You're welcome", 0 },
 	{ 0, "lof", "Low on fuel", 0 },
 	{ 0, "rw", "Runway", 0 },
+	{ 0, "tw", "Tower", 0 },
+	{ 0, "gr", "Ground", 0 },
 	{ 0, "mo", "(current mission origin)", radio_append_mission_origin },
 	{ 0, "md", "(current mission destination)", radio_append_mission_destination },
 #if MAX_AIRPORTS != 20
