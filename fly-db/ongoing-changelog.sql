@@ -52,3 +52,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 May 18', 'Added a radio system, chat msgs prefixed with # are sent as a radio msg - see /helpradio and /radiomacros');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 May 24', 'Updated Catalina City (CATA) map');

@@ -1501,7 +1501,7 @@ static struct REGION regions[] = {
 	R(-1213.91f, -2892.97f, -242.99f, 44.6147f, -768.027f, 900.0f, ZONE_FLINTC),
 	R(-2997.47f, -2892.97f, -242.99f, -1213.91f, -1115.58f, 900.0f, ZONE_WHET),
 	R(11740.0f, 5875.0f, -242.99f, 13718.0f, 7471.5f, 900.0f, ZONE_OCTA),
-	R(-35585.12f, -2906.60f, -242.99f, -32640.87f, -228.24f, 900.0f, ZONE_CATA),
+	R(-35113.6133f, -2984.9619, -242.99f, -33084.4258f, 325.2373f, 900.0f, ZONE_CATA),
 	R(-4780.9155f, 25763.7539f, -242.99f, -2509.3086f, 29620.2578f, 900.0f, ZONE_IGZU),
 	R(4207.2f, -11578.1f, -242.99f, 5815.9f, -10478.2f, 900.0f, ZONE_BNSA),
 	R(8648.0f, -5224.7f, -242.99f, 11727.7f, -2551.8f, 900.0f, ZONE_DUNE),
@@ -1923,7 +1923,7 @@ static struct ZONE zones[] = {
 	{ 12515.4824f, 6536.6035f, 0.0f, 12886.6074f, 6582.3755f, 200.0f, ZONE_OCTA_BEACH },
 	/* end OCTA region zones */
 	/* start CATA region zones */
-	{ -34629.93f, -1822.11f, 0.0f, -33286.82f, -848.27f, 200.0f, ZONE_CATA_CITY },
+	{ -34595.6367f, -1787.6106f, 0.0f, -33376.3125f, -752.8413f, 200.0f, ZONE_CATA_CITY },
 	/* end CATA region zones */
 	/* start IGZU region zones */
 	{ -4560.1260f, 26908.4668f, 0.0f, -3113.8081f, 28430.4473f, 200.0f, ZONE_IGZU_CITY },
