@@ -1301,6 +1301,7 @@ struct REGION {
 #define ZONE_BNSA 181
 #define ZONE_BNSA_CARRIER 181
 #define ZONE_DUNE 182
+#define ZONE_PINE 183
 
 /* see info.zon and american.gxt */
 static char *zonenames[] = {
@@ -1487,6 +1488,7 @@ static char *zonenames[] = {
 	"Iguazu City",
 	"BNS Atlantic",
 	"Sandy Dunes",
+	"Angel Pine Airstrip",
 };
 
 static struct REGION regions[] = {
@@ -1899,6 +1901,7 @@ static struct ZONE zones[] = {
 	{ -1132.82f, -787.391f, 0.0f, -956.476f, -768.027f, 200.0f, ZONE_EBAY },
 	/* end FLINTC region zones */
 	/* start WHET region zones */
+	{ -2773.34f, -2361.66f, 0.0f, -2595.89f, -2132.78f, 200.0f, ZONE_PINE },
 	{ -2324.94f, -2584.29f, 0.0f, -1964.22f, -2212.11f, 200.0f, ZONE_ANGPI },
 	{ -1820.64f, -2643.68f, 0.0f, -1226.78f, -1771.66f, 200.0f, ZONE_CREEK },
 	{ -2030.12f, -2174.89f, 0.0f, -1820.64f, -1771.66f, 200.0f, ZONE_CREEK },

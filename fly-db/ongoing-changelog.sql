@@ -55,3 +55,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 May 24', 'Updated Catalina City (CATA) map');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 May 30', 'New destination: Angel Pine Airstrip (PINE)');
