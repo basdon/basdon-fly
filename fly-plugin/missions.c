@@ -857,9 +857,9 @@ void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh)
 			SendClientMessage(playerid, COL_WARN,
 				WARN" Your mission vehicle has been destroyed, "
 				"your mission has been aborted and you have "
-				"been fined $"EQ(MISSION_CANCEL_FINE)".");
+				"been fined $"SETTING__MISSION_CANCEL_FEE_STR".");
 			NC_DisablePlayerRaceCheckpoint(playerid);
-			money_take(playerid, MISSION_CANCEL_FINE);
+			money_take(playerid, SETTING__MISSION_CANCEL_FEE_INT);
 			missions_end_unfinished(playerid, MISSION_STATE_ABANDONED);
 			return;
 		}
@@ -1508,7 +1508,7 @@ void missions_process_cancel_request_by_player(int playerid)
 		} else {
 			NC_DisablePlayerRaceCheckpoint(playerid);
 		}
-		money_take(playerid, MISSION_CANCEL_FINE);
+		money_take(playerid, SETTING__MISSION_CANCEL_FEE_INT);
 		missions_end_unfinished(playerid, MISSION_STATE_DECLINED);
 	} else {
 		SendClientMessage(playerid, COL_WARN, WARN"You're not on an active mission.");
@@ -1570,7 +1570,7 @@ void missions_engage_help_or_map(int playerid)
 		}
 		SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &activemission[playerid]->endpoint->pos, MISSION_CP_RAD);
 		SendClientMessage(playerid, COL_WARN,
-			WARN"You're already working! Use /s to stop your current work first ($"EQ(MISSION_CANCEL_FINE)" fee).");
+			WARN"You're already working! Use /s to stop your current work first ($"SETTING__MISSION_CANCEL_FEE_STR" fee).");
 		break;
 	}
 }

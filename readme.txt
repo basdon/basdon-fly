@@ -112,6 +112,12 @@ Installation/configuration
 
 	Configuration
 	=============
+	general:
+		The settings.ini file in the root dir controls various settings
+		that are used both in the fly-plugin and fly-web code.
+		Changes made in this file will only be applied after rebuilding
+		plugin and web (run 'make').
+
 	anna:
 		For chatlogs, enable the packaged mod_log and set the path.
 		For example, if the IRC channel is #basdon and the echo channel
@@ -171,11 +177,13 @@ Installation/configuration
 
 			*/5 * * * * cd /path/to/basdon-fly/fly-web/cli; php genplayergraph.php
 
-		In dev, set the SGID sticky bit (g+s) on the fly-web/gen folder.
-		Otherwise it won't be able to regenerate templates on page load
+		In dev, set the SGID sticky bit (g+s) on the fly-web/inc and
+		fly-web/gen folders. Otherwise it won't be able to regenerate
+		some files (including templates and settings files) on page load
 		when the $__REPARSE__ setting is set. Also remember to run make
 		with the $BASDONDEV environment variable so it will set g+w
-		permissions on the files in fly-web/gen.
+		permissions on the files when (re)generating them from the
+		Makefile.
 
 	server:
 		When running, the server.cfg file is created from combining:

@@ -193,7 +193,7 @@ void help_init()
 	for (;;) {
 		if (*t == '$') {
 			t++;
-			len = sprintf(t, ""EQ(MISSION_CANCEL_FINE)"~w~.");
+			len = sprintf(t, ""SETTING__MISSION_CANCEL_FEE_STR"~w~.");
 			td_helpmission_4.rpcdata->text_length = t - td_helpmission_4.rpcdata->text + len;
 #ifdef DEV
 			assert(td_helpmission_4.rpcdata->text[td_helpmission_4.rpcdata->text_length] == 0);

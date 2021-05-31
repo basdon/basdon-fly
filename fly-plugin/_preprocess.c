@@ -2,29 +2,68 @@
 #include <stdio.h>
 #include <string.h>
 
-#define INFILE "samp.asm"
-#define OUTFILE "__sampasm.h"
-#define MAX_TESTS 50
+static
+FILE *checked_fopen(char *filename, char *mode)
+{
+	FILE *file;
 
-int main()
+	file = fopen(filename, mode);
+	if (!file) {
+		printf("preprocess: can't fopen '%s' with mode '%s'\n", filename, mode);
+		return 0;
+	}
+	return file;
+}
+
+static
+int generate_settings_from_ini_file()
 {
 	FILE *in, *out;
 	char line[1024];
-	char funcname[72];
-	char tests[MAX_TESTS][200];
-	int num_tests;
-	int i, j;
 
-	in = fopen(INFILE, "r");
+	in = checked_fopen("../settings.ini", "r");
 	if (!in) {
-		puts("preprocess: can't open "INFILE" for reading");
 		return 1;
 	}
 
-	out = fopen(OUTFILE, "w");
+	out = checked_fopen("__settings.h", "w");
 	if (!out) {
 		fclose(in);
-		puts("preprocess: can't open "OUTFILE" for reading");
+		return 1;
+	}
+
+	while (fgets(line, sizeof(line), in)) {
+		if (line[0] && line[0] != '\n' && line[0] != '#') {
+			fwrite("#define SETTING__", 17, 1, out);
+			fputs(line, out);
+		}
+	}
+
+	fclose(in);
+	fclose(out);
+	return 0;
+}
+
+static
+int generate_sampasm_header_from_asm_file()
+{
+#define SAMPASM_MAX_TESTS 50
+
+	FILE *in, *out;
+	char line[1024];
+	char funcname[72];
+	char tests[SAMPASM_MAX_TESTS][200];
+	int num_tests;
+	int i, j;
+
+	in = checked_fopen("samp.asm", "r");
+	if (!in) {
+		return 1;
+	}
+
+	out = checked_fopen("__sampasm.h", "w");
+	if (!out) {
+		fclose(in);
 		return 1;
 	}
 
@@ -58,7 +97,7 @@ int main()
 			}
 			sprintf(tests[num_tests], "\tassert(((void) \"asmtest %s\", %s));\n", funcname, &line[6]);
 			num_tests++;
-			assert(num_tests < MAX_TESTS);
+			assert(num_tests < SAMPASM_MAX_TESTS);
 		}
 	}
 
@@ -71,4 +110,9 @@ int main()
 	fclose(in);
 	fclose(out);
 	return 0;
+}
+
+int main()
+{
+	return generate_settings_from_ini_file() || generate_sampasm_header_from_asm_file();
 }

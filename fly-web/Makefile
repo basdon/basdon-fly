@@ -13,6 +13,14 @@ ARTICLE_OBJECTS := $(patsubst articles/%.txt, gen/article_%.html, $(ARTICLE_SOUR
 .PHONY: templates aerodromcharts apfactsheets apvehicelist articles ensureplayergraph islandmaps flightmapjs clean cleantemplates cleanarticles airportlist navinfotable
 default: templates aerodromecharts apfactsheets apvehiclelist articles ensureplayergraph islandmaps flightmapjs airportlist navinfotable
 
+inc/__settings.php: ../settings.ini cli/gensettings.php
+	cd cli && php gensettings.php
+	@# Regenerating the file resets the file's permissions,
+	@# which means the reparsing them in dev (with $__REPARSE__ in conf.php) will fail.
+	@# The SGID bit should be set on the inc folder,
+	@# then this will add write permissions for the httpd user again.
+	[ -z "$(BASDONDEV)" ] || chmod g+w inc/__settings.php
+
 cleantemplates:
 	rm -f gen/_*.php
 	rm -f gen/^*.php
@@ -33,45 +41,46 @@ gen/tohtml.sed: articles/tohtml.source.sed articles/tohtml.gen.sed
 	sed -f articles/tohtml.gen.sed < articles/tohtml.source.sed > gen/tohtml.sed
 gen/article_%.html: articles/%.txt cleanarticles gen/tohtml.sed
 	sed -f gen/tohtml.sed < $< > $@
-articles: $(ARTICLE_OBJECTS)
+articles: $(ARTICLE_OBJECTS) inc/__settings.php
 	cd cli && php genarticlemap.php
 	cd cli && php genbeaconlist.php
 	cd cli && php ensureairportcodearticlelinking.php
 
-aerodromecharts:
+aerodromecharts: inc/__settings.php
 	rm -f gen/aerodrome*
 	rm -f static/gen/aerodrome*
 	cd cli && php genaerodromechart.php
 
-apfactsheets:
+apfactsheets: inc/__settings.php
 	rm -f gen/apfactsheet*
 	cd cli && php genapfactsheet.php
 
-apvehiclelist:
+apvehiclelist: inc/__settings.php
 	rm -f gen/apvehiclelist*
 	cd cli && php genapvehiclelist.php
 
-islandmaps:
+islandmaps: inc/__settings.php
 	rm -f gen/islandmap*
 	rm -f static/gen/islandmap*
 	cd cli && php genislandmaps.php
 
-flightmapjs: islandmaps
+flightmapjs: islandmaps inc/__settings.php
 	rm -f static/gen/fm_complete.js
 	cd cli && php genflightmapjscomplete.php
 
-ensureplayergraph:
+ensureplayergraph: inc/__settings.php
 	@# The player graph should only created by the cron job,
 	@# but it can be deleted with a 'clean'.
 	@# Generate one here if it doesn't exist.
 	[ -f "gen/playergraph.png" ] || (cd cli && php genplayergraph.php)
 
-airportlist:
+airportlist: inc/__settings.php
 	cd cli && php genairportlist.php
 
-navinfotable:
+navinfotable: inc/__settings.php
 	cd cli && php gennavinfotable.php
 
 clean:
+	rm -f inc/__settings.php
 	rm -f gen/*
 	rm -f static/gen/*

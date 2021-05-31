@@ -7,6 +7,10 @@ $__rawmsgs = [];
 require('../inc/conf.php');
 include('../inc/db.php');
 include('../inc/funcs.php');
+if ($__REPARSE__) {
+	include('../cli/gensettings.php');
+}
+include('../inc/__settings.php');
 
 $GROUP_BANNED = 1;
 $GROUP_GUEST = 2;

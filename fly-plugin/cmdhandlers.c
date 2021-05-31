@@ -944,7 +944,7 @@ int cmd_radiomacros(struct COMMANDCONTEXT cmdctx)
 
 #define NO_RECLASSSPAWN WARN"You cannot reclass/respawn while on a mission. "\
 			"Use /s to cancel your current mission for a fee "\
-			"($"EQ(MISSION_CANCEL_FINE)")."
+			"($"SETTING__MISSION_CANCEL_FEE_STR")."
 
 #define CMD_RECLASS_SYNTAX ""
 #define CMD_RECLASS_DESC "Brings you to class selection to change your class (pilot/army etc)"
@@ -1011,7 +1011,7 @@ int cmd_respawn(struct COMMANDCONTEXT cmdctx)
 }
 
 #define CMD_S_SYNTAX ""
-#define CMD_S_DESC "Cancels your current mission for $"EQ(MISSION_CANCEL_FINE)""
+#define CMD_S_DESC "Cancels your current mission for $"SETTING__MISSION_CANCEL_FEE_STR""
 static
 int cmd_s(struct COMMANDCONTEXT cmdctx)
 {

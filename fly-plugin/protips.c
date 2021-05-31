@@ -5,11 +5,8 @@ static const char *protips[] = {
 	/*(note: this is the max lengths before it would get split.
 	 * Ideally protips should only be the length of one client message, but it can be more.*/
 	/*--------------------------------------------------------------------------------------------------------------------------------------------*/
-#ifndef MISSION_CANCEL_FINE
-#error need MISSION_CANCE_FINE
-#endif
 	"Pro Tip: Don't like the aviation panel night colors? Disable it in /p(references).",
-	"Pro Tip: Use /w(ork) to find a mission. /s(top) to cancel your mission ($"EQ(MISSION_CANCEL_FINE)" fee).",
+	"Pro Tip: Use /w(ork) to find a mission. /s(top) to cancel your mission ($"SETTING__MISSION_CANCEL_FEE_STR" fee).",
 	"Pro Tip: Use /nearest to get a list of all airports, sorted by proximity!",
 	"Pro Tip: Enable navigation with /adf [beacon] or /vor [beacon][runway], see /helpnav",
 	"Pro Tip: ILS can be toggled using /ils when VOR is already active, see /helpils",

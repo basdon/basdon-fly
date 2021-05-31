@@ -4,7 +4,8 @@
 **/bin/
 **/bin-test/
 **/out
-/fly-plugin/__sampasm.h
+# files that start with __ are generated files
+**/__*
 /fly-web/**/gen/**
 !/fly-web/**/gen/.gitkeep
 /fly-web/inc/conf.php

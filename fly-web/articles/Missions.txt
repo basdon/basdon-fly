@@ -8,6 +8,10 @@ more.
 
 The type of mission depends on the class and aircraft type.
 
+Missions can be cancelled by using {@code /stopwork} or {@code /s} or
+{@code cancelwork} or {@code cancelmission}, but you will have to pay a fee of
+$<?=$SETTING__MISSION_CANCEL_FEE_STR?>.
+
 {@h3 Passenger missions}
 
 Passenger missions are given in most aircraft types, when spawed as the Pilot
