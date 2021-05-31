@@ -14,17 +14,20 @@
 				<p><strong>Programming</strong>: robin_be</p>
 			</li>
 			<li>
-				<p><strong>Mapping</strong>: adalarda, spitfire, robin_be.</p>
+				<p><strong>Mapping</strong>: {@unsafe $SETTING__CREDITS_MAPP}</p>
 				<p><small>See the airport articles (<a href="article.php?category=Airports">Category: Airports</a>) to see who mapped what airport. If not mentioned, it's probably robin_be.</small></p>
 			</li>
 			<li>
 				<p><strong>Brand graphics</strong>: spitfire</p>
 			</li>
 			<li>
-				<p><strong>Beta testers</strong>: adalarva, dipa, spitfire, ...</p>
+				<p><strong>Beta testers</strong>: {@unsafe $SETTING__CREDITS_BETA}</p>
 			</li>
 			<li>
-				<p><strong>Special thanks</strong>: Nati_Mage, Sunpy</p>
+				<p><strong>Special thanks</strong>: {@unsafe $SETTING__CREDITS_SPEC}</p>
+			</li>
+			<li>
+				<p><strong>Inspiration and ideas</strong>: {@unsafe $SETTING__CREDITS_INSP}</p>
 			</li>
 		</ul>
 	</div></div>

@@ -156,11 +156,11 @@ static struct TEXTDRAW td_credits_0 = { "bg",         TEXTDRAW_ALLOC_AS_NEEDED, 
 static struct TEXTDRAW td_credits_1 = { "title",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_credits_2 = { "sections",   TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_credits_3 = { "prog",       TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_credits_4 = { "mapp",       TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_credits_5 = { "beta",       TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_credits_4 = { "mapp",       40, NULL };
+static struct TEXTDRAW td_credits_5 = { "beta",       40, NULL };
 static struct TEXTDRAW td_credits_6 = { "bran",       TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_credits_7 = { "spec",       TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_credits_8 = { "insp",       TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_credits_7 = { "spec",       40, NULL };
+static struct TEXTDRAW td_credits_8 = { "insp",       60, NULL };
 static struct TEXTDRAW td_credits_9 = { "close",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 #define NUM_CREDITS_TDS 10
 STATIC_ASSERT(NUM_CREDITS_TDS <= NUM_HELP_TEXTDRAWS);
@@ -205,6 +205,18 @@ void help_init()
 		}
 		t++;
 	}
+
+	/*Set credits texts.*/
+#ifdef DEV
+	assert(td_credits_4.allocated_text_length > strlen(SETTING__CREDITS_MAPP));
+	assert(td_credits_5.allocated_text_length > strlen(SETTING__CREDITS_BETA));
+	assert(td_credits_7.allocated_text_length > strlen(SETTING__CREDITS_SPEC));
+	assert(td_credits_8.allocated_text_length > strlen(SETTING__CREDITS_INSP));
+#endif
+	td_credits_4.rpcdata->text_length = sprintf(td_credits_4.rpcdata->text, "%s", SETTING__CREDITS_MAPP);
+	td_credits_5.rpcdata->text_length = sprintf(td_credits_5.rpcdata->text, "%s", SETTING__CREDITS_BETA);
+	td_credits_7.rpcdata->text_length = sprintf(td_credits_7.rpcdata->text, "%s", SETTING__CREDITS_SPEC);
+	td_credits_8.rpcdata->text_length = sprintf(td_credits_8.rpcdata->text, "%s", SETTING__CREDITS_INSP);
 }
 
 static
