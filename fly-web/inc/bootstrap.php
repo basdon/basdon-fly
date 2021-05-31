@@ -4,11 +4,16 @@ $__timer = microtime(true);
 $__msgs = [];
 $__rawmsgs = [];
 
+if (!file_exists('../inc/conf.php')) {
+	die('missing "inc/conf.php" file, read "inc/conf.sample.php" instructions');
+}
 require('../inc/conf.php');
 include('../inc/db.php');
 include('../inc/funcs.php');
 if ($__REPARSE__) {
 	include('../cli/gensettings.php');
+} else if (!file_exists('../inc/__settings.php')) {
+	die('missing "inc/__settings.php" file, run "make web" first');
 }
 include('../inc/__settings.php');
 

@@ -462,7 +462,7 @@ static char aircraftmodelindex[VEHICLE_MODEL_TOTAL];
 #include <assert.h>
 #include "idalloc.h"
 #include "sounds.h"
-/*Files starting with __ are generated during build by _preprocess.c*/
+/*Files starting with __ are generated during build by _preprocess.c, just run the 'build' file with bash.*/
 #include "__sampasm.h"
 #include "__settings.h"
 #include "common.h"
