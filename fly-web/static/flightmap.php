@@ -1,23 +1,36 @@
 <?php
 include('../inc/conf.php');
+include('../inc/funcs.php');
+header('Content-Type: image/png');
+
+// set up image
+$imgw = 400;
+$imgh = 200;
+$im = imagecreatetruecolor($imgw, $imgh);
+$bg = imagecolorallocate($im, 100, 134, 164);
+$fill = imagecolorallocate($im, 204, 204, 204);
+//$rw = [imagecolorallocate($im, 156, 107, 159), imagecolorallocate($im, 12, 136, 192)];
+imagefilledrectangle($im, 0, 0, $imgw, $imgh, $bg);
 
 // prechecks
-if ($argc != 2) {
-	fwrite(STDERR, "need flight id as arg\n");
-	exit(1);
+if (isset($_GET['id'])) {
+	$id = (int) $_GET['id'];
 }
-$id = $argv[1];
+if (!isset($id) || $id < 0 || $id > 2000000) {
+	imagestring($im, 5, 20, 20, 'no flight given', $fill);
+	goto output;
+}
 
 // read flight file
 $filename = '../static/fdr/'.$id.'.flight';
 if (!file_exists($filename)) {
-	fwrite(STDERR, "can't open: {$filename}\n");
-	exit(1);
+	imagestring($im, 5, 20, 20, 'no flight data', $fill);
+	goto output;
 }
 $filesize = filesize($filename);
 if ($filesize < 40) {
-	fwrite(STDERR, "flight file has too little size: {$filename}\n");
-	exit(1);
+	imagestring($im, 5, 20, 20, 'no flight data', $fill);
+	goto output;
 }
 $f = @fopen($filename, 'rb');
 $data = fread($f, $filesize);
@@ -26,13 +39,13 @@ fclose($f);
 // parse flight file
 $v = unpack('V', $data)[1];
 if (($v & 0xFFFFFF00) != 0x594C4600 || (($v & 0xFF) < 3 || ($v & 0xFF) > 5)) {
-	fwrite(STDERR, "flight file has incorrect version\n");
-	exit(1);
+	imagestring($im, 5, 20, 20, 'flight file has incorrect version', $fill);
+	goto output;
 }
 $v &= 0xFF;
-if (unpack('V', $data[4] . $data[5] . $data[6] . $data[7])[1] != $id) {
-	fwrite(STDERR, "flight file has wrong flight id\n");
-	exit(1);
+if (unpack('V', substr($data, 4, 4))[1] != $id) {
+	imagestring($im, 5, 20, 20, 'flight file has wrong flight id', $fill);
+	goto output;
 }
 $chunksize = 24;
 if ($v > 3) {
@@ -40,13 +53,13 @@ if ($v > 3) {
 }
 $num_frames = ($filesize - 40);
 if ($num_frames % $chunksize) {
-	fwrite(STDERR, 'flight file has extra bytes: '.($num_frames % $chunksize)."\n");
-	exit(1);
+	imagestring($im, 5, 20, 20, 'flight file has extra bytes: '.($num_frames % $chunksize), $fill);
+	goto output;
 }
 $num_frames /= $chunksize;
 if ($num_frames < 2) {
-	fwrite(STDERR, 'flight file has lt 2 frames\n');
-	exit(1);
+	imagestring($im, 5, 20, 20, 'flight file has lt 2 frames', $fill);
+	goto output;
 }
 $minalt = 9e9; $maxalt = -9e9;
 $minx = 9e9; $maxx = -9e9;
@@ -76,14 +89,7 @@ for ($i = 0; $i < $num_frames; $i++) {
 }
 $altrange = max(1, $maxalt - $minalt);
 
-// set up image
-$imgw = 400;
-$imgh = 200;
-$im = imagecreatetruecolor($imgw, $imgh);
-$bg = imagecolorallocate($im, 100, 134, 164);
-$fill = imagecolorallocate($im, 204, 204, 204);
-$rw = [imagecolorallocate($im, 156, 107, 159), imagecolorallocate($im, 12, 136, 192)];
-imagefilledrectangle($im, 0, 0, $imgw, $imgh, $bg);
+// col funcs
 function huestuff($t)
 {
 	if ($t < 0) $t += 1;
@@ -161,8 +167,8 @@ foreach (scandir('../../maps', SCANDIR_SORT_NONE) as $file) {
 			exit(1);
 		}
 		// assuming the map file is correctly structured
-		$numremoves = unpack('V', $data[4] . $data[5] . $data[6] . $data[7])[1];
-		$numzones = unpack('V', $data[16] . $data[17] . $data[18] . $data[19])[1];
+		$numremoves = unpack('V', substr($data, 4, 4))[1];
+		$numzones = unpack('V', substr($data, 16, 4))[1];
 		$offset = 32 + 20 * $numremoves;
 		while ($numzones--) {
 			list(, $zminx, $zminy, $zmaxx, $zmaxy) = unpack('f4', substr($data, $offset, 16));
@@ -205,6 +211,7 @@ for ($i = 1; $i < $num_frames; $i++) {
 }
 
 // output
+output:
 imagetruecolortopalette($im, /*dither*/ false, /*num_colors*/ 20);
-imagepng($im, '../static/flightmaps/' . $id . '.png');
+imagepng($im);
 imagedestroy($im);
