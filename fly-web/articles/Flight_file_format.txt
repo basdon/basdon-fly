@@ -9,9 +9,10 @@ byte 1-3: 'F', 'L', 'Y'
 The rest is dependent on the spec version:
 
 {@ul
-  {@li {@#=v4 Version 4}}
+  {@li {@#=v5 Version 5}}
   {@li {@#=old Old versions}
     {@ul
+      {@li {@#=v4 Version 4}}
       {@li {@#=v3 Version 3}}
       {@li {@#=v2 Version 2}}
       {@li {@#=v1 Version 1}}
@@ -19,7 +20,7 @@ The rest is dependent on the spec version:
   }
 }
 
-{@h3(id="v4") Version 4}
+{@h3(id="v5") Version 5}
 
 <pre>
 byte 4-7: mission id (DWORD)
@@ -54,6 +55,13 @@ if there was an issue with a mission start packet:
 }
 
 {@h3(id="old") Old versions}
+
+{@h4(id="v4") Version 4}
+
+The format of version 4 is identical to {@#=v5 Version 5}, but initially it had
+a bug where the {@code altitude} value had bogus data (it was the same as
+{@code pitch10}). To distinguish between flight files generated with bogus
+altitude data and corrently generated flight files, the version was bumped.
 
 {@h4(id="v3") Version 3}
 
