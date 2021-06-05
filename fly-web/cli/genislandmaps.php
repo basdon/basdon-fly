@@ -31,41 +31,34 @@ foreach($db->query('SELECT filename FROM map WHERE ap='.$aptid)->fetchAll() as $
 	$filesize = filesize($filename);
 	if ($filesize < 32) {
 		echo "invalid map file: {$filename}";
-		continue;
+		exit(1);
 	}
 	$f = fopen($filename, 'rb');
 	if (!$f) {
 		echo "can't open: {$filename}";
-		continue;
+		exit(1);
 	}
 	$data = fread($f, $filesize);
 	fclose($f);
-	$data = unpack('C*', $data);
-	// the data array starts at index 1 for whatever reason
-	if ($data[4] != 3) {
-		echo 'invalid map version: '.$data[3];
-		continue;
+	if (ord($data[3]) != 3) {
+		echo "invalid map version for {$filename}: " . ord($data[3]) . "\n";
+		exit(1);
 	}
-	// assuming the map file is correctly structured
-	$numremoves = $data[5] | ($data[6] << 8) | ($data[7] << 16) | ($data[8] << 24);
-	$numobjects = $data[9] | ($data[10] << 8) | ($data[11] << 16) | ($data[12] << 24);
-	$numzones = $data[17] | ($data[18] << 8) | ($data[19] << 16) | ($data[20] << 24);
-	$offset = 1 /*remember data starts at 1 because php idk*/ + 32 + 20 * $numremoves;
+	$numremoves = unpack('V', substr($data, 4, 4))[1];
+	$numzones = unpack('V', substr($data, 16, 4))[1];
+	$offset = 32 + 20 * $numremoves;
 	while ($numzones--) {
-		$zd = new stdClass();
-		for ($i = 0; $i < 4; $i++) {
-			$int = $data[$offset] | ($data[$offset+1] << 8) | ($data[$offset+2] << 16) | ($data[$offset+3] << 24);
-			$zd->coords[$i] = unpack('f', pack('i', $int))[1];
-			$offset += 4;
-		}
-		$zd->color = $data[$offset] | ($data[$offset+1] << 8) | ($data[$offset+2] << 16) | ($data[$offset+3] << 24);
-		$zones[] = $zd;
-		$offset += 4;
-
-		if ($zd->coords[0] < $minx) $minx = $zd->coords[0];
-		if ($zd->coords[1] < $miny) $miny = $zd->coords[1];
-		if ($zd->coords[2] > $maxx) $maxx = $zd->coords[2];
-		if ($zd->coords[3] > $maxy) $maxy = $zd->coords[3];
+		$c = unpack('f4c/VV', substr($data, $offset, 20)); $offset += 20;
+		$zd = $zones[] = new stdClass();
+		$zd->minx = $c['c1'];
+		$zd->miny = $c['c2'];
+		$zd->maxx = $c['c3'];
+		$zd->maxy = $c['c4'];
+		$zd->color = $c['V'];
+		$minx = min($minx, $zd->minx);
+		$miny = min($miny, $zd->miny);
+		$maxx = max($maxx, $zd->maxx);
+		$maxy = max($maxy, $zd->maxy);
 	}
 }
 
@@ -115,7 +108,7 @@ foreach($zones as $z) {
 	if (!isset($colors[$z->color])) {
 		$colors[$z->color] = imagecolorallocate($im, $z->color & 0xFF, ($z->color >> 8) & 0xFF, ($z->color >> 16) & 0xFF);
 	}
-	imagefilledrectangle($im, xcoord($z->coords[0]), ycoord($z->coords[1]), xcoord($z->coords[2]), ycoord($z->coords[3]), $colors[$z->color]);
+	imagefilledrectangle($im, xcoord($z->minx), ycoord($z->miny), xcoord($z->maxx), ycoord($z->maxy), $colors[$z->color]);
 }
 
 ob_start();
