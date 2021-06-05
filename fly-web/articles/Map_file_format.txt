@@ -84,7 +84,7 @@ byte 40: number of materials (BYTE)
 size VARIABLE bytes
 
 total file size:
-32 + 20 * num_removed_buildings[A] + 20 * num_gangzones[B] + objectdata_size[D]
+32 + 20 * num_removed_buildings[A] + 20 * num_gangzones[C] + objectdata_size[D]
 </pre>
 
 {@h3(id="old") Old versions}
