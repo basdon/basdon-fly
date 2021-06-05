@@ -21,27 +21,11 @@
 	<div><div>
 		<p><a href="flights.php{@if $returnpage != -1}?page={@unsafe $returnpage}{@endif}">Flights</a> &gt; Flight #{@unsafe $id}</p>
 		<h2 id="main">Flight #{@unsafe $id} details</h2>
-<?php 
-try{
-	++$db_querycount;
-	$r = $db->query('SELECT _f.*,_u.name,_u.i,_a.n fromname,_a.c fromcode,_b.n toname,_b.c tocode,_v.m vehmodel ,_m.name fromgate,_n.name togate,_o.name ownername 
-	                 FROM flg _f 
-	                 JOIN usr _u ON _f.player=_u.i 
-	                 JOIN apt _a ON _f.fapt=_a.i 
-	                 JOIN apt _b ON _f.tapt=_b.i 
-	                 JOIN veh _v ON _f.vehicle=_v.i 
-	                 JOIN msp _m ON _f.fmsp = _m.i 
-	                 JOIN msp _n ON _f.tmsp = _n.i 
-	                 LEFT OUTER JOIN usr _o ON _v.ownerplayer=_o.i 
-	                 WHERE id=' . $id);
-	if ($r === false || ($r = $r->fetchAll()) === false || empty($r)) {
-		echo '<p>Flight not found (or something went wrong)!</p>';
-	} else {
-		$r = $r[0];
-?>
-		{@render flightstatuses.php}
-		{@render aircraftnames.php}
-		{@render missiontypes.php}
+	{@if !isset($r)}
+		<p>Flight not found (or something went wrong)!</p>
+	{@elseif $r == false}
+		<p style="color:#c22;">Failed to load flight info!</p>
+	{@else}
 		<div class="fl49">
 			<h3>Overview</h3>
 			<ul>
@@ -116,12 +100,7 @@ try{
 		<div id="fm_mapcanvas"><canvas id="fm_canvas" width="900" height="600" style="width:100%;border:1px solid"></canvas></div>
 		<script src="{@unsafe $STATICPATH}/gen/fm_complete.js?v13"></script>
 		<script>UTCoffset={@unsafe date('Z')};flightmap('{@unsafe $STATICPATH}', {@unsafe $id})</script>
-<?php 
-	}
-} catch (PDOException $e) {
-?>
-		<p style="color:#c22;">Failed to load flight info!</p>
-<?php } ?>
+	{@endif}
 	</div></div>
 	{@render defaultfooter.tpl}
 </body>
