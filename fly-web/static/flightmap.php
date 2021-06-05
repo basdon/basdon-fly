@@ -217,7 +217,7 @@ for ($i = 1; $i < $num_frames; $i++) {
 		$x = $ax + ($bx - $ax) * $t;
 		$y = $ay + ($by - $ay) * $t;
 		$c = colforhue($aa + ($ba - $aa) * $t);
-		imagefilledellipse($im, $x, $y, 5, 5, $c);
+		imagefilledellipse($im, $x, $y, 4, 4, $c);
 	}
 	$ax = $bx;
 	$ay = $by;
