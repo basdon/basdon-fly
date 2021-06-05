@@ -3,11 +3,6 @@
 require '../inc/conf.php';
 require '../inc/db.php';
 
-if (!isset($conf_maps_dir)) {
-	fwrite(STDERR, "warn: not generating island maps because 'conf_maps_dir' conf.php variable is not set\n");
-	exit();
-}
-
 $aptids = [];
 $aptcodes = [];
 foreach ($db->query('SELECT DISTINCT i,c FROM apt') as $r) {
@@ -72,7 +67,7 @@ $miny = 100000;
 $zones = [];
 
 foreach($db->query('SELECT filename FROM map WHERE ap=\''.$aptid.'\'')->fetchAll() as $maprow) {
-	$filename = "{$conf_maps_dir}/{$maprow->filename}.map";
+	$filename = "../../maps/{$maprow->filename}.map";
 	$filesize = filesize($filename);
 	if ($filesize < 32) {
 		echo "invalid map file: {$filename}";

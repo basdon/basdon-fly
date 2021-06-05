@@ -149,7 +149,7 @@ imagefilledrectangle($im, $x1, $y1, $x2, $y2, $fill);
 // read all minimap map files, draw ones that are in the viewport
 foreach (scandir('../../maps', SCANDIR_SORT_NONE) as $file) {
 	if (strpos($file, '_minimap.map') !== false) {
-		$filename = "{$conf_maps_dir}/{$file}";
+		$filename = "../../maps/{$file}";
 		$filesize = filesize($filename);
 		if ($filesize < 32) {
 			fwrite(STDERR, "invalid map file: {$filename}\n");
