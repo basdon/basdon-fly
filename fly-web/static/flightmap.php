@@ -139,51 +139,29 @@ $map_vsize_y += $dy * 2;
 $scale_x = $imgw / $map_vsize_x;
 $scale_y = $imgh / $map_vsize_y;
 
-// draw mainland
-$x1 = $scale_x * (-3000 - $minx);
-$y1 = $scale_y * (-3000 - $miny);
-$x2 = $scale_x * (3000 - $minx);
-$y2 = $scale_y * (3000 - $miny);
-imagefilledrectangle($im, $x1, $y1, $x2, $y2, $fill);
+// minimap and runway data
+eval('$data='.file_get_contents('../gen/islandmapdata.txt'));
 
-// read all minimap map files, draw ones that are in the viewport
-foreach (scandir('../../maps', SCANDIR_SORT_NONE) as $file) {
-	if (strpos($file, '_minimap.map') !== false) {
-		$filename = "../../maps/{$file}";
-		$filesize = filesize($filename);
-		if ($filesize < 32) {
-			fwrite(STDERR, "invalid map file: {$filename}\n");
-			exit(1);
-		}
-		$f = fopen($filename, 'rb');
-		if (!$f) {
-			fwrite(STDERR, "can't open: {$filename}\n");
-			exit(1);
-		}
-		$data = fread($f, $filesize);
-		fclose($f);
-		if (ord($data[3]) != 3) {
-			fwrite(STDERR, 'invalid map version: '.ord($data[3])."\n");
-			exit(1);
-		}
-		// assuming the map file is correctly structured
-		$numremoves = unpack('V', substr($data, 4, 4))[1];
-		$numzones = unpack('V', substr($data, 16, 4))[1];
-		$offset = 32 + 20 * $numremoves;
-		while ($numzones--) {
-			list(, $zminx, $zminy, $zmaxx, $zmaxy) = unpack('f4', substr($data, $offset, 16));
-			$zminy = -$zminy;
-			$zmaxy = -$zmaxy;
-			if ((($minx < $zminx && $zminx < $maxx) || ($minx < $zmaxx && $zmaxx < $maxx)) &&
-				(($miny < $zminy && $zminy < $maxy) || ($miny < $zmaxy && $zmaxy < $maxy)))
-			{
-				$x1 = $scale_x * ($zminx - $minx);
-				$y1 = $scale_y * ($zminy - $miny);
-				$x2 = $scale_x * ($zmaxx - $minx);
-				$y2 = $scale_y * ($zmaxy - $miny);
-				imagefilledrectangle($im, $x1, $y1, $x2, $y2, $fill);
-			}
-			$offset += 20;
+// draw minimap zones that are in the viewport
+for ($i = 1 + $data[0] * 5, $m = count($data); $i < $m;) {
+	$c = $data[$i];
+	$mx = $data[$i + 1];
+	$my = $data[$i + 2];
+	$i += 3;
+	while ($c--) {
+		$x1 = $mx + $data[$i];
+		$y1 = $my + $data[$i + 1];
+		$x2 = $mx + $data[$i + 2];
+		$y2 = $my + $data[$i + 3];
+		$i += 4;
+		if ((($minx < $x1 && $x1 < $maxx) || ($minx < $x2 && $x2 < $maxx)) &&
+			(($miny < $y1 && $y1 < $maxy) || ($miny < $y2 && $y2 < $maxy)))
+		{
+			$x1 = $scale_x * ($x1 - $minx);
+			$y1 = $scale_y * ($y1 - $miny);
+			$x2 = $scale_x * ($x2 - $minx);
+			$y2 = $scale_y * ($y2 - $miny);
+			imagefilledrectangle($im, $x1, $y1, $x2, $y2, $fill);
 		}
 	}
 }

@@ -1,4 +1,5 @@
 <?php
+// generate the island map images and html files for inclusion in articles
 
 require '../inc/conf.php';
 require '../inc/db.php';
@@ -10,51 +11,10 @@ foreach ($db->query('SELECT DISTINCT i,c FROM apt') as $r) {
 	$aptcodes[] = $r->c;
 }
 
-$flightmap_polydata = [];
-
-// runways
-$runways_by_airport = [];
-$numrunways = 0;
-$runwaydata = [];
-foreach($db->query('SELECT r.a,r.x,r.y,r.i,r.h,r.w,a.flags FROM rnw r JOIN apt a ON r.a=a.i WHERE r.type=1') as $r) {
-	if (!isset($runways_by_airport[$r->a])) {
-		$runways_by_airport[$r->a] = [];
-	}
-	if (isset($runways_by_airport[$r->a][$r->i])) {
-		$data = $runways_by_airport[$r->a][$r->i];
-		$dx = $data[1] - $r->x;
-		$dy = $data[2] - $r->y;
-		$runwaydata[] = (int) $data[0];
-		$runwaydata[] = (int) $data[1];
-		$runwaydata[] = (int) $data[2];
-		$runwaydata[] = (int) $data[3];
-		$runwaydata[] = (int) $data[4];
-		$runwaydata[] = round(sqrt($dx * $dx + $dy * $dy));
-		$numrunways++;
-	} else {
-		$runways_by_airport[$r->a][$r->i] = [$r->flags, $r->x, $r->y, $r->h, $r->w, 0];
-	}
-}
-$flightmap_polydata[] = $numrunways;
-foreach ($runwaydata as $r) {
-	$flightmap_polydata[] = $r;
-}
-
-// mainland
-$flightmap_polydata[] = 1;
-$flightmap_polydata[] = -3000;
-$flightmap_polydata[] = -3000;
-$flightmap_polydata[] = 0;
-$flightmap_polydata[] = 0;
-$flightmap_polydata[] = 6000;
-$flightmap_polydata[] = 6000;
-
 nextap:
 
 $aptid = array_pop($aptids);
 if ($aptid == null) {
-	$island_data = 'var fm_islands=' . json_encode($flightmap_polydata) . ';';
-	file_put_contents('../static/gen/islandmap_fm_islands.js', $island_data);
 	exit();
 }
 $aptcode = array_pop($aptcodes);
@@ -66,7 +26,7 @@ $miny = 100000;
 
 $zones = [];
 
-foreach($db->query('SELECT filename FROM map WHERE ap=\''.$aptid.'\'')->fetchAll() as $maprow) {
+foreach($db->query('SELECT filename FROM map WHERE ap='.$aptid)->fetchAll() as $maprow) {
 	$filename = "../../maps/{$maprow->filename}.map";
 	$filesize = filesize($filename);
 	if ($filesize < 32) {
@@ -114,16 +74,6 @@ if (count($zones) < 100 && $minx > -4000 && $maxx < 4000 && $miny > -4000 && $ma
 	// but those obviously aren't islands.
 	// Skip if there are too little amount of zones and it's within mainland boundaries.
 	goto nomapforthisap;
-}
-
-$flightmap_polydata[] = count($zones);
-$flightmap_polydata[] = round($minx);
-$flightmap_polydata[] = -round($miny);
-foreach ($zones as $zd) {
-	$flightmap_polydata[] = round($zd->coords[0] - $minx);
-	$flightmap_polydata[] = -round($zd->coords[1] - $miny);
-	$flightmap_polydata[] = round($zd->coords[2] - $minx);
-	$flightmap_polydata[] = -round($zd->coords[3] - $miny);
 }
 
 // this block is blindlessly copied from genaerodromechart

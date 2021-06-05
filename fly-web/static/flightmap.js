@@ -152,7 +152,7 @@ function flightmap(staticpath, id)
 		mc.fillRect(sidebar_width, 0, 900, 600);
 		/*Draw islands.*/
 		mc.fillStyle = '#ccc';
-		for (var i = 1 + fm_islands[0] * 6; i < fm_islands.length;) {
+		for (var i = 1 + fm_islands[0] * 5; i < fm_islands.length;) {
 			var count = fm_islands[i];
 			var mx = fm_islands[i + 1], my = fm_islands[i + 2];
 			i += 3;
@@ -172,12 +172,12 @@ function flightmap(staticpath, id)
 			x = map_pad_x + (x - minx) * map_scale;
 			y = map_pad_y + (y - miny) * map_scale;
 			mc.save();
-			mc.fillStyle = (fm_islands[i] & 1) ? '#0C88C0' : '#9C6B9F';
+			mc.fillStyle = (fm_islands[i] < 0) ? '#9C6B9F' : '#0C88C0';
 			mc.translate(x, y);
-			mc.rotate(fm_islands[i + 3] / 180 * Math.PI);
-			mc.fillRect(-w / 2, 0, w, -fm_islands[i + 5] * map_scale);
+			mc.rotate(Math.abs(fm_islands[i]) / 180 * Math.PI);
+			mc.fillRect(-w / 2, 0, w, -fm_islands[i + 3] * map_scale);
 			mc.restore();
-			i += 6;
+			i += 5;
 		}
 		mc.fillStyle = '#333';
 		mc.fillRect(0, 0, sidebar_width, 900);

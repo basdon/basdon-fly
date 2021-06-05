@@ -10,8 +10,8 @@ TEMPLATE_OBJECTS_PART := $(patsubst templates/%.tpl, gen/%.php, $(TEMPLATE_SOURC
 ARTICLE_SOURCES := $(wildcard articles/*.txt)
 ARTICLE_OBJECTS := $(patsubst articles/%.txt, gen/article_%.html, $(ARTICLE_SOURCES))
 
-.PHONY: templates aerodromcharts apfactsheets apvehicelist articles ensureplayergraph islandmaps flightmapjs clean cleantemplates cleanarticles airportlist navinfotable
-default: templates aerodromecharts apfactsheets apvehiclelist articles ensureplayergraph islandmaps flightmapjs airportlist navinfotable
+.PHONY: templates aerodromcharts apfactsheets apvehicelist articles ensureplayergraph islandmapdata islandmaps flightmapjs clean cleantemplates cleanarticles airportlist navinfotable
+default: templates aerodromecharts apfactsheets apvehiclelist articles ensureplayergraph islandmapdata islandmaps flightmapjs airportlist navinfotable
 
 inc/__settings.php: ../settings.ini cli/gensettings.php
 	cd cli && php gensettings.php
@@ -59,12 +59,16 @@ apvehiclelist: inc/__settings.php
 	rm -f gen/apvehiclelist*
 	cd cli && php genapvehiclelist.php
 
+islandmapdata:
+	rm -f gen/islandmapdata.txt
+	cd cli && php genislandmapdata.php
+
 islandmaps: inc/__settings.php
-	rm -f gen/islandmap*
+	rm -f gen/islandmap*.html
 	rm -f static/gen/islandmap*
 	cd cli && php genislandmaps.php
 
-flightmapjs: islandmaps inc/__settings.php
+flightmapjs: islandmapdata inc/__settings.php
 	rm -f static/gen/fm_complete.js
 	cd cli && php genflightmapjscomplete.php
 
