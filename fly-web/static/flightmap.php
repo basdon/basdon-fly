@@ -9,7 +9,7 @@ $imgh = 200;
 $im = imagecreatetruecolor($imgw, $imgh);
 $bg = imagecolorallocate($im, 100, 134, 164);
 $fill = imagecolorallocate($im, 204, 204, 204);
-//$rw = [imagecolorallocate($im, 156, 107, 159), imagecolorallocate($im, 12, 136, 192)];
+$rw = [imagecolorallocate($im, 12, 136, 192), imagecolorallocate($im, 156, 107, 159)];
 imagefilledrectangle($im, 0, 0, $imgw, $imgh, $bg);
 
 // prechecks
@@ -132,12 +132,22 @@ if ($mapxyratio > $imgw / $imgh) {
 $pad = 10;
 $dx = $map_vsize_x / $imgw * $pad;
 $minx -= $dx;
+$maxx += $dx;
 $map_vsize_x += $dx * 2;
 $dy = $map_vsize_y / $imgh * $pad;
 $miny -= $dy;
+$maxy += $dy;
 $map_vsize_y += $dy * 2;
 $scale_x = $imgw / $map_vsize_x;
 $scale_y = $imgh / $map_vsize_y;
+
+function is_in_viewport($x1, $y1, $x2, $y2)
+{
+	global $minx, $maxx, $miny, $maxy;
+
+	return ((($minx < $x1 && $x1 < $maxx) || ($minx < $x2 && $x2 < $maxx) || ($x1 < $minx && $x2 > $maxx)) &&
+		(($miny < $y1 && $y1 < $maxy) || ($miny < $y2 && $y2 < $maxy) || ($y1 < $miny && $y2 > $maxy)));
+}
 
 // minimap and runway data
 eval('$data='.file_get_contents('../gen/islandmapdata.txt'));
@@ -154,9 +164,7 @@ for ($i = 1 + $data[0] * 5, $m = count($data); $i < $m;) {
 		$x2 = $mx + $data[$i + 2];
 		$y2 = $my + $data[$i + 3];
 		$i += 4;
-		if ((($minx < $x1 && $x1 < $maxx) || ($minx < $x2 && $x2 < $maxx)) &&
-			(($miny < $y1 && $y1 < $maxy) || ($miny < $y2 && $y2 < $maxy)))
-		{
+		if (is_in_viewport($x1, $y1, $x2, $y2)) {
 			$x1 = $scale_x * ($x1 - $minx);
 			$y1 = $scale_y * ($y1 - $miny);
 			$x2 = $scale_x * ($x2 - $minx);
@@ -164,6 +172,35 @@ for ($i = 1 + $data[0] * 5, $m = count($data); $i < $m;) {
 			imagefilledrectangle($im, $x1, $y1, $x2, $y2, $fill);
 		}
 	}
+}
+
+// draw runways that are in the viewport
+$c = $data[0];
+$i = 1;
+while ($c--) {
+	$x = $data[$i + 1];
+	$y = -$data[$i + 2];
+	$l = $data[$i + 3];
+	// using $l will check for a way bigger area, but it's a quick cull check
+	if (is_in_viewport($x - $l, $y - $l, $x + $l, $y + $l)) {
+		$a = $data[$i];
+		$col = $rw[$a < 0];
+		$a = abs($a + 90) / 180 * pi();
+		$w = $data[$i + 4];
+		$xa = $l * cos($a);
+		$ya = $l * sin($a);
+		$a += pi() / 2;
+		$xb = $w * cos($a);
+		$yb = $w * sin($a);
+		$pts = [
+			$scale_x * ($x - $xa + $xb - $minx), $scale_y * ($y - $ya + $yb - $miny),
+			$scale_x * ($x - $xa - $xb - $minx), $scale_y * ($y - $ya - $yb - $miny),
+			$scale_x * ($x - $xb - $minx), $scale_y * ($y - $yb - $miny),
+			$scale_x * ($x + $xb - $minx), $scale_y * ($y + $yb - $miny),
+		];
+		imagefilledpolygon($im, $pts, 4, $col);
+	}
+	$i += 5;
 }
 
 // draw flight path

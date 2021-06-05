@@ -3,7 +3,7 @@
 // output is an array with whole numbers:
 // - first number is amount of runways, and for each runway:
 //   - number for heading/angle (deg), if negative it means it's untowered
-//   - two numbers for xy middle position
+//   - two numbers for xy (one end of the runway, extends in the direction of the heading/angle)
 //   - number for length
 //   - number for width
 // - then an indefinite amount of rectangle clusters with:
