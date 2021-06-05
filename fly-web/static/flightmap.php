@@ -6,7 +6,7 @@ header('Content-Type: image/png');
 // set up image
 $imgw = 400;
 $imgh = 200;
-$im = imagecreatetruecolor($imgw, $imgh);
+$im = imagecreate($imgw, $imgh);
 $bg = imagecolorallocate($im, 100, 134, 164);
 $fill = imagecolorallocate($im, 204, 204, 204);
 $rw = [imagecolorallocate($im, 12, 136, 192), imagecolorallocate($im, 156, 107, 159)];
@@ -103,15 +103,15 @@ function colforhue($hue)
 {
 	global $im;
 	static $cols = [];
-	$hueclamped = (int) ($hue * 253);
+	$hueclamped = (int) ($hue * 100);
 	if (isset($cols[$hueclamped])) {
 		return $cols[$hueclamped];
 	}
-	$hue = $hueclamped / 253;
+	$hue = $hueclamped / 100;
 	$r = huestuff($hue + 1/3);
 	$g = huestuff($hue);
 	$b = huestuff($hue - 1/3);
-	return $cols[$hueclamped] = [imagecolorallocate($im, $r, $g, $b), imagecolorallocatealpha($im, $r, $g, $b, 80)];
+	return $cols[$hueclamped] = imagecolorallocate($im, $r, $g, $b);
 }
 
 // calculate viewport
@@ -217,8 +217,7 @@ for ($i = 1; $i < $num_frames; $i++) {
 		$x = $ax + ($bx - $ax) * $t;
 		$y = $ay + ($by - $ay) * $t;
 		$c = colforhue($aa + ($ba - $aa) * $t);
-		imagefilledellipse($im, $x, $y, 3, 3, $c[0]);
-		imagefilledellipse($im, $x, $y, 5, 5, $c[1]);
+		imagefilledellipse($im, $x, $y, 5, 5, $c);
 	}
 	$ax = $bx;
 	$ay = $by;
@@ -227,6 +226,5 @@ for ($i = 1; $i < $num_frames; $i++) {
 
 // output
 output:
-imagetruecolortopalette($im, /*dither*/ false, /*num_colors*/ 20);
 imagepng($im);
 imagedestroy($im);
