@@ -472,16 +472,22 @@ static char aircraftmodelindex[VEHICLE_MODEL_TOTAL];
 #include "playerstats.h"
 #include "vehicles.h"
 #include <alloca.h>
+#include <errno.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define __USE_POSIX /*for sigaction and others*/
+#include <signal.h>
+#undef __USE_POSIX
 #include <sys/mman.h>
+#include <sys/types.h> /*for pid_t*/
 #include <time.h>
 #define __USE_MISC /*for getpagesize()*/
 #include <unistd.h>
 #undef __USE_MISC
+extern char **environ; /*see 'man environ'*/
 
 /*TODO remove these*/
 static void zones_update(int playerid, struct vec3 pos);
@@ -491,6 +497,7 @@ static void nav_reset_for_vehicle(int vehicleid);
 
 static unsigned short nametags_max_distance[MAX_PLAYERS];
 
+#include "conf.c"
 #include "memstuff.c"
 #include "natives.c"
 #include "samp.c"
@@ -506,6 +513,7 @@ static unsigned short nametags_max_distance[MAX_PLAYERS];
 #include "airport.c"
 #include "protips.c"
 
+#include "discordflightlog.c"
 #include "ui.c"
 #include "score.c"
 #include "admin.c"
@@ -574,6 +582,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 #endif
 	samp_init();
 	textdraws_init();
+	conf_load();
 
 	cmd_init();
 	game_sa_init();

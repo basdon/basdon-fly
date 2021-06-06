@@ -21,3 +21,5 @@ $CSS_SUFFIX = 'css';
 // don't enable this in production
 $__REPARSE__ = false;
 
+// Discord webhook url to post flight messages in a Discord channel (edit channel, integrations, create webhook)
+//$DISCORD_FLIGHTLOG_WEBHOOK = 'https://discord.com/api/webhooks/yada/yada';

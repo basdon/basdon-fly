@@ -186,6 +186,9 @@ Installation/configuration
 		Makefile.
 
 	server:
+		Copy server/conf.sample.ini to server/conf.ini and edit as
+		needed.
+
 		When running, the server.cfg file is created from combining:
 
 			servercfg-common.cfg

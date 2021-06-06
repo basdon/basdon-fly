@@ -129,6 +129,7 @@ exit:
 	changelog_init();
 	class_init();
 	dialog_init();
+	discordflightlog_init();
 	heartbeat_create_session();
 	help_init();
 	maps_init();

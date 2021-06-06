@@ -546,6 +546,12 @@ active_msp_changed:
 }
 
 static
+void cb_missions_flight_finish_query_done(void *data)
+{
+	discordflightlog_trigger((int) data);
+}
+
+static
 void missions_dispose()
 {
 	free(td_jobhelp_keyhelp.rpcdata);
@@ -831,16 +837,17 @@ static
 void missions_end_unfinished(int playerid, int reason)
 {
 	struct MISSION *mission;
+	char query[1024];
 
 	mission = activemission[playerid];
-	csprintf(buf144,
+	sprintf(query,
 	        "UPDATE flg "
 		"SET state=%d,tlastupdate=UNIX_TIMESTAMP(),adistance=%f "
 		"WHERE id=%d",
 	        reason,
 		mission->actualdistanceM,
 	        mission->id);
-	NC_mysql_tquery_nocb(buf144a);
+	common_mysql_tquery(query, cb_missions_flight_finish_query_done, (void*) mission->id);
 
 	missions_cleanup(playerid);
 }
@@ -1218,7 +1225,7 @@ int missions_after_unload(void *data)
 	}
 	SendClientMessageToBatch(missionmsg_playerids, num_missionmsg_playerids, COL_MISSION, cbuf4096);
 
-	csprintf(buf4096,
+	sprintf(cbuf4096_,
 		"UPDATE flg SET tunload=UNIX_TIMESTAMP(),"
 		"tlastupdate=UNIX_TIMESTAMP(),"
 		"state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
@@ -1240,7 +1247,7 @@ int missions_after_unload(void *data)
 		paymp,
 		miss->damagetaken,
 		miss->id);
-	NC_mysql_tquery_nocb(buf4096a);
+	common_mysql_tquery(cbuf4096_, cb_missions_flight_finish_query_done, (void*) miss->id);
 
 	dialog_init_info(&dialog);
 	dialoginfo = dialog.info;

@@ -58,3 +58,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 May 30', 'New destination: Angel Pine Airstrip (PINE)');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Jun 06', 'Finished flights will now be posted in the #flight-log channel on our Discord server');

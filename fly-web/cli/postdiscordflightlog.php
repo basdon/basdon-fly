@@ -1,0 +1,94 @@
+<?php
+/*This is ran from the plugin whenever a flight is finished, and will send a message to Discord.
+See also fly-plugin/discordflightlog.c*/
+
+include('../inc/conf.php');
+
+if (!isset($DISCORD_FLIGHTLOG_WEBHOOK)) {
+	exit(0);
+}
+
+include('../inc/db.php');
+
+if ($argc < 2) {
+	echo "missing id argument\n";
+	exit(1);
+}
+
+try {
+	$id = (int) $argv[1];
+	$r = $db->query(
+		'SELECT _f.*,_u.name,_u.i,_a.n fromname,_a.c fromcode,_b.n toname,_b.c tocode,_v.m vehmodel,
+		       _m.name fromgate,_n.name togate,_o.name ownername
+		FROM flg _f
+		JOIN usr _u ON _f.player=_u.i
+		JOIN apt _a ON _f.fapt=_a.i
+		JOIN apt _b ON _f.tapt=_b.i
+		JOIN veh _v ON _f.vehicle=_v.i
+		JOIN msp _m ON _f.fmsp = _m.i
+		JOIN msp _n ON _f.tmsp = _n.i
+		LEFT OUTER JOIN usr _o ON _v.ownerplayer=_o.i
+		WHERE id='.$id
+	);
+	if ($r === false || ($r = $r->fetchAll()) === false || empty($r)) {
+		echo "flight does not exist\n";
+		exit(1);
+	}
+} catch (PDOException $e) {
+	echo "failed: {$e->getMessage()}\n";
+	exit(1);
+}
+
+include('../templates/flightstatuses.php');
+include('../templates/missiontypes.php');
+include('../templates/aircraftnames.php');
+$r = $r[0];
+if ($r->missiontype & $passenger_mission_types) {
+	$satisfaction = ':ok_hand: ' . $r->satisfaction . '% passenger satisfaction';
+} else {
+	$satisfaction = 'cargo flight';
+}
+$status = fmt_flight_status($r->state, $r->tload);
+$diff = $r->tlastupdate - $r->tstart;
+$duration = sprintf('%02d:%02d', floor($diff / 60), $diff % 60);
+$vehname = aircraft_name($r->vehmodel);
+$distance = round($r->adistance);
+
+$embed = new stdClass();
+$embed->title = "Flight #{$id} by {$r->name} ({$status})";
+$embed->url = $BASEPATH.'/flight.php?id='.$id;
+$embed->image = new stdClass();
+$embed->image->url = $STATICPATH.'/flightmap.php?id='.$id;
+$from = new stdClass();
+$from->name = 'From';
+$from->value = "[{$r->fromname} ($r->fromcode)]({$BASEPATH}/article.php?title={$r->fromcode}) {$r->fromgate}";
+$from->inline = true;
+$to = new stdClass();
+$to->name = 'To';
+$to->value = "[{$r->toname} ($r->tocode)]({$BASEPATH}/article.php?title={$r->tocode}) {$r->togate}";
+$to->inline = true;
+$details = new stdClass();
+$details->name = 'Details';
+$details->value = ":straight_ruler: {$distance}m :stopwatch: {$duration} :airplane: {$vehname}\n:hearts: {$r->damage} damage taken\n{$satisfaction}";
+$embed->fields = [$from, $to, $details];
+/*The normal status colors are very light (because they're background),
+but these must be pretty strong for the discord embed card (73 saturation instead of 12).*/
+switch ($r->state) {
+case 1: $embed->color = 0x4444ff; break;
+case 2: $embed->color = 0xff4444; break;
+case 4: $embed->color = 0xff4444; break;
+case 8: $embed->color = 0x44ff44; break;
+case 16: $embed->color = 0xff9123; break;
+case 32: $embed->color = 0xff4444; break;
+case 64: $embed->color = 0xa144ff; break;
+}
+
+$content = new stdClass();
+$content->embeds = [$embed];
+fclose(fopen($DISCORD_FLIGHTLOG_WEBHOOK, 'r', false, stream_context_create([
+	'http' => [
+		'method' => 'POST',
+		'header' => 'Content-Type: application/json',
+		'content' => json_encode($content),
+	]
+])));
