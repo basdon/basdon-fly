@@ -56,12 +56,3 @@ int time_elapsed_millis()
 	last_value = now;
 	return diff;
 }
-
-/**
-Sleep.
-*/
-static
-void time_sleep(int millis)
-{
-	usleep(millis * 1000);
-}

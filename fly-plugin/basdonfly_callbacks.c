@@ -86,7 +86,6 @@ exit:
 		buf32[0] = 'e'; buf32[1] = 'x'; buf32[2] = 'i'; buf32[3] = 't';
 		buf32[4] = 0;
 		NC_SendRconCommand(buf32a);
-		time_sleep(10000);
 		return 1;
 
 	}
