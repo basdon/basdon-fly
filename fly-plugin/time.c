@@ -1,20 +1,3 @@
-
-#define ISWIN defined __WIN32__ || defined _WIN32 || defined WIN32
-
-#if ISWIN
-#include <windows.h>
-#include <stdio.h>
-#else
-/*__USE_BSD for usleep (server)*/
-#define __USE_BSD
-/*__USE_BSD for usleep (desktop)*/
-#define __USE_MISC
-#include <unistd.h>
-#undef __USE_BSD
-#undef __USE_MISC
-#include <sys/time.h>
-#endif
-
 /**
 Timestamp value when time_init was called.
 */
@@ -30,9 +13,6 @@ Get amount of elapsed milliseconds since time_init was called.
 static
 unsigned long time_timestamp()
 {
-#if ISWIN
-	return (unsigned long) timeGetTime() - initial_value;
-#else
 	unsigned long value;
 	struct timeval tv;
 
@@ -40,7 +20,6 @@ unsigned long time_timestamp()
 	value = (unsigned long) (tv.tv_sec * 1000L);
 	value += (unsigned long) (tv.tv_usec / 1000L);
 	return value - initial_value;
-#endif
 }
 
 /**
@@ -50,9 +29,6 @@ static
 void time_init()
 {
 	if (!initial_value) {
-#if ISWIN
-		timeBeginPeriod(1);
-#endif
 		initial_value = time_timestamp();
 		last_value = 0;
 	}
@@ -87,9 +63,5 @@ Sleep.
 static
 void time_sleep(int millis)
 {
-#if ISWIN
-	Sleep(millis);
-#else
 	usleep(millis * 1000);
-#endif
 }

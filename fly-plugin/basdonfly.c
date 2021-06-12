@@ -482,10 +482,13 @@ static char aircraftmodelindex[VEHICLE_MODEL_TOTAL];
 #include <signal.h>
 #undef __USE_POSIX
 #include <sys/mman.h>
+#include <sys/time.h> /*for gettimeofday() and struct timeval*/
 #include <sys/types.h> /*for pid_t*/
 #include <time.h>
-#define __USE_MISC /*for getpagesize()*/
+#define __USE_MISC /*for getpagesize() and usleep() (dev)*/
+#define __USE_BSD /*for getpagesize() and usleep() (server)*/
 #include <unistd.h>
+#undef __USE_BSD
 #undef __USE_MISC
 #include <wait.h>
 extern char **environ; /*see 'man environ'*/
