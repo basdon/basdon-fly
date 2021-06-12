@@ -617,6 +617,7 @@ void timecyc_tick()
 	unsigned long nowtime;
 	int idx, playerid;
 	struct vec3 pos;
+	char rcon_cmd[100];
 
 	nowtime = time_timestamp();
 	if (nowtime - lasttime > 1000) {
@@ -639,12 +640,8 @@ timer30s:
 			/*timer30s*/
 			heartbeat_timed_update();
 		}
-		csprintf(buf144,
-			"worldtime %02d:%02d %s",
-			time_h,
-			time_m,
-			weather_descriptions[weather.current]);
-		NC_SendRconCommand(buf144a);
+		sprintf(rcon_cmd, "worldtime %02d:%02d %s", time_h, time_m, weather_descriptions[weather.current]);
+		SendRconCommand(rcon_cmd);
 		/*timer1000*/
 		veh_timed_1s_update();
 

@@ -45,6 +45,14 @@ void SetConsoleVariableString(char *variable_name, char *value)
 }
 
 static
+void SendRconCommand(char *command)
+{
+#ifndef NO_CAST_IMM_FUNCPTR
+	((void (*)(void*,char*))0x809FBD0)(samp_pConsole, command);
+#endif
+}
+
+static
 void SendRPCToPlayer(int playerid, int rpc, void *rpcdata, int size_bytes, int unk)
 {
 	struct BitStream bs;

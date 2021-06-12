@@ -24,12 +24,8 @@ static AMX_NATIVE n_GivePlayerMoney_;
 static AMX_NATIVE n_GivePlayerWeapon;
 static AMX_NATIVE n_IsValidVehicle;
 static AMX_NATIVE n_Kick_;
-static AMX_NATIVE n_MoveObject;
 static AMX_NATIVE n_PutPlayerInVehicle_;
-static AMX_NATIVE n_RemoveBuildingForPlayer;
 static AMX_NATIVE n_ResetPlayerMoney_;
-static AMX_NATIVE n_SHA256_PassHash;
-static AMX_NATIVE n_SendRconCommand;
 static AMX_NATIVE n_SetCameraBehindPlayer;
 static AMX_NATIVE n_SetPlayerCameraPos;
 static AMX_NATIVE n_SetPlayerCameraLookAt;
@@ -61,7 +57,6 @@ static AMX_NATIVE n_cache_get_row_count;
 static AMX_NATIVE n_cache_get_row_float;
 static AMX_NATIVE n_cache_get_row_int;
 static AMX_NATIVE n_cache_insert_id;
-static AMX_NATIVE n_gpci;
 static AMX_NATIVE n_mysql_connect;
 static AMX_NATIVE n_mysql_close;
 static AMX_NATIVE n_mysql_errno;
@@ -173,14 +168,6 @@ static cell tmpfloat;
 
 #define NC_PutPlayerInVehicle __USE__natives_PutPlayerInVehicle__
 
-#define NC_SHA256_PassHash(INPUT,SALT,DEST,MAXLEN) \
-	(NC_PARS_(4)nc_params[1]=INPUT,nc_params[2]=SALT,\
-	nc_params[3]=DEST,nc_params[4]=MAXLEN,\
-	n_SHA256_PassHash(amx,nc_params))
-
-#define NC_SendRconCommand(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
-	n_SendRconCommand(amx,nc_params))
-
 #define NC_SetCameraBehindPlayer(PLAYERID) \
 	(NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_SetCameraBehindPlayer(amx,nc_params))
@@ -262,10 +249,6 @@ static cell tmpfloat;
 #define NC_cache_insert_id() (NC_PARS_(0)\
 	n_cache_insert_id(amx,nc_params))
 
-#define NC_gpci(PLAYERID,BUF,LEN) (NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=BUF,nc_params[3]=LEN,\
-	n_gpci(amx,nc_params))
-
 #define NC_mysql_errno() (NC_PARS_(1)nc_params[1]=1,\
 	n_mysql_errno(amx,nc_params))
 
@@ -343,12 +326,8 @@ int natives_find()
 		N(GivePlayerWeapon),
 		N(IsValidVehicle),
 		N_(Kick),
-		N(MoveObject),
 		N_(PutPlayerInVehicle),
-		N(RemoveBuildingForPlayer),
 		N_(ResetPlayerMoney),
-		N(SHA256_PassHash),
-		N(SendRconCommand),
 		N(SetCameraBehindPlayer),
 		N(SetPlayerCameraPos),
 		N(SetPlayerCameraLookAt),
@@ -380,7 +359,6 @@ int natives_find()
 		N(cache_get_row_float),
 		N(cache_get_row_int),
 		N(cache_insert_id),
-		N(gpci),
 		N(mysql_connect),
 		N(mysql_close),
 		N(mysql_errno),

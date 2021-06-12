@@ -83,9 +83,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	if ((mysql_errno = NC_mysql_errno())) {
 		logprintf("db errno %d", mysql_errno);
 exit:
-		buf32[0] = 'e'; buf32[1] = 'x'; buf32[2] = 'i'; buf32[3] = 't';
-		buf32[4] = 0;
-		NC_SendRconCommand(buf32a);
+		SendRconCommand("exit");
 		return 1;
 
 	}
@@ -134,9 +132,10 @@ exit:
 static
 int set_minconnectiontime(void *data)
 {
-	minconnectiontime = (int) data;
-	csprintf(buf144, "minconnectiontime %d", minconnectiontime);
-	NC_SendRconCommand(buf144a);
+	char buf[100];
+
+	sprintf(buf, "minconnectiontime %d", (int) data);
+	SendRconCommand(buf);
 	return TIMER_NO_REPEAT;
 }
 

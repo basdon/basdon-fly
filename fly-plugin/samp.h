@@ -252,11 +252,15 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, created, 0x2014);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, vehicles, 0x3F54);
 
 struct SampPlayerPool {
-	int _pad0[37503];
+	int _pad0[5003];
+	char gpci[101][1000];
+	int _pad1D8B4[7250];
 	int created[1000];
 	struct SampPlayer *players[1000];
 	/*Incomplete.*/
 };
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, gpci, 0x4E2C);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, _pad1D8B4, 0x1D8B4);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, created, 0x249FC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, players, 0x2599C);
 

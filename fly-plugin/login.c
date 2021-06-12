@@ -388,14 +388,12 @@ alreadyin:
 	}
 
 	if (userid[playerid] > 0) {
-		NC_gpci(playerid, buf64a, 64);
-		ctoai(cbuf64);
 		csprintf(buf4096,
 			"INSERT INTO gpci(u,v,c,first,last) "
 			"VALUES(%d,'%s',1,UNIX_TIMESTAMP(),UNIX_TIMESTAMP()) "
 			"ON DUPLICATE KEY UPDATE c=c+1,last=UNIX_TIMESTAMP()",
 			userid[playerid],
-			cbuf64);
+			samp_pNetGame->playerPool->gpci[playerid]);
 		NC_mysql_tquery_nocb(buf4096a);
 	}
 
