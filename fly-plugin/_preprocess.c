@@ -19,7 +19,7 @@ static
 int generate_settings_from_ini_file()
 {
 	FILE *in, *out;
-	char line[1024];
+	char line[1024], *c;
 
 	in = checked_fopen("../settings.ini", "r");
 	if (!in) {
@@ -33,7 +33,16 @@ int generate_settings_from_ini_file()
 	}
 
 	while (fgets(line, sizeof(line), in)) {
-		if (line[0] && line[0] != '\n' && line[0] != '#') {
+		if (line[0] && line[0] != '\n' && line[0] != ';') {
+			c = strstr(line, "=");
+			if (!c) {
+				puts("settings.ini: wrong format (expected key=value):");
+				puts(line);
+				fclose(in);
+				fclose(out);
+				return 1;
+			}
+			*c = ' ';
 			fwrite("#define SETTING__", 17, 1, out);
 			fputs(line, out);
 		}

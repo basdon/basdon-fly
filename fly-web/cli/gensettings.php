@@ -6,13 +6,8 @@ if ($lines === false) {
 }
 $content = "<?php\n";
 foreach ($lines as $line) {
-	if ($line[0] != '#') {
-		$idx = strpos($line, ' ');
-		if ($idx === false) {
-			echo "invalid settings.ini line: $line";
-			exit(1);
-		}
-		$content .= '$SETTING__' . substr($line, 0, $idx) . '=' . substr($line, $idx + 1) . ";\n";
+	if ($line[0] != ';') {
+		$content .= '$SETTING__' . $line . ";\n";
 	}
 }
 if (file_put_contents('../inc/__settings.php', $content) === false) {

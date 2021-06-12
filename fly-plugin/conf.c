@@ -13,8 +13,8 @@ void conf_load()
 	/*Check usages when adjusting this.*/
 	conf_mysql_pw = (conf_mysql_db = (conf_mysql_user = malloc(2048 * 3)) + 2048) + 2048;
 	while (fgets(line, sizeof(line) - 1, f)) {
-		if (line[0] && line[0] != '\n' && line[0] != '#') {
-			val = strstr(line, " ");
+		if (line[0] && line[0] != '\n' && line[0] != ';') {
+			val = strstr(line, "=");
 			key_len = val - line;
 			if (!val || key_len <= 0) {
 				val = alloca(1000);
