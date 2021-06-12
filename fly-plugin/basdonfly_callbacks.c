@@ -46,7 +46,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	unsigned long t;
 	int mysql_errno;
 
-	samp_pNetGame = *(struct SampNetGame**) 0x81CA4BC;
+	samp_init();
 
 	t = time_timestamp();
 
@@ -433,20 +433,7 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerUpdate(AMX *amx, cell *params)
 {
-	const int playerid = PARAM(1);
-
-	if (kick_update_delay[playerid] > 0) {
-		if (--kick_update_delay[playerid] == 0) {
-			NC_PARS(1);
-			nc_params[1] = playerid;
-			NC(n_Kick_);
-		}
-		return 0;
-	}
-	playerstats_on_player_update(playerid);
-	timecyc_on_player_update(playerid);
-
-	lastvehicle_asdriver[playerid] = 0; /*This will be set again at the end of hook_OnDriverSync.*/
+	samp_OnPlayerUpdate(PARAM(1));
 	return 1;
 }
 

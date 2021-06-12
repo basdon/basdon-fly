@@ -554,10 +554,9 @@ static unsigned short nametags_max_distance[MAX_PLAYERS];
 #endif /*DEV*/
 
 #include "cmd.c"
-#include "basdonfly_callbacks.c"
-
 #define SAMP_NATIVES_IMPL
 #include "samp.c"
+#include "basdonfly_callbacks.c"
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {
@@ -584,7 +583,6 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 #ifdef DEV
 	sampasm_sanitycheck();
 #endif
-	samp_init();
 	textdraws_init();
 	conf_load();
 

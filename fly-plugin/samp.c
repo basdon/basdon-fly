@@ -2,6 +2,8 @@
 
 struct SampNetGame *samp_pNetGame;
 
+static void* samp_pConsole;
+
 static unsigned char vehicle_gear_state[MAX_VEHICLES];
 static int vehicle_gear_change_time[MAX_VEHICLES];
 
@@ -38,7 +40,7 @@ static
 void SetConsoleVariableString(char *variable_name, char *value)
 {
 #ifndef NO_CAST_IMM_FUNCPTR
-	((void (*)(void*,char*,char*))0x80A0110)(*(int**)0x81CA4B8, variable_name, value);
+	((void (*)(void*,char*,char*))0x80A0110)(samp_pConsole, variable_name, value);
 #endif
 }
 
@@ -1018,6 +1020,26 @@ void natives_SpawnPlayer(int playerid)
 #ifdef SAMP_NATIVES_IMPL
 static int player_keystates[MAX_PLAYERS];
 
+static
+void samp_OnPlayerUpdate(int playerid)
+{
+	if (kick_update_delay[playerid] > 0) {
+		if (--kick_update_delay[playerid] == 0) {
+			NC_PARS(1);
+			nc_params[1] = playerid;
+			NC(n_Kick_);
+		}
+		player[playerid]->updateSyncType = 0; /*Reject update, equivalent to 'return 0' in OnPlayerUpdate.*/
+		return;
+	}
+	playerstats_on_player_update(playerid);
+	timecyc_on_player_update(playerid);
+
+	lastvehicle_asdriver[playerid] = 0; /*This will be set again at the end of hook_OnDriverSync.*/
+
+	/*When wanting to return 0, set CPlayer::updateSyncType to 0.*/
+}
+
 void hook_OnOnfootSync(int playerid)
 {
 	struct SYNCDATA_Onfoot *data;
@@ -1045,9 +1067,7 @@ void hook_OnOnfootSync(int playerid)
 	}
 
 	/*TODO remove this when all OnPlayerUpdates are replaced*/
-	/*this is 3 because.. see PARAM definition*/
-	nc_params[3] = playerid;
-	B_OnPlayerUpdate(amx, nc_params);
+	samp_OnPlayerUpdate(playerid);
 
 	/*When wanting to return 0, set CPlayer::updateSyncType to 0.*/
 }
@@ -1116,9 +1136,7 @@ void hook_OnDriverSync(int playerid)
 	storedlastvehicleid = lastvehicle_asdriver[playerid]; /*storing this because OnPlayerUpdate resets it to 0*/
 
 	/*TODO remove this when all OnPlayerUpdates are replaced*/
-	/*this is 3 because.. see PARAM definition*/
-	nc_params[3] = playerid;
-	B_OnPlayerUpdate(amx, nc_params);
+	samp_OnPlayerUpdate(playerid);
 
 	lastvehicle_asdriver[playerid] = data->vehicle_id; /*always write this because OnPlayerUpdate resets it to 0*/
 	if (storedlastvehicleid != data->vehicle_id) {
@@ -1150,9 +1168,7 @@ void hook_OnPassengerSync(int playerid)
 	}
 
 	/*TODO remove this when all OnPlayerUpdates are replaced*/
-	/*this is 3 because.. see PARAM definition*/
-	nc_params[3] = playerid;
-	B_OnPlayerUpdate(amx, nc_params);
+	samp_OnPlayerUpdate(playerid);
 
 	/*When wanting to return 0, set CPlayer::updateSyncType to 0.*/
 }
@@ -1160,6 +1176,8 @@ void hook_OnPassengerSync(int playerid)
 static
 void samp_init()
 {
+	samp_pNetGame = *(struct SampNetGame**) 0x81CA4BC;
+	samp_pConsole = *(int**) 0x81CA4B8;
 	/*Remove filtering in chat messages coming from clients.*/
 	/*OnPlayerText*/
 	mem_protect(0x80B0760, 0x14, PROT_READ | PROT_WRITE | PROT_EXEC);
