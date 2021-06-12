@@ -32,9 +32,9 @@ void conf_load()
 				target = conf_mysql_pw;
 			} else {
 				val = alloca(1000);
-				sprintf(val, "conf.ini: unknown config key: %s", line);
+				sprintf(val, "warn: conf.ini: unknown config key: %s", line);
 				logprintf(val);
-				abort();
+				continue;
 			}
 			val++;
 			while (*val != 0 && *val != '\n') {
