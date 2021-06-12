@@ -120,7 +120,6 @@ NATIVE_ENTRY mysql_escape_string
 NATIVE_ENTRY mysql_log
 NATIVE_ENTRY mysql_query
 NATIVE_ENTRY mysql_tquery
-NATIVE_ENTRY mysql_unprocessed_queries
 // ssocket
 NATIVE_ENTRY ssocket_connect
 NATIVE_ENTRY ssocket_create

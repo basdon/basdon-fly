@@ -69,7 +69,6 @@ static AMX_NATIVE n_mysql_escape_string;
 static AMX_NATIVE n_mysql_log;
 static AMX_NATIVE n_mysql_query;
 static AMX_NATIVE n_mysql_tquery;
-static AMX_NATIVE n_mysql_unprocessed_queries;
 static AMX_NATIVE n_ssocket_connect;
 static AMX_NATIVE n_ssocket_create;
 static AMX_NATIVE n_ssocket_destroy;
@@ -389,7 +388,6 @@ int natives_find()
 		N(mysql_log),
 		N(mysql_query),
 		N(mysql_tquery),
-		N(mysql_unprocessed_queries),
 		N(random),
 		N(ssocket_connect),
 		N(ssocket_create),

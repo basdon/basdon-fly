@@ -21,8 +21,6 @@ cell AMX_NATIVE_CALL B_OnCallbackHit(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 {
-	unsigned long starttime;
-
 	missions_dispose();
 	jobmap_dispose();
 	airports_destroy();
@@ -35,23 +33,8 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 	while (veh_commit_next_vehicle_odo_to_db());
 	veh_dispose();
 
-	/*mysql_close might actually already wait for queued queries so maybe
-	this can be removed...*/
 	NC_PARS(1);
 	nc_params[1] = 1;
-	if (NC(n_mysql_unprocessed_queries)) {
-		logprintf("waiting on queries before exiting");
-		starttime = time_timestamp();
-		do {
-			if (time_timestamp() - starttime > 10000) {
-				logprintf("taking > 10s, fuckit");
-				goto fuckit;
-			}
-			time_sleep(500);
-		} while (NC(n_mysql_unprocessed_queries));
-		logprintf("done");
-	}
-fuckit:
 	NC(n_mysql_close);
 	return 1;
 }
