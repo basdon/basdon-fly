@@ -38,6 +38,7 @@ void discordflightlog_init()
 			status = WEXITSTATUS(status);
 			if (!status) {
 				/*Check OK*/
+				dfl_enabled = 1;
 				/*Do not transform children into zombies when they terminate.*/
 				sigemptyset(&action.sa_mask);
 				action.sa_handler = SIG_IGN;
@@ -53,7 +54,6 @@ void discordflightlog_init()
 	} else {
 		logprintf("discordflightlog: PHP_PATH missing in conf.ini, disabling");
 	}
-	dfl_enabled = 0;
 }
 
 static
