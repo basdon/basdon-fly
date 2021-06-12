@@ -487,6 +487,7 @@ static char aircraftmodelindex[VEHICLE_MODEL_TOTAL];
 #define __USE_MISC /*for getpagesize()*/
 #include <unistd.h>
 #undef __USE_MISC
+#include <wait.h>
 extern char **environ; /*see 'man environ'*/
 
 /*TODO remove these*/
