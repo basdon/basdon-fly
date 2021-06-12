@@ -44,9 +44,7 @@ static
 cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 {
 	unsigned long t;
-	FILE *mysqldat;
-	char mysqlcreds[1000], *m;
-	int mysql_errno, usrlen, dblen, pwlen, mysqllen;
+	int mysql_errno;
 
 	samp_pNetGame = *(struct SampNetGame**) 0x81CA4BC;
 
@@ -54,30 +52,16 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 
 	memset(spawned, 0, sizeof(spawned));
 
-	if (!(mysqldat = fopen("scriptfiles/mysql.dat", "rb"))) {
-		logprintf("cannot read mysql.dat");
-		goto exit;
-	}
-	mysqllen = fread(mysqlcreds, 1, 1000, mysqldat);
-	fclose(mysqldat);
-	usrlen = *((int*) &mysqlcreds);
-	dblen = *(((int*) &mysqlcreds) + 1);
-	pwlen = *(((int*) &mysqlcreds) + 2);
-	if (mysqllen != 12 + usrlen + dblen + pwlen) {
-		logprintf("invalid mysql.dat format");
-		goto exit;
-	}
+	assert(conf_mysql_user && conf_mysql_db && conf_mysql_pw);
 
-	m = mysqlcreds + 12;
-	memcpy(cbuf32, m, usrlen);
-	*((int*) (cbuf32 + usrlen)) = 0;
-	m += usrlen;
-	memcpy(cbuf32_1, m, dblen);
-	*((int*) (cbuf32_1 + dblen)) = 0;
-	m += dblen;
-	memcpy(cbuf144, m, pwlen);
-	*((int*) (cbuf144 + pwlen)) = 0;
 	atoc(buf64, "127.0.0.1", 64);
+	atoc(buf32, conf_mysql_user, 32);
+	atoc(buf144, conf_mysql_db, 144);
+	atoc(buf4096, conf_mysql_pw, 4096);
+
+	/*See conf.c*/
+	memset(conf_mysql_user, 0, 2048 * 3);
+	free(conf_mysql_user);
 
 	NC_PARS(2);
 	nc_params[1] = 1 | 2; /*LOG_ERROR | LOG_WARNING*/
@@ -87,8 +71,8 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	NC_PARS(7);
 	nc_params[1] = buf64a; /*host*/
 	nc_params[2] = buf32a; /*user*/
-	nc_params[3] = buf32_1a; /*database*/
-	nc_params[4] = buf144a; /*password*/
+	nc_params[3] = buf144a; /*database*/
+	nc_params[4] = buf4096a; /*password*/
 	nc_params[5] = 3306;
 	nc_params[6] = 1; /*autoreconnect*/
 	nc_params[7] = 2; /*pool_size, 2 is default in a_mysql.inc*/
@@ -107,6 +91,9 @@ exit:
 
 	}
 	/*mysql_set_charset "Windows-1252"*/
+	memset(buf32, 0, sizeof(buf32));
+	memset(buf144, 0, sizeof(buf144));
+	memset(buf4096, 0, sizeof(buf4096));
 
 	airports_init();
 	changelog_init();
