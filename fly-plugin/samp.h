@@ -253,7 +253,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, vehicles, 0x3F54);
 
 struct SampPlayerPool {
 	int _pad0[5003];
-	char gpci[101][1000];
+	char gpci[1000][101];
 	int _pad1D8B4[7250];
 	int created[1000];
 	struct SampPlayer *players[1000];
