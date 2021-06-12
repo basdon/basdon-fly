@@ -431,6 +431,7 @@ int GetVehicleDriver(int vehicleid)
 Use GetVehicleHealth, defined in anticheat.c
 */
 static
+__attribute__((unused))
 float GetVehicleHealthRaw(int vehicleid)
 {
 	struct SampVehicle *vehicle;
