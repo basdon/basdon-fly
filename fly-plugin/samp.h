@@ -252,13 +252,16 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, created, 0x2014);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, vehicles, 0x3F54);
 
 struct SampPlayerPool {
-	int _pad0[5003];
+	int _pad0[3003];
+	int playerDrunkLevel[1000];
+	int _pad3E8C[1000];
 	char gpci[1000][101];
 	int _pad1D8B4[7250];
 	int created[1000];
 	struct SampPlayer *players[1000];
 	/*Incomplete.*/
 };
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, playerDrunkLevel, 0x2EEC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, gpci, 0x4E2C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, _pad1D8B4, 0x1D8B4);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, created, 0x249FC);
@@ -275,7 +278,9 @@ struct SampNetGame {
 	void *textLabelPool;
 	void *gangzonePool;
 	void *actorPool;
-	int _pad2C[11];
+	int _pad2C[5];
+	struct RakServer *rakServer;
+	int _pad44[5];
 	char showNametags; /*Should be set before anyone connects.*/
 	char _pad59;
 	char _pad5A;
@@ -294,18 +299,15 @@ struct SampNetGame {
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, vehiclePool, 0xC);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, objectPool, 0x14);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, textLabelPool, 0x20);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, gangzonePool, 0x24);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, actorPool, 0x28);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, rakServer, 0x40);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, showNametags, 0x58);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, enableStuntBonus, 0x5B);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, usePlayerPedAnims, 0x6D);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, nametagDrawDistance, 0x72);
-
-struct BitStream {
-	int numberOfBitsUsed;
-	int numberOfBitsAllocated;
-	int readOffset;
-	void *ptrData;
-	char copyData;
-};
 
 struct RPCDATA_ShowGangZone {
 	short zoneid;

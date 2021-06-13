@@ -1186,6 +1186,8 @@ void samp_init()
 {
 	samp_pNetGame = *(struct SampNetGame**) 0x81CA4BC;
 	samp_pConsole = *(int**) 0x81CA4B8;
+	rakServer = samp_pNetGame->rakServer;
+
 	/*Remove filtering in chat messages coming from clients.*/
 	/*OnPlayerText*/
 	mem_protect(0x80B0760, 0x14, PROT_READ | PROT_WRITE | PROT_EXEC);

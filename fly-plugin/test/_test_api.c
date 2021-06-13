@@ -32,6 +32,7 @@ EXPECT_SIZE(struct quat, 4 * sizeof(int));
 #define NC_PARS(X)
 #include "../game_sa_data.c"
 #include "../a_samp.h"
+#include "../raknet.h"
 #include "../samp.h"
 #define csprintf(DST,FMT,...) atoci(DST,sprintf((char*)DST,FMT,__VA_ARGS__))
 struct SampPlayer *player[MAX_PLAYERS];

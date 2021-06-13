@@ -98,6 +98,8 @@ struct quat {
 EXPECT_SIZE(struct quat, 4 * sizeof(cell));
 
 #include "a_samp.h"
+#include "raknet.h"
+#include "raknet.c"
 #include "samp.h"
 
 /*anticheat*/
