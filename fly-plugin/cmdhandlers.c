@@ -1199,6 +1199,6 @@ tellrws:
 static
 int cmd_w(struct COMMANDCONTEXT cmdctx)
 {
-	missions_engage_help_or_map(cmdctx.playerid);
+	missions_locate_or_show_map(cmdctx.playerid);
 	return CMD_OK;
 }

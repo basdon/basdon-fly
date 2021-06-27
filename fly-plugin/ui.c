@@ -1,5 +1,4 @@
 static char *ui_mission_map = "mission map";
-static char *ui_mission_help = "mission help";
 static char *ui_help = "help";
 
 /**

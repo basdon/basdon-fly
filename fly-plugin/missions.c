@@ -37,10 +37,6 @@ struct MISSION {
 };
 
 /**
-The selected option in the job help screen, value should be 0-2.
-*/
-static char mission_help_option[MAX_PLAYERS];
-/**
 Available mission point types for player.
 Usages are a.o. for in job help/map screen and to show mission point enexes.
 */
@@ -77,26 +73,6 @@ static char tracker_afk_packet_sent[MAX_PLAYERS];
 Tracker socket handle.
 */
 static int tracker;
-
-/*Help menu textdraws*/
-#define NUM_JOBHELP_TEXTDRAWS (17)
-static struct TEXTDRAW td_jobhelp_keyhelp = { "keyhelp", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_header = { "header", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_optsbg = { "optsbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_text = { "text", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_greenbtnbg = { "greenbtnbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_bluebtnbg = { "bluebtnbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_redbtnbg = { "redbtnbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_optselbg = { "optselbg", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_enexgreen = { "enexgreen", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_txtgreen = { "txtgreen", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_actiongreen = { "actiongreen", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_enexblue = { "enexblue", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_txtblue = { "txtblue", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_actionblue = { "actionblue", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_enexred = { "enexred", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_txtred = { "txtred", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_jobhelp_actionred = { "actionred", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 
 static
 int missions_get_weatherbonus_for_weather(int weather)
@@ -166,28 +142,6 @@ void missions_show_jobmap_set_stage_set_controllable(int playerid)
 		mission_stage[playerid] = MISSION_STAGE_JOBMAP;
 		TogglePlayerControllable(playerid, 0);
 	}
-}
-
-/**
-@return mask of MISSION_POINT_* values
-*/
-static
-int msptype_mask_to_point_mask(int msptype_mask)
-{
-	int point_mask;
-
-	point_mask = 0;
-	if (msptype_mask & PASSENGER_MISSIONTYPES) {
-		point_mask |= MISSION_POINT_PASSENGERS;
-	}
-	if (msptype_mask & CARGO_MISSIONTYPES) {
-		point_mask |= MISSION_POINT_CARGO;
-	}
-	if (msptype_mask & ~(PASSENGER_MISSIONTYPES | CARGO_MISSIONTYPES)) {
-		point_mask |= MISSION_POINT_SPECIAL;
-	}
-
-	return point_mask;
 }
 
 /**
@@ -267,99 +221,6 @@ struct MISSIONPOINT *missions_get_random_msp(struct AIRPORT *airport, unsigned i
 		mspidx = NC_random(num_applicable_msp);
 	}
 	return applicable_missionpoints[mspidx];
-}
-
-/**
-Also resets the player's {@link mission_stage} and sets player controllable.
-*/
-static
-void missions_jobhelp_hide(int playerid)
-{
-	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
-	TogglePlayerControllable(playerid, 1);
-	textdraws_hide_consecutive(playerid, NUM_JOBHELP_TEXTDRAWS, TEXTDRAW_MISSIONHELP_BASE);
-	ui_closed(playerid, ui_mission_help);
-}
-
-/**
-@param newselection new selected option
-@param direction to go in, in case the selected option is invalid
-*/
-static
-void mission_help_update_selection_ensure_available(int playerid, int newselection, int direction)
-{
-	int point_mask;
-	float optdif;
-
-	assert(direction != 0);
-
-	mission_help_option[playerid] = newselection;
-invalid:
-	if (mission_help_option[playerid] > 2) {
-		mission_help_option[playerid] = 0;
-	} else if (mission_help_option[playerid] < 0) {
-		mission_help_option[playerid] = 2;
-	}
-	point_mask = msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]);
-	if (!((point_mask >> mission_help_option[playerid]) & 1)) {
-		mission_help_option[playerid] += direction;
-		goto invalid;
-	}
-
-	optdif = td_jobhelp_bluebtnbg.rpcdata->y - td_jobhelp_greenbtnbg.rpcdata->y;
-	td_jobhelp_optselbg.rpcdata->y = td_jobhelp_greenbtnbg.rpcdata->y + mission_help_option[playerid] * optdif;
-	textdraws_show(playerid, 1, &td_jobhelp_optselbg);
-}
-
-/**
-Ensure to update {@link mission_help_option} first.
-Also sets the player's {@link mission_stage} and sets player uncontrollable.
-*/
-static
-void missions_jobhelp_show(int playerid, int point_mask)
-{
-	if (!ui_try_show(playerid, ui_mission_help)) {
-		return;
-	}
-
-	mission_stage[playerid] = MISSION_STAGE_HELP;
-	TogglePlayerControllable(playerid, 0);
-
-	assert(point_mask);
-
-	/*Remember textdraw string length is allocated as needed using the strlen from the text in the file.*/
-	if (point_mask & MISSION_POINT_PASSENGERS) {
-		strcpy(td_jobhelp_actiongreen.rpcdata->text, "~w~Find nearest point");
-		td_jobhelp_greenbtnbg.rpcdata->box_color = 0xff333333;
-	} else {
-		strcpy(td_jobhelp_actiongreen.rpcdata->text, "~r~Wrong vehicle");
-		td_jobhelp_greenbtnbg.rpcdata->box_color = 0xff202020;
-	}
-	if (point_mask & MISSION_POINT_CARGO) {
-		strcpy(td_jobhelp_actionblue.rpcdata->text, "~w~Find nearest point");
-		td_jobhelp_bluebtnbg.rpcdata->box_color = 0xff333333;
-	} else {
-		strcpy(td_jobhelp_actionblue.rpcdata->text, "~r~Wrong vehicle");
-		td_jobhelp_bluebtnbg.rpcdata->box_color = 0xff202020;
-	}
-	if (point_mask & MISSION_POINT_SPECIAL) {
-		strcpy(td_jobhelp_actionred.rpcdata->text, "~w~Find nearest point");
-		td_jobhelp_redbtnbg.rpcdata->box_color = 0xff333333;
-	} else {
-		strcpy(td_jobhelp_actionred.rpcdata->text, "~r~Wrong vehicle");
-		td_jobhelp_redbtnbg.rpcdata->box_color = 0xff202020;
-	}
-
-	/*Showing all but the "selection option background" textdraw.*/
-	textdraws_show(playerid, 16,
-		&td_jobhelp_keyhelp, &td_jobhelp_header, &td_jobhelp_optsbg,
-		&td_jobhelp_text, &td_jobhelp_greenbtnbg, &td_jobhelp_bluebtnbg,
-		&td_jobhelp_redbtnbg, &td_jobhelp_enexgreen, &td_jobhelp_txtgreen,
-		&td_jobhelp_actiongreen, &td_jobhelp_enexblue, &td_jobhelp_txtblue,
-		&td_jobhelp_actionblue, &td_jobhelp_enexred, &td_jobhelp_txtred,
-		&td_jobhelp_actionred);
-
-	mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid], 1);
 }
 
 int missions_is_player_on_mission(int playerid)
@@ -554,23 +415,7 @@ void cb_missions_flight_finish_query_done(void *data)
 static
 void missions_dispose()
 {
-	free(td_jobhelp_keyhelp.rpcdata);
-	free(td_jobhelp_header.rpcdata);
-	free(td_jobhelp_optsbg.rpcdata);
-	free(td_jobhelp_text.rpcdata);
-	free(td_jobhelp_greenbtnbg.rpcdata);
-	free(td_jobhelp_bluebtnbg.rpcdata);
-	free(td_jobhelp_redbtnbg.rpcdata);
-	free(td_jobhelp_optselbg.rpcdata);
-	free(td_jobhelp_enexgreen.rpcdata);
-	free(td_jobhelp_txtgreen.rpcdata);
-	free(td_jobhelp_actiongreen.rpcdata);
-	free(td_jobhelp_enexblue.rpcdata);
-	free(td_jobhelp_txtblue.rpcdata);
-	free(td_jobhelp_actionblue.rpcdata);
-	free(td_jobhelp_enexred.rpcdata);
-	free(td_jobhelp_txtred.rpcdata);
-	free(td_jobhelp_actionred.rpcdata);
+	free(td_satisfaction.rpcdata);
 }
 
 static
@@ -578,16 +423,6 @@ void missions_init()
 {
 	/*textdraws*/
 	textdraws_load_from_file("jobsatisfaction", TEXTDRAW_JOBSATISFACTION, 1, &td_satisfaction);
-
-	textdraws_load_from_file("jobhelp", TEXTDRAW_MISSIONHELP_BASE, NUM_JOBHELP_TEXTDRAWS,
-		/*remember to free their rpcdata in missions_dispose*/
-		&td_jobhelp_keyhelp, &td_jobhelp_optsbg, &td_jobhelp_header,
-		&td_jobhelp_text, &td_jobhelp_greenbtnbg, &td_jobhelp_bluebtnbg,
-		&td_jobhelp_redbtnbg, &td_jobhelp_optselbg, &td_jobhelp_enexgreen,
-		&td_jobhelp_txtgreen, &td_jobhelp_actiongreen, &td_jobhelp_enexblue,
-		&td_jobhelp_txtblue, &td_jobhelp_actionblue, &td_jobhelp_enexred,
-		&td_jobhelp_txtred, &td_jobhelp_actionred);
-	textdraws_set_textbox_properties(td_jobhelp_keyhelp.rpcdata);
 
 	/*missionpoints are loaded in airport.c*/
 
@@ -883,7 +718,6 @@ void missions_on_player_connect(int playerid)
 	missions_available_msptype_mask[playerid] = -1;
 	active_msp_index[playerid] = -1;
 	locating_msp_index[playerid] = -1;
-	mission_help_option[playerid] = 0;
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	activemission[playerid] = NULL;
 	number_missions_started_stopped[playerid]++;
@@ -1374,9 +1208,6 @@ void missions_on_player_state_change(int playerid, int from, int to)
 		switch (mission_stage[playerid]) {
 		case MISSION_STAGE_NOMISSION:
 			break;
-		case MISSION_STAGE_HELP:
-			missions_jobhelp_hide(playerid); /*sets controllable and mission stage*/
-			break;
 		case MISSION_STAGE_JOBMAP:
 			missions_hide_jobmap_set_stage_set_controllable(playerid);
 			break;
@@ -1408,9 +1239,7 @@ void missions_on_player_state_change(int playerid, int from, int to)
 
 		/*This could be unnecessary, unless the player gets jacked or teleported.
 		(They can't exit because it'd trigger the keystate change to hide the ui)*/
-		if (mission_stage[playerid] == MISSION_STAGE_HELP) {
-			missions_jobhelp_hide(playerid); /*sets controllable and mission state*/
-		} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
+		if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
 			missions_hide_jobmap_set_stage_set_controllable(playerid);
 		}
 
@@ -1522,66 +1351,6 @@ void missions_process_cancel_request_by_player(int playerid)
 	}
 }
 
-/**
-To be called from the /w command handler.
-*/
-static
-void missions_engage_help_or_map(int playerid)
-{
-	struct vec3 vel;
-	struct dbvehicle *veh;
-	int vehicleid;
-
-	switch (mission_stage[playerid]) {
-	case MISSION_STAGE_NOMISSION:
-		if (active_msp_index[playerid] != -1) {
-			missions_show_jobmap_set_stage_set_controllable(playerid);
-			break;
-		}
-
-		vehicleid = GetPlayerVehicleID(playerid);
-		veh = gamevehicles[vehicleid].dbvehicle;
-		if (!veh || GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
-			SendClientMessage(playerid, COL_WARN, WARN"Get in a vehicle first!");
-			break;
-		}
-
-		/*Checking speed for two reasons:
-		- this command will freeze the player, meaning they will drop from the sky when flying
-		- the player should stop completely before starting a mission*/
-		GetVehicleVelocityUnsafe(vehicleid, &vel);
-		/*Ignoring z velocity because it would be annoying with skimmers riding heavy waves.*/
-		if (vel.x * vel.x + vel.y * vel.y > MAX_SPEED_SQ) {
-			SendClientMessage(playerid, COL_WARN, WARN"Stop the vehicle first!");
-			break;
-		}
-
-		missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(veh->model);
-		if (missions_available_msptype_mask[playerid] == 0) {
-			SendClientMessage(playerid, COL_WARN, WARN"This vehicle can't do any missions!");
-			break;
-		}
-
-		/*For SOME reason, when many enexes are shown, the preview can be messed up
-		(as in the type of messed up you see when only model is on screen).
-		Deleting all enexes before showing the textdraw would help, but it wouldn't work
-		unless there's a game update in between the deletion of the objects and the textdraw creation.
-		But that would add too much delay (and complexity), so I'm just letting it be messed up atm..*/
-
-		missions_jobhelp_show(playerid, msptype_mask_to_point_mask(missions_available_msptype_mask[playerid]));
-		break;
-	case MISSION_STAGE_FLIGHT:
-		if (active_msp_index[playerid] == activemission[playerid]->endpoint - missionpoints) {
-			missions_start_unload(playerid);
-			break;
-		}
-		SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &activemission[playerid]->endpoint->pos, MISSION_CP_RAD);
-		SendClientMessage(playerid, COL_WARN,
-			WARN"You're already working! Use /s to stop your current work first ($"SETTING__MISSION_CANCEL_FEE_STR" fee).");
-		break;
-	}
-}
-
 static
 void missions_stoplocate(int playerid)
 {
@@ -1592,7 +1361,7 @@ void missions_stoplocate(int playerid)
 }
 
 static
-void missions_locate_closest_mission(int playerid, int point_type_mask)
+void missions_locate_closest_mission(int playerid)
 {
 	struct MISSIONPOINT *msp;
 	struct dbvehicle *veh;
@@ -1609,9 +1378,7 @@ void missions_locate_closest_mission(int playerid, int point_type_mask)
 	closest_distance_sq = float_pinf;
 	for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {
 		msptypemask = missionpoints[mspindex].type;
-		if ((msptypemask & missions_available_msptype_mask[playerid]) &&
-			(msptype_mask_to_point_mask(msptypemask) & point_type_mask))
-		{
+		if (msptypemask & missions_available_msptype_mask[playerid]) {
 			dx = missionpoints[mspindex].pos.x - pos.x;
 			dy = missionpoints[mspindex].pos.y - pos.y;
 			distance_sq = dx * dx + dy * dy;
@@ -1638,18 +1405,54 @@ void missions_locate_closest_mission(int playerid, int point_type_mask)
 	}
 }
 
+/**
+To be called from the /w command handler.
+*/
+static
+void missions_locate_or_show_map(int playerid)
+{
+	struct dbvehicle *veh;
+	int vehicleid;
+
+	switch (mission_stage[playerid]) {
+	case MISSION_STAGE_NOMISSION:
+		if (active_msp_index[playerid] != -1) {
+			missions_show_jobmap_set_stage_set_controllable(playerid);
+			break;
+		}
+
+		vehicleid = GetPlayerVehicleID(playerid);
+		veh = gamevehicles[vehicleid].dbvehicle;
+		if (!veh || GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
+			SendClientMessage(playerid, COL_WARN, WARN"Get in a vehicle first!");
+			break;
+		}
+
+		/*TODO this msptype stuff*/
+		missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(veh->model);
+		if (missions_available_msptype_mask[playerid] == 0) {
+			SendClientMessage(playerid, COL_WARN, WARN"This vehicle can't do any missions!");
+			break;
+		}
+
+		missions_locate_closest_mission(playerid);
+		break;
+	case MISSION_STAGE_FLIGHT:
+		if (active_msp_index[playerid] == activemission[playerid]->endpoint - missionpoints) {
+			missions_start_unload(playerid);
+			break;
+		}
+		SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &activemission[playerid]->endpoint->pos, MISSION_CP_RAD);
+		SendClientMessage(playerid, COL_WARN,
+			WARN"You're already working! Use /s to stop your current work first ($"SETTING__MISSION_CANCEL_FEE_STR" fee).");
+		break;
+	}
+}
+
 static
 void missions_driversync_udkeystate_change(int playerid, short udkey)
 {
-	if (mission_stage[playerid] == MISSION_STAGE_HELP) {
-		if (udkey < 0) {
-			mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid] - 1, -1);
-			PlayerPlaySound(playerid, MISSION_HELP_MOVE_UP_SOUND);
-		} else if (udkey > 0) {
-			mission_help_update_selection_ensure_available(playerid, mission_help_option[playerid] + 1, 1);
-			PlayerPlaySound(playerid, MISSION_HELP_MOVE_DOWN_SOUND);
-		}
-	} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
+	if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
 		if (udkey) {
 			jobmap_move_updown(playerid, udkey);
 		}
@@ -1664,17 +1467,7 @@ void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 	struct AIRPORT *selected_airport;
 	unsigned int mission_type;
 
-	if (mission_stage[playerid] == MISSION_STAGE_HELP) {
-		/*Since player is set to not be controllable, these use on-foot controls even though the player is in-vehicle.*/
-		if (KEY_JUST_DOWN(KEY_VEHICLE_ENTER_EXIT)) {
-			PlayerPlaySound(playerid, MISSION_HELP_CANCEL_SOUND);
-			missions_jobhelp_hide(playerid); /*sets controllable and mission state*/
-		} else if (KEY_JUST_DOWN(KEY_SPRINT)) {
-			PlayerPlaySound(playerid, MISSION_HELP_ACCEPT_SOUND);
-			missions_jobhelp_hide(playerid); /*sets controllable and mission state*/
-			missions_locate_closest_mission(playerid, (1 << mission_help_option[playerid]));
-		}
-	} else if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
+	if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
 		/*Since player is set to not be controllable, these use on-foot controls even though the player is in-vehicle.*/
 		if (KEY_JUST_DOWN(KEY_VEHICLE_ENTER_EXIT)) {
 			PlayerPlaySound(playerid, MISSION_JOBMAP_CANCEL_SOUND);

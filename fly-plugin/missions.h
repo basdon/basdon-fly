@@ -4,13 +4,11 @@
 /*internal use*/
 /*these have to be in order for some usages to work*/
 #define MISSION_STAGE_NOMISSION	0
-#define MISSION_STAGE_HELP	1 /*the 'go to a loading point to start a mission' page*/
-#define MISSION_STAGE_JOBMAP 	2 /*the mission map job select screen*/
-#define MISSION_STAGE_PRELOAD	3 /*taxiing to CP*/
-#define MISSION_STAGE_LOAD	4 /*loading time (query executing or timer)*/
-#define MISSION_STAGE_FLIGHT	5 /*flight*/
-#define MISSION_STAGE_UNLOAD	6 /*unloading timer*/
-/*TODO remove POSTLOAD stuff*/
+#define MISSION_STAGE_JOBMAP 	1 /*the mission map job select screen*/
+#define MISSION_STAGE_PRELOAD	2 /*taxiing to CP*/
+#define MISSION_STAGE_LOAD	3 /*loading time (query executing or timer)*/
+#define MISSION_STAGE_FLIGHT	4 /*flight*/
+#define MISSION_STAGE_UNLOAD	5 /*unloading timer*/
 
 /*states saved in db*/
 #define MISSION_STATE_INPROGRESS 1
