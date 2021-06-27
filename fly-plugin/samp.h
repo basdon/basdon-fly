@@ -558,6 +558,11 @@ struct RPCDATA_Delete3DTextLabel {
 	short label_id;
 };
 EXPECT_SIZE(struct RPCDATA_Delete3DTextLabel, 2);
+
+struct RPCDATA_RequestSpawn {
+	int type; /*??. 2 is used for SpawnPlayer(). other values may be in response to client requesting spawn?*/
+};
+EXPECT_SIZE(struct RPCDATA_RequestSpawn, 4);
 #pragma pack()
 
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,unk) \
@@ -589,3 +594,4 @@ EXPECT_SIZE(struct RPCDATA_Delete3DTextLabel, 2);
 #define RPC_Delete3DTextLabel 0x8159960 /*ptr to 0x3A(58)*/
 #define RPC_DisableRemoteVehicleCollisions 0x815CD80 /*ptr to 0xA7(167)*/
 #define RPC_ShowDialog 0x815CD7C /*ptr to 0x3D(61)*/
+#define RPC_RequestSpawn 0x815A61E /*ptr to 0x81(129)*/

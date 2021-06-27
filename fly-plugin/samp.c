@@ -204,6 +204,21 @@ void DisablePlayerRaceCheckpoint(int playerid)
 }
 
 /**
+ * Use natives_SpawnPlayer.
+ */
+static
+void SpawnPlayer(int playerid)
+{
+	struct RPCDATA_RequestSpawn rpcdata;
+	struct BitStream bs;
+
+	rpcdata.type = 2;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	SAMP_SendRPCToPlayer(RPC_RequestSpawn, &bs, playerid, 2);
+}
+
+/**
 When respawning, the player will always regain control.
 
 Player's vehicle will not get damage when a player is not controllable.
@@ -1015,10 +1030,7 @@ void natives_SpawnPlayer(int playerid)
 		NC_ClearAnimations(playerid, 1);
 	}
 	spawn_prespawn(playerid);
-
-	NC_PARS(1);
-	/*nc_params[1] = playerid;*/
-	NC(n_SpawnPlayer_);
+	SpawnPlayer(playerid);
 }
 #endif
 ;

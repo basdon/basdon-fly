@@ -42,7 +42,6 @@ static AMX_NATIVE n_SetSpawnInfo;
 static AMX_NATIVE n_SetVehiclePos;
 static AMX_NATIVE n_SetVehicleToRespawn;
 static AMX_NATIVE n_SetVehicleZAngle;
-static AMX_NATIVE n_SpawnPlayer_;
 static AMX_NATIVE n_UpdateVehicleDamageStatus;
 static AMX_NATIVE n_TogglePlayerClock;
 static AMX_NATIVE n_TogglePlayerControllable;
@@ -206,8 +205,6 @@ static cell tmpfloat;
 	(NC_PARS_(2)nc_params[1]=VEHICLEID,nc_paramf[2]=FROT,\
 	n_SetVehicleZAngle(amx,nc_params))
 
-#define NC_SpawnPlayer __USE__natives_SpawnPlayer__
-
 #define NC_TogglePlayerClock(PLAYERID,FLAG) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
 	n_TogglePlayerClock(amx,nc_params))
@@ -344,7 +341,6 @@ int natives_find()
 		N(SetVehiclePos),
 		N(SetVehicleToRespawn),
 		N(SetVehicleZAngle),
-		N_(SpawnPlayer),
 		N(TogglePlayerClock),
 		N(TogglePlayerSpectating),
 		N(TogglePlayerControllable),
