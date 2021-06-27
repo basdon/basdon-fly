@@ -1402,6 +1402,8 @@ void missions_locate_closest_mission(int playerid)
 				nav_navigate_to_airport(playerid, vehicleid, veh->model, msp->ap);
 			}
 		}
+		/*Message should have same color as the message in nav_navigate_to_airport.*/
+		SendClientMessage(playerid, COL_SAMP_GREY, "Checkpoint set to closest mission point. Use /stoplocate to disable it.");
 	}
 }
 
