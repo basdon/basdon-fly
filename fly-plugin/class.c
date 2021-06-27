@@ -29,7 +29,7 @@ void class_init()
 static
 void class_on_player_connect(int playerid)
 {
-	classid[playerid] = CLASSMAPPING[classidx[playerid] = 0];
+	classid[playerid] = 0;
 	nc_params[0] = 2;
 	nc_params[1] = playerid;
 	nc_params[2] = 0x888888FF;
@@ -39,12 +39,10 @@ void class_on_player_connect(int playerid)
 static
 void class_on_player_request_class(int playerid, int _classid)
 {
-	int class_index;
 	if (_classid < 0 || NUMCLASSES <= _classid) {
-		class_index = classidx[playerid];
+		_classid = classid[playerid];
 	} else {
-		classidx[playerid] = class_index = _classid;
-		classid[playerid] = CLASSMAPPING[class_index];
+		classid[playerid] = _classid;
 	}
 
 	NC_PARS(4);
@@ -59,8 +57,8 @@ void class_on_player_request_class(int playerid, int _classid)
 	NC(n_SetPlayerCameraLookAt);
 
 	/*This is also called when the player is connecting, but then they
-	aren't logged in yet, so SetPlayerPos to hide the player and don't
-	do class thingies.*/
+	aren't logged in yet, so use  SetPlayerPos to hide the player and
+	don't do class thingies.*/
 	if (!ISPLAYING(playerid)) {
 		/*position behind the camera, to hide during login*/
 		nc_paramf[2] = 1500.9938f;
@@ -87,23 +85,19 @@ void class_on_player_request_class(int playerid, int _classid)
 		return;
 	}
 
-	nc_params[2] = CLASS_COLORS[class_index];
+	nc_params[2] = CLASS_COLORS[_classid];
 	NC(n_SetPlayerColor);
 
-	/*facing angle only looks good when the dancing animation is applied*/
+	/*This facing angle may seem a bit strange but it's adjusted for when the dancing animation is applied.*/
 	nc_paramf[2] = 236.0f;
 	NC(n_SetPlayerFacingAngle);
 
-	GameTextForPlayer(playerid, 0x800000, 3, (char*) CLASS_NAMES[class_index]);
+	GameTextForPlayer(playerid, 0x800000, 3, (char*) CLASS_NAMES[_classid]);
 }
 
 static
 int class_on_player_request_spawn(int playerid)
 {
-	if (classid[playerid] == CLASS_TRUCKER) {
-		SendClientMessage(playerid, COL_WARN, WARN"Trucker class is not available yet.");
-		return 0;
-	}
 	HideGameTextForPlayer(playerid);
 	return 1;
 }

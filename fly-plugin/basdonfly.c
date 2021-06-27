@@ -328,11 +328,13 @@ static struct {
 EXPECT_SIZE(weather, 4);
 
 /*class stuff*/
-#define CLASS_PILOT 1
-#define CLASS_RESCUE 2
-#define CLASS_ARMY 4
-#define CLASS_AID 8
-#define CLASS_TRUCKER 16
+/*Note that 'spw' database table depends on these CLASS_* constants.
+'class' column is a bitfield that matches '1 << CLASS_PILOT' for example.*/
+#define CLASS_PILOT 0
+#define CLASS_RESCUE 1
+#define CLASS_ARMY 2
+#define CLASS_AID 3
+/*#define CLASS_TRUCKER 4*/
 
 #define NUMCLASSES /*5*/ 4
 
@@ -341,16 +343,6 @@ EXPECT_SIZE(weather, 4);
 #define SPAWN_WEAPON_2_3 0
 #define SPAWN_AMMO_2_3 0
 
-/**
-From class index (SAMP) to class id (CLASS_ constants)
-*/
-static const int CLASSMAPPING[] = {
-	CLASS_PILOT,
-	CLASS_RESCUE,
-	CLASS_ARMY,
-	CLASS_AID,
-	/*CLASS_TRUCKER,*/
-};
 /**
 Skin ID per class.
 */
@@ -381,10 +373,6 @@ static const int CLASS_COLORS[] = {
 Class id of players (CLASS_ constants).
 */
 static int classid[MAX_PLAYERS];
-/**
-Class index of players (SA-MP's classid).
-*/
-static int classidx[MAX_PLAYERS];
 
 /*randomstuff*/
 

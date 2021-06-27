@@ -11,7 +11,7 @@ static struct vec4 *spawns[NUMCLASSES];
 /**
 The text to show in the spawn list dialog when spawning, per class index.
 
-Elements may be NULL is associated value in numspawns is zero.
+Elements may be NULL if associated value in numspawns is zero.
 */
 static char *spawn_list_text[NUMCLASSES];
 
@@ -34,7 +34,7 @@ void spawn_init()
 			"FROM spw "
 			"JOIN apt ON spw.ap=apt.i "
 			"WHERE apt.e AND (class&%d)",
-			CLASSMAPPING[klass]);
+			1 << klass);
 		querycacheid = NC_mysql_query(buf144a);
 		rows = NC_cache_get_row_count();
 		numspawns[klass] = rows;
@@ -65,8 +65,7 @@ nospawns:
 		NC_cache_delete(querycacheid);
 	}
 	if (numspawns[0] == 0) {
-		logprintf("ERR: no spawns for classid 0, spawn fallback will "
-			"be incorrect!");
+		logprintf("ERR: no spawns for classid 0, spawn fallback will be incorrect!");
 	}
 }
 
@@ -94,7 +93,7 @@ void spawn_cb_dlg_spawn(int playerid, struct DIALOG_RESPONSE response)
 {
 	int klass;
 
-	klass = classidx[playerid];
+	klass = classid[playerid];
 	if (response.response && 0 <= response.listitem && response.listitem < numspawns[klass]) {
 		common_tp_player(playerid, spawns[klass][response.listitem]);
 	}
@@ -111,7 +110,7 @@ streaming and zones twice right after each other.
 static
 void spawn_prespawn(int playerid)
 {
-	int spawnidx, klass = classidx[playerid];
+	int spawnidx, klass = classid[playerid];
 
 	switch (numspawns[klass]) {
 	/*if no spawns, take first spawn of pilot class*/
@@ -145,7 +144,7 @@ void spawn_on_player_spawn(int playerid)
 	struct DIALOG_INFO dialog;
 	int klass;
 
-	klass = classidx[playerid];
+	klass = classid[playerid];
 	/*TODO: spawn preference*/
 	if (numspawns[klass] > 1) {
 		dialog_init_info(&dialog);
