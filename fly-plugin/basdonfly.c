@@ -767,12 +767,5 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *a)
 {
-#if DEV
-	/*Getting here means the server is shutting down. In dev, it should be restarted immediately.
-	But when the server exits, it kicks all the players, and I'd have to restart the game, nogood.
-	So just crash the server here so it doesn't kick me :).
-	TODO: find a better way, preferably one that is even more graceful than the 'lost connection' process.*/
-	assert(((void) "crashing lololol", 0));
-#endif
 	return AMX_ERR_NONE;
 }
