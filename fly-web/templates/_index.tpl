@@ -68,7 +68,7 @@
 			Discord server invite link: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}.
 		</p>
 		<p>
-			IRC: basdon is present on the irc.tl network (<a href="irc://chat.irc.tl">chat.irc.tl</a>{@globe}), our channels are:
+			IRC: basdon is present on LUNet (<a href="irc://irc.liberty-unleashed.co.uk">irc.liberty-unleashed.co.uk</a>{@globe}), our channels are:
 		</p>
 		<ul>
 			<li>#basdon for general talk (<a href="{@unsafe $STATICPATH}/chatlogs/basdon/?C=M;O=D">#basdon chatlogs</a>)</li>
