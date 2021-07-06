@@ -626,6 +626,108 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 	return tax;
 }
 
+static
+struct MISSION *missions_get_mission_from_vehicleid(int vehicleid)
+{
+	register int pid;
+	int i;
+
+	if (vehicleid) {
+		for (i = 0; i < playercount; i++) {
+			pid = players[i];
+			if (activemission[pid] && activemission[pid]->vehicleid == vehicleid) {
+				return activemission[pid];
+			}
+		}
+	}
+	return NULL;
+}
+
+static
+int missions_format_satisfaction_text(int satisfaction, char *out_buf)
+{
+	return sprintf(out_buf, "Passenger~n~Satisfaction: %d%%", satisfaction);
+}
+
+/*
+ * The RPC is not sent to passengers whose own mission stage is MISSION_STAGE_FLIGHT.
+ *
+ * @param vehicleid use {@code 0} to not send it to all passengers in the vehicle.
+ */
+static
+void missions_send_rpc_to_player_and_passengers(int rpc, struct BitStream *bs, int playerid, int vehicleid)
+{
+	register int pid;
+	int i;
+
+	SAMP_SendRPCToPlayer(rpc, bs, playerid, 2);
+	if (vehicleid) {
+		for (i = 0; i < playercount; i++) {
+			pid = players[i];
+			if (player[pid]->vehicleid == vehicleid &&
+				pid != playerid &&
+				/*Check mission stage, in case the passenger is also on their own mission
+				(we don't want to show the satisfaction of the mission of the vehicle
+				they're in instead of the satisfaction of their own current mission).*/
+				mission_stage[pid] != MISSION_STAGE_FLIGHT)
+			{
+				SAMP_SendRPCToPlayer(rpc, bs, pid, 2);
+			}
+		}
+	}
+}
+
+/**
+ * Shows the passenger statisfaction textdraw for given playerid and everyone in given vehicleid.
+ *
+ * @param vehicleid use {@code 0} to not show it for the passengers in the vehicle.
+ */
+static
+void missions_show_passenger_satisfaction_textdraw(int satisfaction, int playerid, int vehicleid)
+{
+	struct BitStream bs;
+
+	td_satisfaction.rpcdata->text_length = missions_format_satisfaction_text(satisfaction, td_satisfaction.rpcdata->text);
+#ifdef DEV
+	textdraws_assert_text_length_within_bounds(&td_satisfaction);
+#endif
+	bs.ptrData = td_satisfaction.rpcdata;
+	bs.numberOfBitsUsed = (sizeof(struct RPCDATA_ShowTextDraw) - 1 + td_satisfaction.rpcdata->text_length) * 8;
+	missions_send_rpc_to_player_and_passengers(RPC_ShowTextDraw, &bs, playerid, vehicleid);
+}
+
+/**
+ * Updates satisfaction textdraw for all players that are in the given vehicle.
+ */
+static
+void missions_update_passenger_satisfaction_textdraw(int satisfaction, int playerid, int vehicleid)
+{
+	struct RPCDATA_TextDrawSetString rpcdata;
+	struct BitStream bs;
+
+	rpcdata.textdrawid = TEXTDRAW_JOBSATISFACTION;
+	rpcdata.text_length = (short) missions_format_satisfaction_text(satisfaction, rpcdata.text);
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = (2 + 2 + rpcdata.text_length) * 8;
+	missions_send_rpc_to_player_and_passengers(RPC_TextDrawSetString, &bs, playerid, vehicleid);
+}
+
+/*
+ * @param vehicleid use {@code 0} to not hide it for the passengers in the vehicle.
+ */
+static
+void missions_hide_passenger_satisfaction_textdraw(int playerid, int vehicleid)
+{
+	struct RPCDATA_HideTextDraw rpcdata;
+	struct BitStream bs;
+
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+
+	rpcdata.textdrawid = (short) TEXTDRAW_JOBSATISFACTION;
+	missions_send_rpc_to_player_and_passengers(RPC_HideTextDraw, &bs, playerid, vehicleid);
+}
+
 /**
 Cleanup a mission and free memory. Does not query. Does send a tracker msg. Resets {@code mission_stage}.
 
@@ -647,7 +749,7 @@ void missions_cleanup(int playerid)
 	NC_ssocket_send(tracker, buf32a, 8);
 
 	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
-		textdraws_hide_consecutive(playerid, 1, TEXTDRAW_JOBSATISFACTION);
+		missions_hide_passenger_satisfaction_textdraw(playerid, mission->vehicleid);
 	}
 
 	if (GetPlayerVehicleID(playerid) != mission->vehicleid) {
@@ -732,12 +834,6 @@ void missions_on_player_disconnect(int playerid)
 	}
 }
 
-static
-int missions_format_satisfaction_text(int satisfaction, char *out_buf)
-{
-	return sprintf(out_buf, "Passenger~n~Satisfaction: %d%%", satisfaction);
-}
-
 struct MISSION_CB_DATA {
 	int player_cc;
 	int number_missions_started_stopped;
@@ -773,8 +869,7 @@ int missions_start_flight(void *data)
 	}
 
 	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
-		td_satisfaction.rpcdata->text_length = missions_format_satisfaction_text(100, td_satisfaction.rpcdata->text);
-		textdraws_show(playerid, 1, &td_satisfaction);
+		missions_show_passenger_satisfaction_textdraw(mission->passenger_satisfaction, playerid, mission->vehicleid);
 	}
 
 	mission_stage[playerid] = MISSION_STAGE_FLIGHT;
@@ -1233,8 +1328,23 @@ void missions_on_player_state_change(int playerid, int from, int to)
 		vehicleid = GetPlayerVehicleID(playerid);
 		if (vehicleid) {
 			missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(GetVehicleModel(vehicleid));
+			/*If the player entering as passenger is on a flight themselves,
+			we don't want to override the displayed satisfaction value with the
+			value of the mission of the vehicleid they're entering as passenger.
+			(Currently not checking if the player is on a flight without satisfaction.)*/
+			if (mission_stage[playerid] != MISSION_STAGE_FLIGHT) {
+				mission = missions_get_mission_from_vehicleid(vehicleid);
+				if (mission) {
+					missions_show_passenger_satisfaction_textdraw(mission->passenger_satisfaction, playerid, 0);
+				}
+			}
 		} else {
 			missions_available_msptype_mask[playerid] = -1;
+			/*Don't hide satisfaction text for the pilot or a passenger
+			if the passenger is on a flight themselves.*/
+			if (mission_stage[playerid] != MISSION_STAGE_FLIGHT) {
+				missions_hide_passenger_satisfaction_textdraw(playerid, 0);
+			}
 		}
 
 		/*This could be unnecessary, unless the player gets jacked or teleported.
@@ -1535,7 +1645,6 @@ void missions_on_vehicle_repaired(int vehicleid, float fixamount, float newhp)
 
 void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
 {
-	struct RPCDATA_TextDrawSetString rpcdata;
 	struct MISSION *miss;
 	int last_satisfaction;
 	float pitchlimit, rolllimit;
@@ -1576,9 +1685,7 @@ void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
 		}
 
 		if (last_satisfaction != miss->passenger_satisfaction) {
-			rpcdata.textdrawid = td_satisfaction.rpcdata->textdrawid;
-			rpcdata.text_length = (short) missions_format_satisfaction_text(miss->passenger_satisfaction, rpcdata.text);
-			SendRPCToPlayer(pid, RPC_TextDrawSetString, &rpcdata, 2 + 2 + rpcdata.text_length, 2);
+			missions_update_passenger_satisfaction_textdraw(miss->passenger_satisfaction, pid, vid);
 		}
 	}
 }

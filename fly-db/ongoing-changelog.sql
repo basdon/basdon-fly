@@ -64,3 +64,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Jun 12', 'Changed SALS taxi lights to an object model without collision');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Jul 06', 'Passengers can now also see the passenger satisfaction of the mission of the vehicle they are in');
