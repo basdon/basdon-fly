@@ -330,13 +330,14 @@ EXPECT_SIZE(weather, 4);
 /*class stuff*/
 /*Note that 'spw' database table depends on these CLASS_* constants.
 'class' column is a bitfield that matches '1 << CLASS_PILOT' for example.*/
-#define CLASS_PILOT 0
-#define CLASS_RESCUE 1
-#define CLASS_ARMY 2
-#define CLASS_AID 3
-/*#define CLASS_TRUCKER 4*/
+#define CLASS_PASSENGER_PILOT 0
+#define CLASS_CARGO_PILOT 1
+#define CLASS_RESCUE 2
+#define CLASS_ARMY 3
+#define CLASS_AID 4
+/*#define CLASS_TRUCKER 5*/
 
-#define NUMCLASSES /*5*/ 4
+#define NUMCLASSES /*6*/ 5
 
 #define SPAWN_WEAPON_1 WEAPON_CAMERA
 #define SPAWN_AMMO_1 3036
@@ -348,6 +349,7 @@ Skin ID per class.
 */
 static const int CLASS_SKINS[] = {
 	61,
+	61,
 	275,
 	287,
 	287,
@@ -355,7 +357,8 @@ static const int CLASS_SKINS[] = {
 };
 
 static const char *CLASS_NAMES[] = {
-	"~p~Pilot",
+	"~p~Passenger Pilot",
+	"~p~~h~Cargo Pilot",
 	"~b~~h~~h~Rescue worker",
 	"~g~~h~Army",
 	"~r~~h~~h~Aid worker",
@@ -364,6 +367,7 @@ static const char *CLASS_NAMES[] = {
 
 static const int CLASS_COLORS[] = {
 	0xa86efcff,
+	0xfca5ffff,
 	0x7087ffff,
 	0x519c42ff,
 	0xff3740ff,
