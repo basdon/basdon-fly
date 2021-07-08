@@ -67,3 +67,9 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Jul 06', 'Passengers can now also see the passenger satisfaction of the mission of the vehicle they are in');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Jul 08', 'You now need the correct class to start missions (cargo missions require cargo pilot class etc)');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Jul 08', 'Changed mission point colors: red = wrong class, blue = wrong vehicle, green = available');

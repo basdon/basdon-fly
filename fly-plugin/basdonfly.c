@@ -164,6 +164,7 @@ struct RUNWAY {
 
 /**
 See {@link missions_get_vehicle_model_msptype_mask} for vehicle assignments
+See {@link CLASS_MSPTYPES} for class assignments
 */
 #define NUM_MISSION_TYPES 11
 static char *mission_type_names[NUM_MISSION_TYPES] = {
@@ -215,23 +216,12 @@ TODO
 /*excluding zero term*/
 #define MAX_MSP_NAME (9)
 
-/**
-The point type, decides the enex color and related things.
-*/
-#define MISSION_POINT_PASSENGERS 1
-#define MISSION_POINT_CARGO 2
-#define MISSION_POINT_SPECIAL 4
-
 #define MAX_MISSIONPOINTS_PER_AIRPORT 15
 
 struct MISSIONPOINT {
 	unsigned short id;
 	struct vec3 pos;
 	unsigned int type;
-	/**
-	See MISSION_POINT_*, decides the enex color and related things.
-	*/
-	char point_type;
 	char name[MAX_MSP_NAME + 1];
 	struct AIRPORT *ap;
 };
@@ -343,6 +333,19 @@ EXPECT_SIZE(weather, 4);
 #define SPAWN_AMMO_1 3036
 #define SPAWN_WEAPON_2_3 0
 #define SPAWN_AMMO_2_3 0
+
+/**
+ * Mission types per class.
+ */
+static const unsigned int CLASS_MSPTYPES[] = {
+	MISSION_TYPE_PASSENGER_S | MISSION_TYPE_PASSENGER_M | MISSION_TYPE_PASSENGER_L |
+		MISSION_TYPE_HELI | MISSION_TYPE_PASSENGER_WATER,
+	MISSION_TYPE_CARGO_S | MISSION_TYPE_CARGO_M | MISSION_TYPE_CARGO_L |
+		MISSION_TYPE_HELI_CARGO,
+	0,
+	MISSION_TYPE_MIL | MISSION_TYPE_MIL_HELI,
+	0,
+};
 
 /**
 Skin ID per class.

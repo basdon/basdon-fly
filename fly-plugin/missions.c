@@ -37,31 +37,37 @@ struct MISSION {
 };
 
 /**
-Available mission point types for player.
-Usages are a.o. for in job help/map screen and to show mission point enexes.
-*/
+ * Available mission point types for player, based on their class and vehicle.
+ */
 static int missions_available_msptype_mask[MAX_PLAYERS];
 /**
-Mission point index for mission indicator slots.
-*/
-static short missionpoint_indicator_index[MAX_PLAYERS][MAX_MISSION_INDICATORS];
+ * Available mission point types for player, only for the vehicle they're in.
+ */
+static int missions_player_vehicle_msptype_mask[MAX_PLAYERS];
+
 #define MISSIONPOINT_INDICATOR_STATE_FREE 0
 #define MISSIONPOINT_INDICATOR_STATE_USED 1
 #define MISSIONPOINT_INDICATOR_STATE_AVAILABLE 2 /*indicator created, but it can be discarded*/
+#define MISSIONPOINT_INDICATOR_COLOR_RED 0
+#define MISSIONPOINT_INDICATOR_COLOR_GREEN 1
+#define MISSIONPOINT_INDICATOR_COLOR_BLUE 2
+struct MSP_INDICATOR {
+	struct MISSIONPOINT *msp[MAX_MISSION_INDICATORS];
+	/**See MISSIONPOINT_INDICATOR_STATE_* defs.*/
+	char state[MAX_MISSION_INDICATORS];
+	/**See MISSIONPOINT_INDICATOR_COLOR_* defs.*/
+	char color[MAX_MISSION_INDICATORS];
+};
+static struct MSP_INDICATOR msp_indicators[MAX_PLAYERS];
 /**
-See MISSIONPOINT_INDICATOR_STATE_* defs.
+Holds the missionpoint the player is in range of (only when player is driver).
+It is always valid for the player's class and the vehicle the player is driver in when not NULL.
 */
-static char missionpoint_indicator_state[MAX_PLAYERS][MAX_MISSION_INDICATORS];
+static struct MISSIONPOINT *active_msp[MAX_PLAYERS];
 /**
-Holds the index of the missionpoint the player is in range of, -1 when none.
-When not -1, the missionpoint is always valid for the vehicle the player is driver in.
+Holds the missionpoint that has an active checkpoint for player, for locating purposes.
 */
-static short active_msp_index[MAX_PLAYERS];
-/**
-Holds the index of the missionpoint that has an active checkpoint for player, for locating purposes.
-When none, -1.
-*/
-static short locating_msp_index[MAX_PLAYERS];
+static struct MISSIONPOINT *locating_msp[MAX_PLAYERS];
 /**
 See {@code MISSION_STAGE} definitions.
 */
@@ -107,16 +113,6 @@ int missions_get_initial_weatherbonus()
 	return a;
 }
 
-/**
-Must only be called if the player has a valid active missionpoint.
-*/
-static
-void missions_get_current_msp_and_mission_type(int playerid, struct MISSIONPOINT **msp, unsigned int *mission_type)
-{
-	*msp = &missionpoints[active_msp_index[playerid]];
-	*mission_type = missions_available_msptype_mask[playerid] & (*msp)->type;
-}
-
 static
 void missions_hide_jobmap_set_stage_set_controllable(int playerid)
 {
@@ -132,12 +128,13 @@ Must only be called if the player has a valid active missionpoint.
 static
 void missions_show_jobmap_set_stage_set_controllable(int playerid)
 {
-	struct MISSIONPOINT *msp;
-	unsigned int mission_type;
+	register struct MISSIONPOINT *msp;
+	register unsigned int mission_type;
 
 	if (ui_try_show(playerid, ui_mission_map)) {
 		HideGameTextForPlayer(playerid); /*The key or /w help text might still be showing.*/
-		missions_get_current_msp_and_mission_type(playerid, &msp, &mission_type);
+		msp = active_msp[playerid];
+		mission_type = missions_available_msptype_mask[playerid] & msp->type;
 		jobmap_show(playerid, mission_type, msp);
 		mission_stage[playerid] = MISSION_STAGE_JOBMAP;
 		TogglePlayerControllable(playerid, 0);
@@ -249,6 +246,12 @@ void missions_destroy_tracker_socket()
 	}
 }
 
+/**
+ * Indicators show missionpoint availability according to class and vehicle:
+ * - when wrong class: red enex (objid 19605)
+ * - when correct class but wrong vehicle: blue enex (objid 19607)
+ * - when correct class and correct vehicle: green enex (objid 19606)
+ */
 static
 void missions_update_missionpoint_indicators(int playerid, float player_x, float player_y, float player_z)
 {
@@ -258,24 +261,45 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 	struct RPCDATA_CreateObject rpcdata_CreateObject;
 	struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 	struct BitStream bitstream;
-	struct MISSIONPOINT *msp;
+	register struct MISSIONPOINT *msp;
+	struct MSP_INDICATOR *indicators;
+	unsigned int vehicle_msptype_mask, class_msptype_mask;
 	int airportidx, indicatoridx, missionptidx, idxtouse;
-	int player_new_active_msp_index;
 	float dx, dy, dz;
+	char color;
 
-	/*change now out-of-range ones to AVAILABLE*/
+	indicators = &msp_indicators[playerid];
+	vehicle_msptype_mask = missions_player_vehicle_msptype_mask[playerid];
+	class_msptype_mask = CLASS_MSPTYPES[classid[playerid]];
+
+	/*change now out-of-range ones, and wrong color ones, to AVAILABLE*/
 	for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
-		if (missionpoint_indicator_state[playerid][indicatoridx] == MISSIONPOINT_INDICATOR_STATE_USED) {
-			dx = missionpoints[missionpoint_indicator_index[playerid][indicatoridx]].pos.x - player_x;
-			dy = missionpoints[missionpoint_indicator_index[playerid][indicatoridx]].pos.y - player_y;
-			if (dx * dx + dy * dy > POINT_RANGE_SQ + 250.0f) {
-				/*No real need to destroy (unless its type doesn't match the player's available types anymore,
-				but the last loop of this method will deal with that).*/
-				missionpoint_indicator_state[playerid][indicatoridx] = MISSIONPOINT_INDICATOR_STATE_AVAILABLE;
-#ifdef MISSIONS_LOG_POINT_INDICATOR_ALLOC
-				printf("%d %d available %d\n", indicatoridx, missionpoint_indicator_index[playerid][indicatoridx], time_timestamp());
-#endif
+		if (indicators->state[indicatoridx] == MISSIONPOINT_INDICATOR_STATE_USED) {
+			/*Check if the indicator's color still matches the required color.*/
+			msp = indicators->msp[indicatoridx];
+			if (msp->type & class_msptype_mask) {
+				if (msp->type & vehicle_msptype_mask) {
+					color = MISSIONPOINT_INDICATOR_COLOR_GREEN;
+				} else {
+					color = MISSIONPOINT_INDICATOR_COLOR_BLUE;
+				}
+			} else {
+				color = MISSIONPOINT_INDICATOR_COLOR_RED;
 			}
+			if (color == indicators->color[indicatoridx]) {
+				/*Color ok, check if it's in range.*/
+				dx = msp->pos.x - player_x;
+				dy = msp->pos.y - player_y;
+				if (dx * dx + dy * dy <= POINT_RANGE_SQ + 250.0f) {
+					continue;
+				}
+			}
+
+			/*The last loop of this method will delete AVAILABLE ones if they're not reused by that point.*/
+			indicators->state[indicatoridx] = MISSIONPOINT_INDICATOR_STATE_AVAILABLE;
+#ifdef MISSIONS_LOG_POINT_INDICATOR_ALLOC
+			printf("%d %p available %lu\n", indicatoridx, indicators->msp[indicatoridx], time_timestamp());
+#endif
 		}
 	}
 
@@ -286,33 +310,36 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 		if (dx * dx + dy * dy < AIRPORT_RANGE_SQ) {
 			msp = airports[airportidx].missionpoints;
 			for (missionptidx = airports[airportidx].num_missionpts; missionptidx > 0; missionptidx--) {
-				if (!(msp->type & missions_available_msptype_mask[playerid])) {
-					goto next;
-				}
-
 				dx = msp->pos.x - player_x;
 				dy = msp->pos.y - player_y;
 				if (dx * dx + dy * dy > POINT_RANGE_SQ) {
 					goto next;
 				}
 
+				if (msp->type & class_msptype_mask) {
+					if (msp->type & vehicle_msptype_mask) {
+						color = MISSIONPOINT_INDICATOR_COLOR_GREEN;
+					} else {
+						color = MISSIONPOINT_INDICATOR_COLOR_BLUE;
+					}
+				} else {
+					color = MISSIONPOINT_INDICATOR_COLOR_RED;
+				}
+
 				idxtouse = -1;
 				for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
-					if (missionpoint_indicator_state[playerid][indicatoridx] != MISSIONPOINT_INDICATOR_STATE_USED) {
+					if (indicators->state[indicatoridx] != MISSIONPOINT_INDICATOR_STATE_USED) {
 						idxtouse = indicatoridx;
-					} else if (missionpoint_indicator_index[playerid][indicatoridx] == msp - missionpoints) {
+					} else if (indicators->msp[indicatoridx] == msp) {
 						/*This missionpoint is already created.*/
 						goto next;
 					}
 				}
 
 				if (idxtouse != -1) {
+					/*19605 red enex, 19606 green enex, 19607 blue enex*/
 					rpcdata_CreateObject.objectid = OBJECT_MISSION_INDICATOR_BASE + idxtouse;
-					/*This relies on the types being 1, 2, 4.*/
-					/*Passenger 1 19606*/
-					/*Cargo 2 19607*/
-					/*Special 4 19605*/
-					rpcdata_CreateObject.modelid = 19607 - (msp->point_type & 1) - ((msp->point_type >> 1) & 0x2);
+					rpcdata_CreateObject.modelid = 19605 + color;
 					rpcdata_CreateObject.x = msp->pos.x;
 					rpcdata_CreateObject.y = msp->pos.y;
 					rpcdata_CreateObject.z = msp->pos.z;
@@ -327,12 +354,12 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 					bitstream.ptrData = &rpcdata_CreateObject;
 					bitstream.numberOfBitsUsed = sizeof(rpcdata_CreateObject) * 8;
 					SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
-					missionpoint_indicator_state[playerid][idxtouse] = MISSIONPOINT_INDICATOR_STATE_USED;
-					missionpoint_indicator_index[playerid][idxtouse] = msp - missionpoints;
+					indicators->state[idxtouse] = MISSIONPOINT_INDICATOR_STATE_USED;
+					indicators->color[idxtouse] = color;
+					indicators->msp[idxtouse] = msp;
 #ifdef MISSIONS_LOG_POINT_INDICATOR_ALLOC
-					printf("%d %d created %d\n", idxtouse, msp-missionpoints, time_timestamp());
+					printf("%d %p created %lu\n", idxtouse, msp, time_timestamp());
 #endif
-					goto next;
 				}
 next:
 				msp++;
@@ -340,67 +367,74 @@ next:
 		}
 	}
 
-	/*delete AVAILABLE ones when they don't apply anymore*/
+	/*delete AVAILABLE ones*/
 	for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
-		if (missionpoint_indicator_state[playerid][indicatoridx] != MISSIONPOINT_INDICATOR_STATE_FREE &&
-			!(missionpoints[missionpoint_indicator_index[playerid][indicatoridx]].type & missions_available_msptype_mask[playerid]))
-		{
+		if (indicators->state[indicatoridx] == MISSIONPOINT_INDICATOR_STATE_AVAILABLE) {
 			rpcdata_DestroyObject.objectid = OBJECT_MISSION_INDICATOR_BASE + indicatoridx;
 			bitstream.ptrData = &rpcdata_DestroyObject;
 			bitstream.numberOfBitsUsed = sizeof(rpcdata_DestroyObject);
 			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream, playerid, 2);
-			missionpoint_indicator_state[playerid][indicatoridx] = MISSIONPOINT_INDICATOR_STATE_FREE;
+			indicators->state[indicatoridx] = MISSIONPOINT_INDICATOR_STATE_FREE;
 #ifdef MISSIONS_LOG_POINT_INDICATOR_ALLOC
-			printf("%d %d destroyed %d\n", indicatoridx, missionpoint_indicator_index[playerid][indicatoridx], time_timestamp());
+			printf("%d %p destroyed %lu\n", indicatoridx, indicators->msp[indicatoridx], time_timestamp());
 #endif
 		}
 	}
 
-	/*update active_msp_index and show 'press ...' text if needed*/
+	/*update active_msp and show 'press ...' text if needed*/
 	if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
 		for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
-			if (missionpoint_indicator_state[playerid][indicatoridx] == MISSIONPOINT_INDICATOR_STATE_USED) {
-				msp = &missionpoints[missionpoint_indicator_index[playerid][indicatoridx]];
+			if (indicators->state[indicatoridx] == MISSIONPOINT_INDICATOR_STATE_USED) {
+				msp = indicators->msp[indicatoridx];
 				dx = msp->pos.x - player_x;
 				dy = msp->pos.y - player_y;
 				dz = msp->pos.z - player_z;
 				if (dx * dx + dy * dy + dz * dz < MISSION_CP_RAD_SQ) {
-					if (active_msp_index[playerid] == missionpoint_indicator_index[playerid][indicatoridx]) {
+					if (active_msp[playerid] == indicators->msp[indicatoridx]) {
 						return;
 					}
 
-					player_new_active_msp_index = missionpoint_indicator_index[playerid][indicatoridx];
-					if (activemission[playerid]) {
-						if (player_new_active_msp_index == activemission[playerid]->endpoint - missionpoints) {
-							GameTextForPlayer(playerid, 3000, 3,
-								"~w~Press ~b~~k~~CONVERSATION_YES~~w~ to unload,~n~or type ~b~/w");
-						}
-						active_msp_index[playerid] = player_new_active_msp_index;
+					/*TODO: show better help (tell class or vehicle)*/
+					/*TODO: this keep showing constantly (because active_msp is not set,
+						because active_msp shouldn't be set, because it's not a valid msp for the player)*/
+					switch (indicators->color[indicatoridx]) {
+					case MISSIONPOINT_INDICATOR_COLOR_RED:
+						GameTextForPlayer(playerid, 3000, 3,
+							"~r~This missionpoint requires a different class (/reclass)");
+						return;
+					case MISSIONPOINT_INDICATOR_COLOR_BLUE:
+						GameTextForPlayer(playerid, 3000, 3,
+							"~r~This missionpoint requires a different vehicle");
+						return;
+					}
+
+					active_msp[playerid] = indicators->msp[indicatoridx];
+					if (activemission[playerid] && active_msp[playerid] == activemission[playerid]->endpoint) {
+						GameTextForPlayer(playerid, 3000, 3,
+							"~w~Press ~b~~k~~CONVERSATION_YES~~w~ to unload,~n~or type ~b~/w");
 						return;
 					}
 
 					/*TODO: sometimes when entering/exiting vehicle, this text doesn't show even though code gets hit*/
 					GameTextForPlayer(playerid, 3000, 3,
 						"~w~Press ~b~~k~~CONVERSATION_YES~~w~ to view missions,~n~or type ~b~/w");
+					if (active_msp[playerid] == locating_msp[playerid] && locating_msp[playerid]) {
+						locating_msp[playerid] = NULL;
+						DisablePlayerRaceCheckpoint(playerid);
+					}
 					goto active_msp_changed;
 				}
 			}
 		}
 	}
-	if (active_msp_index[playerid] == -1) {
-		return;
-	}
-	player_new_active_msp_index = -1;
+
+	if (active_msp[playerid]) {
+		active_msp[playerid] = NULL;
 active_msp_changed:
-	if (player_new_active_msp_index == locating_msp_index[playerid] && locating_msp_index[playerid] != -1) {
-		locating_msp_index[playerid] = -1;
-		DisablePlayerRaceCheckpoint(playerid);
+		if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
+			missions_hide_jobmap_set_stage_set_controllable(playerid);
+		}
 	}
-	if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
-		missions_hide_jobmap_set_stage_set_controllable(playerid);
-	}
-	/*this assignment has to be done *after* the jobmap_hide call*/
-	active_msp_index[playerid] = player_new_active_msp_index;
 
 #undef AIRPORT_RANGE_SQ
 #undef POINT_RANGE_SQ
@@ -812,14 +846,16 @@ void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh)
 
 void missions_on_player_connect(int playerid)
 {
+	register char *indicator_states;
 	int i;
 
+	indicator_states = msp_indicators[playerid].state;
 	for (i = 0; i < MAX_MISSION_INDICATORS; i++) {
-		missionpoint_indicator_state[playerid][i] = MISSIONPOINT_INDICATOR_STATE_FREE;
+		indicator_states[i] = MISSIONPOINT_INDICATOR_STATE_FREE;
 	}
 	missions_available_msptype_mask[playerid] = -1;
-	active_msp_index[playerid] = -1;
-	locating_msp_index[playerid] = -1;
+	active_msp[playerid] = NULL;
+	locating_msp[playerid] = NULL;
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	activemission[playerid] = NULL;
 	number_missions_started_stopped[playerid]++;
@@ -951,6 +987,16 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 		return;
 	}
 
+	if (!(CLASS_MSPTYPES[classid[playerid]] & missiontype)) {
+		/*This should never happen, since this should only be called from the missionmap,
+		and players shouldn't be able to reclass while the missionmap is opened.*/
+#if DEV
+		assert(((void) "wrong class", 0));
+#endif
+		SendClientMessage(playerid, COL_WARN, WARN"Wrong class! (/reclass)");
+		return;
+	}
+
 	vehicleid = GetPlayerVehicleID(playerid);
 	veh = gamevehicles[vehicleid].dbvehicle;
 	if (!veh || !(missions_get_vehicle_model_msptype_mask(veh->model) & missiontype)) {
@@ -1038,7 +1084,7 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 	TogglePlayerControllable(playerid, 0);
 	GameTextForPlayer(playerid, 0x800000, 3, "~p~Loading");
 	kneeboard_update_all(playerid, &player_position);
-	locating_msp_index[playerid] = -1;
+	locating_msp[playerid] = NULL;
 }
 
 struct MISSION_UNLOAD_DATA {
@@ -1292,6 +1338,41 @@ void missions_start_unload(int playerid)
 }
 
 static
+void missions_update_available_msptypes(int playerid, int vehicleid)
+{
+	register unsigned int mask;
+
+	missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[classid[playerid]];
+	if (vehicleid) {
+		mask = missions_get_vehicle_model_msptype_mask(GetVehicleModel(vehicleid));
+		missions_player_vehicle_msptype_mask[playerid] = mask;
+		missions_available_msptype_mask[playerid] &= mask;
+	} else {
+		missions_player_vehicle_msptype_mask[playerid] = 0;
+	}
+}
+
+/*TODO: same thing but for passenger state?*/
+static
+void missions_on_driver_changed_vehicle_without_state_change(int playerid, int newvehicleid)
+{
+	struct vec3 pos;
+
+	missions_update_available_msptypes(playerid, newvehicleid);
+	GetPlayerPos(playerid, &pos);
+	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
+}
+
+static
+void missions_stoplocate(int playerid)
+{
+	if (locating_msp[playerid]) {
+		locating_msp[playerid] = NULL;
+		DisablePlayerRaceCheckpoint(playerid);
+	}
+}
+
+static
 void missions_on_player_state_change(int playerid, int from, int to)
 {
 	struct MISSION *mission;
@@ -1317,17 +1398,13 @@ void missions_on_player_state_change(int playerid, int from, int to)
 			break;
 		}
 
-		if (locating_msp_index[playerid] != -1) {
-			locating_msp_index[playerid] = -1;
-			DisablePlayerRaceCheckpoint(playerid);
-		}
+		missions_stoplocate(playerid);
 		return;
 	}
 
 	if (to == PLAYER_STATE_ONFOOT || from == PLAYER_STATE_ONFOOT) {
 		vehicleid = GetPlayerVehicleID(playerid);
 		if (vehicleid) {
-			missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(GetVehicleModel(vehicleid));
 			/*If the player entering as passenger is on a flight themselves,
 			we don't want to override the displayed satisfaction value with the
 			value of the mission of the vehicleid they're entering as passenger.
@@ -1339,7 +1416,6 @@ void missions_on_player_state_change(int playerid, int from, int to)
 				}
 			}
 		} else {
-			missions_available_msptype_mask[playerid] = -1;
 			/*Don't hide satisfaction text for the pilot or a passenger
 			if the passenger is on a flight themselves.*/
 			if (mission_stage[playerid] != MISSION_STAGE_FLIGHT) {
@@ -1352,7 +1428,13 @@ void missions_on_player_state_change(int playerid, int from, int to)
 		if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
 			missions_hide_jobmap_set_stage_set_controllable(playerid);
 		}
+	}
 
+	if (from == PLAYER_STATE_DRIVER || to == PLAYER_STATE_DRIVER ||
+		from == PLAYER_STATE_PASSENGER || to == PLAYER_STATE_PASSENGER)
+	{
+		vehicleid = GetPlayerVehicleID(playerid);
+		missions_update_available_msptypes(playerid, vehicleid);
 		GetPlayerPos(playerid, &pos);
 		missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 	}
@@ -1462,29 +1544,19 @@ void missions_process_cancel_request_by_player(int playerid)
 }
 
 static
-void missions_stoplocate(int playerid)
-{
-	if (locating_msp_index[playerid] != -1) {
-		locating_msp_index[playerid] = -1;
-		DisablePlayerRaceCheckpoint(playerid);
-	}
-}
-
-static
 void missions_locate_closest_mission(int playerid)
 {
-	struct MISSIONPOINT *msp;
+	struct MISSIONPOINT *closest;
 	struct dbvehicle *veh;
 	struct vec3 pos;
 	int mspindex;
-	int closest_index;
 	float dx, dy;
 	float closest_distance_sq, distance_sq;
 	int vehicleid;
 	int msptypemask;
 
 	GetPlayerPos(playerid, &pos);
-	closest_index = -1;
+	closest = NULL;
 	closest_distance_sq = float_pinf;
 	for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {
 		msptypemask = missionpoints[mspindex].type;
@@ -1494,22 +1566,21 @@ void missions_locate_closest_mission(int playerid)
 			distance_sq = dx * dx + dy * dy;
 			if (distance_sq < closest_distance_sq) {
 				closest_distance_sq = distance_sq;
-				closest_index = mspindex;
+				closest = &missionpoints[mspindex];
 			}
 		}
 	}
 
-	if (closest_index == -1) {
-		SendClientMessage(playerid, COL_WARN, WARN"No mission points available for this vehicle.");
+	if (!closest) {
+		SendClientMessage(playerid, COL_WARN, WARN"No mission points available for your class and vehicle combination.");
 	} else {
-		locating_msp_index[playerid] = closest_index;
-		msp = &missionpoints[closest_index];
-		SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &msp->pos, MISSION_CP_RAD);
+		locating_msp[playerid] = closest;
+		SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &closest->pos, MISSION_CP_RAD);
 		if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER) {
 			vehicleid = GetPlayerVehicleID(playerid);
 			veh = gamevehicles[vehicleid].dbvehicle;
 			if (veh) {
-				nav_navigate_to_airport(playerid, vehicleid, veh->model, msp->ap);
+				nav_navigate_to_airport(playerid, vehicleid, veh->model, closest->ap);
 			}
 		}
 		/*Message should have same color as the message in nav_navigate_to_airport.*/
@@ -1528,7 +1599,7 @@ void missions_locate_or_show_map(int playerid)
 
 	switch (mission_stage[playerid]) {
 	case MISSION_STAGE_NOMISSION:
-		if (active_msp_index[playerid] != -1) {
+		if (active_msp[playerid]) {
 			missions_show_jobmap_set_stage_set_controllable(playerid);
 			break;
 		}
@@ -1540,9 +1611,7 @@ void missions_locate_or_show_map(int playerid)
 			break;
 		}
 
-		/*TODO this msptype stuff*/
-		missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(veh->model);
-		if (missions_available_msptype_mask[playerid] == 0) {
+		if (missions_get_vehicle_model_msptype_mask(veh->model) == 0) {
 			SendClientMessage(playerid, COL_WARN, WARN"This vehicle can't do any missions!");
 			break;
 		}
@@ -1550,7 +1619,7 @@ void missions_locate_or_show_map(int playerid)
 		missions_locate_closest_mission(playerid);
 		break;
 	case MISSION_STAGE_FLIGHT:
-		if (active_msp_index[playerid] == activemission[playerid]->endpoint - missionpoints) {
+		if (active_msp[playerid] == activemission[playerid]->endpoint) {
 			missions_start_unload(playerid);
 			break;
 		}
@@ -1587,9 +1656,10 @@ void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 		} else if (KEY_JUST_DOWN(KEY_SPRINT)) {
 			PlayerPlaySound(playerid, MISSION_JOBMAP_ACCEPT_SOUND);
 			selected_airport = jobmap_do_accept_button(playerid);
-			if (selected_airport && active_msp_index[playerid] != -1) {
+			if (selected_airport && active_msp[playerid]) {
 				missions_hide_jobmap_set_stage_set_controllable(playerid);
-				missions_get_current_msp_and_mission_type(playerid, &frommsp, &mission_type);
+				frommsp = active_msp[playerid];
+				mission_type = missions_available_msptype_mask[playerid] & frommsp->type;
 				tomsp = missions_get_random_msp(selected_airport, mission_type);
 				if (tomsp) {
 					missions_start_mission(playerid, frommsp, tomsp, mission_type);
@@ -1600,12 +1670,10 @@ void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 				}
 			}
 		}
-	} else if (KEY_JUST_DOWN(KEY_YES) && active_msp_index[playerid] != -1) {
+	} else if (KEY_JUST_DOWN(KEY_YES) && active_msp[playerid]) {
 		if (mission_stage[playerid] == MISSION_STAGE_NOMISSION) {
 			missions_show_jobmap_set_stage_set_controllable(playerid);
-		} else if (mission_stage[playerid] == MISSION_STAGE_FLIGHT &&
-			active_msp_index[playerid] == activemission[playerid]->endpoint - missionpoints)
-		{
+		} else if (mission_stage[playerid] == MISSION_STAGE_FLIGHT && active_msp[playerid] == activemission[playerid]->endpoint) {
 			missions_start_unload(playerid);
 		}
 	}
@@ -1641,6 +1709,13 @@ void missions_on_vehicle_repaired(int vehicleid, float fixamount, float newhp)
 			return;
 		}
 	}
+}
+
+static
+void missions_on_player_spawn(int playerid, struct vec3 pos)
+{
+	missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[classid[playerid]];
+	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 }
 
 void missions_update_satisfaction(int pid, int vid, float pitch, float roll)

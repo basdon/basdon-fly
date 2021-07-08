@@ -926,6 +926,7 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 			but that's supposed to be as last-resort (for players that are vehicle warping)*/
 			oldvehicleid = GetPlayerVehicleID(playerid);
 			veh_on_driver_changed_vehicle_without_state_change(playerid, oldvehicleid, vehicleid);
+			missions_on_driver_changed_vehicle_without_state_change(playerid, vehicleid);
 			lastvehicle_asdriver[playerid] = vehicleid; /*So hook_OnDriverSync doesn't detect warping.*/
 		}
 	}
@@ -1161,6 +1162,7 @@ void hook_OnDriverSync(int playerid)
 	lastvehicle_asdriver[playerid] = data->vehicle_id; /*always write this because OnPlayerUpdate resets it to 0*/
 	if (storedlastvehicleid != data->vehicle_id) {
 		veh_on_driver_changed_vehicle_without_state_change(playerid, storedlastvehicleid, data->vehicle_id);
+		missions_on_driver_changed_vehicle_without_state_change(playerid, data->vehicle_id);
 		/*TODO: This is vehicle warping when reaching this (but how trustworthy is it?
 		Maybe a player is still sending driversync of the old vehicle
 		after PutPlayerInVehicle was called?)*/

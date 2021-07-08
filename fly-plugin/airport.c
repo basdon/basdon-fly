@@ -36,7 +36,7 @@ void airports_print_stats()
 		printf(" missionpoints: %d types: %d\n", ap->num_missionpts, ap->missiontypes);
 		msp = ap->missionpoints;
 		for (j = 0; j < ap->num_missionpts; j++) {
-			printf("  missionpoint %d: %s type %d point_type %d\n", msp->id, msp->name, msp->type, msp->point_type);
+			printf("  missionpoint %d: %s type %08x\n", msp->id, msp->name, msp->type);
 			msp++;
 		}
 		ap++;
@@ -218,21 +218,6 @@ have_airport:
 		msp->pos.z = (*field = 4, NCF(n_cache_get_field_f));
 		msp->type = (*field = 5, NC(n_cache_get_field_i));
 		ap->missiontypes |= msp->type;
-		if (msp->type & PASSENGER_MISSIONTYPES) {
-			msp->point_type = MISSION_POINT_PASSENGERS;
-			if (msp->type & ~PASSENGER_MISSIONTYPES) {
-mixed_missionpoints:
-				logprintf("mixed missionpoint types msp id %d ap %s", msp->id, ap->name);
-				assert(((void) "mixed missionpoint types", 0));
-			}
-		} else if (msp->type & CARGO_MISSIONTYPES) {
-			msp->point_type = MISSION_POINT_CARGO;
-			if (msp->type & ~CARGO_MISSIONTYPES) {
-				goto mixed_missionpoints;
-			}
-		} else {
-			msp->point_type = MISSION_POINT_SPECIAL;
-		}
 		NC_PARS(3);
 		*field = 6; NC(n_cache_get_field_s);
 		ctoa(msp->name, buf32, MAX_MSP_NAME + 1);

@@ -382,7 +382,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 	nametags_update_for_player(playerid);
 	spawn_on_player_spawn(playerid);
 	svp_update_mapicons(playerid, pos.x, pos.y);
-	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
+	missions_on_player_spawn(playerid, pos);
 	zones_update(playerid, pos);
 
 	return 1;
