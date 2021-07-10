@@ -422,7 +422,7 @@ int cmd_androm(struct COMMANDCONTEXT cmdctx)
 }
 
 #define CMD_AT400_SYNTAX ""
-#define CMD_AT400_DESC "Teleports into a nearby andromada as driver"
+#define CMD_AT400_DESC "Teleports into a nearby AT-400 as driver"
 static
 int cmd_at400(struct COMMANDCONTEXT cmdctx)
 {
