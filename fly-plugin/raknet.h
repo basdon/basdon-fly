@@ -42,8 +42,10 @@ struct RakServer {
 
 struct RakServer_vtable {
 	int _pad0[60];
+	/**thiscall with one parameter, use RakServer__GetPlayerIDFromIndex in samp.asm*/
 	void (*GetPlayerIDFromIndex)(struct PlayerID *outPlayerID, struct RakServer *rakServer, short playerIndex);
 	int _padF4[9];
+	/**cdecl*/
 	struct RakNetStatistics *(*GetStatistics)(struct RakServer *rakServer, struct PlayerID playerID);
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetPlayerIDFromIndex, 0xF0);

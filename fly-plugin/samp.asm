@@ -1,5 +1,6 @@
 extern logprintf
 extern samp_pNetGame
+extern rakServer;
 
 extern hook_OnOnfootSync
 extern hook_OnDriverSync
@@ -152,6 +153,17 @@ GetVehicleZAngleUnsafe:
 	mov ebx, [ebx+eax*4+03F54h]
 	mov eax, 080DD032h ;n_GetVehicleZAngle
 	jmp eax
+
+;prot void RakServer__GetPlayerIDFromIndex(struct PlayerID *outPlayerId, struct RakServer *rakServer, short playerIndex);
+global RakServer__GetPlayerIDFromIndex:function
+RakServer__GetPlayerIDFromIndex:
+	push dword [esp+0Ch] ; playerIndex
+	push dword [esp+0Ch] ; rakServer
+	push dword [esp+0Ch] ; outPlayerId
+	mov eax, 0807C720h
+	call eax ; thiscall with 1 parameter; pops 1 arg
+	add esp, 0x8
+	ret
 
 segment .data
 logprintRetAddr	dd 00h
