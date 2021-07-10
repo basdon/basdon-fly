@@ -278,7 +278,7 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 			/*Check if the indicator's color still matches the required color.*/
 			msp = indicators->msp[indicatoridx];
 			if (msp->type & class_msptype_mask) {
-				if (msp->type & vehicle_msptype_mask) {
+				if (msp->type & class_msptype_mask & vehicle_msptype_mask) {
 					color = MISSIONPOINT_INDICATOR_COLOR_GREEN;
 				} else {
 					color = MISSIONPOINT_INDICATOR_COLOR_BLUE;
@@ -317,7 +317,7 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 				}
 
 				if (msp->type & class_msptype_mask) {
-					if (msp->type & vehicle_msptype_mask) {
+					if (msp->type & class_msptype_mask & vehicle_msptype_mask) {
 						color = MISSIONPOINT_INDICATOR_COLOR_GREEN;
 					} else {
 						color = MISSIONPOINT_INDICATOR_COLOR_BLUE;
