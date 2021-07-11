@@ -173,19 +173,31 @@ struct SampVehicle {
 	int model;
 	struct vec3 spawnPos;
 	float rotation;
-	int color1; /*what's the difference with col1?*/
-	int color2; /*what's the difference with col2?*/
+	/*Primary color, set when creating the vehicle. This color will be used when respawning. See moddedColor1.*/
+	int spawnColor1;
+	/*Primary color, set when creating the vehicle. This color will be used when respawning. See moddedColor2.*/
+	int spawnColor2;
 	int respawn_delay_ms;
-	int _padA2;
+	int interior;
 	float health;
 	struct SampVehicleDamageStatus damageStatus;
-	char _padB4[0xC6-0xB4];
-	int col1; /*what's the difference with color1?*/
-	int col2; /*what's the difference with color2?*/
+	char _padB4;
+	short _padB5;
+	char modslots[14];
+	char paintjob;
+	/*Primary color after ChangeVehicleColor or TransFender garage has been used.
+	When not set yet, this is -1. This gets reset to -1 when the vehicle is respawned.
+	A value of -1 means the spawnColor1 will be used instead.*/
+	int moddedColor1;
+	/*Secondary color after ChangeVehicleColor or TransFender garage has been used.
+	When not set yet, this is -1. This gets reset to -1 when the vehicle is respawned.
+	A value of -1 means the spawnColor2 will be used instead.*/
+	int moddedColor2;
 	char numberplate[33]; /*32 + 1 pad*/
 	struct SampVehicleParams params;
-	char _padFF[0x105-0xFF];
-	int creationTickCount; /*GetTickCount() at time of creation*/
+	char _padFF[0x101-0xFF];
+	int lastRespawnTickCount; /*GetTickCount() at time of last respawn*/
+	int lastSpawnTickCount; /*GetTickCount() at time of last (re)spawn*/
 	char use_siren;
 	char _pad10A;
 };
@@ -195,8 +207,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, model, 0x82);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, respawn_delay_ms, 0x9E);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, health, 0xA6);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, damageStatus, 0xAA);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, col1, 0xC6);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, col2, 0xCA);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, paintjob, 0xC5);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, params, 0xEF);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, use_siren, 0x109);
 
@@ -585,6 +596,35 @@ struct RPCDATA_RequestSpawn {
 	int type; /*??. 2 is used for SpawnPlayer(). other values may be in response to client requesting spawn?*/
 };
 EXPECT_SIZE(struct RPCDATA_RequestSpawn, 4);
+
+struct RPCDATA_CreateVehicle {
+	short vehicleid;
+	int model;
+	struct vec4 pos;
+	char spawnColor1; /*Note how spawnColorX is 4 bytes in SampVehicle, but 1 byte here & moddedColorX is 1 byte / 4 bytes...!?*/
+	char spawnColor2;
+	float health;
+	char interior;
+	struct SampVehicleDamageStatus damagestatus;
+	char siren;
+	char modslots[14];
+	char paintjob;
+	int moddedColor1;
+	int moddedColor2;
+};
+EXPECT_SIZE(struct RPCDATA_CreateVehicle, 2 + 4 + 16 + 1 + 1 + 4 + 1 + 10 + 1 + 14 + 1 + 4 + 4);
+
+struct RPCDATA_DeleteVehicle {
+	short vehicleid;
+};
+EXPECT_SIZE(struct RPCDATA_DeleteVehicle, 2);
+
+struct RPCDATA_SetVehicleNumberplate {
+	short vehicleid;
+	char text_length;
+	char text[1]; /*actually arbitrary size*/
+};
+EXPECT_SIZE(struct RPCDATA_SetVehicleNumberplate, 2 + 1 + 1);
 #pragma pack()
 
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,unk) \
@@ -617,3 +657,6 @@ EXPECT_SIZE(struct RPCDATA_RequestSpawn, 4);
 #define RPC_DisableRemoteVehicleCollisions 0x815CD80 /*ptr to 0xA7(167)*/
 #define RPC_ShowDialog 0x815CD7C /*ptr to 0x3D(61)*/
 #define RPC_RequestSpawn 0x815A61E /*ptr to 0x81(129)*/
+#define RPC_CreateVehicle 0x8166228 /*ptr to 0xA4(164)*/
+#define RPC_DeleteVehicle 0x816622C /*ptr to 0xA5(165)*/
+#define RPC_SetVehicleNumberplate 0x816622A /*ptr to  0x7B(123)*/

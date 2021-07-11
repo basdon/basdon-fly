@@ -559,13 +559,20 @@ int cmd_engine(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_getspray(struct COMMANDCONTEXT cmdctx)
 {
-	int vehicleid, col1, col2;
-	char msg144[144];
+	struct SampVehicle *vehicle;
+	char buf[144], *b;
 
-	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
-	if (vehicleid && GetVehicleColor(vehicleid, &col1, &col2)) {
-		sprintf(msg144, "colors: %d, %d", col1, col2);
-		SendClientMessage(cmdctx.playerid, -1, msg144);
+	vehicle = samp_pNetGame->vehiclePool->vehicles[GetPlayerVehicleID(cmdctx.playerid)];
+	if (vehicle) {
+		b = buf;
+		b += sprintf(b, "primary: %d, secondary: %d", vehicle->spawnColor1, vehicle->spawnColor2);
+		if (vehicle->moddedColor1 != -1) {
+			b += sprintf(b, ", (modded primary color: %d)", vehicle->moddedColor1);
+		}
+		if (vehicle->moddedColor2 != -1) {
+			b += sprintf(b, ", (modded secondary color: %d)", vehicle->moddedColor1);
+		}
+		SendClientMessage(cmdctx.playerid, -1, buf);
 	}
 	return CMD_OK;
 }
@@ -1008,6 +1015,7 @@ int cmd_s(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_spray(struct COMMANDCONTEXT cmdctx)
 {
+	/*TODO: check OnVehicleRespray to store colors like /spray?*/
 	veh_spray_from_cmd(cmdctx, /*bypass_permissions*/ 0);
 	return CMD_OK;
 }

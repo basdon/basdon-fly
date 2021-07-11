@@ -522,7 +522,7 @@ void veh_init()
 
 			/*pos coords must be set to float_pinf*/
 			pos.r = veh->pos.r;
-			vehicleid = CreateVehicle(veh->model, &pos, 126, 126, VEHICLE_RESPAWN_DELAY_MS);
+			vehicleid = CreateVehicle(veh->model, &pos, veh->col1, veh->col2, VEHICLE_RESPAWN_DELAY_MS);
 			if (vehicleid != INVALID_VEHICLE_ID) {
 				veh->spawnedvehicleid = vehicleid;
 				gamevehicles[vehicleid].dbvehicle = veh;
@@ -623,7 +623,7 @@ rand2nd:
 			if (random1 != NULL || random2 != NULL) {
 				game_random_carcol(GetVehicleModel(vehicleid), random1, random2);
 			}
-			SetVehicleColor(vehicleid, col1, col2);
+			SetVehicleColorPermanent(vehicleid, col1, col2);
 			if (veh != NULL) {
 				veh->col1 = (unsigned char) col1;
 				veh->col2 = (unsigned char) col2;
@@ -761,7 +761,7 @@ int veh_create(struct dbvehicle *veh)
 
 	pos.coords.x = pos.coords.y = pos.coords.z = float_pinf;
 	pos.r = veh->pos.r;
-	vehicleid = CreateVehicle(veh->model, &pos, 126, 126, VEHICLE_RESPAWN_DELAY_MS);
+	vehicleid = CreateVehicle(veh->model, &pos, veh->col1, veh->col2, VEHICLE_RESPAWN_DELAY_MS);
 	if (vehicleid != INVALID_VEHICLE_ID) {
 		gamevehicles[vehicleid].dbvehicle = veh;
 		gamevehicles[vehicleid].reincarnation++;

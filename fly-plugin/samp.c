@@ -679,9 +679,13 @@ void RepairVehicle(int vehicleid)
 
 /**
 This is named ChangeVehicleColor in the PAWN API.
+
+Color will be reset to spawnColor1/spawnColor2 when the vehicle respawns
+(so this function has the same behavior as changing the color in TransFender garages).
+See also SetVehicleColorPermanent.
 */
 static
-void SetVehicleColor(int vehicleid, int col1, int col2)
+void SetVehicleColorTemporary(int vehicleid, int col1, int col2)
 {
 	struct SampVehicle *vehicle;
 
@@ -700,19 +704,70 @@ void SetVehicleColor(int vehicleid, int col1, int col2)
 
 /**
 This does not exist in the PAWN API.
+
+Color will persist when the vehicle respawns.
+See also SetVehicleColorTemporary.
 */
 static
+void SetVehicleColorPermanent(int vehicleid, int col1, int col2)
+{
+	struct SampVehicle *vehicle;
+
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+		/*Setting temporary color is needed for the color to change for the players that have the vehicle streamed in.*/
+		SetVehicleColorTemporary(vehicleid, col1, col2);
+		/*Change the actual spawn colors, so the vehicle respawns with these colors.*/
+		vehicle->spawnColor1 = col1;
+		vehicle->spawnColor2 = col2;
+		/*Unset modded colors, because the spawn colors are correct.*/
+		vehicle->moddedColor1 = -1;
+		vehicle->moddedColor2 = -1;
+	}
+}
+
+/**
+This does not exist in the PAWN API.
+*/
+static
+__attribute__((unused))
 int GetVehicleColor(int vehicleid, int *col1, int *col2)
 {
 	struct SampVehicle *vehicle;
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
 	if (vehicle) {
-		*col1 = vehicle->col1;
-		*col2 = vehicle->col2;
+		if (vehicle->moddedColor1 != -1) {
+			*col1 = vehicle->moddedColor1;
+		} else {
+			*col1 = vehicle->spawnColor1;
+		}
+		if (vehicle->moddedColor2 != -1) {
+			*col2 = vehicle->moddedColor2;
+		} else {
+			*col2 = vehicle->spawnColor2;
+		}
 		return 1;
 	}
 	return 0;
+}
+
+static
+__attribute__((unused))
+void SetVehiclePaintjob(int vehicleid, char paintjob)
+{
+	struct SampVehicle *vehicle;
+
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+#ifndef NO_CAST_IMM_FUNCPTR
+		((void (*)(struct SampVehicle*,short,int))0x814C2F0)(
+			vehicle,
+			INVALID_PLAYER_ID, /*The player that caused this update, so gamemode/filterscripts can block it (not applicable here).*/
+			paintjob
+		);
+#endif
+	}
 }
 
 /**
