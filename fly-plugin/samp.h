@@ -3,6 +3,18 @@ EXPECT_SIZE(short, 2);
 EXPECT_SIZE(int, 4);
 
 #pragma pack(1)
+struct SampMatrix {
+	struct vec3 right; /*unsure*/
+	float _14;
+	struct vec3 up; /*unsure*/
+	float _24;
+	struct vec3 at; /*unsure*/
+	float _34;
+	struct vec3 pos;
+	float _44;
+};
+EXPECT_SIZE(struct SampMatrix, 0x40);
+
 struct SampVehicleParamsDoorsWindows {
 	char frontleft; /*-1 unset, 0 closed, 1 open*/
 	char frontright; /*-1 unset, 0 closed, 1 open*/
@@ -153,32 +165,40 @@ EXPECT_SIZE(struct SYNCDATA_Passenger, 0x18);
 
 struct SampVehicle {
 	struct vec3 pos;
-	char _padC[0x40];
+	struct SampMatrix matrix;
 	struct vec3 vel;
-	int field_58;
-	int field_5C;
-	int field_60;
+	int field_58[3];
 	short vehicleid;
 	char _pad66[0x82-0x66];
-	short model;
-	char _pad84[0xA6-0x84];
+	int model;
+	struct vec3 spawnPos;
+	float rotation;
+	int color1; /*what's the difference with col1?*/
+	int color2; /*what's the difference with col2?*/
+	int respawn_delay_ms;
+	int _padA2;
 	float health;
 	struct SampVehicleDamageStatus damageStatus;
 	char _padB4[0xC6-0xB4];
-	int col1;
-	int col2;
-	char _padCE[0xEF-0xCE];
+	int col1; /*what's the difference with color1?*/
+	int col2; /*what's the difference with color2?*/
+	char numberplate[33]; /*32 + 1 pad*/
 	struct SampVehicleParams params;
-	/*Incomplete.*/
+	char _padFF[0x105-0xFF];
+	int creationTickCount; /*GetTickCount() at time of creation*/
+	char use_siren;
+	char _pad10A;
 };
-STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, vel, 0xC + 0x40);
+EXPECT_SIZE(struct SampVehicle, 0x10B); /*Complete.*/
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, vehicleid, 0x64);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, model, 0x82);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, respawn_delay_ms, 0x9E);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, health, 0xA6);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, damageStatus, 0xAA);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, col1, 0xC6);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, col2, 0xCA);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, params, 0xEF);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, use_siren, 0x109);
 
 #define UPDATE_SYNC_TYPE_NONE 0
 #define UPDATE_SYNC_TYPE_ONFOOT 1
@@ -243,9 +263,11 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, color, 0x2C34);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, interior, 0x2C40);
 
 struct SampVehiclePool {
-	char _pad0[8212];
+	char _pad0[0xD4];
+	int _padD4[2000];
 	int created[2000];
 	struct SampVehicle *vehicles[2000];
+	int poolsize;
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, created, 0x2014);

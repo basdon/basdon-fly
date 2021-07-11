@@ -2,10 +2,8 @@
 custom code and shouldn't be used directly.*/
 
 static AMX_NATIVE n_AddPlayerClass;
-static AMX_NATIVE n_AddStaticVehicleEx;
 static AMX_NATIVE n_ClearAnimations;
 static AMX_NATIVE n_CreatePlayerObject;
-static AMX_NATIVE n_CreateVehicle_;
 static AMX_NATIVE n_DestroyObject;
 static AMX_NATIVE n_DestroyPlayerObject;
 static AMX_NATIVE n_DestroyVehicle_;
@@ -113,8 +111,6 @@ static cell tmpfloat;
 #define NC_ClearAnimations(PLAYERID,FORCESYNC) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FORCESYNC,\
 	n_ClearAnimations(amx,nc_params))
-
-#define CreateVehicle __USE__veh_CreateVehicle__
 
 #define NC_DestroyObject(OBJECTID) (NC_PARS_(1)nc_params[1]=OBJECTID,\
 	n_DestroyObject(amx,nc_params))
@@ -301,10 +297,8 @@ int natives_find()
 	};
 	struct NATIVE natives[] = {
 		N(AddPlayerClass),
-		N(AddStaticVehicleEx),
 		N(ClearAnimations),
 		N(CreatePlayerObject),
-		N_(CreateVehicle),
 		N(DestroyObject),
 		N(DestroyPlayerObject),
 		N_(DestroyVehicle),

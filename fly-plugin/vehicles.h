@@ -1,7 +1,7 @@
 
 /* vim: set filetype=c ts=8 noexpandtab: */
 
-#define VEHICLE_RESPAWN_DELAY 300
+#define VEHICLE_RESPAWN_DELAY_MS (5 * 60 * 1000)
 
 struct dbvehicle {
 	int id;
@@ -67,16 +67,6 @@ OnGameModeExit.
 @return 0 if there was nothing to commit
 */
 int veh_commit_next_vehicle_odo_to_db();
-/**
-Create a vehicle from given dbvehicle.
-
-Will create the vehicle with bogus position and colors, then respawns the
-vehicle. The rotation is instantly correct because that can't be changed
-afterwards.
-
-@return vehicle id (might be INVALID_VEHICLE_ID)
-*/
-int veh_create(struct dbvehicle *veh);
 /**
 Free memory
 */

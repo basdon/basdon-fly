@@ -161,6 +161,20 @@ void Delete3DTextLabel(int playerid, int label_id)
 	SAMP_SendRPCToPlayer(RPC_Delete3DTextLabel, &bs, playerid, 2);
 }
 
+/**
+ * Does not apply until the vehicle is respawned.
+ */
+static
+void SetVehicleSiren(int vehicleid, char siren)
+{
+	struct SampVehicle *vehicle;
+
+	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	if (vehicle) {
+		vehicle->use_siren = siren;
+	}
+}
+
 static
 __attribute__((unused))
 int IsPlayerStreamedIn(int forplayerid, int playerid)

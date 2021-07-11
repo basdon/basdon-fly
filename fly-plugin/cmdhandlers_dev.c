@@ -249,6 +249,20 @@ int cmd_dev_rnw(struct COMMANDCONTEXT cmdctx)
 	}
 }
 
+#define CMD_SIREN_SYNTAX "<1/0>"
+#define CMD_SIREN_DESC "Sets the vehicle's siren flag"
+static
+int cmd_dev_siren(struct COMMANDCONTEXT cmdctx)
+{
+	int flag;
+
+	if (cmd_get_int_param(&cmdctx, &flag)) {
+		SetVehicleSiren(GetPlayerVehicleID(cmdctx.playerid), flag);
+		return CMD_OK;
+	}
+	return CMD_SYNTAX_ERR;
+}
+
 #define CMD_SOUND_SYNTAX "<soundid>"
 #define CMD_SOUND_DESC "Plays a sound"
 static
@@ -365,15 +379,7 @@ int cmd_dev_v(struct COMMANDCONTEXT cmdctx)
 		NC(n_DestroyVehicle_);
 	}
 	GetPlayerPosRot(cmdctx.playerid, &pos);
-	NC_PARS(9);
-	nc_params[1] = modelid;
-	nc_paramf[2] = pos.coords.x;
-	nc_paramf[3] = pos.coords.y;
-	nc_paramf[4] = pos.coords.z;
-	nc_paramf[5] = pos.r;
-	nc_params[6] = nc_params[7] = nc_params[8] = 126;
-	nc_params[9] = 0;
-	devvehicle = NC(n_CreateVehicle_);
+	devvehicle = CreateVehicle(modelid, &pos, 126, 126, -1);
 	natives_PutPlayerInVehicle(cmdctx.playerid, devvehicle, 0);
 	sprintf(msg144, "%d - %s - %s", modelid, vehmodelnames[modelid - 400], vehnames[modelid - 400]);
 	SendClientMessage(cmdctx.playerid, -1, msg144);

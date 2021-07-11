@@ -82,9 +82,9 @@ samphost_GetPtrStreamDistance:
 	add esp, 0x8
 	ret
 
-;/**
-;Crashes if vehicle does not exist.
-;*/
+;prot /**
+;prot Crashes if vehicle does not exist.
+;prot */
 ;prot void GetVehiclePosRotUnsafe(int vehicleid, struct vec4 *pos);
 global GetVehiclePosRotUnsafe:function
 GetVehiclePosRotUnsafe:
@@ -111,10 +111,10 @@ GetVehiclePosRotUnsafe:
 	mov eax, 080DD032h ;n_GetVehicleZAngle
 	jmp eax
 
-;/**
-;Crashes if vehicle does not exist.
-;{@param rot} must be ptr to {@code struct { float w, x, y, z }}.
-;*/
+;prot /**
+;prot Crashes if vehicle does not exist.
+;prot {@param rot} must be ptr to {@code struct { float w, x, y, z }}.
+;prot */
 ;prot void GetVehicleRotationQuatUnsafe(int vehicleid, struct quat *rot);
 ;test *(int*) 0x80DD14C == 0xFFF6E970 /*Call to MatrixToQuat?*/
 global GetVehicleRotationQuatUnsafe:function
@@ -134,10 +134,11 @@ GetVehicleRotationQuatUnsafe:
 	pop ebx
 	ret
 
-;/**
-;Crashes if vehicle does not exist.
-;*/
+;prot /**
+;prot Crashes if vehicle does not exist.
+;prot */
 ;prot void GetVehicleZAngleUnsafe(int vehicleid, float *angle);
+;test __builtin_offsetof(struct SampNetGame, vehiclePool) == 0xC
 global GetVehicleZAngleUnsafe:function
 GetVehicleZAngleUnsafe:
 	push ebp
@@ -154,6 +155,51 @@ GetVehicleZAngleUnsafe:
 	mov eax, 080DD032h ;n_GetVehicleZAngle
 	jmp eax
 
+;prot /**
+;prot  * Use SetVehicleSiren to set the siren flag (it's included in CreateVehicle for the PAWN API).
+;prot  *
+;prot  * AddStaticVehicle(Ex) is really not special.
+;prot  * The only difference is that AddStaticVehicle(Ex) will add 3x FREIFLAT or STREAKC when spawning a FREIGHT or STREAK,
+;prot  * and CreateVehicle will not allow creating FREIGHT or STREAK (but if you force it, it works?).
+;prot  *
+;prot  * Clients ALWAYS create the 3x FREIFLAT or STREAKC, so when the server doesn't create it, you'll get lots of
+;prot  * "Warning: vehicle xx was not deleted" messages because vehicleid collisions could occur etc.
+;prot  */
+;prot int CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_delay_ms);
+;test __builtin_offsetof(struct SampNetGame, vehiclePool) == 0xC
+;test __builtin_offsetof(struct vec4, r) == 0xC
+global CreateVehicle:function
+CreateVehicle:
+	push edi
+	push esi
+	push dword [esp+01Ch] ; respawn_delay_ms
+	push dword [esp+01Ch] ; col2
+	push dword [esp+01Ch] ; col1
+	mov eax, [esp+01Ch] ; pos
+	push dword [eax+0Ch] ; pos->r
+	push eax ; pos
+	mov esi, [esp+020h] ; model
+	push esi
+	mov eax, [samp_pNetGame]
+	mov eax, [eax+0Ch] ; vehiclePool
+	push eax
+	mov edi, 0x814CB10 ; SampVehiclePool::Add
+	call edi ; SampVehiclePool::Add
+	sub esi, 537 ; freight=537, streak=538
+	cmp esi, 1
+	ja end
+	add esi, 569 ; freiflat=569, streakc=570
+	mov [esp+04h], esi ; model
+	call edi ; SampVehiclePool::Add
+	call edi ; SampVehiclePool::Add
+	call edi ; SampVehiclePool::Add
+	sub eax, 3 ; need to return the vehicleid of the engine of course
+end:
+	add esp, 01Ch
+	pop esi
+	pop edi
+	ret
+
 ;prot void RakServer__GetPlayerIDFromIndex(struct PlayerID *outPlayerId, struct RakServer *rakServer, short playerIndex);
 global RakServer__GetPlayerIDFromIndex:function
 RakServer__GetPlayerIDFromIndex:
@@ -162,7 +208,7 @@ RakServer__GetPlayerIDFromIndex:
 	push dword [esp+0Ch] ; outPlayerId
 	mov eax, 0807C720h
 	call eax ; thiscall with 1 parameter; pops 1 arg
-	add esp, 0x8
+	add esp, 08h
 	ret
 
 segment .data

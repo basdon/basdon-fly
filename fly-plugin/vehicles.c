@@ -455,6 +455,7 @@ void veh_save_user_model_stats(int playerid)
 void veh_init()
 {
 	struct dbvehicle *veh;
+	struct vec4 pos;
 	int i, owner_name_len, owner_label_buf_size, rowcount, dbcache, vehicleid, *fld = nc_params + 2;
 	char owner_name[MAX_PLAYER_NAME + 1];
 	char owner_string_tmp[144];
@@ -483,6 +484,7 @@ void veh_init()
 	}
 	numdbvehicles = 0;
 	dbvehicles = malloc(sizeof(int*) * dbvehiclealloc);
+	pos.coords.x = pos.coords.y = pos.coords.z = float_pinf;
 	while (rowcount--) {
 		dbvehicles[rowcount] = veh = malloc(sizeof(struct dbvehicle));
 		nc_params[1] = rowcount;
@@ -518,14 +520,9 @@ void veh_init()
 			veh->owner_name = 0;
 			veh->owner_label_bits_data = 0;
 
-			NC_PARS(9);
-			nc_params[1] = veh->model;
-			nc_paramf[2] = nc_paramf[3] = nc_paramf[4] = float_pinf;
-			nc_paramf[5] = veh->pos.r;
-			nc_params[6] = nc_params[7] = 1;
-			nc_params[8] = VEHICLE_RESPAWN_DELAY;
-			nc_params[9] = 0; /*addsiren*/
-			vehicleid = NC(n_AddStaticVehicleEx);
+			/*pos coords must be set to float_pinf*/
+			pos.r = veh->pos.r;
+			vehicleid = CreateVehicle(veh->model, &pos, 126, 126, VEHICLE_RESPAWN_DELAY_MS);
 			if (vehicleid != INVALID_VEHICLE_ID) {
 				veh->spawnedvehicleid = vehicleid;
 				gamevehicles[vehicleid].dbvehicle = veh;
@@ -747,18 +744,24 @@ void veh_dispose()
 	free(td_vehpanel_spd.rpcdata);
 }
 
+/**
+Create a vehicle from given dbvehicle.
+
+Will create the vehicle with bogus position and colors, then respawns the
+vehicle. The rotation is instantly correct because that can't be changed
+afterwards.
+
+@return vehicle id (might be INVALID_VEHICLE_ID)
+*/
+static
 int veh_create(struct dbvehicle *veh)
 {
+	struct vec4 pos;
 	int vehicleid;
 
-	NC_PARS(9);
-	nc_params[1] = veh->model;
-	nc_paramf[2] = nc_paramf[3] = nc_paramf[4] = float_pinf;
-	nc_paramf[5] = veh->pos.r;
-	nc_params[6] = nc_params[7] = 126;
-	nc_params[8] = VEHICLE_RESPAWN_DELAY;
-	nc_params[9] = 0; /*addsiren*/
-	vehicleid = NC(n_CreateVehicle_);
+	pos.coords.x = pos.coords.y = pos.coords.z = float_pinf;
+	pos.r = veh->pos.r;
+	vehicleid = CreateVehicle(veh->model, &pos, 126, 126, VEHICLE_RESPAWN_DELAY_MS);
 	if (vehicleid != INVALID_VEHICLE_ID) {
 		gamevehicles[vehicleid].dbvehicle = veh;
 		gamevehicles[vehicleid].reincarnation++;
