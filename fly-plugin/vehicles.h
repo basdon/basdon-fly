@@ -59,11 +59,6 @@ persist, although there won't be any feedback on this.
 */
 struct dbvehicle *veh_create_new_dbvehicle(int model, struct vec4 *pos);
 /**
-Check if given player can modify a vehicle (park, spray, ..).
-Player can modify if they own the vehicle or have admin rights.
-*/
-int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh);
-/**
 Commits odo of next vehicle in update queue to db.
 
 To be called in 5 second timer, or to be called in a loop until it returns 0 in

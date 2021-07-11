@@ -136,6 +136,15 @@ int cmd__makeanewpermanentpublicvehiclehere(struct COMMANDCONTEXT cmdctx)
 	return CMD_SYNTAX_ERR;
 }
 
+#define CMD__PARK_SYNTAX ""
+#define CMD__PARK_DESC "Like /park but without owner checks for admin"
+static
+int cmd__park(struct COMMANDCONTEXT cmdctx)
+{
+	veh_park_from_cmd(cmdctx, /*bypass_permissions*/ 1);
+	return CMD_OK;
+}
+
 #define CMD__RESPAWN_SYNTAX ""
 #define CMD__RESPAWN_DESC "Respawns the vehicle you're in"
 static
@@ -186,6 +195,15 @@ int cmd__rr(struct COMMANDCONTEXT cmdctx)
 skip_occupied:
 		;
 	}
+	return CMD_OK;
+}
+
+#define CMD__SPRAY_SYNTAX "[col1] [col2]"
+#define CMD__SPRAY_DESC "Like /spray but without owner checks for admins"
+static
+int cmd__spray(struct COMMANDCONTEXT cmdctx)
+{
+	veh_spray_from_cmd(cmdctx, /*bypass_permissions*/ 1);
 	return CMD_OK;
 }
 
@@ -827,41 +845,7 @@ int cmd_metar(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_park(struct COMMANDCONTEXT cmdctx)
 {
-	struct dbvehicle *veh;
-	int vehicleid;
-	float lastrot;
-
-	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
-	if (vehicleid) {
-		veh = gamevehicles[vehicleid].dbvehicle;
-		if (!veh_can_player_modify_veh(cmdctx.playerid, veh)) {
-			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"You are not allowed to park this vehicle");
-			return CMD_OK;
-		}
-		lastrot = veh->pos.r;
-		GetVehiclePosRotUnsafe(vehicleid, &veh->pos);
-		if (356.0f < veh->pos.r || veh->pos.r < 4.0f) {
-			veh->pos.r = 0.0f;
-		} else if (86.0f < veh->pos.r && veh->pos.r < 94.0f) {
-			veh->pos.r = 90.0f;
-		} else if (176.0f < veh->pos.r && veh->pos.r < 184.0f) {
-			veh->pos.r = 180.0f;
-		} else if (266.0f < veh->pos.r && veh->pos.r < 274.0f) {
-			veh->pos.r = 270.0f;
-		}
-		if (fabs(lastrot - veh->pos.r) > 3.0f) {
-			gamevehicles[vehicleid].need_recreation = 1;
-		}
-		csprintf(buf144,
-			"UPDATE veh SET x=%f,y=%f,z=%f,r=%f WHERE i=%d",
-			veh->pos.coords.x,
-			veh->pos.coords.y,
-			veh->pos.coords.z,
-			veh->pos.r,
-			veh->id);
-		NC_mysql_tquery_nocb(buf144a);
-		SendClientMessage(cmdctx.playerid, COL_SUCC, SUCC"Vehicle parked!");
-	}
+	veh_park_from_cmd(cmdctx, /*bypass_permissions*/ 0);
 	return CMD_OK;
 }
 
@@ -1024,47 +1008,7 @@ int cmd_s(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_spray(struct COMMANDCONTEXT cmdctx)
 {
-	struct dbvehicle *veh;
-	int vehicleid, col1, col2, *a, *b;
-
-	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
-	if (vehicleid) {
-		veh = gamevehicles[vehicleid].dbvehicle;
-		if (!veh_can_player_modify_veh(cmdctx.playerid, veh)) {
-			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"You are not allowed to respray this vehicle");
-			return CMD_OK;
-		}
-		a = b = NULL;
-		if (cmd_get_int_param(&cmdctx, &col1)) {
-			if (col1 == -1) {
-				a = &col1;
-			}
-			if (!cmd_get_int_param(&cmdctx, &col2)) {
-				goto rand2nd;
-			}
-			if (col2 == -1) {
-				b = &col2;
-			}
-		} else {
-			col1 = NC_random(256);
-rand2nd:
-			col2 = NC_random(256);
-		}
-		if (a != NULL || b != NULL) {
-			game_random_carcol(GetVehicleModel(vehicleid), a, b);
-		}
-		SetVehicleColor(vehicleid, col1, col2);
-		if (veh != NULL) {
-			veh->col1 = (unsigned char) col1;
-			veh->col2 = (unsigned char) col2;
-			csprintf(buf144,
-				"UPDATE veh SET col1=%d,col2=%d WHERE i=%d",
-				veh->col1,
-				veh->col2,
-				veh->id);
-			NC_mysql_tquery_nocb(buf144a);
-		}
-	}
+	veh_spray_from_cmd(cmdctx, /*bypass_permissions*/ 0);
 	return CMD_OK;
 }
 

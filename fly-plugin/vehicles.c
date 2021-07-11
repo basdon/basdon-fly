@@ -542,10 +542,101 @@ void veh_init()
 	textdraws_load_from_file("vehpanel", TEXTDRAW_VEHSPD, 1, &td_vehpanel_spd);
 }
 
+/**
+Check if given player can modify a vehicle (park, spray, ..). Does not check admin rights.
+*/
+static
 int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh)
 {
-	return (veh && userid[playerid] == veh->owneruserid) ||
-		GROUPS_ISADMIN(pdata[playerid]->groups);
+	return veh && userid[playerid] == veh->owneruserid;
+}
+
+static
+void veh_park_from_cmd(struct COMMANDCONTEXT cmdctx, int bypass_permissions)
+{
+	struct dbvehicle *veh;
+	register int vehicleid;
+	register int rot10;
+
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
+	veh = gamevehicles[vehicleid].dbvehicle;
+	if (veh) {
+		if (bypass_permissions || veh_can_player_modify_veh(cmdctx.playerid, veh)) {
+			GetVehiclePosRotUnsafe(vehicleid, &veh->pos);
+			rot10 = (int) (veh->pos.r * 10.0f);
+			if (3560 < rot10 || rot10 < 40) {
+				veh->pos.r = 0.0f;
+			} else if (860 < rot10 && rot10 < 940) {
+				veh->pos.r = 90.0f;
+			} else if (1760 < rot10 && rot10 < 1840) {
+				veh->pos.r = 180.0f;
+			} else if (2660 < rot10 && rot10 < 2740) {
+				veh->pos.r = 270.0f;
+			} else {
+				goto no_need_recreate;
+			}
+			gamevehicles[veh->spawnedvehicleid].need_recreation = 1;
+no_need_recreate:
+			csprintf(buf144,
+				"UPDATE veh SET x=%f,y=%f,z=%f,r=%f WHERE i=%d",
+				veh->pos.coords.x,
+				veh->pos.coords.y,
+				veh->pos.coords.z,
+				veh->pos.r,
+				veh->id);
+			NC_mysql_tquery_nocb(buf144a);
+			SendClientMessage(cmdctx.playerid, COL_SUCC, SUCC"Vehicle parked!");
+		} else {
+			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"You are not allowed to park this vehicle");
+		}
+	}
+}
+
+static
+void veh_spray_from_cmd(struct COMMANDCONTEXT cmdctx, int bypass_permissions)
+{
+	struct dbvehicle *veh;
+	register int vehicleid;
+	int col1, col2, *random1, *random2;
+
+	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
+	if (vehicleid) {
+		veh = gamevehicles[vehicleid].dbvehicle;
+		if (bypass_permissions || veh_can_player_modify_veh(cmdctx.playerid, veh)) {
+			random1 = random2 = NULL;
+			if (cmd_get_int_param(&cmdctx, &col1)) {
+				if (col1 == -1) {
+					random1 = &col1;
+				} else {
+					col1 &= 0xFF;
+				}
+				if (!cmd_get_int_param(&cmdctx, &col2)) {
+					goto rand2nd;
+				}
+				if (col2 == -1) {
+					random2 = &col2;
+				} else {
+					col1 &= 0xFF;
+				}
+			} else {
+				col1 = NC_random(256);
+rand2nd:
+				col2 = NC_random(256);
+			}
+			if (random1 != NULL || random2 != NULL) {
+				game_random_carcol(GetVehicleModel(vehicleid), random1, random2);
+			}
+			SetVehicleColor(vehicleid, col1, col2);
+			if (veh != NULL) {
+				veh->col1 = (unsigned char) col1;
+				veh->col2 = (unsigned char) col2;
+				csprintf(buf144, "UPDATE veh SET col1=%d,col2=%d WHERE i=%d", col1, col2, veh->id);
+				NC_mysql_tquery_nocb(buf144a);
+			}
+		} else {
+			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"You are not allowed to respray this vehicle");
+		}
+	}
 }
 
 float model_fuel_capacity(short modelid)
