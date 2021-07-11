@@ -17,7 +17,7 @@ void conf_load()
 			val = strstr(line, "=");
 			key_len = val - line;
 			if (!val || key_len <= 0) {
-				val = alloca(1000);
+				val = alloca(sizeof(line) + 500);
 				sprintf(val, "conf.ini: invalid line: %s", line);
 				logprintf(val);
 				abort();
@@ -31,7 +31,7 @@ void conf_load()
 			} else if (!memcmp(line, "MYSQL_PW", key_len)) {
 				target = conf_mysql_pw;
 			} else {
-				val = alloca(1000);
+				val = alloca(sizeof(line) + 500);
 				sprintf(val, "warn: conf.ini: unknown config key: %s", line);
 				logprintf(val);
 				continue;

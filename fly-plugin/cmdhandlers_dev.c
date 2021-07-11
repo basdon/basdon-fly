@@ -457,7 +457,7 @@ int cmd_dev_vhpnan(struct COMMANDCONTEXT cmdctx)
 {
 	float hp;
 
-	*((int*) &hp) = 0x7F800100;
+	hp = 0.0 / 0.0;
 	assert(hp != hp);
 	SetVehicleHealth(GetPlayerVehicleID(cmdctx.playerid), hp);
 	return CMD_OK;
