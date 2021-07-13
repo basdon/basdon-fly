@@ -171,8 +171,7 @@ struct SampVehicle {
 	short vehicleid;
 	char _pad66[0x82-0x66];
 	int model;
-	struct vec3 spawnPos;
-	float rotation;
+	struct vec4 spawnPos;
 	/*Primary color, set when creating the vehicle. This color will be used when respawning. See moddedColor1.*/
 	int spawnColor1;
 	/*Primary color, set when creating the vehicle. This color will be used when respawning. See moddedColor2.*/

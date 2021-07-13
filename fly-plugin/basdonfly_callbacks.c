@@ -482,23 +482,6 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 		return 0;
 	}
 
-	if (gamevehicles[vehicleid].need_recreation) {
-		gamevehicles[vehicleid].need_recreation = 0;
-		veh_DestroyVehicle(vehicleid);
-		if (veh_create(veh) == INVALID_VEHICLE_ID) {
-			logprintf(
-				"ERR: couldn't recreate "
-				"vehicle %d (public: %d)",
-				veh->id,
-				!veh->owneruserid);
-		}
-		/*always return because veh_create will already call
-		OnVehicleSpawn for the recreated vehicle*/
-		return 0;
-	}
-
-	/*this might've been already increased (due to recreate)
-	but it doesn't matter, it just needs to change*/
 	gamevehicles[vehicleid].reincarnation++;
 
 	NC_PARS(4);
@@ -507,13 +490,6 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 	nc_paramf[3] = veh->pos.coords.y;
 	nc_paramf[4] = veh->pos.coords.z;
 	NC(n_SetVehiclePos);
-
-	/*     WARNING
-	if you're looking for a place to clean up stuff,
-	check common_on_vehicle_respawn_or_destroyed
-	since OnVehicleSpawn might destroy and recreate a vehicle, in which
-	case code will not reach this point for the vehicle you're expecting
-	since the vehicle has been destroyed.*/
 
 	common_on_vehicle_respawn_or_destroy(vehicleid, veh);
 	veh_on_vehicle_spawn(veh);

@@ -33,13 +33,6 @@ struct vehicle {
 	vehicle as earlier.
 	*/
 	short reincarnation;
-	/**
-	Flag denoting if this vehicle needs to be recreated. This should be
-	checked whenever the vehicle is respawned (see OnVehicleSpawn).
-	Recreation is needed when the spawn rotation changed, because that can't
-	be set when there is no passenger...
-	*/
-	char need_recreation;
 };
 
 extern struct vehicle gamevehicles[MAX_VEHICLES];

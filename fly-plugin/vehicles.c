@@ -464,7 +464,6 @@ void veh_init()
 	for (i = 0; i < MAX_VEHICLES; i++) {
 		gamevehicles[i].dbvehicle = NULL;
 		gamevehicles[i].reincarnation = 0;
-		gamevehicles[i].need_recreation = 0;
 	}
 	vehstoupdate = NULL;
 	dbvehicles = NULL;
@@ -551,6 +550,7 @@ int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh)
 static
 void veh_park_from_cmd(struct COMMANDCONTEXT cmdctx, int bypass_permissions)
 {
+	struct SampVehicle *vehicle;
 	struct dbvehicle *veh;
 	register int vehicleid;
 	register int rot10;
@@ -569,11 +569,11 @@ void veh_park_from_cmd(struct COMMANDCONTEXT cmdctx, int bypass_permissions)
 				veh->pos.r = 180.0f;
 			} else if (2660 < rot10 && rot10 < 2740) {
 				veh->pos.r = 270.0f;
-			} else {
-				goto no_need_recreate;
 			}
-			gamevehicles[veh->spawnedvehicleid].need_recreation = 1;
-no_need_recreate:
+			vehicle = vehiclepool->vehicles[vehicleid];
+			if (vehicle) {
+				vehicle->spawnPos.r = veh->pos.r;
+			}
 			csprintf(buf144,
 				"UPDATE veh SET x=%f,y=%f,z=%f,r=%f WHERE i=%d",
 				veh->pos.coords.x,
@@ -765,7 +765,6 @@ int veh_create(struct dbvehicle *veh)
 	if (vehicleid != INVALID_VEHICLE_ID) {
 		gamevehicles[vehicleid].dbvehicle = veh;
 		gamevehicles[vehicleid].reincarnation++;
-		gamevehicles[vehicleid].need_recreation = 0;
 		veh->spawnedvehicleid = vehicleid;
 		
 		NC_PARS(1);
