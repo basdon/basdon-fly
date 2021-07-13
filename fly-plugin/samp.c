@@ -1,6 +1,8 @@
 #ifndef SAMP_NATIVES_IMPL
 
 struct SampNetGame *samp_pNetGame;
+struct SampPlayerPool *playerpool;
+struct SampVehiclePool *vehiclepool;
 
 static void* samp_pConsole;
 
@@ -162,9 +164,10 @@ void Delete3DTextLabel(int playerid, int label_id)
 }
 
 /**
- * Does not apply until the vehicle is respawned.
+ * Does not apply until the vehicle is respawned for players that has the vehicle streamed in.
  */
 static
+__attribute__((unused))
 void SetVehicleSiren(int vehicleid, char siren)
 {
 	struct SampVehicle *vehicle;
@@ -996,9 +999,9 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 			oldvehicleid = GetPlayerVehicleID(playerid);
 			veh_on_driver_changed_vehicle_without_state_change(playerid, oldvehicleid, vehicleid);
 			missions_on_driver_changed_vehicle_without_state_change(playerid, vehicleid);
-			lastvehicle_asdriver[playerid] = vehicleid; /*So hook_OnDriverSync doesn't detect warping.*/
 		}
 	}
+	lastvehicle_asdriver[playerid] = vehicleid; /*So hook_OnDriverSync doesn't detect warping.*/
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(GetVehicleModel(vehicleid));
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
@@ -1174,6 +1177,14 @@ void hook_OnDriverSync(int playerid)
 
 	data = &player[playerid]->driverSyncData;
 
+	if (!vehiclepool->vehicles[data->vehicle_id]) {
+		/*It sometimes happens that driversync packets of just deleted vehicles are sent/arrive late.*/
+		player[playerid]->updateSyncType = 0;
+		samp_OnPlayerUpdate(playerid); /*TODO: what to do with this...*/
+		lastvehicle_asdriver[playerid] = data->vehicle_id; /*because ^ OnPlayerUpdate resets it..*/
+		return;
+	}
+
 	vehiclemodel = GetVehicleModel(data->vehicle_id);
 	/*Suppress secondary fire (my R key, hydra rockets, hunter minigun, ...).*/
 	if ((data->partial_keys & KEY_ACTION) &&
@@ -1184,8 +1195,7 @@ void hook_OnDriverSync(int playerid)
 		data->partial_keys &= ~KEY_ACTION;
 	}
 	/*Primary fire (my LCTRL key, hunter rockets, ...).*/
-	if ((data->partial_keys & KEY_FIRE) && (vehiclemodel == MODEL_HUNTER))
-	{
+	if ((data->partial_keys & KEY_FIRE) && (vehiclemodel == MODEL_HUNTER)) {
 		data->partial_keys &= ~KEY_FIRE;
 	}
 
@@ -1269,6 +1279,8 @@ void samp_init()
 {
 	samp_pNetGame = *(struct SampNetGame**) 0x81CA4BC;
 	samp_pConsole = *(int**) 0x81CA4B8;
+	playerpool = samp_pNetGame->playerPool;
+	vehiclepool = samp_pNetGame->vehiclePool;
 	rakServer = samp_pNetGame->rakServer;
 
 	/*Remove filtering in chat messages coming from clients.*/
