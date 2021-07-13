@@ -224,7 +224,9 @@ struct SampPlayer {
 	char _padC2[0x155-0xC2];
 	char playerStreamedIn[1000]; /*Does this get reset when player disconnects?*/
 	char vehicleStreamedIn[2000];
-	char _padD0D[0x24F5-0xD0D];
+	char _padD0D[1000];
+	char textLabelCreated[1024];
+	char pickupCreated[4096];
 	char actorStreamedIn[1000];
 	char _pad28DD[0x2915-0x28DD];
 	struct vec3 pos;
@@ -236,21 +238,60 @@ struct SampPlayer {
 	short lrkey;
 	short udkey;
 	int keys;
-	char _pad2951[0x295D-0x2951];
+	int _pad2951;
+	int isEditingObject;
+	int _pad2959;
 	short lastSentDialogID;
-	char _pad295F[0x2967-0x295F];
+	int _pad295F;
+#ifdef __TINYC__
+	int textlabelPool;
+#else
+	void *textlabelPool;
+#endif
 	short playerid;
 	int updateSyncType;
-	char _pad2969[0x2BA9-0x296D];
+	int _pad296D[130];
+	int _pad2B75[10];
+	int isAiming;
+	int hasTrailerToSync;
+	int _pad2BA5;
 	char currentState;
-	char _pad2BAA[0x2C31-0x2BAA];
+	struct vec3 checkpointPos;
+	float checkpointSize;
+	int isCurrentlyInCheckpoint;
+	struct vec3 raceCheckpointPos;
+	struct vec3 raceCheckpointNextPos;
+	char raceCheckpointType;
+	float raceCheckpointSize;
+	int isCurrentlyInRaceCheckpoint;
+	char _pad2BDF[0x2C31-0x2BDF];
 	char vehicleseat;
 	short vehicleid;
 	int color;
-	char _pad2C38[0x2C40-0x2C38];
+	int isCheckpointEnabled;
+	int isRaceCheckpointEnabled;
 	int interior;
-	/*Incomplete.*/
+	int _field2C44[13];
+	char _field2C78[13];
+	char _field2C85;
+	short _field2C86;
+	short _field2C88;
+	int _field2C8A;
+	char _field2C8E;
+	int _field2C8F[10];
+	char _field2CB7;
+	int _field2CB8;
+	char _field2CBC;
+	int _field2CBD;
+	int lastStreamingTick;
+	int _field2CC5;
+	int _field2CC9;
+	int _field2CCD;
+	char _field2CD1;
+	char _pad2CD2[8];
+	int _field2CDA;
 };
+EXPECT_SIZE(struct SampPlayer, 0x2CDE); /*Complete.*/
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, driverSyncData, 0x27);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, passengerSyncData, 0x66);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, onfootSyncData, 0x7E);
@@ -268,14 +309,17 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, lastSentDialogID, 0x295D);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, playerid, 0x2967);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, updateSyncType, 0x2969);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, currentState, 0x2BA9);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, raceCheckpointType, 0x2BD6);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, isCurrentlyInRaceCheckpoint, 0x2BDB);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleseat, 0x2C31);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleid, 0x2C32);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, color, 0x2C34);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, interior, 0x2C40);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, _field2CDA, 0x2CDA);
 
 struct SampVehiclePool {
 	char _pad0[0xD4];
-	int _padD4[2000];
+	int virtualworld[2000];
 	int created[2000];
 	struct SampVehicle *vehicles[2000];
 	int poolsize;
@@ -285,13 +329,17 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, created, 0x2014);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, vehicles, 0x3F54);
 
 struct SampPlayerPool {
-	int _pad0[3003];
+	int virtualworld[1000];
+	int _padFA0[2003];
 	int playerDrunkLevel[1000];
 	int _pad3E8C[1000];
 	char gpci[1000][101];
 	int _pad1D8B4[7250];
 	int created[1000];
 	struct SampPlayer *players[1000];
+	char names[1000][25];
+	int isAdmin[1000];
+	int isNpc[1000];
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, playerDrunkLevel, 0x2EEC);
@@ -299,6 +347,8 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, gpci, 0x4E2C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, _pad1D8B4, 0x1D8B4);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, created, 0x249FC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, players, 0x2599C);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, names, 0x2693C);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, isAdmin, 0x2CAE4);
 
 struct SampNetGame {
 	void *pGameMode;
@@ -539,6 +589,12 @@ struct RPCDATA_ShowGameText {
 };
 EXPECT_SIZE(struct RPCDATA_ShowGameText, 4 + 4 + 4 + 800);
 
+struct RPCDATA_SetCheckpoint {
+	struct vec3 pos;
+	float size;
+};
+EXPECT_SIZE(struct RPCDATA_SetCheckpoint, 12 + 4);
+
 struct RPCDATA_SetRaceCheckpoint {
 	char type;
 	struct vec3 pos;
@@ -625,6 +681,17 @@ struct RPCDATA_SetVehicleNumberplate {
 	char text[1]; /*actually arbitrary size*/
 };
 EXPECT_SIZE(struct RPCDATA_SetVehicleNumberplate, 2 + 1 + 1);
+
+struct RPCDATA_SetVehiclePos {
+	short vehicleid;
+	struct vec3 pos;
+};
+EXPECT_SIZE(struct RPCDATA_SetVehiclePos, 2 + 12);
+
+struct RPCDATA_SetPlayerPos {
+	struct vec3 pos;
+};
+EXPECT_SIZE(struct RPCDATA_SetPlayerPos, 12);
 #pragma pack()
 
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,unk) \
@@ -648,6 +715,8 @@ EXPECT_SIZE(struct RPCDATA_SetVehicleNumberplate, 2 + 1 + 1);
 #define RPC_TextDrawSetString 0x815214C /*ptr to 0x69(105)*/
 #define RPC_SetRaceCheckpoint 0x815CD7A /*ptr to 0x26(38)*/
 #define RPC_DisableRaceCheckpoint 0x81587C7 /*ptr to 0x27(39)*/
+#define RPC_SetCheckpoint 0x81639A5 /*ptr to 0x6B(107)*/
+#define RPC_DisableCheckpoint 0x815A860 /*ptr to 0x25(37) (rpc has no data)*/
 #define RPC_SetVehicleParams 0x815CCFC /*ptr to 0xA1(161)*/
 #define RPC_SetVehicleParamsEx 0x8166226 /*ptr to 0x18(24)*/
 #define RPC_Create3DTextLabel 0x815072C /*ptr to 0x24(36)*/
@@ -660,3 +729,5 @@ EXPECT_SIZE(struct RPCDATA_SetVehicleNumberplate, 2 + 1 + 1);
 #define RPC_CreateVehicle 0x8166228 /*ptr to 0xA4(164)*/
 #define RPC_DeleteVehicle 0x816622C /*ptr to 0xA5(165)*/
 #define RPC_SetVehicleNumberplate 0x816622A /*ptr to  0x7B(123)*/
+#define RPC_SetVehiclePos 0x8166224 /*ptr to 0x9F(159)*/
+#define RPC_SetPlayerPos 0x815CCEC /*ptr to 0xC(12)*/

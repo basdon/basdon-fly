@@ -9,7 +9,8 @@ typedef void (*cb_t)(void* data);
 #define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
 #define EXPECT_SIZE(S,SIZE) STATIC_ASSERT(sizeof(S)==(SIZE))
 /*May also use offsetof(), but that requires stddef.h*/
-#define MEMBER_OFFSET(S,M) (__builtin_offsetof(S,M))
+#define MEMBER_OFFSET(S,M) (offsetof(S,M))
+/*Not defining this one, because a few fail because the used tcc is 64 bit, meaning ptrs will take 4 extra bytes...*/
 #define STATIC_ASSERT_MEMBER_OFFSET(S,M,O)
 EXPECT_SIZE(char, 1);
 EXPECT_SIZE(short, 2);
