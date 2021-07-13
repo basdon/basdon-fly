@@ -155,49 +155,99 @@ GetVehicleZAngleUnsafe:
 	mov eax, 080DD032h ;n_GetVehicleZAngle
 	jmp eax
 
+; need index at ebx
+VehiclePoolAddVehicleAtIndex:
+	;814CB10
+	push ebp
+	mov ebp, esp
+	push edi
+	push esi
+	push ebx
+	sub esp, 01Ch
+	mov eax, [ebp+0Ch]
+	mov esi, [ebp+08h]
+	;814CB24
+	mov eax, 0814CB6Eh
+	jmp eax
+
 ;prot /**
 ;prot  * Use SetVehicleSiren to set the siren flag (it's included in CreateVehicle for the PAWN API).
 ;prot  *
 ;prot  * AddStaticVehicle(Ex) is really not special.
 ;prot  * The only difference is that AddStaticVehicle(Ex) will add 3x FREIFLAT or STREAKC when spawning a FREIGHT or STREAK,
-;prot  * and CreateVehicle will not allow creating FREIGHT or STREAK (but if you force it, it works?).
+;prot  * and CreateVehicle will not allow creating FREIGHT or STREAK.
 ;prot  *
-;prot  * Clients ALWAYS create the 3x FREIFLAT or STREAKC, so when the server doesn't create it, you'll get lots of
-;prot  * "Warning: vehicle xx was not deleted" messages because vehicleid collisions could occur etc.
+;prot  * Clients ALWAYS create the 3x FREIFLAT or STREAKC, the server doesn't stream those vehicles to the client either.
+;prot  * So when the server doesn't create it, you'll get lots of "Warning: vehicle xx was not deleted" messages,
+;prot  * since the client will create those carriage vehicles and they may override other vehicles with the same id;
+;prot  * or a new vehicle with the same id might stream in and then it would override a carriage vehicle.
+;prot  *
+;prot  * Clients ALWAYS take the next 3 vehicleids, even if they're already taken.
+;prot  * If they're taken, it emits a "Warning: vehicle xx was not deleted" message.
+;prot  *
+;prot  * There's also a "Warning: bad train carriages" message, but I'm unsure what exactly triggers that.
+;prot  *
+;prot  * This also means the client will crash when creating the train as vehicleid higher than 1996, since the carriage(s)
+;prot  * will exceed the limit of 2000. Did not test on the server, but it won't do anything good either.
+;prot  *
+;prot  * TODO: create DestroyVehicle that will also delete the carriages (samp doesn't even do this)
 ;prot  */
 ;prot int CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_delay_ms);
 ;test __builtin_offsetof(struct SampNetGame, vehiclePool) == 0xC
+;test __builtin_offsetof(struct SampVehiclePool, poolsize) == 0x5E94
 ;test __builtin_offsetof(struct vec4, r) == 0xC
 global CreateVehicle:function
 CreateVehicle:
+	push ebp
+	lea ebp, [esp+04h]
 	push edi
 	push esi
-	push dword [esp+01Ch] ; respawn_delay_ms
-	push dword [esp+01Ch] ; col2
-	push dword [esp+01Ch] ; col1
-	mov eax, [esp+01Ch] ; pos
+	push edx
+	push dword [ebp+014h] ; respawn_delay_ms
+	push dword [ebp+010h] ; col2
+	push dword [ebp+0Ch] ; col1
+	mov eax, [ebp+08h] ; pos
 	push dword [eax+0Ch] ; pos->r
 	push eax ; pos
-	mov esi, [esp+020h] ; model
+	mov esi, [ebp+04h] ; model
 	push esi
 	mov eax, [samp_pNetGame]
-	mov eax, [eax+0Ch] ; vehiclePool
-	push eax
+	mov edx, [eax+0Ch] ; vehiclepool
+	push edx
+	lea eax, [esi-537] ; freight=537, streak=538
+	cmp eax, 1
+	jbe itsatrain
 	mov edi, 0x814CB10 ; SampVehiclePool::Add
 	call edi ; SampVehiclePool::Add
-	sub esi, 537 ; freight=537, streak=538
-	cmp esi, 1
-	ja end
-	add esi, 569 ; freiflat=569, streakc=570
+	jmp end
+itsatrain:
+	; Crap, it's a train.
+	; Create the train + 3 carriages at the end of the vehicle pool.
+	; (because the client ALWAYS takes the 3 next ids)
+	mov edi, [edx+05E94h] ; vehiclepool->poolsize
+	cmp edi, 1996
+	jb enoughspace
+	; Not enough space to create 4 vehicles, returning INVALID_VEHICLE_ID.
+	mov eax, 0FFFFh
+	jmp end
+enoughspace:
+	lea ebx, [edi+1] ; vehicleid
+	call VehiclePoolAddVehicleAtIndex
+	add esi, 32 ; freight=537(freiflat=569), streak=538(streakc=570)
 	mov [esp+04h], esi ; model
-	call edi ; SampVehiclePool::Add
-	call edi ; SampVehiclePool::Add
-	call edi ; SampVehiclePool::Add
-	sub eax, 3 ; need to return the vehicleid of the engine of course
+	lea ebx, [edi+2] ; vehicleid
+	call VehiclePoolAddVehicleAtIndex
+	lea ebx, [edi+3] ; vehicleid
+	call VehiclePoolAddVehicleAtIndex
+	lea ebx, [edi+4] ; vehicleid
+	call VehiclePoolAddVehicleAtIndex
+	lea eax, [edi+1]
 end:
 	add esp, 01Ch
+	pop edx
 	pop esi
 	pop edi
+	pop ebp
 	ret
 
 ;prot void RakServer__GetPlayerIDFromIndex(struct PlayerID *outPlayerId, struct RakServer *rakServer, short playerIndex);
