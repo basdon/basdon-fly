@@ -1141,7 +1141,8 @@ int veh_DestroyVehicle(int vehicleid)
 	struct dbvehicle *veh;
 
 	veh = gamevehicles[vehicleid].dbvehicle;
-	common_on_vehicle_respawn_or_destroy(vehicleid, veh);
+	nav_disable_for_respawned_or_destroyed_vehicle(vehicleid);
+	missions_on_vehicle_destroyed_or_respawned(veh);
 	if (veh != NULL) {
 		veh->spawnedvehicleid = 0;
 		gamevehicles[vehicleid].dbvehicle = NULL;
@@ -1151,16 +1152,6 @@ int veh_DestroyVehicle(int vehicleid)
 	return NC(n_DestroyVehicle_);
 	/*DestroyVehicle triggers OnVehicleStreamOut,
 	so no need to destroy labels here*/
-}
-
-void veh_on_vehicle_spawn(struct dbvehicle *veh)
-{
-	float min_fuel;
-
-	min_fuel = model_fuel_capacity(veh->model) * .25f;
-	if (veh->fuel < min_fuel) {
-		veh->fuel = min_fuel;
-	}
 }
 
 static

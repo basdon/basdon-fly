@@ -490,12 +490,6 @@ static char aircraftmodelindex[VEHICLE_MODEL_TOTAL];
 #include <wait.h>
 extern char **environ; /*see 'man environ'*/
 
-/*TODO remove these*/
-static void zones_update(int playerid, struct vec3 pos);
-static void missions_update_missionpoint_indicators(int playerid, float player_x, float player_y, float player_z);
-static int missions_get_vehicle_model_msptype_mask(int model);
-static void nav_reset_for_vehicle(int vehicleid);
-
 static unsigned short nametags_max_distance[MAX_PLAYERS];
 
 #include "conf.c"

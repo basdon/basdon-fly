@@ -1331,7 +1331,7 @@ void missions_start_unload(int playerid)
 	TogglePlayerControllable(playerid, 0); /*Needs to be after getting vehicle health, it repairs the vehicle.*/
 	DisablePlayerRaceCheckpoint(playerid);
 	if (prefs[playerid] & PREF_WORK_AUTONAV) {
-		nav_reset_for_vehicle(vehicleid);
+		nav_disable(vehicleid);
 	}
 
 	timer_set(MISSION_LOAD_UNLOAD_TIME, missions_after_unload, cbdata);

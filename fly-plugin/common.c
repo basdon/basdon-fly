@@ -144,12 +144,6 @@ int common_GetVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d)
 	return res;
 }
 
-void common_on_vehicle_respawn_or_destroy(int vehicleid, struct dbvehicle *veh)
-{
-	missions_on_vehicle_destroyed_or_respawned(veh);
-	nav_reset_for_vehicle(vehicleid);
-}
-
 int common_SetVehiclePos(int vehicleid, struct vec3 *pos)
 {
 	NC_PARS(4);

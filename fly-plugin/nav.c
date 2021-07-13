@@ -47,9 +47,23 @@ void nav_init()
 static
 void nav_disable(int vehicleid)
 {
-	free(nav[vehicleid]);
-	nav[vehicleid] = NULL;
-	panel_nav_updated(vehicleid);
+	if (nav[vehicleid]) {
+		free(nav[vehicleid]);
+		nav[vehicleid] = NULL;
+		panel_nav_updated(vehicleid);
+	}
+}
+
+/**
+ * Same as nav_disable, but doesn't try to update the panel immediately.
+ */
+static
+void nav_disable_for_respawned_or_destroyed_vehicle(int vehicleid)
+{
+	if (nav[vehicleid]) {
+		free(nav[vehicleid]);
+		nav[vehicleid] = NULL;
+	}
 }
 
 /**
@@ -274,12 +288,4 @@ void nav_navigate_to_airport(int playerid, int vehicleid, int vehiclemodel, stru
 	}
 
 	nav_enable(vehicleid, &ap->pos, NULL);
-}
-
-static
-void nav_reset_for_vehicle(int vehicleid)
-{
-	if (nav[vehicleid] != NULL) {
-		nav_disable(vehicleid);
-	}
 }

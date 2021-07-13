@@ -474,12 +474,13 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 {
 	struct dbvehicle *veh;
 	int vehicleid = PARAM(1);
+	float min_fuel;
 
 	veh = gamevehicles[vehicleid].dbvehicle;
 	if (veh == NULL) {
 		/*can't put non-db vehicles back to a normal position*/
 		veh_DestroyVehicle(vehicleid);
-		return 0;
+		return 1;
 	}
 
 	gamevehicles[vehicleid].reincarnation++;
@@ -491,8 +492,13 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 	nc_paramf[4] = veh->pos.coords.z;
 	NC(n_SetVehiclePos);
 
-	common_on_vehicle_respawn_or_destroy(vehicleid, veh);
-	veh_on_vehicle_spawn(veh);
+	missions_on_vehicle_destroyed_or_respawned(veh);
+	nav_disable_for_respawned_or_destroyed_vehicle(vehicleid);
+
+	min_fuel = model_fuel_capacity(veh->model) * .25f;
+	if (veh->fuel < min_fuel) {
+		veh->fuel = min_fuel;
+	}
 
 	return 1;
 }

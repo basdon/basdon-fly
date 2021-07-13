@@ -215,16 +215,6 @@ Uses buf32.
 */
 int common_GetVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d);
 /**
-Callback-like for DestroyVehicle and OnVehicleSpawn (without recreation) events.
-
-In the case of OnVehicleSpawn WITH recreation, DestroyVehicle is used, which
-also calls this function.
-
-In the case of DestroyVehicle, this function is
-called _before_ dbvehicle <-> gamevehicle links are cleared.
-*/
-void common_on_vehicle_respawn_or_destroy(int vehicleid, struct dbvehicle *veh);
-/**
 Convenience method to set a vehicle's pos to given vec3 struct.
 
 Uses buf32 buf64 buf144.
