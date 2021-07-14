@@ -130,12 +130,13 @@ static struct TEXTDRAW td_helpmission_2 = { "1",          TEXTDRAW_ALLOC_AS_NEED
 static struct TEXTDRAW td_helpmission_3 = { "2",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_helpmission_4 = { "3",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_helpmission_5 = { "4",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-static struct TEXTDRAW td_helpmission_6 = { "close",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
-#define NUM_HELPMISSION_TDS 7
+static struct TEXTDRAW td_helpmission_6 = { "5",          TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_helpmission_7 = { "close",      TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+#define NUM_HELPMISSION_TDS 8
 STATIC_ASSERT(NUM_HELPMISSION_TDS <= NUM_HELP_TEXTDRAWS);
 static struct TEXTDRAW *tds_helpmission[NUM_HELPMISSION_TDS] = {
 	&td_helpmission_0, &td_helpmission_1, &td_helpmission_2, &td_helpmission_3, &td_helpmission_4,
-	&td_helpmission_5, &td_helpmission_6,
+	&td_helpmission_5, &td_helpmission_6, &td_helpmission_7,
 };
 
 static struct TEXTDRAW td_helpradio_0 = { "bg",         TEXTDRAW_ALLOC_AS_NEEDED, NULL };
@@ -189,15 +190,15 @@ void help_init()
 	textdraws_load_from_file_a("credits", TEXTDRAW_HELP_BASE, NUM_CREDITS_TDS, tds_credits);
 
 	/*Set mission cancel fee amount in missionhelp textdraw.*/
-	t = td_helpmission_4.rpcdata->text;
+	t = td_helpmission_5.rpcdata->text;
 	for (;;) {
 		if (*t == '$') {
 			t++;
 			len = sprintf(t, ""SETTING__MISSION_CANCEL_FEE_STR"~w~.");
-			td_helpmission_4.rpcdata->text_length = t - td_helpmission_4.rpcdata->text + len;
+			td_helpmission_5.rpcdata->text_length = t - td_helpmission_5.rpcdata->text + len;
 #ifdef DEV
-			assert(td_helpmission_4.rpcdata->text[td_helpmission_4.rpcdata->text_length] == 0);
-			textdraws_assert_text_length_within_bounds(&td_helpmission_4);
+			assert(td_helpmission_5.rpcdata->text[td_helpmission_5.rpcdata->text_length] == 0);
+			textdraws_assert_text_length_within_bounds(&td_helpmission_5);
 #endif
 			break;
 		} else if (*t == 0) {
