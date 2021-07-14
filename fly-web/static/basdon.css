@@ -179,10 +179,10 @@ table.highlight-row tr:hover {
 .flight-state-8 {
 	background: #dfd;
 }
-.flight-state-2, .flight-state-4, .flight-state-32 {
+.flight-state-2, .flight-state-4, .flight-state-32, .flight-state-256, .flight-state-512, .flight-state-1024 {
 	background: #fdd;
 }
-.flight-state-16 {
+.flight-state-16, .flight-state-128 {
 	background: #fdb;
 }
 .flight-state-64 {

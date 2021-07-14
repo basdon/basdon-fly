@@ -6,7 +6,11 @@ $flightstatuses = array(
 	'8'=>'Finished',
 	'16'=>'Declined',
 	'32'=>'Died',
-	'64'=>'Server error'
+	'64'=>'Server error',
+	'128'=>'Connection lost',
+	'256'=>'Player quit',
+	'512'=>'Player kicked',
+	'1024'=>'Vehicle destroyed',
 );
 function fmt_flight_status($state, $tload)
 {

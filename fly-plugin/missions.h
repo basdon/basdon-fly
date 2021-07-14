@@ -12,12 +12,16 @@
 
 /*states saved in db*/
 #define MISSION_STATE_INPROGRESS 1
-#define MISSION_STATE_ABANDONED  2
+#define MISSION_STATE_ABANDONED  2 /*not used anymore, see other ABANDONED states*/
 #define MISSION_STATE_CRASHED    4
 #define MISSION_STATE_FINISHED   8
 #define MISSION_STATE_DECLINED   16
 #define MISSION_STATE_DIED       32
 #define MISSION_STATE_SERVER_ERR 64
+#define MISSION_STATE_ABANDONED_TIMEOUT 128
+#define MISSION_STATE_ABANDONED_QUIT 256
+#define MISSION_STATE_ABANDONED_KICKED 512
+#define MISSION_STATE_ABANDONED_VEHICLE_DESTROYED 1024
 
 #define MISSION_WEATHERBONUS_RAINY     1250
 #define MISSION_WEATHERBONUS_FOGGY     2250
@@ -63,7 +67,6 @@ Check if player is currently doing a mission.
 */
 int missions_is_player_on_mission(int playerid);
 void missions_on_player_connect(int playerid);
-void missions_on_player_disconnect(int playerid);
 /**
 Call when a vehicle is destroyed or respawned.
 */

@@ -838,7 +838,7 @@ void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh)
 				"been fined $"SETTING__MISSION_CANCEL_FEE_STR".");
 			NC_DisablePlayerRaceCheckpoint(playerid);
 			money_take(playerid, SETTING__MISSION_CANCEL_FEE_INT);
-			missions_end_unfinished(playerid, MISSION_STATE_ABANDONED);
+			missions_end_unfinished(playerid, MISSION_STATE_ABANDONED_VEHICLE_DESTROYED);
 			return;
 		}
 	}
@@ -861,12 +861,17 @@ void missions_on_player_connect(int playerid)
 	number_missions_started_stopped[playerid]++;
 }
 
-void missions_on_player_disconnect(int playerid)
+static
+void missions_on_player_disconnect(int playerid, int reason)
 {
 	struct MISSION *miss;
 
 	if ((miss = activemission[playerid]) != NULL) {
-		missions_end_unfinished(playerid, MISSION_STATE_ABANDONED);
+		switch (reason) {
+		case 0: missions_end_unfinished(playerid, MISSION_STATE_ABANDONED_TIMEOUT); break;
+		default: missions_end_unfinished(playerid, MISSION_STATE_ABANDONED_QUIT); break;
+		case 2: missions_end_unfinished(playerid, MISSION_STATE_ABANDONED_KICKED); break;
+		}
 	}
 }
 

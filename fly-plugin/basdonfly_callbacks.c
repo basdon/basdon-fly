@@ -274,7 +274,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	echo_on_player_disconnect(playerid, reason);
 	dialog_on_player_disconnect(playerid);
 	maps_on_player_disconnect(playerid);
-	missions_on_player_disconnect(playerid);
+	missions_on_player_disconnect(playerid, reason);
 	jobmap_on_player_disconnect(playerid);
 	panel_remove_panel_player(playerid);
 	playerstats_on_player_disconnect(playerid);

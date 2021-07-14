@@ -75,11 +75,15 @@ $embed->fields = [$from, $to, $details];
 but these must be pretty strong for the discord embed card (73 saturation instead of 12).*/
 switch ($r->state) {
 case 1: $embed->color = 0x4444ff; break;
-case 2: $embed->color = 0xff4444; break;
-case 4: $embed->color = 0xff4444; break;
+case 2:
+case 4:
+case 32:
+case 256:
+case 512:
+case 1024: $embed->color = 0xff4444; break;
 case 8: $embed->color = 0x44ff44; break;
-case 16: $embed->color = 0xff9123; break;
-case 32: $embed->color = 0xff4444; break;
+case 16:
+case 128: $embed->color = 0xff9123; break;
 case 64: $embed->color = 0xa144ff; break;
 }
 
