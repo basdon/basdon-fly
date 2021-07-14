@@ -202,7 +202,7 @@ CreateVehicle:
 	lea ebp, [esp+04h]
 	push edi
 	push esi
-	push edx
+	push ebx
 	push dword [ebp+014h] ; respawn_delay_ms
 	push dword [ebp+010h] ; col2
 	push dword [ebp+0Ch] ; col1
@@ -244,7 +244,7 @@ enoughspace:
 	lea eax, [edi+1]
 end:
 	add esp, 01Ch
-	pop edx
+	pop ebx
 	pop esi
 	pop edi
 	pop ebp
