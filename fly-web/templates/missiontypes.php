@@ -5,9 +5,9 @@ function fmt_mission_type($missiontype)
 	case 1: return 'Passengers (small quantity)';
 	case 2: return 'Passengers (medium quantity)';
 	case 4: return 'Passengers (large quantity)';
-	case 8: return 'Cargo';
-	case 16: return 'Cargo';
-	case 32: return 'Cargo';
+	case 8: return 'Cargo (small quantity)';
+	case 16: return 'Cargo (medium quantity)';
+	case 32: return 'Cargo (large quantity)';
 	case 64: return 'Helicopter (passengers)';
 	case 128: return 'Helicopter (cargo)';
 	case 256: return 'Helicopter (military)';

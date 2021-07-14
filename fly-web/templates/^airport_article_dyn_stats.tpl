@@ -1,8 +1,37 @@
 {@render aircraftnames.php}
 {@render fmt_money.php}
+{@render missiontypes.php}
 
 {@rem clear since this is rendered in an article, and the factsheet might still be floated right @}
 <div class="clear"></div>
+
+<h3>Mission points</h3>
+
+{@if $missionpoints}
+	<table class="new rowseps">
+		<thead>
+			<tr><th>Name</th><th>Available mission types</th></tr>
+		</thead>
+		<tbody>
+			{@foreach $missionpoints as $msp}
+			<tr>
+				<td>{$msp->name}</td>
+				<td>
+					<ul class="compact">
+						{@for $i = 0; $i < 31; $i++}
+							{@if (1 << $i) & $msp->t}
+								<li>{@unsafe fmt_mission_type(1 << $i)}</li>
+							{@endif}
+						{@endfor}
+					</ul>
+				</td>
+			</tr>
+			{@endif}
+		</tbody>
+	</table>
+{@else}
+	<p>Failed to retrieve data.</p>
+{@endif}
 
 <h3>Latest flights</h3>
 

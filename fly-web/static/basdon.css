@@ -163,6 +163,12 @@ table.new thead tr {
 table.highlight-row tr:hover {
 	background: #f0f0f0;
 }
+table.rowseps tr + tr td {
+	border-top: 1px solid #000;
+}
+:not(.newtableheader) + table.new th + th {
+	border-left: 1px solid #000;
+}
 .clear {
 	clear: both;
 }
@@ -281,4 +287,8 @@ p.msg.success {
 }
 .article .navinfo table.box td+td{
 	width:100%
+}
+ul.compact {
+	margin: 0;
+	padding-left: 1em;
 }

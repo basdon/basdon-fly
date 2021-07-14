@@ -41,6 +41,8 @@ if (($r = $db->query('SELECT i,c,n,flags FROM apt WHERE c=\'' . $code . '\' LIMI
 		$stat_repair_spending = $r[0]->spending;
 		$stat_dmg_repaired = $r[0]->dmg;
 	}
+	++$db_querycount;
+	$missionpoints = $db->query('SELECT i,name,t FROM msp WHERE a='.$apt->i);
 	$__script = '^airport_article_dyn_stats';
 	include('../inc/output.php');
 } else {
