@@ -17,7 +17,7 @@ helipad at LSA.
 
 {@h3 Vehicle spawns}
 
-<?php readfile('../gen/apvehicellist_'.$code.'.html') ?>
+<?php readfile('../gen/apvehiclelist_'.$code.'.html') ?>
 
 {@h3 Service points}
 
