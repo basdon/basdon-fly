@@ -46,7 +46,7 @@ try {
 		include('../templates/missiontypes.php');
 		include('../templates/aircraftnames.php');
 		$r = $r[0];
-		if ($r->missiontype & $passenger_mission_types) {
+		if ($r->missiontype & $SETTING__PASSENGER_MISSIONTYPES) {
 			$satisfaction = $r->satisfaction . '% passenger satisfaction';
 		} else {
 			$satisfaction = 'cargo';

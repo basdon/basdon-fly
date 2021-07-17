@@ -35,7 +35,7 @@
 				<li><strong>Total flights:</strong> {@unsafe $flg->totalflights}</li>
 			{@endif}
 			{@eval ++$db_querycount}
-			{@eval $avgpst = $db->query('SELECT AVG(satisfaction) a,COUNT(id) c FROM flg WHERE player=' . $id . ' AND missiontype&' . $passenger_mission_types)}
+			{@eval $avgpst = $db->query('SELECT AVG(satisfaction) a,COUNT(id) c FROM flg WHERE player=' . $id . ' AND missiontype&' . $SETTING__PASSENGER_MISSIONTYPES)}
 			{@if $avgpst !== false && ($avgpst = $avgpst->fetchAll()) !== false && count($avgpst) && ($avgpst = $avgpst[0]->a) != null}
 				<li><strong>Average passenger satisfaction:</strong> {@unsafe round($avgpst, 2)}%</li>
 			{@endif}

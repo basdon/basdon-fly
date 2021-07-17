@@ -40,7 +40,7 @@
 				<li><strong>Flight duration:</strong> {@if $r->state != 1}{@unsafe sprintf('%02d:%02d', floor(($diff=$r->tlastupdate-$r->tstart)/60), $diff%60)}{@endif}</li>
 				<li><strong>Aircraft:</strong> {@unsafe aircraft_name($r->vehmodel)} (owned by: {@unsafe aircraftowner($r->ownername)})</li>
 				<li><strong>Flight type:</strong> {@unsafe fmt_mission_type($r->missiontype)}</li>
-				{@if $r->missiontype & $passenger_mission_types}
+				{@if $r->missiontype & $SETTING__PASSENGER_MISSIONTYPES}
 					<li><strong>Passenger satisfaction:</strong> {@unsafe $r->satisfaction}%</li>
 				{@endif}
 				{@if $r->state == 8}

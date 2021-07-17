@@ -8,6 +8,7 @@ if (!isset($DISCORD_FLIGHTLOG_WEBHOOK)) {
 	exit(0);
 }
 
+include('../inc/__settings.php');
 include('../inc/db.php');
 
 if ($argc < 2) {
@@ -43,7 +44,7 @@ include('../templates/flightstatuses.php');
 include('../templates/missiontypes.php');
 include('../templates/aircraftnames.php');
 $r = $r[0];
-if ($r->missiontype & $passenger_mission_types) {
+if ($r->missiontype & $SETTING__PASSENGER_MISSIONTYPES) {
 	$satisfaction = ':ok_hand: ' . $r->satisfaction . '% passenger satisfaction';
 } else {
 	$satisfaction = 'cargo flight';
