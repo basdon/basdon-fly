@@ -14,7 +14,7 @@ $content = "<?php\n";
 for ($i = 0; $i < count($lines); $i++) {
 	$line = $lines[$i];
 	if ($line[0] != ';') {
-		while ($line[-1] == '\\') {
+		while ($line[strlen($line) - 1] == '\\') {
 			$line = substr($line, 0, -1);
 			$i++;
 			if ($i < count($lines)) {
