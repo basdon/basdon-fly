@@ -19,7 +19,7 @@ static
 int generate_settings_from_ini_file()
 {
 	FILE *in, *out;
-	char line[1024], *c;
+	char line[1024], value[5000], *v, *c;
 
 	in = checked_fopen("../settings.ini", "r");
 	if (!in) {
@@ -44,7 +44,28 @@ int generate_settings_from_ini_file()
 			}
 			*c = ' ';
 			fwrite("#define SETTING__", 17, 1, out);
-			fputs(line, out);
+			fwrite(line, c - line + 1, 1, out);
+			v = value;
+			value[0] = 0;
+			for (;;) {
+				c++;
+				if (!*c) {
+					break;
+				} else if (*c == '\\') {
+					if (!fgets(line, sizeof(line), in)) {
+						break;
+					}
+					c = line - 1;
+					continue;
+				} else if (*c == '`') {
+					v += sprintf(v, "%s", "SETTING__");
+				} else {
+					*v = *c;
+					v++;
+					*v = 0;
+				}
+			}
+			fputs(value, out);
 		}
 	}
 

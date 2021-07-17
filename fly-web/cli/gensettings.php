@@ -5,8 +5,19 @@ if ($lines === false) {
 	exit(1);
 }
 $content = "<?php\n";
-foreach ($lines as $line) {
+for ($i = 0; $i < count($lines); $i++) {
+	$line = $lines[$i];
 	if ($line[0] != ';') {
+		while ($line[-1] == '\\') {
+			$line = substr($line, 1, -1);
+			$i++;
+			if ($i < count($lines)) {
+				$line .= $lines[$i];
+				continue;
+			}
+			break;
+		}
+		$line = str_replace('`', '$SETTING__', $line);
 		$content .= '$SETTING__' . $line . ";\n";
 	}
 }
