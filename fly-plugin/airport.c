@@ -15,6 +15,39 @@ void airports_destroy()
 	airports = NULL;
 }
 
+#ifdef DEV
+static
+void airports_test_missionpoints()
+{
+	struct MISSIONPOINT *msp;
+	int i, vehiclemodel, classid, j;
+	unsigned int type;
+
+	for (i = 0; i < nummissionpoints; i++) {
+		msp = &missionpoints[i];
+		for (vehiclemodel = VEHICLE_MODEL_MIN; vehiclemodel < VEHICLE_MODEL_MAX; vehiclemodel++) {
+			for (classid = 0; classid < SETTING__NUM_CLASSES; classid++) {
+				if (vehicleflags[vehiclemodel - VEHICLE_MODEL_MIN] & (PLANE | HELI)) {
+					type = CLASS_MSPTYPES[classid] & vehicle_msptypes[vehiclemodel] & msp->type;
+					for (j = 0; j < 31; j++) {
+						if (((type >> j) & 1) && (type >> (j + 1))) {
+							logprintf(
+								"multiple mission types available for msp id %d vehiclemodel %d class %d: %08X",
+								msp->id,
+								vehiclemodel,
+								classid,
+								type
+							);
+							abort();
+						}
+					}
+				}
+			}
+		}
+	}
+}
+#endif
+
 #ifdef AIRPORT_PRINT_STATS
 static
 void airports_print_stats()
@@ -223,6 +256,10 @@ have_airport:
 		ctoa(msp->name, buf32, MAX_MSP_NAME + 1);
 	}
 	NC_cache_delete(cacheid);
+
+#ifdef DEV
+	airports_test_missionpoints();
+#endif
 
 #ifdef AIRPORT_PRINT_STATS
 	airports_print_stats();

@@ -416,17 +416,12 @@ void jobmap_show(int playerid, unsigned int mission_type, struct MISSIONPOINT *m
 	/*Include mission type name in header.*/
 	for (i = 0;; i++) {
 		if (i >= SETTING__NUM_MISSION_TYPES) {
-			logprintf("failed to construct mission map title for msp id %d vehiclemodel %d",
-				msp->id, GetVehicleModel(GetPlayerVehicleID(playerid)));
+			logprintf("failed to construct mission map title for msp id %d vehiclemodel %d class %d",
+				msp->id, GetVehicleModel(GetPlayerVehicleID(playerid)), classid[playerid]);
 			textdraws_strcpy(&td_jobmap_title, "Flights");
 			break;
 		}
 		if ((mission_type >> i) & 1) {
-			if ((mission_type >> (i + 1)) & 1) {
-				/*TODO: maybe move this test to an init func for all options?*/
-				logprintf("multiple mission types available for msp id %d vehiclemodel %d",
-					msp->id, GetVehicleModel(GetPlayerVehicleID(playerid)));
-			}
 			td_jobmap_title.rpcdata->text_length =
 				sprintf(td_jobmap_title.rpcdata->text, "%s Flights", mission_type_names[i]);
 			break;
