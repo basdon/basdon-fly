@@ -416,7 +416,7 @@ just run the 'build' file with bash (or 'make plugin' in repo root).*/
 #include <wait.h>
 extern char **environ; /*see 'man environ'*/
 
-static unsigned int vehicle_msptypes[VEHICLE_MODEL_TOTAL];
+static unsigned int vehicle_msptypes[VEHICLE_MODEL_MAX + 1];
 
 static
 void init_mission_type_names()
