@@ -293,7 +293,7 @@ int cmd__tomsp(struct COMMANDCONTEXT cmdctx)
 
 	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (vehicleid) {
-		msptype_mask = missions_get_vehicle_model_msptype_mask(GetVehicleModel(vehicleid));
+		msptype_mask = vehicle_msptypes[GetVehicleModel(vehicleid)];
 	} else {
 		msptype_mask = -1;
 	}

@@ -1003,7 +1003,7 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 	}
 	lastvehicle_asdriver[playerid] = vehicleid; /*So hook_OnDriverSync doesn't detect warping.*/
 	svp_update_mapicons(playerid, pos.x, pos.y);
-	missions_available_msptype_mask[playerid] = missions_get_vehicle_model_msptype_mask(GetVehicleModel(vehicleid));
+	missions_available_msptype_mask[playerid] = vehicle_msptypes[GetVehicleModel(vehicleid)];
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 	zones_update(playerid, pos);
 

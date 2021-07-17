@@ -18,6 +18,9 @@
 
 
 #include "vendor/SDK/amxplugin.c" /*includes plugincommon.h*/
+/*Files starting with __ are generated during build by _preprocess.c,
+just run the 'build' file with bash (or 'make plugin' in repo root).*/
+#include "__settings.h"
 
 #define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
 #define EXPECT_SIZE(S,SIZE) STATIC_ASSERT(sizeof(S)==(SIZE))
@@ -163,55 +166,9 @@ struct RUNWAY {
 };
 
 /**
-See {@link missions_get_vehicle_model_msptype_mask} for vehicle assignments
-See {@link CLASS_MSPTYPES} for class assignments
+See /settings.ini and init_mission_type_names
 */
-#define NUM_MISSION_TYPES 11
-static char *mission_type_names[NUM_MISSION_TYPES] = {
-#define MISSION_TYPE_PASSENGER_S 1
-	"Passengers (S)",
-#define MISSION_TYPE_PASSENGER_M 2
-	"Passengers (M)",
-#define MISSION_TYPE_PASSENGER_L 4
-	"Passengers (L)",
-#define MISSION_TYPE_CARGO_S 8
-	"Cargo (S)",
-#define MISSION_TYPE_CARGO_M 16
-	"Cargo (M)",
-#define MISSION_TYPE_CARGO_L 32
-	"Cargo (L)",
-#define MISSION_TYPE_HELI 64
-	"Heli",
-#define MISSION_TYPE_HELI_CARGO 128
-	"Heli (cargo)",
-#define MISSION_TYPE_MIL_HELI 256
-	"Heli (military)",
-#define MISSION_TYPE_MIL 512
-	"Military",
-#define MISSION_TYPE_PASSENGER_WATER 1024
-	"Passengers (water)",
-/*
-TODO
-#define MISSION_TYPE_STUNT 2048
-#define MISSION_TYPE_CROPD 4096
-#define MISSION_TYPE_AWACS 8192
-*/
-/*TODO cargo water*/
-};
-
-#define PASSENGER_MISSIONTYPES \
-	(MISSION_TYPE_PASSENGER_S | MISSION_TYPE_PASSENGER_M | \
-	MISSION_TYPE_PASSENGER_L | MISSION_TYPE_PASSENGER_WATER | \
-	MISSION_TYPE_HELI)
-
-#define CARGO_MISSIONTYPES \
-	(MISSION_TYPE_CARGO_S | MISSION_TYPE_CARGO_M | MISSION_TYPE_CARGO_L | MISSION_TYPE_HELI_CARGO)
-
-/*all heli missions, including cargo*/
-#define HELI_MISSIONTYPES \
-	(MISSION_TYPE_HELI | MISSION_TYPE_HELI_CARGO | MISSION_TYPE_MIL_HELI)
-#define MIL_MISSIONTYPES \
-	(MISSION_TYPE_MIL | MISSION_TYPE_MIL_HELI)
+static char *mission_type_names[SETTING__NUM_MISSION_TYPES];
 
 /*excluding zero term*/
 #define MAX_MSP_NAME (9)
@@ -317,65 +274,34 @@ static struct {
 } weather;
 EXPECT_SIZE(weather, 4);
 
-/*class stuff*/
-/*Note that 'spw' database table depends on these CLASS_* constants.
-'class' column is a bitfield that matches '1 << CLASS_PILOT' for example.*/
-#define CLASS_PASSENGER_PILOT 0
-#define CLASS_CARGO_PILOT 1
-#define CLASS_RESCUE 2
-#define CLASS_ARMY 3
-#define CLASS_AID 4
-/*#define CLASS_TRUCKER 5*/
-
-#define NUMCLASSES /*6*/ 5
-
 #define SPAWN_WEAPON_1 WEAPON_CAMERA
 #define SPAWN_AMMO_1 3036
 #define SPAWN_WEAPON_2_3 0
 #define SPAWN_AMMO_2_3 0
 
-/**
- * Mission types per class.
- */
-static const unsigned int CLASS_MSPTYPES[] = {
-	MISSION_TYPE_PASSENGER_S | MISSION_TYPE_PASSENGER_M | MISSION_TYPE_PASSENGER_L |
-		MISSION_TYPE_HELI | MISSION_TYPE_PASSENGER_WATER,
-	MISSION_TYPE_CARGO_S | MISSION_TYPE_CARGO_M | MISSION_TYPE_CARGO_L |
-		MISSION_TYPE_HELI_CARGO,
-	0,
-	MISSION_TYPE_MIL | MISSION_TYPE_MIL_HELI,
-	0,
-};
-
-/**
-Skin ID per class.
-*/
-static const int CLASS_SKINS[] = {
+/*See /settings.ini for class stuff */
+static const int CLASS_SKINS[SETTING__NUM_CLASSES] = {
 	61,
 	61,
 	275,
 	287,
 	287,
-	/*133,*/
 };
 
-static const char *CLASS_NAMES[] = {
-	"~p~Passenger Pilot",
-	"~p~~h~Cargo Pilot",
-	"~b~~h~~h~Rescue worker",
-	"~g~~h~Army",
-	"~r~~h~~h~Aid worker",
-	/*"~y~Trucker",*/
-};
+static char *CLASS_NAMES[SETTING__NUM_CLASSES];
 
-static const int CLASS_COLORS[] = {
+static const int CLASS_COLORS[SETTING__NUM_CLASSES] = {
 	0xa86efcff,
 	0xfca5ffff,
 	0x7087ffff,
 	0x519c42ff,
 	0xff3740ff,
-	/*0xe2c063ff,*/
 };
+
+/**
+ * Mission types per class, see init_class_msptypes
+ */
+static unsigned int CLASS_MSPTYPES[SETTING__NUM_CLASSES];
 /**
 Class id of players (CLASS_ constants).
 */
@@ -459,9 +385,9 @@ static char aircraftmodelindex[VEHICLE_MODEL_TOTAL];
 #include <assert.h>
 #include "idalloc.h"
 #include "sounds.h"
-/*Files starting with __ are generated during build by _preprocess.c, just run the 'build' file with bash.*/
+/*Files starting with __ are generated during build by _preprocess.c,
+just run the 'build' file with bash (or 'make plugin' in repo root).*/
 #include "__sampasm.h"
-#include "__settings.h"
 #include "common.h"
 #include "echo.h"
 #include "missions.h"
@@ -489,6 +415,69 @@ static char aircraftmodelindex[VEHICLE_MODEL_TOTAL];
 #undef __USE_MISC
 #include <wait.h>
 extern char **environ; /*see 'man environ'*/
+
+static unsigned int vehicle_msptypes[VEHICLE_MODEL_TOTAL];
+
+static
+void init_mission_type_names()
+{
+	mission_type_names[SETTING__MISSION_TYPEID_PASSENGER_S] = "Passengers (S)";
+	mission_type_names[SETTING__MISSION_TYPEID_PASSENGER_M] = "Passengers (M)";
+	mission_type_names[SETTING__MISSION_TYPEID_PASSENGER_L] = "Passengers (L)";
+	mission_type_names[SETTING__MISSION_TYPEID_CARGO_S] = "Cargo (S)";
+	mission_type_names[SETTING__MISSION_TYPEID_CARGO_M] = "Cargo (M)";
+	mission_type_names[SETTING__MISSION_TYPEID_CARGO_L] = "Cargo (L)";
+	mission_type_names[SETTING__MISSION_TYPEID_HELI] = "Heli";
+	mission_type_names[SETTING__MISSION_TYPEID_HELI_CARGO] = "Heli (cargo)";
+	mission_type_names[SETTING__MISSION_TYPEID_MIL_HELI] = "Heli (military)";
+	mission_type_names[SETTING__MISSION_TYPEID_MIL] = "Military";
+	mission_type_names[SETTING__MISSION_TYPEID_PASSENGER_WATER] = "Passengers (water)";
+}
+
+static
+void init_vehicle_msptypes()
+{
+	memset(vehicle_msptypes, 0, sizeof(vehicle_msptypes));
+	vehicle_msptypes[MODEL_ANDROM] = SETTING__ANDROM_MSPTYPES;
+	vehicle_msptypes[MODEL_AT400] = SETTING__AT400_MSPTYPES;
+	vehicle_msptypes[MODEL_BEAGLE] = SETTING__BEAGLE_MSPTYPES;
+	vehicle_msptypes[MODEL_CARGOBOB] = SETTING__CARGOBOB_MSPTYPES;
+	vehicle_msptypes[MODEL_CROPDUST] = SETTING__CROPDUST_MSPTYPES;
+	vehicle_msptypes[MODEL_DODO] = SETTING__DODO_MSPTYPES;
+	vehicle_msptypes[MODEL_HUNTER] = SETTING__HUNTER_MSPTYPES;
+	vehicle_msptypes[MODEL_HYDRA] = SETTING__HYDRA_MSPTYPES;
+	vehicle_msptypes[MODEL_LEVIATHN] = SETTING__LEVIATHN_MSPTYPES;
+	vehicle_msptypes[MODEL_MAVERICK] = SETTING__MAVERICK_MSPTYPES;
+	vehicle_msptypes[MODEL_NEVADA] = SETTING__NEVADA_MSPTYPES;
+	vehicle_msptypes[MODEL_POLMAV] = SETTING__POLMAV_MSPTYPES;
+	vehicle_msptypes[MODEL_RAINDANC] = SETTING__RAINDANC_MSPTYPES;
+	vehicle_msptypes[MODEL_RUSTLER] = SETTING__RUSTLER_MSPTYPES;
+	vehicle_msptypes[MODEL_SHAMAL] = SETTING__SHAMAL_MSPTYPES;
+	vehicle_msptypes[MODEL_SKIMMER] = SETTING__SKIMMER_MSPTYPES;
+	vehicle_msptypes[MODEL_SPARROW] = SETTING__SPARROW_MSPTYPES;
+	vehicle_msptypes[MODEL_STUNT] = SETTING__STUNT_MSPTYPES;
+	vehicle_msptypes[MODEL_VCNMAV] = SETTING__VCNMAV_MSPTYPES;
+}
+
+static
+void init_class_msptypes()
+{
+	CLASS_MSPTYPES[SETTING__CLASSID_PASSENGER_PILOT] = SETTING__PASSENGER_PILOT_MSPTYPES;
+	CLASS_MSPTYPES[SETTING__CLASSID_CARGO_PILOT] = SETTING__CARGO_PILOT_MSPTYPES;
+	CLASS_MSPTYPES[SETTING__CLASSID_RESCUE] = SETTING__RESCUE_MSPTYPES;
+	CLASS_MSPTYPES[SETTING__CLASSID_ARMY] = SETTING__ARMY_MSPTYPES;
+	CLASS_MSPTYPES[SETTING__CLASSID_AID] = SETTING__AID_MSPTYPES;
+}
+
+static
+void init_class_names()
+{
+	CLASS_NAMES[SETTING__CLASSID_PASSENGER_PILOT] = SETTING__PASSENGER_PILOT_COLOR SETTING__PASSENGER_PILOT_NAME;
+	CLASS_NAMES[SETTING__CLASSID_CARGO_PILOT] = SETTING__CARGO_PILOT_COLOR SETTING__CARGO_PILOT_NAME;
+	CLASS_NAMES[SETTING__CLASSID_RESCUE] = SETTING__RESCUE_COLOR SETTING__RESCUE_NAME;
+	CLASS_NAMES[SETTING__CLASSID_ARMY] = SETTING__ARMY_COLOR SETTING__ARMY_NAME;
+	CLASS_NAMES[SETTING__CLASSID_AID] = SETTING__AID_COLOR SETTING__AID_NAME;
+}
 
 static unsigned short nametags_max_distance[MAX_PLAYERS];
 
@@ -557,6 +546,11 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 {
 	char sha256buf[SHA256BUFSIZE + 1];
+
+	init_mission_type_names();
+	init_vehicle_msptypes();
+	init_class_msptypes();
+	init_class_names();
 
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 #undef logprintf

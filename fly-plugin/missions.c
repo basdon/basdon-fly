@@ -142,52 +142,6 @@ void missions_show_jobmap_set_stage_set_controllable(int playerid)
 }
 
 /**
-@return mask of MISSION_TYPE_* values
-*/
-static
-int missions_get_vehicle_model_msptype_mask(int model)
-{
-	switch (model) {
-	case MODEL_ANDROM:
-		return MISSION_TYPE_PASSENGER_L | MISSION_TYPE_CARGO_L;
-	case MODEL_AT400:
-		return MISSION_TYPE_PASSENGER_L | MISSION_TYPE_CARGO_L;
-	case MODEL_BEAGLE:
-		return MISSION_TYPE_PASSENGER_M | MISSION_TYPE_CARGO_M;
-	case MODEL_CARGOBOB:
-		return MISSION_TYPE_MIL_HELI | MISSION_TYPE_HELI_CARGO;
-	case MODEL_DODO:
-		return MISSION_TYPE_PASSENGER_S | MISSION_TYPE_CARGO_S;
-	case MODEL_LEVIATHN:
-		return MISSION_TYPE_HELI | MISSION_TYPE_HELI_CARGO;
-	case MODEL_MAVERICK:
-		return MISSION_TYPE_HELI;
-	case MODEL_NEVADA:
-		return MISSION_TYPE_PASSENGER_M | MISSION_TYPE_CARGO_M;
-	case MODEL_RAINDANC:
-		return MISSION_TYPE_HELI | MISSION_TYPE_HELI_CARGO;
-	case MODEL_SKIMMER:
-		return MISSION_TYPE_PASSENGER_WATER;
-	case MODEL_POLMAV:
-		return MISSION_TYPE_HELI;
-	case MODEL_SPARROW:
-		return MISSION_TYPE_HELI;
-	case MODEL_SHAMAL:
-		return MISSION_TYPE_PASSENGER_M;
-	case MODEL_VCNMAV:
-		return MISSION_TYPE_HELI;
-	case MODEL_HUNTER:
-		return MISSION_TYPE_MIL_HELI;
-	case MODEL_HYDRA:
-		return MISSION_TYPE_MIL;
-	case MODEL_RUSTLER:
-		return MISSION_TYPE_MIL;
-	default:
-		return 0;
-	}
-}
-
-/**
 TODO: prioritize mission points that have the least amount of active missions
 
 @return NULL if none applicable for given type mast
@@ -593,35 +547,35 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 	int costpermsp, tax = 500, chargernws = 0;
 
 	switch (missiontype) {
-	case MISSION_TYPE_PASSENGER_WATER:
+	case SETTING__MISSION_TYPE_PASSENGER_WATER:
 		/* skimmer, also for runways (lights maintenance etc) */
 		costpermsp = 15;
 		chargernws = 1;
 		break;
-	case MISSION_TYPE_PASSENGER_S:
+	case SETTING__MISSION_TYPE_PASSENGER_S:
 		/*dodo is excluded from runway cost*/
 		costpermsp = 20;
 		break;
-	case MISSION_TYPE_PASSENGER_M:
+	case SETTING__MISSION_TYPE_PASSENGER_M:
 		costpermsp = 30;
 		chargernws = 1;
 		break;
-	case MISSION_TYPE_PASSENGER_L:
+	case SETTING__MISSION_TYPE_PASSENGER_L:
 		costpermsp = 50;
 		chargernws = 1;
 		break;
-	case MISSION_TYPE_CARGO_S:
-	case MISSION_TYPE_CARGO_M:
-	case MISSION_TYPE_CARGO_L:
+	case SETTING__MISSION_TYPE_CARGO_S:
+	case SETTING__MISSION_TYPE_CARGO_M:
+	case SETTING__MISSION_TYPE_CARGO_L:
 		costpermsp = 40;
 		chargernws = 1;
 		break;
-	case MISSION_TYPE_HELI:
-	case MISSION_TYPE_HELI_CARGO:
+	case SETTING__MISSION_TYPE_HELI:
+	case SETTING__MISSION_TYPE_HELI_CARGO:
 		costpermsp = 30;
 		break;
-	case MISSION_TYPE_MIL_HELI:
-	case MISSION_TYPE_MIL:
+	case SETTING__MISSION_TYPE_MIL_HELI:
+	case SETTING__MISSION_TYPE_MIL:
 	default:
 		/* military is govt, and no tax for special missions */
 		return 0;
@@ -640,7 +594,7 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 	/*for others: 50 per runway + 15 if VOR + 15 if ILS*/
 	rnw = ap->runways;
 	while (rnw != ap->runwaysend) {
-		if (missiontype & HELI_MISSIONTYPES) {
+		if (missiontype & SETTING__HELI_MISSIONTYPES) {
 			if (rnw->type == RUNWAY_TYPE_HELIPAD) {
 				tax += 40;
 			}
@@ -782,7 +736,7 @@ void missions_cleanup(int playerid)
 	buf32[1] = mission->id;
 	NC_ssocket_send(tracker, buf32a, 8);
 
-	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
+	if (mission->missiontype & SETTING__PASSENGER_MISSIONTYPES) {
 		missions_hide_passenger_satisfaction_textdraw(playerid, mission->vehicleid);
 	}
 
@@ -909,7 +863,7 @@ int missions_start_flight(void *data)
 		nav_navigate_to_airport(playerid, mission->veh->spawnedvehicleid, mission->veh->model, mission->endpoint->ap);
 	}
 
-	if (mission->missiontype & PASSENGER_MISSIONTYPES) {
+	if (mission->missiontype & SETTING__PASSENGER_MISSIONTYPES) {
 		missions_show_passenger_satisfaction_textdraw(mission->passenger_satisfaction, playerid, mission->vehicleid);
 	}
 
@@ -1004,7 +958,7 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 
 	vehicleid = GetPlayerVehicleID(playerid);
 	veh = gamevehicles[vehicleid].dbvehicle;
-	if (!veh || !(missions_get_vehicle_model_msptype_mask(veh->model) & missiontype)) {
+	if (!veh || !(vehicle_msptypes[veh->model] & missiontype)) {
 		SendClientMessage(playerid, COL_WARN, WARN"Wrong vehicle type!");
 		return;
 	}
@@ -1170,7 +1124,7 @@ int missions_after_unload(void *data)
 	ptax = -calculate_airport_tax(miss->endpoint->ap, miss->missiontype);
 	pdistance = 500 + (int) (miss->distance * 1.935f);
 	pdistance = (int) (pdistance * paymp);
-	if (miss->missiontype & PASSENGER_MISSIONTYPES) {
+	if (miss->missiontype & SETTING__PASSENGER_MISSIONTYPES) {
 		if (miss->passenger_satisfaction == 100) {
 			psatisfaction = 500;
 		} else {
@@ -1249,7 +1203,7 @@ int missions_after_unload(void *data)
 	             duration_m,
 		     miss->fuelburned,
 	             paymp);
-	if (miss->missiontype & PASSENGER_MISSIONTYPES) {
+	if (miss->missiontype & SETTING__PASSENGER_MISSIONTYPES) {
 		dialoginfo += sprintf(dialoginfo,
 		             "{ffffff}Passenger Satisfaction:\t"
 			     ""ECOL_MISSION"%d%%\n",
@@ -1264,7 +1218,7 @@ int missions_after_unload(void *data)
 		dialoginfo += missions_append_pay(dialoginfo, "{ffffff}Weather bonus:\t\t", miss->weatherbonus);
 	}
 	dialoginfo += missions_append_pay(dialoginfo, "{ffffff}Distance Pay:\t\t", pdistance);
-	if (miss->missiontype & PASSENGER_MISSIONTYPES) {
+	if (miss->missiontype & SETTING__PASSENGER_MISSIONTYPES) {
 		if (psatisfaction > 0) {
 			dialoginfo += missions_append_pay(dialoginfo, "{ffffff}Satisfaction Bonus:\t", psatisfaction);
 		} else {
@@ -1349,7 +1303,7 @@ void missions_update_available_msptypes(int playerid, int vehicleid)
 
 	missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[classid[playerid]];
 	if (vehicleid) {
-		mask = missions_get_vehicle_model_msptype_mask(GetVehicleModel(vehicleid));
+		mask = vehicle_msptypes[GetVehicleModel(vehicleid)];
 		missions_player_vehicle_msptype_mask[playerid] = mask;
 		missions_available_msptype_mask[playerid] &= mask;
 	} else {
@@ -1616,7 +1570,7 @@ void missions_locate_or_show_map(int playerid)
 			break;
 		}
 
-		if (missions_get_vehicle_model_msptype_mask(veh->model) == 0) {
+		if (vehicle_msptypes[veh->model] == 0) {
 			SendClientMessage(playerid, COL_WARN, WARN"This vehicle can't do any missions!");
 			break;
 		}
@@ -1731,7 +1685,7 @@ void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
 
 	if (mission_stage[pid] == MISSION_STAGE_FLIGHT &&
 		(miss = activemission[pid]) != NULL &&
-		(miss->missiontype & PASSENGER_MISSIONTYPES) &&
+		(miss->missiontype & SETTING__PASSENGER_MISSIONTYPES) &&
 		miss->veh->spawnedvehicleid == vid &&
 		miss->passenger_satisfaction != 0)
 	{

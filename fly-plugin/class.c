@@ -20,7 +20,7 @@ void class_init()
 	nc_params[8] = nc_params[10] = SPAWN_WEAPON_2_3;
 	nc_params[9] = nc_params[11] = SPAWN_AMMO_2_3;
 
-	for (i = 0; i < NUMCLASSES; i++) {
+	for (i = 0; i < SETTING__NUM_CLASSES; i++) {
 		nc_params[1] = CLASS_SKINS[i];
 		NC(n_AddPlayerClass);
 	}
@@ -39,7 +39,7 @@ void class_on_player_connect(int playerid)
 static
 void class_on_player_request_class(int playerid, int _classid)
 {
-	if (_classid < 0 || NUMCLASSES <= _classid) {
+	if (_classid < 0 || SETTING__NUM_CLASSES <= _classid) {
 		_classid = classid[playerid];
 	} else {
 		classid[playerid] = _classid;

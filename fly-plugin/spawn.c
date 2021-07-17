@@ -1,19 +1,19 @@
 /**
 Amount of spawns per class index.
 */
-static int numspawns[NUMCLASSES];
+static int numspawns[SETTING__NUM_CLASSES];
 /**
 Array of spawn locations per class index.
 
 Elements may be NULL if associated value in numspawns is zero.
 */
-static struct vec4 *spawns[NUMCLASSES];
+static struct vec4 *spawns[SETTING__NUM_CLASSES];
 /**
 The text to show in the spawn list dialog when spawning, per class index.
 
 Elements may be NULL if associated value in numspawns is zero.
 */
-static char *spawn_list_text[NUMCLASSES];
+static char *spawn_list_text[SETTING__NUM_CLASSES];
 
 /**
 Loads spawn locations from database, creates spawn list texts.
@@ -23,7 +23,7 @@ Must run after airports_init
 static
 void spawn_init()
 {
-	int querycacheid, row, rows, ap, klass = NUMCLASSES;
+	int querycacheid, row, rows, ap, klass = SETTING__NUM_CLASSES;
 	int *field = nc_params + 2;
 	struct vec4 *sp;
 	char *txt;
@@ -75,7 +75,7 @@ Frees memory.
 static
 void spawn_dispose()
 {
-	int i = NUMCLASSES;
+	int i = SETTING__NUM_CLASSES;
 	while (i--) {
 		if (spawns[i]) {
 			free(spawns[i]);

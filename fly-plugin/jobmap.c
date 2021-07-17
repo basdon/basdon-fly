@@ -415,7 +415,7 @@ void jobmap_show(int playerid, unsigned int mission_type, struct MISSIONPOINT *m
 
 	/*Include mission type name in header.*/
 	for (i = 0;; i++) {
-		if (i >= NUM_MISSION_TYPES) {
+		if (i >= SETTING__NUM_MISSION_TYPES) {
 			logprintf("failed to construct mission map title for msp id %d vehiclemodel %d",
 				msp->id, GetVehicleModel(GetPlayerVehicleID(playerid)));
 			textdraws_strcpy(&td_jobmap_title, "Flights");
