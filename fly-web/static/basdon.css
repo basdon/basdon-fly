@@ -135,7 +135,7 @@ img.missing {
 	text-align: center;
 	background: #99f;
 	border-bottom: 0;
-	border: 1px solid #000;
+	border: 1px solid #aab;
 	border-bottom: 0;
 	font-size: 1.3em;
 }
@@ -148,14 +148,14 @@ img.missing {
 	margin: 1em 0;
 	max-width: 100%;
 	display: inline-block;
-	border: 1px solid #000;
+	border: 1px solid #aab;
 }
 .tablescroller table.new {
 	border: 0;
 	margin: 0;
 }
 table.new {
-	border: 1px solid #000;
+	border: 1px solid #aab;
 	border-collapse: collapse;
 	margin:1em 0;
 }
@@ -166,19 +166,19 @@ table.new td, table.new th {
 	padding: .2em .5em;
 }
 table.new td + td {
-	border-left: 1px solid #000;
+	border-left: 1px solid #aab;
 }
 table.new thead tr {
-	border-bottom: 1px solid #000;
+	border-bottom: 1px solid #aab;
 }
 table.highlight-row tr:hover {
 	background: #f0f0f0;
 }
 table.rowseps tr + tr td {
-	border-top: 1px solid #000;
+	border-top: 1px solid #aab;
 }
 table.new th + th {
-	border-left: 1px solid #000;
+	border-left: 1px solid #aab;
 }
 .newtableheader + table.new th + th {
 	border-left: 0;

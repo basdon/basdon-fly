@@ -5,7 +5,7 @@
 	{@render defaulthead.tpl}
 	<style>
 		#paytable td + td {
-			border-left: 1px solid #000;
+			border-left: 1px solid #aab;
 			font-family: 'Courier New',monospace;
 		}
 		#fm_mapcanvas {
@@ -86,8 +86,8 @@
 						{@if $r->pcheat}<tr><td>Cheat penalty</td><td>{@unsafe fmt_money($r->pcheat)}</tr>{@endif}
 						{@if $r->pbonus}<tr><td>Bonus</td><td>{@unsafe fmt_money($r->pbonus)}</tr>{@endif}
 						<tr>
-							<td style="border-top:1px solid #000"><strong>Total</strong></td>
-							<td style="border-top:1px solid #000"><strong>{@unsafe fmt_money($r->ptotal)}</strong></td>
+							<td style="border-top:1px solid #aab"><strong>Total</strong></td>
+							<td style="border-top:1px solid #aab"><strong>{@unsafe fmt_money($r->ptotal)}</strong></td>
 						</tr>
 					</tbody>
 				</table>

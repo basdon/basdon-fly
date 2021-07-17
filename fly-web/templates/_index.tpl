@@ -89,7 +89,7 @@
 				<tr><th>Online over last 24h</th></tr>
 			</thead>
 			<tbody>
-				<tr><td style="padding:0"><img style="width:100%;border-bottom:1px solid #000" src="{@unsafe $STATICPATH}/gen/playergraph.png" /></td></tr>
+				<tr><td style="padding:0"><img style="width:100%;border-bottom:1px solid #aab" src="{@unsafe $STATICPATH}/gen/playergraph.png" /></td></tr>
 				<tr><td><strong>Online now ({@unsafe count($onlineplayers)})</strong></td></tr>
 				<tr>
 					<td>
@@ -121,7 +121,7 @@
 		{@render aircraftnames.php}
 
 		<h3 class="newtableheader">Active flights</h3>
-		<table border="0" width="100%" class="new highlight-row center">
+		<table border="0" width="100%" class="new rowseps highlight-row center">
 			<thead>
 				<tr>
 					<th>#</th>
@@ -153,7 +153,7 @@
 		</table>
 
 		<h3 class="newtableheader">Last 10 finished flights</h3>
-		<table border="0" width="100%" class="new highlight-row center">
+		<table border="0" width="100%" class="new rowseps highlight-row center">
 			<thead>
 				<tr>
 					<th>#</th>
