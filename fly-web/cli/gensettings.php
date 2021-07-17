@@ -1,4 +1,10 @@
 <?php
+// treat all notices/warnings/errors as errors
+function exception_error_handler($severity, $message, $file, $line)
+{
+	throw new ErrorException($message, 0, $severity, $file, $line);
+}
+set_error_handler("exception_error_handler");
 
 $lines = file('../../settings.ini', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 if ($lines === false) {

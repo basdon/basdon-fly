@@ -11,6 +11,14 @@
 //   - two numbers for xy top-left position of the cluster
 //   - for each rectangle:
 //     - four numbers: minx, miny, maxx, maxy (relative to top-left position of cluster)
+
+// treat all notices/warnings/errors as errors
+function exception_error_handler($severity, $message, $file, $line)
+{
+	throw new ErrorException($message, 0, $severity, $file, $line);
+}
+set_error_handler("exception_error_handler");
+
 $mapdata = [];
 
 require '../inc/conf.php';
