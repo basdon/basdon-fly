@@ -27,7 +27,7 @@ ob_start();
 #mpta td, #mpta th {
 	text-align: center;
 }
-#mpta th,#mpta tr>td:first-child {
+#mpta tr>td:first-child {
 	background: #dc6;
 	text-align: left;
 }

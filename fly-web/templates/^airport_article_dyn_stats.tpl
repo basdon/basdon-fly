@@ -40,7 +40,7 @@
 {@rem TODO too much margin in between here (but only when page is wide enough, it's okay when it's not wide and under each other @}
 
 <div class="fl49">
-	<h4 class="newtableheader">Last 5 inbound flights</h4>
+	<h4>Last 5 inbound flights</h4>
 	<table class="new center" width="100%">
 		<thead>
 			<tr><th>Flight</th><th>Date</th><th>Aircraft</th><th>From</th><th>To</th></tr>
@@ -63,7 +63,7 @@
 	</table>
 </div>
 <div class="fr49">
-	<h4 class="newtableheader">Last 5 outbound flights</h4>
+	<h4>Last 5 outbound flights</h4>
 	<table class="new center" width="100%">
 		<thead>
 			<tr><th>Flight</th><th>Date</th><th>Aircraft</th><th>From</th><th>To</th></tr>

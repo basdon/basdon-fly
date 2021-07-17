@@ -58,9 +58,6 @@ body > p.msg {
 	text-align: center;
 	border-bottom:1px solid #a88;
 }
-hr {
-	height: 1px;
-}
 .fr49 {
 	float: right;
 	width: 49%;
@@ -89,8 +86,11 @@ hr {
 		font-size:1.3em;
 	}
 }
-h2, h3, h4, h5, h6 {
+h2, h3 {
 	border-bottom: 1px solid #000;
+}
+h4, h5, h6 {
+	margin: .25em 0
 }
 h2 {
 	font-size: 1.75em;
@@ -102,10 +102,7 @@ h4 {
 	font-size: 1.25em;
 }
 h5 {
-	font-size: .9em;
-}
-h6 {
-	font-size: .8em;
+	font-size: 1.1em;
 }
 h2+div,h3+div,h4+div,h5+div{
 	margin-bottom:0;
@@ -130,19 +127,6 @@ img.missing {
 	image-rendering: -webkit-pixelated;
 	image-rendering: pixelated;
 }
-.newtableheader {
-	margin-bottom: 0;
-	text-align: center;
-	background: #99f;
-	border-bottom: 0;
-	border: 1px solid #aab;
-	border-bottom: 0;
-	font-size: 1.3em;
-}
-.newtableheader + table.new {
-	border-top: 0;
-	margin-top:0;
-}
 .tablescroller {
 	overflow-x: auto;
 	margin: 1em 0;
@@ -160,7 +144,7 @@ table.new {
 	margin:1em 0;
 }
 table.new th {
-	background: #99f;
+	background: #dc6;
 }
 table.new td, table.new th {
 	padding: .2em .5em;
@@ -179,9 +163,6 @@ table.rowseps tr + tr td {
 }
 table.new th + th {
 	border-left: 1px solid #aab;
-}
-.newtableheader + table.new th + th {
-	border-left: 0;
 }
 .clear {
 	clear: both;
