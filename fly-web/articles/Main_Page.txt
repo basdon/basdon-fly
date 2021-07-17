@@ -49,6 +49,7 @@
 			<td><ul>
 				{@li {@article Missions}}
 				{@li {@article Passenger_Satisfaction}}
+				{@li {@article Mission_point_types}}
 			</ul></td>
 			<td class="navinfo">
 				<?php readfile('../gen/navinfotable.html'); ?>

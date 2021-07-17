@@ -12,7 +12,7 @@
   }
   {@li {@#=Other_planes Other planes}
     {@ul
-      {@li {@#=Crop_duster Crop duster}}
+      {@li {@#=Cropduster Crop duster}}
       {@li {@#=Stuntplane Stuntplane}}
     }
   }
@@ -20,9 +20,9 @@
     {@ul
       {@li {@#=Leviathan Leviathan}}
       {@li {@#=Maverick Maverick}}
-      {@li {@#=Police_maverick Police maverick}}
+      {@li {@#=Police_Maverick Police maverick}}
       {@li {@#=Raindance Raindance}}
-      {@li {@#=San_news_heli San News heli}}
+      {@li {@#=San_News_heli San News heli}}
       {@li {@#=Sparrow Sparrow}}
       {@li {@#=Seasparrow Seasparrow}}
     }
@@ -159,7 +159,7 @@ in the game's display settings).<br/>
 
 Apart from passenger and cargo planes, there are two other civilian planes that have a specific purpose.
 
-{@h4(id="Crop_duster") Crop duster}
+{@h4(id="Cropduster") Crop duster}
 {@infoboxright
   {@aimg=cropduster.png;Crop duster;Crop duster}
   <small>Crop duster</small>
@@ -225,12 +225,12 @@ Light helicopter with 3 passenger seats. Since it's light, winds can make it dri
 {@b Based on:} Bell 206 LongRanger<br/>
 {@b Fuel capacity:} 416L<br/>
 {@b Fuel usage:} 0.6L/s<br/>
-{@b See also:} {@#=Police_maverick Police maverick}<br/>
-{@b See also:} {@#=San_news_heli San News heli}<br/>
+{@b See also:} {@#=Police_Maverick Police maverick}<br/>
+{@b See also:} {@#=San_News_heli San News heli}<br/>
 
 {@clear}
 
-{@h4(id="Police_maverick") Police maverick}
+{@h4(id="Police_Maverick") Police maverick}
 {@infoboxright
   {@aimg=polmav.png;Police maverick;Police maverick}
   <small>Police maverick</small>
@@ -244,7 +244,7 @@ The Police maverick is slightly faster than the standard Maverick.
 {@b Fuel capacity:} 416L<br/>
 {@b Fuel usage:} 0.6L/s<br/>
 {@b See also:} {@#=Maverick Maverick}<br/>
-{@b See also:} {@#=San_news_heli San News heli}<br/>
+{@b See also:} {@#=San_News_heli San News heli}<br/>
 {@b Trivia:} In single player, SWAT can come down ropes from this helicopter when the player has a
 wanted level of at least 3.<br/>
 
@@ -264,7 +264,7 @@ SAFD fire helicopter. Quite bulky, but not too hard on the controls.
 
 {@clear}
 
-{@h4(id="San_news_heli") San News heli}
+{@h4(id="San_News_heli") San News heli}
 {@infoboxright
   {@aimg=newschopper.png;San News heli;San News heli}
   <small>San News heli</small>
@@ -277,7 +277,7 @@ with a Newsvan, which is an adapted Pony vehicle with a satellite dish.
 {@b Fuel capacity:} 416L<br/>
 {@b Fuel usage:} 0.6L/s<br/>
 {@b See also:} {@#=Maverick Maverick}<br/>
-{@b See also:} {@#=Police_maverick Police maverick}<br/>
+{@b See also:} {@#=Police_Maverick Police maverick}<br/>
 
 {@clear}
 

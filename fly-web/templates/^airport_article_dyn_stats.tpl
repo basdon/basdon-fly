@@ -10,7 +10,7 @@
 {@if $missionpoints}
 	<table class="new rowseps">
 		<thead>
-			<tr><th>Name</th><th>Available mission types</th></tr>
+			<tr><th>Name</th><th><a href="article.php?title=Mission_point_types">Available mission types</a></th></tr>
 		</thead>
 		<tbody>
 			{@foreach $missionpoints as $msp}
@@ -20,7 +20,9 @@
 					<ul class="compact">
 						{@for $i = 0; $i < 31; $i++}
 							{@if (1 << $i) & $msp->t}
-								<li>{@unsafe fmt_mission_type(1 << $i)}</li>
+								<li>
+									<a href="article.php?title=Mission_point_types#mpta">{@unsafe fmt_mission_type(1 << $i)}</a>
+								</li>
 							{@endif}
 						{@endfor}
 					</ul>

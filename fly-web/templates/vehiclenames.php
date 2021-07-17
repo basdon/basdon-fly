@@ -90,7 +90,7 @@ function vehicle_name($model)
 		'Baggage',
 		'Dozer',
 		'Maverick',
-		'News Chopper',
+		'San News heli',
 		'Rancher',
 		'FBI Rancher',
 		'Virgo',

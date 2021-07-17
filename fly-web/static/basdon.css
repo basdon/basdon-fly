@@ -143,6 +143,17 @@ img.missing {
 	border-top: 0;
 	margin-top:0;
 }
+.tablescroller {
+	overflow-x: auto;
+	margin: 1em 0;
+	max-width: 100%;
+	display: inline-block;
+	border: 1px solid #000;
+}
+.tablescroller table.new {
+	border: 0;
+	margin: 0;
+}
 table.new {
 	border: 1px solid #000;
 	border-collapse: collapse;
@@ -166,8 +177,11 @@ table.highlight-row tr:hover {
 table.rowseps tr + tr td {
 	border-top: 1px solid #000;
 }
-:not(.newtableheader) + table.new th + th {
+table.new th + th {
 	border-left: 1px solid #000;
+}
+.newtableheader + table.new th + th {
+	border-left: 0;
 }
 .clear {
 	clear: both;

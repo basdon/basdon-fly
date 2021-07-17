@@ -1,0 +1,11 @@
+This article shows which vehicles apply to which mission point types, and which
+airports have a mission point for a specific mission point type.
+
+<?php readfile('../static/gen/mission-point-types-airports.html'); ?>
+<a href="<?=$STATICPATH?>/gen/mission-point-types-airports.html">Show table fullscreen</a>
+
+<?php readfile('../static/gen/mission-point-types-vehicles.html'); ?>
+<a href="<?=$STATICPATH?>/gen/mission-point-types-vehicles.html">Show table fullscreen</a>
+
+<?php readfile('../static/gen/mission-point-types-classes.html'); ?>
+<a href="<?=$STATICPATH?>/gen/mission-point-types-classes.html">Show table fullscreen</a>
