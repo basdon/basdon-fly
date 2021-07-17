@@ -43,7 +43,22 @@
 			The main activity is to grab a plane or helicopter and enjoy flying around, either freely or by accepting missions towards various destinations. 
 			Start your flight and have fun!
 		</p>
-		<p style="text-align:center;font-size:1.5em;margin:.5em">basdon.net:7777<br/><span style="font-size:80%"><a href="https://files.sa-mp.com/sa-mp-0.3.7-R4-install.exe">SA-MP 0.3.7</a></span></p>
+
+		<div class="center">
+			<p style="font-size:1.5em">
+				basdon.net:7777<br/>
+			</p>
+			<p>
+				<a href="https://files.sa-mp.com/sa-mp-0.3.7-R4-install.exe">SA-MP 0.3.7</a> - <a href="article.php?title=How_To_Join">How to join</a>
+			</p>
+			<p>
+				Join our Discord: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}
+			</p>
+			<p>
+				IRC: #basdon (<a href="{@unsafe $STATICPATH}/chatlogs/basdon/?C=M;O=D">chatlogs</a>) and #basdon.echo (<a href="{@unsafe $STATICPATH}/chatlogs/basdon.echo/?C=M;O=D">chatlogs</a>) on LUNet (<a href="irc://irc.liberty-unleashed.co.uk">irc.liberty-unleashed.co.uk</a>{@globe})
+			</p>
+		</div>
+
 		<h3 class="title">Our destinations</h3>
 		<div class="airportlist">
 			<?php readfile('../gen/airportlist.html'); ?>
@@ -59,21 +74,6 @@
 			<a href="{@unsafe $STATICPATH}/showcase-spitfire2.png"><img src="{@unsafe $STATICPATH}/showcase-spitfire2.png" title="spitfire"></a>
 			<a href="flight.php?id=2572"><img src="{@unsafe $STATICPATH}/showcase-map.png" title="flight map"></a>
 		</p>
-
-		<h2>Server Info</h2>
-		<p>
-			Join by adding <a href="samp://basdon.net:7777">basdon.net:7777</a> to your list of servers and clicking 'connect' (<a href="article.php?title=How_To_Join">How to join</a>). Our server is running using the latest official release: 0.3.7.
-		</p>
-		<p>
-			Discord server invite link: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}.
-		</p>
-		<p>
-			IRC: basdon is present on LUNet (<a href="irc://irc.liberty-unleashed.co.uk">irc.liberty-unleashed.co.uk</a>{@globe}), our channels are:
-		</p>
-		<ul>
-			<li>#basdon for general talk (<a href="{@unsafe $STATICPATH}/chatlogs/basdon/?C=M;O=D">#basdon chatlogs</a>)</li>
-			<li>#basdon.echo with relayed server chat (<a href="{@unsafe $STATICPATH}/chatlogs/basdon.echo/?C=M;O=D">#basdon.echo chatlogs</a>)</li>
-		</ul>
 
 		<h3><strong>Changelog:</strong></h3>
 		<ul>
