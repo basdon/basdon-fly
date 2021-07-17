@@ -9,12 +9,12 @@ set_error_handler("exception_error_handler");
 require '../inc/conf.php';
 require '../inc/db.php';
 
-$imgw = 978;
-$imgh = 100;
+$imgw = 980;
+$imgh = 125;
 
 $im = imagecreate($imgw, $imgh);
 
-$bg = imagecolorallocate($im, 0xd8, 0xd8, 0xd8);
+$bg = imagecolorallocate($im, 255, 255, 255);
 $color_fill = imagecolorallocate($im, 0xeb, 0xeb, 0x68);
 $color_outline = imagecolorallocate($im, 0xA8, 0xA8, 0x4B);
 $color_peak = imagecolorallocate($im, 0x69, 0x7F, 0xEA);
@@ -58,7 +58,8 @@ $values[] = $o;
 
 $peakranges = [];
 $inpeak = false;
-$maxy = $imgh - imagefontheight(2) - 3;
+$maxy = $imgh - 5; // - imagefontheight(2) - 3;
+$miny = 3 + imagefontheight(2) + 3;
 if ($max_num_players > 0) {
 	/*basically put a value for every x of the graph*/
 	$o = new stdclass();
@@ -91,28 +92,24 @@ if ($max_num_players > 0) {
 		} else {
 			$inpeak = false;
 		}
-		$ytop = $imgh - $maxy * ($thisvalue / $max_num_players);
-		$vals[] = $ytop;
+		$vals[] = $imgh - $miny - ($maxy - $miny) * ($thisvalue / $max_num_players);
 	}
 
 	/*smoothen out the values, give them a slope*/
-	// TODO? this is slightly biased towards the left (because it goes left to right)
-	$changed = true;
-	for ($j = 0; $j < 5 && $changed; $j++) {
-		$changed = false;
+	$processed = array_fill(0, count($vals), 0);
+	for ($j = 0; $j < 5; $j++) {
 		for ($i = 0; $i < count($vals) - 1; $i++) {
-			$v = $vals[$i];
-			$left = $vals[$i + 1];
-			$nv = $v;
-			if ($left - $v < -20) {
-				$nv = $vals[$i] = ceil(($left + $v) / 2);
-				$changed = true;
-			}
-			if ($i > 0) {
-				$right = $vals[$i - 1];
-				if ($right - $v < -20) {
-					$vals[$i] = ceil(($right + $v) / 2);
-					$changed = true;
+			$n = $i + 1;
+			$cur = $vals[$i];
+			$nex = $vals[$n];
+			if (abs($nex - $cur) > 10) {
+				if (!$processed[$n]) {
+					$processed[$n] = 1;
+					$vals[$n] = $cur + ($nex - $cur) * 3 / 4;
+				}
+				if (!$processed[$i]) {
+					$processed[$i] = 1;
+					$vals[$i] = $cur + ($nex - $cur) * 1 / 4;
 				}
 			}
 		}
@@ -123,37 +120,34 @@ if ($max_num_players > 0) {
 		$v = (int) $v;
 	}
 
-	/*draw it!*/
+	/*calc points to draw*/
 	$x = $imgw - 1;
-	imageline($im, $x, $imgh, $x, $vals[0], $color_fill);
-	imagesetpixel($im, $x, $vals[0], $color_outline);
 	$lastv = $vals[0];
-	for ($i = 1; $i < count($vals); $i++) {
+	$points = [];
+	for ($i = 2; $i < count($vals) - 2; $i++) {
 		$x = $imgw - 1 - $i;
 		$v = $vals[$i];
-		imageline($im, $x, $imgh, $x, $v + 1, $color_fill);
 		if ($v == $lastv) {
-			imagesetpixel($im, $x, $v, $color_outline);
-			if ($i > 1) {
-				$rr = $vals[$i - 2];
-				if ($rr < $lastv) {
-					imagesetpixel($im, $x + 1, $v, $color_fill);
-				} else if ($rr > $lastv) {
-					imagesetpixel($im, $x + 1, $v, $bg);
-				}
-			}
+			$points[] = [$x, $v];
 		} else if ($v < $lastv) {
 			for ($z = $lastv - 1; $z >= $v; $z--) {
-				imagesetpixel($im, $x, $z, $color_outline);
+				$points[] = [$x, $z];
 			}
 		} else {
 			for ($z = $lastv + 1; $z <= $v; $z++) {
-				imagesetpixel($im, $x, $z, $color_outline);
+				$points[] = [$x, $z];
 			}
 		}
 		$lastv = $v;
 	}
-} else {
+
+	/*draw it!*/
+	foreach ($points as $p) {
+		imagefilledellipse($im, $p[0], $p[1], 5, 5, $color_outline);
+	}
+	foreach ($points as $p) {
+		imagefilledellipse($im, $p[0], $p[1], 3, 3, $color_fill);
+	}
 }
 
 /*hour 'axis' guidelines*/
@@ -161,16 +155,17 @@ $hour_guide_time = $time_end;
 $hour_guide_time_offset = 3600 - ($time_end % 3600); /*align them on the hour*/
 $x = $imgw - 1 + $hour_guide_time_offset * $imgw / 24 / 3600;
 $xincrement = $imgw / 24; /*one per hour*/
+$texty = $imgh - imagefontheight(2);
+$lt = $imgh - imagefontheight(2);
 for ($i = 0; $i < 25 /*25 because we do one extra at the right*/; $i++) {
-	imageline($im, $x, 0, $x, imagefontheight(2), $color_hour_guide);
+	imageline($im, $x, $imgh, $x, $lt, $color_hour_guide);
 	$textx = $x - imagefontwidth(2) * 1.5 - $xincrement / 2;
-	$texty = 0;
 	imagestring($im, 2, $textx, $texty, date('H', $hour_guide_time) . 'h', $color_hour_guide);
 	$hour_guide_time -= 3600;
 	$x -= $xincrement;
 }
 
-/*show peak square and text, if there were any players*/
+/*show peak and text, if there were any players*/
 if (count($peakranges)) {
 	$longest = $peakranges[0];
 	foreach ($peakranges as $p) {
@@ -181,7 +176,7 @@ if (count($peakranges)) {
 	}
 	$x = $longest->min + ($longest->max - $longest->min) / 2;
 	$y = $imgh - $maxy;
-	imagefilledrectangle($im, $x - 2, $y - 2, $x + 2, $y + 2, $color_peak);
+	imagefilledellipse($im, $x, $y, 8, 8, $color_peak);
 	$txt = "peak: " . $max_num_players;
 	if ($x > $imgw / 2) {
 		$x -= imagefontwidth(2) * strlen($txt);
@@ -189,15 +184,13 @@ if (count($peakranges)) {
 	imagestring($im, 2, $x, $y + 2, $txt, $color_text);
 }
 
-$text = date('j M H:i O', time());
-$textx = ($imgw - imagefontwidth(2) * strlen($text)) / 2;
-$texty = $imgh - imagefontheight(2);
-imagestring($im, 2, $textx, $texty, $text, $color_text);
+//$text = date('j M H:i O', time());
+//$textx = ($imgw - imagefontwidth(2) * strlen($text)) / 2;
+//$texty = $imgh - imagefontheight(2);
+//imagestring($im, 2, $textx, $texty, $text, $color_text);
 if ($max_num_players == 0) {
-	$text = 'no players last 24h :(';
 	$textx = ($imgw - imagefontwidth(2) * strlen($text)) / 2;
-	$texty -= imagefontheight(2) - 2;
-	imagestring($im, 2, $textx, $texty, $text, $color_text);
+	imagestring($im, 2, $textx, 5, 'no players last 24h :(', $color_text);
 }
 
 if (isset($_SERVER['REMOTE_ADDR']) && !isset($_GET['d'])) {
