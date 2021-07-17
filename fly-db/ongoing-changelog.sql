@@ -73,3 +73,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Jul 08', 'Changed mission point colors: red = wrong class, blue = wrong vehicle, green = available');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Jul 17', 'Updated PINE map, made it bigger and combined its non-heli mission points');
