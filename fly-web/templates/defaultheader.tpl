@@ -20,7 +20,7 @@
 	<img src="{@unsafe $STATICPATH}/banner.png" style="width:100%" alt="header panorama img"/>
 	<div>
 		<p id="ip">IP: <a href="samp://basdon.net:7777">basdon.net:7777</a> (<a href="article.php?title=How_To_Join">How to join</a>)</p>
-		<p><a href="./">Home</a> <!--:: <a href="news.php">News</a>--> :: <a href="flights.php">Flights</a> <!--:: <a href="map.php">Live Map</a>--> :: <a href="article.php">Articles</a> :: <a href="trac.php">Tracker</a> <!--:: <a href="bbs.php">Message Board</a>--> :: <a href="stats.php">Stats</a></p>
+		<p><a href="./">Home</a> :: <a href="flights.php">Flights</a> :: <a href="article.php">Articles</a> :: <a href="stats.php">Stats</a></p>
 	</div>
 </header>
 {@foreach $__msgs as $msg}
