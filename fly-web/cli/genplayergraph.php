@@ -189,8 +189,10 @@ if (count($peakranges)) {
 //$texty = $imgh - imagefontheight(2);
 //imagestring($im, 2, $textx, $texty, $text, $color_text);
 if ($max_num_players == 0) {
+	$text = 'no players last 24h :(';
 	$textx = ($imgw - imagefontwidth(2) * strlen($text)) / 2;
-	imagestring($im, 2, $textx, 5, 'no players last 24h :(', $color_text);
+	$texty = $imgh - imagefontheight(2) - 30;
+	imagestring($im, 2, $textx, $texty, $text, $color_text);
 }
 
 if (isset($_SERVER['REMOTE_ADDR']) && !isset($_GET['d'])) {
