@@ -1517,7 +1517,7 @@ static struct REGION regions[] = {
 	R(-4780.9155f, 25763.7539f, -242.99f, -2509.3086f, 29620.2578f, 900.0f, ZONE_IGZU),
 	R(4207.2f, -11578.1f, -242.99f, 5815.9f, -10478.2f, 900.0f, ZONE_BNSA),
 	R(8648.0f, -5224.7f, -242.99f, 11727.7f, -2551.8f, 900.0f, ZONE_DUNE),
-	R(-19495.4f,-4942.8f, -242.99f, -16188.9f, 2053.7f, 900.0f, ZONE_STRS),
+	R(-12495.4f, -11942.8f, -7242.99f, -9188.9f, -4947.3f, 900.0f, ZONE_STRS),
 	#undef R
 };
 
@@ -1949,12 +1949,12 @@ static struct ZONE zones[] = {
 	{ 9489.8f, -4277.8f, 0.0f, 10869.3f, -3381.3f, 200.0f, ZONE_DUNE },
 	/* end DUNE region zones */
 	/* start STRS region zones */
-	{ -17670.2f, -3998.1f, 0.0f, -17430.1f, -3816.8f, 200.0f, ZONE_STRS_CITY },
-	{ -17430.1f, -3926.7f, 0.0f, -17285.7f, -3884.6f, 200.0f, ZONE_STRS_LIGHTHOUSE },
-	{ -17680.6f, -4220.8f, 0.0f, -17620.3f, -3998.1f, 200.0f, ZONE_STRS_PIER },
-	{ -18354.6f, -3983.8f, 0.0f, -17670.2f, -3108.1f, 200.0f, ZONE_STRS_AIRPORT },
-	{ -17670.2f, -3816.8f, 0.0f, -17229.2f, -3608.4f, 200.0f, ZONE_STRS_AIRPORT },
-	{ -17670.2f, -3608.4f, 0.0f, -17354.1f, -3108.1f, 200.0f, ZONE_STRS_AIRPORT },
+	{ -10670.2f, -10998.1f, 0.0f, -10430.1f, -10816.8f, 200.0f, ZONE_STRS_CITY },
+	{ -10430.1f, -10926.7f, 0.0f, -10285.7f, -10884.6f, 200.0f, ZONE_STRS_LIGHTHOUSE },
+	{ -10680.6f, -11220.8f, 0.0f, -10620.3f, -10998.1f, 200.0f, ZONE_STRS_PIER },
+	{ -11354.6f, -10983.8f, 0.0f, -10670.2f, -10108.1f, 200.0f, ZONE_STRS_AIRPORT },
+	{ -10670.2f, -10816.8f, 0.0f, -10229.2f, -10608.4f, 200.0f, ZONE_STRS_AIRPORT },
+	{ -10670.2f, -10608.4f, 0.0f, -10354.1f, -10108.1f, 200.0f, ZONE_STRS_AIRPORT },
 	/* end STRS region zones */
 };
 
