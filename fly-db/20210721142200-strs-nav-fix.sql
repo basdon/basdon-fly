@@ -1,0 +1,2 @@
+UPDATE rnw SET n=0 WHERE a=14 AND h=270 AND s='R';
+UPDATE rnw SET n=0 WHERE a=14 AND h=90 AND s='L';

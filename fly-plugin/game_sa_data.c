@@ -1302,6 +1302,11 @@ struct REGION {
 #define ZONE_BNSA_CARRIER 181
 #define ZONE_DUNE 182
 #define ZONE_PINE 183
+#define ZONE_STRS 184
+#define ZONE_STRS_AIRPORT 185
+#define ZONE_STRS_CITY 186
+#define ZONE_STRS_LIGHTHOUSE 187
+#define ZONE_STRS_PIER 188
 
 /* see info.zon and american.gxt */
 static char *zonenames[] = {
@@ -1489,6 +1494,11 @@ static char *zonenames[] = {
 	"BNS Atlantic",
 	"Sandy Dunes",
 	"Angel Pine Airstrip",
+	"Santa Rosa Airport",
+	"Airport",
+	"City",
+	"Lighthouse",
+	"Pier",
 };
 
 static struct REGION regions[] = {
@@ -1507,6 +1517,7 @@ static struct REGION regions[] = {
 	R(-4780.9155f, 25763.7539f, -242.99f, -2509.3086f, 29620.2578f, 900.0f, ZONE_IGZU),
 	R(4207.2f, -11578.1f, -242.99f, 5815.9f, -10478.2f, 900.0f, ZONE_BNSA),
 	R(8648.0f, -5224.7f, -242.99f, 11727.7f, -2551.8f, 900.0f, ZONE_DUNE),
+	R(-19495.4f,-4942.8f, -242.99f, -16188.9f, 2053.7f, 900.0f, ZONE_STRS),
 	#undef R
 };
 
@@ -1937,6 +1948,14 @@ static struct ZONE zones[] = {
 	/* start DUNE region zones */
 	{ 9489.8f, -4277.8f, 0.0f, 10869.3f, -3381.3f, 200.0f, ZONE_DUNE },
 	/* end DUNE region zones */
+	/* start STRS region zones */
+	{ -17670.2f, -3998.1f, 0.0f, -17430.1f, -3816.8f, 200.0f, ZONE_STRS_CITY },
+	{ -17430.1f, -3926.7f, 0.0f, -17285.7f, -3884.6f, 200.0f, ZONE_STRS_LIGHTHOUSE },
+	{ -17680.6f, -4220.8f, 0.0f, -17620.3f, -3998.1f, 200.0f, ZONE_STRS_PIER },
+	{ -18354.6f, -3983.8f, 0.0f, -17670.2f, -3108.1f, 200.0f, ZONE_STRS_AIRPORT },
+	{ -17670.2f, -3816.8f, 0.0f, -17229.2f, -3608.4f, 200.0f, ZONE_STRS_AIRPORT },
+	{ -17670.2f, -3608.4f, 0.0f, -17354.1f, -3108.1f, 200.0f, ZONE_STRS_AIRPORT },
+	/* end STRS region zones */
 };
 
 static int regioncount = sizeof(regions)/sizeof(regions[0]);
