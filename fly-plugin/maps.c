@@ -120,6 +120,14 @@ int maps_load_from_file(int mapidx)
 		goto exitzero;
 	}
 
+	if (header.stream_out_radius < header.stream_in_radius + 50.0f) {
+		logprintf("map %s has streamout %f < streamin %f + 100",
+			maps[mapidx].name,
+			header.stream_out_radius,
+			header.stream_in_radius);
+		abort();
+	}
+
 	maps[mapidx].stream_in_radius_sq = header.stream_in_radius * header.stream_in_radius;
 	maps[mapidx].stream_out_radius_sq = header.stream_out_radius * header.stream_out_radius;
 
