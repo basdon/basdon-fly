@@ -76,3 +76,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Jul 17', 'Updated PINE map, made it bigger and combined its non-heli mission points');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Jul 21', 'New destination: Santa Rosa Airport (STRS)');
