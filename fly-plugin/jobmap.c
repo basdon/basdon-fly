@@ -453,7 +453,7 @@ void jobmap_show(int playerid, unsigned int mission_type, struct MISSIONPOINT *m
 		&td_jobmap_island_mainland, &td_jobmap_island_octa, &td_jobmap_island_cata,
 		&td_jobmap_island_igzu, &td_jobmap_island_bnsa, &td_jobmap_island_dune,
 		&td_jobmap_island_strs,
-		&td_jobmap_from, &td_jobmap_to);
+		&td_jobmap_from);
 
 	jobmap_update_selection_textdraws(playerid, jobmapdata);
 
@@ -637,7 +637,7 @@ void jobmap_init()
 	textdraws_initialize_from(&td_jobmap_island_cata, &td_jobmap_island_igzu, TEXTDRAW_MISSIONMAP_ISLAND_IGZU);
 	textdraws_initialize_from(&td_jobmap_island_cata, &td_jobmap_island_bnsa, TEXTDRAW_MISSIONMAP_ISLAND_BNSA);
 	textdraws_initialize_from(&td_jobmap_island_cata, &td_jobmap_island_dune, TEXTDRAW_MISSIONMAP_ISLAND_DUNE);
-	textdraws_initialize_from(&td_jobmap_island_cata, &td_jobmap_island_strs, TEXTDRAW_MISSIONMAP_ISLAND_DUNE);
+	textdraws_initialize_from(&td_jobmap_island_cata, &td_jobmap_island_strs, TEXTDRAW_MISSIONMAP_ISLAND_STRS);
 
 	jobmap_set_island_textdraw_properties();
 }
