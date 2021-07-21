@@ -62,14 +62,6 @@ EXPECT_SIZE(float, 4);
 #define csprintf(DST,FMT,...) atoci(DST,sprintf((char*)DST,FMT,__VA_ARGS__))
 #define B144(X) atoc(buf144,X,144)
 
-#ifdef DEV
-#define DBG(format,...) sprintf(cbuf64,format,__VA_ARGS__);\
-			printf("%s\n", cbuf64);printf("\n");\
-			SendClientMessageToAll(-1,cbuf644);
-#else
-#define DBG(...)
-#endif
-
 /*
 These are moved to variables float_pinf and float_ninf because these are ints.
 #define FLOAT_PINF (0x7F800000)
