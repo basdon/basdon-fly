@@ -79,3 +79,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Jul 21', 'New destination: Santa Rosa Airport (STRS)');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Jul 22', 'Fixed a bug where random objects would disappear');

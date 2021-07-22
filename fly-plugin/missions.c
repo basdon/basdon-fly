@@ -326,7 +326,7 @@ next:
 		if (indicators->state[indicatoridx] == MISSIONPOINT_INDICATOR_STATE_AVAILABLE) {
 			rpcdata_DestroyObject.objectid = OBJECT_MISSION_INDICATOR_BASE + indicatoridx;
 			bitstream.ptrData = &rpcdata_DestroyObject;
-			bitstream.numberOfBitsUsed = sizeof(rpcdata_DestroyObject);
+			bitstream.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
 			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream, playerid, 2);
 			indicators->state[indicatoridx] = MISSIONPOINT_INDICATOR_STATE_FREE;
 #ifdef MISSIONS_LOG_POINT_INDICATOR_ALLOC
