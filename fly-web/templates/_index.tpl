@@ -48,14 +48,12 @@
 			Start your flight and have fun!
 		</p>
 
-		<p style="font-size:1.5em">
-			basdon.net:7777
-		</p>
+		<h3 style="border:0">Server IP: basdon.net:7777</h3>
 		<p>
 			<a href="https://files.sa-mp.com/sa-mp-0.3.7-R4-install.exe">SA-MP 0.3.7</a> - <a href="article.php?title=How_To_Join">How to join</a>
 		</p>
 		<p>
-			Join our Discord: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}
+			Discord: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}
 		</p>
 		<p>
 			IRC: #basdon (<a href="{@unsafe $STATICPATH}/chatlogs/basdon/?C=M;O=D">chatlogs</a>) and #basdon.echo (<a href="{@unsafe $STATICPATH}/chatlogs/basdon.echo/?C=M;O=D">chatlogs</a>) on LUNet (<a href="irc://irc.liberty-unleashed.co.uk">irc.liberty-unleashed.co.uk</a>{@globe})
