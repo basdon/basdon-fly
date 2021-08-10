@@ -761,6 +761,7 @@ int cmd_loc(struct COMMANDCONTEXT cmdctx)
 	struct vec3 pos;
 	struct vec3 vvel;
 	char buf[144], *b;
+	float vel;
 
 	if (!cmd_get_player_param(&cmdctx, &target)) {
 		return CMD_SYNTAX_ERR;
@@ -781,14 +782,16 @@ int cmd_loc(struct COMMANDCONTEXT cmdctx)
 	b += sprintf(b, "%s ", zonenames[zone_last_region[target]]);
 	vehicleid = GetPlayerVehicleID(target);
 	if (vehicleid) {
-		model = GetVehicleModel(vehicleid);
 		GetVehicleVelocityUnsafe(vehicleid, &vvel);
-		sprintf(b, "travelling at %.0f KPH in a %s (%.0f FT)",
-			VEL_TO_KPH * sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z),
-			vehnames[model - 400],
-			pos.z);
+		model = GetVehicleModel(vehicleid);
+		vel = sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z);
+		if (game_is_air_vehicle(model)) {
+			sprintf(b, "traveling at %.0f kts in a %s (%.0f ft)", VEL_TO_KTS * vel, vehnames[model - 400], pos.z);
+		} else {
+			sprintf(b, "traveling at %.0f kph in a %s", VEL_TO_KPH * vel, vehnames[model - 400]);
+		}
 	} else {
-		sprintf(b, "on foot (%.0f FT)", pos.z);
+		sprintf(b, "on foot");
 	}
 
 	SendClientMessage(cmdctx.playerid, COL_INFO_GENERIC, buf);
