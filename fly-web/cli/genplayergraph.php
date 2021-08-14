@@ -10,7 +10,7 @@ require '../inc/conf.php';
 require '../inc/db.php';
 
 $imgw = 980;
-$imgh = 125;
+$imgh = 140;
 
 $im = imagecreate($imgw, $imgh);
 
@@ -58,96 +58,95 @@ $values[] = $o;
 
 $peakranges = [];
 $inpeak = false;
-$maxy = $imgh - 5; // - imagefontheight(2) - 3;
+$maxy = $imgh - 20;
 $miny = 3 + imagefontheight(2) + 3;
-if ($max_num_players > 0) {
-	/*basically put a value for every x of the graph*/
-	$o = new stdclass();
-	$o->stamp = $time_end;
-	$o->value = $rightvalue;
-	array_unshift($values, $o);
-	$value = $rightvalue;
-	$idx = 0;
-	$vals = [];
-	for ($x = $imgw - 1; $x >= 0; $x--) {
-		$t = $time_start + ($time_end - $time_start) * ($x + 1) / $imgw;
-		$newvalue = 0;
-		$thisvalue = $value;
-		while ($idx < count($values) - 1 && $values[$idx + 1]->stamp >= $t) {
-			$idx++;
-			$value = $values[$idx]->value;
-			$newvalue = max($newvalue, $value);
-			$thisvalue = $newvalue;
-		}
-		if ($thisvalue == $max_num_players) {
-			if ($inpeak) {
-				$peakranges[0]->min = $x;
-			} else {
-				$peak = new stdclass();
-				$peak->min = $x;
-				$peak->max = $x;
-				array_unshift($peakranges, $peak);
-				$inpeak = true;
-			}
+$max_value = max($max_num_players, 1);
+/*basically put a value for every x of the graph*/
+$o = new stdclass();
+$o->stamp = $time_end;
+$o->value = $rightvalue;
+array_unshift($values, $o);
+$value = $rightvalue;
+$idx = 0;
+$vals = [];
+for ($x = $imgw - 1; $x >= 0; $x--) {
+	$t = $time_start + ($time_end - $time_start) * ($x + 1) / $imgw;
+	$newvalue = 0;
+	$thisvalue = $value;
+	while ($idx < count($values) - 1 && $values[$idx + 1]->stamp >= $t) {
+		$idx++;
+		$value = $values[$idx]->value;
+		$newvalue = max($newvalue, $value);
+		$thisvalue = $newvalue;
+	}
+	if ($thisvalue == $max_value) {
+		if ($inpeak) {
+			$peakranges[0]->min = $x;
 		} else {
-			$inpeak = false;
+			$peak = new stdclass();
+			$peak->min = $x;
+			$peak->max = $x;
+			array_unshift($peakranges, $peak);
+			$inpeak = true;
 		}
-		$vals[] = $imgh - $miny - ($maxy - $miny) * ($thisvalue / $max_num_players);
+	} else {
+		$inpeak = false;
 	}
+	$vals[] = $imgh - $miny - ($maxy - $miny) * ($thisvalue / $max_value);
+}
 
-	/*smoothen out the values, give them a slope*/
-	$processed = array_fill(0, count($vals), 0);
-	for ($j = 0; $j < 5; $j++) {
-		for ($i = 0; $i < count($vals) - 1; $i++) {
-			$n = $i + 1;
-			$cur = $vals[$i];
-			$nex = $vals[$n];
-			if (abs($nex - $cur) > 10) {
-				if (!$processed[$n]) {
-					$processed[$n] = 1;
-					$vals[$n] = $cur + ($nex - $cur) * 3 / 4;
-				}
-				if (!$processed[$i]) {
-					$processed[$i] = 1;
-					$vals[$i] = $cur + ($nex - $cur) * 1 / 4;
-				}
+/*smoothen out the values, give them a slope*/
+$processed = array_fill(0, count($vals), 0);
+for ($j = 0; $j < 5; $j++) {
+	for ($i = 0; $i < count($vals) - 1; $i++) {
+		$n = $i + 1;
+		$cur = $vals[$i];
+		$nex = $vals[$n];
+		if (abs($nex - $cur) > 10) {
+			if (!$processed[$n]) {
+				$processed[$n] = 1;
+				$vals[$n] = $cur + ($nex - $cur) * 3 / 4;
+			}
+			if (!$processed[$i]) {
+				$processed[$i] = 1;
+				$vals[$i] = $cur + ($nex - $cur) * 1 / 4;
 			}
 		}
 	}
+}
 
-	/*I guess*/
-	foreach ($vals as &$v) {
-		$v = (int) $v;
-	}
+/*I guess*/
+foreach ($vals as &$v) {
+	$v = (int) $v;
+}
 
-	/*calc points to draw*/
-	$x = $imgw - 1;
-	$lastv = $vals[0];
-	$points = [];
-	for ($i = 2; $i < count($vals) - 2; $i++) {
-		$x = $imgw - 1 - $i;
-		$v = $vals[$i];
-		if ($v == $lastv) {
-			$points[] = [$x, $v];
-		} else if ($v < $lastv) {
-			for ($z = $lastv - 1; $z >= $v; $z--) {
-				$points[] = [$x, $z];
-			}
-		} else {
-			for ($z = $lastv + 1; $z <= $v; $z++) {
-				$points[] = [$x, $z];
-			}
+/*calc points to draw*/
+$x = $imgw - 1;
+$lastv = $vals[0];
+$points = [];
+for ($i = 2; $i < count($vals) - 2; $i++) {
+	$x = $imgw - 1 - $i;
+	$v = $vals[$i];
+	if ($v == $lastv) {
+		$points[] = [$x, $v];
+	} else if ($v < $lastv) {
+		for ($z = $lastv - 1; $z >= $v; $z--) {
+			$points[] = [$x, $z];
 		}
-		$lastv = $v;
+	} else {
+		for ($z = $lastv + 1; $z <= $v; $z++) {
+			$points[] = [$x, $z];
+		}
 	}
+	$lastv = $v;
+}
 
-	/*draw it!*/
-	foreach ($points as $p) {
-		imagefilledellipse($im, $p[0], $p[1], 5, 5, $color_outline);
-	}
-	foreach ($points as $p) {
-		imagefilledellipse($im, $p[0], $p[1], 3, 3, $color_fill);
-	}
+/*draw it!*/
+foreach ($points as $p) {
+	imagefilledellipse($im, $p[0], $p[1], 5, 5, $color_outline);
+}
+foreach ($points as $p) {
+	imagefilledellipse($im, $p[0], $p[1], 3, 3, $color_fill);
 }
 
 /*hour 'axis' guidelines*/
@@ -159,8 +158,11 @@ $texty = $imgh - imagefontheight(2);
 $lt = $imgh - imagefontheight(2);
 for ($i = 0; $i < 25 /*25 because we do one extra at the right*/; $i++) {
 	imageline($im, $x, $imgh, $x, $lt, $color_hour_guide);
-	$textx = $x - imagefontwidth(2) * 1.5 - $xincrement / 2;
-	imagestring($im, 2, $textx, $texty, date('H', $hour_guide_time) . 'h', $color_hour_guide);
+	$halfwidth = imagefontwidth(2) * 1.5;
+	$textx = $x - $halfwidth - $xincrement / 2;
+	if ($textx  > 0 && $textx < $imgw - $halfwidth * 2) {
+		imagestring($im, 2, $textx, $texty, date('H', $hour_guide_time) . 'h', $color_hour_guide);
+	}
 	$hour_guide_time -= 3600;
 	$x -= $xincrement;
 }
@@ -178,10 +180,11 @@ if (count($peakranges)) {
 	$y = $imgh - $maxy;
 	imagefilledellipse($im, $x, $y, 8, 8, $color_peak);
 	$txt = "peak: " . $max_num_players;
-	if ($x > $imgw / 2) {
-		$x -= imagefontwidth(2) * strlen($txt);
-	}
-	imagestring($im, 2, $x, $y + 2, $txt, $color_text);
+	$txtwidth = imagefontwidth(2) * strlen($txt);
+	$x -= $txtwidth / 2;
+	$x = max($x, 2);
+	$x = min($x, $imgw - $txtwidth - 2);
+	imagestring($im, 2, $x, 2, $txt, $color_text);
 }
 
 //$text = date('j M H:i O', time());
