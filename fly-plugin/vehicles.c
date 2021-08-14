@@ -943,9 +943,6 @@ int veh_commit_next_vehicle_odo_to_db()
 	return 0;
 }
 
-/**
-TODO: replace usages with GetPlayerVehicle or GetPlayerVehicleEx (todo)
-*/
 int veh_GetPlayerVehicle(int playerid, int *reinc, struct dbvehicle **veh)
 {
 	int vehicleid;

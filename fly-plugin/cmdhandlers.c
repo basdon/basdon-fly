@@ -757,9 +757,8 @@ int cmd_irc(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_loc(struct COMMANDCONTEXT cmdctx)
 {
-	int target, vehicleid, model;
-	struct vec3 pos;
-	struct vec3 vvel;
+	struct SampVehicle *veh;
+	int target, model;
 	char buf[144], *b;
 	float vel;
 
@@ -770,8 +769,7 @@ int cmd_loc(struct COMMANDCONTEXT cmdctx)
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"That player is not online.");
 		return CMD_OK;
 	}
-	GetPlayerPos(target, &pos);
-	zones_update(target, pos);
+	zones_update(target, player[target]->pos);
 
 	b = buf;
 	b += sprintf(buf, "%s(%d) is located in ",
@@ -780,13 +778,17 @@ int cmd_loc(struct COMMANDCONTEXT cmdctx)
 		b += sprintf(b, "%s, ", zonenames[zone_last_id[target]]);
 	}
 	b += sprintf(b, "%s ", zonenames[zone_last_region[target]]);
-	vehicleid = GetPlayerVehicleID(target);
-	if (vehicleid) {
-		GetVehicleVelocityUnsafe(vehicleid, &vvel);
-		model = GetVehicleModel(vehicleid);
-		vel = sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z);
+	veh = GetPlayerVehicle(target);
+	if (veh) {
+		model = veh->model;
+		vel = sqrt(veh->vel.x * veh->vel.x + veh->vel.y * veh->vel.y + veh->vel.z * veh->vel.z);
 		if (game_is_air_vehicle(model)) {
-			sprintf(b, "traveling at %.0f kts in a %s (%.0f ft)", VEL_TO_KTS * vel, vehnames[model - 400], pos.z);
+			sprintf(b,
+				"traveling at %.0f kts in a %s (%.0f ft)",
+				VEL_TO_KTS * vel,
+				vehnames[model - 400],
+				player[target]->pos.z
+			);
 		} else {
 			sprintf(b, "traveling at %.0f kph in a %s", VEL_TO_KPH * vel, vehnames[model - 400]);
 		}

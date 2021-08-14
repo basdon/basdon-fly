@@ -410,17 +410,12 @@ short GetPlayerVehicleID(int playerid)
 	return player[playerid]->vehicleid;
 }
 
-/**
-@return 0 when not in vehicle. The result of veh can still be NULL.
-*/
 static
-short GetPlayerVehicle(int playerid, struct dbvehicle **veh)
+struct SampVehicle *GetPlayerVehicle(int playerid)
 {
-	short vehicleid;
-
-	vehicleid = GetPlayerVehicleID(playerid);
-	*veh = gamevehicles[vehicleid].dbvehicle;
-	return vehicleid;
+	/*Player's vehicleid will be 0 when not in a vehicle.*/
+	/*Non allocated vehicleids will always have a nullptr in SampVehiclePool::vehicles.*/
+	return vehiclepool->vehicles[player[playerid]->vehicleid];
 }
 
 static
