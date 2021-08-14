@@ -965,6 +965,9 @@ void panel_reshow_if_needed(int playerid)
 
 	vehicleid = GetPlayerVehicleID(playerid);
 
+	caches[playerid].vor_shown = 0;
+	caches[playerid].ils_shown = 0;
+
 	GetVehiclePosRotUnsafe(vehicleid, &vpos);
 	kneeboard_update_distance(playerid, &vpos.coords);
 	altitude = (int) vpos.coords.z;
