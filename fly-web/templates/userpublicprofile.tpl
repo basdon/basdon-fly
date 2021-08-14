@@ -90,31 +90,35 @@
 
 		<h3>All flights by this user</h3>
 
-		{@<?php}
-			$page = get_page();
-			$paginationoffset = ($page - 1) * 50;
-			$totalrows=1;
-			++$db_querycount;
-			$amtflights = $db->query('SELECT COUNT(id) c FROM flg WHERE player='.$id);
-			if ($amtflights !== false && ($amtflights = $amtflights->fetchAll()) !== false && count($amtflights)) {
-				$totalrows = $amtflights[0]->c;
-			}
-		{@?>}
+		{@if $flg->totalflights}
+			{@<?php}
+				$page = get_page();
+				$paginationoffset = ($page - 1) * 50;
+				$totalrows=1;
+				++$db_querycount;
+				$amtflights = $db->query('SELECT COUNT(id) c FROM flg WHERE player='.$id);
+				if ($amtflights !== false && ($amtflights = $amtflights->fetchAll()) !== false && count($amtflights)) {
+					$totalrows = $amtflights[0]->c;
+				}
+			{@?>}
 
-		{@eval ++$db_querycount}
-		{@eval $flightlist = $db->query('SELECT id,_a.c f,_b.c t,state,tload,tlastupdate,adistance,_v.m vehmodel
-						     FROM flg _f
-						     JOIN apt _a ON _a.i=_f.fapt
-						     JOIN apt _b ON _b.i=_f.tapt
-						     JOIN veh _v ON _v.i=_f.vehicle
-						     WHERE player='.$id.'
-						     ORDER BY id DESC
-						     LIMIT 50 OFFSET ' . $paginationoffset)}
-		{@eval $flightlist_date_format = 'j M Y H:i'}
-		{@eval $flightlist_show_user = 0}
-		{@eval $flightlist_url_returnpage = 0}
-		{@eval $flightlist_pagination_url = $paginationbaseurl.'&amp;page='}
-		{@render flightlist.tpl}
+			{@eval ++$db_querycount}
+			{@eval $flightlist = $db->query('SELECT id,_a.c f,_b.c t,state,tload,tlastupdate,adistance,_v.m vehmodel
+							     FROM flg _f
+							     JOIN apt _a ON _a.i=_f.fapt
+							     JOIN apt _b ON _b.i=_f.tapt
+							     JOIN veh _v ON _v.i=_f.vehicle
+							     WHERE player='.$id.'
+							     ORDER BY id DESC
+							     LIMIT 50 OFFSET ' . $paginationoffset)}
+			{@eval $flightlist_date_format = 'j M Y H:i'}
+			{@eval $flightlist_show_user = 0}
+			{@eval $flightlist_url_returnpage = 0}
+			{@eval $flightlist_pagination_url = $paginationbaseurl.'&amp;page='}
+			{@render flightlist.tpl}
+		{@else}
+			<p class="center">None</p>
+		{@endif}
 	{@endif}
 {@catch PDOException $e}
 	<p>Something went wrong while retrieving the user's data.</p>
