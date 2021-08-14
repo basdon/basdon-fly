@@ -894,16 +894,6 @@ int cmd_prefs(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-#define CMD_PROTIP_SYNTAX ""
-#define CMD_PROTIP_DESC "Sends a random protip"
-static
-int cmd_protip(struct COMMANDCONTEXT cmdctx)
-{
-	SendClientMessage(cmdctx.playerid, COL_INFO_LIGHT, protips_get_random_protip());
-	return CMD_OK;
-}
-
-
 #define CMD_R_SYNTAX "<message>"
 #define CMD_R_DESC "Sends a private message reply to the player that last sent a pm to you"
 static
@@ -1043,6 +1033,15 @@ int cmd_tickrate(struct COMMANDCONTEXT cmdctx)
 
 	sprintf(msg144, "%d", (int) NC_GetServerTickRate());
 	SendClientMessage(cmdctx.playerid, -1, msg144);
+	return CMD_OK;
+}
+
+#define CMD_TIP_SYNTAX ""
+#define CMD_TIP_DESC "Sends a random tip"
+static
+int cmd_tip(struct COMMANDCONTEXT cmdctx)
+{
+	SendClientMessage(cmdctx.playerid, COL_INFO_LIGHT, protips_get_random_protip());
 	return CMD_OK;
 }
 
