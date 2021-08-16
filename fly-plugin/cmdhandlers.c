@@ -310,7 +310,7 @@ int cmd__tomsp(struct COMMANDCONTEXT cmdctx)
 		closest_distance_sq = float_pinf;
 		GetPlayerPos(cmdctx.playerid, &player_pos);
 		for (mspindex = 0; mspindex < nummissionpoints; mspindex++) {
-			if (missionpoints[mspindex].type & msptype_mask) {
+			if (missionpoints[mspindex].type & msptype_mask & CLASS_MSPTYPES[classid[cmdctx.playerid]]) {
 				dx = player_pos.x - missionpoints[mspindex].pos.x;
 				dy = player_pos.y - missionpoints[mspindex].pos.y;
 				if (dx * dx + dy * dy < closest_distance_sq) {
