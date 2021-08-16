@@ -63,10 +63,6 @@ static int num_removed_objects = 0;
 
 /**Maps a player's object id to a map idx. -1 when object is not created.*/
 static short player_objectid_to_mapidx[MAX_PLAYERS][MAX_MAPSYSTEM_OBJECTS];
-/**Stores time_h*3+time_m/20 at which the object was created. To be used in maps_recreate_textured_objects.*/
-static char player_time_of_creating_object[MAX_PLAYERS][MAX_MAPSYSTEM_OBJECTS];
-/**The object that is created.*/
-static struct RPCDATA_CreateObject *player_objects[MAX_PLAYERS][MAX_MAPSYSTEM_OBJECTS];
 
 /*maps a player's gang zone id to map idx*/
 /*this is (at time of writing) the only system that uses gang zones,
@@ -385,15 +381,12 @@ int maps_stream_in_for_player(int playerid, int mapidx)
 	struct BitStream bitstream;
 	struct RPCDATA_CreateObject *obj;
 	short *objectid_to_mapidx;
-	char *time_of_creating_object;
-	struct RPCDATA_CreateObject **player_object;
 	short *gangzoneid_to_mapidx;
 	int tmp_saved_objdata_size;
 	int gang_zone_idx;
 	int objectid;
 	int i;
 	int num_rpcs_sent;
-	char time;
 
 #ifdef MAPS_LOG_STREAMING
 	logprintf("map %s streamed in for %d", maps[mapidx].name, playerid);
@@ -404,11 +397,8 @@ int maps_stream_in_for_player(int playerid, int mapidx)
 
 	/*objects*/
 	if (maps[mapidx].num_objects) {
-		time = time_h * 3 + time_m / 20;
 		obj = maps[mapidx].objects;
 		objectid_to_mapidx = player_objectid_to_mapidx[playerid];
-		time_of_creating_object = player_time_of_creating_object[playerid];
-		player_object = player_objects[playerid];
 		objectid = 0; /*TODO: samp starts at objectid 1, should we also do that?*/
 		for (i = maps[mapidx].num_objects; i > 0; i--) {
 			while (objectid_to_mapidx[objectid] >= 0) {
@@ -419,8 +409,6 @@ int maps_stream_in_for_player(int playerid, int mapidx)
 				}
 			}
 			objectid_to_mapidx[objectid] = mapidx;
-			time_of_creating_object[objectid] = time;
-			player_object[objectid] = obj;
 			tmp_saved_objdata_size = obj->objectid;
 			obj->objectid = objectid;
 			bitstream.ptrData = obj;
@@ -486,7 +474,6 @@ int maps_stream_out_for_player(int playerid, int mapidx)
 	struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 	struct BitStream bitstream_destroy;
 	short *objectid_to_mapidx;
-	struct RPCDATA_CreateObject **player_object;
 	short *gangzoneid_to_mapidx;
 	int objectid;
 	int num_rpcs_sent;
@@ -503,11 +490,9 @@ int maps_stream_out_for_player(int playerid, int mapidx)
 
 	/*objects*/
 	objectid_to_mapidx = player_objectid_to_mapidx[playerid];
-	player_object = player_objects[playerid];
 	for (objectid = 0; objectid < MAX_OBJECTS; objectid++) {
 		if (objectid_to_mapidx[objectid] == mapidx) {
 			objectid_to_mapidx[objectid] = -1;
-			player_object[objectid] = NULL;
 			rpcdata_DestroyObject.objectid = objectid;
 			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream_destroy, playerid, 2);
 			num_rpcs_sent++;
@@ -536,51 +521,6 @@ int maps_stream_out_for_player(int playerid, int mapidx)
 	if (mapidx == octavia_island_actor_mapidx) {
 		SendRPCToPlayer(playerid, RPC_HideActor, &rpcdata_hide_actor, sizeof(rpcdata_hide_actor), 2);
 		num_rpcs_sent++;
-	}
-
-	return num_rpcs_sent;
-}
-
-/**
-Recreates textures objects that have been created for the player,
-if they have been created during a different in-game hour.
-
-This should fix the issue with textured objects being either too bright or too dark.
-
-@return amount of RPCs sent
-*/
-static
-__attribute__((unused))
-int maps_recreate_textured_objects(int playerid)
-{
-	struct BitStream bitstream;
-	short tmp_saved_objdata_size;
-	char *time_of_creating_object;
-	struct RPCDATA_CreateObject **player_object;
-	int i, num_rpcs_sent;
-	char time;
-
-	num_rpcs_sent = 0;
-	time = time_h * 3 + time_m / 20;
-	time_of_creating_object = player_time_of_creating_object[playerid];
-	player_object = player_objects[playerid];
-
-	for (i = 0; i < MAX_MAPSYSTEM_OBJECTS; i++) {
-		/*TODO: check if the materials are textures and not only text (don't need to recreate for text)*/
-		/*TODO: this should only be needed for textured materials with custom material color*/
-		if (player_object[i] && player_object[i]->num_materials && time_of_creating_object[i] != time) {
-			time_of_creating_object[i] = time;
-			tmp_saved_objdata_size = player_object[i]->objectid;
-			player_object[i]->objectid = i;
-			bitstream.ptrData = player_object[i];
-			bitstream.numberOfBitsUsed = tmp_saved_objdata_size * 8;
-			SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
-			num_rpcs_sent++;
-			player_object[i]->objectid = tmp_saved_objdata_size;
-			if( num_rpcs_sent > 200) {
-				break;
-			}
-		}
 	}
 
 	return num_rpcs_sent;
@@ -618,12 +558,6 @@ void maps_stream_for_player(int playerid, struct vec3 pos)
 			}
 		}
 	}
-
-	/*This is disabled until it only recreates/retextures objects that use custom material colors
-	if (num_rpcs_sent < 200 && !isafk[playerid]) {
-		maps_recreate_textured_objects(playerid);
-	}
-	*/
 }
 
 /**
