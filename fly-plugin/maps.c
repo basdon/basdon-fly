@@ -21,7 +21,7 @@ struct REMOVEDOBJECT {
 };
 EXPECT_SIZE(struct REMOVEDOBJECT, sizeof(cell) * 5);
 EXPECT_SIZE(struct REMOVEDOBJECT, sizeof(struct RPCDATA_RemoveBuilding));
-/*this has to be synced with the SetGangZone RPC data*/
+/*this has to be synced with the SetGangZone RPC data struct*/
 /*the map file format gang zone is made to be in sync*/
 struct GANG_ZONE {
 	float min_x;
@@ -57,8 +57,7 @@ static struct RPCDATA_CreateObject *map_radar_object_for_player[MAX_PLAYERS];
 static struct MAP maps[MAX_MAPS];
 static int num_maps;
 
-/*doing size +1 to prevent an overrun when reading map files*/
-static struct REMOVEDOBJECT removed_objects[MAX_REMOVED_OBJECTS + 1];
+static struct REMOVEDOBJECT removed_objects[MAX_REMOVED_OBJECTS];
 static int num_removed_objects = 0;
 
 /**Maps a player's object id to a map idx. -1 when object is not created.*/
@@ -113,7 +112,7 @@ int maps_load_from_file(int mapidx)
 
 	if (header.spec_version != 0x0350414D) {
 		logprintf("unknown map spec %p in %s", header.spec_version, filename);
-		goto exitzero;
+		goto returnzero;
 	}
 
 	if (header.stream_out_radius < header.stream_in_radius + 50.0f) {
@@ -134,7 +133,7 @@ int maps_load_from_file(int mapidx)
 		if (!fread(&removed_objects[num_removed_objects], sizeof(struct REMOVEDOBJECT), 1, fs)) {
 			goto corrupted;
 		}
-		if (num_removed_objects == MAX_REMOVED_OBJECTS) {
+		if (num_removed_objects == MAX_REMOVED_OBJECTS - 1) {
 			logprintf("ERR: MAX_REMOVED_OBJECTS limit hit!");
 		} else {
 			num_removed_objects++;
@@ -230,7 +229,7 @@ addradar:
 	return 1;
 corrupted:
 	logprintf("corrupted map %s", filename);
-exitzero:
+returnzero:
 	fclose(fs);
 	return 0;
 }
