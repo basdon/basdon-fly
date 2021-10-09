@@ -40,7 +40,7 @@ if ($wth !== false && ($weathercats = $wth->fetchAll())) {
 	}
 }
 arsort($weather_percategory);
-unset($weather_categorymapping);
+$last_weathers = $db->query('SELECT w, t FROM wth WHERE t>UNIX_TIMESTAMP()-6*3600 ORDER BY t DESC');
 
 $__script = '_stats';
 include('../inc/output.php');

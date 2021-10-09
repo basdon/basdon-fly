@@ -12,7 +12,29 @@
 		<p>This page needs more content :)</p>
 		{@if $weather_totalcount > 0}
 			<h3>Weather</h3>
-			<table>
+			<h4>Recent weather</h4>
+			<table class="new rowseps">
+				<thead>
+					<tr><th>Weather</th><th>When</th><th>Duration</th></tr>
+				</thead>
+				<tbody>
+					{@eval $last_time = 0}
+					{@foreach $last_weathers as $w}
+						<tr>
+							<td>{@unsafe $weather_categorynames[$weather_categorymapping[$w->w]]}</td>
+							<td>{@unsafe format_duration_short(time() - $w->t)} ago</td>
+							{@if $last_time}
+								<td>{@unsafe format_duration_short($last_time - $w->t)}</td>
+							{@else}
+								<td>{@unsafe format_duration_short(time() - $w->t)} and counting</td>
+							{@endif}
+							{@eval $last_time = $w->t}
+						</tr>
+					{@endforeach}
+				</tbody>
+			</table>
+			<h4>All time stats</h4>
+			<table class="new rowseps">
 				<thead>
 					<tr><th>Weather category</th><th>Percentage</th></tr>
 				</thead>
@@ -27,7 +49,7 @@
 			</table>
 			{@eval unset($weather_categorynames)}
 			{@eval unset($weather_percategory)}
-			<table>
+			<table class="new rowseps">
 				<thead>
 					<tr><th>Weather</th><th>Percentage</th></tr>
 				</thead>
@@ -40,6 +62,8 @@
 					{@endforeach}
 				</tbody>
 			</table>
+			{@eval unset($weather_categorymapping)}
+			{@eval unset($weather_categorynames)}
 			{@eval unset($weather_names)}
 		{@endif}
 	</div></div>
