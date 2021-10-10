@@ -85,3 +85,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Jul 29', 'Made PINE runway longer, fixed STRS misaligned taxi lights');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Oct 10', 'Fixed game crashes due to DUNE not completely unloading, overflowing the client when loading other islands');
