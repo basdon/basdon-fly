@@ -1038,7 +1038,7 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 		mission->endpoint->ap->name,
 		mission->endpoint->ap->code,
 		mission->endpoint->name);
-	SendClientMessage(playerid, COL_MISSION, cbuf144);
+	SendClientMessage(playerid, COL_MISSION_ALT, cbuf144);
 
 	TogglePlayerControllable(playerid, 0);
 	GameTextForPlayer(playerid, 0x800000, 3, "~p~Loading");
