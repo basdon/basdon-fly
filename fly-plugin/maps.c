@@ -125,8 +125,6 @@ static short next_streaming_tick_delay[MAX_PLAYERS];
 
 static struct RPCDATA_ShowActor rpcdata_show_actor;
 static struct RPCDATA_HideActor rpcdata_hide_actor;
-static struct BitStream bs_maps_move_object;
-static struct RPCDATA_MoveObject rpcdata_MoveObject;
 
 #define MAP_LOAD_RESULT_HAS_OBJECTS 1
 #define MAP_LOAD_RESULT_HAS_ZONES 2
@@ -307,7 +305,7 @@ void maps_print_stats()
 	printf("%d removes\n", num_removed_objects);
 }
 #endif
-/*jeanine:p:i:22;p:20;a:r;x:415;y:-516;*/
+/*jeanine:p:i:22;p:20;a:r;x:409;y:-560;*/
 static
 void maps_load_from_db()
 {
@@ -355,45 +353,49 @@ void maps_load_from_db()
 	maps_print_stats();/*jeanine:l:25*/
 #endif
 }
-/*jeanine:p:i:23;p:20;a:r;x:414;y:14;*/
+/*jeanine:p:i:23;p:20;a:r;x:407;y:53;*/
 static
 int maps_timer_rotate_radar(void *data)
 {
 	static float obj_radar_z_rot = 0.0f;
 	static int z_off_i = 0;
 
-	struct RPCDATA_CreateObject *object;
+	struct BitStream bitstream;
+	struct RPCDATA_MoveObject rpcdata;
+	register struct RPCDATA_CreateObject *object;
 	int playerindex, playerid;
 	float zoffset;
 
-	obj_radar_z_rot += 179.0f;
+	obj_radar_z_rot += 120.0f;
 	if (obj_radar_z_rot > 360.0f) {
 		obj_radar_z_rot -= 360.0f;
 	}
-	z_off_i ^= 0x3bc49ba6;
+	z_off_i ^= 0x3bc49ba6; /*0.06f*/
 	zoffset = *((float*) &z_off_i);
+
+	bitstream.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	bitstream.ptrData = &rpcdata;
+
+	rpcdata.objectid = OBJECT_ROTATING_RADAR;
+	rpcdata.speed = 0.0024f;
+	rpcdata.to_rx = 0.0f;
+	rpcdata.to_ry = 0.0f;
+	rpcdata.to_rz = obj_radar_z_rot;
 
 	for (playerindex = 0; playerindex < playercount; playerindex++) {
 		playerid = players[playerindex];
 		if ((object = radar_object_for_player[playerid])) {
-			rpcdata_MoveObject.objectid = OBJECT_ROTATING_RADAR;
-			rpcdata_MoveObject.from_x = object->x;
-			rpcdata_MoveObject.from_y = object->y;
-			rpcdata_MoveObject.from_z = object->z;
-			rpcdata_MoveObject.to_x = object->x;
-			rpcdata_MoveObject.to_y = object->y;
-			rpcdata_MoveObject.to_z = object->z + zoffset;
-			rpcdata_MoveObject.speed = 0.0012f;
-			rpcdata_MoveObject.to_rx = 0.0f;
-			rpcdata_MoveObject.to_ry = 0.0f;
-			rpcdata_MoveObject.to_rz = obj_radar_z_rot;
-			SAMP_SendRPCToPlayer(RPC_MoveObject, &bs_maps_move_object, playerid, 2);
+			rpcdata.from_x = object->x;
+			rpcdata.from_y = object->y;
+			rpcdata.from_z = object->z;
+			rpcdata.to_x = object->x;
+			rpcdata.to_y = object->y;
+			rpcdata.to_z = object->z + zoffset;
+			SAMP_SendRPCToPlayer(RPC_MoveObject, &bitstream, playerid, 2);
 		}
 	}
 
-	return 5300;
-	/*5000 is more accurate timing, but players with fluctuating ping might see
-	the radar going back and forth instead of full circles*/
+	return 2500;
 }
 /*jeanine:p:i:20;p:0;a:b;x:0;y:30;*/
 /**
@@ -404,9 +406,6 @@ void maps_init()
 {
 	octavia_island_actor_mapidx = -1;
 	maps_load_from_db();/*jeanine:l:22*/
-
-	bs_maps_move_object.numberOfBitsUsed = sizeof(rpcdata_MoveObject) * 8;
-	bs_maps_move_object.ptrData = &rpcdata_MoveObject;
 
 	rpcdata_show_actor.actorid = OCTA_ACTORID;
 	rpcdata_show_actor.modelid = 141;
