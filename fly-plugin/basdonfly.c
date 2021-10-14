@@ -582,13 +582,17 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
 	static int count = 0;
+	int elapsed_time;
 #ifdef LOG_SLOW_TICKS
 	static int tickcount = 0;
 	int newtickcount;
 #endif /*LOG_SLOW_TICKS*/
 
+	elapsed_time = time_elapsed_millis();
+
 	echo_tick();
-	timer_tick();
+	timer_tick(elapsed_time);
+	maps_process_tick(elapsed_time);
 
 	if (joinpressure > 0) {
 		joinpressure -= JOINPRESSURE_DEC;

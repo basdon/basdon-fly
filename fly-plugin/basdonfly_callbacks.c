@@ -124,7 +124,6 @@ exit:
 
 	/*Delays here are semi random so they don't start ticking at the same time.. But they'll probably converge anyways*/
 	timer_set(0, echo_init, NULL);
-	timer_set(250, maps_process_tick, NULL);
 	timer_set(500, nametags_update, NULL);
 	return 1;
 }
@@ -377,7 +376,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 
 	GetPlayerPos(playerid, &pos);
 	kneeboard_update_all(playerid, &pos);
-	maps_stream_for_player(playerid, pos);
+	maps_stream_for_player(playerid, pos.x, pos.y, OBJ_STREAM_MODE_CLOSEST_NOW);
 	money_on_player_spawn(playerid);
 	nametags_update_for_player(playerid);
 	spawn_on_player_spawn(playerid);

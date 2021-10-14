@@ -982,7 +982,9 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 	}
 
 	GetVehiclePos(vehicleid, &pos);
-	maps_stream_for_player(playerid, pos);
+	GameTextForPlayer(playerid, 0x80000, 3, "Loading objects...");
+	maps_stream_for_player(playerid, pos.x, pos.y, OBJ_STREAM_MODE_CLOSEST_NOW);
+	HideGameTextForPlayer(playerid);
 	playerstate = GetPlayerState(playerid);
 	if (playerstate == PLAYER_STATE_DRIVER || playerstate == PLAYER_STATE_PASSENGER) {
 		/*Players will see the player in the original seat/vehicle when warping,
@@ -1064,15 +1066,9 @@ static
 int natives_SetPlayerPos(int playerid, struct vec3 pos)
 #ifdef SAMP_NATIVES_IMPL
 {
-	/*TODO? Technically the amount of _models_ and not _objects_ determines how long
-	it will take to load, because the models are loaded in a blocking way.
-	Because of that, a map with 100 objects but all different models might block more
-	than a 1000 object map with 1 model, but the check below is pure object count.*/
-	if (maps_calculate_objects_to_create_for_player_at_position(playerid, pos) > 200) {
-		GameTextForPlayer(playerid, 0x80000, 3, "Loading objects...");
-	}
-	maps_stream_for_player(playerid, pos);
-	GameTextForPlayer(playerid, 0, 5, "_");
+	GameTextForPlayer(playerid, 0x80000, 3, "Loading objects...");
+	maps_stream_for_player(playerid, pos.x, pos.y, OBJ_STREAM_MODE_CLOSEST_NOW);
+	HideGameTextForPlayer(playerid);
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 	nametags_update_for_player(playerid);

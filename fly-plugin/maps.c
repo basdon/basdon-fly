@@ -1,8 +1,20 @@
+/*
+Object and gangzone streamer. Also deals with removed objects.
+
+Map data is stored in .map files. Data is read into separate object and (gang)zone structs.
+Objects and zones that are loaded from the same map file are grouped. The streamer works
+by checking if that entire cluster of objects and zones should be streamed in or out, then
+individual objects/zones are being sent to the client per map tick.
+*/
+
 #define MAX_MAPS (50)
 #define MAP_MAX_FILENAME (34) /*see db col*/
 #define MAX_REMOVED_OBJECTS 1000
 
 #define MAPSTREAMING_UPDATE_INTERVAL 1000
+#define MAX_OBJECTS_TO_CREATE_PER_TICK 150
+#define MAX_ZONES_TO_CREATE_PER_TICK 75
+#define IMM_STREAMING_RADIUS_SQ (100*100)
 
 #pragma pack(1)
 struct MAP_FILE_HEADER {
@@ -15,91 +27,136 @@ struct MAP_FILE_HEADER {
 	float stream_out_radius;
 	float draw_radius;
 };
-struct REMOVEDOBJECT {
-	int model;
-	float x, y, z, radius;
+/*Gangzones in the map file doesn't have zoneid, but we want to load it
+immediately into a struct ready to send because it eliminates copying
+stuff when actually having to send it. Therefor this union exists.*/
+union GANG_ZONE {
+	struct RPCDATA_ShowGangZone rpcdata;
+	struct {
+		short zoneid;
+		struct {
+			float min_x;
+			float min_y;
+			float max_x;
+			float max_y;
+			int colorABGR;
+		} from_map_file;
+	} data;
 };
-EXPECT_SIZE(struct REMOVEDOBJECT, sizeof(cell) * 5);
-EXPECT_SIZE(struct REMOVEDOBJECT, sizeof(struct RPCDATA_RemoveBuilding));
-/*this has to be synced with the SetGangZone RPC data struct*/
-/*the map file format gang zone is made to be in sync*/
-struct GANG_ZONE {
-	float min_x;
-	float min_y;
-	float max_x;
-	float max_y;
-	int colorABGR;
-};
-EXPECT_SIZE(struct GANG_ZONE, 5 * 4);
+EXPECT_SIZE(union GANG_ZONE, sizeof(struct RPCDATA_ShowGangZone));
+STATIC_ASSERT_MEMBER_OFFSET(union GANG_ZONE, data.zoneid,\
+	MEMBER_OFFSET(struct RPCDATA_ShowGangZone, zoneid));
+STATIC_ASSERT_MEMBER_OFFSET(union GANG_ZONE, data.from_map_file.min_x,\
+	MEMBER_OFFSET(struct RPCDATA_ShowGangZone, min_x));
+STATIC_ASSERT_MEMBER_OFFSET(union GANG_ZONE, data.from_map_file.min_y,\
+	MEMBER_OFFSET(struct RPCDATA_ShowGangZone, min_y));
+STATIC_ASSERT_MEMBER_OFFSET(union GANG_ZONE, data.from_map_file.max_x,\
+	MEMBER_OFFSET(struct RPCDATA_ShowGangZone, max_x));
+STATIC_ASSERT_MEMBER_OFFSET(union GANG_ZONE, data.from_map_file.max_y,\
+	MEMBER_OFFSET(struct RPCDATA_ShowGangZone, max_y));
+STATIC_ASSERT_MEMBER_OFFSET(union GANG_ZONE, data.from_map_file.colorABGR,\
+	MEMBER_OFFSET(struct RPCDATA_ShowGangZone, colorABGR));
 #pragma pack()
 
-struct MAP {
-	int id;
-	float middle_x, middle_y;
-	float stream_in_radius_sq, stream_out_radius_sq;
-	/*TODO: for fun we can add a command to change the draw distance at runtime*/
-	char name[MAP_MAX_FILENAME];
-	/*unallocated when num_objects is 0*/
-	struct RPCDATA_CreateObject *objects;
-	int num_objects;
-	/*unallocated when num_gang_zones is 0*/
-	struct GANG_ZONE *gang_zones;
-	int num_gang_zones;
-	/* 1 streamed in, 0 streamed out */
-	char stream_status_for_player[MAX_PLAYERS];
+enum MAP_STREAM_STATUS {
+	STREAMED_OUT,
+	STREAMING_IN,
+	STREAMED_IN,
 };
 
-/*the rotating radar object for each map, NULL for maps that don't have any*/
-/*they are automatically made when a base object is found in a map (7981)*/
-static struct RPCDATA_CreateObject *map_radar_object_for_map[MAX_MAPS];
-static struct RPCDATA_CreateObject *map_radar_object_for_player[MAX_PLAYERS];
+static struct OBJECT_MAP {
+	float middle_x, middle_y;
+	float stream_in_radius_sq, stream_out_radius_sq;
+	char name[MAP_MAX_FILENAME];
+	struct RPCDATA_CreateObject *objects;
+	int num_objects;
+	enum MAP_STREAM_STATUS stream_status_for_player[MAX_PLAYERS];
+	/**The rotating radar object for each map, NULL for maps that don't have any.*/
+	struct RPCDATA_CreateObject *radar_object;
+} obj_maps[MAX_MAPS];
+static int num_obj_maps;
 
-static struct MAP maps[MAX_MAPS];
-static int num_maps;
+static struct ZONE_MAP {
+	float middle_x, middle_y;
+	float stream_in_radius_sq, stream_out_radius_sq;
+	char name[MAP_MAX_FILENAME];
+	union GANG_ZONE *gang_zones;
+	int num_gang_zones;
+	enum MAP_STREAM_STATUS stream_status_for_player[MAX_PLAYERS];
+} zone_maps[MAX_MAPS];
+static int num_zone_maps;
 
-static struct REMOVEDOBJECT removed_objects[MAX_REMOVED_OBJECTS];
+/**The rotating radar object created for player. This data is needed for the position information.*/
+static struct RPCDATA_CreateObject *radar_object_for_player[MAX_PLAYERS];
+
+/**All combined removed objects.*/
+static struct RPCDATA_RemoveBuilding removed_objects[MAX_REMOVED_OBJECTS];
 static int num_removed_objects = 0;
 
 /**Maps a player's object id to a map idx. -1 when object is not created.*/
-static short player_objectid_to_mapidx[MAX_PLAYERS][MAX_MAPSYSTEM_OBJECTS];
+static short player_objectid_to_objmapidx[MAX_PLAYERS][MAX_MAPSYSTEM_OBJECTS];
+
+/**Per-player streaming status.*/
+static struct STREAMING_DATA {
+	/**The object map that is currently being streamed in.*/
+	struct OBJECT_MAP *obj_map;
+	/**Objects to be streamed in next map streaming tick.
+	They will be streamed in from last to first.*/
+	struct RPCDATA_CreateObject *queued_objects[MAX_MAPSYSTEM_OBJECTS];
+	/**Number of objects left in {@link queued_objects} to stream in.*/
+	short num_queued_objects;
+	/**The gangzone map that is currently being streamed in.*/
+	struct ZONE_MAP *zone_map;
+	/**Index in the zone_map's gangzones to stream in next streaming tick.*/
+	short next_zone_idx;
+} streaming_data[MAX_PLAYERS];
 
 /*maps a player's gang zone id to map idx*/
 /*this is (at time of writing) the only system that uses gang zones,
 so no checks are being done on a global scale if a gang zone is being used*/
 /*-1 when unused, -2 when marked for deletion*/
-static short player_gangzoneid_to_mapidx[MAX_PLAYERS][MAX_GANG_ZONES];
+static short player_gangzoneid_to_zonemapidx[MAX_PLAYERS][MAX_GANG_ZONES];
 
 /*the mapidx of octavia island map where the actor should be made*/
-static int octavia_island_actor_mapidx;
+static short octavia_island_actor_mapidx;
+
+/**For each player, how much ms is left for next map streaming tick.*/
+static short next_streaming_tick_delay[MAX_PLAYERS];
 
 static struct RPCDATA_ShowActor rpcdata_show_actor;
 static struct RPCDATA_HideActor rpcdata_hide_actor;
-static struct BitStream bs_maps_remove_building;
-static struct RPCDATA_RemoveBuilding rpcdata_RemoveBuilding;
-static struct BitStream bs_maps_show_gang_zone;
-static struct RPCDATA_ShowGangZone rpcdata_ShowGangZone;
 static struct BitStream bs_maps_move_object;
 static struct RPCDATA_MoveObject rpcdata_MoveObject;
 
+#define MAP_LOAD_RESULT_HAS_OBJECTS 1
+#define MAP_LOAD_RESULT_HAS_ZONES 2
+/*jeanine:p:i:24;p:22;a:r;x:766;y:-654;*/
 /**
-Load a map from file as specified in given map.
+Load a map from file as specified in given map structs.
 
-@return 1 on success
+@return bitfield with:
+        - {@link MAP_LOAD_RESULT_HAS_OBJECTS} if obj_map has been filled in
+        - {@link MAP_LOAD_RESULT_HAS_ZONES} if zone_map has been filled in
+        If none set, it means the map only contained removed objects, or was empty, or error.
 */
 static
-int maps_load_from_file(int mapidx)
+int maps_load_from_file(char *name, struct OBJECT_MAP *obj_map, struct ZONE_MAP *zone_map)
 {
 	FILE *fs;
 	char filename[22 + MAP_MAX_FILENAME];
 	int i;
 	struct MAP_FILE_HEADER header;
 	struct RPCDATA_CreateObject *object_data;
-	struct GANG_ZONE *gang_zone;
+	union GANG_ZONE *gang_zone;
 	float middle_x, middle_y;
-	int total_element_count_for_middle;
 	float radar_angle, radar_offset_x, radar_offset_y;
+	int result;
 
-	sprintf(filename, "../maps/%s.map", maps[mapidx].name);
+	memset(obj_map, 0, sizeof(struct OBJECT_MAP));
+	memset(zone_map, 0, sizeof(struct ZONE_MAP));
+	strcpy(obj_map->name, name);
+	strcpy(zone_map->name, name);
+	sprintf(filename, "../maps/%s.map", name);
 	if (!(fs = fopen(filename, "rb"))) {
 		logprintf("failed to open map %s", filename);
 		return 0;
@@ -112,25 +169,29 @@ int maps_load_from_file(int mapidx)
 
 	if (header.spec_version != 0x0350414D) {
 		logprintf("unknown map spec %p in %s", header.spec_version, filename);
-		goto returnzero;
+		goto corrupted;
 	}
 
 	if (header.stream_out_radius < header.stream_in_radius + 50.0f) {
-		logprintf("map %s has streamout %f < streamin %f + 100",
-			maps[mapidx].name,
-			header.stream_out_radius,
-			header.stream_in_radius);
+		logprintf("map %s has streamout %f < streamin %f + 100", name, header.stream_out_radius, header.stream_in_radius);
 		abort();
 	}
 
-	maps[mapidx].stream_in_radius_sq = header.stream_in_radius * header.stream_in_radius;
-	maps[mapidx].stream_out_radius_sq = header.stream_out_radius * header.stream_out_radius;
+#ifdef MAPS_PRINT_STATS
+	printf("map %s streamin %.0f streamout %.0f draw %.0f\n",
+		name, header.stream_in_radius, header.stream_out_radius, header.draw_radius);
+#endif
+
+	zone_map->stream_in_radius_sq = obj_map->stream_in_radius_sq = header.stream_in_radius * header.stream_in_radius;
+	zone_map->stream_out_radius_sq = obj_map->stream_out_radius_sq = header.stream_out_radius * header.stream_out_radius;
+
+	result = 0;
 
 	/*TODO? could check if num_objects num_removes num_zones go over their limits*/
 
 	/*read removed objects*/
 	for (i = header.num_removes; i > 0; i--) {
-		if (!fread(&removed_objects[num_removed_objects], sizeof(struct REMOVEDOBJECT), 1, fs)) {
+		if (!fread(&removed_objects[num_removed_objects], sizeof(struct RPCDATA_RemoveBuilding), 1, fs)) {
 			goto corrupted;
 		}
 		if (num_removed_objects == MAX_REMOVED_OBJECTS - 1) {
@@ -140,52 +201,51 @@ int maps_load_from_file(int mapidx)
 		}
 	}
 
-	total_element_count_for_middle = 0;
-	middle_x = middle_y = 0.0f;
-
 	/*read gangzones*/
-	maps[mapidx].num_gang_zones = header.num_gang_zones;
 	if (header.num_gang_zones) {
-		maps[mapidx].gang_zones = gang_zone = malloc(sizeof(struct GANG_ZONE) * header.num_gang_zones);
+		middle_x = middle_y = 0.0f;
+		zone_map->num_gang_zones = header.num_gang_zones;
+		zone_map->gang_zones = gang_zone = malloc(sizeof(union GANG_ZONE) * header.num_gang_zones);
 		for (i = header.num_gang_zones; i > 0; i--) {
-			/*can not directly read into struct because the order of coordinates differ*/
-			if (!fread(gang_zone, sizeof(struct GANG_ZONE), 1, fs)) {
-				free(maps[mapidx].gang_zones);
-				if (header.num_objects) {
-					free(maps[mapidx].objects);
-				}
+			if (!fread(&gang_zone->data.from_map_file, sizeof(gang_zone->data.from_map_file), 1, fs)) {
+				free(zone_map->gang_zones);
 				/*no need to null because the map will be discarded as a whole*/
 				goto corrupted;
 			}
-			total_element_count_for_middle += 2;
-			middle_x += gang_zone->min_x;
-			middle_x += gang_zone->max_x;
-			middle_y += gang_zone->min_y;
-			middle_y += gang_zone->max_y;
+			middle_x += gang_zone->data.from_map_file.min_x;
+			middle_x += gang_zone->data.from_map_file.max_x;
+			middle_y += gang_zone->data.from_map_file.min_y;
+			middle_y += gang_zone->data.from_map_file.max_y;
 			gang_zone++;
 		}
+		/*div by 2 since there's min and max coords for each zone*/
+		zone_map->middle_x = middle_x / header.num_gang_zones / 2;
+		zone_map->middle_y = middle_y / header.num_gang_zones / 2;
+		result |= MAP_LOAD_RESULT_HAS_ZONES;
 	}
 
 	/*read objects*/
-	map_radar_object_for_map[mapidx] = 0;
-	maps[mapidx].num_objects = header.num_objects;
 	if (header.num_objects) {
-		maps[mapidx].objects = object_data = malloc(header.objdata_size);
+		middle_x = middle_y = 0.0f;
+		obj_map->num_objects = header.num_objects;
+		obj_map->objects = object_data = malloc(header.objdata_size);
 		for (i = header.num_objects; i > 0; i--) {
 			if (!fread(object_data, 2, 1, fs) ||
 				!fread((char*) object_data + 2, object_data->objectid - 2, 1, fs))
 			{
-				free(maps[mapidx].objects);
+				free(obj_map->objects);
+				if (zone_map->gang_zones) {
+					free(zone_map->gang_zones);
+				}
 				/*no need to null because the map will be discarded as a whole*/
 				goto corrupted;
 			}
-			total_element_count_for_middle++;
 			middle_x += object_data->x;
 			middle_y += object_data->y;
 			object_data->drawdistance = header.draw_radius;
 
 			/*automatically create object for the rotating radar if the base is found*/
-			if (!map_radar_object_for_map[mapidx]) {
+			if (!obj_map->radar_object) {
 				if (object_data->modelid == 7981/*smallradar02_lvS*/) {
 					radar_angle = object_data->rz * M_PI / 180.0f;
 					radar_offset_x = 4.4148f * (float) cos(radar_angle);
@@ -196,81 +256,79 @@ int maps_load_from_file(int mapidx)
 					radar_offset_x = -4.2038f * (float) cos(radar_angle) - 1.2057f * (float) sin(radar_angle);
 					radar_offset_y = -4.2038f * (float) sin(radar_angle) + 1.2057f * (float) cos(radar_angle);
 addradar:
-					map_radar_object_for_map[mapidx] = malloc(sizeof(struct RPCDATA_CreateObject));
-					map_radar_object_for_map[mapidx]->objectid = OBJECT_ROTATING_RADAR;
-					map_radar_object_for_map[mapidx]->modelid = 1682;
-					map_radar_object_for_map[mapidx]->x = object_data->x + radar_offset_x;
-					map_radar_object_for_map[mapidx]->y = object_data->y + radar_offset_y;
-					map_radar_object_for_map[mapidx]->z = object_data->z + 11.4f;
-					map_radar_object_for_map[mapidx]->rx = 0.0f;
-					map_radar_object_for_map[mapidx]->ry = 0.0f;
-					map_radar_object_for_map[mapidx]->rz = 0.0f;
-					map_radar_object_for_map[mapidx]->drawdistance = header.draw_radius;
-					map_radar_object_for_map[mapidx]->no_camera_col = 0;
-					map_radar_object_for_map[mapidx]->attached_object_id = -1;
-					map_radar_object_for_map[mapidx]->attached_vehicle_id = -1;
-					map_radar_object_for_map[mapidx]->num_materials = 0;
+					obj_map->radar_object = malloc(sizeof(struct RPCDATA_CreateObject));
+					obj_map->radar_object->objectid = OBJECT_ROTATING_RADAR;
+					obj_map->radar_object->modelid = 1682;
+					obj_map->radar_object->x = object_data->x + radar_offset_x;
+					obj_map->radar_object->y = object_data->y + radar_offset_y;
+					obj_map->radar_object->z = object_data->z + 11.4f;
+					obj_map->radar_object->rx = 0.0f;
+					obj_map->radar_object->ry = 0.0f;
+					obj_map->radar_object->rz = 0.0f;
+					obj_map->radar_object->drawdistance = header.draw_radius;
+					obj_map->radar_object->no_camera_col = 0;
+					obj_map->radar_object->attached_object_id = -1;
+					obj_map->radar_object->attached_vehicle_id = -1;
+					obj_map->radar_object->num_materials = 0;
 				}
 			}
 
 			object_data = (void*) ((char*) object_data + object_data->objectid);
 		}
+		obj_map->middle_x = middle_x / header.num_objects;
+		obj_map->middle_y = middle_y / header.num_objects;
+		result |= MAP_LOAD_RESULT_HAS_OBJECTS;
 	}
-
-	/*determine center*/
-	if (total_element_count_for_middle > 0) {
-		middle_x /= total_element_count_for_middle;
-		middle_y /= total_element_count_for_middle;
-	}
-	maps[mapidx].middle_x = middle_x;
-	maps[mapidx].middle_y = middle_y;
 
 	fclose(fs);
-	return 1;
+	return result;
 corrupted:
 	logprintf("corrupted map %s", filename);
-returnzero:
-	fclose(fs);
 	return 0;
 }
-
+/*jeanine:p:i:25;p:22;a:r;x:30;y:0;*/
 #ifdef MAPS_PRINT_STATS
 static
 void maps_print_stats()
 {
-	int mapidx;
+	struct OBJECT_MAP *obj_map;
+	struct ZONE_MAP *zone_map;
 	int total_objects, total_gang_zones;
 
 	total_objects = total_gang_zones = 0;
-	for (mapidx = 0; mapidx < num_maps; mapidx++) {
-		total_objects += maps[mapidx].num_objects;
-		total_gang_zones += maps[mapidx].num_gang_zones;
+	for (obj_map = obj_maps; obj_map != obj_maps + num_obj_maps; obj_map++) {
+		total_objects += obj_map->num_objects;
 	}
-	printf("%d maps\n", num_maps);
-	printf("  %d objects\n", total_objects);
-	printf("  %d removes\n", num_removed_objects);
-	printf("  %d gang zones\n", total_gang_zones);
+	for (zone_map = zone_maps; zone_map != zone_maps + num_zone_maps; zone_map++) {
+		total_gang_zones += zone_map->num_gang_zones;
+	}
+	printf("%d object maps, %d objects\n", num_obj_maps, total_objects);
+	printf("%d zone maps, %d zones\n", num_zone_maps, total_gang_zones);
+	printf("%d removes\n", num_removed_objects);
 }
 #endif
-
+/*jeanine:p:i:22;p:20;a:r;x:415;y:-516;*/
 static
 void maps_load_from_db()
 {
+	char mapname[MAP_MAX_FILENAME];
 	char q[] =
-		"SELECT filename,id FROM map "
+		"SELECT filename FROM map "
 		"LEFT JOIN apt ON map.ap=apt.i "
 		"WHERE apt.e=1 OR apt.e IS NULL";
-	int cacheid, rowcount;
+	int cacheid, rowcount, load_result;
 	int i;
 
 	atoc(buf4096, q, sizeof(q));
 	cacheid = NC_mysql_query(buf4096a);
 	rowcount = NC_cache_get_row_count();
 	if (rowcount > MAX_MAPS) {
+		/*Actual number of needed slots can be less because maps that are only removed objects don't take slots.*/
 		logprintf("can't load all maps! missing %d slots", rowcount - MAX_MAPS);
 		rowcount = MAX_MAPS;
 	}
-	num_maps = 0;
+	num_obj_maps = 0;
+	num_zone_maps = 0;
 	for (i = 0; i < rowcount; i++) {
 		nc_params[3] = buf32a;
 		while (rowcount--) {
@@ -278,25 +336,26 @@ void maps_load_from_db()
 			nc_params[1] = rowcount;
 			nc_params[2] = 0;
 			NC(n_cache_get_field_s);
-			ctoa(maps[num_maps].name, buf32, sizeof(maps[rowcount].name));
-			if (maps_load_from_file(num_maps)) {
-				if (!strcmp("octa_lod", maps[num_maps].name)) {
-					octavia_island_actor_mapidx = num_maps;
+			ctoa(mapname, buf32, MAP_MAX_FILENAME);
+			load_result = maps_load_from_file(mapname, &obj_maps[num_obj_maps], &zone_maps[num_zone_maps]);/*jeanine:l:24*/
+			if (load_result & MAP_LOAD_RESULT_HAS_OBJECTS) {
+				if (!strcmp("octa_lod", mapname)) {
+					octavia_island_actor_mapidx = num_obj_maps;
 				}
-				NC_PARS(2);
-				nc_params[2] = 1;
-				maps[num_maps].id = NC(n_cache_get_field_i);
-				num_maps++;
+				num_obj_maps++;
+			}
+			if (load_result & MAP_LOAD_RESULT_HAS_ZONES) {
+				num_zone_maps++;
 			}
 		}
 	}
 	NC_cache_delete(cacheid);
 
 #ifdef MAPS_PRINT_STATS
-	maps_print_stats();
+	maps_print_stats();/*jeanine:l:25*/
 #endif
 }
-
+/*jeanine:p:i:23;p:20;a:r;x:414;y:14;*/
 static
 int maps_timer_rotate_radar(void *data)
 {
@@ -316,7 +375,7 @@ int maps_timer_rotate_radar(void *data)
 
 	for (playerindex = 0; playerindex < playercount; playerindex++) {
 		playerid = players[playerindex];
-		if ((object = map_radar_object_for_player[playerid])) {
+		if ((object = radar_object_for_player[playerid])) {
 			rpcdata_MoveObject.objectid = OBJECT_ROTATING_RADAR;
 			rpcdata_MoveObject.from_x = object->x;
 			rpcdata_MoveObject.from_y = object->y;
@@ -336,7 +395,7 @@ int maps_timer_rotate_radar(void *data)
 	/*5000 is more accurate timing, but players with fluctuating ping might see
 	the radar going back and forth instead of full circles*/
 }
-
+/*jeanine:p:i:20;p:0;a:b;x:0;y:30;*/
 /**
 Initialize mapping system. Loads maps from db and reads their files.
 */
@@ -344,13 +403,7 @@ static
 void maps_init()
 {
 	octavia_island_actor_mapidx = -1;
-	maps_load_from_db();
-
-	bs_maps_remove_building.numberOfBitsUsed = sizeof(rpcdata_RemoveBuilding) * 8;
-	bs_maps_remove_building.ptrData = &rpcdata_RemoveBuilding;
-
-	bs_maps_show_gang_zone.numberOfBitsUsed = sizeof(rpcdata_ShowGangZone) * 8;
-	bs_maps_show_gang_zone.ptrData = &rpcdata_ShowGangZone;
+	maps_load_from_db();/*jeanine:l:22*/
 
 	bs_maps_move_object.numberOfBitsUsed = sizeof(rpcdata_MoveObject) * 8;
 	bs_maps_move_object.ptrData = &rpcdata_MoveObject;
@@ -366,270 +419,528 @@ void maps_init()
 
 	rpcdata_hide_actor.actorid = OCTA_ACTORID;
 
-	timer_set(2000, maps_timer_rotate_radar, NULL);
+	timer_set(2000, maps_timer_rotate_radar, NULL);/*jeanine:l:23*/
 }
-
+/*jeanine:p:i:21;p:27;a:r;x:28;y:619;*/
 /**
-Creates all objects/gangzones in given map for the given player.
-
-@return amount of RPCs sent
+*
 */
 static
-int maps_stream_in_for_player(int playerid, int mapidx)
+void maps_continue_stream_in_queued_zones_for_player(int playerid, struct STREAMING_DATA *streamingdata)
 {
 	struct BitStream bitstream;
-	struct RPCDATA_CreateObject *obj;
-	short *objectid_to_mapidx;
-	short *gangzoneid_to_mapidx;
-	int tmp_saved_objdata_size;
-	int gang_zone_idx;
-	int objectid;
-	int i;
-	int num_rpcs_sent;
+	struct ZONE_MAP *map;
+	union GANG_ZONE *zone;
+	short *gangzoneid_to_zonemapidx;
+	short zoneid;
+	short num_created_zones;
+
+	map = streamingdata->zone_map;
+	bitstream.numberOfBitsUsed = sizeof(struct RPCDATA_ShowGangZone) * 8;
+	zoneid = 0;
+	gangzoneid_to_zonemapidx = player_gangzoneid_to_zonemapidx[playerid];
+	zone = map->gang_zones + streamingdata->next_zone_idx;
+	num_created_zones = 0;
+	while (zone < map->gang_zones + map->num_gang_zones) {
+		while (gangzoneid_to_zonemapidx[zoneid] >= 0) {
+			zoneid++;
+			if (zoneid >= MAX_GANG_ZONES) {
+				logprintf("gang zone limit hit while streaming map %s", map->name);
+				goto stop_streaming;
+			}
+		}
+		gangzoneid_to_zonemapidx[zoneid] = map - zone_maps;
+		zone->rpcdata.zoneid = zoneid;
+		bitstream.ptrData = &zone->rpcdata;
+		SAMP_SendRPCToPlayer(RPC_ShowGangZone, &bitstream, playerid, 2);
+		if (++num_created_zones >= MAX_ZONES_TO_CREATE_PER_TICK) {
+			return;
+		}
+		zone++;
+		streamingdata->next_zone_idx++;
+	}
+stop_streaming:
 
 #ifdef MAPS_LOG_STREAMING
-	logprintf("map %s streamed in for %d", maps[mapidx].name, playerid);
+	logprintf("zone map %s done streaming in for %d", streamingdata->zone_map->name, playerid);
 #endif
 
-	maps[mapidx].stream_status_for_player[playerid] = 1;
-	num_rpcs_sent = 0;
-
-	/*objects*/
-	if (maps[mapidx].num_objects) {
-		obj = maps[mapidx].objects;
-		objectid_to_mapidx = player_objectid_to_mapidx[playerid];
-		objectid = 0; /*TODO: samp starts at objectid 1, should we also do that?*/
-		for (i = maps[mapidx].num_objects; i > 0; i--) {
-			while (objectid_to_mapidx[objectid] >= 0) {
-				objectid++;
-				if (objectid >= MAX_MAPSYSTEM_OBJECTS) {
-					logprintf("object limit hit while streaming map %s", maps[mapidx].name);
-					goto skip_objects;
-				}
-			}
-			objectid_to_mapidx[objectid] = mapidx;
-			tmp_saved_objdata_size = obj->objectid;
-			obj->objectid = objectid;
-			bitstream.ptrData = obj;
-			bitstream.numberOfBitsUsed = tmp_saved_objdata_size * 8;
-			SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
-			num_rpcs_sent++;
-			obj->objectid = tmp_saved_objdata_size;
-			obj = (void*) ((char*) obj + tmp_saved_objdata_size);
-		}
-	}
-skip_objects:
-	;
-
-	/*the special rotating radar object*/
-	/*It won't be made if another streamed in map already has a radar, meaning when that other
-	map gets streamed out, this new map will not have a radar...
-	No maps with radars should have intersecting stream radii anyways.*/
-	if (map_radar_object_for_map[mapidx] && !map_radar_object_for_player[playerid]) {
-		map_radar_object_for_player[playerid] = map_radar_object_for_map[mapidx];
-		bitstream.ptrData = map_radar_object_for_map[mapidx];
-		bitstream.numberOfBitsUsed = sizeof(struct RPCDATA_CreateObject) * 8;
-		SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
-		num_rpcs_sent++;
-	}
-
-	/*gang zones*/
-	rpcdata_ShowGangZone.zoneid = 0;
-	gangzoneid_to_mapidx = player_gangzoneid_to_mapidx[playerid];
-	for (gang_zone_idx = 0; gang_zone_idx < maps[mapidx].num_gang_zones; gang_zone_idx++) {
-		while (gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] >= 0) {
-			rpcdata_ShowGangZone.zoneid++;
-			if (rpcdata_ShowGangZone.zoneid >= MAX_GANG_ZONES) {
-				logprintf("gang zone limit hit while streaming map %s", maps[mapidx].name);
-				goto skip_gang_zones;
-			}
-		}
-		gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] = mapidx;
-		memcpy(&rpcdata_ShowGangZone.min_x, &maps[mapidx].gang_zones[gang_zone_idx], sizeof(struct GANG_ZONE));
-		/*TODO: what's the 2 for? possibly priority*/
-		SAMP_SendRPCToPlayer(RPC_ShowGangZone, &bs_maps_show_gang_zone, playerid, 2);
-		num_rpcs_sent++;
-	}
-skip_gang_zones:
-	;
-
-	/*Octavia actor*/
-	if (mapidx == octavia_island_actor_mapidx) {
-		SendRPCToPlayer(playerid, RPC_ShowActor, &rpcdata_show_actor, sizeof(rpcdata_show_actor), 2);
-		num_rpcs_sent++;
-	}
-
-	return num_rpcs_sent;
+	streamingdata->zone_map->stream_status_for_player[playerid] = STREAMED_IN;
+	streamingdata->zone_map = NULL;
 }
-
+/*jeanine:p:i:11;p:17;a:r;x:106;y:-297;*/
 /**
-Deletes all the objects/gangzones from given map for the given player.
-
-@return amount of RPCs sent
+Deletes all the objects from given map for the given player.
 */
 static
-int maps_stream_out_for_player(int playerid, int mapidx)
+void maps_stream_out_objects_for_player(int playerid, struct OBJECT_MAP *map)
 {
 	struct RPCDATA_DestroyObject rpcdata_DestroyObject;
-	struct BitStream bitstream_destroy;
-	short *objectid_to_mapidx;
-	short *gangzoneid_to_mapidx;
-	int objectid;
-	int num_rpcs_sent;
+	struct BitStream bitstream;
+	short *objectid_to_objmapidx;
+	int objectid, mapidx;
 
 #ifdef MAPS_LOG_STREAMING
-	logprintf("map %s streamed out for %d", maps[mapidx].name, playerid);
+	logprintf("obj map %s streamed out for %d", map->name, playerid);
 #endif
 
-	maps[mapidx].stream_status_for_player[playerid] = 0;
-	num_rpcs_sent = 0;
-
-	bitstream_destroy.ptrData = &rpcdata_DestroyObject;
-	bitstream_destroy.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
+	mapidx = map - obj_maps;
 
 	/*objects*/
-	objectid_to_mapidx = player_objectid_to_mapidx[playerid];
+	bitstream.ptrData = &rpcdata_DestroyObject;
+	bitstream.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
+	objectid_to_objmapidx = player_objectid_to_objmapidx[playerid];
 	for (objectid = 0; objectid < MAX_OBJECTS; objectid++) {
-		if (objectid_to_mapidx[objectid] == mapidx) {
-			objectid_to_mapidx[objectid] = -1;
+		if (objectid_to_objmapidx[objectid] == mapidx) {
+			objectid_to_objmapidx[objectid] = -1;
 			rpcdata_DestroyObject.objectid = objectid;
-			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream_destroy, playerid, 2);
-			num_rpcs_sent++;
+			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream, playerid, 2);
 		}
 	}
 
-	/*the special rotating radar object*/
-	if (map_radar_object_for_map[mapidx] && map_radar_object_for_map[mapidx] == map_radar_object_for_player[playerid]) {
-		map_radar_object_for_player[playerid] = 0;
-		rpcdata_DestroyObject.objectid = OBJECT_ROTATING_RADAR;
-		SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream_destroy, playerid, 2);
-		num_rpcs_sent++;
-	}
-
-	/*gang zones*/
-	gangzoneid_to_mapidx = player_gangzoneid_to_mapidx[playerid];
-	for (rpcdata_ShowGangZone.zoneid = 0; rpcdata_ShowGangZone.zoneid < MAX_GANG_ZONES; rpcdata_ShowGangZone.zoneid++) {
-		if (gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] == mapidx) {
-			gangzoneid_to_mapidx[rpcdata_ShowGangZone.zoneid] = -1;
-			/*there's no real need to hide the gang zone, just mark it as available and be done*/
-			/*SAMP_SendRPCToPlayer(RPC_HideGangZone, &bs_maps_show_gang_zone, playerid, 2);*/
-		}
+	/*The special rotating radar object.*/
+	if (map->radar_object == radar_object_for_player[playerid]) {
+		/*No real need to destroy the object.*/
+		radar_object_for_player[playerid] = NULL;
 	}
 
 	/*Octavia actor*/
 	if (mapidx == octavia_island_actor_mapidx) {
 		SendRPCToPlayer(playerid, RPC_HideActor, &rpcdata_hide_actor, sizeof(rpcdata_hide_actor), 2);
-		num_rpcs_sent++;
 	}
-
-	return num_rpcs_sent;
 }
-
+/*jeanine:p:i:19;p:17;a:r;x:105;y:170;*/
+/**
+Deletes all the gangzones from given map for the given player.
+*/
 static
-void maps_stream_for_player(int playerid, struct vec3 pos)
+void maps_stream_out_zones_for_player(int playerid, struct ZONE_MAP *map)
 {
-	float dx, dy, distance;
+	short *gangzoneid_to_zonemapidx;
+	short zoneid;
 	int mapidx;
-	int num_rpcs_sent;
 
-	num_rpcs_sent = 0;
+#ifdef MAPS_LOG_STREAMING
+	logprintf("zone map %s streamed out for %d", map->name, playerid);
+#endif
 
-	/*check everything to stream out first, only then stream in*/
+	mapidx = map - zone_maps;
 
-	for (mapidx = 0; mapidx < num_maps; mapidx++) {
-		if (maps[mapidx].stream_status_for_player[playerid]) {
-			dx = maps[mapidx].middle_x - pos.x;
-			dy = maps[mapidx].middle_y - pos.y;
+	gangzoneid_to_zonemapidx = player_gangzoneid_to_zonemapidx[playerid];
+	for (zoneid = 0; zoneid < MAX_GANG_ZONES; zoneid++) {
+		if (gangzoneid_to_zonemapidx[zoneid] == mapidx) {
+			/*No real need to hide the gang zone, just mark it as available and be done.*/
+			gangzoneid_to_zonemapidx[zoneid] = -1;
+		}
+	}
+}
+/*jeanine:p:i:9;p:28;a:r;x:50;y:242;*/
+static
+void maps_print_object_breakdown(int playerid)
+{
+	int map_loaded[MAX_MAPS];
+	int objects_per_mapidx[MAX_MAPS];
+	int i, mapidx;
+	int num_maps_loaded;
+
+	memset(map_loaded, 0, sizeof(map_loaded));
+	memset(objects_per_mapidx, 0, sizeof(objects_per_mapidx));
+	num_maps_loaded = 0;
+	for (i = 0; i < MAX_MAPSYSTEM_OBJECTS; i++) {
+		mapidx = player_objectid_to_objmapidx[playerid][i];
+		if (mapidx != -1) {
+			if (!map_loaded[mapidx]) {
+				map_loaded[mapidx] = 1;
+				num_maps_loaded++;
+			}
+			objects_per_mapidx[mapidx]++;
+		}
+	}
+	logprintf("%d maps loaded for player %d", num_maps_loaded, playerid);
+	for (i = 0; i < num_obj_maps; i++) {
+		if (map_loaded[i]) {
+			logprintf("  map %s: %d objs", obj_maps[i].name, objects_per_mapidx[i]);
+		}
+	}
+}
+/*jeanine:p:i:28;p:27;a:r;x:944;y:-2;*/
+/**
+ * @return amount of objects created
+ */
+static
+int maps_continue_stream_in_queued_objects_for_player(int playerid, struct STREAMING_DATA *streamingdata, int max_objs_to_create)
+{
+	struct BitStream bitstream;
+	struct RPCDATA_CreateObject *obj;
+	short tmp_saved_objdata_size;
+	int num_created_objects;
+	int objectid;
+	int mapidx;
+	short *objectid_to_objmapidx;
+
+	mapidx = streamingdata->obj_map - obj_maps;
+	objectid_to_objmapidx = player_objectid_to_objmapidx[playerid];
+	objectid = 0; /*Note: samp starts at objectid 1, should we also do that? Seems like it's okay.*/
+	num_created_objects = 0;
+	while (streamingdata->num_queued_objects > 0) {
+		while (objectid_to_objmapidx[objectid] >= 0) {
+			objectid++;
+			if (objectid >= MAX_MAPSYSTEM_OBJECTS) {
+				logprintf("object limit hit while streaming map %s", streamingdata->obj_map->name);
+				maps_print_object_breakdown(playerid);/*jeanine:l:9*/
+				goto stop_streaming;
+			}
+		}
+		obj = streamingdata->queued_objects[--streamingdata->num_queued_objects];
+		objectid_to_objmapidx[objectid] = mapidx;
+		/*The objectid field is used to store the size of the object data.*/
+		/*Temporary save this size data while setting the correct objectid.*/
+		tmp_saved_objdata_size = obj->objectid;
+		obj->objectid = objectid;
+		bitstream.ptrData = obj;
+		bitstream.numberOfBitsUsed = tmp_saved_objdata_size * 8;
+		SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
+		/*Reset the object data size field.*/
+		obj->objectid = tmp_saved_objdata_size;
+		if (++num_created_objects > max_objs_to_create) {
+			return num_created_objects;
+		}
+	}
+stop_streaming:
+
+#ifdef MAPS_LOG_STREAMING
+	logprintf("object map %s done streaming in for %d", streamingdata->obj_map->name, playerid);
+#endif
+
+	/*Octavia actor*/
+	if (streamingdata->obj_map - obj_maps == octavia_island_actor_mapidx) {
+		SendRPCToPlayer(playerid, RPC_ShowActor, &rpcdata_show_actor, sizeof(rpcdata_show_actor), 2);
+	}
+
+	/*The special rotating radar object.*/
+	/*This will override the existing object if it exists, but no maps with radars should have intersecting stream radii anyways.*/
+	if (streamingdata->obj_map->radar_object) {
+		radar_object_for_player[playerid] = streamingdata->obj_map->radar_object;
+		bitstream.ptrData = streamingdata->obj_map->radar_object;
+		bitstream.numberOfBitsUsed = sizeof(struct RPCDATA_CreateObject) * 8;
+		SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
+	}
+
+	streamingdata->obj_map->stream_status_for_player[playerid] = STREAMED_IN;
+	streamingdata->obj_map = NULL;
+
+	return num_created_objects;
+}
+/*jeanine:p:i:16;p:27;a:r;x:3802;y:13;*/
+static
+struct OBJECT_MAP *maps_find_next_object_map_to_stream_for_player(int playerid, float x, float y)
+{
+	float dx, dy;
+	float candidate_distance_sq, selected_stream_in_radius_sq;
+	struct OBJECT_MAP *selected, *candidate;
+
+	selected = NULL;
+	selected_stream_in_radius_sq = float_ninf;
+	candidate = obj_maps;
+	while (candidate != obj_maps + num_obj_maps) {
+		if (candidate->stream_status_for_player[playerid] == STREAMED_OUT) {
+			dx = candidate->middle_x - x;
+			dy = candidate->middle_y - y;
+			candidate_distance_sq = dx * dx + dy * dy;
+			if (candidate_distance_sq < candidate->stream_in_radius_sq &&
+				/*Prioritize maps that have longer stream distance.*/
+				candidate->stream_in_radius_sq > selected_stream_in_radius_sq)
+			{
+				selected = candidate;
+				selected_stream_in_radius_sq = candidate->stream_in_radius_sq;
+			}
+		}
+		candidate++;
+	}
+
+#ifdef MAPS_LOG_STREAMING
+	if (selected) {
+		logprintf("picked obj map %s to stream in for %d", selected->name, playerid);
+	}
+#endif
+
+	return selected;
+}
+/*jeanine:p:i:7;p:27;a:r;x:2860;y:-2;*/
+/**
+ * Does not check if a map is already being streamed in.
+ * Does not check if objects in the map are already streamed in.
+ *
+ * If a map is already being streamed in, that streaming will be stopped and the map
+ * will stay in an unfinished streaming state.
+ */
+static
+void maps_prepare_streaming_object_map(int playerid, struct OBJECT_MAP *map, struct STREAMING_DATA *streamingdata)
+{
+	struct RPCDATA_CreateObject *obj;
+	int i;
+
+	map->stream_status_for_player[playerid] = STREAMING_IN;
+	streamingdata->obj_map = map;
+	streamingdata->num_queued_objects = 0;
+	obj = map->objects;
+	for (i = map->num_objects; i > 0; i--) {
+		streamingdata->queued_objects[streamingdata->num_queued_objects++] = obj;
+		obj = (void*) ((char*) obj + obj->objectid);
+	}
+
+#ifdef MAPS_LOG_STREAMING
+	logprintf("queued %d objects for map %s", streamingdata->num_queued_objects, map->name);
+#endif
+}
+/*jeanine:p:i:17;p:27;a:r;x:4712;y:3;*/
+/**
+ * Both objects and zones.
+ */
+static
+void maps_stream_out_maps_for_player(int playerid, float posx, float posy)
+{
+	struct OBJECT_MAP *obj_map;
+	struct ZONE_MAP *zone_map;
+	float dx, dy, distance;
+
+	for (obj_map = obj_maps; obj_map != obj_maps + num_obj_maps; obj_map++) {
+		if (obj_map->stream_status_for_player[playerid] != STREAMED_OUT) {
+			dx = obj_map->middle_x - posx;
+			dy = obj_map->middle_y - posy;
 			distance = dx * dx + dy * dy;
-			if (distance > maps[mapidx].stream_out_radius_sq) {
-				num_rpcs_sent += maps_stream_out_for_player(playerid, mapidx);
+			if (distance > obj_map->stream_out_radius_sq) {
+				if (streaming_data[playerid].obj_map == obj_map) {
+					streaming_data[playerid].obj_map = NULL;
+				}
+				obj_map->stream_status_for_player[playerid] = STREAMED_OUT;
+				maps_stream_out_objects_for_player(playerid, obj_map);/*jeanine:l:11*/
 			}
 		}
 	}
-
-	for (mapidx = 0; mapidx < num_maps; mapidx++) {
-		if (!maps[mapidx].stream_status_for_player[playerid]) {
-			dx = maps[mapidx].middle_x - pos.x;
-			dy = maps[mapidx].middle_y - pos.y;
+	for (zone_map = zone_maps; zone_map != zone_maps + num_zone_maps; zone_map++) {
+		if (zone_map->stream_status_for_player[playerid] != STREAMED_OUT) {
+			dx = zone_map->middle_x - posx;
+			dy = zone_map->middle_y - posy;
 			distance = dx * dx + dy * dy;
-			if (distance < maps[mapidx].stream_in_radius_sq) {
-				num_rpcs_sent += maps_stream_in_for_player(playerid, mapidx);
+			if (distance > zone_map->stream_out_radius_sq) {
+				if (streaming_data[playerid].zone_map == zone_map) {
+					streaming_data[playerid].zone_map = NULL;
+				}
+				zone_map->stream_status_for_player[playerid] = STREAMED_OUT;
+				maps_stream_out_zones_for_player(playerid, zone_map);/*jeanine:l:19*/
 			}
 		}
 	}
 }
+/*jeanine:p:i:18;p:27;a:r;x:124;y:-7;*/
+static
+struct ZONE_MAP *maps_find_next_zone_map_to_stream_for_player(int playerid, float x, float y)
+{
+	float dx, dy;
+	float selected_distance_sq, candidate_distance_sq;
+	struct ZONE_MAP *selected, *candidate;
+
+	selected_distance_sq = float_pinf;
+	selected = NULL;
+	candidate = zone_maps;
+	while (candidate != zone_maps + num_zone_maps) {
+		if (candidate->stream_status_for_player[playerid] == STREAMED_OUT) {
+			dx = candidate->middle_x - x;
+			dy = candidate->middle_y - y;
+			candidate_distance_sq = dx * dx + dy * dy;
+			if (candidate_distance_sq < candidate->stream_in_radius_sq &&
+				/*Prioritize zones that are closer.*/
+				candidate_distance_sq < selected_distance_sq)
+			{
+				selected = candidate;
+				selected_distance_sq = candidate_distance_sq;
+			}
+		}
+		candidate++;
+	}
+
+#ifdef MAPS_LOG_STREAMING
+	if (selected) {
+		logprintf("picked zone %s to stream in for %d", selected->name, playerid);
+	}
+#endif
+
+	return selected;
+}
+/*jeanine:p:i:15;p:27;a:r;x:2089;y:-9;*/
+/**
+ * Moves objects within {@link IMM_STREAMING_RADIUS_SQ} to the front of the queue (which is
+ * actually at the end), and returns the amount of objects that is.
+ */
+static
+int maps_prioritize_closest_objects(struct STREAMING_DATA *streamingdata, float x, float y)
+{
+	struct RPCDATA_CreateObject *obj;
+	register float dx, dy;
+	register int dist_sq;
+	int i, j, count;
+
+	i = j = streamingdata->num_queued_objects - 1;
+	count = 0;
+	for (; i >= 0; i--) {
+		obj = streamingdata->queued_objects[i];
+		dx = x - obj->x;
+		dy = y - obj->y;
+		dist_sq = (int) (dx * dx + dy * dy);
+		if (dist_sq < IMM_STREAMING_RADIUS_SQ) {
+			/*Swap current obj with obj on the current position where the
+			prioritized objects end.*/
+			streamingdata->queued_objects[i] = streamingdata->queued_objects[j];
+			streamingdata->queued_objects[j] = obj;
+			j--;
+			count++;
+		}
+	}
+
+#ifdef MAPS_LOG_STREAMING
+	logprintf("prioritized %d objects", count);
+#endif
+
+	return count;
+}
+/*jeanine:p:i:5;p:27;a:r;x:38;y:506;*/
+static
+void maps_prepare_streaming_zone_map(int playerid, struct ZONE_MAP *map, struct STREAMING_DATA *streamingdata)
+{
+	map->stream_status_for_player[playerid] = STREAMING_IN;
+	streamingdata->zone_map = map;
+	streamingdata->next_zone_idx = 0;
+}
+/*jeanine:p:i:27;p:29;a:b;x:4;y:783;*/
+enum OBJ_STREAM_MODE {
+	OBJ_STREAM_MODE_ANY,
+	OBJ_STREAM_MODE_CLOSEST_NOW,
+};
 
 /**
-@return amount of objects that would be created when the player would be teleported to given pos
-*/
-int maps_calculate_objects_to_create_for_player_at_position(int playerid, struct vec3 pos)
+ * Streams out/in objects and zones.
+ *
+ * Limitations to {@code OBJ_STREAM_MODE_CLOSEST_NOW}:
+ * - If a current map is still streaming in, that map will continue to stream in,
+ *   even if it's not the closest.
+ * - The next map picked to stream in might not be the closest map, as it will prefer maps
+ *   with the greatest draw distance.
+ *
+ * @param mode - When {@link OBJ_STREAM_MODE_ANY}, will stream in up to
+ *               {@link MAX_OBJECTS_TO_CREATE_PER_TICK} objects now.
+ *             - When {@link OBJ_STREAM_MODE_CLOSEST_NOW}, will stream in all queued objects closer
+ *               than {@link IMM_STREAMING_RADIUS_SQ} now, but only when a new map is being streamed in.
+ *               Other objects may also be streamed in if the number of close objects is less than
+ *               {@link MAX_OBJECTS_TO_CREATE_PER_TICK}.
+ */
+static
+void maps_stream_for_player(int playerid, float posx, float posy, enum OBJ_STREAM_MODE mode)
 {
-	float dx, dy, distance;
-	int mapidx;
-	int amount_of_objects;
+	struct OBJECT_MAP *next_object_map;
+	struct ZONE_MAP *next_zone_map;
+	struct STREAMING_DATA *streamingdata;
+	int max_objs_to_create;
+	int num_objs_created;
+	register int num_prioritized_objs;
 
-	/*not checking amount of objects to destroy atm*/
+	streamingdata = &streaming_data[playerid];
 
-	amount_of_objects = 0;
-	for (mapidx = 0; mapidx < num_maps; mapidx++) {
-		if (!maps[mapidx].stream_status_for_player[playerid]) {
-			dx = maps[mapidx].middle_x - pos.x;
-			dy = maps[mapidx].middle_y - pos.y;
-			distance = dx * dx + dy * dy;
-			if (distance < maps[mapidx].stream_in_radius_sq) {
-				amount_of_objects += maps[mapidx].num_objects;
+	maps_stream_out_maps_for_player(playerid, posx, posy);/*jeanine:l:17*/
+
+	max_objs_to_create = MAX_OBJECTS_TO_CREATE_PER_TICK;
+	num_objs_created = 0;
+	do {
+		if (!streamingdata->obj_map) {
+			next_object_map = maps_find_next_object_map_to_stream_for_player(playerid, posx, posy);/*jeanine:l:16*/
+			if (!next_object_map) {
+				break;
+			}
+			maps_prepare_streaming_object_map(playerid, next_object_map, streamingdata);/*jeanine:l:7*/
+		}
+		if (mode == OBJ_STREAM_MODE_CLOSEST_NOW) {
+			num_prioritized_objs = maps_prioritize_closest_objects(streamingdata, posx, posy);/*jeanine:l:15*/
+			if (num_prioritized_objs > MAX_OBJECTS_TO_CREATE_PER_TICK) {
+				max_objs_to_create = num_prioritized_objs;
 			}
 		}
+		num_objs_created += maps_continue_stream_in_queued_objects_for_player(playerid, streamingdata, max_objs_to_create);/*jeanine:l:28*/
+	} while (num_objs_created < MAX_OBJECTS_TO_CREATE_PER_TICK);
+
+	if (!streamingdata->zone_map) {
+		next_zone_map = maps_find_next_zone_map_to_stream_for_player(playerid, posx, posy);/*jeanine:l:18*/
+		if (!next_zone_map) {
+			return;
+		}
+		maps_prepare_streaming_zone_map(playerid, next_zone_map, streamingdata);/*jeanine:l:5*/
 	}
-
-	return amount_of_objects;
+	maps_continue_stream_in_queued_zones_for_player(playerid, streamingdata);/*jeanine:l:21*/
 }
-
+/*jeanine:p:i:26;p:20;a:b;x:0;y:30;*/
 static
-int maps_process_tick(void *data)
+/**
+ *Should be called from ProcessTick()
+ */
+void maps_process_tick(int elapsed_time)
 {
-	static int next_updating_playeridx = 0;
+	register struct vec3 *pos;
+	register int playerid;
 
-	int playerid;
-	struct vec3 ppos;
+	int i;
 
-	if (!playercount) {
-		return MAPSTREAMING_UPDATE_INTERVAL;
+	for (i = 0; i < playercount; i++) {
+		playerid = players[i];
+		next_streaming_tick_delay[playerid] -= elapsed_time;
+		if (next_streaming_tick_delay[playerid] <= 0) {
+			pos = &player[playerid]->pos;
+			maps_stream_for_player(playerid, pos->x, pos->y, OBJ_STREAM_MODE_ANY);
+			/*Do this in a loop to ensure we don't overload
+			the streamer if some hang occurred.*/
+			do {
+				next_streaming_tick_delay[playerid] += MAPSTREAMING_UPDATE_INTERVAL;
+			} while (next_streaming_tick_delay[playerid] <= 0);
+		}
 	}
-
-	if (++next_updating_playeridx >= playercount) {
-		next_updating_playeridx = 0;
-	}
-
-	playerid = players[next_updating_playeridx];
-	GetPlayerPos(playerid, &ppos);
-	maps_stream_for_player(playerid, ppos);
-
-	return MAPSTREAMING_UPDATE_INTERVAL / playercount;
 }
-
+/*jeanine:p:i:2;p:26;a:b;x:0;y:30;*/
 static
 void maps_on_player_connect(int playerid)
 {
+	struct BitStream bitstream;
 	int i;
 
-	for (i = num_removed_objects; i >= 0;) {
-		i--;
-		memcpy(&rpcdata_RemoveBuilding, &removed_objects[i], sizeof(struct REMOVEDOBJECT));
-		SAMP_SendRPCToPlayer(RPC_RemoveBuilding, &bs_maps_remove_building, playerid, 2);
+	bitstream.numberOfBitsUsed = sizeof(struct RPCDATA_RemoveBuilding) * 8;
+	for (i = 0; i < num_removed_objects; i++) {
+		bitstream.ptrData = &removed_objects[i];
+		SAMP_SendRPCToPlayer(RPC_RemoveBuilding, &bitstream, playerid, 2);
 	}
 
-	memset(player_objectid_to_mapidx[playerid], -1, sizeof(player_objectid_to_mapidx[playerid]));
-	memset(player_gangzoneid_to_mapidx[playerid], -1, sizeof(player_gangzoneid_to_mapidx[playerid]));
-	map_radar_object_for_player[playerid] = 0;
+	memset(player_objectid_to_objmapidx[playerid], -1, sizeof(player_objectid_to_objmapidx[playerid]));
+	memset(player_gangzoneid_to_zonemapidx[playerid], -1, sizeof(player_gangzoneid_to_zonemapidx[playerid]));
+	for (i = num_obj_maps; i > 0; ) {
+		obj_maps[--i].stream_status_for_player[playerid] = STREAMED_OUT;
+	}
+	for (i = num_zone_maps; i > 0; ) {
+		zone_maps[--i].stream_status_for_player[playerid] = STREAMED_OUT;
+	}
+	streaming_data[playerid].obj_map = NULL;
+	streaming_data[playerid].num_queued_objects = 0;
+	streaming_data[playerid].zone_map = NULL;
+	next_streaming_tick_delay[playerid] = 3000; /*Initial delay, different from repeating delay.*/
 }
-
+/*jeanine:p:i:29;p:2;a:b;x:0;y:30;*/
+/**
+ * To reset map stream states for player.
+ */
 static
 void maps_on_player_disconnect(int playerid)
 {
-	int mapidx;
+	int i;
 
-	for (mapidx = num_maps; mapidx > 0; mapidx--) {
-		maps[mapidx].stream_status_for_player[playerid] = 0;
+	for (i = num_obj_maps; i > 0; ) {
+		obj_maps[--i].stream_status_for_player[playerid] = STREAMED_OUT;
+	}
+	for (i = num_zone_maps; i > 0; ) {
+		zone_maps[--i].stream_status_for_player[playerid] = STREAMED_OUT;
 	}
 }

@@ -60,12 +60,11 @@ void timer_set(int interval, timer_cb cb, void *data)
 Process the timers.
 */
 static
-void timer_tick()
+void timer_tick(int elapsed_time)
 {
 	struct TIMER *t;
-	int i, elapsed_time, new_time;
+	int i, new_time;
 
-	elapsed_time = time_elapsed_millis();
 	for (i = 0, t = timers; i < numtimers; i++, t++) {
 		t->time_left -= elapsed_time;
 		if (t->time_left <= 0) {
