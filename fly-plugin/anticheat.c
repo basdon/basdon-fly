@@ -130,8 +130,9 @@ void anticheat_log(int playerid, int eventtype, char *info)
 		b += sprintf(b, "'',NULL,-1");
 	} else {
 		b += sprintf(b,
-			"'%s',%d,%d",
+			"'%s',IF(%d<1,NULL,%d),%d",
 			pdata[playerid]->ip,
+			userid[playerid],
 			userid[playerid],
 			loggedstatus[playerid]);
 	}
