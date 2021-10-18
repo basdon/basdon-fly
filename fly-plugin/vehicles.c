@@ -1107,7 +1107,7 @@ void veh_timed_1s_update()
 
 			engineState = GetVehicleEngineState(vehicleid);
 
-			if (engineState && veh) {
+			if (engineState && veh && !isafk[playerid]) {
 				veh_consume_fuel(playerid, vehicleid, veh);
 			}
 
