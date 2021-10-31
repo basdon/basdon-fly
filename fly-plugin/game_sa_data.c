@@ -1307,6 +1307,7 @@ struct REGION {
 #define ZONE_STRS_CITY 186
 #define ZONE_STRS_LIGHTHOUSE 187
 #define ZONE_STRS_PIER 188
+#define ZONE_WMRE 189
 
 /* see info.zon and american.gxt */
 static char *zonenames[] = {
@@ -1499,6 +1500,7 @@ static char *zonenames[] = {
 	"City",
 	"Lighthouse",
 	"Pier",
+	"Windmill Resort",
 };
 
 static struct REGION regions[] = {
@@ -1518,6 +1520,7 @@ static struct REGION regions[] = {
 	R(4207.2f, -11578.1f, -242.99f, 5815.9f, -10478.2f, 900.0f, ZONE_BNSA),
 	R(8648.0f, -5224.7f, -242.99f, 11727.7f, -2551.8f, 900.0f, ZONE_DUNE),
 	R(-12495.4f, -11942.8f, -7242.99f, -9188.9f, -4947.3f, 900.0f, ZONE_STRS),
+	R(-8749.75f, 2049.53f, -242.99f, -5855.87f, 4094.04f, 900.0f, ZONE_WMRE),
 	#undef R
 };
 
@@ -1956,6 +1959,9 @@ static struct ZONE zones[] = {
 	{ -10670.2f, -10816.8f, 0.0f, -10229.2f, -10608.4f, 200.0f, ZONE_STRS_AIRPORT },
 	{ -10670.2f, -10608.4f, 0.0f, -10354.1f, -10108.1f, 200.0f, ZONE_STRS_AIRPORT },
 	/* end STRS region zones */
+	/* start WMRE region zones */
+	{ -7743.39f, 2740.35f, 0.0f, -7021.04f, 3332.41f, 200.0f, ZONE_WMRE },
+	/* end WMRE region zones */
 };
 
 static int regioncount = sizeof(regions)/sizeof(regions[0]);

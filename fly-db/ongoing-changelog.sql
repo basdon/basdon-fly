@@ -91,3 +91,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2021 Oct 18', 'Fuel will not drain anymore while being afk');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2021 Oct 31', 'New destination: Windmill Resort (WMRE)');

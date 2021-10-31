@@ -120,6 +120,28 @@ static short player_gangzoneid_to_zonemapidx[MAX_PLAYERS][MAX_GANG_ZONES];
 /*the mapidx of octavia island map where the actor should be made*/
 static short octavia_island_actor_mapidx;
 
+/*The mapidx of WMRE, to know when to create the windmill blades objects.*/
+static short wmre_mapidx;
+/*Objectids of the windmill blade objects for each player. -1 means it's not created.*/
+static short wmre_blades_objectids[MAX_PLAYERS][12];
+static struct RPCDATA_CreateObject *wmre_blade_template;
+/*Positions of WMRE windmill blade objects.*/
+static float wmre_blade_x[4] = {
+	-7273.9067f, -7092.6699f, -7116.2734f, -7179.7515f
+}, wmre_blade_y[4] = {
+	3266.6731, 3122.7756f, 3194.5857f, 3279.6697f
+}, wmre_blade_z[4] = {
+	37.6830f, 35.7430f, 34.5030f, 37.2130f
+};
+/*Current Z-coordinate offset for WMRE windmill blade objects.*/
+/*This is needed because you can't rotate an object without moving it,
+so we're moving the Z back and forth every time.*/
+/*Global variable so that it's synced for people that just got the blades streamed in.*/
+static int wmre_blade_z_offset_i;
+/*The angle to which the windmill blades are currently rotating.*/
+/*Global variable so that it's synced for people that just got the blades streamed in.*/
+static int wmre_blade_01_angle, wmre_blade_23_angle;
+
 /**For each player, how much ms is left for next map streaming tick.*/
 static short next_streaming_tick_delay[MAX_PLAYERS];
 
@@ -305,7 +327,7 @@ void maps_print_stats()
 	printf("%d removes\n", num_removed_objects);
 }
 #endif
-/*jeanine:p:i:22;p:20;a:r;x:409;y:-560;*/
+/*jeanine:p:i:22;p:20;a:r;x:400;y:-984;*/
 static
 void maps_load_from_db()
 {
@@ -340,6 +362,9 @@ void maps_load_from_db()
 				if (!strcmp("octa_lod", mapname)) {
 					octavia_island_actor_mapidx = num_obj_maps;
 				}
+				if (!strcmp("wmre_lod", mapname)) {
+					wmre_mapidx = num_obj_maps;
+				}
 				num_obj_maps++;
 			}
 			if (load_result & MAP_LOAD_RESULT_HAS_ZONES) {
@@ -353,7 +378,7 @@ void maps_load_from_db()
 	maps_print_stats();/*jeanine:l:25*/
 #endif
 }
-/*jeanine:p:i:23;p:20;a:r;x:407;y:53;*/
+/*jeanine:p:i:23;p:20;a:r;x:1232;y:65;*/
 static
 int maps_timer_rotate_radar(void *data)
 {
@@ -397,6 +422,82 @@ int maps_timer_rotate_radar(void *data)
 
 	return 2500;
 }
+/*jeanine:p:i:31;p:20;a:r;x:397;y:87;*/
+static
+int maps_timer_rotate_wmre_blades(void *data)
+{
+	struct BitStream bitstream;
+	struct RPCDATA_MoveObject rpcdata;
+	int blade, bladeidx, playerindex, playerid;
+	float prev_zoffset, next_zoffset;
+
+	wmre_blade_01_angle += 120;
+	if (wmre_blade_01_angle > 360) {
+		wmre_blade_01_angle -= 360;
+	}
+	wmre_blade_23_angle += 60;
+	if (wmre_blade_23_angle > 360) {
+		wmre_blade_23_angle -= 360;
+	}
+
+	prev_zoffset = *((float*) &wmre_blade_z_offset_i);
+	wmre_blade_z_offset_i ^= 0x3bc49ba6; /*0.06f*/
+	next_zoffset = *((float*) &wmre_blade_z_offset_i);
+
+	bitstream.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	bitstream.ptrData = &rpcdata;
+
+	rpcdata.speed = 0.003f;
+	rpcdata.to_ry = 180.0f;
+	rpcdata.to_rz = -160.0f;
+
+	for (blade = 0; blade < 12; blade++) {
+		bladeidx = blade / 3;
+		rpcdata.from_x = wmre_blade_x[bladeidx];
+		rpcdata.from_y = wmre_blade_y[bladeidx];
+		rpcdata.from_z = wmre_blade_z[bladeidx] + prev_zoffset;
+		rpcdata.to_x = wmre_blade_x[bladeidx];
+		rpcdata.to_y = wmre_blade_y[bladeidx];
+		rpcdata.to_z = wmre_blade_z[bladeidx] + next_zoffset;
+		if (blade < 6) {
+			rpcdata.to_rx = (float) (wmre_blade_01_angle + 120 * (blade % 3));
+		} else {
+			rpcdata.to_rx = (float) (wmre_blade_23_angle + 120 * (blade % 3));
+		}
+		for (playerindex = 0; playerindex < playercount; playerindex++) {
+			playerid = players[playerindex];
+			rpcdata.objectid = wmre_blades_objectids[playerid][blade];
+			if (rpcdata.objectid != -1) {
+				SAMP_SendRPCToPlayer(RPC_MoveObject, &bitstream, playerid, 2);
+			}
+		}
+	}
+
+	return 2000;
+}
+/*jeanine:p:i:30;p:20;a:r;x:395;y:-110;*/
+/**
+ * Loads the "wmre_blades.map" mapfile to copy the first object as template for the windmill's blades.
+ *
+ * Uses the {@link obj_maps} and {@link zone_maps} variables as temporary storage,
+ * so this function should be called before any other map is loaded.
+ */
+static
+void maps_load_wmre_blade_template_object()
+{
+	int size, result;
+
+	result = maps_load_from_file("wmre_blades", obj_maps, zone_maps);
+	/*This map should only have the blade objects, no zones.*/
+	assert(result & MAP_LOAD_RESULT_HAS_OBJECTS);
+	assert(!(result & ~MAP_LOAD_RESULT_HAS_OBJECTS));
+	assert(obj_maps->num_objects);
+	/*Objectid is used for the size of the whole CreateObject RPC data.*/
+	size = obj_maps->objects[0].objectid;
+	wmre_blade_template = malloc(size);
+	memcpy(wmre_blade_template, obj_maps->objects, size);
+	free(obj_maps->objects);
+}
 /*jeanine:p:i:20;p:0;a:b;x:0;y:30;*/
 /**
 Initialize mapping system. Loads maps from db and reads their files.
@@ -405,6 +506,9 @@ static
 void maps_init()
 {
 	octavia_island_actor_mapidx = -1;
+	wmre_mapidx = -1;
+
+	maps_load_wmre_blade_template_object();/*jeanine:l:30*/
 	maps_load_from_db();/*jeanine:l:22*/
 
 	rpcdata_show_actor.actorid = OCTA_ACTORID;
@@ -418,7 +522,8 @@ void maps_init()
 
 	rpcdata_hide_actor.actorid = OCTA_ACTORID;
 
-	timer_set(2000, maps_timer_rotate_radar, NULL);/*jeanine:l:23*/
+	timer_set(2500, maps_timer_rotate_radar, NULL);/*jeanine:l:23*/
+	timer_set(2000, maps_timer_rotate_wmre_blades, NULL);/*jeanine:l:31*/
 }
 /*jeanine:p:i:21;p:27;a:r;x:28;y:619;*/
 /**
@@ -507,8 +612,15 @@ void maps_stream_out_objects_for_player(int playerid, struct OBJECT_MAP *map)
 	if (mapidx == octavia_island_actor_mapidx) {
 		SendRPCToPlayer(playerid, RPC_HideActor, &rpcdata_hide_actor, sizeof(rpcdata_hide_actor), 2);
 	}
+
+	/*WMRE windmill blades*/
+	if (mapidx == wmre_mapidx) {
+		/*The objectids are linked to the mapidx, so they will be deleted automatically.*/
+		/*Just need to cleanup the objectid links.*/
+		memset(wmre_blades_objectids[playerid], -1, sizeof(wmre_blades_objectids[playerid]));
+	}
 }
-/*jeanine:p:i:19;p:17;a:r;x:105;y:170;*/
+/*jeanine:p:i:19;p:17;a:r;x:106;y:274;*/
 /**
 Deletes all the gangzones from given map for the given player.
 */
@@ -574,7 +686,7 @@ int maps_continue_stream_in_queued_objects_for_player(int playerid, struct STREA
 	short tmp_saved_objdata_size;
 	int num_created_objects;
 	int objectid;
-	int mapidx;
+	int mapidx, i;
 	short *objectid_to_objmapidx;
 
 	mapidx = streamingdata->obj_map - obj_maps;
@@ -614,6 +726,42 @@ stop_streaming:
 	/*Octavia actor*/
 	if (streamingdata->obj_map - obj_maps == octavia_island_actor_mapidx) {
 		SendRPCToPlayer(playerid, RPC_ShowActor, &rpcdata_show_actor, sizeof(rpcdata_show_actor), 2);
+	}
+
+	/*WMRE windmill blades*/
+	if (streamingdata->obj_map - obj_maps == wmre_mapidx) {
+		bitstream.ptrData = wmre_blade_template;
+		tmp_saved_objdata_size = wmre_blade_template->objectid;
+		bitstream.numberOfBitsUsed = tmp_saved_objdata_size * 8;
+		for (i = 0; i < 12; i++) {
+			while (objectid_to_objmapidx[objectid] >= 0) {
+				objectid++;
+				if (objectid >= MAX_MAPSYSTEM_OBJECTS) {
+					logprintf("object limit hit while streaming wmre blades");
+					maps_print_object_breakdown(playerid);
+					goto skip_wmre_blades;
+				}
+			}
+			/*Link to same mapidx, then we don't have to delete the blades manually on unload.*/
+			objectid_to_objmapidx[objectid] = mapidx;
+			wmre_blade_template->x = wmre_blade_x[i / 3];
+			wmre_blade_template->y = wmre_blade_y[i / 3];
+			/*Add zoffset and correct rx, so the blades are set up at the position for the next movement tick.*/
+			wmre_blade_template->z = wmre_blade_z[i / 3] + *((float*) &wmre_blade_z_offset_i);
+			if (i < 6) {
+				wmre_blade_template->rx = (float) (wmre_blade_01_angle + 120 * (i % 3));
+			} else {
+				wmre_blade_template->rx = (float) (wmre_blade_23_angle + 120 * (i % 3));
+			}
+			wmre_blade_template->ry = 180.0f;
+			wmre_blade_template->rz = -160.0f;
+			wmre_blade_template->objectid = objectid;
+			SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
+			wmre_blades_objectids[playerid][i] = objectid;
+			num_created_objects++;
+		}
+skip_wmre_blades:
+		wmre_blade_template->objectid = tmp_saved_objdata_size;
 	}
 
 	/*The special rotating radar object.*/
@@ -916,6 +1064,7 @@ void maps_on_player_connect(int playerid)
 
 	memset(player_objectid_to_objmapidx[playerid], -1, sizeof(player_objectid_to_objmapidx[playerid]));
 	memset(player_gangzoneid_to_zonemapidx[playerid], -1, sizeof(player_gangzoneid_to_zonemapidx[playerid]));
+	memset(wmre_blades_objectids[playerid], -1, sizeof(wmre_blades_objectids[playerid]));
 	for (i = num_obj_maps; i > 0; ) {
 		obj_maps[--i].stream_status_for_player[playerid] = STREAMED_OUT;
 	}
