@@ -94,6 +94,8 @@ echo '<tr><td colspan="2"><strong>Elevation</strong></td><td>' . round($apt->z) 
 echo '<tr><td colspan="2"><strong>Mission points</strong></td><td>' . $missionpointcount . '</td></tr>';
 echo '<tr><td colspan="2"><strong>Service points</strong></td><td>' . $servicepointcount . '</td></tr>';
 echo '<tr><td colspan="2"><strong>Vehicle spawns</strong></td><td>' . $vehiclecount . '</td></tr>';
+echo '<tr class="fsh"><td colspan="3">Location</td></tr>';
+echo '<tr class="center"><td><strong>X:</strong> ' . round($apt->x) . '</td><td><strong>Y:</strong> ' . round($apt->y) . '</td><td><strong>Z:</strong> ' . round($apt->z) . '</td></tr>';
 if (count($runways)) {
 	echo '<tr class="fsh"><td colspan="3">Runways</td></tr>';
 	echo '<tr style="text-align:center;background:#dddddd;font-size:90%"><td><strong>Direction</strong></td><td><strong>Length/Width</strong></td><td><strong>Surface</strong></td></tr>';
