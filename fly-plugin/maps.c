@@ -91,7 +91,7 @@ static struct RPCDATA_CreateObject *radar_object_for_player[MAX_PLAYERS];
 
 /**All combined removed objects.*/
 static struct RPCDATA_RemoveBuilding removed_objects[MAX_REMOVED_OBJECTS];
-static int num_removed_objects = 0;
+static int num_removed_objects;
 
 /**Maps a player's object id to a map idx. -1 when object is not created.*/
 static short player_objectid_to_objmapidx[MAX_PLAYERS][MAX_MAPSYSTEM_OBJECTS];
@@ -507,6 +507,15 @@ void maps_init()
 {
 	octavia_island_actor_mapidx = -1;
 	wmre_mapidx = -1;
+
+	/*Add a remove for the peculiar telegraph pole that spawns
+	in the center.*/
+	removed_objects[0].model = 1308;
+	removed_objects[0].x = 9.0234f;
+	removed_objects[0].y = 15.1563f;
+	removed_objects[0].z = -5.7109f;
+	removed_objects[0].radius = 0.25f;
+	num_removed_objects = 1;
 
 	maps_load_wmre_blade_template_object();/*jeanine:l:30*/
 	maps_load_from_db();/*jeanine:l:22*/
