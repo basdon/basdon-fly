@@ -1161,14 +1161,16 @@ static char drive_udkeystate[MAX_PLAYERS];
 void hook_OnDriverSync(int playerid)
 {
 	struct SYNCDATA_Driver *data;
+	struct SampVehicle *vehicle;
 	/*TODO reset these keystate variables when player gets into the drive state?*/
 	int oldkeys, newkeys;
 	int storedlastvehicleid;
 	short vehiclemodel;
 
 	data = &player[playerid]->driverSyncData;
+	vehicle = vehiclepool->vehicles[data->vehicle_id];
 
-	if (!vehiclepool->vehicles[data->vehicle_id]) {
+	if (!vehicle) {
 		/*It sometimes happens that driversync packets of just deleted vehicles are sent/arrive late.*/
 		player[playerid]->updateSyncType = 0;
 		samp_OnPlayerUpdate(playerid); /*TODO: what to do with this...*/
@@ -1176,18 +1178,17 @@ void hook_OnDriverSync(int playerid)
 		return;
 	}
 
-	vehiclemodel = GetVehicleModel(data->vehicle_id);
-	/*Suppress secondary fire (my R key, hydra rockets, hunter minigun, ...).*/
-	if ((data->partial_keys & KEY_ACTION) &&
-		(vehiclemodel == MODEL_HYDRA || vehiclemodel == MODEL_HUNTER ||
-		 vehiclemodel == MODEL_RUSTLER || vehiclemodel == MODEL_SEASPAR ||
-		 vehiclemodel == MODEL_RCBARON))
-	{
-		data->partial_keys &= ~KEY_ACTION;
-	}
-	/*Primary fire (my LCTRL key, hunter rockets, ...).*/
-	if ((data->partial_keys & KEY_FIRE) && (vehiclemodel == MODEL_HUNTER)) {
-		data->partial_keys &= ~KEY_FIRE;
+	/*Suppress secondary fire (my R key: hydra rockets, hunter/rustler/seaspar/rcbaron minigun).*/
+	data->partial_keys &= ~KEY_ACTION;
+
+	/*Suppress primary fire (my LCTRL key: hunter rockets, predator minigun).*/
+	/*But allow firetruk/swatvan water cannon and hydra flares..*/
+	/*Watercannons can be used to annoy players though... But allow it for now.*/
+	if (data->partial_keys & KEY_FIRE) {
+		vehiclemodel = vehicle->model;
+		if (vehiclemodel != MODEL_FIRETRUK && vehiclemodel != MODEL_SWATVAN && vehiclemodel != MODEL_HYDRA) {
+			data->partial_keys &= ~KEY_FIRE;
+		}
 	}
 
 	vehicle_gear_state[data->vehicle_id] = data->landing_gear_state;
