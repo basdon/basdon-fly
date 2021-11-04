@@ -1128,16 +1128,15 @@ void hook_OnOnfootSync(int playerid)
 {
 	struct SYNCDATA_Onfoot *data;
 	int oldkeys, newkeys;
-	char weapon;
 
 	data = &player[playerid]->onfootSyncData;
 
-	weapon = data->weapon_id;
-	if ((data->partial_keys & KEY_FIRE) &&
-		(weapon == WEAPON_NVIS || weapon == WEAPON_IRVIS || weapon == WEAPON_CAMERA))
-	{
-		data->partial_keys &= ~KEY_FIRE;
-	}
+	/*Disable all onfoot weapons.*/
+	/*People can still cheat in weapons, but they won't be able to shoot others.*/
+	/*This doesn't give issues with syncing activating parachutes.*/
+	/*Previously, only NVIS/IRVIS/CAMERA was unsynced,
+	but there's no reason to sync anything so everything is now unsynced.*/
+	data->partial_keys &= ~KEY_FIRE;
 
 	/*keystate change*/
 	oldkeys = player_keystates[playerid];
