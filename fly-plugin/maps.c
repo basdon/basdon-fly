@@ -732,13 +732,12 @@ stop_streaming:
 	logprintf("object map %s done streaming in for %d", streamingdata->obj_map->name, playerid);
 #endif
 
-	/*Octavia actor*/
-	if (streamingdata->obj_map - obj_maps == octavia_island_actor_mapidx) {
+	/*Map specific things.*/
+	if (mapidx == octavia_island_actor_mapidx) {
+		/*Octavia actor*/
 		SendRPCToPlayer(playerid, RPC_ShowActor, &rpcdata_show_actor, sizeof(rpcdata_show_actor), 2);
-	}
-
-	/*WMRE windmill blades*/
-	if (streamingdata->obj_map - obj_maps == wmre_mapidx) {
+	} else if (mapidx == wmre_mapidx) {
+		/*WMRE windmill blades*/
 		bitstream.ptrData = wmre_blade_template;
 		tmp_saved_objdata_size = wmre_blade_template->objectid;
 		bitstream.numberOfBitsUsed = tmp_saved_objdata_size * 8;
