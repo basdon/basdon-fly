@@ -1131,13 +1131,6 @@ void hook_OnOnfootSync(int playerid)
 
 	data = &player[playerid]->onfootSyncData;
 
-	/*Disable all onfoot weapons.*/
-	/*People can still cheat in weapons, but they won't be able to shoot others.*/
-	/*This doesn't give issues with syncing activating parachutes.*/
-	/*Previously, only NVIS/IRVIS/CAMERA was unsynced,
-	but there's no reason to sync anything so everything is now unsynced.*/
-	data->partial_keys &= ~KEY_FIRE;
-
 	/*keystate change*/
 	oldkeys = player_keystates[playerid];
 	/*newkeys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF*/;
@@ -1148,6 +1141,15 @@ void hook_OnOnfootSync(int playerid)
 		}
 		player_keystates[playerid] = newkeys;
 	}
+
+	/*Disable all onfoot weapons.*/
+	/*People can still cheat in weapons, but they won't be able to shoot others.*/
+	/*This doesn't give issues with syncing activating parachutes.*/
+	/*Previously, only NVIS/IRVIS/CAMERA was unsynced,
+	but there's no reason to sync anything so everything is now unsynced.*/
+	/*Note that putting it here means that there will be a difference between
+	GetPlayerKeys (which uses the sync data)and player_keystates (which is set above).*/
+	data->partial_keys &= ~KEY_FIRE;
 
 	/*TODO remove this when all OnPlayerUpdates are replaced*/
 	samp_OnPlayerUpdate(playerid);
