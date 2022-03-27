@@ -640,27 +640,27 @@ float model_fuel_capacity(short modelid)
 {
 	switch (modelid)
 	{
-	case MODEL_ANDROM: return 95000.0f;
-	case MODEL_AT400: return 23000.0f;
-	case MODEL_BEAGLE: return 518.0f;
-	case MODEL_DODO: return 285.0f;
-	case MODEL_NEVADA: return 3224.0f;
-	case MODEL_SHAMAL: return 4160.0f;
-	case MODEL_SKIMMER: return 285.0f;
-	case MODEL_CROPDUST: return 132.0f;
-	case MODEL_STUNT: return 91.0f;
-	case MODEL_LEVIATHN: return 2925.0f;
-	case MODEL_MAVERICK: return 416.0f;
-	case MODEL_POLMAV: return 416.0f;
-	case MODEL_RAINDANC: return 1360.0f;
-	case MODEL_VCNMAV: return 416.0f;
-	case MODEL_SPARROW: return 106.0f;
-	case MODEL_SEASPAR: return 106.0f;
-	case MODEL_CARGOBOB: return 5510.0f;
-	case MODEL_HUNTER: return 2400.0f;
-	case MODEL_HYDRA: return 3754.0f;
-	case MODEL_RUSTLER: return 1018.0f;
-	default: return 1000.0f;
+	case MODEL_ANDROM: return SETTING__FUEL_CAP_ANDROM;
+	case MODEL_AT400: return SETTING__FUEL_CAP_AT400;
+	case MODEL_BEAGLE: return SETTING__FUEL_CAP_BEAGLE;
+	case MODEL_CARGOBOB: return SETTING__FUEL_CAP_CARGOBOB;
+	case MODEL_CROPDUST: return SETTING__FUEL_CAP_CROPDUST;
+	case MODEL_DODO: return SETTING__FUEL_CAP_DODO;
+	case MODEL_HUNTER: return SETTING__FUEL_CAP_HUNTER;
+	case MODEL_HYDRA: return SETTING__FUEL_CAP_HYDRA;
+	case MODEL_LEVIATHN: return SETTING__FUEL_CAP_LEVIATHN;
+	case MODEL_MAVERICK: return SETTING__FUEL_CAP_MAVERICK;
+	case MODEL_NEVADA: return SETTING__FUEL_CAP_NEVADA;
+	case MODEL_POLMAV: return SETTING__FUEL_CAP_POLMAV;
+	case MODEL_RAINDANC: return SETTING__FUEL_CAP_RAINDANC;
+	case MODEL_RUSTLER: return SETTING__FUEL_CAP_RUSTLER;
+	case MODEL_SEASPAR: return SETTING__FUEL_CAP_SEASPAR;
+	case MODEL_SHAMAL: return SETTING__FUEL_CAP_SHAMAL;
+	case MODEL_SKIMMER: return SETTING__FUEL_CAP_SKIMMER;
+	case MODEL_SPARROW: return SETTING__FUEL_CAP_SPARROW;
+	case MODEL_STUNT: return SETTING__FUEL_CAP_STUNT;
+	case MODEL_VCNMAV: return SETTING__FUEL_CAP_VCNMAV;
+	default: return SETTING__FUEL_CAP_DEFAULT;
 	}
 }
 
@@ -669,27 +669,27 @@ float model_fuel_usage(int modelid)
 {
 	switch (modelid)
 	{
-	case MODEL_ANDROM: return 10.0f;
-	case MODEL_AT400: return 10.0f;
-	case MODEL_BEAGLE: return 1.1f;
-	case MODEL_DODO: return 0.2f;
-	case MODEL_NEVADA: return 2.3f;
-	case MODEL_SHAMAL: return 3.6f;
-	case MODEL_SKIMMER: return 0.1f;
-	case MODEL_CROPDUST: return 0.1f;
-	case MODEL_STUNT: return 0.1f;
-	case MODEL_LEVIATHN: return 1.7f;
-	case MODEL_MAVERICK: return 0.6f;
-	case MODEL_POLMAV: return 0.6f;
-	case MODEL_RAINDANC: return 1.7f;
-	case MODEL_VCNMAV: return 0.6f;
-	case MODEL_SPARROW: return 0.2f;
-	case MODEL_SEASPAR: return 0.2f;
-	case MODEL_CARGOBOB: return 3.2f;
-	case MODEL_HUNTER: return 2.3f;
-	case MODEL_HYDRA: return 4.5f;
-	case MODEL_RUSTLER: return 0.9f;
-	default: return 1;
+	case MODEL_ANDROM: return SETTING__FUEL_USE_ANDROM;
+	case MODEL_AT400: return SETTING__FUEL_USE_AT400;
+	case MODEL_BEAGLE: return SETTING__FUEL_USE_BEAGLE;
+	case MODEL_CARGOBOB: return SETTING__FUEL_USE_CARGOBOB;
+	case MODEL_CROPDUST: return SETTING__FUEL_USE_CROPDUST;
+	case MODEL_DODO: return SETTING__FUEL_USE_DODO;
+	case MODEL_HUNTER: return SETTING__FUEL_USE_HUNTER;
+	case MODEL_HYDRA: return SETTING__FUEL_USE_HYDRA;
+	case MODEL_LEVIATHN: return SETTING__FUEL_USE_LEVIATHN;
+	case MODEL_MAVERICK: return SETTING__FUEL_USE_MAVERICK;
+	case MODEL_NEVADA: return SETTING__FUEL_USE_NEVADA;
+	case MODEL_POLMAV: return SETTING__FUEL_USE_POLMAV;
+	case MODEL_RAINDANC: return SETTING__FUEL_USE_RAINDANC;
+	case MODEL_RUSTLER: return SETTING__FUEL_USE_RUSTLER;
+	case MODEL_SEASPAR: return SETTING__FUEL_USE_SEASPAR;
+	case MODEL_SHAMAL: return SETTING__FUEL_USE_SHAMAL;
+	case MODEL_SKIMMER: return SETTING__FUEL_USE_SKIMMER;
+	case MODEL_SPARROW: return SETTING__FUEL_USE_SPARROW;
+	case MODEL_STUNT: return SETTING__FUEL_USE_STUNT;
+	case MODEL_VCNMAV: return SETTING__FUEL_USE_VCNMAV;
+	default: return SETTING__FUEL_USE_DEFAULT;
 	}
 }
 
@@ -704,7 +704,8 @@ void veh_consume_fuel(int playerid, int vehicleid, struct dbvehicle *veh)
 
 	fuelcapacity = model_fuel_capacity(veh->model);
 	lastpercentage = veh->fuel / fuelcapacity;
-	consumptionmp = (player[playerid]->keys & KEY_SPRINT) ? 1.0f : 0.2f; /*KEY_SPRINT is vehicle acceleration key*/
+	/*KEY_SPRINT is vehicle acceleration key*/
+	consumptionmp = (player[playerid]->keys & KEY_SPRINT) ? 1.0f : (float) SETTING__FUEL_USAGE_IDLE_MODIFIER;
 	veh->fuel -= model_fuel_usage(veh->model) * consumptionmp;
 	if (veh->fuel < 0.0f) {
 		veh->fuel = 0.0f;
