@@ -18,7 +18,7 @@
 				<p><small>See the airport articles (<a href="article.php?category=Airports">Category: Airports</a>) to see who mapped what airport. If not mentioned, it's probably robin_be.</small></p>
 			</li>
 			<li>
-				<p><strong>Brand graphics</strong>: spitfire</p>
+				<p><strong>Brand graphics</strong>: Jenis</p>
 			</li>
 			<li>
 				<p><strong>Beta testers</strong>: {@unsafe $SETTING__CREDITS_BETA}</p>

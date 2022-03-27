@@ -8,7 +8,7 @@
 
 {@b Trivia:} BNS is the NATO prefix for {@em Belgium Naval Ship}.
 
-This map was mapped by player spitfire.
+This map was mapped by player Jenis.
 
 {@h3 Vehicle spawns}
 

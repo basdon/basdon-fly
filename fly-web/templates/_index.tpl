@@ -69,9 +69,9 @@
 		</div>
 		<h3>Screenshots</h3>
 		<p id="showcase">
-			<a href="{@unsafe $STATICPATH}/showcase-spitfire.jpg"><img src="{@unsafe $STATICPATH}/showcase-spitfire.jpg" title="spitfire landing at DUNE"></a>
+			<a href="{@unsafe $STATICPATH}/showcase-spitfire.jpg"><img src="{@unsafe $STATICPATH}/showcase-spitfire.jpg" title="Jenis landing at DUNE"></a>
 			<a href="{@unsafe $STATICPATH}/showcase-jobmap.jpg"><img src="{@unsafe $STATICPATH}/showcase-jobmap.jpg" title="mission map"></a>
-			<a href="{@unsafe $STATICPATH}/showcase-spitfire2.png"><img src="{@unsafe $STATICPATH}/showcase-spitfire2.png" title="spitfire"></a>
+			<a href="{@unsafe $STATICPATH}/showcase-spitfire2.png"><img src="{@unsafe $STATICPATH}/showcase-spitfire2.png" title="Jenis"></a>
 			<a href="flight.php?id=2572"><img src="{@unsafe $STATICPATH}/showcase-map.png" title="flight map"></a>
 		</p>
 

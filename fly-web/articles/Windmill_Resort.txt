@@ -4,7 +4,7 @@
   <?php readfile('../gen/apfactsheet_'.$code.'.html') ?>
 </div>
 
-This map was mapped by player spitfire.
+This map was mapped by player Jenis.
 
 {@h3 Vehicle spawns}
 

@@ -6,7 +6,7 @@
 
 {@stub}
 
-This map was mapped by player spitfire, edited by robin_be.
+This map was mapped by player Jenis, edited by robin_be.
 
 {@h3 Vehicle spawns}
 
