@@ -33,20 +33,18 @@
 				<li><strong>Pilot:</strong> {@unsafe linkuser($r)}</li>
 				<li><strong>Origin:</strong> <a href="article.php?title={@unsafe $r->fromcode}">{@unsafe $r->fromname} ({@unsafe $r->fromcode})</a> {@unsafe $r->fromgate}</li>
 				<li><strong>Destination:</strong> <a href="article.php?title={@unsafe $r->tocode}">{@unsafe $r->toname} ({@unsafe $r->tocode})</a> {@unsafe $r->togate}</li>
-				<li><strong>Point-to-point distance:</strong> {@unsafe $r->distance}m</li>
-				<li><strong>Actual flown distance:</strong> {@unsafe $r->adistance}m</li>
+				<li><strong>Point-to-point distance:</strong> {@unsafe round($r->distance, 2)}m</li>
+				<li><strong>Actual flown distance:</strong>{@if $r->state != 1} {@unsafe round($r->adistance, 2)}m{@endif}</li>
 				<li><strong>Flight start:</strong> {@unsafe format_datetime($r->tstart)}</li>
 				<li><strong>Flight end:</strong> {@if $r->state != 1}{@unsafe format_datetime($r->tlastupdate)}{@endif}</li>
 				<li><strong>Flight duration:</strong> {@if $r->state != 1}{@unsafe sprintf('%02d:%02d', floor(($diff=$r->tlastupdate-$r->tstart)/60), $diff%60)}{@endif}</li>
 				<li><strong>Aircraft:</strong> {@unsafe aircraft_name($r->vehmodel)} (owned by: {@unsafe aircraftowner($r->ownername)})</li>
 				<li><strong>Flight type:</strong> {@unsafe fmt_mission_type($r->missiontype)}</li>
 				{@if $r->missiontype & $SETTING__PASSENGER_MISSIONTYPES}
-					<li><strong>Passenger satisfaction:</strong> {@unsafe $r->satisfaction}%</li>
+					<li><strong>Passenger satisfaction:</strong>{@if $r->state != 1} {@unsafe $r->satisfaction}%{@endif}</li>
 				{@endif}
-				{@if $r->state == 8}
-					<li><strong>Fuel burned:</strong> {@unsafe round($r->fuel, 2)}L</li>
-					<li><strong>Damage taken:</strong> {@unsafe $r->damage}</li>
-				{@endif}
+				<li><strong>Fuel burned:</strong>{@if $r->state != 1} {@unsafe round($r->fuel, 2)}L{@endif}</li>
+				<li><strong>Damage taken:</strong>{@if $r->state != 1} {@unsafe $r->damage}{@endif}</li>
 			</ul>
 			<h3>Detailed timing</h3>
 			<ul>
