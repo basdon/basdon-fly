@@ -1,6 +1,6 @@
 <footer>
 	<div>
-		<p>Copyright &copy; 2019-2020 basdon.net<br/>
+		<p>Copyright &copy; 2019-2022 basdon.net<br/>
 		basdon.net and the contents herein, are not affiliated with Rockstar Games, Rockstar North, Take-Two Interactive Software Inc or the San Andreas Multiplayer team.<br/>
 		Grand Theft Auto and Grand Theft Auto: San Andreas are registered trademarks of Take-Two Interactive Software Inc.</p>
 		<small>
