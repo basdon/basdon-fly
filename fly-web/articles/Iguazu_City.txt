@@ -41,13 +41,13 @@ the city.
 
 {@h3 Gallery}
 
-{@agalleryimg igzu_trees.jpg;Octavia Island by dawn}
-{@agalleryimg igzu_cargo.jpg;Beach}
-{@agalleryimg igzu_ap_overview.jpg;Airport gates}
-{@agalleryimg igzu_rw13.jpg;Runway 09}
-{@agalleryimg igzu_ap_inside.jpg;Beach lighthouse}
-{@agalleryimg igzu_ap_entrance.jpg;Residential area}
-{@agalleryimg igzu_gate_e.jpg;Residential area}
-{@agalleryimg igzu_tower.jpg;Octavia Island by dawn}
-{@agalleryimg igzu_city.jpg;Cargo area}
-{@agalleryimg igzu_fromabove.jpg;Residential area}
+{@agalleryimg igzu_trees.jpg;Overview, approach}
+{@agalleryimg igzu_cargo.jpg;Cargo area}
+{@agalleryimg igzu_ap_overview.jpg;Overview, ramps}
+{@agalleryimg igzu_rw13.jpg;Runway 13}
+{@agalleryimg igzu_ap_inside.jpg;Terminal inside area}
+{@agalleryimg igzu_ap_entrance.jpg;Drop-off zone}
+{@agalleryimg igzu_gate_e.jpg;Terminal}
+{@agalleryimg igzu_tower.jpg;ATC Tower}
+{@agalleryimg igzu_city.jpg;City view}
+{@agalleryimg igzu_fromabove.jpg;Cloudy overview}
