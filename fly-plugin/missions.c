@@ -80,6 +80,10 @@ Tracker socket handle.
 */
 static int tracker;
 
+#define TRACKER_HDR_FLAG_CANARY 0x1
+#define TRACKER_HDR_FLAG_HAS_BANK_PITCH 0x2
+#define TRACKER_HDR_FLAG_HAS_ALTITUDE 0x4
+
 static
 int missions_get_weatherbonus_for_weather(int weather)
 {
@@ -911,13 +915,8 @@ void missions_querycb_create(void *data)
 	/* flight tracker packet 1 */
 	buf32[0] = 0x01594C46;
 	buf32[1] = mission->id;
-	*((float*) (cbuf32 + 8)) = model_fuel_capacity(mission->veh->model);
-	*((short*) (cbuf32 + 12)) = mission->veh->model;
-	cbuf32[14] = pdata[playerid]->namelen;
-	memset(cbuf32 + 15, 0, 24); /* don't leak random data */
-	strcpy(cbuf32 + 15, pdata[playerid]->name);
-	/*buf32 is len 32 * 4 so 40 is fine*/
-	NC_ssocket_send(tracker, buf32a, 40);
+	buf32[2] = TRACKER_HDR_FLAG_CANARY | TRACKER_HDR_FLAG_HAS_BANK_PITCH | TRACKER_HDR_FLAG_HAS_ALTITUDE; /*flags (actually a short)*/
+	NC_ssocket_send(tracker, buf32a, 10);
 
 	loading_time_left = mission_cb_data->query_time + MISSION_LOAD_UNLOAD_TIME - time_timestamp();
 	if (loading_time_left > 100) {
@@ -1445,6 +1444,7 @@ void missions_send_tracker_data(
 	struct MISSION *mission;
 	unsigned char flags;
 	short spd, alt, hpv, pitch10, roll10;
+	float fuel;
 
 	if ((mission = activemission[playerid]) == NULL ||
 		mission->veh->spawnedvehicleid != vehicleid ||
@@ -1463,6 +1463,7 @@ void missions_send_tracker_data(
 	spd = (short) (VEL_TO_KTS * sqrt(vvel->x * vvel->x + vvel->y * vvel->y + vvel->z * vvel->z));
 	pitch10 = (short) (pitch * 10.0f);
 	roll10 = (short) (roll * 10.0f);
+	fuel = mission->veh->fuel / model_fuel_capacity(mission->veh->model);
 
 	/* flight tracker packet 2 */
 	buf32[0] = 0x02594C46;
@@ -1472,7 +1473,7 @@ void missions_send_tracker_data(
 	memcpy(cbuf32 + 10, &spd, 2);
 	memcpy(cbuf32 + 12, &alt, 2);
 	memcpy(cbuf32 + 14, &hpv, 2);
-	memcpy(cbuf32 + 16, &mission->veh->fuel, 4);
+	memcpy(cbuf32 + 16, &fuel, 4);
 	memcpy(cbuf32 + 20, &vpos->x, 4);
 	memcpy(cbuf32 + 24, &vpos->y, 4);
 	memcpy(cbuf32 + 28, &pitch10, 2);

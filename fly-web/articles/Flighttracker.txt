@@ -19,13 +19,11 @@ Sent when a new mission started.
 
 <pre>
 byte 4-7: mission id (DWORD)
-byte 8-11: vehicle fuel capacity (FLOAT)
-byte 12-13: vehicle model id (WORD)
-byte 14: player name length (min 1 max 24)
-byte 15-(14+value of 14) player name
-byte xx-39: padding to align packet size to 4 bytes
-= length 40
+byte 8-9: flags (WORD)
+= length 10
 </pre>
+
+See {@article Flight_file_format} for flag values.
 
 {@h4(id=p2) Packet type 2: mission flight data}
 

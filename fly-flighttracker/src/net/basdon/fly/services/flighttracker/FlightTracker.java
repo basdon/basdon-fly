@@ -1,4 +1,4 @@
-// Copyright 2019 basdon.net - this source is licensed under AGPL
+// Copyright 2019-2022 basdon.net - this source is licensed under AGPL
 // see the LICENSE file for more details
 package net.basdon.fly.services.flighttracker;
 
@@ -166,34 +166,29 @@ throws InterruptedIOException
 boolean handleMissionStart(int length)
 throws InterruptedIOException
 {
-	if (length < 15) {
+	if (length < 10) {
 		packet_wrong_length_count++;
 		return false;
 	}
 	FileOutputStream os = outputStreamForMission(4);
-	if (os == null) {
-		return false;
-	}
-	byte nameLen = buf[14];
-	if (nameLen < 1 || 24 < nameLen) {
-		return false;
-	}
-	try {
-		FileChannel channel = os.getChannel();
-		long position = channel.position();
-		if (position != 8) {
-			channel.position(8);
+	if (os != null) {
+		try {
+			FileChannel channel = os.getChannel();
+			long position = channel.position();
+			if (position != 8) {
+				channel.position(8);
+			}
+			channel.write(ByteBuffer.wrap(buf, 8, 2));
+			channel.position(position);
+			os.flush();
+			return true;
+		} catch (InterruptedIOException e) {
+			throw e;
+		} catch (IOException e) {
+			last_io_issue = e;
+			last_io_issue_time = System.currentTimeMillis();
+			io_issue_count++;
 		}
-		channel.write(ByteBuffer.wrap(buf, 8, 6 + 1 + nameLen));
-		channel.position(position);
-		os.flush();
-		return true;
-	} catch (InterruptedIOException e) {
-		throw e;
-	} catch (IOException e) {
-		last_io_issue = e;
-		last_io_issue_time = System.currentTimeMillis();
-		io_issue_count++;
 	}
 	return false;
 }
@@ -243,7 +238,7 @@ throws InterruptedIOException
 	}
 	FileOutputStream os = outputStreamForMission(4);
 	if (os != null) {
-		missionFiles.remove(new Integer(i32(4)));
+		missionFiles.remove(Integer.valueOf(i32(4)));
 		try {
 			os.close();
 			return true;
@@ -265,7 +260,7 @@ FileOutputStream outputStreamForMission(int missionIdOffset)
 throws InterruptedIOException
 {
 	int id = i32(missionIdOffset);
-	Integer key = new Integer(id);
+	Integer key = Integer.valueOf(id);
 	FileOutputStream os = missionFiles.get(key);
 	if (os == null) {
 		File file = new File(fdr_directory, id + ".flight");
@@ -280,15 +275,12 @@ throws InterruptedIOException
 			return null;
 		}
 		try {
-			os.write(5);
+			os.write(6);
 			os.write('F');
 			os.write('L');
 			os.write('Y');
 			os.write(buf, missionIdOffset, 4);
-			os.write(new byte[6]); // vehicle fuel cap / vehicle model id
-			os.write(1); // player name len
-			os.write('?'); // player name
-			os.write(new byte[24]); // pad
+			os.write(new byte[2]); // flags
 			os.flush();
 		} catch (InterruptedIOException e) {
 			throw e;
