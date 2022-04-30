@@ -63,11 +63,15 @@ try {
 		but these must be pretty strong for the discord embed card (73 saturation instead of 12).*/
 		switch ($r->state) {
 		case 1: $META_TAGS['theme-color'] = '#4444ff'; break;
-		case 2: $META_TAGS['theme-color'] = '#ff4444'; break;
-		case 4: $META_TAGS['theme-color'] = '#ff4444'; break;
+		case 2:
+		case 4:
+		case 32:
+		case 256:
+		case 512:
+		case 1024: $META_TAGS['theme-color'] = '#ff4444'; break;
 		case 8: $META_TAGS['theme-color'] = '#44ff44'; break;
-		case 16: $META_TAGS['theme-color'] = '#ff9123'; break;
-		case 32: $META_TAGS['theme-color'] = '#ff4444'; break;
+		case 16:
+		case 128: $META_TAGS['theme-color'] = '#ff9123'; break;
 		case 64: $META_TAGS['theme-color'] = '#a144ff'; break;
 		}
 	}
