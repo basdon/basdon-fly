@@ -62,7 +62,7 @@ size 28 bytes
 
 if there was an issue with a mission start packet:
 {@ul
-  {@li vehicle model id may be {@code 0}}
+  {@li {@code flags} will be {@code 0}}
 }
 
 {@h3(id="old") Old versions}
