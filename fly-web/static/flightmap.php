@@ -38,25 +38,16 @@ fclose($f);
 
 // parse flight file
 $v = unpack('V', $data)[1];
-if (($v & 0xFFFFFF00) != 0x594C4600 || (($v & 0xFF) < 3 || ($v & 0xFF) > 5)) {
+if ($v != 0x594C4606) {
 	imagestring($im, 5, 20, 20, 'flight file has incorrect version', $fill);
 	goto output;
 }
-$v &= 0xFF;
-if (unpack('V', substr($data, 4, 4))[1] != $id) {
-	imagestring($im, 5, 20, 20, 'flight file has wrong flight id', $fill);
+$num_frames = ($filesize - 10);
+if ($num_frames % 28) {
+	imagestring($im, 5, 20, 20, 'flight file has extra bytes: '.($num_frames % 28), $fill);
 	goto output;
 }
-$chunksize = 24;
-if ($v > 3) {
-	$chunksize = 28;
-}
-$num_frames = ($filesize - 40);
-if ($num_frames % $chunksize) {
-	imagestring($im, 5, 20, 20, 'flight file has extra bytes: '.($num_frames % $chunksize), $fill);
-	goto output;
-}
-$num_frames /= $chunksize;
+$num_frames /= 28;
 if ($num_frames < 2) {
 	imagestring($im, 5, 20, 20, 'flight file has lt 2 frames', $fill);
 	goto output;
@@ -64,7 +55,7 @@ if ($num_frames < 2) {
 $minalt = 9e9; $maxalt = -9e9;
 $minx = 9e9; $maxx = -9e9;
 $miny = 9e9; $maxy = -9e9;
-$offset = 40;
+$offset = 10;
 $posx = [];
 $posy = [];
 $altat = [];
@@ -85,7 +76,7 @@ for ($i = 0; $i < $num_frames; $i++) {
 	$altat[$i] = $alt;
 	$posx[$i] = $x;
 	$posy[$i] = $y;
-	$offset += $chunksize;
+	$offset += 28;
 }
 $altrange = max(1, $maxalt - $minalt);
 
