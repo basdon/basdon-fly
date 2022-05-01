@@ -3,6 +3,11 @@ EXPECT_SIZE(short, 2);
 EXPECT_SIZE(int, 4);
 
 #pragma pack(1)
+struct Quaternion {
+	float w, x, y, z;
+};
+EXPECT_SIZE(struct Quaternion, 0x10);
+
 struct SampMatrix {
 	struct vec3 right; /*unsure*/
 	float _14;
@@ -169,7 +174,9 @@ struct SampVehicle {
 	struct vec3 vel;
 	int field_58[3];
 	short vehicleid;
-	char _pad66[0x82-0x66];
+	int _pad66;
+	short driverplayerid;
+	char _pad6C[0x82-0x6C];
 	int model;
 	struct vec4 spawnPos;
 	/*Primary color, set when creating the vehicle. This color will be used when respawning. See moddedColor1.*/
@@ -227,13 +234,17 @@ struct SampPlayer {
 	char textLabelCreated[1024];
 	char pickupCreated[4096];
 	char actorStreamedIn[1000];
-	char _pad28DD[0x2915-0x28DD];
+	int numPlayersStreamedIn; /**Samp doesn't stream in new players if this is 200.*/
+	int numVehiclesStreamedIn;
+	int _pad28E5;
+	int numTextLabelsStreamedIn;
+	char _pad28ED[0x2915-0x28ED];
 	struct vec3 pos;
 	float hp;
 	float armor;
 	char _pad2929[0x2939-0x2929];
 	float facingAngle;
-	char _pad293D[0x2949-0x293D];
+	struct vec3 onfootvelocity;
 	short lrkey;
 	short udkey;
 	int keys;
@@ -241,10 +252,11 @@ struct SampPlayer {
 	int isEditingObject;
 	int _pad2959;
 	short lastSentDialogID;
-	int _pad295F;
 #ifdef __TINYC__
+	int textdrawpool;
 	int textlabelPool;
 #else
+	void *textdrawpool;
 	void *textlabelPool;
 #endif
 	short playerid;
@@ -263,7 +275,11 @@ struct SampPlayer {
 	char raceCheckpointType;
 	float raceCheckpointSize;
 	int isCurrentlyInRaceCheckpoint;
-	char _pad2BDF[0x2C31-0x2BDF];
+	char _pad2BDF[0x2BFD-0x2BDF];
+	char team;
+	int skin;
+	char _pad2C02[0x2C30-0x2C02];
+	char fightingstyle;
 	char vehicleseat;
 	short vehicleid;
 	int color;
@@ -297,6 +313,8 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, onfootSyncData, 0x7E);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, playerStreamedIn, 0x155);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleStreamedIn, 0x53D);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, actorStreamedIn, 0x24F5);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, numPlayersStreamedIn, 0x28DD);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, numVehiclesStreamedIn, 0x28E1);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, pos, 0x2915);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, hp, 0x2921);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, armor, 0x2925);
@@ -310,6 +328,9 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, updateSyncType, 0x2969);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, currentState, 0x2BA9);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, raceCheckpointType, 0x2BD6);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, isCurrentlyInRaceCheckpoint, 0x2BDB);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, team, 0x2BFD);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, skin, 0x2BFE);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, fightingstyle, 0x2C30);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleseat, 0x2C31);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleid, 0x2C32);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, color, 0x2C34);
@@ -333,7 +354,8 @@ struct SampPlayerPool {
 	int playerDrunkLevel[1000];
 	int _pad3E8C[1000];
 	char gpci[1000][101];
-	int _pad1D8B4[7250];
+	char version[1000][25];
+	int playerSlotState_[1000]; /*?unsure*/
 	int created[1000];
 	struct SampPlayer *players[1000];
 	char names[1000][25];
@@ -343,7 +365,8 @@ struct SampPlayerPool {
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, playerDrunkLevel, 0x2EEC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, gpci, 0x4E2C);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, _pad1D8B4, 0x1D8B4);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, version, 0x1D8B4);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, playerSlotState_, 0x23A5C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, created, 0x249FC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, players, 0x2599C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, names, 0x2693C);
@@ -691,6 +714,74 @@ struct RPCDATA_SetPlayerPos {
 	struct vec3 pos;
 };
 EXPECT_SIZE(struct RPCDATA_SetPlayerPos, 12);
+
+struct RPCDATA_PlayerJoin {
+	short playerid;
+	int unkAlwaysOne;
+	/**NPCs don't have nametags and are not shown in the TAB list (scoreboard?),
+	NPCs also have different physics, they will barely fall when hanging in the sky.*/
+	char npc;
+	char namelen;
+	char name[1]; /*actually arbitrary size with max length 24*/
+};
+EXPECT_SIZE(struct RPCDATA_PlayerJoin, 2 + 4 + 1 + 1 + 1);
+
+struct RPCDATA_PlayerLeave {
+	short playerid;
+	char reason; /*0 timeout 1 quit 2 kick*/
+};
+EXPECT_SIZE(struct RPCDATA_PlayerLeave, 2 + 1);
+
+/*See 0x80CAC70 int StreamInPlayer(struct SampPlayer *theplayer, short forplayerid)*/
+struct RPCDATA_PlayerCreate {
+	short playerid;
+	char team;
+	int skin;
+	float x;
+	float y;
+	float z;
+	float facingAngle;
+	int colorRGBA;
+	char fightingstyle;
+};
+EXPECT_SIZE(struct RPCDATA_PlayerCreate, 2 + 1 + 4 + 12 + 4 + 4 + 1);
+
+struct RPCDATA_PutPlayerInVehicle {
+	short vehicleid;
+	char seat;
+};
+EXPECT_SIZE(struct RPCDATA_PutPlayerInVehicle, 2 + 1);
+
+/**
+DriverSync
+	char packet_id; (200)
+	short playerid;
+	short vehicleid;
+	short lrkey;
+	short udkey;
+	short partial_keys;
+		rotation: see 80CE880
+		bit: 1 if w<0
+		bit: 1 if x<0
+		bit: 1 if y<0
+		bit: 1 if z<0
+		short abs(x)*65535.0f
+		short abs(y)*65535.0f
+		short abs(z)*7.5f
+	float x;
+	float y;
+	float z;
+		velocity compressed
+	short vehicle_health;
+	char health_armor; (TODO)
+	char weapon_id_additional_keys;
+	char siren_state : 1;
+	char landing_gear_state : 1;
+	char has_misc : 1;
+		int misc; (if has_misc)
+	char has_trailer_id: 1;
+		short trailer_id (if has_trailer_id)
+*/
 #pragma pack()
 
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,unk) \
@@ -730,3 +821,7 @@ EXPECT_SIZE(struct RPCDATA_SetPlayerPos, 12);
 #define RPC_SetVehicleNumberplate 0x816622A /*ptr to  0x7B(123)*/
 #define RPC_SetVehiclePos 0x8166224 /*ptr to 0x9F(159)*/
 #define RPC_SetPlayerPos 0x815CCEC /*ptr to 0xC(12)*/
+#define RPC_PlayerJoin 0x815AA76 /*ptr to 0x89(137)*/
+#define RPC_PlayerCreate 0x816324E /*ptr to 0x20(32)*/
+#define RPC_PlayerLeave 0x815AA78 /*ptr to 0x8A(138)*/
+#define RPC_PutPlayerInVehicle 0x815A058 /*ptr to 0x46(70)*/

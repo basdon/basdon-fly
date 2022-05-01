@@ -127,7 +127,7 @@ void admin_engage_vehinfo_dialog(int playerid)
 	struct CB_VEHICLEINFO *cbdata;
 	char query[100];
 
-	if (veh_GetPlayerVehicle(playerid, NULL, &veh) && veh) {
+	if (veh_GetPlayerVehicle(playerid, &veh) && veh) {
 		admin_show_vehinfo_dialog(playerid, veh, "<loading>", "<loading>");
 		cbdata = malloc(sizeof(struct CB_VEHICLEINFO));
 		cbdata->player_cc = MK_PLAYER_CC(playerid);

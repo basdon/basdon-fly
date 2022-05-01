@@ -36,14 +36,14 @@
 				<li><strong>Point-to-point distance:</strong> {@unsafe round($r->distance, 2)}m</li>
 				<li><strong>Actual flown distance:</strong>{@if $r->state != 1} {@unsafe round($r->adistance, 2)}m{@endif}</li>
 				<li><strong>Flight start:</strong> {@unsafe format_datetime($r->tstart)}</li>
-				<li><strong>Flight end:</strong> {@if $r->state != 1}{@unsafe format_datetime($r->tlastupdate)}{@endif}</li>
-				<li><strong>Flight duration:</strong> {@if $r->state != 1}{@unsafe sprintf('%02d:%02d', floor(($diff=$r->tlastupdate-$r->tstart)/60), $diff%60)}{@endif}</li>
+				<li><strong>Flight end:</strong> {@if $r->is_finished}{@unsafe format_datetime($r->tlastupdate)}{@endif}</li>
+				<li><strong>Flight duration:</strong> {@if $r->is_finished}{@unsafe sprintf('%02d:%02d', floor($r->duration/60), $r->duration%60)}{@endif}</li>
 				<li><strong>Aircraft:</strong> {@unsafe aircraft_name($r->vehmodel)} (owned by: {@unsafe aircraftowner($r->ownername)})</li>
 				<li><strong>Flight type:</strong> {@unsafe fmt_mission_type($r->missiontype)}</li>
 				{@if $r->missiontype & $SETTING__PASSENGER_MISSIONTYPES}
-					<li><strong>Passenger satisfaction:</strong>{@if $r->state != 1} {@unsafe $r->satisfaction}%{@endif}</li>
+					<li><strong>Passenger satisfaction:</strong> {@unsafe $r->satisfaction}%</li>
 				{@endif}
-				<li><strong>Fuel burned:</strong>{@if $r->state != 1} {@unsafe round($r->fuel, 2)}L{@endif}</li>
+				<li><strong>Fuel burned:</strong>{@if $r->state != 1} {@unsafe round($r->fuel * vehicle_fuel_cap($r->vehmodel), 2)}L{@endif}</li>
 				<li><strong>Damage taken:</strong>{@if $r->state != 1} {@unsafe $r->damage}{@endif}</li>
 			</ul>
 			<h3>Detailed timing</h3>
@@ -56,7 +56,7 @@
 				{@if $r->tunload > 0}
 					<li><strong>{@unsafe date('H:i:s', $r->tunload)}</strong> cargo unloaded, flight ended</li>
 				{@endif}
-				{@if $r->state != 1 && $r->state != 8}
+				{@if $r->state != 1 && $r->state != 8 && $r->state != 2048}
 					<li><strong>{@unsafe date('H:i:s', $r->tlastupdate)}</strong> <span style="color:#c22">flight ended without finishing</span></li>
 				{@endif}
 			</ul>
@@ -96,7 +96,7 @@
 		<noscript><p>Enable JavaScript to see the detailed flight map/info.</p></noscript>
 		<div id="fm_mapmsg"><p>Loading...</p></div>
 		<div id="fm_mapcanvas"><canvas id="fm_canvas" width="900" height="600" style="width:100%;border:1px solid"></canvas></div>
-		<script src="{@unsafe $STATICPATH}/gen/fm_complete.js?v14"></script>
+		<script src="{@unsafe $STATICPATH}/gen/fm_complete.js?v15"></script>
 		<script>UTCoffset={@unsafe date('Z')};flightmap('{@unsafe $STATICPATH}', {@unsafe $id})</script>
 	{@endif}
 	</div></div>

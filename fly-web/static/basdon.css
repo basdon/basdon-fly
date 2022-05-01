@@ -180,7 +180,7 @@ table.new th + th {
 .flight-state-8 {
 	background: #dfd;
 }
-.flight-state-2, .flight-state-4, .flight-state-32, .flight-state-256, .flight-state-512, .flight-state-1024 {
+.flight-state-2, .flight-state-4, .flight-state-32, .flight-state-256, .flight-state-512, .flight-state-1024, .flight-state-4096 {
 	background: #fdd;
 }
 .flight-state-16, .flight-state-128 {
@@ -188,6 +188,9 @@ table.new th + th {
 }
 .flight-state-64 {
 	background: #edf;
+}
+.flight-state-2048 {
+	background: #ffd;
 }
 code {
 	font-family: 'Courier new', monospace;

@@ -23,14 +23,13 @@ if (($r = $db->query('SELECT i,c,n,flags FROM apt WHERE c=\'' . $code . '\' LIMI
 		$stat_num_inbound = $r[0]->inb;
 		$stat_num_outbound = $r[0]->outb;
 	}
-	$stat_refuels = $stat_fuel_loaded = $stat_refuel_spending = 0;
+	$stat_refuels = $stat_refuel_spending = 0;
 	++$db_querycount;
-	if (($r = $db->query('SELECT COUNT(*) num,SUM(paid) spending, SUM(fuel) fuel '.
+	if (($r = $db->query('SELECT COUNT(*) num,SUM(paid) spending '.
 			'FROM refuellog r JOIN svp s ON s.id=r.svp WHERE s.apt='.$apt->i)) && $r = $r->fetchAll())
 	{
 		$stat_refuels = $r[0]->num;
 		$stat_refuel_spending = $r[0]->spending;
-		$stat_fuel_loaded = $r[0]->fuel;
 	}
 	$stat_repairs = $stat_dmg_repaired = $stat_repair_spending = 0;
 	++$db_querycount;

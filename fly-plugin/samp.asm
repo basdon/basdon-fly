@@ -192,12 +192,12 @@ VehiclePoolAddVehicleAtIndex:
 ;prot  *
 ;prot  * TODO: create DestroyVehicle that will also delete the carriages (samp doesn't even do this)
 ;prot  */
-;prot int CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_delay_ms);
+;prot int _CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_delay_ms);
 ;test __builtin_offsetof(struct SampNetGame, vehiclePool) == 0xC
 ;test __builtin_offsetof(struct SampVehiclePool, poolsize) == 0x5E94
 ;test __builtin_offsetof(struct vec4, r) == 0xC
-global CreateVehicle:function
-CreateVehicle:
+global _CreateVehicle:function
+_CreateVehicle:
 	push ebp
 	lea ebp, [esp+04h]
 	push edi
@@ -260,6 +260,34 @@ RakServer__GetPlayerIDFromIndex:
 	call eax ; thiscall with 1 parameter; pops 1 arg
 	add esp, 08h
 	ret
+
+;prot /**
+;prot  * Need to ensure that {@code struct PlayerID playerID} is equivalent to {@code int binaryAddress, short port}.
+;prot  */
+;prot void RakServer__Send(struct RakServer *rakServer, struct BitStream *bitstream, int priority, int reliability, int orderStream, struct PlayerID playerID, int broadcast);
+global RakServer__Send:function
+RakServer__Send:
+	push dword [esp+020h] ; broadcast
+	push dword [esp+020h] ; playerID.port
+	push dword [esp+020h] ; playerID.binaryAddress
+	push dword [esp+020h] ; orderStream
+	push dword [esp+020h] ; reliability
+	push dword [esp+020h] ; priority
+	push dword [esp+020h] ; bitstream
+	mov eax, [esp+020h] ; rakServer
+	push eax
+	mov eax, [eax] ; vtable
+	mov eax, [eax+024h] ; SendFunc, most likely 0807BB60h
+	call eax ; thiscall with 6 parameters; pops 7 (1 parameter is a struct)
+	add esp, 020h
+	ret
+
+;prot void QuaternionToMatrix(struct Quaternion *quat, struct SampMatrix *mat);
+;test *(int*) 0x804BB93 == 0xFFFFFE59 /*Call to the actual calculation*/
+global QuaternionToMatrix:function
+QuaternionToMatrix:
+	mov eax, 0804BB30h
+	jmp eax
 
 segment .data
 logprintRetAddr	dd 00h

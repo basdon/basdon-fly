@@ -34,11 +34,11 @@ back from afk.
 <pre>
 byte 4-7: mission id (DWORD)
 byte 8: flags (BYTE) (see below)
-byte 9: passenger satisfaction (BYTE)
+byte 9: passenger satisfaction% [0-100] (BYTE)
 byte 10-11: aircraft speed, knots (WORD)
 byte 12-13: aircraft altitude (WORD)
 byte 14-15: health (WORD)
-byte 16-19: fuel level (FLOAT)
+byte 16-19: fuel level% [0-1] (FLOAT)
 byte 20-23: x pos (FLOAT)
 byte 24-27: y pos (FLOAT)
 byte 28-29: bank in degrees * 10 (WORD)
@@ -49,13 +49,14 @@ byte 30-31: pitch in degrees * 10 (WORD)
 Flags (right to left):
 
 <pre>
-bit 1: paused
-bit 2: engine on
+bit 1: is player paused
+bit 2: is engine on
+bit 3: is first packet since flight was paused
 </pre>
 
 {@h4(id=p3) Packet type 3: mission end}
 
-Sent when the mission ends.
+Sent when the mission ends or pauses.
 
 <pre>
 byte 4-7: mission id (DWORD)

@@ -65,6 +65,9 @@ function flightmap(staticpath, id)
 				events += formatevent(time, 'engine ' + (engine ? 'started' : 'stopped'));
 				lastengine = engine;
 			}
+			if (frameflags & 4) {
+				events += formatevent(time, 'flight continued after reconnecting');
+			}
 			sat.push(value = dv.getInt8(5));
 			if (value < minsat) minsat = value;
 			if (value > maxsat) maxsat = value;

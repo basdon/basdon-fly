@@ -45,12 +45,14 @@ try {
 		include('../templates/flightstatuses.php');
 		include('../templates/missiontypes.php');
 		include('../templates/aircraftnames.php');
+		include('../templates/vehiclefuelcap.php');
 		$r = $r[0];
 		if ($r->missiontype & $SETTING__PASSENGER_MISSIONTYPES) {
 			$satisfaction = $r->satisfaction . '% passenger satisfaction';
 		} else {
 			$satisfaction = 'cargo';
 		}
+		$r->is_finished = $r->state != 1 /*inprogress*/ && $r->state != 2048 /*paused*/;
 		$status = fmt_flight_status($r->state, $r->tload);
 		$diff = $r->tlastupdate - $r->tstart;
 		$duration = sprintf('%02d:%02d', floor($diff / 60), $diff % 60);
@@ -68,11 +70,13 @@ try {
 		case 32:
 		case 256:
 		case 512:
-		case 1024: $META_TAGS['theme-color'] = '#ff4444'; break;
+		case 1024:
+		case 4096: $META_TAGS['theme-color'] = '#ff4444'; break;
 		case 8: $META_TAGS['theme-color'] = '#44ff44'; break;
 		case 16:
 		case 128: $META_TAGS['theme-color'] = '#ff9123'; break;
 		case 64: $META_TAGS['theme-color'] = '#a144ff'; break;
+		case 2048: $META_TAGS['theme-color'] = '#ffff44'; break;
 		}
 	}
 } catch (PDOException $e) {

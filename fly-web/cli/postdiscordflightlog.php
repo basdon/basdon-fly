@@ -81,11 +81,13 @@ case 4:
 case 32:
 case 256:
 case 512:
-case 1024: $embed->color = 0xff4444; break;
+case 1024:
+case 4096: $embed->color = 0xff4444; break;
 case 8: $embed->color = 0x44ff44; break;
 case 16:
 case 128: $embed->color = 0xff9123; break;
 case 64: $embed->color = 0xa144ff; break;
+case 2048: $embed->color = 0xffff44; break; /*paused flights should never be posted to discord, so this is not really needed to be here*/
 }
 
 $content = new stdClass();

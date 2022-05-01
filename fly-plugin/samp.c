@@ -789,6 +789,12 @@ void GameTextForPlayer(int playerid, int milliseconds, int style, char *text)
 }
 
 static
+struct SampVehicle *GetSampVehicleByID(int vehicleid)
+{
+	return samp_pNetGame->vehiclePool->vehicles[vehicleid];
+}
+
+static
 int GetVehiclePos(int vehicleid, struct vec3 *pos)
 {
 	struct SampVehicle *vehicle;
@@ -1239,6 +1245,8 @@ void hook_OnDriverSync(int playerid)
 		Maybe a player is still sending driversync of the old vehicle
 		after PutPlayerInVehicle was called?)*/
 	}
+
+	missions_on_driversync(playerid, data);
 
 	/*When wanting to return 0, set CPlayer::updateSyncType to 0.*/
 }

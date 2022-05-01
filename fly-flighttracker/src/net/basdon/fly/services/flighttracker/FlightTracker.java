@@ -31,7 +31,6 @@ public Throwable last_handle_err;
 public int invalid_packet_count;
 public int invalid_packet_type_count;
 public int packet_wrong_length_count;
-public int mission_file_already_existed_count;
 public int handle_issue_count;
 public int io_issue_count;
 public IOException last_io_issue;
@@ -150,7 +149,7 @@ throws InterruptedIOException
 	switch (buf[3]) {
 	case 1: return handleMissionStart(length);
 	case 2: return handleMissionData(length);
-	case 3: return handleMissionEnd(length);
+	case 3: return handleMissionEndOrPause(length);
 	case 4:
 	case 5: closeAllFiles(); return true;
 	default:
@@ -229,7 +228,7 @@ throws InterruptedIOException
 /**
  * @return {@code false} if the packet was invalid or an IOException occurred
  */
-boolean handleMissionEnd(int length)
+boolean handleMissionEndOrPause(int length)
 throws InterruptedIOException
 {
 	if (length != 8) {
@@ -264,31 +263,40 @@ throws InterruptedIOException
 	FileOutputStream os = missionFiles.get(key);
 	if (os == null) {
 		File file = new File(fdr_directory, id + ".flight");
-		if (file.exists()) {
-			mission_file_already_existed_count++;
-			return null;
-		}
+		boolean exists = file.exists();
 		try {
-			missionFiles.put(key, os = new FileOutputStream(file));
+			/**
+			 * Only using 'append' mode if the file already exists, because the filechannel's
+			 * position can't be set when it's opened in append mode.
+			 * We need to set the filechannel's position when the flight starts, to receive
+			 * the flight start packet and overwrite the existing header data.
+			 * When continuing a flight, this is not needed and append mode is required
+			 * because we need to append data and that's not possible by simply changing
+			 * the channel's position (maybe with reading and writing the existing file
+			 * contents, but that sounds stupid).
+			 */
+			missionFiles.put(key, os = new FileOutputStream(file, exists));
 		} catch (FileNotFoundException e) {
 			io_issue_count++;
 			return null;
 		}
-		try {
-			os.write(6);
-			os.write('F');
-			os.write('L');
-			os.write('Y');
-			os.write(buf, missionIdOffset, 4);
-			os.write(new byte[2]); // flags
-			os.flush();
-		} catch (InterruptedIOException e) {
-			throw e;
-		} catch (IOException e) {
-			last_io_issue = e;
-			last_io_issue_time = System.currentTimeMillis();
-			io_issue_count++;
-			return null;
+		if (!exists) {
+			try {
+				os.write(6);
+				os.write('F');
+				os.write('L');
+				os.write('Y');
+				os.write(buf, missionIdOffset, 4);
+				os.write(new byte[2]); // flags
+				os.flush();
+			} catch (InterruptedIOException e) {
+				throw e;
+			} catch (IOException e) {
+				last_io_issue = e;
+				last_io_issue_time = System.currentTimeMillis();
+				io_issue_count++;
+				return null;
+			}
 		}
 	}
 	return os;

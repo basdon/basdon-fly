@@ -85,7 +85,6 @@ struct dbvehicle *veh_create_new_dbvehicle(int model, struct vec4 *pos)
 	veh->col1 = (char) col1;
 	veh->col2 = (char) col2;
 	memcpy(&veh->pos, pos, sizeof(struct vec4));
-	veh->fuel = model_fuel_capacity((short) model);
 	veh->owneruserid = 0;
 	veh->owner_name = NULL;
 	veh->owner_label_bits_data = NULL;
@@ -463,7 +462,6 @@ void veh_init()
 
 	for (i = 0; i < MAX_VEHICLES; i++) {
 		gamevehicles[i].dbvehicle = NULL;
-		gamevehicles[i].reincarnation = 0;
 	}
 	vehstoupdate = NULL;
 	dbvehicles = NULL;
@@ -499,7 +497,6 @@ void veh_init()
 		veh->col2 = (unsigned char) (*fld = 8, NC(n_cache_get_field_i));
 		veh->odoKM = (*fld = 9, NCF(n_cache_get_field_f));
 		veh->spawnedvehicleid = 0;
-		veh->fuel = model_fuel_capacity(veh->model);
 		if (veh->owneruserid) {
 			NC_PARS(3);
 			nc_params[3] = buf32a;
@@ -664,8 +661,7 @@ float model_fuel_capacity(short modelid)
 	}
 }
 
-static
-float model_fuel_usage(int modelid)
+float model_fuel_usage(short modelid)
 {
 	switch (modelid)
 	{
@@ -697,20 +693,22 @@ float model_fuel_usage(int modelid)
 Make given vehicle consumer fuel. Should be called every second while the engine is on.
 */
 static
-void veh_consume_fuel(int playerid, int vehicleid, struct dbvehicle *veh)
+void veh_consume_fuel(int playerid, int vehicleid)
 {
 	float consumptionmp;
-	float fuelcapacity, lastpercentage, newpercentage;
+	float fuel, cap, lastpercentage, newpercentage;
 
-	fuelcapacity = model_fuel_capacity(veh->model);
-	lastpercentage = veh->fuel / fuelcapacity;
+	cap = vehicle_fuel_cap[vehicleid];
+	fuel = vehicle_fuel[vehicleid];
+	lastpercentage = fuel / cap;
 	/*KEY_SPRINT is vehicle acceleration key*/
 	consumptionmp = (player[playerid]->keys & KEY_SPRINT) ? 1.0f : (float) SETTING__FUEL_USAGE_IDLE_MODIFIER;
-	veh->fuel -= model_fuel_usage(veh->model) * consumptionmp;
-	if (veh->fuel < 0.0f) {
-		veh->fuel = 0.0f;
+	fuel -= vehicle_fuel_usage[vehicleid] * consumptionmp;
+	if (fuel < 0.0f) {
+		fuel = 0.0f;
 	}
-	newpercentage = veh->fuel / fuelcapacity;
+	vehicle_fuel[vehicleid] = fuel;
+	newpercentage = fuel / cap;
 
 	if (lastpercentage > 0.0f && newpercentage == 0.0f) {
 		SetVehicleEngineState(vehicleid, 0);
@@ -765,7 +763,6 @@ int veh_create(struct dbvehicle *veh)
 	vehicleid = CreateVehicle(veh->model, &pos, veh->col1, veh->col2, VEHICLE_RESPAWN_DELAY_MS);
 	if (vehicleid != INVALID_VEHICLE_ID) {
 		gamevehicles[vehicleid].dbvehicle = veh;
-		gamevehicles[vehicleid].reincarnation++;
 		veh->spawnedvehicleid = vehicleid;
 		
 		NC_PARS(1);
@@ -866,7 +863,6 @@ Pre: playerid is the driver of vehicleid and pressed the engine key.
 static
 void veh_start_or_stop_engine(int playerid, int vehicleid)
 {
-	struct dbvehicle *veh;
 	struct vec3 vvel;
 
 	if (GetVehicleEngineState(vehicleid)) {
@@ -878,8 +874,7 @@ void veh_start_or_stop_engine(int playerid, int vehicleid)
 			SendClientMessage(playerid, COL_INFO, INFO"Engine stopped");
 		}
 	} else {
-		veh = gamevehicles[vehicleid].dbvehicle;
-		if (veh != NULL && veh->fuel == 0.0f) {
+		if (vehicle_fuel[vehicleid] == 0.0f) {
 			SendClientMessage(playerid, COL_WARN, WARN"The engine cannot be started, there is no fuel!");
 		} else {
 			SetVehicleEngineState(vehicleid, 1);
@@ -907,19 +902,16 @@ void veh_on_driver_key_state_change(int playerid, int oldkeys, int newkeys)
 	}
 }
 
-void veh_on_player_now_driving(int playerid, int vehicleid, struct dbvehicle *veh)
+void veh_on_player_now_driving(int playerid, int vehicleid)
 {
-	int required_engine_state;
-
-	/*veh could be NULL*/
-
-	GetVehiclePosUnsafe(vehicleid, &lastvpos[playerid]);
-
-	lastcontrolactivity[playerid] = time_timestamp();
-	required_engine_state = veh == NULL || veh->fuel > 0.0f;
-	SetVehicleEngineState(vehicleid, required_engine_state);
-	if (!required_engine_state) {
-		SendClientMessage(playerid, COL_WARN, WARN"This vehicle is out of fuel!");
+	if (GetVehiclePos(vehicleid, &lastvpos[playerid])) {
+		lastcontrolactivity[playerid] = time_timestamp();
+		if (vehicle_fuel[vehicleid] > 0.0f) {
+			SetVehicleEngineState(vehicleid, 1);
+		} else {
+			SetVehicleEngineState(vehicleid, 0);
+			SendClientMessage(playerid, COL_WARN, WARN"This vehicle is out of fuel!");
+		}
 	}
 }
 
@@ -944,14 +936,11 @@ int veh_commit_next_vehicle_odo_to_db()
 	return 0;
 }
 
-int veh_GetPlayerVehicle(int playerid, int *reinc, struct dbvehicle **veh)
+int veh_GetPlayerVehicle(int playerid, struct dbvehicle **veh)
 {
 	int vehicleid;
 
 	vehicleid = GetPlayerVehicleID(playerid);
-	if (reinc != NULL) {
-		*reinc = gamevehicles[vehicleid].reincarnation;
-	}
 	*veh = gamevehicles[vehicleid].dbvehicle;
 	return vehicleid;
 }
@@ -975,8 +964,7 @@ void veh_update_odo(int playerid, int vehicleid, struct vec3 pos, struct PLAYERM
 	dz = lastvpos[playerid].z - pos.z;
 	distanceM = (float) sqrt(dx * dx + dy * dy + dz * dz);
 	lastvpos[playerid] = pos;
-	veh = gamevehicles[vehicleid].dbvehicle;
-	if (veh == NULL || distanceM != distanceM || distanceM == 0.0f) {
+	if (distanceM != distanceM || distanceM == 0.0f) {
 		return;
 	}
 	distanceKM = distanceM / 1000.0f;
@@ -984,26 +972,29 @@ void veh_update_odo(int playerid, int vehicleid, struct vec3 pos, struct PLAYERM
 	missions_player_traveled_distance_in_vehicle(playerid, vehicleid, distanceM);
 
 	playerodoKM[playerid] += distanceKM;
-	veh->odoKM += distanceKM;
 	if (model_stats) {
 		model_stats->odoKM += distanceKM;
 	}
 
-	if (!veh->needsodoupdate) {
-		veh->needsodoupdate = 1;
-		if (vehstoupdate == NULL) {
-			vehstoupdate = malloc(sizeof(struct vehnode));
-			vehstoupdate->veh = veh;
-			vehstoupdate->next = NULL;
-		} else {
-			vuq = vehstoupdate;
-			while (vuq->next != NULL) {
+	veh = gamevehicles[vehicleid].dbvehicle;
+	if (veh) {
+		veh->odoKM += distanceKM;
+		if (!veh->needsodoupdate) {
+			veh->needsodoupdate = 1;
+			if (vehstoupdate == NULL) {
+				vehstoupdate = malloc(sizeof(struct vehnode));
+				vehstoupdate->veh = veh;
+				vehstoupdate->next = NULL;
+			} else {
+				vuq = vehstoupdate;
+				while (vuq->next != NULL) {
+					vuq = vuq->next;
+				}
+				vuq->next = malloc(sizeof(struct vehnode));
 				vuq = vuq->next;
+				vuq->veh = veh;
+				vuq->next = NULL;
 			}
-			vuq->next = malloc(sizeof(struct vehnode));
-			vuq = vuq->next;
-			vuq->veh = veh;
-			vuq->next = NULL;
 		}
 	}
 }
@@ -1102,14 +1093,13 @@ void veh_timed_1s_update()
 			vehiclemodel = GetVehicleModel(vehicleid);
 		}
 
-
 		if (vehicleid == lastvehicle_asdriver[playerid]) {
 			GetVehiclePosUnsafe(vehicleid, &vpos);
 
 			engineState = GetVehicleEngineState(vehicleid);
 
-			if (engineState && veh && !isafk[playerid]) {
-				veh_consume_fuel(playerid, vehicleid, veh);
+			if (engineState && !isafk[playerid]) {
+				veh_consume_fuel(playerid, vehicleid);
 			}
 
 			model_stats = NULL;
@@ -1138,10 +1128,10 @@ int veh_DestroyVehicle(int vehicleid)
 {
 	struct dbvehicle *veh;
 
-	veh = gamevehicles[vehicleid].dbvehicle;
 	nav_disable_for_respawned_or_destroyed_vehicle(vehicleid);
-	missions_on_vehicle_destroyed_or_respawned(veh);
-	if (veh != NULL) {
+	missions_on_vehicle_destroyed_or_respawned(vehicleid);
+	veh = gamevehicles[vehicleid].dbvehicle;
+	if (veh) {
 		veh->spawnedvehicleid = 0;
 		gamevehicles[vehicleid].dbvehicle = NULL;
 	}
@@ -1158,7 +1148,7 @@ void veh_on_driver_changed_vehicle_without_state_change(int playerid, int oldveh
 	struct dbvehicle *veh;
 	int old_driver;
 
-	veh_on_player_now_driving(playerid, newvehicleid, gamevehicles[newvehicleid].dbvehicle);
+	veh_on_player_now_driving(playerid, newvehicleid);
 
 	veh = gamevehicles[oldvehicleid].dbvehicle;
 	if (veh_needs_owner_label(veh)) {
@@ -1195,13 +1185,16 @@ void veh_on_player_state_change(int playerid, int from, int to)
 			vehpanel_shown[playerid] = 1;
 		}
 
-		if (!copilot_is_player_copiloting(playerid, vehicleid)) {
+		/*Why don't show vehicle name when player is copiloting??*/
+		/*Don't show vehicle name when player is resuming mission because it will hide
+		more important gametexts (mission resume 'handing over control')*/
+		if (!copilot_is_player_copiloting(playerid, vehicleid) && !missions_is_player_resuming_mission(playerid)) {
 			sprintf(veh_name_buf, "~g~%s", vehnames[vehiclemodel - 400]);
 			GameTextForPlayer(playerid, 2000, 1, veh_name_buf);
 		}
 
 		if (to == PLAYER_STATE_DRIVER) {
-			veh_on_player_now_driving(playerid, vehicleid, veh);
+			veh_on_player_now_driving(playerid, vehicleid);
 			veh_destroy_owner_label_for_all(vehicleid);
 		}
 	} else if (vehpanel_shown[playerid]) {

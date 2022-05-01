@@ -47,6 +47,7 @@ int kneeboard_format_distance(int playerid, struct vec3 *playerpos, char *out_bu
 	}
 	if (dist != kneeboard_last_distance[playerid]) {
 		kneeboard_last_distance[playerid] = dist;
+		/*The distance text is also the background, so we really need those newlines*/
 		if (dist == -1) {
 			return sprintf(out_buf, "~n~~n~~n~~n~~n~");
 		} else if (dist < 1000) {

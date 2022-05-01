@@ -1,4 +1,4 @@
-// Copyright 2019 basdon.net - this source is licensed under AGPL
+// Copyright 2019-2022 basdon.net - this source is licensed under AGPL
 // see the LICENSE file for more details
 package annamod;
 
@@ -80,7 +80,6 @@ throws IOException
 		ft.handle_issue_count +
 		ft.invalid_packet_count +
 		ft.invalid_packet_type_count +
-		ft.mission_file_already_existed_count +
 		ft.packet_wrong_length_count;
 	o.print(" other issues count: " + c + ", last: ");
 	o.print((ft.last_issue_time == 0 ? "N/A" : format_time(ft.last_issue_time)) + "\n");

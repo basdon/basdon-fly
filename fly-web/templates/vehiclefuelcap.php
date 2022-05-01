@@ -1,0 +1,32 @@
+<?php 
+$vehicle_fuel_cap_values = array(
+	'592'=>$SETTING__FUEL_CAP_ANDROM,
+	'577'=>$SETTING__FUEL_CAP_AT400,
+	'511'=>$SETTING__FUEL_CAP_BEAGLE,
+	'548'=>$SETTING__FUEL_CAP_CARGOBOB,
+	'512'=>$SETTING__FUEL_CAP_CROPDUST,
+	'593'=>$SETTING__FUEL_CAP_DODO,
+	'425'=>$SETTING__FUEL_CAP_HUNTER,
+	'520'=>$SETTING__FUEL_CAP_HYDRA,
+	'417'=>$SETTING__FUEL_CAP_LEVIATHN,
+	'487'=>$SETTING__FUEL_CAP_MAVERICK,
+	'553'=>$SETTING__FUEL_CAP_NEVADA,
+	'497'=>$SETTING__FUEL_CAP_POLMAV,
+	'563'=>$SETTING__FUEL_CAP_RAINDANC,
+	'476'=>$SETTING__FUEL_CAP_RUSTLER,
+	'447'=>$SETTING__FUEL_CAP_SEASPAR,
+	'519'=>$SETTING__FUEL_CAP_SHAMAL,
+	'460'=>$SETTING__FUEL_CAP_SKIMMER,
+	'469'=>$SETTING__FUEL_CAP_SPARROW,
+	'513'=>$SETTING__FUEL_CAP_STUNT,
+	'488'=>$SETTING__FUEL_CAP_VCNMAV,
+);
+function vehicle_fuel_cap($model)
+{
+	global $vehicle_fuel_cap_values;
+	if (array_key_exists($model, $vehicle_fuel_cap_values)) {
+		return $vehicle_fuel_cap_values[$model];
+	}
+	return $SETTING__FUEL_CAP_DEFAULT;
+}
+?>

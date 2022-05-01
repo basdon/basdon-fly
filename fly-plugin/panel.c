@@ -407,19 +407,15 @@ void panel_update_odo_fl_hp_gear(int playerid, int vehicleid, int is_update)
 
 	bs.ptrData = &rpcdata;
 
-	veh = gamevehicles[vehicleid].dbvehicle;
-	if (veh) {
-		tmp_fuel_percent = 100.0f * veh->fuel / model_fuel_capacity(veh->model);
-		fl_pct = (int) tmp_fuel_percent;
-		/*Some rounding stuff because otherwise it'll immediately be 99%*/
-		if (tmp_fuel_percent - fl_pct > .49f) {
-			fl_pct++;
-		}
-		odo = (int) veh->odoKM;
-	} else {
-		fl_pct = 0;
-		odo = 0;
+	tmp_fuel_percent = 100.0f * vehicle_fuel[vehicleid] / vehicle_fuel_cap[vehicleid];
+	fl_pct = (int) tmp_fuel_percent;
+	/*Some rounding stuff because otherwise it'll immediately be 99%*/
+	if (tmp_fuel_percent - fl_pct > .49f) {
+		fl_pct++;
 	}
+
+	veh = gamevehicles[vehicleid].dbvehicle;
+	odo = veh ? (int) veh->odoKM : 0;
 
 	health = GetVehicleHealth(vehicleid) - 250.0f;
 	if (health < 0.0f) {
@@ -872,8 +868,10 @@ void panel_timed_update()
 
 		vehicleid = GetPlayerVehicleID(playerid);
 
-		if (!vehicleid) {
-			logprintf("WARN: panel player was not in a vehicle!");
+		if (!vehicleid || /*vehicle could be destroyed already*/ !GetSampVehicleByID(vehicleid)) {
+			if (!vehicleid) {
+				logprintf("WARN: panel player was not in a vehicle!");
+			}
 			panelplayers[n] = panelplayers[--numpanelplayers];
 			continue;
 		}

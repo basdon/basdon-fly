@@ -97,6 +97,7 @@ flg -- flights
   tlastupdate -
   tload - (default 0)
   tunload - (default 0)
+  duration - in seconds, total time mission has been active while player is online (default 0)
   satisfaction - passenger satisfaction (default 100)
   ptax - airport tax (default 0)
   pweatherbonus - (default 0)
@@ -107,8 +108,30 @@ flg -- flights
   pcheat - cheating penalty (default 0)
   pbonus - extra bonus (default 0)
   ptotal - total pay (default 0)
-  fuel - fuel used (float) (default 0)
+  fuel - percentage fuel used [0-1] (may be more than 1 because one can refuel) (float) (default 0)
   damage - total damage taken (default 0)
+</pre>
+
+<pre>
+pfl -- paused flights
+  fid - flight id (flg.id)
+  t - timestamp
+  x - pos x (float)
+  y - pos y (float)
+  z - pos z (float)
+  qw - rotation w (float)
+  qx - rotation x (float)
+  qy - rotation y (float)
+  qz - rotation z (float)
+  vx - velocity x (float)
+  vy - velocity y (float)
+  vz - velocity z (float)
+  fuel - percentage of fuel left (percentage just in case fuel capacity changes) (float)
+  hp - (float)
+  gear_keys - gear state (0x100000, additional keys (0x30000) and partial keys (0xFFFF)
+  udlrkeys - udkey (0xFFFF) and lrkey (0xFFFF0000)
+  misc - for driversync packet
+  reason - OnPlayerDisconnect reason (0 timeout, 1 quit, 2 kicked)
 </pre>
 
 <pre>
@@ -189,7 +212,7 @@ svp -- servicepoints
 repairlog --
   id - rowid
   stamp - timestamp
-  vehicle - (veh.i)
+  vehicle - (veh.i) NULL
   driver - (usr.i) NULL
   invokr - (usr.i)
   svp - (svp.id)
@@ -201,12 +224,12 @@ repairlog --
 refuellog --
   id - rowid
   stamp - timestamp
-  vehicle - (veh.i)
+  vehicle - (veh.i) NULL
   driver - (usr.i) NULL
   invokr - (usr.i)
   svp - (svp.id)
   paid -
-  fuel - (float)
+  fuel - percentage refueled [0-1] (float)
 </pre>
 
 <pre>

@@ -11,9 +11,9 @@ struct dbvehicle {
 	*/
 	int owneruserid;
 	struct vec4 pos;
+	/*TODO: isn't this data in SampVehicle struct already? since it has spawn colors and current colors*/
 	unsigned char col1, col2;
 	float odoKM;
-	float fuel;
 	char *owner_name;
 	char *owner_label_bits_data;
 	short owner_label_bits_length;
@@ -27,12 +27,6 @@ struct dbvehicle {
 
 struct vehicle {
 	struct dbvehicle *dbvehicle;
-	/**
-	Number holding the amount of times this vehicle has been respawned.
-	Can be used to check if a vehicleid is still assigned to the same
-	vehicle as earlier.
-	*/
-	short reincarnation;
 };
 
 extern struct vehicle gamevehicles[MAX_VEHICLES];
@@ -67,10 +61,9 @@ void veh_dispose();
 /**
 Convenience method to get a player's vehicle data.
 
-@param reinc will be set to reincarnation value (may be NULL if not needed)
 @return vehicleid
 */
-int veh_GetPlayerVehicle(int playerid, int *reinc, struct dbvehicle **veh);
+int veh_GetPlayerVehicle(int playerid, struct dbvehicle **veh);
 void veh_init();
 /**
 Check if a player is allowed to be in given vehicle.
@@ -82,6 +75,7 @@ be NULL when this functions returns 0.
 */
 int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh);
 float model_fuel_capacity(short modelid);
+float model_fuel_usage(short modelid);
 int veh_DestroyVehicle(int vehicleid);
 void veh_load_user_model_stats(int playerid);
 void veh_on_player_connect(int playerid);
@@ -97,7 +91,7 @@ To be called from OnPlayerStateChange with new state being driver, or when
 calling PutPlayerInVehicle when the player was already a driver (because
 this won't trigger a OnPlayerStateChange.
 */
-void veh_on_player_now_driving(int playerid, int vehicleid, struct dbvehicle *veh);
+void veh_on_player_now_driving(int playerid, int vehicleid);
 void veh_on_vehicle_spawn(struct dbvehicle *veh);
 void veh_on_vehicle_stream_in(int vehicleid, int forplayerid);
 void veh_on_vehicle_stream_out(int vehicleid, int forplayerid);

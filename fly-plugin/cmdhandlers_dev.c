@@ -93,13 +93,29 @@ int cmd_dev_jetpack(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-#define CMD_KICKME_SYNTAX ""
+static
+int cmd_dev_kickme_delayed(void *data)
+{
+	int playerid;
+
+	playerid = (int) data;
+	SendClientMessage(playerid, -1, "you're kicked, bye");
+	natives_Kick(playerid, "requested \n''\n \0 ok", NULL, -1);
+	return TIMER_NO_REPEAT;
+}
+
+#define CMD_KICKME_SYNTAX "[seconds_delay]"
 #define CMD_KICKME_DESC "Kicks you"
 static
 int cmd_dev_kickme(struct COMMANDCONTEXT cmdctx)
 {
-	SendClientMessage(cmdctx.playerid, -1, "you're kicked, bye");
-	natives_Kick(cmdctx.playerid, "requested \n''\n \0 ok", NULL, -1);
+	int delay;
+
+	if (cmd_get_int_param(&cmdctx, &delay)) {
+		timer_set(delay * 1000, cmd_dev_kickme_delayed, (void*) cmdctx.playerid);
+	} else {
+		cmd_dev_kickme_delayed((void*) cmdctx.playerid);
+	}
 	return CMD_OK;
 }
 
@@ -423,13 +439,13 @@ int cmd_dev_vfl(struct COMMANDCONTEXT cmdctx)
 		return CMD_OK;
 	}
 
-	capacity = model_fuel_capacity(veh->model);
+	capacity = vehicle_fuel_cap[vehicleid];
 
 	if (cmd_get_int_param(&cmdctx, &fl_pct)) {
-		veh->fuel = capacity * fl_pct / 100.0f;
+		vehicle_fuel[vehicleid] = capacity * fl_pct / 100.0f;
 	}
 
-	sprintf(cbuf32, "fl %f/%f (%.1f%%)", veh->fuel, capacity, veh->fuel / capacity);
+	sprintf(cbuf32, "fl %f/%f (%.1f%%)", vehicle_fuel[vehicleid], capacity, vehicle_fuel[vehicleid] / capacity);
 	SendClientMessage(cmdctx.playerid, -1, cbuf32);
 	return CMD_OK;
 }

@@ -101,16 +101,15 @@ To be called from the /refuel command.
 static
 int svp_refuel(int playerid)
 {
+	int vehicleid, driverid, driveruserid, budget, svpid, cost, refuelpct, vehid;
+	float fuel, fuel_cap, refuelamount;
 	struct dbvehicle *veh;
 	struct vec3 vpos;
-	int vehicleid, driverid, budget, svpid, cost, refuelpct;
-	int driveruserid;
-	float capacity, refuelamount;
-	char buf1[10];
 	char msg144[144];
+	char buf1[10];
 
-	vehicleid = veh_GetPlayerVehicle(playerid, NULL, &veh);
-	if (!vehicleid || veh == NULL) {
+	vehicleid = GetPlayerVehicleID(playerid);
+	if (!vehicleid) {
 		return CMD_OK;
 	}
 
@@ -119,7 +118,10 @@ int svp_refuel(int playerid)
 		return CMD_OK;
 	}
 
-	GetVehiclePosUnsafe(vehicleid, &vpos);
+	if (!GetVehiclePos(vehicleid, &vpos)) {
+		return CMD_OK;
+	}
+
 	/*The created mapicons for the player could be used,
 	but there can only exist 4 at a time.. Maybe that's too little?*/
 	svpid = svp_find_point(vpos);
@@ -128,16 +130,17 @@ int svp_refuel(int playerid)
 		return CMD_OK;
 	}
 
-	capacity = model_fuel_capacity(veh->model);
-	refuelamount = capacity - veh->fuel;
-	refuelpct = (int) (100.0f * refuelamount / capacity);
+	fuel_cap = vehicle_fuel_cap[vehicleid];
+	fuel = vehicle_fuel[vehicleid];
+	refuelamount = fuel_cap - fuel;
+	refuelpct = (int) (100.0f * refuelamount / fuel_cap);
 	if (refuelpct <= 0) {
 		sprintf(msg144,
 		        WARN"Refueling is not needed yet! "
 			"Capacity: %.0f/%.0f (%.0f%%)",
-		        veh->fuel,
-		        capacity,
-			100.0f * veh->fuel / capacity);
+			fuel,
+		        fuel_cap,
+			100.0f * fuel / fuel_cap);
 		SendClientMessage(playerid, COL_WARN, msg144);
 		return CMD_OK;
 	}
@@ -150,13 +153,13 @@ int svp_refuel(int playerid)
 			sprintf(msg144,
 			        WARN"You can't pay the refuel fee! "
 				"Capacity: %.0f/%.0f (%.0f%%)",
-			        veh->fuel,
-			        capacity,
-				100.0f * veh->fuel / capacity);
+				fuel,
+			        fuel_cap,
+				100.0f * fuel / fuel_cap);
 			SendClientMessage(playerid, COL_WARN, msg144);
 			return 1;
 		}
-		refuelamount = refuelpct * capacity / 100.0f;
+		refuelamount = refuelpct * fuel_cap / 100.0f;
 		cost = FUEL_BASE_COST + FUEL_PCT_COST * refuelpct;
 		strcpy(buf1, "partially");
 	} else {
@@ -165,7 +168,7 @@ int svp_refuel(int playerid)
 
 	money_take(playerid, cost);
 
-	veh->fuel += refuelamount;
+	fuel = (vehicle_fuel[vehicleid] += refuelamount);
 
 	sprintf(msg144,
 		INFO"Your vehicle has been %s refueled for $%d (+%d%%) "
@@ -173,9 +176,9 @@ int svp_refuel(int playerid)
 	        buf1,
 	        cost,
 		refuelpct,
-	        veh->fuel,
-	        capacity,
-		100.0f * veh->fuel / capacity);
+		fuel,
+	        fuel_cap,
+		100.0f * fuel / fuel_cap);
 	SendClientMessage(playerid, COL_INFO, msg144);
 
 	if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
@@ -195,13 +198,16 @@ int svp_refuel(int playerid)
 		driveruserid = userid[driverid];
 	}
 
-	if (veh && userid[playerid] > 0) {
+	if (userid[playerid] > 0) {
+		veh = gamevehicles[vehicleid].dbvehicle;
+		vehid = veh ? veh->id : -1;
 		csprintf(buf4096,
 			"INSERT INTO refuellog"
 			"(stamp,vehicle,driver,invokr,svp,paid,fuel) "
 			"VALUES "
-			"(UNIX_TIMESTAMP(),%d,IF(%d<1,NULL,%d),%d,%d,%d,%.4f)",
-			veh->id,
+			"(UNIX_TIMESTAMP(),IF(%d<0,NULL,%d),IF(%d<1,NULL,%d),%d,%d,%d,%.4f)",
+			vehid,
+			vehid,
 			driveruserid,
 			driveruserid,
 			userid[playerid],
@@ -223,11 +229,11 @@ int svp_repair(int playerid)
 {
 	struct dbvehicle *veh;
 	struct vec3 vpos;
-	int vehicleid, driverid, driveruserid, budget, svpid, cost;
+	int vehicleid, driverid, driveruserid, budget, svpid, cost, vehid;
 	float hp, fixamount;
 	char msg144[144];
 
-	vehicleid = veh_GetPlayerVehicle(playerid, NULL, &veh);
+	vehicleid = GetPlayerVehicleID(playerid);
 	if (!vehicleid) {
 		return CMD_OK;
 	}
@@ -283,14 +289,17 @@ int svp_repair(int playerid)
 		driveruserid = userid[driverid];
 	}
 
-	if (veh && userid[playerid] > 0) {
+	if (userid[playerid] > 0) {
+		veh = gamevehicles[vehicleid].dbvehicle;
+		vehid = veh ? veh->id : -1;
 		csprintf(buf4096,
 			"INSERT INTO "
 			"repairlog"
 			"(stamp,vehicle,driver,invokr,svp,paid,damage) "
 			"VALUES "
-			"(UNIX_TIMESTAMP(),%d,IF(%d<1,NULL,%d),%d,%d,%d,%d)",
-			veh->id,
+			"(UNIX_TIMESTAMP(),IF(%d<0,NULL,%d),IF(%d<1,NULL,%d),%d,%d,%d,%d)",
+			vehid,
+			vehid,
 			driveruserid,
 			driveruserid,
 			userid[playerid],

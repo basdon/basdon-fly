@@ -46,7 +46,11 @@ size 10 bytes
 
 > data (frames), repeated x times
 byte 0-3: timestamp (DWORD)
-byte 4: flags (right to left: bit 1: paused? bit 2: engine on?) (BYTE)
+byte 4: flags (BYTE)
+	right to left:
+	bit 1: is player paused
+	bit 2: is engine on
+	bit 3: is first packet since flight was paused
 byte 5: passenger satisfaction% [0-100] (BYTE)
 byte 6-7: aircraft speed, knots (WORD)
 byte 8-9: aircraft altitude (WORD)

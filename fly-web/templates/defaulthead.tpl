@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="{@unsafe $STATICPATH}/basdon.{@unsafe $CSS_SUFFIX}?v10" type="text/css" title="basdon default theme" />
+<link rel="stylesheet" href="{@unsafe $STATICPATH}/basdon.{@unsafe $CSS_SUFFIX}?v11" type="text/css" title="basdon default theme" />
 <link rel="icon" type="image/png" sizes="16x16 32x32 48x48" href="{@unsafe $STATICPATH}/favicon.ico?4"/>
 <link rel="icon" type="image/png" sizes="96x96" href="{@unsafe $STATICPATH}/favicon-96x96.png">
 {@foreach $META_TAGS as $prop => $content}

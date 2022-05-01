@@ -96,7 +96,6 @@
 	{@rem using round() for int values as well, because they can be NULL when no svps at airport (yukkie) @}
 	<li><strong>Service points refuels:</strong> {@unsafe $stat_refuels}</li>
 	<li><strong>Service points refuel spending:</strong> {@unsafe fmt_money(-$stat_refuel_spending)}</li>
-	<li><strong>Service points fuel loaded:</strong> {@unsafe round($stat_fuel_loaded, 1)}L</li>
 	<li><strong>Service points repairs:</strong> {@unsafe $stat_repairs}</li>
 	<li><strong>Service points repair spending:</strong> {@unsafe fmt_money(-$stat_repair_spending)}</li>
 	<li><strong>Service points damage repaired:</strong> {@unsafe round($stat_dmg_repaired, 0)}</li>

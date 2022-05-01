@@ -11,17 +11,20 @@
 #define MISSION_STAGE_UNLOAD	5 /*unloading timer*/
 
 /*states saved in db*/
+/*TODO: these could be consecutive numbers...*/
 #define MISSION_STATE_INPROGRESS 1
 #define MISSION_STATE_ABANDONED  2 /*not used anymore, see other ABANDONED states*/
 #define MISSION_STATE_CRASHED    4
 #define MISSION_STATE_FINISHED   8
-#define MISSION_STATE_DECLINED   16
+#define MISSION_STATE_ABORTED    16
 #define MISSION_STATE_DIED       32
 #define MISSION_STATE_SERVER_ERR 64
-#define MISSION_STATE_ABANDONED_TIMEOUT 128
-#define MISSION_STATE_ABANDONED_QUIT 256
-#define MISSION_STATE_ABANDONED_KICKED 512
+#define MISSION_STATE_ABANDONED_TIMEOUT 128 /*not used anymore, state will be PAUSED on disconnect*/
+#define MISSION_STATE_ABANDONED_QUIT 256 /*not used anymore, state will be PAUSED on disconnect*/
+#define MISSION_STATE_ABANDONED_KICKED 512 /*not used anymore, state will be PAUSED on disconnect*/
 #define MISSION_STATE_ABANDONED_VEHICLE_DESTROYED 1024
+#define MISSION_STATE_PAUSED 2048
+#define MISSION_STATE_EXPIRED 4096 /*a paused flight can't be continued because the origin/destination doesn't exist anymore*/
 
 #define MISSION_WEATHERBONUS_RAINY     1250
 #define MISSION_WEATHERBONUS_FOGGY     2250
@@ -70,7 +73,7 @@ void missions_on_player_connect(int playerid);
 /**
 Call when a vehicle is destroyed or respawned.
 */
-void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh);
+void missions_on_vehicle_destroyed_or_respawned(int vehicleid);
 /**
 Call when the vehicle was refueled.
 */

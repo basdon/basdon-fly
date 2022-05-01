@@ -473,6 +473,23 @@ void init_class_names()
 
 static unsigned short nametags_max_distance[MAX_PLAYERS];
 
+static float vehicle_fuel[MAX_VEHICLES], vehicle_fuel_cap[MAX_VEHICLES], vehicle_fuel_usage[MAX_VEHICLES];
+
+/*TODO: move this elsewhere*/
+static
+int CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_delay_ms)
+{
+	register int vehicleid;
+	register float fuel_cap;
+
+	vehicleid = _CreateVehicle(model, pos, col1, col2, respawn_delay_ms);
+	fuel_cap = model_fuel_capacity(model);
+	vehicle_fuel[vehicleid] = fuel_cap;
+	vehicle_fuel_cap[vehicleid] = fuel_cap;
+	vehicle_fuel_usage[vehicleid] = model_fuel_usage(model);
+	return vehicleid;
+}
+
 #include "conf.c"
 #include "memstuff.c"
 #include "natives.c"

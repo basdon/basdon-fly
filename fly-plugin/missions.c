@@ -12,29 +12,60 @@ activemission[playerid] is still the same mission as it was when the async func 
 */
 static int number_missions_started_stopped[MAX_PLAYERS];
 
+#define MISSION_FLAG_NEEDS_TRACKER_RESUME_FLAG 0x1
+#define MISSION_FLAG_IS_PAUSED_SET_TO_IN_PROGRESS_ON_NEXT_DRIVERSYNC 0x2
+/*whether or not the last_syncdata field is set*/
+#define MISSION_FLAG_HAS_LAST_SYCDATA 0x4
+#define MISSION_FLAG_WAS_PAUSED 0x8
+
 struct MISSION {
 	int id;
 	int missiontype;
 	struct MISSIONPOINT *startpoint, *endpoint;
 	float distance, actualdistanceM;
 	int passenger_satisfaction;
-	struct dbvehicle *veh;
+	short vehmodel;
 	/**
 	The vehicleid of the vehicle the mission was started with.
 	*/
 	int vehicleid;
-	/**
-	Reincarnation value of vehicleid when the mission was started.
-
-	Use in combination with vehicleid to check if vehicle at the end is
-	the same vehicle the mission was started with.
-	*/
-	int vehicle_reincarnation;
+	/**if this mission is the continuation of a paused mission, this is the time of resuming*/
 	time_t starttime;
 	short lastvehiclehp, damagetaken;
 	float lastfuel, fuelburned;
 	short weatherbonus;
+	int flags;
+	struct SYNCDATA_Driver last_syncdata;
 };
+
+struct PAUSED_MISSION {
+	int id;
+	int missiontype;
+	struct MISSIONPOINT *startpoint, *endpoint;
+	int passenger_satisfaction;
+	int vehid;
+	short vehmodel;
+	struct vec3 pos;
+	struct Quaternion quat;
+	struct vec3 vel;
+	float fuel_percentage;
+	short hp;
+	int gear_keys;
+	int udlrkeys;
+	short weatherbonus;
+	int damage;
+	float distance, actualdistanceM;
+	float fuel_burned_percentage;
+	int misc;
+	/**A paused mission can be cancelled/aborted while still in the 'handover' phase.
+	When the player respawns, the current paused mission may still be set (because it gets cleared in the
+	'sync' timer callback, which may happen later), so the player might get a dialog to resume the mission
+	that was just cancelled. This flag exists to prevent that, if a player's paused mission is set, but this
+	cancelled flag is also set, that paused mission should not be considered.*/
+	char is_cancelled : 1;
+};
+
+static struct PAUSED_MISSION *paused_mission[MAX_PLAYERS];
 
 /**
  * Available mission point types for player, based on their class and vehicle.
@@ -181,6 +212,12 @@ struct MISSIONPOINT *missions_get_random_msp(struct AIRPORT *airport, unsigned i
 int missions_is_player_on_mission(int playerid)
 {
 	return activemission[playerid] != NULL;
+}
+
+static
+int missions_is_player_resuming_mission(int playerid)
+{
+	return activemission[playerid] && (activemission[playerid]->flags & MISSION_FLAG_WAS_PAUSED);
 }
 
 void missions_create_tracker_socket()
@@ -399,7 +436,7 @@ active_msp_changed:
 }
 
 static
-void cb_missions_flight_finish_query_done(void *data)
+void cb_missions_post_to_discord_after_finish_query_done(void *data)
 {
 	discordflightlog_trigger((int) data);
 }
@@ -730,7 +767,7 @@ Call when ending a mission.
 static
 void missions_cleanup(int playerid)
 {
-	struct vec3 pos;
+	int was_paused_mission, missionvehicleid;
 	struct MISSION *mission;
 
 	mission = activemission[playerid];
@@ -748,13 +785,32 @@ void missions_cleanup(int playerid)
 		SetVehicleObjectiveForPlayer(mission->vehicleid, playerid, 0);
 	}
 
+	if (mission->flags & MISSION_FLAG_WAS_PAUSED) {
+		was_paused_mission = 1;
+		missionvehicleid = mission->vehicleid;
+		/*destroy vehicle/respawn player AFTER resetting activemission,
+		or the destroy vehicle will cause another mission end and thus
+		infinite loop*/
+
+		if (paused_mission[playerid] && paused_mission[playerid]->id == mission->id) {
+			paused_mission[playerid]->is_cancelled = 1;
+		}
+	}
+
 	free(mission);
 	activemission[playerid] = NULL;
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	number_missions_started_stopped[playerid]++;
 
-	GetPlayerPos(playerid, &pos);
-	kneeboard_update_all(playerid, &pos);
+	if (was_paused_mission) {
+		veh_DestroyVehicle(missionvehicleid);
+		playerpool->virtualworld[playerid] = 0;
+		if (GetPlayerState(playerid) != PLAYER_STATE_WASTED) {
+			natives_SpawnPlayer(playerid);
+		}
+	} else {
+		kneeboard_update_all(playerid, &player[playerid]->pos);
+	}
 }
 
 /**
@@ -767,21 +823,75 @@ void missions_end_unfinished(int playerid, int reason)
 {
 	struct MISSION *mission;
 	char query[1024];
+	int duration;
 
 	mission = activemission[playerid];
+	mission->damagetaken += mission->lastvehiclehp - (short) GetVehicleHealth(mission->vehicleid);
+	mission->fuelburned += mission->lastfuel - vehicle_fuel[mission->vehicleid];
+	duration = (int) difftime(time(NULL), mission->starttime);
 	sprintf(query,
 	        "UPDATE flg "
-		"SET state=%d,tlastupdate=UNIX_TIMESTAMP(),adistance=%f "
+		"SET state=%d,tlastupdate=UNIX_TIMESTAMP(),duration=duration+%d,adistance=%f,"
+		"fuel=%f,damage=%d,satisfaction=%d,pweatherbonus=%d "
 		"WHERE id=%d",
 	        reason,
+	        duration,
 		mission->actualdistanceM,
-	        mission->id);
-	common_mysql_tquery(query, cb_missions_flight_finish_query_done, (void*) mission->id);
+		mission->fuelburned / vehicle_fuel_cap[mission->vehicleid],
+	        mission->damagetaken,
+	        mission->passenger_satisfaction,
+	        mission->weatherbonus,
+	        mission->id
+	);
+	if (reason == MISSION_STATE_PAUSED) {
+		common_mysql_tquery(query, NULL, NULL);
+	} else {
+		common_mysql_tquery(query, cb_missions_post_to_discord_after_finish_query_done, (void*) mission->id);
+	}
 
 	missions_cleanup(playerid);
 }
 
-void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh)
+/**
+player must be on a mission or get segfault'd.
+
+@param reason the quit reason as reported in OnPlayerDisconnect
+*/
+static
+void missions_end_paused(int playerid, int reason)
+{
+	struct SYNCDATA_Driver *syncdata;
+	struct MISSION *mission;
+	int gear_keys;
+	float fuel;
+
+	mission = activemission[playerid];
+	syncdata = &mission->last_syncdata;
+	gear_keys = syncdata->partial_keys | ((syncdata->additional_keys & 3) << 16);
+	if (syncdata->landing_gear_state) {
+		gear_keys |= 0x100000;
+	}
+	fuel = vehicle_fuel[mission->vehicleid] / vehicle_fuel_cap[mission->vehicleid];
+	csprintf(buf4096,
+		"INSERT INTO pfl(fid,t,x,y,z,qw,qx,qy,qz,vx,vy,vz,fuel,hp,gear_keys,udlrkeys,misc,reason)"
+		"VALUES (%d,UNIX_TIMESTAMP(),%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%d,%d)",
+		mission->id,
+		syncdata->pos.x, syncdata->pos.y, syncdata->pos.z,
+		syncdata->quat_w, syncdata->quat_x, syncdata->quat_y, syncdata->quat_z,
+		syncdata->vel.x, syncdata->vel.y, syncdata->vel.z,
+		fuel,
+		syncdata->vehicle_hp,
+		gear_keys,
+		syncdata->udkey | (syncdata->lrkey << 16),
+		syncdata->misc,
+		reason
+	);
+	NC_mysql_tquery_nocb(buf4096a);
+
+	missions_end_unfinished(playerid, MISSION_STATE_PAUSED);
+}
+
+void missions_on_vehicle_destroyed_or_respawned(int vehicleid)
 {
 	struct MISSION *mission;
 	int i, playerid;
@@ -789,7 +899,7 @@ void missions_on_vehicle_destroyed_or_respawned(struct dbvehicle *veh)
 	for (i = 0; i < playercount; i++) {
 		playerid = players[i];
 		mission = activemission[playerid];
-		if (mission != NULL && mission->veh == veh) {
+		if (mission && mission->vehicleid == vehicleid) {
 			SendClientMessage(playerid, COL_WARN,
 				WARN" Your mission vehicle has been destroyed, "
 				"your mission has been aborted and you have "
@@ -816,6 +926,7 @@ void missions_on_player_connect(int playerid)
 	locating_msp[playerid] = NULL;
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	activemission[playerid] = NULL;
+	paused_mission[playerid] = NULL;
 	number_missions_started_stopped[playerid]++;
 }
 
@@ -824,12 +935,24 @@ void missions_on_player_disconnect(int playerid, int reason)
 {
 	struct MISSION *miss;
 
-	if ((miss = activemission[playerid]) != NULL) {
-		switch (reason) {
-		case 0: missions_end_unfinished(playerid, MISSION_STATE_ABANDONED_TIMEOUT); break;
-		default: missions_end_unfinished(playerid, MISSION_STATE_ABANDONED_QUIT); break;
-		case 2: missions_end_unfinished(playerid, MISSION_STATE_ABANDONED_KICKED); break;
+	if (mission_stage[playerid] == MISSION_STAGE_FLIGHT && (miss = activemission[playerid])) {
+		if (miss->flags & MISSION_FLAG_IS_PAUSED_SET_TO_IN_PROGRESS_ON_NEXT_DRIVERSYNC) {
+			/*mission was already paused but player disconnected before they got control after resuming*/
+			/*nothing to be done except cleanup, player will continue using the pause data from last time*/
+			missions_cleanup(playerid);
+		} else if (miss->flags & MISSION_FLAG_HAS_LAST_SYCDATA && loggedstatus[playerid] == LOGGED_IN) {
+			missions_end_paused(playerid, reason);
+		} else {
+			switch (reason) {
+			case 0: missions_end_unfinished(playerid, MISSION_STATE_ABANDONED_TIMEOUT); break;
+			default: missions_end_unfinished(playerid, MISSION_STATE_ABANDONED_QUIT); break;
+			case 2: missions_end_unfinished(playerid, MISSION_STATE_ABANDONED_KICKED); break;
+			}
 		}
+	}
+	if (paused_mission[playerid]) {
+		free(paused_mission[playerid]);
+		paused_mission[playerid] = NULL;
 	}
 }
 
@@ -864,7 +987,7 @@ int missions_start_flight(void *data)
 	mission = activemission[playerid];
 
 	if (prefs[playerid] & PREF_WORK_AUTONAV) {
-		nav_navigate_to_airport(playerid, mission->veh->spawnedvehicleid, mission->veh->model, mission->endpoint->ap);
+		nav_navigate_to_airport(playerid, mission->vehicleid, mission->vehmodel, mission->endpoint->ap);
 	}
 
 	if (mission->missiontype & SETTING__PASSENGER_MISSIONTYPES) {
@@ -963,7 +1086,7 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 	}
 
 	for (i = 0; i < playercount; i++) {
-		if ((mission = activemission[players[i]]) != NULL && mission->veh == veh) {
+		if ((mission = activemission[players[i]]) != NULL && mission->vehicleid == vehicleid) {
 			SendClientMessage(playerid, COL_WARN, WARN"This vehicle is already used in a mission!");
 			return;
 		}
@@ -992,15 +1115,15 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 	mission->distance = sqrt(dx * dx + dy * dy);
 	mission->actualdistanceM = 0.0f;
 	mission->passenger_satisfaction = 100;
-	mission->veh = veh;
+	mission->vehmodel = veh->model;
 	mission->vehicleid = vehicleid;
-	mission->vehicle_reincarnation = gamevehicles[vehicleid].reincarnation;
 	mission->starttime = time(NULL);
 	mission->lastvehiclehp = (short) vhp;
 	mission->damagetaken = 0;
-	mission->lastfuel = veh->fuel;
+	mission->lastfuel = vehicle_fuel[vehicleid];
 	mission->fuelburned = 0.0f;
 	mission->weatherbonus = missions_get_initial_weatherbonus();
+	mission->flags = 0;
 
 	csprintf(buf144, "UPDATE msp SET o=o+1 WHERE i=%d", startpoint->id);
 	NC_mysql_tquery_nocb(buf144a);
@@ -1063,7 +1186,7 @@ int missions_after_unload(void *data)
 	struct MISSION *miss;
 	float vehhp, paymp, mintime;
 	int ptax, psatisfaction, pdistance, pbonus = 0, ptotal, pdamage, pcheat;
-	int totaltime, duration_h, duration_m, extra_damage_taken;
+	int duration_total_s, duration_h, duration_m, extra_damage_taken;
 	int i;
 	char *dialoginfo;
 	short missionmsg_playerids[MAX_PLAYERS];
@@ -1100,26 +1223,26 @@ int missions_after_unload(void *data)
 		miss->damagetaken += extra_damage_taken;
 	}
 	miss->lastvehiclehp = (short) vehhp;
-	miss->fuelburned += miss->lastfuel - miss->veh->fuel;
+	miss->fuelburned += miss->lastfuel - vehicle_fuel[miss->vehicleid];
 
-	totaltime = (int) difftime(time(NULL), miss->starttime);
-	duration_m = totaltime % 60;
-	duration_h = (totaltime - duration_m) / 60;
+	duration_total_s = (int) difftime(time(NULL), miss->starttime);
+	duration_m = duration_total_s % 60;
+	duration_h = (duration_total_s - duration_m) / 60;
 
 	/* don't use adistance because it also includes z changes */
 	mintime = miss->distance;
-	mintime /= missions_get_vehicle_maximum_speed(miss->veh->model);
-	if (totaltime < (int) mintime) {
+	mintime /= missions_get_vehicle_maximum_speed(miss->vehmodel);
+	if (duration_total_s < (int) mintime) {
 		pcheat -= 250000;
 		sprintf(cbuf144,
 			"flg(#%d) too fast: min: %d actual: %d",
 			miss->id,
 			(int) mintime,
-			totaltime);
+			duration_total_s);
 		anticheat_log(playerid, AC_MISSION_TOOFAST, cbuf144);
 	}
 
-	paymp = missions_get_vehicle_paymp(miss->veh->model);
+	paymp = missions_get_vehicle_paymp(miss->vehmodel);
 	ptax = -calculate_airport_tax(miss->endpoint->ap, miss->missiontype);
 	pdistance = 500 + (int) (miss->distance * 1.935f);
 	pdistance = (int) (pdistance * paymp);
@@ -1147,7 +1270,7 @@ int missions_after_unload(void *data)
 	        miss->endpoint->ap->code,
 	        duration_h,
 	        duration_m,
-	        vehnames[miss->veh->model - VEHICLE_MODEL_MIN]);
+	        vehnames[miss->vehmodel - VEHICLE_MODEL_MIN]);
 	echo_send_generic_message(ECHO_PACK12_FLIGHT_MESSAGE, cbuf4096);
 	num_missionmsg_playerids = 0;
 	for (i = 0; i < playercount; i++) {
@@ -1160,13 +1283,14 @@ int missions_after_unload(void *data)
 
 	sprintf(cbuf4096_,
 		"UPDATE flg SET tunload=UNIX_TIMESTAMP(),"
-		"tlastupdate=UNIX_TIMESTAMP(),"
+		"tlastupdate=UNIX_TIMESTAMP(),duration=duration+%d,"
 		"state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
 		"pdistance=%d,pdamage=%d,pcheat=%d,pbonus=%d,ptotal=%d,"
 		"satisfaction=%d,adistance=%f,paymp=%f,damage=%d "
 		"WHERE id=%d",
+		duration_total_s,
 		MISSION_STATE_FINISHED,
-		miss->fuelburned,
+		miss->fuelburned / vehicle_fuel_cap[miss->vehicleid],
 		ptax,
 		miss->weatherbonus,
 		psatisfaction,
@@ -1180,7 +1304,7 @@ int missions_after_unload(void *data)
 		paymp,
 		miss->damagetaken,
 		miss->id);
-	common_mysql_tquery(cbuf4096_, cb_missions_flight_finish_query_done, (void*) miss->id);
+	common_mysql_tquery(cbuf4096_, cb_missions_post_to_discord_after_finish_query_done, (void*) miss->id);
 
 	dialog_init_info(&dialog);
 	dialoginfo = dialog.info;
@@ -1252,8 +1376,7 @@ void missions_start_unload(int playerid)
 	struct MISSION_UNLOAD_DATA *cbdata;
 	struct MISSION *mission;
 	struct vec3 vvel;
-	struct dbvehicle *veh;
-	int vehicleid, vv;
+	int vehicleid;
 
 	if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
 		return;
@@ -1265,8 +1388,8 @@ void missions_start_unload(int playerid)
 		return;
 	}
 
-	vehicleid = veh_GetPlayerVehicle(playerid, &vv, &veh);
-	if (vehicleid != mission->vehicleid || vv != mission->vehicle_reincarnation || veh->id != mission->veh->id) {
+	vehicleid = GetPlayerVehicleID(playerid);
+	if (vehicleid != mission->vehicleid) {
 		SendClientMessage(playerid, COL_WARN, WARN"You must be in the starting vehicle to continue!");
 		return;
 	}
@@ -1447,7 +1570,7 @@ void missions_send_tracker_data(
 	float fuel;
 
 	if ((mission = activemission[playerid]) == NULL ||
-		mission->veh->spawnedvehicleid != vehicleid ||
+		mission->vehicleid != vehicleid ||
 		(isafk[playerid] && tracker_afk_packet_sent[playerid]))
 	{
 		return;
@@ -1458,12 +1581,17 @@ void missions_send_tracker_data(
 		flags |= 2;
 	}
 
+	if (mission->flags & MISSION_FLAG_NEEDS_TRACKER_RESUME_FLAG) {
+		flags |= 0x4;
+		mission->flags &= ~MISSION_FLAG_NEEDS_TRACKER_RESUME_FLAG;
+	}
+
 	hpv = (short) hp;
 	alt = (short) vpos->z;
 	spd = (short) (VEL_TO_KTS * sqrt(vvel->x * vvel->x + vvel->y * vvel->y + vvel->z * vvel->z));
 	pitch10 = (short) (pitch * 10.0f);
 	roll10 = (short) (roll * 10.0f);
-	fuel = mission->veh->fuel / model_fuel_capacity(mission->veh->model);
+	fuel = vehicle_fuel[mission->vehicleid] / vehicle_fuel_cap[mission->vehicleid];
 
 	/* flight tracker packet 2 */
 	buf32[0] = 0x02594C46;
@@ -1497,7 +1625,7 @@ void missions_process_cancel_request_by_player(int playerid)
 			NC_DisablePlayerRaceCheckpoint(playerid);
 		}
 		money_take(playerid, SETTING__MISSION_CANCEL_FEE_INT);
-		missions_end_unfinished(playerid, MISSION_STATE_DECLINED);
+		missions_end_unfinished(playerid, MISSION_STATE_ABORTED);
 	} else {
 		SendClientMessage(playerid, COL_WARN, WARN"You're not on an active mission.");
 	}
@@ -1646,10 +1774,10 @@ void missions_on_vehicle_refueled(int vehicleid, float refuelamount)
 
 	for (i = 0; i < playercount; i++) {
 		if ((miss = activemission[players[i]]) != NULL &&
-			miss->veh->spawnedvehicleid == vehicleid)
+			miss->vehicleid == vehicleid)
 		{
 			miss->fuelburned += refuelamount;
-			miss->lastfuel = miss->veh->fuel;
+			miss->lastfuel = vehicle_fuel[vehicleid];
 			return;
 		}
 	}
@@ -1662,7 +1790,7 @@ void missions_on_vehicle_repaired(int vehicleid, float fixamount, float newhp)
 
 	for (i = 0; i < playercount; i++) {
 		if ((miss = activemission[players[i]]) != NULL &&
-			miss->veh->spawnedvehicleid == vehicleid)
+			miss->vehicleid == vehicleid)
 		{
 			miss->damagetaken += (short) fixamount;
 			miss->lastvehiclehp = (short) newhp;
@@ -1672,10 +1800,468 @@ void missions_on_vehicle_repaired(int vehicleid, float fixamount, float newhp)
 }
 
 static
+void missions_on_driversync(int playerid, struct SYNCDATA_Driver *syncdata)
+{
+	register struct MISSION *mission;
+
+	if (mission_stage[playerid] == MISSION_STAGE_FLIGHT) {
+		mission = activemission[playerid];
+		if (mission && mission->vehicleid == syncdata->vehicle_id) {
+			mission->flags |= MISSION_FLAG_HAS_LAST_SYCDATA;
+			mission->last_syncdata = *syncdata;
+			if (mission->flags & MISSION_FLAG_IS_PAUSED_SET_TO_IN_PROGRESS_ON_NEXT_DRIVERSYNC) {
+				mission->flags &= ~MISSION_FLAG_IS_PAUSED_SET_TO_IN_PROGRESS_ON_NEXT_DRIVERSYNC;
+				csprintf(buf4096, "UPDATE flg SET state=%d WHERE id=%d", MISSION_STATE_INPROGRESS, mission->id);
+				NC_mysql_tquery_nocb(buf4096a);
+			}
+		}
+	}
+}
+
+/**
+ * Sends PlayerJoin+PlayerCreate RPCs to given player.
+ * This fake player will be used to set the correct aircraft position/rotation/speed
+ * before the player can take over and resume the mission.
+ */
+static
+void missions_resume_mission_create_npc(int forplayerid)
+{
+	struct BitStream bitstream;
+	struct RPCDATA_PlayerCreate playercreate;
+	struct RPCDATA_PlayerJoin playerjoin;
+
+	playerjoin.playerid = FAKE_PLAYER_ID_RESUME_MISSION;
+	playerjoin.unkAlwaysOne = 1;
+	playerjoin.npc = 1;
+	playerjoin.namelen = 1;
+	playerjoin.name[0] = 'x';
+	bitstream.ptrData = &playerjoin;
+	bitstream.numberOfBitsUsed = sizeof(playerjoin) * 8;
+	SAMP_SendRPCToPlayer(RPC_PlayerJoin, &bitstream, forplayerid, 2);
+
+	memset(&playercreate, 0, sizeof(playercreate));
+	playercreate.playerid = FAKE_PLAYER_ID_RESUME_MISSION;
+	bitstream.ptrData = &playercreate;
+	bitstream.numberOfBitsUsed = sizeof(playercreate) * 8;
+	SAMP_SendRPCToPlayer(RPC_PlayerCreate, &bitstream, forplayerid, 2);
+}
+
+/**
+ * Sends PlayerLeave RPC to given player.
+ */
+static
+void missions_resume_mission_destroy_npc(int forplayerid)
+{
+	struct BitStream bitstream;
+	struct RPCDATA_PlayerLeave playerleave;
+
+	playerleave.playerid = FAKE_PLAYER_ID_RESUME_MISSION;
+	playerleave.reason = 1; /*quit*/
+	bitstream.ptrData = &playerleave;
+	bitstream.numberOfBitsUsed = sizeof(playerleave) * 8;
+	SAMP_SendRPCToPlayer(RPC_PlayerLeave, &bitstream, forplayerid, 2);
+}
+
+#define MISSION_RESUME_SYNCDATA_TIMEOUT 50
+struct MISSION_RESUME_DATA {
+	int playerid;
+	int player_cc;
+	int number_missions_started_stopped;
+	int ms_left;
+	char send_initial : 1;
+	char send_onfoot : 1;
+	char done : 1;
+	char dialog_closed : 1;
+};
+
+static
+int missions_resume_mission_send_syncdata(void *data)
+{
+#pragma pack(push,1)
+	struct {
+		/*Padding to ensure the 'short' members in 'aligned' are aligned on a 2byte address boundary.*/
+		char _pad0;
+		struct {
+			struct {
+				char packet_id;
+				short playerid;
+				short vehicleid;
+				short lrkey;
+				short udkey;
+				short partial_keys;
+			} structured;
+			char more_data[200];
+		} aligned;
+	} syncdata;
+#pragma pack(pop)
+	struct RPCDATA_PutPlayerInVehicle ppiv;
+	struct MISSION_RESUME_DATA *rd;
+	struct PAUSED_MISSION *paused;
+	struct SampVehicle *vehicle;
+	struct BitStream bitstream;
+	struct MISSION *mission;
+	char text[100];
+	int playerid;
+
+	rd = data;
+	playerid = rd->playerid;
+	if (_cc[playerid] != rd->player_cc || number_missions_started_stopped[playerid] != rd->number_missions_started_stopped) {
+		missions_resume_mission_destroy_npc(playerid);
+exit:
+		free(data);
+		free(paused_mission[playerid]);
+		paused_mission[playerid] = NULL;
+		return TIMER_NO_REPEAT;
+	}
+
+	mission = activemission[playerid];
+	paused = paused_mission[playerid];
+	if (rd->done) {
+		missions_resume_mission_destroy_npc(playerid);
+		GameTextForPlayer(playerid, 2000, 3, "~n~~n~~g~You have control!");
+		/*PutPlayerInVehicle is failing me, so sending the raw packet now*/
+		/*This is probably not needed, but if it finally works I'm not touching it anymore*/
+		/*Using samp's PutPlayerInVehicle also makes sure the vehicle is streamed in, and
+		  some checkpoint shenanigans it seems like.*/
+		ppiv.vehicleid = mission->vehicleid;
+		ppiv.seat = 0;
+		vehicle = samp_pNetGame->vehiclePool->vehicles[mission->vehicleid];
+		bitstream.ptrData = &ppiv;
+		bitstream.numberOfBitsUsed = sizeof(ppiv) * 8;
+		SAMP_SendRPCToPlayer(RPC_PutPlayerInVehicle, &bitstream, playerid, 2);
+		if (vehicle) {
+			vehicle->driverplayerid = playerid; /*probably not needed but... meh*/
+		}
+		goto exit;
+	}
+
+	bitstream.ptrData = &syncdata.aligned;
+	bitstream.numberOfBitsAllocated = sizeof(syncdata.aligned) * 8;
+	if (rd->send_onfoot) {
+		rd->send_onfoot = 0;
+		rd->done = 1;
+		/*destroying the fake player causes the vehicle to just stop in place, so send one onfoot sync packet instead*/
+		bitstream.numberOfBitsUsed = 0;
+		bitstream_write_bits(&bitstream, 0xCF, 8); /*onfoot sync packet*/
+		bitstream_write_bits(&bitstream, FAKE_PLAYER_ID_RESUME_MISSION, 16); /*playerid*/
+		bitstream_write_zero(&bitstream); /*lrkey*/
+		bitstream_write_zero(&bitstream); /*udkey*/
+		bitstream_write_bits(&bitstream, 0, 16); /*partial_keys*/
+		bitstream_write_bytes(&bitstream, vec3_zero, 12); /*position*/
+		bitstream_write_quaternion(&bitstream, 0.0f, 0.0f, 0.0f, 0.0f); /*rotation*/
+		bitstream_write_bits(&bitstream, 0xFF, 8); /*player_health_armor (unsure how this val is made, but this works)*/
+		bitstream_write_bits(&bitstream, 0, 8); /*weapon_id_additional_keys*/
+		bitstream_write_bits(&bitstream, 0, 8); /*special_action*/
+		bitstream_write_velocity(&bitstream, 0.0f, 0.0f, 0.0f);
+		bitstream_write_zero(&bitstream); /*not surfing a vehicle*/
+		bitstream_write_zero(&bitstream); /*no animation*/
+		/*See 0x80AC4F9 (CNetGame::BroadCastPlayerSyncData+129)*/
+		RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+		/*send it 3x because it's important :D*/
+		RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+		RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+		return 20; /*wait less long to exit*/
+	} else {
+		bitstream.numberOfBitsUsed = sizeof(syncdata.aligned.structured) * 8;
+		syncdata.aligned.structured.packet_id = 0xC8; /*driver sync packet*/
+		syncdata.aligned.structured.playerid = FAKE_PLAYER_ID_RESUME_MISSION;
+		syncdata.aligned.structured.vehicleid = mission->vehicleid;
+		syncdata.aligned.structured.lrkey = (paused->udlrkeys >> 16) & 0xFFFF;
+		syncdata.aligned.structured.udkey = paused->udlrkeys & 0xFFFF;
+		syncdata.aligned.structured.partial_keys = paused->gear_keys & 0xFFFF;
+		bitstream_write_quaternion(&bitstream, paused->quat.w, paused->quat.x, paused->quat.y, paused->quat.z);
+		bitstream_write_bytes(&bitstream, &paused->pos, 12); /*position*/
+		if (rd->ms_left < MISSION_RESUME_SYNCDATA_TIMEOUT * 3 || rd->send_initial) {
+			bitstream_write_velocity(&bitstream, paused->vel.x, paused->vel.y, paused->vel.z);
+		} else {
+			bitstream_write_velocity(&bitstream, 0.0f, 0.0f, 0.0f);
+		}
+		bitstream_write_bits(&bitstream, paused->hp, 16); /*vehicle_health*/
+		bitstream_write_bits(&bitstream, 0xFF, 8); /*player_health_armor (unsure how this val is made, but this works)*/
+		bitstream_write_bits(&bitstream, 0, 6); /*weapon_id*/
+		bitstream_write_bits(&bitstream, (paused->gear_keys >> 16) & 3, 2); /*additional_keys*/
+		bitstream_write_zero(&bitstream); /*siren_state*/
+		if (paused->gear_keys & 0x100000) {
+			bitstream_write_one(&bitstream); /*landing_gear_state*/
+		} else {
+			bitstream_write_zero(&bitstream); /*landing_gear_state*/
+		}
+		if (paused->misc) {
+			bitstream_write_one(&bitstream); /*has_misc*/
+			bitstream_write_bits(&bitstream, paused->misc, 32); /*has_misc*/
+		} else {
+			bitstream_write_zero(&bitstream); /*has_misc*/
+		}
+		bitstream_write_zero(&bitstream); /*has_trailer_id*/
+		/*See 0x80AC4F9 (CNetGame::BroadCastPlayerSyncData+129)*/
+		RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+	}
+
+	if (rd->send_initial) {
+		/*
+		the complete hand over time should be long enough to:
+		- load the map
+		- spin up the rotor if it's a heli flight
+		Note that the hand over time doesn't progress while the 'paused introduction' dialog is showing,
+		but the user can dismiss that dialog immediately.
+		*/
+		rd->send_initial = 0;
+		rd->ms_left = 5000;
+		return 2500; /*do a longer pause first, so the player's camera can get behind the vehicle*/
+	}
+
+	if (rd->dialog_closed) {
+		rd->ms_left -= MISSION_RESUME_SYNCDATA_TIMEOUT;
+		if (rd->ms_left < MISSION_RESUME_SYNCDATA_TIMEOUT) {
+			rd->send_onfoot = 1;
+			return 20; /*wait less long to exit after sending the last driversync*/
+		}
+
+		sprintf(text, "~n~~n~~b~Handing over control, get ready!~n~%.1fs", rd->ms_left / 1000.0f);
+		GameTextForPlayer(playerid, 1000, 3, text);
+	}
+
+	return MISSION_RESUME_SYNCDATA_TIMEOUT;
+}
+
+static
+void missions_cb_dlg_paused_mission_introduction(int playerid, struct DIALOG_RESPONSE response)
+{
+	struct MISSION_RESUME_DATA *rd;
+
+	rd = response.data;
+	rd->dialog_closed = 1;
+}
+
+static void missions_query_paused_missions(int playerid);
+
+static
+void missions_cb_dlg_continue_paused_mission(int playerid, struct DIALOG_RESPONSE response)
+{
+	struct MISSION_RESUME_DATA *rd;
+	struct PAUSED_MISSION *paused;
+	struct SampVehicle *vehicle;
+	struct DIALOG_INFO dialog;
+	struct MISSION *mission;
+	struct vec4 pos;
+	int vehicleid;
+
+	if (paused_mission[playerid] && paused_mission[playerid]->id == (int) response.data) {
+		if (response.response) {
+			if (mission_stage[playerid] != MISSION_STAGE_NOMISSION || activemission[playerid]) {
+				SendClientMessage(playerid, COL_WARN, WARN" You currently already are on a mission, try again later.");
+			} else if (GetPlayerState(playerid) == PLAYER_STATE_WASTED) {
+				SendClientMessage(playerid, COL_WARN, WARN" You can't resume a mission while dead.");
+			} else {
+				number_missions_started_stopped[playerid]++;
+				rd = malloc(sizeof(struct MISSION_RESUME_DATA));
+				rd->playerid = playerid;
+				rd->player_cc = _cc[playerid];
+				rd->number_missions_started_stopped = number_missions_started_stopped[playerid];
+				rd->send_initial = 1;
+				rd->send_onfoot = 0;
+				rd->done = 0;
+				rd->dialog_closed = 0;
+				paused = paused_mission[playerid];
+				pos.coords = paused->pos;
+				pos.r = 0.0f;
+				vehicleid = CreateVehicle(paused->vehmodel, &pos, 1, 1, 1000000);
+				vehicle_fuel[vehicleid] = paused->fuel_percentage * vehicle_fuel_cap[vehicleid];
+				mission_stage[playerid] = MISSION_STAGE_FLIGHT;
+				activemission[playerid] = mission = malloc(sizeof(struct MISSION));
+				mission->id = paused->id;
+				mission->missiontype = paused->missiontype;
+				mission->startpoint = paused->startpoint;
+				mission->endpoint = paused->endpoint;
+				mission->distance = paused->distance;
+				mission->actualdistanceM = paused->actualdistanceM;
+				mission->passenger_satisfaction = paused->passenger_satisfaction;
+				mission->vehmodel = paused->vehmodel;
+				mission->vehicleid = vehicleid;
+				mission->starttime = time(NULL);
+				mission->lastvehiclehp = (short) paused->hp;
+				mission->damagetaken = paused->damage;
+				mission->lastfuel = vehicle_fuel[vehicleid];
+				mission->fuelburned = paused->fuel_burned_percentage * vehicle_fuel_cap[vehicleid];
+				mission->weatherbonus = paused->weatherbonus;
+				mission->flags = MISSION_FLAG_WAS_PAUSED;
+				mission->flags |= MISSION_FLAG_NEEDS_TRACKER_RESUME_FLAG;
+				mission->flags |= MISSION_FLAG_IS_PAUSED_SET_TO_IN_PROGRESS_ON_NEXT_DRIVERSYNC;
+				playerpool->virtualworld[playerid] = VW_MISSION_RESUME_BASE + playerid;
+				vehiclepool->virtualworld[vehicleid] = VW_MISSION_RESUME_BASE + playerid;
+				vehicle = vehiclepool->vehicles[vehicleid];
+				/*set vehicle stuff so that nav works during the handover period*/
+				if (vehicle) {
+					vehicle->vel = paused->vel;
+					QuaternionToMatrix(&paused->quat, &vehicle->matrix);
+				}
+				nav_navigate_to_airport(playerid, mission->vehicleid, mission->vehmodel, mission->endpoint->ap);
+				natives_PutPlayerInVehicle(playerid, vehicleid, /*seat*/ 0x3F);
+				missions_resume_mission_create_npc(playerid);
+				SetPlayerRaceCheckpointNoDir(playerid, RACE_CP_TYPE_NORMAL, &mission->endpoint->pos, MISSION_CP_RAD);
+				timer_set(0, missions_resume_mission_send_syncdata, rd);
+				if (mission->missiontype & SETTING__PASSENGER_MISSIONTYPES) {
+					missions_show_passenger_satisfaction_textdraw(mission->passenger_satisfaction, playerid, vehicleid);
+				}
+				kneeboard_update_all(playerid, &paused->pos);
+				dialog_init_info(&dialog);
+				dialog.info =
+					"You are put in a separate world with a temporary vehicle to resume this flight.\n"
+					"While resuming this flight, you will not see any other vehicles or players,\n"
+					"but you can still use the chat to talk with other players.\n"
+					"Your aircraft will be deleted and you will respawn when this flight ends.";
+				dialog.transactionid = DLG_TID_PAUSEDMISSION;
+				dialog.style = DIALOG_STYLE_MSGBOX;
+				dialog.caption = "Resuming paused flight";
+				dialog.button1 = "Ok";
+				dialog.handler.callback = missions_cb_dlg_paused_mission_introduction;
+				dialog.handler.data = rd;
+				dialog_show(playerid, &dialog);
+			}
+			return;
+		} else {
+			csprintf(buf4096, "UPDATE flg SET state=%d WHERE id=%d", MISSION_STATE_ABORTED, paused_mission[playerid]->id);
+			NC_mysql_tquery_nocb(buf4096a);
+
+			free(paused_mission[playerid]);
+			paused_mission[playerid] = NULL;
+		}
+	};
+	missions_query_paused_missions(playerid);
+}
+
+static
+void missions_prompt_continue_paused_mission(int playerid)
+{
+	struct PAUSED_MISSION *paused;
+	struct DIALOG_INFO dialog;
+	char *info;
+
+	paused = paused_mission[playerid];
+	dialog_init_info(&dialog);
+	info = dialog.info;
+	info += sprintf(info, ""ECOL_DIALOG_TEXT"Welcome back!\n\n");
+	info += sprintf(info, "It seems like a mission was in progress when you left:\n");
+	info += sprintf(info, "Flight: "ECOL_MISSION"#%d\n", paused->id);
+	info += sprintf(info, ""ECOL_DIALOG_TEXT"Aircraft: "ECOL_MISSION"%s\n", vehnames[paused->vehmodel - VEHICLE_MODEL_MIN]);
+	info += sprintf(info, ""ECOL_DIALOG_TEXT"Origin: "ECOL_MISSION"%s\n", paused->startpoint->ap->name);
+	info += sprintf(info, ""ECOL_DIALOG_TEXT"Destination: "ECOL_MISSION"%s\n\n", paused->endpoint->ap->name);
+	info += sprintf(info, ""ECOL_DIALOG_TEXT"Do you want to continue this flight?\n");
+	info += sprintf(info, "Note: aborting will result in a $"SETTING__MISSION_CANCEL_FEE_STR" fine.");
+	dialog.transactionid = DLG_TID_PAUSEDMISSION;
+	dialog.style = DIALOG_STYLE_MSGBOX;
+	dialog.caption = "Paused flight found";
+	dialog.button1 = "Continue";
+	dialog.button2 = "Abort";
+	dialog.handler.callback = missions_cb_dlg_continue_paused_mission;
+	dialog.handler.data = (void*) paused->id;
+	dialog_show(playerid, &dialog);
+}
+
+static
+void missions_cb_load_paused_mission(void *data)
+{
+	int playerid, *field, from_msp_id, to_msp_id, missiontype, i, mission_id;
+	struct MISSIONPOINT *msp, *from_msp, *to_msp;
+	struct PAUSED_MISSION *paused;
+
+	playerid = PLAYER_CC_GETID(data);
+	if (!PLAYER_CC_CHECK(data, playerid)) {
+		return;
+	}
+
+	if (paused_mission[playerid]) {
+		return;
+	}
+
+	if (NC_cache_get_row_count()) {
+		NC_PARS(2);
+		field = nc_params + 2;
+		nc_params[1] = 0;
+		missiontype = (*field = 16, NC(n_cache_get_field_i));
+		from_msp_id = (*field = 17, NC(n_cache_get_field_i));
+		to_msp_id = (*field = 18, NC(n_cache_get_field_i));
+		mission_id = (*field = 21, NC(n_cache_get_field_i));
+		for (i = 0, msp = missionpoints; i < nummissionpoints; i++, msp++) {
+			if (from_msp_id == msp->id) {
+				from_msp = msp;
+			}
+			if (to_msp_id == msp->id) {
+				to_msp = msp;
+			}
+		}
+		if (!from_msp || !to_msp || !(from_msp->type & missiontype) || !(to_msp->type & missiontype)) {
+			sprintf(cbuf4096, "UPDATE flg SET state=%d WHERE id=%d", MISSION_STATE_EXPIRED, mission_id);
+			NC_mysql_tquery_nocb(buf4096a);
+			missions_query_paused_missions(playerid);
+			return;
+		}
+
+		NC_PARS(2);
+		nc_params[1] = 0;
+		paused = paused_mission[playerid] = malloc(sizeof(struct PAUSED_MISSION));
+		paused->is_cancelled = 0;
+		paused->vehmodel = (*field = 0, NC(n_cache_get_field_i));
+		paused->pos.x = (*field = 1, NCF(n_cache_get_field_f));
+		paused->pos.y = (*field = 2, NCF(n_cache_get_field_f));
+		paused->pos.z = (*field = 3, NCF(n_cache_get_field_f));
+		paused->quat.w = (*field = 4, NCF(n_cache_get_field_f));
+		paused->quat.x = (*field = 5, NCF(n_cache_get_field_f));
+		paused->quat.y = (*field = 6, NCF(n_cache_get_field_f));
+		paused->quat.z = (*field = 7, NCF(n_cache_get_field_f));
+		paused->vel.x = (*field = 8, NCF(n_cache_get_field_f));
+		paused->vel.y = (*field = 9, NCF(n_cache_get_field_f));
+		paused->vel.z = (*field = 10, NCF(n_cache_get_field_f));
+		paused->fuel_percentage = (*field = 11, NCF(n_cache_get_field_f));
+		paused->hp = (short) (*field = 12, NCF(n_cache_get_field_f));
+		paused->gear_keys = (*field = 13, NC(n_cache_get_field_i));
+		paused->udlrkeys = (*field = 14, NC(n_cache_get_field_i));
+		paused->misc = (*field = 15, NC(n_cache_get_field_i));
+		paused->missiontype = missiontype;
+		paused->startpoint = from_msp;
+		paused->endpoint = to_msp;
+		paused->passenger_satisfaction = (*field = 19, NC(n_cache_get_field_i));
+		paused->weatherbonus = (*field = 20, NC(n_cache_get_field_i));
+		paused->id = mission_id;
+		paused->damage = (*field = 22, NCF(n_cache_get_field_f));
+		paused->distance = (*field = 23, NCF(n_cache_get_field_f));
+		paused->fuel_burned_percentage = (*field = 24, NCF(n_cache_get_field_f));
+		paused->actualdistanceM = (*field = 25, NCF(n_cache_get_field_f));
+		if (spawned[playerid] && mission_stage[playerid] == MISSION_STAGE_NOMISSION) {
+			missions_prompt_continue_paused_mission(playerid);
+		}
+	}
+}
+
+static
+void missions_query_paused_missions(int playerid)
+{
+	sprintf(cbuf4096_,
+		"SELECT v.m,"
+		"p.x,p.y,p.z,p.qw,p.qx,p.qy,p.qz,p.vx,p.vy,p.vz,p.fuel,p.hp,p.gear_keys,p.udlrkeys,p.misc,"
+		"f.missiontype,f.fmsp,f.tmsp,f.satisfaction,f.pweatherbonus,f.id,f.damage,f.distance,f.fuel,f.adistance "
+		"FROM pfl p "
+		"JOIN flg f ON p.fid=f.id "
+		"JOIN veh v ON f.vehicle=v.i "
+		"WHERE f.state=%d AND f.player=%d "
+		"ORDER BY f.tstart ASC, p.t DESC "
+		"LIMIT 1",
+		MISSION_STATE_PAUSED,
+		userid[playerid]
+	);
+	common_mysql_tquery(cbuf4096_, missions_cb_load_paused_mission, V_MK_PLAYER_CC(playerid));
+}
+
+static
 void missions_on_player_spawn(int playerid, struct vec3 pos)
 {
 	missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[classid[playerid]];
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
+	if (paused_mission[playerid] && !paused_mission[playerid]->is_cancelled) {
+		missions_prompt_continue_paused_mission(playerid);
+	} else if (userid[playerid] > 0 && loggedstatus[playerid] == LOGGED_IN) {
+		missions_query_paused_missions(playerid);
+	}
 }
 
 void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
@@ -1687,10 +2273,10 @@ void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
 	if (mission_stage[pid] == MISSION_STAGE_FLIGHT &&
 		(miss = activemission[pid]) != NULL &&
 		(miss->missiontype & SETTING__PASSENGER_MISSIONTYPES) &&
-		miss->veh->spawnedvehicleid == vid &&
+		miss->vehicleid == vid &&
 		miss->passenger_satisfaction != 0)
 	{
-		if (game_is_heli(miss->veh->model)) {
+		if (game_is_heli(miss->vehmodel)) {
 			pitchlimit = 50.0f;
 			rolllimit = 40.0f;
 		} else {
