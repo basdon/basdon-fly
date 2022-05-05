@@ -182,7 +182,7 @@ void airports_init()
 		while (i--) {
 			NC_PARS(2);
 			nc_params[1] = rowcount;
-			rnw->dbid = (*field = 9, NCF(n_cache_get_field_f));
+			rnw->dbid = (*field = 9, NC(n_cache_get_field_i));
 			rnw->pos.x = (*field = 1, NCF(n_cache_get_field_f));
 			rnw->pos.y = (*field = 2, NCF(n_cache_get_field_f));
 			rnw->pos.z = (*field = 3, NCF(n_cache_get_field_f));
