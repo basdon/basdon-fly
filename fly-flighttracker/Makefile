@@ -9,6 +9,7 @@ anna:
 
 out/mod_bas_ft.jar: anna $(SOURCES)
 	@mkdir -p out
+	@[ ! -f "out/mod_bas_ft.jar" ] || rm out/mod_bas_ft.jar
 	javac -g -d out -cp "$(ANNA_DIR)/anna/out" $(SOURCES)
 	jar cfM out/mod_bas_ft.jar -C out .
 	cp out/mod_bas_ft.jar "$(ANNA_DIR)/out"
