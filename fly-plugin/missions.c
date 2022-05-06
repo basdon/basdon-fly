@@ -785,8 +785,7 @@ void missions_cleanup(int playerid)
 		SetVehicleObjectiveForPlayer(mission->vehicleid, playerid, 0);
 	}
 
-	if (mission->flags & MISSION_FLAG_WAS_PAUSED) {
-		was_paused_mission = 1;
+	if ((was_paused_mission = (mission->flags & MISSION_FLAG_WAS_PAUSED))) {
 		missionvehicleid = mission->vehicleid;
 		/*destroy vehicle/respawn player AFTER resetting activemission,
 		or the destroy vehicle will cause another mission end and thus
@@ -2182,6 +2181,8 @@ void missions_cb_load_paused_mission(void *data)
 		from_msp_id = (*field = 17, NC(n_cache_get_field_i));
 		to_msp_id = (*field = 18, NC(n_cache_get_field_i));
 		mission_id = (*field = 21, NC(n_cache_get_field_i));
+		to_msp = NULL;
+		from_msp = NULL;
 		for (i = 0, msp = missionpoints; i < nummissionpoints; i++, msp++) {
 			if (from_msp_id == msp->id) {
 				from_msp = msp;

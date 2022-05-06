@@ -56,7 +56,7 @@ UPDATE refuellog r JOIN veh v ON r.vehicle=v.i SET r.fuel=r.fuel/285.0 WHERE v.m
 UPDATE refuellog r JOIN veh v ON r.vehicle=v.i SET r.fuel=r.fuel/106.0 WHERE v.m=469; -- sparrow
 UPDATE refuellog r JOIN veh v ON r.vehicle=v.i SET r.fuel=r.fuel/91.0 WHERE v.m=513; -- stuntplane
 UPDATE refuellog r JOIN veh v ON r.vehicle=v.i SET r.fuel=r.fuel/416.0 WHERE v.m=488; -- vcnmav
-UPDATE refuellog r SET r.fuel=r.fuel/1000.0 WHERE r.fuel>1 -- other
+UPDATE refuellog r SET r.fuel=r.fuel/1000.0 WHERE r.fuel>1; -- other
 
 -- fuel is now in percentage, update missions
 UPDATE flg f JOIN veh v ON f.vehicle=v.i SET f.fuel=f.fuel/95000.0 WHERE v.m=592; -- androm
