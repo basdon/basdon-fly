@@ -31,6 +31,8 @@ struct MISSION {
 	int vehicleid;
 	/**if this mission is the continuation of a paused mission, this is the time of resuming*/
 	time_t starttime;
+	/*if this mission is the continuation of a paused mission, this is the the total duration seconds before resuming*/
+	int previous_duration_s;
 	short lastvehiclehp, damagetaken;
 	float lastfuel, fuelburned;
 	short weatherbonus;
@@ -55,6 +57,7 @@ struct PAUSED_MISSION {
 	short weatherbonus;
 	int damage;
 	float distance, actualdistanceM;
+	int previous_duration_s;
 	float fuel_burned_percentage;
 	int misc;
 	/**A paused mission can be cancelled/aborted while still in the 'handover' phase.
@@ -827,10 +830,10 @@ void missions_end_unfinished(int playerid, int reason)
 	mission = activemission[playerid];
 	mission->damagetaken += mission->lastvehiclehp - (short) GetVehicleHealth(mission->vehicleid);
 	mission->fuelburned += mission->lastfuel - vehicle_fuel[mission->vehicleid];
-	duration = (int) difftime(time(NULL), mission->starttime);
+	duration = mission->previous_duration_s + (int) difftime(time(NULL), mission->starttime);
 	sprintf(query,
 	        "UPDATE flg "
-		"SET state=%d,tlastupdate=UNIX_TIMESTAMP(),duration=duration+%d,adistance=%f,"
+		"SET state=%d,tlastupdate=UNIX_TIMESTAMP(),duration=%d,adistance=%f,"
 		"fuel=%f,damage=%d,satisfaction=%d,pweatherbonus=%d "
 		"WHERE id=%d",
 	        reason,
@@ -1113,6 +1116,7 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 	mission->endpoint = endpoint;
 	mission->distance = sqrt(dx * dx + dy * dy);
 	mission->actualdistanceM = 0.0f;
+	mission->previous_duration_s = 0;
 	mission->passenger_satisfaction = 100;
 	mission->vehmodel = veh->model;
 	mission->vehicleid = vehicleid;
@@ -1224,7 +1228,7 @@ int missions_after_unload(void *data)
 	miss->lastvehiclehp = (short) vehhp;
 	miss->fuelburned += miss->lastfuel - vehicle_fuel[miss->vehicleid];
 
-	duration_total_s = (int) difftime(time(NULL), miss->starttime);
+	duration_total_s = miss->previous_duration_s + (int) difftime(time(NULL), miss->starttime);
 	duration_m = duration_total_s % 60;
 	duration_h = (duration_total_s - duration_m) / 60;
 
@@ -1282,7 +1286,7 @@ int missions_after_unload(void *data)
 
 	sprintf(cbuf4096_,
 		"UPDATE flg SET tunload=UNIX_TIMESTAMP(),"
-		"tlastupdate=UNIX_TIMESTAMP(),duration=duration+%d,"
+		"tlastupdate=UNIX_TIMESTAMP(),duration=%d,"
 		"state=%d,fuel=%f,ptax=%d,pweatherbonus=%d,psatisfaction=%d,"
 		"pdistance=%d,pdamage=%d,pcheat=%d,pbonus=%d,ptotal=%d,"
 		"satisfaction=%d,adistance=%f,paymp=%f,damage=%d "
@@ -2074,6 +2078,7 @@ void missions_cb_dlg_continue_paused_mission(int playerid, struct DIALOG_RESPONS
 				mission->endpoint = paused->endpoint;
 				mission->distance = paused->distance;
 				mission->actualdistanceM = paused->actualdistanceM;
+				mission->previous_duration_s = paused->previous_duration_s;
 				mission->passenger_satisfaction = paused->passenger_satisfaction;
 				mission->vehmodel = paused->vehmodel;
 				mission->vehicleid = vehicleid;
@@ -2226,8 +2231,9 @@ void missions_cb_load_paused_mission(void *data)
 		paused->id = mission_id;
 		paused->damage = (*field = 22, NCF(n_cache_get_field_f));
 		paused->distance = (*field = 23, NCF(n_cache_get_field_f));
-		paused->fuel_burned_percentage = (*field = 24, NCF(n_cache_get_field_f));
-		paused->actualdistanceM = (*field = 25, NCF(n_cache_get_field_f));
+		paused->actualdistanceM = (*field = 24, NCF(n_cache_get_field_f));
+		paused->previous_duration_s = (*field = 25, NCF(n_cache_get_field_f));
+		paused->fuel_burned_percentage = (*field = 26, NCF(n_cache_get_field_f));
 		if (spawned[playerid] && mission_stage[playerid] == MISSION_STAGE_NOMISSION) {
 			missions_prompt_continue_paused_mission(playerid);
 		}
@@ -2240,7 +2246,7 @@ void missions_query_paused_missions(int playerid)
 	sprintf(cbuf4096_,
 		"SELECT v.m,"
 		"p.x,p.y,p.z,p.qw,p.qx,p.qy,p.qz,p.vx,p.vy,p.vz,p.fuel,p.hp,p.gear_keys,p.udlrkeys,p.misc,"
-		"f.missiontype,f.fmsp,f.tmsp,f.satisfaction,f.pweatherbonus,f.id,f.damage,f.distance,f.fuel,f.adistance "
+		"f.missiontype,f.fmsp,f.tmsp,f.satisfaction,f.pweatherbonus,f.id,f.damage,f.distance,f.adistance,f.duration,f.fuel "
 		"FROM pfl p "
 		"JOIN flg f ON p.fid=f.id "
 		"JOIN veh v ON f.vehicle=v.i "
