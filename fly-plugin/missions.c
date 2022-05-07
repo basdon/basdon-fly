@@ -1875,6 +1875,7 @@ struct MISSION_RESUME_DATA {
 	char send_onfoot : 1;
 	char done : 1;
 	char dialog_closed : 1;
+	char send_with_velocity : 1;
 };
 
 static
@@ -1974,7 +1975,7 @@ exit:
 		syncdata.aligned.structured.partial_keys = paused->gear_keys & 0xFFFF;
 		bitstream_write_quaternion(&bitstream, paused->quat.w, paused->quat.x, paused->quat.y, paused->quat.z);
 		bitstream_write_bytes(&bitstream, &paused->pos, 12); /*position*/
-		if (rd->ms_left < MISSION_RESUME_SYNCDATA_TIMEOUT * 3 || rd->send_initial) {
+		if (rd->send_initial || rd->send_with_velocity) {
 			bitstream_write_velocity(&bitstream, paused->vel.x, paused->vel.y, paused->vel.z);
 		} else {
 			bitstream_write_velocity(&bitstream, 0.0f, 0.0f, 0.0f);
@@ -1998,6 +1999,14 @@ exit:
 		bitstream_write_zero(&bitstream); /*has_trailer_id*/
 		/*See 0x80AC4F9 (CNetGame::BroadCastPlayerSyncData+129)*/
 		RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+
+		if (rd->send_with_velocity) {
+			/*send it 3x because it's important to have these delivered :D*/
+			RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+			RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+			rd->send_onfoot = 1;
+			return 30; /*wait less long to exit after sending the last driversync*/
+		}
 	}
 
 	if (rd->send_initial) {
@@ -2016,8 +2025,7 @@ exit:
 	if (rd->dialog_closed) {
 		rd->ms_left -= MISSION_RESUME_SYNCDATA_TIMEOUT;
 		if (rd->ms_left < MISSION_RESUME_SYNCDATA_TIMEOUT) {
-			rd->send_onfoot = 1;
-			return 20; /*wait less long to exit after sending the last driversync*/
+			rd->send_with_velocity = 1;
 		}
 
 		sprintf(text, "~n~~n~~b~Handing over control, get ready!~n~%.1fs", rd->ms_left / 1000.0f);
@@ -2065,6 +2073,7 @@ void missions_cb_dlg_continue_paused_mission(int playerid, struct DIALOG_RESPONS
 				rd->send_onfoot = 0;
 				rd->done = 0;
 				rd->dialog_closed = 0;
+				rd->send_with_velocity = 0;
 				paused = paused_mission[playerid];
 				pos.coords = paused->pos;
 				pos.r = 0.0f;
