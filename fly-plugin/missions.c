@@ -17,6 +17,7 @@ static int number_missions_started_stopped[MAX_PLAYERS];
 /*whether or not the last_syncdata field is set*/
 #define MISSION_FLAG_HAS_LAST_SYCDATA 0x4
 #define MISSION_FLAG_WAS_PAUSED 0x8
+#define MISSION_FLAG_CHANGE_CLASS_AFTER_FINISH 0x16
 
 struct MISSION {
 	int id;
@@ -31,12 +32,14 @@ struct MISSION {
 	int vehicleid;
 	/**if this mission is the continuation of a paused mission, this is the time of resuming*/
 	time_t starttime;
-	/*if this mission is the continuation of a paused mission, this is the the total duration seconds before resuming*/
+	/**if this mission is the continuation of a paused mission, this is the the total duration seconds before resuming*/
 	int previous_duration_s;
 	short lastvehiclehp, damagetaken;
 	float lastfuel, fuelburned;
 	short weatherbonus;
 	int flags;
+	/**class to change to on finish if this mission is the continuation of a paused mission*/
+	short previous_player_class;
 	struct SYNCDATA_Driver last_syncdata;
 };
 
@@ -71,7 +74,7 @@ struct PAUSED_MISSION {
 static struct PAUSED_MISSION *paused_mission[MAX_PLAYERS];
 
 /**
- * Available mission point types for player, based on their class and vehicle.
+ * Available mission point types for player, only for the class they are.
  */
 static int missions_available_msptype_mask[MAX_PLAYERS];
 /**
@@ -794,6 +797,13 @@ void missions_cleanup(int playerid)
 		or the destroy vehicle will cause another mission end and thus
 		infinite loop*/
 
+		missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[mission->previous_player_class];
+		classid[playerid] = mission->previous_player_class;
+		NC_PARS(2);
+		nc_params[1] = playerid;
+		nc_params[2] = CLASS_COLORS[mission->previous_player_class];
+		NC(n_SetPlayerColor);
+
 		if (paused_mission[playerid] && paused_mission[playerid]->id == mission->id) {
 			paused_mission[playerid]->is_cancelled = 1;
 		}
@@ -807,6 +817,8 @@ void missions_cleanup(int playerid)
 	if (was_paused_mission) {
 		veh_DestroyVehicle(missionvehicleid);
 		playerpool->virtualworld[playerid] = 0;
+		mission->flags |= MISSION_FLAG_CHANGE_CLASS_AFTER_FINISH;
+		mission->previous_player_class = classid[playerid];
 		if (GetPlayerState(playerid) != PLAYER_STATE_WASTED) {
 			natives_SpawnPlayer(playerid);
 		}
@@ -1875,7 +1887,7 @@ struct MISSION_RESUME_DATA {
 	char send_onfoot : 1;
 	char done : 1;
 	char dialog_closed : 1;
-	char send_with_velocity : 1;
+	char last_invehicle_packet : 1;
 };
 
 static
@@ -1975,12 +1987,16 @@ exit:
 		syncdata.aligned.structured.partial_keys = paused->gear_keys & 0xFFFF;
 		bitstream_write_quaternion(&bitstream, paused->quat.w, paused->quat.x, paused->quat.y, paused->quat.z);
 		bitstream_write_bytes(&bitstream, &paused->pos, 12); /*position*/
-		if (rd->send_initial || rd->send_with_velocity) {
+		if (rd->send_initial || rd->last_invehicle_packet) {
 			bitstream_write_velocity(&bitstream, paused->vel.x, paused->vel.y, paused->vel.z);
 		} else {
-			bitstream_write_velocity(&bitstream, 0.0f, 0.0f, 0.0f);
+			bitstream_write_velocity(&bitstream, 0.0f, 0.0f, 0.01f);
 		}
-		bitstream_write_bits(&bitstream, paused->hp, 16); /*vehicle_health*/
+		if (rd->last_invehicle_packet) {
+			bitstream_write_bits(&bitstream, paused->hp, 16); /*vehicle_health*/
+		} else {
+			bitstream_write_bits(&bitstream, 1000, 16); /*vehicle_health*/
+		}
 		bitstream_write_bits(&bitstream, 0xFF, 8); /*player_health_armor (unsure how this val is made, but this works)*/
 		bitstream_write_bits(&bitstream, 0, 6); /*weapon_id*/
 		bitstream_write_bits(&bitstream, (paused->gear_keys >> 16) & 3, 2); /*additional_keys*/
@@ -2000,7 +2016,7 @@ exit:
 		/*See 0x80AC4F9 (CNetGame::BroadCastPlayerSyncData+129)*/
 		RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
 
-		if (rd->send_with_velocity) {
+		if (rd->last_invehicle_packet) {
 			/*send it 3x because it's important to have these delivered :D*/
 			RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
 			RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
@@ -2025,7 +2041,7 @@ exit:
 	if (rd->dialog_closed) {
 		rd->ms_left -= MISSION_RESUME_SYNCDATA_TIMEOUT;
 		if (rd->ms_left < MISSION_RESUME_SYNCDATA_TIMEOUT) {
-			rd->send_with_velocity = 1;
+			rd->last_invehicle_packet = 1;
 		}
 
 		sprintf(text, "~n~~n~~b~Handing over control, get ready!~n~%.1fs", rd->ms_left / 1000.0f);
@@ -2054,8 +2070,8 @@ void missions_cb_dlg_continue_paused_mission(int playerid, struct DIALOG_RESPONS
 	struct SampVehicle *vehicle;
 	struct DIALOG_INFO dialog;
 	struct MISSION *mission;
+	int vehicleid, i;
 	struct vec4 pos;
-	int vehicleid;
 
 	if (paused_mission[playerid] && paused_mission[playerid]->id == (int) response.data) {
 		if (response.response) {
@@ -2073,7 +2089,7 @@ void missions_cb_dlg_continue_paused_mission(int playerid, struct DIALOG_RESPONS
 				rd->send_onfoot = 0;
 				rd->done = 0;
 				rd->dialog_closed = 0;
-				rd->send_with_velocity = 0;
+				rd->last_invehicle_packet = 0;
 				paused = paused_mission[playerid];
 				pos.coords = paused->pos;
 				pos.r = 0.0f;
@@ -2100,6 +2116,21 @@ void missions_cb_dlg_continue_paused_mission(int playerid, struct DIALOG_RESPONS
 				mission->flags = MISSION_FLAG_WAS_PAUSED;
 				mission->flags |= MISSION_FLAG_NEEDS_TRACKER_RESUME_FLAG;
 				mission->flags |= MISSION_FLAG_IS_PAUSED_SET_TO_IN_PROGRESS_ON_NEXT_DRIVERSYNC;
+				if (!(CLASS_MSPTYPES[classid[playerid]] & mission->missiontype)) {
+					for (i = 0; i < SETTING__NUM_CLASSES; i++) {
+						if (CLASS_MSPTYPES[i] & mission->missiontype) {
+							mission->flags |= MISSION_FLAG_CHANGE_CLASS_AFTER_FINISH;
+							mission->previous_player_class = classid[playerid];
+							missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[i];
+							classid[playerid] = i;
+							NC_PARS(2);
+							nc_params[1] = playerid;
+							nc_params[2] = CLASS_COLORS[i];
+							NC(n_SetPlayerColor);
+							break;
+						}
+					}
+				}
 				playerpool->virtualworld[playerid] = VW_MISSION_RESUME_BASE + playerid;
 				vehiclepool->virtualworld[vehicleid] = VW_MISSION_RESUME_BASE + playerid;
 				vehicle = vehiclepool->vehicles[vehicleid];

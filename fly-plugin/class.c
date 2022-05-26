@@ -57,7 +57,7 @@ void class_on_player_request_class(int playerid, int _classid)
 	NC(n_SetPlayerCameraLookAt);
 
 	/*This is also called when the player is connecting, but then they
-	aren't logged in yet, so use  SetPlayerPos to hide the player and
+	aren't logged in yet, so use SetPlayerPos to hide the player and
 	don't do class thingies.*/
 	if (!ISPLAYING(playerid)) {
 		/*position behind the camera, to hide during login*/

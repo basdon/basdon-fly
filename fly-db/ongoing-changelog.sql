@@ -97,3 +97,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2022 May 06', 'Flights will now be paused when leaving the server, they can be resumed when reconnecting');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2022 May 26', 'Fixed some issues regarding to continuing paused flights');
