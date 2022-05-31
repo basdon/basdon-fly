@@ -78,7 +78,7 @@ int copilot_is_player_copiloting(int playerid, int vehicleid)
 	int vehiclemodel;
 
 	vehiclemodel = GetVehicleModel(vehicleid);
-	return GetPlayerVehicleSeat(playerid) > game_get_air_vehicle_passengerseats(vehiclemodel);
+	return game_is_air_vehicle(vehiclemodel) && GetPlayerVehicleSeat(playerid) > game_get_air_vehicle_passengerseats(vehiclemodel);
 }
 
 static
