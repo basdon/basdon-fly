@@ -797,12 +797,14 @@ void missions_cleanup(int playerid)
 		or the destroy vehicle will cause another mission end and thus
 		infinite loop*/
 
-		missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[mission->previous_player_class];
-		classid[playerid] = mission->previous_player_class;
-		NC_PARS(2);
-		nc_params[1] = playerid;
-		nc_params[2] = CLASS_COLORS[mission->previous_player_class];
-		NC(n_SetPlayerColor);
+		if (mission->flags & MISSION_FLAG_CHANGE_CLASS_AFTER_FINISH) {
+			missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[mission->previous_player_class];
+			classid[playerid] = mission->previous_player_class;
+			NC_PARS(2);
+			nc_params[1] = playerid;
+			nc_params[2] = CLASS_COLORS[mission->previous_player_class];
+			NC(n_SetPlayerColor);
+		}
 
 		if (paused_mission[playerid] && paused_mission[playerid]->id == mission->id) {
 			paused_mission[playerid]->is_cancelled = 1;
@@ -817,8 +819,6 @@ void missions_cleanup(int playerid)
 	if (was_paused_mission) {
 		veh_DestroyVehicle(missionvehicleid);
 		playerpool->virtualworld[playerid] = 0;
-		mission->flags |= MISSION_FLAG_CHANGE_CLASS_AFTER_FINISH;
-		mission->previous_player_class = classid[playerid];
 		if (GetPlayerState(playerid) != PLAYER_STATE_WASTED) {
 			natives_SpawnPlayer(playerid);
 		}
