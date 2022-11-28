@@ -165,7 +165,11 @@ table.new th + th {
 	font-size: .8em;
 }
 .flight-state {
-	padding: 0;
+	padding: .1em .4em;
+	border-radius: 3px;
+	font-family: monospace;
+	text-transform: uppercase;
+	white-space: nowrap;
 }
 .flight-state-1 {
 	background: #ddf;
@@ -283,3 +287,28 @@ ul.compact {
 	margin: 0;
 	padding-left: 1em;
 }
+
+.flightlist {
+	border-spacing: 0 5px;
+	}
+	.flightlist tr {
+	}
+	.flightlist td {
+		background: #eee;
+		padding: .1em .3em;
+	}
+	.flightlist td:first-child {
+		border-radius: .5em 0 0 .5em;
+		padding-left: 1.3em;
+	}
+	.flightlist td:last-child {
+		border-radius: 0 .5em .5em 0;
+		padding-right: 1.3em;
+	}
+	.flightlist .route {
+		font-family: monospace;
+		}
+		.flightlist .route span {
+			font-size: 120%;
+			margin: 0 .3em;
+		}
