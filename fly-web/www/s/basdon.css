@@ -120,13 +120,6 @@ h2+div,h3+div,h4+div,h5+div{
 	height: auto;
 	padding: .3em;
 }
-img.missing {
-	width: 100%;
-	image-rendering: -moz-crisp-edges;
-	image-rendering: -o-crisp-edges;
-	image-rendering: -webkit-pixelated;
-	image-rendering: pixelated;
-}
 .tablescroller {
 	overflow-x: auto;
 	margin: 1em 0;
