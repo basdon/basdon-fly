@@ -10,12 +10,8 @@ require '../inc/conf.php';
 require '../inc/db.php';
 
 $aptcodes = [];
-if (isset($_GET['id'])) {
-	$aptcodes[] = $db->query('SELECT c FROM apt WHERE i='.$_GET['id'])->fetchAll()[0]->c;
-} else {
-	foreach ($db->query('SELECT c FROM apt') as $r) {
-		$aptcodes[] = $r->c;
-	}
+foreach ($db->query('SELECT c FROM apt') as $r) {
+	$aptcodes[] = $r->c;
 }
 
 nextap:
@@ -143,11 +139,6 @@ echo '</tbody>';
 echo '</table>';
 
 file_put_contents('../gen/apfactsheet_'.$apt->c.'.html', ob_get_contents());
-if (isset($_GET['web'])) {
-	echo '<link rel="stylesheet" href="http://localhost:8080/sapstatic/article.css" type="text/css" />';
-	ob_end_flush();
-} else {
-	ob_end_clean();
-}
+ob_end_clean();
 
 goto nextap;
