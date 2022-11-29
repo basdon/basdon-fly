@@ -18,7 +18,7 @@ if ($__REPARSE__) {
 include('../inc/__settings.php');
 
 $META_TAGS = [
-	'og:image' => '/s/favicon-96x96.png',
+	'og:image' => $ABS_URL . '/s/favicon-96x96.png',
 	'og:site_name' => 'basdon.net aviation server',
 ];
 
