@@ -65,7 +65,7 @@ if ($action == 'home') {
 
 function adminlink($name, $target)
 {
-	global $action, $BASEPATH;
+	global $action;
 	if ($action == $target) {
 		echo '<strong>'.$name.'</strong>';
 	} else {

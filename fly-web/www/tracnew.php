@@ -59,7 +59,7 @@ if (!isset($loggeduser)) {
 			if ($visibility == $GROUPS_ALL) {
 				$gamemsg .= ': ' . mb_convert_encoding($summary, 'ASCII');
 			}
-			$ircmsg = $gamemsg.' -> '.$BASEPATH.'/tracview.php?id='.$id;
+			$ircmsg = $gamemsg.' -> '.$ABS_URL.'/tracview.php?id='.$id;
 			echo_send_message_irc_game(1, $ircmsg, $gamemsg);
 
 			header('Location: tracview.php?id=' . $id . '#u' .$t);

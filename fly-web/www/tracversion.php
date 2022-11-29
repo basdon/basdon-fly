@@ -43,7 +43,7 @@ if (group_is_owner($usergroups) && isset($_GET['rel'], $_GET['dorelease'])) {
 
 	include('../inc/echo.php');
 	$gamemsg = 'TRAC: '.$loggeduser->name.' released version '.trac_releasetime($rel).', closing '.count($tickets).' tickets';
-	$ircmsg = $gamemsg.' -> '.$BASEPATH.'/tracversion.php?rel='.$rel;
+	$ircmsg = $gamemsg.' -> '.$ABS_URL.'/tracversion.php?rel='.$rel;
 	echo_send_message_irc_game(1, $ircmsg, $gamemsg);
 } skiprelease:
 

@@ -42,7 +42,7 @@ if (!isset($loggeduser)) {
 
 function acclink($name, $target)
 {
-	global $action, $BASEPATH;
+	global $action;
 	if ($action == $target) {
 		echo '<strong>'.$name.'</strong>';
 	} else {

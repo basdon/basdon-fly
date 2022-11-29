@@ -5,7 +5,7 @@ $db_name = '';
 $db_uname = '';
 $db_passw = '';
 
-$BASEPATH = 'http://basdon-local.net';
+$ABS_URL = 'http://basdon-local.net'; // no trailing slash
 $COOKIENAME = 'jsessionid';
 $COOKIEPATH = '';
 $COOKIEDOMAIN = '';

@@ -134,7 +134,7 @@ if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 	$stmt->bindValue(1, $article_name);
 	if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 		http_response_code(301);
-		header('Location: '.$BASEPATH.'/article.php?title='.$r[0]->name.'&from='.$article_name);
+		header('Location: '.$ABS_URL.'/article.php?title='.$r[0]->name.'&from='.$article_name);
 		die();
 	}
 }
