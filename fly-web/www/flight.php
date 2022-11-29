@@ -58,7 +58,7 @@ try {
 		$duration = sprintf('%02d:%02d', floor($diff / 60), $diff % 60);
 		$vehname = aircraft_name($r->vehmodel);
 		$META_TAGS['og:title'] = "Flight #{$id} by {$r->name} ({$status})";
-		$META_TAGS['og:image'] = "/s/flightmap.php?id={$id}";
+		$META_TAGS['og:image'] = "{$ABS_URL}/s/flightmap.php?id={$id}";
 		$META_TAGS['twitter:card'] = 'summary_large_image';
 		$META_TAGS['og:description'] = "{$r->fromname} -&gt; {$r->toname} ({$r->adistance}m) ({$duration})\n{$vehname}, {$satisfaction}";
 		/*The normal status colors are very light (because they're background),
