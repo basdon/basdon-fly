@@ -124,13 +124,13 @@ Installation/configuration
 		is #basdon.echo, add this to
 		$ANNA_DIR/out/config/mod_log.properties:
 
-			channel.basdon.echo=/path/to/basdon-fly/fly-web/static/chatlogs/basdon.echo
-			channel.basdon=/path/to/basdon-fly/fly-web/static/chatlogs/basdon
+			channel.basdon.echo=/basdon-fly/fly-web/www/s/chatlogs/basdon.echo
+			channel.basdon=/basdon-fly/fly-web/www/s/chatlogs/basdon
 
-	      Or set it by sending commands to Anna^:
+		Or set it by sending commands to Anna^:
 
-			&confadd mod_log channel.basdon.echo /path/to/basdon-fly/fly-web/static/chatlogs/basdon.echo
-			&confadd mod_log channel.basdon /path/to/basdon-fly/fly-web/static/chatlogs/basdon
+			&confadd mod_log channel.basdon.echo /basdon-fly/fly-web/www/s/chatlogs/basdon.echo
+			&confadd mod_log channel.basdon /basdon-fly/fly-web/www/s/chatlogs/basdon
 
 	fly-echo:
 		The mod_bas_echo.jar file is placed in $ANNA_DIR/out by the
@@ -158,11 +158,11 @@ Installation/configuration
 
 		Add this to $ANNA_DIR/out/config/mod_bas_ft.properties:
 
-			fdr.path=/path/to/basdon-fly/fly-web/static/fdr
+			fdr.path=/basdon-fly/fly-web/www/s/fdr
 
 	      Or set it by sending commands to Anna^:
 
-			&confadd mod_bas_ft fdr.path /path/to/basdon-fly/fly-web/static/fdr
+			&confadd mod_bas_ft fdr.path /basdon-fly/fly-web/www/s/fdr
 
 	fly-web:
 		An Apache http server configuration file is provided in

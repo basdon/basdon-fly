@@ -101,7 +101,7 @@ function spate_generate($template_dir, $template)
 			} while ($c != ' ' && $c != '}');
 			switch ($directive) {
 			case "@globe":
-				$result .= '<img src="<?=$STATICPATH?>/moin-www.png" alt="globe icon" title="external link"/>';
+				$result .= '<img src="/s/moin-www.png" alt="globe icon" title="external link"/>';
 				$j += 81;
 				goto next;
 			case "@pre":

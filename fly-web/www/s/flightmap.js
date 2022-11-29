@@ -2,7 +2,7 @@ function e(a)
 {
 	return document.getElementById(a);
 }
-function flightmap(staticpath, id)
+function flightmap(id)
 {
 	var formatevent = function(time, description)
 	{
@@ -547,7 +547,7 @@ function flightmap(staticpath, id)
 	var msgdiv = e('fm_mapmsg');
 	var req = new XMLHttpRequest();
 	req.responseType = "arraybuffer";
-	req.open('GET', staticpath + '/fdr/' + id + '.flight', 1);
+	req.open('GET', '/s/fdr/' + id + '.flight', 1);
 	req.onload = function()
 	{
 		if (this.status >= 200 && this.status < 300) {

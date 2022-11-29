@@ -53,7 +53,7 @@ articles: $(ARTICLE_OBJECTS) inc/__settings.php
 
 aerodromecharts: inc/__settings.php
 	rm -f gen/aerodrome*
-	rm -f static/gen/aerodrome*
+	rm -f www/s/gen/aerodrome*
 	cd cli && php genaerodromechart.php
 
 apfactsheets: inc/__settings.php
@@ -70,11 +70,11 @@ islandmapdata:
 
 islandmaps: inc/__settings.php
 	rm -f gen/islandmap*.html
-	rm -f static/gen/islandmap*
+	rm -f www/s/gen/islandmap*
 	cd cli && php genislandmaps.php
 
 flightmapjs: islandmapdata inc/__settings.php
-	rm -f static/gen/fm_complete.js
+	rm -f www/s/gen/fm_complete.js
 	cd cli && php genflightmapjscomplete.php
 
 ensureplayergraph: inc/__settings.php
@@ -97,4 +97,4 @@ mission-point-types-tables: inc/__settings.php
 clean:
 	rm -f inc/__settings.php
 	rm -f gen/*
-	rm -f static/gen/*
+	rm -f www/s/gen/*

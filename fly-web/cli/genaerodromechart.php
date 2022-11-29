@@ -313,15 +313,15 @@ ob_start();
 imagepng($im);
 imagedestroy($im);
 $imagedata = ob_get_clean();
-file_put_contents('../static/gen/aerodromev2_'.$apt->c.'.png', $imagedata);
+file_put_contents('../www/s/gen/aerodromev2_'.$apt->c.'.png', $imagedata);
 
 ob_start();
 ?>
 <div>
-<link rel="stylesheet" href="<?=$STATICPATH?>/aerodromechart.css" type="text/css" />
+<link rel="stylesheet" href="/s/aerodromechart.css" type="text/css" />
 <input id="aer-show" type="checkbox" /><label for="aer-show">Show chart (wide content)</label><br/>
 <div class="aechart" style="min-width:<?=$imgw?>px;min-height:<?=$imgh?>px">
-	<img src="<?=$STATICPATH?>/gen/aerodromev2_<?=$apt->c?>.png" alt="<?=$apcode?> aerodrome chart"/>
+	<img src="/s/gen/aerodromev2_<?=$apt->c?>.png" alt="<?=$apcode?> aerodrome chart"/>
 	<?php if(count($vehicles) || count($missionpoints) || count($spawns)) {?>
 		<div class="toggles">
 			<input type="checkbox" checked="checked" id="aer-0" class="hide"/>

@@ -122,8 +122,8 @@ ob_start();
 imagepng($im);
 imagedestroy($im);
 $imagedata = ob_get_clean();
-file_put_contents('../static/gen/islandmap_'.$aptcode.'.png', $imagedata);
-$htmldata = '<h3>Island map</h3><p><img src="'.$STATICPATH.'/gen/islandmap_'.$aptcode.'.png" alt="'.$aptcode.' island map" title="'.$aptcode.' island map" /></p>';
+file_put_contents('../www/s/gen/islandmap_'.$aptcode.'.png', $imagedata);
+$htmldata = '<h3>Island map</h3><p><img src="/s/gen/islandmap_'.$aptcode.'.png" alt="'.$aptcode.' island map" title="'.$aptcode.' island map" /></p>';
 writehtml:
 file_put_contents('../gen/islandmap_'.$aptcode.'.html', $htmldata);
 

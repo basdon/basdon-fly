@@ -60,7 +60,7 @@ ob_start();
 					<th></th>
 					<?php foreach ($vehicles as $v) { ?>
 						<th>
-							<a href="<?=$BASEPATH?>/article.php?title=List_of_aircraft#<?=str_replace(' ', '_', vehicle_name($v[0]))?>">
+							<a href="/article.php?title=List_of_aircraft#<?=str_replace(' ', '_', vehicle_name($v[0]))?>">
 								<?=vehicle_name($v[0])?>
 							</a>
 						</th>
@@ -88,4 +88,4 @@ ob_start();
 $htmldata = ob_get_clean();
 $htmldata = str_replace("\t", "", $htmldata);
 $htmldata = str_replace("\n", "", $htmldata);
-file_put_contents('../static/gen/mission-point-types-vehicles.html', $htmldata);
+file_put_contents('../www/s/gen/mission-point-types-vehicles.html', $htmldata);

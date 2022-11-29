@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<title>Category:{$cat->name} :: basdon.net aviation server</title>
-	<link rel="stylesheet" href="{@unsafe $STATICPATH}/article.{@unsafe $CSS_SUFFIX}" type="text/css" />
+	<link rel="stylesheet" href="/s/article.{@unsafe $CSS_SUFFIX}" type="text/css" />
 	{@render defaulthead.tpl}
 </head>
 <body>

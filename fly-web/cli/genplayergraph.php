@@ -204,7 +204,7 @@ if (isset($_SERVER['REMOTE_ADDR']) && !isset($_GET['d'])) {
 
 ob_start();
 imagepng($im);
-file_put_contents('../static/gen/playergraph.png', ob_get_contents());
+file_put_contents('../www/s/gen/playergraph.png', ob_get_contents());
 if (isset($_SERVER['REMOTE_ADDR'])) {
 	ob_end_flush();
 } else {

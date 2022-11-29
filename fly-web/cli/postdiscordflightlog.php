@@ -59,7 +59,7 @@ $embed = new stdClass();
 $embed->title = "Flight #{$id} by {$r->name} ({$status})";
 $embed->url = $BASEPATH.'/flight.php?id='.$id;
 $embed->image = new stdClass();
-$embed->image->url = $STATICPATH.'/flightmap.php?id='.$id;
+$embed->image->url = $BASEPATH.'/s/flightmap.php?id='.$id;
 $from = new stdClass();
 $from->name = 'From';
 $from->value = "[{$r->fromname} ($r->fromcode)]({$BASEPATH}/article.php?title={$r->fromcode}) {$r->fromgate}";

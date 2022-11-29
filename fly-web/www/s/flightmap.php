@@ -1,6 +1,6 @@
 <?php
-include('../inc/conf.php');
-include('../inc/funcs.php');
+include '../../inc/conf.php' ;
+include '../../inc/funcs.php' ;
 header('Content-Type: image/png');
 
 // set up image
@@ -22,7 +22,7 @@ if (!isset($id) || $id < 0 || $id > 2000000) {
 }
 
 // read flight file
-$filename = '../static/fdr/'.$id.'.flight';
+$filename = 'fdr/'.$id.'.flight';
 if (!file_exists($filename)) {
 	imagestring($im, 5, 20, 20, 'no flight data', $fill);
 	goto output;
@@ -141,7 +141,7 @@ function is_in_viewport($x1, $y1, $x2, $y2)
 }
 
 // minimap and runway data
-eval('$data='.file_get_contents('../gen/islandmapdata.txt'));
+eval('$data='.file_get_contents('../../gen/islandmapdata.txt'));
 
 // draw minimap zones that are in the viewport
 for ($i = 1 + $data[0] * 5, $m = count($data); $i < $m;) {

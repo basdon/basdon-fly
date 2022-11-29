@@ -7,7 +7,7 @@ Service point 3D text}
 
 Service points are areas where you can repair and refuel your vehicle. They are
 marked on the radar with a S symbol: <img
-src="<?=$STATICPATH?>/articles/servicepoint.png" alt="Sweet mission icon"
+src="/s/articles/servicepoint.png" alt="Sweet mission icon"
 title="Service point marker"/>. Beware: because of SA-MP limits, a service point
 map icon does not show unless you are close to it. If you are close enough,
 there will also be a floating text label.

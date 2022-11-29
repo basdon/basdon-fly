@@ -154,12 +154,12 @@ s_{@stub}_<p class="msg warning">This article is a stub.</p>_
 	}
 
 	/{@agalleryimg/ {
-		s_{@agalleryimg \([^;]*\);\(.*\)}_<img class="gallery" src="<?=$STATICPATH?>/articles/\1" title="\2" alt="\2"/>_
+		s_{@agalleryimg \([^;]*\);\(.*\)}_<img class="gallery" src="/s/articles/\1" title="\2" alt="\2"/>_
 		b nexttag
 	}
-	s_{@aimg(\([^)]*\))=\([^;]*\);\([^;]*\);\([^;]*\);\(.*\)}_{@img(\1)=<?=$STATICPATH?>/articles/\2;\3;\4;\5}_
-	s_{@aimg=\([^;]*\);\([^;]*\);\([^;]*\);\(.*\)}_{@img=<?=$STATICPATH?>/articles/\1;\2;\3;\4}_
-	s_{@simg=\([^;]*\);\([^;]*\);\([^;]*\);\(.*\)}_{@img=<?=$STATICPATH?>/\1;\2;\3;\4}_
+	s_{@aimg(\([^)]*\))=\([^;]*\);\([^;]*\);\([^;]*\);\(.*\)}_{@img(\1)=/s/articles/\2;\3;\4;\5}_
+	s_{@aimg=\([^;]*\);\([^;]*\);\([^;]*\);\(.*\)}_{@img=/s/articles/\1;\2;\3;\4}_
+	s_{@simg=\([^;]*\);\([^;]*\);\([^;]*\);\(.*\)}_{@img=/s/\1;\2;\3;\4}_
 	/{@img=[^;]*;[^;]*;[^;]*;.*}/ {
 		s_{@img=\([^;]*\);\([^;]*\);\([^;]*\);\(.*\)}_<p class="img"><img src="\1" alt="\2" title="\3"/><br/>\4</p>_
 		b nexttag
@@ -169,9 +169,9 @@ s_{@stub}_<p class="msg warning">This article is a stub.</p>_
 		b nexttag
 	}
 
-	s_{@aimg(\([^)]*\))=\([^;]*\);\([^;]*\);\([^;]*\)}_{@img(\1)=<?=$STATICPATH?>/articles/\2;\3;\4}_
-	s_{@aimg=\([^;]*\);\([^;]*\);\([^;]*\)}_{@img=<?=$STATICPATH?>/articles/\1;\2;\3}_
-	s_{@simg=\([^;]*\);\([^;]*\);\([^;]*\)}_{@img=<?=$STATICPATH?>/\1;\2;\3}_
+	s_{@aimg(\([^)]*\))=\([^;]*\);\([^;]*\);\([^;]*\)}_{@img(\1)=/s/articles/\2;\3;\4}_
+	s_{@aimg=\([^;]*\);\([^;]*\);\([^;]*\)}_{@img=/s/articles/\1;\2;\3}_
+	s_{@simg=\([^;]*\);\([^;]*\);\([^;]*\)}_{@img=/s/\1;\2;\3}_
 	/{@img=[^;]*;[^;]*;.*}/ {
 		s_{@img=\([^;]*\);\([^;]*\);\(.*\)}_<p class="img"><img src="\1" alt="\2" title="\3"/></p>_
 		b nexttag
@@ -181,11 +181,11 @@ s_{@stub}_<p class="msg warning">This article is a stub.</p>_
 		b nexttag
 	}
 	/{@plainsimg=[^;]*;[^;]*;[^}]*}/ {
-		s_{@plainsimg=\([^;]*\);\([^;]*\);\([^}]*\)}_<img src="<?=$STATICPATH?>/\1" alt="\2" title="\3"/>_
+		s_{@plainsimg=\([^;]*\);\([^;]*\);\([^}]*\)}_<img src="/s/\1" alt="\2" title="\3"/>_
 		b nexttag
 	}
 	/{@plainsimg=[^;]*;[^}]*}/ {
-		s_{@plainsimg=\([^;]*\);\([^}]*\)}_<img src="<?=$STATICPATH?>/\1" alt="\2" title="\2"/>_
+		s_{@plainsimg=\([^;]*\);\([^}]*\)}_<img src="/s/\1" alt="\2" title="\2"/>_
 		b nexttag
 	}
 
@@ -194,14 +194,14 @@ s_{@stub}_<p class="msg warning">This article is a stub.</p>_
 		g
 		s/\(.*\)\n.*$/\1\n<\/a>/
 		x
-		s_.*\n\(.*\){@ia=\([^ ]*\) \?\(.*\)_\1<a href="<?=$BASEPATH?>/\2">\3_
+		s_.*\n\(.*\){@ia=\([^ ]*\) \?\(.*\)_\1<a href="/\2">\3_
 		b nexttag
 	}
 
 	/{@nfa=[^ ]*\( \|$\)/ {
 		H
 		g
-		s_\(.*\)\n.*$_\1\n</a><img src="<?=$STATICPATH?>/moin-www.png" alt="globe icon" title="external link"/>_
+		s_\(.*\)\n.*$_\1\n</a><img src="/s/moin-www.png" alt="globe icon" title="external link"/>_
 		x
 		s/.*\n\(.*\){@nfa=\([^ ]*\) \?\(.*\)/\1<a href="\2" rel="nofollow">\3/
 		b nexttag
@@ -210,7 +210,7 @@ s_{@stub}_<p class="msg warning">This article is a stub.</p>_
 	/{@a=[^ ]*\( \|$\)/ {
 		H
 		g
-		s_\(.*\)\n.*$_\1\n</a><img src="<?=$STATICPATH?>/moin-www.png" alt="globe icon" title="external link"/>_
+		s_\(.*\)\n.*$_\1\n</a><img src="/s/moin-www.png" alt="globe icon" title="external link"/>_
 		x
 		s/.*\n\(.*\){@a=\([^ ]*\) \?\(.*\)/\1<a href="\2">\3/
 		b nexttag

@@ -17,7 +17,7 @@
 		</small>
 		<h1><a href="./">basdon.net aviation server <span style="font-size:.7em;color:#28c">beta</span></a></h1>
 	</div>
-	<img src="{@unsafe $STATICPATH}/banner.png" style="width:100%" alt="header panorama img"/>
+	<img src="/s/banner.png" style="width:100%" alt="header panorama img"/>
 	<div>
 		<p id="ip">IP: <a href="samp://basdon.net:7777">basdon.net:7777</a> (<a href="article.php?title=How_To_Join">How to join</a>)</p>
 		<p><a href="./">Home</a> :: <a href="flights.php">Flights</a> :: <a href="article.php">Articles</a> :: <a href="stats.php">Stats</a></p>

@@ -56,7 +56,7 @@
 			Discord: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}
 		</p>
 		<p>
-			IRC: #basdon (<a href="{@unsafe $STATICPATH}/chatlogs/basdon/?C=M;O=D">chatlogs</a>) and #basdon.echo (<a href="{@unsafe $STATICPATH}/chatlogs/basdon.echo/?C=M;O=D">chatlogs</a>) on LUNet (<a href="irc://irc.liberty-unleashed.co.uk">irc.liberty-unleashed.co.uk</a>{@globe})
+			IRC: #basdon (<a href="/s/chatlogs/basdon/?C=M;O=D">chatlogs</a>) and #basdon.echo (<a href="/s/chatlogs/basdon.echo/?C=M;O=D">chatlogs</a>) on LUNet (<a href="irc://irc.liberty-unleashed.co.uk">irc.liberty-unleashed.co.uk</a>{@globe})
 		</p>
 
 		<h3>Our destinations</h3>
@@ -69,10 +69,10 @@
 		</div>
 		<h3>Screenshots</h3>
 		<p id="showcase">
-			<a href="{@unsafe $STATICPATH}/showcase-spitfire.jpg"><img src="{@unsafe $STATICPATH}/showcase-spitfire.jpg" title="Jenis landing at DUNE"></a>
-			<a href="{@unsafe $STATICPATH}/showcase-jobmap.jpg"><img src="{@unsafe $STATICPATH}/showcase-jobmap.jpg" title="mission map"></a>
-			<a href="{@unsafe $STATICPATH}/showcase-spitfire2.png"><img src="{@unsafe $STATICPATH}/showcase-spitfire2.png" title="Jenis"></a>
-			<a href="flight.php?id=2572"><img src="{@unsafe $STATICPATH}/showcase-map.png" title="flight map"></a>
+			<a href="/s/showcase-spitfire.jpg"><img src="/s/showcase-spitfire.jpg" title="Jenis landing at DUNE"></a>
+			<a href="/s/showcase-jobmap.jpg"><img src="/s/showcase-jobmap.jpg" title="mission map"></a>
+			<a href="/s/showcase-spitfire2.png"><img src="/s/showcase-spitfire2.png" title="Jenis"></a>
+			<a href="flight.php?id=2572"><img src="/s/showcase-map.png" title="flight map"></a>
 		</p>
 
 		<h3>Changelog</h3>
@@ -84,7 +84,7 @@
 		<p><a href="changelog.php">More...</a></p>
 
 		<h3>Player activity</h3>
-		<p><img style="width:100%" src="{@unsafe $STATICPATH}/gen/playergraph.png" /></p>
+		<p><img style="width:100%" src="/s/gen/playergraph.png" /></p>
 
 		<h4>Online now ({@unsafe count($onlineplayers)})</h4>
 		<p>

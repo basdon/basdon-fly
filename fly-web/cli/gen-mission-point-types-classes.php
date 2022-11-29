@@ -72,4 +72,4 @@ ob_start();
 $htmldata = ob_get_clean();
 $htmldata = str_replace("\t", "", $htmldata);
 $htmldata = str_replace("\n", "", $htmldata);
-file_put_contents('../static/gen/mission-point-types-classes.html', $htmldata);
+file_put_contents('../www/s/gen/mission-point-types-classes.html', $htmldata);

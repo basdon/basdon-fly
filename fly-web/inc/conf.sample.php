@@ -6,7 +6,6 @@ $db_uname = '';
 $db_passw = '';
 
 $BASEPATH = 'http://basdon-local.net';
-$STATICPATH = 'http://static.basdon-local.net';
 $COOKIENAME = 'jsessionid';
 $COOKIEPATH = '';
 $COOKIEDOMAIN = '';

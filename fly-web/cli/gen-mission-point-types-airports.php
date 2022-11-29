@@ -46,7 +46,7 @@ ob_start();
 					<th></th>
 					<?php foreach ($apts as $apt) { ?>
 						<th>
-							<a href="<?=$BASEPATH?>/article.php?title=<?=$apt->c?>">
+							<a href="/article.php?title=<?=$apt->c?>">
 								<?=$apt->c?>
 							</a>
 						</th>
@@ -74,4 +74,4 @@ ob_start();
 $htmldata = ob_get_clean();
 $htmldata = str_replace("\t", "", $htmldata);
 $htmldata = str_replace("\n", "", $htmldata);
-file_put_contents('../static/gen/mission-point-types-airports.html', $htmldata);
+file_put_contents('../www/s/gen/mission-point-types-airports.html', $htmldata);
