@@ -1,1 +1,1 @@
-UPDATE map SET name='LSAP',filename='lsa' WHERE id=1
+UPDATE map SET name='LSAP',filename='lsa' WHERE id=1;
