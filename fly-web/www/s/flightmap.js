@@ -117,8 +117,8 @@ function flightmap(id)
 			}
 		}
 		*/
-		var map_vsize = maxx - minx;
-		var map_vsize_y = maxy - miny;
+		var map_vsize = Math.max(maxx - minx, 1); // prevent division by zero below
+		var map_vsize_y = Math.max(maxy - miny, 1); // prevent division by zero below
 		if (map_vsize > map_vsize_y) {
 			var dif = (map_vsize - map_vsize_y) * 4 / 6;
 			miny -= dif / 2;
