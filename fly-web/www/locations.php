@@ -1,3 +1,3 @@
 <?php
 // same redirect as airport.php
-include('airport.php');
+require 'airport.php';

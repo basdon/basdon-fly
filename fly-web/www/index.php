@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 $db_querycount += 9;
 $activeflights = $db->query("
@@ -70,4 +70,4 @@ include '../inc/aircraftnames.php';
 include '../inc/flightstatuses.php';
 
 $__script = '_index';
-include('../inc/output.php');
+require '../inc/output.php';

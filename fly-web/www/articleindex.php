@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 $cats = [];
 $subcats = []; // temp to have mapping to load articles into
@@ -37,4 +37,4 @@ foreach ($db->query('SELECT id,cat,name,title FROM art ORDER BY cat ASC,title AS
 unset($subcats);
 
 $__script = '_articleindex';
-include('../inc/output.php');
+require '../inc/output.php';

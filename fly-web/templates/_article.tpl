@@ -30,8 +30,8 @@
 			{@if !is_file($file)}
 				<p style="color:#c22">Failed to get article contents.</p>
 			{@else}
-				{@eval include('../gen/articlemap.php')}
-				{@eval include($file)}
+				{@eval include '../gen/articlemap.php'}
+				{@eval include $file}
 			{@endif}
 			{@if isset($cat)}
 				{@rem don't show category box on uncategorized pages @}

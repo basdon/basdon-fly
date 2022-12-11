@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 // weather
 ++$db_querycount;
@@ -43,4 +43,4 @@ arsort($weather_percategory);
 $last_weathers = $db->query('SELECT w, t FROM wth WHERE t>UNIX_TIMESTAMP()-6*3600 ORDER BY t DESC');
 
 $__script = '_stats';
-include('../inc/output.php');
+require '../inc/output.php';

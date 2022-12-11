@@ -6,7 +6,7 @@ function exception_error_handler($severity, $message, $file, $line)
 }
 set_error_handler("exception_error_handler");
 
-require('../inc/spate.php');
+require '../inc/spate.php';
 if (count($argv) != 2) {
 	die('need file');
 }

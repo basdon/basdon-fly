@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 function fetch_changes()
 {
@@ -8,4 +8,4 @@ function fetch_changes()
 }
 
 $__script = '_changelog';
-include('../inc/output.php');
+require '../inc/output.php';

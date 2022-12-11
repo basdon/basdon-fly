@@ -31,4 +31,4 @@ doesn't have any navigational aids, however, there is a working beacon present.
 <?php readfile('../gen/aerodromechart_'.$code.'.html') ?>
 
 {@rem no clear, the dyn-stats template clears (before the flights part) @}
-<?php include('../articles/airport-dyn-stats.php') ?>
+<?php include '../articles/airport-dyn-stats.php' ?>

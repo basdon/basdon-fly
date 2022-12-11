@@ -39,4 +39,4 @@ The ship has no service points. Aircrafts in need for repair usually go to
 <?php readfile('../gen/aerodromechart_'.$code.'.html') ?>
 
 {@rem no clear, the dyn-stats template clears (before the flights part) @}
-<?php include('../articles/airport-dyn-stats.php') ?>
+<?php include '../articles/airport-dyn-stats.php' ?>

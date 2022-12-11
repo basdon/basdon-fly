@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 $id = -1;
 if (isset($_GET['id'])) {
@@ -84,4 +84,4 @@ try {
 }
 
 $__script = '_flight';
-include('../inc/output.php');
+require '../inc/output.php';

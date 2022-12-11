@@ -1,6 +1,6 @@
 <?php
-include('../inc/bootstrap.php');
-include('../inc/trac_constants.php');
+require '../inc/bootstrap.php';
+require '../inc/trac_constants.php';
 
 if (!isset($loggeduser)) {
 	$__script = '_unauthorized';
@@ -54,7 +54,7 @@ if (!isset($loggeduser)) {
 		if ($stmt->execute()) {
 			$id = $db->lastInsertId();
 
-			include('../inc/echo.php');
+			include '../inc/echo.php';
 			$gamemsg = 'TRAC: '.$loggeduser->name.' created ticket #'.$id;
 			if ($visibility == $GROUPS_ALL) {
 				$gamemsg .= ': ' . mb_convert_encoding($summary, 'ASCII');
@@ -68,8 +68,8 @@ if (!isset($loggeduser)) {
 		$__rawmsgs[] = 'Failed to create a ticket. <a href="contact.php">Contact us.</a>';
 	} reject:
 
-	include('../inc/form.php');
+	include '../inc/form.php';
 	$__script = '_tracnew';
 }
 
-include('../inc/output.php');
+require '../inc/output.php';

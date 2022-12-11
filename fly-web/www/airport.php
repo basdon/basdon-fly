@@ -1,5 +1,5 @@
 <?php
-include('../inc/funcs.php');
+require '../inc/funcs.php';
 
 http_response_code(301);
 if (isset($_GET['code'])) {

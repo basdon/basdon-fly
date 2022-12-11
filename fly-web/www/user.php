@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 $id = -1;
 $name = '';
@@ -34,4 +34,4 @@ include '../inc/flightstatuses.php';
 include '../inc/missiontypes.php';
 
 $__script = '_user';
-include('../inc/output.php');
+require '../inc/output.php';

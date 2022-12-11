@@ -2,14 +2,14 @@
 /*This is ran from the plugin whenever a flight is finished, and will send a message to Discord.
 See also fly-plugin/discordflightlog.c*/
 
-include('../inc/conf.php');
+require '../inc/conf.php';
 
 if (!isset($DISCORD_FLIGHTLOG_WEBHOOK)) {
 	exit(0);
 }
 
-include('../inc/__settings.php');
-include('../inc/db.php');
+require '../inc/__settings.php';
+require '../inc/db.php';
 
 if ($argc < 2) {
 	echo "missing id argument\n";

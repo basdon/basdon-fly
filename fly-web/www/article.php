@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 function fetch_category_box($categoryname, $categoryid, &$cat, &$categories)
 {
@@ -89,7 +89,7 @@ nextparentcat4catpage:
 if (isset($_GET['category'])) {
 	fetch_category_box($_GET['category'], null, $cat, $categories);
 	$__script = '_article_category';
-	include('../inc/output.php');
+	require '../inc/output.php';
 	die();
 }
 
@@ -145,4 +145,4 @@ include '../inc/aircraftnames.php';
 include '../inc/missiontypes.php';
 
 $__script = '_article';
-include('../inc/output.php');
+require '../inc/output.php';

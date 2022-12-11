@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 $action = 'publicprofile';
 if (isset($_GET['action']) && in_array($_GET['action'], ['publicprofile', 'fal'])) {
@@ -55,4 +55,4 @@ include '../inc/aircraftnames.php';
 include '../inc/flightstatuses.php';
 
 $__script = '_account';
-include('../inc/output.php');
+require '../inc/output.php';

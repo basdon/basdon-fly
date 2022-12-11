@@ -1,6 +1,6 @@
 <?php
-include('../inc/bootstrap.php');
-include('../inc/form.php');
+require '../inc/bootstrap.php';
+require '../inc/form.php';
 
 if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd'])) {
 	if (!isset($_POST['yummie'])) {
@@ -66,4 +66,4 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 } skiplogin:
 
 $__script = '_login';
-include('../inc/output.php');
+require '../inc/output.php';
