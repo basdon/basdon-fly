@@ -80,6 +80,8 @@ if (isset($_COOKIE[$COOKIENAME]) && strlen($_COOKIE[$COOKIENAME]) == 32) {
 		$usergroups = $loggeduser->groups;
 		$HAARP = $loggeduser->logoutkey; // maybe this should he something different?
 	} else {
+		// ideally the 3rd parameter should be ['expires' => 0, 'samesite' => 'Strict'],
+		// but this is done on the webserver level for now
 		setcookie($COOKIENAME, '', 0, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
 	}
 }
