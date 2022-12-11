@@ -1,7 +1,3 @@
-{@render aircraftnames.php}
-{@render fmt_money.php}
-{@render missiontypes.php}
-
 {@rem clear since this is rendered in an article, and the factsheet might still be floated right @}
 <div class="clear"></div>
 

@@ -8,7 +8,7 @@ set_error_handler("exception_error_handler");
 
 require '../inc/conf.php';
 require '../inc/__settings.php';
-require '../templates/missiontypes.php';
+require '../inc/missiontypes.php';
 $classes = [];
 $classes[$SETTING__CLASSID_PASSENGER_PILOT] = [$SETTING__PASSENGER_PILOT_NAME, $SETTING__PASSENGER_PILOT_MSPTYPES];
 $classes[$SETTING__CLASSID_CARGO_PILOT] = [$SETTING__CARGO_PILOT_NAME, $SETTING__CARGO_PILOT_MSPTYPES];

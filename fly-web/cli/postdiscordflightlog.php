@@ -40,9 +40,9 @@ try {
 	exit(1);
 }
 
-include('../templates/flightstatuses.php');
-include('../templates/missiontypes.php');
-include('../templates/aircraftnames.php');
+require '../inc/flightstatuses.php';
+require '../inc/missiontypes.php';
+require '../inc/aircraftnames.php';
 $r = $r[0];
 if ($r->missiontype & $SETTING__PASSENGER_MISSIONTYPES) {
 	$satisfaction = ':ok_hand: ' . $r->satisfaction . '% passenger satisfaction';

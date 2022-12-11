@@ -21,4 +21,3 @@ function fmt_mission_type($missiontype)
 	}
 	return 'Unknown';
 }
-?>

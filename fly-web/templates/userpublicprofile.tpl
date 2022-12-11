@@ -24,7 +24,6 @@
 			</li>
 		</ul>
 		<ul>
-			{@render missiontypes.php}
 			{@eval ++$db_querycount}
 			{@eval $flg = $db->query('SELECT
 						  (SELECT COUNT(id) FROM flg WHERE player='.$id.' AND state!=1 AND state!=64) totalflights,
@@ -41,7 +40,6 @@
 			{@endif}
 		</ul>
 		<ul>
-			{@render fmt_money.php}
 			{@eval ++$db_querycount}
 			{@eval $rp = $db->query('SELECT SUM(paid) s FROM refuellog WHERE invokr='.$id)}
 			{@if $rp !== false && ($rp = $rp->fetchAll()) !== false && count($rp)}

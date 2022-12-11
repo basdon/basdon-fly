@@ -50,5 +50,9 @@ function acclink($name, $target)
 	}
 }
 
+// required to render flight list on public profile
+include '../inc/aircraftnames.php';
+include '../inc/flightstatuses.php';
+
 $__script = '_account';
 include('../inc/output.php');

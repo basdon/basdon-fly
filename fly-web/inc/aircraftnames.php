@@ -25,4 +25,3 @@ function aircraft_name($model)
 	}
 	return 'Unknown';
 }
-?>

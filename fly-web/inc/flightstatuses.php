@@ -25,4 +25,3 @@ function fmt_flight_status($state, $tload)
 	}
 	return 'Unknown?';
 }
-?>

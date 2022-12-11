@@ -108,9 +108,6 @@
 			{@endif}
 		</p>
 
-		{@render flightstatuses.php}
-		{@render aircraftnames.php}
-
 		<h3>Active flights</h3>
 		{@if $activeflights !== false && ($activeflights = $activeflights->fetchAll()) && count($activeflights)}
 			<table width="100%" class="new rowseps highlight-row">
@@ -183,7 +180,6 @@
 		<p>
 			Members: {@unsafe $membercount->c} &bull; Guest sessions: {@unsafe $guestcount->c} &bull; Latest: {@unsafe linkuser($latestmember)}
 			{@if $combinedstats != null}
-				{@render fmt_money.php}
 				<br/>Combined online time: {@unsafe round($combinedstats->o)}h &bull; Combined flight time: {@unsafe round($combinedstats->f)}h &bull; Combined distance flown: {@unsafe round($combinedstats->d,1)}km<br/>
 				Total flights: {@unsafe $flightcount->c} &bull; Total cash: {@unsafe fmt_money($combinedstats->c)}
 			{@endif}

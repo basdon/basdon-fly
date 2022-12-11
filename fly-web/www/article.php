@@ -139,5 +139,10 @@ if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 	}
 }
 
+// these are needed in the airport articles (airport_article_dyn_stats template)...
+// TODO: airport articles should really be moved back to airport.php instead of article.php
+include '../inc/aircraftnames.php';
+include '../inc/missiontypes.php';
+
 $__script = '_article';
 include('../inc/output.php');

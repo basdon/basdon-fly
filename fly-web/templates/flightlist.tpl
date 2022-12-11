@@ -1,7 +1,5 @@
 {@unsafe $pagination = simple_pagination($flightlist_pagination_url, $page, $totalrows, 50)}
 {@if $flightlist !== false}
-	{@render flightstatuses.php}
-	{@render aircraftnames.php}
 	<table border="0" width="100%" id="flights" class="flightlist center">
 		<thead>
 			<tr>
