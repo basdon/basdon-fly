@@ -106,8 +106,8 @@ function colforhue($hue)
 }
 
 // calculate viewport
-$map_vsize_x = $maxx - $minx;
-$map_vsize_y = $maxy - $miny;
+$map_vsize_x = max($maxx - $minx, 1); // max to prevent division by zero below
+$map_vsize_y = max($maxy - $miny, 1); // max to prevent division by zero below
 $imgxyratio = $imgw / $imgh;
 $mapxyratio = $map_vsize_x / $map_vsize_y;
 if ($mapxyratio > $imgw / $imgh) {
