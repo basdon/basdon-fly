@@ -92,10 +92,14 @@ case 2048: $embed->color = 0xffff44; break; /*paused flights should never be pos
 
 $content = new stdClass();
 $content->embeds = [$embed];
-fclose(fopen($DISCORD_FLIGHTLOG_WEBHOOK, 'r', false, stream_context_create([
+$resource = fopen($DISCORD_FLIGHTLOG_WEBHOOK, 'r', false, stream_context_create([
 	'http' => [
 		'method' => 'POST',
 		'header' => 'Content-Type: application/json',
 		'content' => json_encode($content),
 	]
-])));
+]));
+if ($resource !== false) {
+	fclose($resource);
+}
+// TODO ideally log somewhere, although an E_WARNING should be emitted, when 'fopen' fails
