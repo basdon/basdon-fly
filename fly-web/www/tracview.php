@@ -1,4 +1,9 @@
 <?php
+if (!isset($_GET['id'])) {
+	header('Location: /trac.php');
+	die();
+}
+
 include('../inc/bootstrap.php');
 include('../inc/form.php');
 include('../inc/trac_constants.php');
