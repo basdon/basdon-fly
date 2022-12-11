@@ -23,7 +23,7 @@
 		{@rem every subview needs the #main element! @}
 		{@mayrequire ^admin_home}
 		{@mayrequire ^admin_acl}
-		<?php include('../gen/^admin_' . $action . '.php'); ?>
+		<?php include('../templates/gen/^admin_' . $action . '.php'); ?>
 	</div></div>
 	{@render defaultfooter.tpl}
 </body>

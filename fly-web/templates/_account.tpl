@@ -15,7 +15,7 @@
 		{@mayrequire ^account_notloggedin}
 		{@mayrequire ^account_publicprofile}
 		{@mayrequire ^account_fal}
-		<?php include('../gen/^account_' . $action . '.php'); ?>
+		<?php include('../templates/gen/^account_' . $action . '.php'); ?>
 	</div></div>
 	{@render defaultfooter.tpl}
 </body>
