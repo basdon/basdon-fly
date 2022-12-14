@@ -9,7 +9,7 @@ set_error_handler("exception_error_handler");
 require '../inc/conf.php';
 require '../inc/__settings.php';
 require '../inc/db.php';
-require '../templates/missiontypes.php';
+require '../inc/missiontypes.php';
 
 $res = $db->query('SELECT c,(SELECT BIT_OR(t) FROM msp WHERE a=apt.i) t FROM apt ORDER BY c ASC');
 if (!$res || !($apts = $res->fetchAll())) {

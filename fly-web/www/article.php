@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 function fetch_category_box($categoryname, $categoryid, &$cat, &$categories)
 {
@@ -89,7 +89,7 @@ nextparentcat4catpage:
 if (isset($_GET['category'])) {
 	fetch_category_box($_GET['category'], null, $cat, $categories);
 	$__script = '_article_category';
-	include('../inc/output.php');
+	require '../inc/output.php';
 	die();
 }
 
@@ -139,5 +139,10 @@ if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 	}
 }
 
+// these are needed in the airport articles (airport_article_dyn_stats template)...
+// TODO: airport articles should really be moved back to airport.php instead of article.php
+include '../inc/aircraftnames.php';
+include '../inc/missiontypes.php';
+
 $__script = '_article';
-include('../inc/output.php');
+require '../inc/output.php';

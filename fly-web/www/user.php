@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 $id = -1;
 $name = '';
@@ -28,5 +28,10 @@ if (isset($_GET['id'])) {
 } skip:
 ++$db_querycount;
 
+// required to render the user's flight list
+include '../inc/aircraftnames.php';
+include '../inc/flightstatuses.php';
+include '../inc/missiontypes.php';
+
 $__script = '_user';
-include('../inc/output.php');
+require '../inc/output.php';

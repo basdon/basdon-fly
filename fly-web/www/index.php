@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 $db_querycount += 9;
 $activeflights = $db->query("
@@ -66,5 +66,8 @@ if ($last48 !== false && ($last48 = $last48->fetchAll()) !== false) {
 	$last48 = [];
 }
 
+include '../inc/aircraftnames.php';
+include '../inc/flightstatuses.php';
+
 $__script = '_index';
-include('../inc/output.php');
+require '../inc/output.php';

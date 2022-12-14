@@ -8,8 +8,8 @@ set_error_handler("exception_error_handler");
 
 require '../inc/conf.php';
 require '../inc/__settings.php';
-require '../templates/missiontypes.php';
-require '../templates/vehiclenames.php';
+require '../inc/missiontypes.php';
+require '../inc/vehiclenames.php';
 $vehicles = [
 	[592, $SETTING__ANDROM_MSPTYPES],
 	[577, $SETTING__AT400_MSPTYPES],

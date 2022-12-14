@@ -8,7 +8,7 @@ set_error_handler("exception_error_handler");
 
 require '../inc/conf.php';
 require '../inc/db.php';
-require '../templates/vehiclenames.php';
+require '../inc/vehiclenames.php';
 
 $apts = $db->query('SELECT i,c FROM apt')->fetchAll();
 

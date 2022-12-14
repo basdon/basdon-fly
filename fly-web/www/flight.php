@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 $id = -1;
 if (isset($_GET['id'])) {
@@ -42,10 +42,10 @@ try {
 	if ($r === false || ($r = $r->fetchAll()) === false || empty($r)) {
 		unset($r);
 	} else {
-		include('../templates/flightstatuses.php');
-		include('../templates/missiontypes.php');
-		include('../templates/aircraftnames.php');
-		include('../templates/vehiclefuelcap.php');
+		include '../inc/flightstatuses.php';
+		include '../inc/missiontypes.php';
+		include '../inc/aircraftnames.php';
+		include '../inc/vehiclefuelcap.php';
 		$r = $r[0];
 		if ($r->missiontype & $SETTING__PASSENGER_MISSIONTYPES) {
 			$satisfaction = $r->satisfaction . '% passenger satisfaction';
@@ -84,4 +84,4 @@ try {
 }
 
 $__script = '_flight';
-include('../inc/output.php');
+require '../inc/output.php';

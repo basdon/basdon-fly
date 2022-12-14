@@ -29,4 +29,3 @@ function vehicle_fuel_cap($model)
 	}
 	return $SETTING__FUEL_CAP_DEFAULT;
 }
-?>

@@ -1,6 +1,6 @@
 <?php
-include('../inc/bootstrap.php');
-include('../inc/trac_constants.php');
+require '../inc/bootstrap.php';
+require '../inc/trac_constants.php';
 
 function trac_version($t)
 {
@@ -20,4 +20,4 @@ if ($totalrows && ($totalrows = $totalrows->fetchAll())) {
 }
 
 $__script = '_trac';
-include('../inc/output.php');
+require '../inc/output.php';

@@ -35,4 +35,4 @@ There is one service point at Las Venturas Airport, located in the north part.
 <?php readfile('../gen/aerodromechart_'.$code.'.html') ?>
 
 {@rem no clear, the dyn-stats template clears (before the flights part) @}
-<?php include('../articles/airport-dyn-stats.php') ?>
+<?php include '../articles/airport-dyn-stats.php' ?>

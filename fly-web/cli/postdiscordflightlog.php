@@ -2,14 +2,14 @@
 /*This is ran from the plugin whenever a flight is finished, and will send a message to Discord.
 See also fly-plugin/discordflightlog.c*/
 
-include('../inc/conf.php');
+require '../inc/conf.php';
 
 if (!isset($DISCORD_FLIGHTLOG_WEBHOOK)) {
 	exit(0);
 }
 
-include('../inc/__settings.php');
-include('../inc/db.php');
+require '../inc/__settings.php';
+require '../inc/db.php';
 
 if ($argc < 2) {
 	echo "missing id argument\n";
@@ -40,9 +40,9 @@ try {
 	exit(1);
 }
 
-include('../templates/flightstatuses.php');
-include('../templates/missiontypes.php');
-include('../templates/aircraftnames.php');
+require '../inc/flightstatuses.php';
+require '../inc/missiontypes.php';
+require '../inc/aircraftnames.php';
 $r = $r[0];
 if ($r->missiontype & $SETTING__PASSENGER_MISSIONTYPES) {
 	$satisfaction = ':ok_hand: ' . $r->satisfaction . '% passenger satisfaction';

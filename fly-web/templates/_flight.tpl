@@ -71,7 +71,6 @@
 						<tr><th>Category</th><th>Amount</th></tr>
 					</thead>
 					<tbody>
-						{@render fmt_money.php}
 						{@if $r->ptax}<tr><td>Airport tax</td><td>{@unsafe fmt_money($r->ptax)}</tr>{@endif}
 						{@if $r->pweatherbonus}<tr><td>Weather bonus</td><td>{@unsafe fmt_money($r->pweatherbonus)}</tr>{@endif}
 						{@if $r->pdistance}<tr><td>Distance pay</td><td>{@unsafe fmt_money($r->pdistance)}</tr>{@endif}

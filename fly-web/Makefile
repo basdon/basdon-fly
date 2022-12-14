@@ -27,16 +27,15 @@ inc/__settings.php: ../settings.ini cli/gensettings.php
 	[ -z "$(BASDONDEV)" ] || chmod g+w inc/__settings.php
 
 cleantemplates:
-	rm -f gen/_*.php
-	rm -f gen/^*.php
+	rm -f templates/gen/*.php
 gen/%.php: templates/%.tpl cleantemplates
 	cd cli && php parsetemplate.php $<
 templates: $(TEMPLATE_OBJECTS_FULL) $(TEMPLATE_OBJECTS_PART)
 	@# Regenerating templates resets their permissions,
 	@# which means the reparsing them in dev (with $__REPARSE__ in conf.php) will fail.
-	@# The SGID bit should be set on the gen folder,
+	@# The SGID bit should be set on the templates/gen folder,
 	@# then this will add write permissions for the httpd user again.
-	[ -z "$(BASDONDEV)" ] || chmod g+w gen/*
+	[ -z "$(BASDONDEV)" ] || chmod g+w templates/gen/*
 
 cleanarticles:
 	rm -f gen/article_*
@@ -97,4 +96,5 @@ mission-point-types-tables: inc/__settings.php
 clean:
 	rm -f inc/__settings.php
 	rm -f gen/*
+	rm -f templates/gen/*
 	rm -f www/s/gen/*

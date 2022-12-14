@@ -43,7 +43,7 @@ if (($r = $db->query('SELECT i,c,n,flags FROM apt WHERE c=\'' . $code . '\' LIMI
 	++$db_querycount;
 	$missionpoints = $db->query('SELECT i,name,t FROM msp WHERE a='.$apt->i);
 	$__script = '^airport_article_dyn_stats';
-	include('../inc/output.php');
+	require '../inc/output.php';
 } else {
 	echo '<p>failed to get info for airport ' . $code . '</p>';
 }

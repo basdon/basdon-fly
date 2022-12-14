@@ -37,4 +37,4 @@ available. The closest one is probably to be found at
 <?php readfile('../gen/aerodromechart_'.$code.'.html') ?>
 
 {@rem no clear, the dyn-stats template clears (before the flights part) @}
-<?php include('../articles/airport-dyn-stats.php') ?>
+<?php include '../articles/airport-dyn-stats.php' ?>

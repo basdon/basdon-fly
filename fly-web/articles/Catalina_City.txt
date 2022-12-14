@@ -40,7 +40,7 @@ station. The other two are next to each other, at the west side.
 <?php readfile('../gen/aerodromechart_'.$code.'.html') ?>
 
 {@rem no clear, the dyn-stats template clears (before the flights part) @}
-<?php include('../articles/airport-dyn-stats.php') ?>
+<?php include '../articles/airport-dyn-stats.php' ?>
 
 {@h3 Gallery}
 

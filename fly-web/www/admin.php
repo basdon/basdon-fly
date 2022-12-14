@@ -1,5 +1,5 @@
 <?php
-include('../inc/bootstrap.php');
+require '../inc/bootstrap.php';
 
 $action = 'home';
 if (isset($_GET['action']) && in_array($_GET['action'], ['home', 'acl'])) {
@@ -9,7 +9,7 @@ if (isset($_GET['action']) && in_array($_GET['action'], ['home', 'acl'])) {
 if (!isset($loggeduser) || !group_is_admin($loggeduser->groups)) {
 	$ret = 'admin.php&action='.$action;
 	$__script = '_unauthorized';
-	include('../inc/output.php');
+	require '../inc/output.php';
 	exit();
 }
 
@@ -74,4 +74,4 @@ function adminlink($name, $target)
 }
 
 $__script = '_admin';
-include('../inc/output.php');
+require '../inc/output.php';

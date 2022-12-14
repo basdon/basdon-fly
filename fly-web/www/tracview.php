@@ -4,9 +4,9 @@ if (!isset($_GET['id'])) {
 	die();
 }
 
-include('../inc/bootstrap.php');
-include('../inc/form.php');
-include('../inc/trac_constants.php');
+require '../inc/bootstrap.php';
+require '../inc/form.php';
+require '../inc/trac_constants.php';
 
 function trac_releasetime($t)
 {
@@ -30,7 +30,7 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 		// (it will also prevent resubmitting)
 		header('Location: tracview.php?id='.$id.'#u'.$t);
 
-		include('../inc/echo.php');
+		include '../inc/echo.php';
 		$gamemsg = 'TRAC: '.$loggeduser->name.' commented on ticket #'.$id;
 		$ircmsg = $gamemsg.' -> '.$ABS_URL.'/tracview.php?id='.$id;
 		echo_send_message_irc_game(1, $ircmsg, $gamemsg);
@@ -98,7 +98,7 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 			// redirecting is kinda unnecessary, but marks the link as visited...
 			header('Location: tracview.php?id='.$id.'#u'.$t);
 
-			include('../inc/echo.php');
+			include '../inc/echo.php';
 			$gamemsg = 'TRAC: '.$loggeduser->name.' updated ticket #'.$id;
 			if ($visibility == $GROUPS_ALL) {
 				$gamemsg .= ': ' . mb_convert_encoding($_POST['summary'], 'ASCII');
@@ -135,4 +135,4 @@ if ($trac && ($trac = $trac->fetchAll()) && count($trac)) {
 }
 
 $__script = '_tracview';
-include('../inc/output.php');
+require '../inc/output.php';

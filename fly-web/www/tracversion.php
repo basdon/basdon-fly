@@ -1,6 +1,6 @@
 <?php
-include('../inc/bootstrap.php');
-include('../inc/trac_constants.php');
+require '../inc/bootstrap.php';
+require '../inc/trac_constants.php';
 
 function trac_releasetime($t)
 {
@@ -41,7 +41,7 @@ if (group_is_owner($usergroups) && isset($_GET['rel'], $_GET['dorelease'])) {
 		$stmt->execute();
 	}
 
-	include('../inc/echo.php');
+	include '../inc/echo.php';
 	$gamemsg = 'TRAC: '.$loggeduser->name.' released version '.trac_releasetime($rel).', closing '.count($tickets).' tickets';
 	$ircmsg = $gamemsg.' -> '.$ABS_URL.'/tracversion.php?rel='.$rel;
 	echo_send_message_irc_game(1, $ircmsg, $gamemsg);
@@ -91,4 +91,4 @@ if (count($releaseids)) {
 }
 
 $__script = '_tracversion';
-include('../inc/output.php');
+require '../inc/output.php';
