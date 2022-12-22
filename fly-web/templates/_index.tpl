@@ -131,7 +131,7 @@
 							<td>{@unsafe aircraft_name($f->vehmodel)}</td>
 							<td><a href="article.php?title={@unsafe $f->f}">{@unsafe $f->f}</a></td>
 							<td><a href="article.php?title={@unsafe $f->t}">{@unsafe $f->t}</a></td>
-							<td class="no600 flight-state flight-state-{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
+							<td class="no600 flight-state f{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
 						</tr>
 					{@endforeach}
 				</tbody>
@@ -165,7 +165,7 @@
 							<td><a href="article.php?title={@unsafe $f->f}">{@unsafe $f->f}</a></td>
 							<td><a href="article.php?title={@unsafe $f->t}">{@unsafe $f->t}</a></td>
 							<td class="no800">{@if $f->state != 1}{@unsafe round($f->adistance)}m{@endif}</td>
-							<td class="no600 flight-state flight-state-{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
+							<td class="no600 flight-state f{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
 						</tr>
 					{@endforeach}
 				</tbody>

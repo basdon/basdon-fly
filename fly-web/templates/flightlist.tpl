@@ -29,7 +29,7 @@
 					<a href="article.php?title={@unsafe $f->t}">{@unsafe $f->t}</a>
 				</td>
 				<td>
-					<span class="flight-state flight-state-{@unsafe $f->state}">
+					<span class="flight-state f{@unsafe $f->state}">
 						{@unsafe fmt_flight_status($f->state, $f->tload)}
 					</span>
 				</td>
