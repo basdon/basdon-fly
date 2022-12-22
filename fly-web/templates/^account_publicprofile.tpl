@@ -1,2 +1,2 @@
 <p>Public profile: {@unsafe linkuser($loggeduser)}</p>
-{@render userpublicprofile.tpl}
+<p>TODO: This page has been removed :D</p>
