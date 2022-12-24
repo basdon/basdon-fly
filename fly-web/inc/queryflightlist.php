@@ -85,8 +85,12 @@ function _flight_list_query($opts)
 		}
 
 		if (isset($page) && $page > 1) {
+			// Calculate the last page, so the 'newer' link always links to a page that is not empty,
+			// eg if $page is 60, but there are only enough flights to fill 4 pages, we should link to
+			// page 4 instead of page 59.
+			$lastpage = ceil($count / $limit);
 			$fltrs_and_page = $fltrs;
-			$fltrs_and_page[] = 'page='.($page-1);
+			$fltrs_and_page[] = 'page='.min($lastpage, $page-1);
 			$flight_list->newer_page_query_params = implode($fltrs_and_page, '&');
 		}
 		if ($offset + $limit < $count) {
