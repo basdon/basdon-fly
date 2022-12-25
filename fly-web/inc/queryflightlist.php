@@ -37,11 +37,11 @@ function _flight_list_query($opts)
 	if (isset($opts->filter_pilot_id)) {
 		$where[] = 'i=?';
 		$parms[] = (int) $opts->filter_pilot_id;
-		$fltrs[] = 'flqpid='.((int) $opts->filter_pilot_id);
+		$fltrs['flqpid'] = (int) $opts->filter_pilot_id;
 	} else if (isset($opts->filter_pilot_name)) {
 		$where[] = 'name=?';
 		$parms[] = $opts->filter_pilot_name;
-		$fltrs[] = 'flqpn='.urlencode($opts->filter_pilot_name);
+		$fltrs['flqpn'] = $opts->filter_pilot_name;
 	}
 	$where = implode($where, ' AND ');
 	$limit = 100;
@@ -56,9 +56,10 @@ function _flight_list_query($opts)
 
 	$flight_list = new stdClass();
 	$flight_list->opts = $opts;
+	$flight_list->filters = $fltrs;
 	$flight_list->date_format = 'j M H:i';
 	$flight_list->show_pilot = true;
-	$flight_list->to_flights_page_query_params = implode($fltrs, '&');
+	$flight_list->to_flights_page_query_params = http_build_query($fltrs);
 	$flight_list->view_from = 0;
 	$flight_list->view_to = 0;
 	$flight_list->total = 0;
@@ -84,20 +85,21 @@ function _flight_list_query($opts)
 			$flight_list->view_to = 0;
 		}
 
+		$flight_list->last_page = ceil($count / $limit);
+
 		if (isset($page) && $page > 1) {
-			// Calculate the last page, so the 'newer' link always links to a page that is not empty,
+			// Check the last page, so the 'newer' link always links to a page that is not empty,
 			// eg if $page is 60, but there are only enough flights to fill 4 pages, we should link to
 			// page 4 instead of page 59.
-			$lastpage = ceil($count / $limit);
-			$fltrs_and_page = $fltrs;
-			$fltrs_and_page[] = 'page='.min($lastpage, $page-1);
-			$flight_list->newer_page_query_params = implode($fltrs_and_page, '&');
+			$fltrs['page'] = min($flight_list->last_page, $page-1);
+			$flight_list->newer_page_query_params = http_build_query($fltrs);
 		}
 		if ($offset + $limit < $count) {
-			$fltrs_and_page = $fltrs;
-			$fltrs_and_page[] = 'page='.(isset($page) ? $page+1 : 2);
-			$flight_list->older_page_query_params = implode($fltrs_and_page, '&');
+			$fltrs['page'] = isset($page) ? $page+1 : 2;
+			$flight_list->older_page_query_params = http_build_query($fltrs);
 		}
+
+		$flight_list->page = isset($page) ? $page : 1;
 	}
 
 	$flight_list->dbq = (new DBQ())->prepare('SELECT * FROM flg_enriched WHERE '.$where.' LIMIT '.$limit.' OFFSET '.$offset);
