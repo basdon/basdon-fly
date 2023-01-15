@@ -2,6 +2,7 @@
 $flight_list_query_opts = [
 	'filter_pilot_id' => 'flqpid',
 	'filter_pilot_name' => 'flqpn',
+	'filter_status' => 'flqstate',
 	'page' => 'page',
 ];
 
@@ -42,6 +43,11 @@ function _flight_list_query($opts)
 		$where[] = 'name=?';
 		$parms[] = $opts->filter_pilot_name;
 		$fltrs['flqpn'] = $opts->filter_pilot_name;
+	}
+	if (isset($opts->filter_status)) {
+		$where[] = 'state=?';
+		$parms[] = (int) $opts->filter_status;
+		$fltrs['flqstate'] = (int) $opts->filter_status;
 	}
 	$where = implode($where, ' AND ');
 	$limit = 100;

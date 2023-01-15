@@ -148,9 +148,6 @@ table.new td + td {
 table.new thead tr {
 	border-bottom: 1px solid #aab;
 }
-table.highlight-row tr:hover {
-	background: #f0f0f0;
-}
 table.rowseps tr + tr td {
 	border-top: 1px solid #aab;
 }
@@ -226,11 +223,6 @@ p.msg.success {
 }
 @media (max-width: 800px) {
 	.no800 {
-		display: none;
-	}
-}
-@media (max-width: 600px) {
-	.no600 {
 		display: none;
 	}
 }

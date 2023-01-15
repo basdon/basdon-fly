@@ -109,70 +109,14 @@
 		</p>
 
 		<h3>Active flights</h3>
-		{@if $activeflights !== false && ($activeflights = $activeflights->fetchAll()) && count($activeflights)}
-			<table width="100%" class="new rowseps highlight-row">
-				<thead>
-					<tr>
-						<th>#</th>
-						<th class="no800">Time since start</th>
-						<th>Pilot</th>
-						<th>Aircraft</th>
-						<th>From</th>
-						<th>To</th>
-						<th class="no600">Status</th>
-					</tr>
-				</thead>
-				<tbody>
-					{@foreach $activeflights as $f}
-						<tr>
-							<td><a href="flight.php?id={@unsafe $f->id}">#{@unsafe $f->id}</a></td>
-							<td class="no800">{@unsafe format_duration_short(time() - $f->tstart)}</td>
-							<td>{@unsafe linkuser($f)}</td>
-							<td>{@unsafe aircraft_name($f->vehmodel)}</td>
-							<td><a href="article.php?title={@unsafe $f->f}">{@unsafe $f->f}</a></td>
-							<td><a href="article.php?title={@unsafe $f->t}">{@unsafe $f->t}</a></td>
-							<td class="no600 flight-state f{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
-						</tr>
-					{@endforeach}
-				</tbody>
-			</table>
-		{@else}
-			<p>None</p>
-		{@endif}
 
-		<h3>Last 10 finished flights</h3>
-		{@if $lastflights !== false && ($lastflights = $lastflights->fetchAll()) && count($lastflights)}
-			<table width="100%" class="new rowseps highlight-row">
-				<thead>
-					<tr>
-						<th>#</th>
-						<th class="no600">Date</th>
-						<th>Pilot</th>
-						<th>Aircraft</th>
-						<th>From</th>
-						<th>To</th>
-						<th class="no800">Distance</th>
-						<th class="no600">Status</th>
-					</tr>
-				</thead>
-				<tbody>
-					{@foreach $lastflights as $f}
-						<tr>
-							<td><a href="flight.php?id={@unsafe $f->id}">#{@unsafe $f->id}</a></td>
-							<td class="no600">{@unsafe date('j M H:i', $f->tlastupdate)}</td>
-							<td>{@unsafe linkuser($f)}</td>
-							<td>{@unsafe aircraft_name($f->vehmodel)}</td>
-							<td><a href="article.php?title={@unsafe $f->f}">{@unsafe $f->f}</a></td>
-							<td><a href="article.php?title={@unsafe $f->t}">{@unsafe $f->t}</a></td>
-							<td class="no800">{@if $f->state != 1}{@unsafe round($f->adistance)}m{@endif}</td>
-							<td class="no600 flight-state f{@unsafe $f->state}">{@unsafe fmt_flight_status($f->state, $f->tload)}</td>
-						</tr>
-					{@endforeach}
-				</tbody>
-			</table>
-		{@else}
-			<p>None</p>
-		{@endif}
+		{@eval $flight_list = index_get_active_flights()}
+		{@render flightlist.tpl}
+
+		<h3>Last 7 finished flights</h3>
+
+		{@eval $flight_list = index_get_last_finished_flights()}
+		{@render flightlist.tpl}
 
 		<p><a href="flights.php">All flights</a></p>
 
