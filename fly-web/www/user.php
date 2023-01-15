@@ -45,7 +45,6 @@ if (isset($is_guest)) {
 $flight_list_opts->fetch_pagination_data = false;
 $flight_list_opts->limit = 15;
 $flight_list = flight_list_query($flight_list_opts);
-$flight_list->date_format = 'j M Y H:i';
 $flight_list->show_pilot = false;
 
 $__script = '_user';
