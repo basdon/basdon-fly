@@ -16,6 +16,20 @@
 				border-radius: .3em;
 				margin: 0 .5em;
 			}
+		select.flight-state {
+			border: 1px solid #777;
+			padding: .2em;
+			border-radius: 5px;
+			}
+			select.flight-state:hover {
+				filter: brightness(90%);
+			}
+			select.flight-state:active {
+				filter: brightness(85%);
+			}
+			select.flight-state option {
+				background: #fff;
+			}
 	</style>
 </head>
 <body>
@@ -31,11 +45,17 @@
 				<p>
 					<fieldset>
 						<legend>Flight status</legend>
-						<select name=flqstate>
+						<select 
+							name=flqstate 
+							class="flight-state f{@unsafe $filter_status}" 
+							onchange="this.className='flight-state f'+this.value"
+						>
 							<option value=""></option>
 							{@foreach $flightstatuses as $tmp_id => $tmp_name}
-								<option class="flight-state f{$tmp_id}" value={$tmp_id}
-									{@if $tmp_id == $filter_status} selected{@endif}
+								<option 
+									class="flight-state f{@unsafe $tmp_id}" 
+									value={@unsafe $tmp_id} 
+									{@if $tmp_id == $filter_status}selected{@endif}
 								>
 									{$tmp_name}
 								</option>
