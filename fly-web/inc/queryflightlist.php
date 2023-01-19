@@ -12,7 +12,7 @@ function flight_list_query_get_opts_from_query_parameters()
 
 	$opts = new stdClass();
 	foreach ($flight_list_query_opts as $opt_name => $opt_param) {
-		if (isset($_GET[$opt_param])) {
+		if (isset($_GET[$opt_param]) && !empty($_GET[$opt_param])) {
 			$opts->$opt_name = $_GET[$opt_param];
 		}
 	}
