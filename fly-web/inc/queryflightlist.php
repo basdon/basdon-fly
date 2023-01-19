@@ -71,6 +71,12 @@ function _flight_list_query($opts)
 	$flight_list->total = 0;
 
 	if (isset($opts->fetch_pagination_data) && $opts->fetch_pagination_data) {
+		$flight_list->page = isset($page) ? $page : 1;
+		$flight_list->last_page = 0;
+		$flight_list->total = 0;
+		$flight_list->view_from = 0;
+		$flight_list->view_to = 0;
+
 		$flight_list->dbq = (new DBQ())->prepare('SELECT COUNT(id) AS c FROM flg_enriched WHERE '.$where)->executew0ia($parms);
 		$meta = $flight_list->dbq->fetch_all();
 
@@ -86,9 +92,6 @@ function _flight_list_query($opts)
 		if ($offset < $count) {
 			$flight_list->view_from = $offset + 1;
 			$flight_list->view_to = min($flight_list->total, $offset + $limit);
-		} else {
-			$flight_list->view_from = 0;
-			$flight_list->view_to = 0;
 		}
 
 		$flight_list->last_page = ceil($count / $limit);
@@ -104,8 +107,6 @@ function _flight_list_query($opts)
 			$fltrs['page'] = isset($page) ? $page+1 : 2;
 			$flight_list->older_page_query_params = http_build_query($fltrs);
 		}
-
-		$flight_list->page = isset($page) ? $page : 1;
 	}
 
 	$flight_list->dbq = (new DBQ())->prepare('SELECT * FROM flg_enriched WHERE '.$where.' LIMIT '.$limit.' OFFSET '.$offset);
