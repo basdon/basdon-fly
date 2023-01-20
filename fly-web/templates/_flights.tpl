@@ -16,20 +16,29 @@
 				border-radius: .3em;
 				margin: 0 .5em;
 			}
-		select.flight-state {
-			border: 1px solid #777;
-			padding: .2em;
-			border-radius: 5px;
+			#filters select {
+				min-height: 15em;
 			}
-			select.flight-state:hover {
-				filter: brightness(90%);
-			}
-			select.flight-state:active {
-				filter: brightness(85%);
-			}
-			select.flight-state option {
-				background: #fff;
-			}
+		#filters-expanded ~ div {
+			max-height: 0;
+			overflow: hidden;
+			transition: max-height .2s ease;
+		}
+		#filters-expanded:checked ~ div {
+			max-height: 100vh;
+		}
+		#filters-expanded + p span.on,
+		#filters-expanded:checked + p span.off {
+			display: none;
+		}
+		#filters-expanded:checked + p span.on {
+			display: inline;
+		}
+		label[for=filters-expanded] {
+			text-decoration: underline;
+			cursor: pointer;
+			color: #06c;
+		}
 	</style>
 </head>
 <body>
@@ -39,29 +48,53 @@
 		<h2 id="main">Flights</h2>
 		<div class=center>
 			<form id=filters>
+				{@if $num_active_filters}
+					<p>
+						<strong>Active filters</strong> (<a href=/flights.php>clear</a>)
+					</p>
+					<p style=line-height:1.5em>
+						{@if !empty($filter_pilot_id)}
+							<strong>Pilot id:</strong> {$filter_pilot_id}<br>
+						{@endif}
+						{@if !empty($filter_pilot_name)}
+							<strong>Pilot name:</strong> {$filter_pilot_name}<br>
+						{@endif}
+						{@if !empty($filter_status)}
+							<strong>Status:</strong> 
+							{@foreach $filter_status as $status}
+								<span class="flight-state f{@unsafe $status}">
+									{@unsafe fmt_flight_status($status, 1)}
+								</span> 
+							{@endforeach}
+							<br>
+						{@endif}
+					</p>
+				{@endif}
+				<input style=display:none type=checkbox id=filters-expanded>
 				<p>
-					<strong>Filters</strong>
+					<label for=filters-expanded>
+						<span class=off>Edit </span>
+						<span class=on>Close </span>
+						filters
+					</label>
 				</p>
-				<p>
+				<div>
+					<p>
+						<em>Ctrl+click to select or unselect mutliple.</em>
+					</p>
 					<fieldset>
 						<legend>Flight status</legend>
-						<select 
-							name=flqstate 
-							class="flight-state f{@unsafe $filter_status}" 
-							onchange="this.className='flight-state f'+this.value"
-						>
-							<option value=""></option>
+						<select name=flqstate[] multiple>
 							{@foreach $flightstatuses as $tmp_id => $tmp_name}
 								<option 
-									class="flight-state f{@unsafe $tmp_id}" 
-									value={@unsafe $tmp_id} 
-									{@if $tmp_id == $filter_status}selected{@endif}
+									value={@unsafe $tmp_id}
+									{@if in_array($tmp_id, $filter_status)} selected{@endif}
 								>
 									{$tmp_name}
-								</option>
 							{@endforeach}
 						</select>
 					</fieldset>
+					<p>
 					<fieldset>
 						<legend>Pilot ID</legend>
 						<input type=text name=flqpid value="{$filter_pilot_id}" style=max-width:5em>
@@ -70,10 +103,10 @@
 						<legend>Pilot name</legend>
 						<input type=text name=flqpn value="{$filter_pilot_name}">
 					</fieldset>
-				</p>
-				<p>
-					<input type=submit value=Apply>
-				</p>
+					<p>
+						<input type=submit value=Apply>
+					</p>
+				</div>
 			</form>
 			<p>
 				Showing results

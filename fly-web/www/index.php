@@ -11,7 +11,7 @@ function index_get_active_flights()
 {
 	$flight_list_opts = new stdClass();
 	$flight_list_opts->fetch_pagination_data = false;
-	$flight_list_opts->filter_status = 1;
+	$flight_list_opts->filter_status = [1];
 	return flight_list_query($flight_list_opts);
 }
 
@@ -19,8 +19,8 @@ function index_get_last_finished_flights()
 {
 	$flight_list_opts = new stdClass();
 	$flight_list_opts->fetch_pagination_data = false;
+	$flight_list_opts->filter_status = [8];
 	$flight_list_opts->limit = 7;
-	$flight_list_opts->filter_status = 8;
 	return flight_list_query($flight_list_opts);
 }
 
