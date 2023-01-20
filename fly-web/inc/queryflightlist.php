@@ -22,9 +22,17 @@ function flight_list_query_get_opts_from_query_parameters()
 			$opts->$opt_name = $_GET[$opt_param];
 		}
 	}
+	$num_array_filters = 0;
 	foreach ($flight_list_query_array_opts as $opt_name => $opt_param) {
 		if (isset($_GET_ARRAY[$opt_param]) && !empty($_GET_ARRAY[$opt_param])) {
+			$count = count($_GET_ARRAY[$opt_param]);
+			if ($count + $num_array_filters > 30) {
+				// 30 is an arbitrary limit; maybe this can be higher without too much impact?
+				$opts->error_too_many_filters = true;
+				break;
+			}
 			$opts->$opt_name = $_GET_ARRAY[$opt_param];
+			$num_array_filters += $count;
 		}
 	}
 	return $opts;

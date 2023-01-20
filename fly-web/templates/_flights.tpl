@@ -82,6 +82,11 @@
 							<br>
 						{@endif}
 					</p>
+					{@if isset($flight_list_opts->error_too_many_filters)}
+						<p class="msg error">
+							Too many filters! Some filters have been dropped.
+						</p>
+					{@endif}
 				{@endif}
 				<input style=display:none type=checkbox id=filters-expanded>
 				<p>
