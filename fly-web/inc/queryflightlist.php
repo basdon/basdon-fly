@@ -10,6 +10,9 @@ function flight_list_query_get_opts_from_query_parameters()
 		'page' => 'page',
 	];
 	static $flight_list_query_array_opts = [
+		'filter_to' => 'flqt',
+		'filter_from' => 'flqf',
+		'filter_aircraft' => 'flqvm',
 		'filter_status' => 'flqstate',
 	];
 
@@ -52,10 +55,25 @@ function _flight_list_query($opts)
 		$parms[] = $opts->filter_pilot_name;
 		$fltrs['flqpn'] = $opts->filter_pilot_name;
 	}
+	if (isset($opts->filter_aircraft)) {
+		$where[] = '(' . implode(array_fill(0, count($opts->filter_aircraft), 'vehmodel=?'), ' OR ') . ')';
+		$parms = array_merge($parms, $opts->filter_aircraft);
+		$fltrs['flqvm'] = $opts->filter_aircraft;
+	}
 	if (isset($opts->filter_status)) {
 		$where[] = '(' . implode(array_fill(0, count($opts->filter_status), 'state=?'), ' OR ') . ')';
 		$parms = array_merge($parms, $opts->filter_status);
 		$fltrs['flqstate'] = $opts->filter_status;
+	}
+	if (isset($opts->filter_from)) {
+		$where[] = '(' . implode(array_fill(0, count($opts->filter_from), 'f=?'), ' OR ') . ')';
+		$parms = array_merge($parms, $opts->filter_from);
+		$fltrs['flqf'] = $opts->filter_from;
+	}
+	if (isset($opts->filter_to)) {
+		$where[] = '(' . implode(array_fill(0, count($opts->filter_to), 't=?'), ' OR ') . ')';
+		$parms = array_merge($parms, $opts->filter_to);
+		$fltrs['flqt'] = $opts->filter_to;
 	}
 	$where = implode($where, ' AND ');
 	$limit = 100;

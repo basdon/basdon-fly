@@ -53,11 +53,24 @@
 						<strong>Active filters</strong> (<a href=/flights.php>clear</a>)
 					</p>
 					<p style=line-height:1.5em>
+						{@if !empty($filter_aircraft)}
+							<strong>Aircraft:</strong> 
+							{@foreach $filter_aircraft as $model}
+								{@unsafe aircraft_name($model)} 
+							{@endforeach}
+							<br>
+						{@endif}
 						{@if !empty($filter_pilot_id)}
 							<strong>Pilot id:</strong> {$filter_pilot_id}<br>
 						{@endif}
 						{@if !empty($filter_pilot_name)}
 							<strong>Pilot name:</strong> {$filter_pilot_name}<br>
+						{@endif}
+						{@if !empty($filter_from)}
+							<strong>From:</strong> {@unsafe implode($filter_from, ', ')}<br>
+						{@endif}
+						{@if !empty($filter_to)}
+							<strong>To:</strong> {@unsafe implode($filter_to, ', ')}<br>
 						{@endif}
 						{@if !empty($filter_status)}
 							<strong>Status:</strong> 
@@ -82,6 +95,42 @@
 					<p>
 						<em>Ctrl+click to select or unselect mutliple.</em>
 					</p>
+					<fieldset>
+						<legend>Aircraft</legend>
+						<select name=flqvm[] multiple>
+							{@foreach $aircraft_names as $tmp_id => $tmp_name}
+								<option 
+									value={@unsafe $tmp_id}
+									{@if in_array($tmp_id, $filter_aircraft)} selected{@endif}
+								>
+									{@unsafe $tmp_name}
+							{@endforeach}
+						</select>
+					</fieldset>
+					<fieldset>
+						<legend>From</legend>
+						<select name=flqf[] multiple>
+							{@foreach $all_airport_codes as $code}
+								<option 
+									value={@unsafe $code}
+									{@if in_array($code, $filter_from)} selected{@endif}
+								>
+									{@unsafe $code}
+							{@endforeach}
+						</select>
+					</fieldset>
+					<fieldset>
+						<legend>To</legend>
+						<select name=flqt[] multiple>
+							{@foreach $all_airport_codes as $code}
+								<option 
+									value={@unsafe $code}
+									{@if in_array($code, $filter_to)} selected{@endif}
+								>
+									{@unsafe $code}
+							{@endforeach}
+						</select>
+					</fieldset>
 					<fieldset>
 						<legend>Flight status</legend>
 						<select name=flqstate[] multiple>
