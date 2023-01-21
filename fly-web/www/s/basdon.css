@@ -168,6 +168,7 @@ table.new th + th {
 	text-transform: uppercase;
 	white-space: nowrap;
 	}
+	/*when editing, remember to edit hue shifts in _flights.tpl, colors in postdiscordflightlog.php, colors in og meta*/
 	.flight-state.f1 {
 		background: #ddf;
 	}

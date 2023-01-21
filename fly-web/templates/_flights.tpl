@@ -14,11 +14,27 @@
 			#filters fieldset {
 				display: inline-block;
 				border-radius: .3em;
-				margin: 0 .5em;
+				margin: 0 1em;
 			}
 			#filters select {
 				min-height: 15em;
 			}
+		option.fs {
+			{@rem /*12x12 rounded rectangle border #404040 brush width 1 corner size 4*/@}
+			background-image: url('data:image/png;base64,
+				iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMBAMAAACkW0HUAAAABGdBTUEAALGPC/xhBQAAAAFzUkdC
+				AK7OHOkAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAeUExURUBAQEdwTEBAQEBAQEBAQEBAQEBAQOHD
+				w//d3UBAQDgE91wAAAAHdFJOU4MA4Qyrx6OtsUq6AAAANklEQVQI12MQZpo5U8GQwdS9o6MkmIGl
+				AwgcGNRBVBHDDBDViZ2CKmEDUQkMpukdHWXBDBDDABlnH1kbPBThAAAAAElFTkSuQmCC');
+			background-repeat: no-repeat;
+			background-position: 4px center;
+			padding-left: 22px;
+			}
+			option.fs1 { filter: hue-rotate(240deg); }
+			option.fs8 { filter: hue-rotate(120deg); }
+			option.fs16, option.fs.fs128 { filter: hue-rotate(30deg) saturate(200%); }
+			option.fs64 { filter: hue-rotate(270deg); }
+			option.fs2048 { filter: hue-rotate(60deg); }
 		#filters-expanded ~ div {
 			max-height: 0;
 			overflow: hidden;
@@ -27,18 +43,21 @@
 		#filters-expanded:checked ~ div {
 			max-height: 100vh;
 		}
-		#filters-expanded + p span.on,
-		#filters-expanded:checked + p span.off {
-			display: none;
-		}
-		#filters-expanded:checked + p span.on {
-			display: inline;
-		}
 		label[for=filters-expanded] {
-			text-decoration: underline;
+			display: inline-block;
+			background: #ddd;
+			border: 1px solid #777;
+			border-radius: 4px;
+			padding: .2em .4em;
 			cursor: pointer;
-			color: #06c;
-		}
+			user-select: none;
+			}
+			label[for=filters-expanded]:hover {
+				filter: brightness(90%);
+			}
+			label[for=filters-expanded]:active {
+				filter: brightness(85%);
+			}
 	</style>
 </head>
 <body>
@@ -50,7 +69,7 @@
 			<form id=filters>
 				{@if $num_active_filters}
 					<p>
-						<strong>Active filters</strong> (<a href=/flights.php>clear</a>)
+						<strong>Search parameters:</strong> (<a href=/flights.php>clear</a>)
 					</p>
 					<p style=line-height:1.5em>
 						{@if !empty($filter_aircraft)}
@@ -93,11 +112,7 @@
 				{@endif}
 				<input style=display:none type=checkbox id=filters-expanded>
 				<p>
-					<label for=filters-expanded>
-						<span class=off>Edit </span>
-						<span class=on>Close </span>
-						filters
-					</label>
+					<label for=filters-expanded>Change search</label>
 				</p>
 				<div>
 					<p>
@@ -156,6 +171,7 @@
 						<select name=flqstate[] multiple>
 							{@foreach $flightstatuses as $tmp_id => $tmp_name}
 								<option 
+									class="fs fs{@unsafe $tmp_id}" 
 									value={@unsafe $tmp_id}
 									{@if in_array($tmp_id, $filter_status)} selected{@endif}
 								>
