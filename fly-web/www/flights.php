@@ -24,6 +24,7 @@ $filter_status = get_flight_list_opt($flight_list_opts, 'filter_status', [], $nu
 $filter_aircraft = get_flight_list_opt($flight_list_opts, 'filter_aircraft', [], $num_active_filters);
 $filter_pilot_id = get_flight_list_opt($flight_list_opts, 'filter_pilot_id', '', $num_active_filters);
 $filter_pilot_name = get_flight_list_opt($flight_list_opts, 'filter_pilot_name', '', $num_active_filters);
+$filter_route_includes = get_flight_list_opt($flight_list_opts, 'filter_route_includes', [], $num_active_filters);
 
 $__script = '_flights';
 require '../inc/output.php';

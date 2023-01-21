@@ -72,6 +72,9 @@
 						{@if !empty($filter_to)}
 							<strong>To:</strong> {@unsafe implode($filter_to, ', ')}<br>
 						{@endif}
+						{@if !empty($filter_route_includes)}
+							<strong>From/To:</strong> {@unsafe implode($filter_route_includes, ', ')}<br>
+						{@endif}
 						{@if !empty($filter_status)}
 							<strong>Status:</strong> 
 							{@foreach $filter_status as $status}
@@ -131,6 +134,18 @@
 								<option 
 									value={@unsafe $code}
 									{@if in_array($code, $filter_to)} selected{@endif}
+								>
+									{@unsafe $code}
+							{@endforeach}
+						</select>
+					</fieldset>
+					<fieldset>
+						<legend>From/To</legend>
+						<select name=flqri[] multiple>
+							{@foreach $all_airport_codes as $code}
+								<option 
+									value={@unsafe $code}
+									{@if in_array($code, $filter_route_includes)} selected{@endif}
 								>
 									{@unsafe $code}
 							{@endforeach}

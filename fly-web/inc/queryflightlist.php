@@ -14,6 +14,7 @@ function flight_list_query_get_opts_from_query_parameters()
 		'filter_from' => 'flqf',
 		'filter_aircraft' => 'flqvm',
 		'filter_status' => 'flqstate',
+		'filter_route_includes' => 'flqri',
 	];
 
 	$opts = new stdClass();
@@ -82,6 +83,14 @@ function _flight_list_query($opts)
 		$where[] = '(' . implode(array_fill(0, count($opts->filter_to), 't=?'), ' OR ') . ')';
 		$parms = array_merge($parms, $opts->filter_to);
 		$fltrs['flqt'] = $opts->filter_to;
+	}
+	if (isset($opts->filter_route_includes)) {
+		$where[] = '(' . implode(array_fill(0, count($opts->filter_route_includes), '(t=? OR f=?)'), ' AND ') . ')';
+		foreach ($opts->filter_route_includes as $code) {
+			$parms[] = $code;
+			$parms[] = $code;
+		}
+		$fltrs['flqri'] = $opts->filter_route_includes;
 	}
 	$where = implode($where, ' AND ');
 	$limit = 100;
