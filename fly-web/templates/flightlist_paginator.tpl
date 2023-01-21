@@ -7,7 +7,13 @@
 		{@endif}
 		&#32;|&#32;
 		{@foreach $flight_list->filters as $filter_name => $filter_value}
-			<input type="hidden" name="{@unsafe $filter_name}" value="{$filter_value}" />
+			{@if is_array($filter_value)}
+				{@foreach $filter_value as $value}
+					<input type="hidden" name="{@unsafe $filter_name}[]" value="{$value}" />
+				{@endforeach}
+			{@else}
+				<input type="hidden" name="{@unsafe $filter_name}" value="{$filter_value}" />
+			{@endif}
 		{@endforeach}
 		page:
 		<select name="page">

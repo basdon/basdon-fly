@@ -1,19 +1,39 @@
 <?php
-$flight_list_query_opts = [
-	'filter_pilot_id' => 'flqpid',
-	'filter_pilot_name' => 'flqpn',
-	'filter_status' => 'flqstate',
-	'page' => 'page',
-];
 
 function flight_list_query_get_opts_from_query_parameters()
 {
-	global $flight_list_query_opts;
+	global $_GET_ARRAY;
+
+	static $flight_list_query_scalar_opts = [
+		'filter_pilot_id' => 'flqpid',
+		'filter_pilot_name' => 'flqpn',
+		'page' => 'page',
+	];
+	static $flight_list_query_array_opts = [
+		'filter_to' => 'flqt',
+		'filter_from' => 'flqf',
+		'filter_aircraft' => 'flqvm',
+		'filter_status' => 'flqstate',
+		'filter_route_includes' => 'flqri',
+	];
 
 	$opts = new stdClass();
-	foreach ($flight_list_query_opts as $opt_name => $opt_param) {
-		if (isset($_GET[$opt_param])) {
+	foreach ($flight_list_query_scalar_opts as $opt_name => $opt_param) {
+		if (isset($_GET[$opt_param]) && !empty($_GET[$opt_param])) {
 			$opts->$opt_name = $_GET[$opt_param];
+		}
+	}
+	$num_array_filters = 0;
+	foreach ($flight_list_query_array_opts as $opt_name => $opt_param) {
+		if (isset($_GET_ARRAY[$opt_param]) && !empty($_GET_ARRAY[$opt_param])) {
+			$count = count($_GET_ARRAY[$opt_param]);
+			if ($count + $num_array_filters > 30) {
+				// 30 is an arbitrary limit; maybe this can be higher without too much impact?
+				$opts->error_too_many_filters = true;
+				break;
+			}
+			$opts->$opt_name = $_GET_ARRAY[$opt_param];
+			$num_array_filters += $count;
 		}
 	}
 	return $opts;
@@ -44,10 +64,33 @@ function _flight_list_query($opts)
 		$parms[] = $opts->filter_pilot_name;
 		$fltrs['flqpn'] = $opts->filter_pilot_name;
 	}
+	if (isset($opts->filter_aircraft)) {
+		$where[] = '(' . implode(array_fill(0, count($opts->filter_aircraft), 'vehmodel=?'), ' OR ') . ')';
+		$parms = array_merge($parms, $opts->filter_aircraft);
+		$fltrs['flqvm'] = $opts->filter_aircraft;
+	}
 	if (isset($opts->filter_status)) {
-		$where[] = 'state=?';
-		$parms[] = (int) $opts->filter_status;
-		$fltrs['flqstate'] = (int) $opts->filter_status;
+		$where[] = '(' . implode(array_fill(0, count($opts->filter_status), 'state=?'), ' OR ') . ')';
+		$parms = array_merge($parms, $opts->filter_status);
+		$fltrs['flqstate'] = $opts->filter_status;
+	}
+	if (isset($opts->filter_from)) {
+		$where[] = '(' . implode(array_fill(0, count($opts->filter_from), 'f=?'), ' OR ') . ')';
+		$parms = array_merge($parms, $opts->filter_from);
+		$fltrs['flqf'] = $opts->filter_from;
+	}
+	if (isset($opts->filter_to)) {
+		$where[] = '(' . implode(array_fill(0, count($opts->filter_to), 't=?'), ' OR ') . ')';
+		$parms = array_merge($parms, $opts->filter_to);
+		$fltrs['flqt'] = $opts->filter_to;
+	}
+	if (isset($opts->filter_route_includes)) {
+		$where[] = '(' . implode(array_fill(0, count($opts->filter_route_includes), '(t=? OR f=?)'), ' AND ') . ')';
+		foreach ($opts->filter_route_includes as $code) {
+			$parms[] = $code;
+			$parms[] = $code;
+		}
+		$fltrs['flqri'] = $opts->filter_route_includes;
 	}
 	$where = implode($where, ' AND ');
 	$limit = 100;
@@ -71,6 +114,12 @@ function _flight_list_query($opts)
 	$flight_list->total = 0;
 
 	if (isset($opts->fetch_pagination_data) && $opts->fetch_pagination_data) {
+		$flight_list->page = isset($page) ? $page : 1;
+		$flight_list->last_page = 0;
+		$flight_list->total = 0;
+		$flight_list->view_from = 0;
+		$flight_list->view_to = 0;
+
 		$flight_list->dbq = (new DBQ())->prepare('SELECT COUNT(id) AS c FROM flg_enriched WHERE '.$where)->executew0ia($parms);
 		$meta = $flight_list->dbq->fetch_all();
 
@@ -86,9 +135,6 @@ function _flight_list_query($opts)
 		if ($offset < $count) {
 			$flight_list->view_from = $offset + 1;
 			$flight_list->view_to = min($flight_list->total, $offset + $limit);
-		} else {
-			$flight_list->view_from = 0;
-			$flight_list->view_to = 0;
 		}
 
 		$flight_list->last_page = ceil($count / $limit);
@@ -104,8 +150,6 @@ function _flight_list_query($opts)
 			$fltrs['page'] = isset($page) ? $page+1 : 2;
 			$flight_list->older_page_query_params = http_build_query($fltrs);
 		}
-
-		$flight_list->page = isset($page) ? $page : 1;
 	}
 
 	$flight_list->dbq = (new DBQ())->prepare('SELECT * FROM flg_enriched WHERE '.$where.' LIMIT '.$limit.' OFFSET '.$offset);
