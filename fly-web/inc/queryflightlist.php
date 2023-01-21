@@ -108,7 +108,7 @@ function _flight_list_query($opts)
 	$flight_list->filters = $fltrs;
 	$flight_list->date_format = 'j M Y';
 	$flight_list->show_pilot = true;
-	$flight_list->to_flights_page_query_params = http_build_query($fltrs);
+	$flight_list->active_filters_query_params = http_build_query($fltrs);
 	$flight_list->view_from = 0;
 	$flight_list->view_to = 0;
 	$flight_list->total = 0;

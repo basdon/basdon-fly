@@ -89,7 +89,7 @@
 		<h3>Last {@unsafe $flight_list->opts->limit} flights by this user</h3>
 		{@render flightlist.tpl}
 		<p class="center">
-			<a href="/flights.php?{@unsafe $flight_list->to_flights_page_query_params}">
+			<a href="/flights.php?{@unsafe $flight_list->active_filters_query_params}">
 				All flights by this user
 			</a>
 		</p>
