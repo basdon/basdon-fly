@@ -108,14 +108,7 @@
 			{@endif}
 		</p>
 
-		<h3>Active flights</h3>
-
-		{@eval $flight_list = index_get_active_flights()}
-		{@render flightlist.tpl}
-
-		<h3>Last 7 finished flights</h3>
-
-		{@eval $flight_list = index_get_last_finished_flights()}
+		<h3>Recent flights</h3>
 		{@render flightlist.tpl}
 
 		<p><a href="flights.php">All flights</a></p>

@@ -39,6 +39,20 @@ function flight_list_query_get_opts_from_query_parameters()
 	return $opts;
 }
 
+function flight_list_query_mkresult($opts, $fltrs)
+{
+	$flight_list = new stdClass();
+	$flight_list->opts = $opts;
+	$flight_list->filters = $fltrs;
+	$flight_list->date_format = 'j M Y';
+	$flight_list->show_pilot = true;
+	$flight_list->active_filters_query_params = http_build_query($fltrs);
+	$flight_list->view_from = 0;
+	$flight_list->view_to = 0;
+	$flight_list->total = 0;
+	return $flight_list;
+}
+
 /**delete when all queries are changed to work with ERRMODE_SILENT*/
 function flight_list_query($opts)
 {
@@ -103,15 +117,7 @@ function _flight_list_query($opts)
 		$offset = ($page - 1) * $limit;
 	}
 
-	$flight_list = new stdClass();
-	$flight_list->opts = $opts;
-	$flight_list->filters = $fltrs;
-	$flight_list->date_format = 'j M Y';
-	$flight_list->show_pilot = true;
-	$flight_list->active_filters_query_params = http_build_query($fltrs);
-	$flight_list->view_from = 0;
-	$flight_list->view_to = 0;
-	$flight_list->total = 0;
+	$flight_list = flight_list_query_mkresult($opts, $fltrs);
 
 	if (isset($opts->fetch_pagination_data) && $opts->fetch_pagination_data) {
 		$flight_list->page = isset($page) ? $page : 1;
@@ -154,5 +160,26 @@ function _flight_list_query($opts)
 
 	$flight_list->dbq = (new DBQ())->prepare('SELECT * FROM flg_enriched WHERE '.$where.' LIMIT '.$limit.' OFFSET '.$offset);
 	$flight_list->dbq->executew0ia($parms);
+	return $flight_list;
+}
+
+/**delete when all queries are changed to work with ERRMODE_SILENT*/
+function homepage_flight_list_query()
+{
+	global $db;
+
+	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+	$res = _homepage_flight_list_query();
+	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	return $res;
+}
+
+function _homepage_flight_list_query()
+{
+	$flight_list = flight_list_query_mkresult(new stdClass(), []);
+	$flight_list->dbq = (new DBQ())->prepare(
+		'(SELECT * FROM flg_enriched WHERE state=1 ORDER BY id DESC)
+		UNION
+		(SELECT * FROM flg_enriched WHERE state!=1 ORDER BY id DESC LIMIT 7)')->execute();
 	return $flight_list;
 }
