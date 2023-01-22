@@ -18,7 +18,7 @@
 		page:
 		<select name=page>
 			{@for $p = 1; $p <= $flight_list->last_page; $p++}
-				<option value={@unsafe $p}{@if $flight_list->page == $p} selected{@endif}>
+				<option{@if $flight_list->page == $p} selected{@endif}>
 					{@unsafe $p}
 			{@endfor}
 		</select>

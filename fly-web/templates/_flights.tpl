@@ -19,7 +19,7 @@
 			#filters select {
 				min-height: 15em;
 			}
-		option.fs {
+		#fs option {
 			{@rem /*12x12 rounded rectangle border #404040 brush width 1 corner size 4*/@}
 			background-image: url('data:image/png;base64,
 				iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMBAMAAACkW0HUAAAABGdBTUEAALGPC/xhBQAAAAFzUkdC
@@ -30,18 +30,18 @@
 			background-position: 4px center;
 			padding-left: 22px;
 			}
-			option.fs1 { filter: hue-rotate(240deg); }
-			option.fs8 { filter: hue-rotate(120deg); }
-			option.fs16, option.fs.fs128 { filter: hue-rotate(30deg) saturate(200%); }
-			option.fs64 { filter: hue-rotate(270deg); }
-			option.fs2048 { filter: hue-rotate(60deg); }
+			#fs .fs1 { filter: hue-rotate(240deg); }
+			#fs .fs8 { filter: hue-rotate(120deg); }
+			#fs .fs16,
+			#fs .fs128 { filter: hue-rotate(30deg) saturate(200%); }
+			#fs .fs64 { filter: hue-rotate(270deg); }
+			#fs .fs2048 { filter: hue-rotate(60deg); }
 		#filters-expanded ~ div {
-			max-height: 0;
+			height: 0;
 			overflow: hidden;
-			transition: max-height .2s ease;
 		}
 		#filters-expanded:checked ~ div {
-			max-height: 100vh;
+			height: revert;
 		}
 		label[for=filters-expanded] {
 			display: inline-block;
@@ -134,10 +134,7 @@
 						<legend>From</legend>
 						<select name=flqf[] multiple>
 							{@foreach $all_airport_codes as $code}
-								<option 
-									value={@unsafe $code}
-									{@if in_array($code, $filter_from)} selected{@endif}
-								>
+								<option{@if in_array($code, $filter_from)} selected{@endif}>
 									{@unsafe $code}
 							{@endforeach}
 						</select>
@@ -146,10 +143,7 @@
 						<legend>To</legend>
 						<select name=flqt[] multiple>
 							{@foreach $all_airport_codes as $code}
-								<option 
-									value={@unsafe $code}
-									{@if in_array($code, $filter_to)} selected{@endif}
-								>
+								<option{@if in_array($code, $filter_to)} selected{@endif}>
 									{@unsafe $code}
 							{@endforeach}
 						</select>
@@ -158,20 +152,17 @@
 						<legend>From/To</legend>
 						<select name=flqri[] multiple>
 							{@foreach $all_airport_codes as $code}
-								<option 
-									value={@unsafe $code}
-									{@if in_array($code, $filter_route_includes)} selected{@endif}
-								>
+								<option{@if in_array($code, $filter_route_includes)} selected{@endif}>
 									{@unsafe $code}
 							{@endforeach}
 						</select>
 					</fieldset>
 					<fieldset>
 						<legend>Flight status</legend>
-						<select name=flqstate[] multiple>
+						<select name=flqstate[] multiple id=fs>
 							{@foreach $flightstatuses as $tmp_id => $tmp_name}
 								<option 
-									class="fs fs{@unsafe $tmp_id}" 
+									class=fs{@unsafe $tmp_id} 
 									value={@unsafe $tmp_id}
 									{@if in_array($tmp_id, $filter_status)} selected{@endif}
 								>
