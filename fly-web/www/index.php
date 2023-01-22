@@ -1,27 +1,15 @@
 <?php
 require '../inc/bootstrap.php';
 
-$db_querycount += 9;
-$activeflights = $db->query("
-	SELECT id,_u.name,_u.i,_a.c f,_b.c t,tstart,state,tload,veh.m vehmodel
-	FROM flg _f
-	JOIN usr _u ON _f.player=_u.i
-	JOIN apt _a ON _a.i=_f.fapt
-	JOIN apt _b ON _b.i=_f.tapt
-	JOIN veh ON veh.i=_f.vehicle
-	WHERE state=1
-	ORDER BY tstart DESC
-	LIMIT 10");
-$lastflights = $db->query(
-	"SELECT id,_u.name,_u.i,_a.c f,_b.c t,state,tload,adistance,tlastupdate,veh.m vehmodel
-	FROM flg _f
-	JOIN usr _u ON _f.player=_u.i
-	JOIN apt _a ON _a.i=_f.fapt
-	JOIN apt _b ON _b.i=_f.tapt
-	JOIN veh ON veh.i=_f.vehicle
-	WHERE state=8
-	ORDER BY id DESC
-	LIMIT 7");
+
+require '../inc/queryflightlist.php'; // required to render flight list
+require '../inc/aircraftnames.php'; // required to render flight list
+require '../inc/flightstatuses.php'; // required to render flight list
+require '../inc/missiontypes.php'; // required to render flight list
+
+$flight_list = homepage_flight_list_query();
+
+$db_querycount += 7;
 $onlineplayers = $db->query("
 	SELECT _u.name,_u.i,_u.score
 	FROM ses _s
@@ -65,9 +53,6 @@ if ($last48 !== false && ($last48 = $last48->fetchAll()) !== false) {
 } else {
 	$last48 = [];
 }
-
-include '../inc/aircraftnames.php';
-include '../inc/flightstatuses.php';
 
 $__script = '_index';
 require '../inc/output.php';

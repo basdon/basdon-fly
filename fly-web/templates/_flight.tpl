@@ -29,7 +29,7 @@
 		<div class="fl49">
 			<h3>Overview</h3>
 			<ul>
-				<li><strong>Status:</strong> <span class="flight-state flight-state-{@unsafe $r->state}">{@unsafe fmt_flight_status($r->state, $r->tload)}</span></li>
+				<li><strong>Status:</strong> <span class="flight-state f{@unsafe $r->state}">{@unsafe fmt_flight_status($r->state, $r->tload)}</span></li>
 				<li><strong>Pilot:</strong> {@unsafe linkuser($r)}</li>
 				<li><strong>Origin:</strong> <a href="article.php?title={@unsafe $r->fromcode}">{@unsafe $r->fromname} ({@unsafe $r->fromcode})</a> {@unsafe $r->fromgate}</li>
 				<li><strong>Destination:</strong> <a href="article.php?title={@unsafe $r->tocode}">{@unsafe $r->toname} ({@unsafe $r->tocode})</a> {@unsafe $r->togate}</li>

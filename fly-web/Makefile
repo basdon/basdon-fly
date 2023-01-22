@@ -10,11 +10,11 @@ TEMPLATE_OBJECTS_PART := $(patsubst templates/%.tpl, gen/%.php, $(TEMPLATE_SOURC
 ARTICLE_SOURCES := $(wildcard articles/*.txt)
 ARTICLE_OBJECTS := $(patsubst articles/%.txt, gen/article_%.html, $(ARTICLE_SOURCES))
 
-.PHONY: templates aerodromcharts apfactsheets apvehicelist \
+.PHONY: templates aerodromcharts all_airport_codes apfactsheets apvehicelist \
 	articles ensureplayergraph islandmapdata islandmaps flightmapjs \
 	clean cleantemplates cleanarticles \
 	airportlist navinfotable mission-point-types-tables
-default: templates aerodromecharts apfactsheets apvehiclelist \
+default: templates aerodromecharts all_airport_codes apfactsheets apvehiclelist \
 	articles ensureplayergraph islandmapdata islandmaps flightmapjs \
 	airportlist navinfotable mission-point-types-tables
 
@@ -54,6 +54,10 @@ aerodromecharts: inc/__settings.php
 	rm -f gen/aerodrome*
 	rm -f www/s/gen/aerodrome*
 	cd cli && php genaerodromechart.php
+
+all_airport_codes:
+	rm -f inc/gen/all_airport_codes.php
+	cd cli && php gen_all_airport_codes.php
 
 apfactsheets: inc/__settings.php
 	rm -f gen/apfactsheet*
@@ -95,6 +99,7 @@ mission-point-types-tables: inc/__settings.php
 
 clean:
 	rm -f inc/__settings.php
+	rm -f inc/gen/*
 	rm -f gen/*
 	rm -f templates/gen/*
 	rm -f www/s/gen/*

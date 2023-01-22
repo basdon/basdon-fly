@@ -148,9 +148,6 @@ table.new td + td {
 table.new thead tr {
 	border-bottom: 1px solid #aab;
 }
-table.highlight-row tr:hover {
-	background: #f0f0f0;
-}
 table.rowseps tr + tr td {
 	border-top: 1px solid #aab;
 }
@@ -170,25 +167,26 @@ table.new th + th {
 	font-family: monospace;
 	text-transform: uppercase;
 	white-space: nowrap;
-}
-.flight-state-1 {
-	background: #ddf;
-}
-.flight-state-8 {
-	background: #dfd;
-}
-.flight-state-2, .flight-state-4, .flight-state-32, .flight-state-256, .flight-state-512, .flight-state-1024, .flight-state-4096 {
-	background: #fdd;
-}
-.flight-state-16, .flight-state-128 {
-	background: #fdb;
-}
-.flight-state-64 {
-	background: #edf;
-}
-.flight-state-2048 {
-	background: #ffd;
-}
+	}
+	/*when editing, remember to edit hue shifts in _flights.tpl, colors in postdiscordflightlog.php, colors in og meta*/
+	.flight-state.f1 {
+		background: #ddf;
+	}
+	.flight-state.f8 {
+		background: #dfd;
+	}
+	.flight-state.f2, .flight-state.f4, .flight-state.f32, .flight-state.f256, .flight-state.f512, .flight-state.f1024, .flight-state.f4096 {
+		background: #fdd;
+	}
+	.flight-state.f16, .flight-state.f128 {
+		background: #fdb;
+	}
+	.flight-state.f64 {
+		background: #edf;
+	}
+	.flight-state.f2048 {
+		background: #ffd;
+	}
 code {
 	font-family: 'Courier new', monospace;
 	background: #ddd;
@@ -226,11 +224,6 @@ p.msg.success {
 }
 @media (max-width: 800px) {
 	.no800 {
-		display: none;
-	}
-}
-@media (max-width: 600px) {
-	.no600 {
 		display: none;
 	}
 }
@@ -290,12 +283,13 @@ ul.compact {
 
 .flightlist {
 	border-spacing: 0 5px;
+	margin: 1em 0;
 	}
 	.flightlist tr {
 	}
 	.flightlist td {
 		background: #eee;
-		padding: .1em .3em;
+		padding: 0;
 	}
 	.flightlist td:first-child {
 		border-radius: .5em 0 0 .5em;

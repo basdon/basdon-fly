@@ -1,15 +1,23 @@
 <?php
 
-function sanitize_params(&$pars)
+function sanitize_params(&$pars, &$array_destination)
 {
 	foreach ($pars as $k => $v) {
+		if (is_array($v) && !is_null($array_destination)) {
+			$array = $pars[$k];
+			$dummy = null;
+			sanitize_params($array, $dummy);
+			$array_destination[$k] = $array;
+		}
 		if (!is_int($v) && !is_string($v) && !is_float($v)) {
 			unset($pars[$k]);
 		}
 	}
 }
-sanitize_params($_GET);
-sanitize_params($_POST);
+$_GET_ARRAY = [];
+$_POST_ARRAY = [];
+sanitize_params($_GET, $_GET_ARRAY);
+sanitize_params($_POST, $_POST_ARRAY);
 // $_FILES?
 
 function header_value($value)
