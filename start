@@ -3,6 +3,7 @@
 
 # dev configuration is used if the $BASDONDEV environment variable is set
 
+ulimit -c unlimited # we want core dumps
 pushd server > /dev/null
 if [ -f "servercfg-rcon_password.cfg" ]
 then
