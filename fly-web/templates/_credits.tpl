@@ -7,7 +7,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div>
+	<main>
 		<h2 id="main">Credits</h2>
 		<ul>
 			<li>
@@ -30,7 +30,7 @@
 				<p><strong>Inspiration and ideas</strong>: {@unsafe $SETTING__CREDITS_INSP}</p>
 			</li>
 		</ul>
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>

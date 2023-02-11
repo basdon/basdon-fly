@@ -16,7 +16,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div>
+	<main>
 		{@if isset($selectedrelease)}
 			<p><a href="trac.php">Tracker</a> &gt; <a href="tracversion.php">Change log</a> &gt; Release {@unsafe trac_releasetime($selectedrelease)}</p>
 			<h2 id="main">Change log for release {@unsafe trac_releasetime($selectedrelease)}</h2>
@@ -51,7 +51,7 @@
 
 			{@unsafe $pagination}
 		{@endif}
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>

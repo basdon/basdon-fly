@@ -18,7 +18,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div>
+	<main>
 		<p><a href="flights.php{@if $returnpage != -1}?page={@unsafe $returnpage}{@endif}">Flights</a> &gt; Flight #{@unsafe $id}</p>
 		<h2 id="main">Flight #{@unsafe $id} details</h2>
 	{@if !isset($r)}
@@ -98,7 +98,7 @@
 		<script src="/s/gen/fm_complete.js?v17"></script>
 		<script>UTCoffset={@unsafe date('Z')};flightmap({@unsafe $id})</script>
 	{@endif}
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>

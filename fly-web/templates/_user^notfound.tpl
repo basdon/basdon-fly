@@ -7,10 +7,10 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div>
+	<main>
 		<h2 id="main">User not found</h2>
 		<p>Note that profiles of guest accounts can only be found by using their user account id.</p>
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>

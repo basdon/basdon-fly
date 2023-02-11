@@ -39,7 +39,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div class="center">
+	<main class=center>
 		<h2 id="main" class="left">Welcome!</h2>
 		<p class="left">
 			basdon.net aviation server is a server for <a href="https://www.sa-mp.com/">San Andreas Multiplayer (SA-MP)</a>{@globe}, 
@@ -84,7 +84,7 @@
 		<p><a href="changelog.php">More...</a></p>
 
 		<h3>Player activity</h3>
-		<p><img style="width:100%" src="/s/gen/playergraph.png" /></p>
+		<p><img style=width:980px src=/s/gen/playergraph.png></p>
 
 		<h4>Online now ({@unsafe count($onlineplayers)})</h4>
 		<p>
@@ -122,7 +122,7 @@
 			{@endif}
 		</p>
 		<p><a href="stats.php">More stats</a></p>
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>

@@ -8,7 +8,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div class="article">
+	<main class=article>
 		<p>
 			<a href="article.php">Articles</a>
 			{@foreach $categories as $c}
@@ -39,7 +39,7 @@
 			{@endif}
 		{@endif}
 		{@render article_bottom_right_links.tpl}
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>
