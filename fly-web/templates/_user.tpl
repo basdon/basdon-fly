@@ -7,9 +7,9 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div>
+	<main>
 		{@render userpublicprofile.tpl}
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>

@@ -14,14 +14,27 @@ if (!isset($loggeduser) || !group_is_admin($loggeduser->groups)) {
 }
 
 if ($action == 'home') {
-	$db_querycount += 4;
+	$db_querycount += 3;
 	$healthchecks = $db->query('SELECT
 		(SELECT COUNT(i) FROM usr WHERE playtime>onlinetime) playtime,
 		(SELECT COUNT(i) FROM usr WHERE flighttime>playtime) flighttime,
 		(SELECT COUNT(i) FROM usr WHERE distance>10000000) distance')->fetchAll()[0];
 	$heartbeat = $db->query('SELECT tstart,tlast FROM heartbeat WHERE tlast>UNIX_TIMESTAMP()-35 ORDER BY tlast DESC LIMIT 1')->fetchAll();
 	$lastheartbeat = $db->query('SELECT MAX(tlast) tlast FROM heartbeat')->fetchAll();
-	$lastsessions = $db->query('SELECT tstart,tlast,cleanexit FROM heartbeat ORDER BY id DESC LIMIT 10')->fetchAll();
+
+	function fetch_last_sessions_info() {
+		$q = (new DBQ())->query('SELECT tstart,tlast,cleanexit FROM heartbeat ORDER BY id DESC LIMIT 10');
+	fetch_next_session_info:
+		$next = $q->fetch_next();
+		if ($next) {
+			if (isset($newer_session_tstart)) {
+				$next->offline_time_s = $newer_session_tstart - $next->tlast;
+			}
+			$newer_session_tstart = $next->tstart;
+			yield $next;
+			goto fetch_next_session_info;
+		}
+	}
 } else if ($action == 'acl') {
 	$page = get_page();
 	$db_querycount += 2;

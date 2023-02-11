@@ -23,7 +23,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div>
+	<main>
 		<p><a href="trac.php">Tracker</a> {@if $trac_released != null}&gt; <a href="tracversion.php?rel={@unsafe $trac_released}">Release {@unsafe $trac_released_display}</a> {@endif}&gt; {$trac_summary}</p>
 		{@if isset($trac)}
 			<h2 id="main">Tracker: {$trac->summary}</h2>
@@ -115,7 +115,7 @@
 			<h2 id="main">Tracker</h2>
 			<p>This ticket does not exist or is not visible for you.</p>
 		{@endif}
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>

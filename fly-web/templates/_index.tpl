@@ -39,7 +39,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div class="center">
+	<main class=center>
 		<h2 id="main" class="left">Welcome!</h2>
 		<p class="left">
 			basdon.net aviation server is a server for <a href="https://www.sa-mp.com/">San Andreas Multiplayer (SA-MP)</a>{@globe}, 
@@ -50,7 +50,7 @@
 
 		<h3 style="border:0">Server IP: basdon.net:7777</h3>
 		<p>
-			<a href="https://files.sa-mp.com/sa-mp-0.3.7-R4-install.exe">SA-MP 0.3.7</a> - <a href="article.php?title=How_To_Join">How to join</a>
+			<a href="https://files.sa-mp.com/sa-mp-0.3.7-R5-1-install.exe">SA-MP 0.3.7</a> - <a href="article.php?title=How_To_Join">How to join</a>
 		</p>
 		<p>
 			Discord: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}
@@ -75,16 +75,8 @@
 			<a href="flight.php?id=2572"><img src="/s/showcase-map.png" title="flight map"></a>
 		</p>
 
-		<h3>Changelog</h3>
-		<ul style="list-style:none;text-align:left;padding:0;display:table;margin:0 auto">
-			{@foreach $last_changelog_entries as $change}
-				<li><strong>{@unsafe $change->stamp}</strong>: {$change->entry}</li>
-			{@endforeach}
-		</ul>
-		<p><a href="changelog.php">More...</a></p>
-
 		<h3>Player activity</h3>
-		<p><img style="width:100%" src="/s/gen/playergraph.png" /></p>
+		<p><img style=width:980px src=/s/gen/playergraph.png></p>
 
 		<h4>Online now ({@unsafe count($onlineplayers)})</h4>
 		<p>
@@ -117,12 +109,20 @@
 		<p>
 			Members: {@unsafe $membercount->c} &bull; Guest sessions: {@unsafe $guestcount->c} &bull; Latest: {@unsafe linkuser($latestmember)}
 			{@if $combinedstats != null}
-				<br/>Combined online time: {@unsafe round($combinedstats->o)}h &bull; Combined flight time: {@unsafe round($combinedstats->f)}h &bull; Combined distance flown: {@unsafe round($combinedstats->d,1)}km<br/>
-				Total flights: {@unsafe $flightcount->c} &bull; Total cash: {@unsafe fmt_money($combinedstats->c)}
+				<br/>
+				Combined online time: {@unsafe number_format($combinedstats->o, 0, '', ',')}h 
+				&bull; 
+				Combined flight time: {@unsafe number_format($combinedstats->f, 0, '', ',')}h 
+				&bull; 
+				Combined distance flown: {@unsafe number_format($combinedstats->d, 0, '', ',')}km
+				<br/>
+				Total flights: {@unsafe $flightcount->c} 
+				&bull; 
+				Total cash: {@unsafe fmt_money($combinedstats->c)}
 			{@endif}
 		</p>
 		<p><a href="stats.php">More stats</a></p>
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>

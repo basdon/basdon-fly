@@ -22,26 +22,22 @@
 	<li>Last heartbeat: {@if empty($lastheartbeat)}<strong class="indicator">NONE?</strong>{@else}{@unsafe format_duration_short_days(time() - $lastheartbeat[0]->tlast)} ago{@endif}</li>
 </ul>
 <h4>Last sessions</h4>
-<table class="new center">
-	<thead><tr><th>start</th><th>end</th><th>duration</th><th>cleanexit</th><th>offline time</th></tr></thead>
+<table class="new center rowseps">
+	<thead><tr><th>start<th>end<th>duration<th>cleanexit</thead>
 	<tbody>
-		{@rem TODO this loop looks like shit @}
-		{@for $i = 0; $i < count($lastsessions); $i++}
-			{@eval $s = $lastsessions[$i]}
+		{@foreach fetch_last_sessions_info() as $s}
+			{@if isset($s->offline_time_s)}
+				<tr>
+					<td colspan=4>
+						{@if $s->offline_time_s > 90}<strong>{@endif}
+						offline for {@unsafe format_duration_short_days($s->offline_time_s)}
+						{@if $s->offline_time_s > 90}</strong>{@endif}
+			{@endif}
 			<tr>
 				<td>{@unsafe format_datetime($s->tstart)}</td>
 				<td>{@unsafe format_datetime($s->tlast)}</td>
 				<td>{@unsafe format_duration_short_days($s->tlast - $s->tstart)}</td>
 				<td>{@unsafe $s->cleanexit}</td>
-				<td>
-					{@if $i < count($lastsessions)-1}
-						{@eval $duration=$s->tstart - $lastsessions[$i+1]->tlast}
-						{@if $duration>90}<strong>{@endif}
-						{@unsafe format_duration_short_days($duration)}
-						{@if $duration>90}</strong>{@endif}
-					{@endif}
-				</td>
-			</tr>
-		{@endfor}
+		{@endforeach}
 	</tbody>
 </table>

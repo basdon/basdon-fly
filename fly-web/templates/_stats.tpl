@@ -7,7 +7,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div>
+	<main>
 		<h2 id="main">Stats</h2>
 		<p>This page needs more content :)</p>
 		{@if $weather_totalcount > 0}
@@ -66,7 +66,7 @@
 			{@eval unset($weather_categorynames)}
 			{@eval unset($weather_names)}
 		{@endif}
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>

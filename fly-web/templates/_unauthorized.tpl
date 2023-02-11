@@ -7,14 +7,14 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div>
+	<main>
 		<h2 id="main">Unauthorized</h2>
 		{@if isset($loggeduser)}
 			<p class="msg error">You don't have acces to this page</p>
 		{@else}
 			<p class="msg error">You need to <a href="login.php?ret={@urlencode $ret}">log in</a> to see this page</p>
 		{@endif}
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>

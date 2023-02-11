@@ -63,7 +63,7 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div>
+	<main>
 		<h2 id="main">Flights</h2>
 		<div class=center>
 			<form id=filters>
@@ -193,7 +193,7 @@
 		{@render flightlist_paginator.tpl}
 		{@render flightlist.tpl}
 		{@render flightlist_paginator.tpl}
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>

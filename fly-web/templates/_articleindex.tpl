@@ -8,13 +8,13 @@
 <body>
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
-	<div><div class="article">
+	<main class=article>
 		<h2 id="main">Article index</h2>
 		{@foreach $cats as $cat}
 			{@render article_category_box.tpl}
 		{@endforeach}
 		{@render article_bottom_right_links.tpl}
-	</div></div>
+	</main>
 	{@render defaultfooter.tpl}
 </body>
 </html>
