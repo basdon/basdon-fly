@@ -4,6 +4,7 @@
 			<li><a href=credits.php>credits</a>
 			<li><a href=contact.php>contact</a>
 			<li><a href=brand.php>brand</a>
+			<li><a href=changelog.php>changelog</a>
 			<li><a href=https://github.com/basdon>github{@globe}</a>
 		</ul>
 		<p style=font-size:small>

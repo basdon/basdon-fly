@@ -75,14 +75,6 @@
 			<a href="flight.php?id=2572"><img src="/s/showcase-map.png" title="flight map"></a>
 		</p>
 
-		<h3>Changelog</h3>
-		<ul style="list-style:none;text-align:left;padding:0;display:table;margin:0 auto">
-			{@foreach $last_changelog_entries as $change}
-				<li><strong>{@unsafe $change->stamp}</strong>: {$change->entry}</li>
-			{@endforeach}
-		</ul>
-		<p><a href="changelog.php">More...</a></p>
-
 		<h3>Player activity</h3>
 		<p><img style=width:980px src=/s/gen/playergraph.png></p>
 
