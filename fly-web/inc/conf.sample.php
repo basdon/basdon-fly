@@ -18,3 +18,5 @@ $__REPARSE__ = false;
 
 // Discord webhook url to post flight messages in a Discord channel (edit channel, integrations, create webhook)
 //$DISCORD_FLIGHTLOG_WEBHOOK = 'https://discord.com/api/webhooks/yada/yada';
+// Discord webhook url to post server crash messages in a Discord channel (edit channel, integrations, create webhook)
+//$DISCORD_CRASHLOG_WEBHOOK = 'https://discord.com/api/webhooks/yada/yada';

@@ -3,7 +3,6 @@
 
 # dev configuration is used if the $BASDONDEV environment variable is set
 
-ulimit -c unlimited # we want core dumps
 pushd server > /dev/null
 if [ -f "servercfg-rcon_password.cfg" ]
 then
@@ -12,7 +11,7 @@ then
 		if cp ../fly-plugin/out/basdonfly-prod.so plugins/basdonfly.so &&
 			cat servercfg-common.cfg servercfg-rcon_password.cfg servercfg-prod-*.cfg > server.cfg
 		then
-			nohup ./samp03svr &
+			nohup bash serverloop &
 		fi
 	else
 		echo "RUNNING WITH DEV CONFIG"

@@ -1,0 +1,19 @@
+ulimit -c unlimited # we want core dumps
+while true
+do
+	./samp03svr
+	if ls -U core* 1>/dev/null 2>&1
+	then
+		DATE=$(date +%b-%d-%H%M%S)
+		ZIPFILENAME="basdonfly-${DATE}.zip"
+		zip ../fly-web/www/s/coredumps/$ZIPFILENAME plugins/basdonfly.so core*
+		rm core*
+		pushd ../fly-web/cli >/dev/null
+		php postdiscordcrashlog.php $ZIPFILENAME
+		popd >/dev/null
+		sleep 5
+	else
+		# if there's no coredump, assume the server shutdown was planned
+		break
+	fi
+done
