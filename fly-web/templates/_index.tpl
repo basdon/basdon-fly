@@ -109,8 +109,16 @@
 		<p>
 			Members: {@unsafe $membercount->c} &bull; Guest sessions: {@unsafe $guestcount->c} &bull; Latest: {@unsafe linkuser($latestmember)}
 			{@if $combinedstats != null}
-				<br/>Combined online time: {@unsafe round($combinedstats->o)}h &bull; Combined flight time: {@unsafe round($combinedstats->f)}h &bull; Combined distance flown: {@unsafe round($combinedstats->d,1)}km<br/>
-				Total flights: {@unsafe $flightcount->c} &bull; Total cash: {@unsafe fmt_money($combinedstats->c)}
+				<br/>
+				Combined online time: {@unsafe number_format($combinedstats->o, 0, '', ',')}h 
+				&bull; 
+				Combined flight time: {@unsafe number_format($combinedstats->f, 0, '', ',')}h 
+				&bull; 
+				Combined distance flown: {@unsafe number_format($combinedstats->d, 0, '', ',')}km
+				<br/>
+				Total flights: {@unsafe $flightcount->c} 
+				&bull; 
+				Total cash: {@unsafe fmt_money($combinedstats->c)}
 			{@endif}
 		</p>
 		<p><a href="stats.php">More stats</a></p>

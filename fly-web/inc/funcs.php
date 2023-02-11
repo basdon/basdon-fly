@@ -34,13 +34,5 @@ function fmt_money($amount)
 	} else {
 		$s .= '2a2">$';
 	}
-	$amount = "$amount";
-	$l = $len = strlen($amount);
-	while ($l--) {
-		$s .= $amount[$len - $l - 1];
-		if ($l && $l % 3 == 0) {
-			$s .= ',';
-		}
-	}
-	return $s . '</span>';
+	return $s. number_format($amount, 0, '', ',') . '</span>';
 }
