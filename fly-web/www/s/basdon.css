@@ -20,9 +20,8 @@ main, .wrapper {
 	max-width:1000px;
 	margin-left:auto;
 	margin-right:auto;
-}
-main, .wrapper-padding {
-	padding:1em;
+	padding-left:1em;
+	padding-right:1em;
 }
 main {
 	padding-top:0;
@@ -46,7 +45,7 @@ header hr {
 }
 header p {
 	margin:0;
-	padding:1em;
+	padding:1em 0;
 	font-size:small;
 	text-align:right;
 }

@@ -14,8 +14,7 @@
 			<a href=flights.php>Flights</a>
 			<a href=/>Home</a>
 		</nav>
-		<div class=clear></div>
-		<hr>
+		<hr class=clear>
 		<p>
 			<span id=ip>IP: basdon.net:7777 (<a href="article.php?title=How_To_Join">How to join</a>)</span>
 			{@if isset($loggeduser)}
@@ -35,7 +34,7 @@
 	</div>
 </header>
 {@if count($__msgs) + count($__rawmsgs)}
-	<div class="wrapper wrapper-pad">
+	<div class=wrapper>
 		{@foreach $__msgs as $msg}
 			<p class=topmsg>{$msg}</p>
 		{@endforeach}
