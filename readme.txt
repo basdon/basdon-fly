@@ -160,7 +160,7 @@ Installation/configuration
 
 			fdr.path=/basdon-fly/fly-web/www/s/fdr
 
-	      Or set it by sending commands to Anna^:
+		Or set it by sending commands to Anna^:
 
 			&confadd mod_bas_ft fdr.path /basdon-fly/fly-web/www/s/fdr
 
@@ -175,7 +175,7 @@ Installation/configuration
 		Add a cron job to regenerate the player graph image every
 		5 minutes:
 
-			*/5 * * * * cd /path/to/basdon-fly/fly-web/cli; php genplayergraph.php
+			*/5 * * * * cd /basdon-fly/fly-web/cli; php genplayergraph.php
 
 		In dev, set the SGID sticky bit (g+s) on the fly-web/inc and
 		fly-web/gen folders. Otherwise it won't be able to regenerate
@@ -204,8 +204,8 @@ Installation/configuration
 	Things to backup periodically
 	=============================
 	The database
-	Flight files: /path/to/basdon-fly/fly-web/static/fdr/*
-	Chatlogs: /path/to/basdon-fly/fly-web/static/chatlogs/*
+	Flight files: /basdon-fly/fly-web/s/fdr/*
+	Chatlogs: /basdon-fly/fly-web/s/chatlogs/*
 
 Running
 -------
@@ -219,10 +219,13 @@ Run the server by executing:
 
 	. start
 
-To use the dev configuration, set the $BASDONDEV environment variable.
+If a $BASDONDEV variable is present, the dev configuration will be used.
 
 Running the server without the dev settings will start it using nohup and run
-it in the background.
+it in the background. When a segfault happens and a core dump file is found,
+it will be zipped together with the plugin and moved to the
+fly-web/www/s/coredumps folder. A message will be posted to Discord, if
+configured, and the server should restart.
 
 Notes
 -----
