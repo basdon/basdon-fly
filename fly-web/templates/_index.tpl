@@ -56,7 +56,7 @@
 			Discord: <a href="https://discordapp.com/invite/w4jFpqd" rel="nofollow">https://discordapp.com/invite/w4jFpqd</a>{@globe}
 		</p>
 		<p>
-			IRC: #basdon (<a href="/s/chatlogs/basdon/?C=M;O=D">chatlogs</a>) and #basdon.echo (<a href="/s/chatlogs/basdon.echo/?C=M;O=D">chatlogs</a>) on LUNet (<a href="irc://irc.liberty-unleashed.co.uk">irc.liberty-unleashed.co.uk</a>{@globe})
+			IRC: #basdon (<a href="/s/chatlogs/basdon/?C=M;O=D">chatlogs</a>) and #basdon.echo (<a href="/s/chatlogs/basdon.echo/?C=M;O=D">chatlogs</a>) on LUNet (<a href=http://liberty-unleashed.co.uk/irc/servers/>irc.liberty-unleashed.co.uk</a>{@globe})
 		</p>
 
 		<h3>Our destinations</h3>
