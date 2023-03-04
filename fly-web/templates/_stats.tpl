@@ -50,15 +50,6 @@
 						<tr><th>Weather<th>Percentage
 					<tbody>
 						{@foreach $weather_percentage_per_category as $cat => $value}
-							{@foreach $weather_percentage_per_weather as $weather => $val}
-								{@if $cat == $weather_categorymapping[$weather]}
-									<tr>
-										<td style=text-indent:20px>
-											{@unsafe $weather_names[$weather]}
-										<td>
-											{@unsafe round(100 * $val / $weather_totalcount, 2)}%
-								{@endif}
-							{@endforeach}
 							<tr>
 								<td colspan=2 style=padding:0>
 							<tr>
@@ -70,6 +61,15 @@
 									<strong>{@unsafe round(100 * $value / $weather_totalcount, 2)}%</strong>
 							<tr>
 								<td colspan=2 style=padding:0>
+							{@foreach $weather_percentage_per_weather as $weather => $val}
+								{@if $cat == $weather_categorymapping[$weather]}
+									<tr>
+										<td style=text-indent:20px>
+											{@unsafe $weather_names[$weather]}
+										<td>
+											{@unsafe round(100 * $val / $weather_totalcount, 2)}%
+								{@endif}
+							{@endforeach}
 						{@endforeach}
 				</table>
 			</div>
