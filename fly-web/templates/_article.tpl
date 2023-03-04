@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang=en>
 <head>
 	<title>{$article_title} :: basdon.net aviation server</title>
-	<link rel="stylesheet" href="/s/article.css?v2" type="text/css" />
+	<link rel=stylesheet href=/s/article.css?v2 type=text/css>
 	{@render defaulthead.tpl}
 </head>
 <body>
@@ -10,7 +10,7 @@
 	{@render defaultheader.tpl}
 	<main class=article>
 		<p>
-			<a href="article.php">Articles</a>
+			<a href=article.php>Articles</a>
 			{@foreach $categories as $c}
 				&#32;&gt;&#32;
 				<a href="article.php?category={@urlencode $c->name}">{@unsafe $c->name}</a>
@@ -22,13 +22,13 @@
 			{@endif}
 		</p>
 		{@if !isset($article_pageviews)}
-			<h2 id="main">Article not found!</h2>
+			<h2 id=main>Article not found!</h2>
 			<p>The article with name '{$article_name}' was not found.</p>
 		{@else}
-			<h2 id="main">{@unsafe $article_title}</h2>
+			<h2 id=main>{@unsafe $article_title}</h2>
 			{@eval $file = '../gen/article_' . $article_name . '.html'}
 			{@if !is_file($file)}
-				<p style="color:#c22">Failed to get article contents.</p>
+				<p class="msg error">Failed to get article contents.</p>
 			{@else}
 				{@eval include '../gen/articlemap.php'}
 				{@eval include $file}

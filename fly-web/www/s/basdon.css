@@ -159,6 +159,9 @@ table.rowseps tr td {
 table.new th + th {
 	border-left: 1px solid #aab;
 }
+th.takenospace {
+	width: 1px;
+}
 .clear {
 	clear: both;
 }
@@ -289,6 +292,7 @@ ul.compact {
 .flightlist {
 	border-spacing: 0 5px;
 	margin: 1em 0;
+	width: 100%;
 	}
 	.flightlist tr {
 	}

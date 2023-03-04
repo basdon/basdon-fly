@@ -2,7 +2,7 @@
 	<div class=wrapper>
 		<h1>
 			<a href=/>
-				<img src=/s/brand/logo-full2-small.png aria-hidden=true>
+				<img src=/s/brand/logo-full2-small.png aria-hidden=true alt="">
 			</a>
 			{@rem display the logo image subtext in textual form for screen reader users @}
 			<span style=position:absolute;top:-100em>basdon.net aviation server</span>

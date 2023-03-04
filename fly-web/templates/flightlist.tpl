@@ -1,11 +1,11 @@
-<table border=0 width=100% id=flights class="flightlist center">
+<table id=flights class="flightlist center">
 	<thead>
 		<tr>
-			<th width=1px>#
+			<th class=takenospace>#
 			<th>Aircraft
 			{@if $flight_list->show_pilot}<th>Pilot{@endif}
 			<th>Route
-			<th width=1px>Status
+			<th class=takenospace>Status
 			<th class="right no800">Distance
 			<th>Date
 	<tbody>

@@ -19,10 +19,10 @@ $boxes = [
 ob_start();
 foreach ($boxes as $box) {
 	$title = $db->query("SELECT title FROM art WHERE name='{$box[0]}'")->fetchAll()[0]->title;
-	echo("<table class=\"box\">");
+	echo("<table class=box>");
 	echo("<tr>");
-	echo("<td><a href=\"article.php?title={$box[0]}\"><img src=\"/s/articles/{$box[1]}\" alt=\"{$box[2]}\" title=\"{$box[2]}\"/></a></td>");
-	echo("<td valign=\"center\"><p><a href=\"article.php?title={$box[0]}\">{$title}</a><br/>{$box[3]}</p></td>");
+	echo("<td><a href=\"article.php?title={$box[0]}\"><img src=/s/articles/{$box[1]} alt=\"{$box[2]}\" title=\"{$box[2]}\"></a></td>");
+	echo("<td><p><a href=\"article.php?title={$box[0]}\">{$title}</a><br>{$box[3]}</p></td>");
 	echo("</tr>");
 	echo("</table>");
 }
