@@ -137,7 +137,7 @@ function spate_generate($template_dir, $template)
 			case "@rem":
 				$pos = strpos($in, '@}', $i);
 				if ($pos !== false) {
-					$i = $pos + 2;
+					$i = $pos + 1;
 				}
 				goto next;
 			case "@input":
