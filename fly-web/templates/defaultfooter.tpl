@@ -1,4 +1,4 @@
-<footer class=center style=padding:1px>
+<footer class=center style=padding:1px;margin-top:5em>
 	<div class=wrapper>
 		<ul>
 			<li><a href=credits.php>credits</a>
