@@ -53,5 +53,5 @@ if ($last48 !== false && ($last48 = $last48->fetchAll()) !== false) {
 	$last48 = [];
 }
 
-$__script = '_index';
+$__template = '_index';
 require '../inc/output.php';

@@ -26,7 +26,7 @@ if (isset($_GET['id'])) {
 		goto haveuser;
 	}
 }
-$__script = '_user^notfound';
+$__template = '_user^notfound';
 require '../inc/output.php';
 exit();
 
@@ -47,5 +47,5 @@ $flight_list_opts->limit = 15;
 $flight_list = flight_list_query($flight_list_opts);
 $flight_list->show_pilot = false;
 
-$__script = '_user';
+$__template = '_user';
 require '../inc/output.php';

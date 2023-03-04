@@ -1,3 +1,3 @@
 <?php
-$__script = '_credits';
+$__template = '_credits';
 require '../inc/bootstrap.php';

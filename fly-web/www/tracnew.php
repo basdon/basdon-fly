@@ -3,7 +3,7 @@ require '../inc/bootstrap.php';
 require '../inc/trac_constants.php';
 
 if (!isset($loggeduser)) {
-	$__script = '_unauthorized';
+	$__template = '_unauthorized';
 	$ret = 'tracnew.php';
 } else {
 
@@ -69,7 +69,7 @@ if (!isset($loggeduser)) {
 	} reject:
 
 	include '../inc/form.php';
-	$__script = '_tracnew';
+	$__template = '_tracnew';
 }
 
 require '../inc/output.php';

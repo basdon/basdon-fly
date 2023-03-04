@@ -7,5 +7,5 @@ function fetch_changes()
 	return $db->query('SELECT stamp,entry FROM chg ORDER BY id DESC');
 }
 
-$__script = '_changelog';
+$__template = '_changelog';
 require '../inc/output.php';

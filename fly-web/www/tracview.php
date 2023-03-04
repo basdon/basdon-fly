@@ -134,5 +134,5 @@ if ($trac && ($trac = $trac->fetchAll()) && count($trac)) {
 	unset($trac);
 }
 
-$__script = '_tracview';
+$__template = '_tracview';
 require '../inc/output.php';

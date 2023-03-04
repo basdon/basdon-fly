@@ -11,5 +11,5 @@ if (isset($loggeduser, $_GET['k']) && $_GET['k'] === $loggeduser->logoutkey) {
 	die('redirecting');
 }
 
-$__script = '_logout';
+$__template = '_logout';
 require '../inc/output.php';

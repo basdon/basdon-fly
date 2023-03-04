@@ -54,5 +54,5 @@ function acclink($name, $target)
 include '../inc/aircraftnames.php';
 include '../inc/flightstatuses.php';
 
-$__script = '_account';
+$__template = '_account';
 require '../inc/output.php';

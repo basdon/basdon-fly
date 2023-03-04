@@ -8,7 +8,7 @@ if (isset($_GET['action']) && in_array($_GET['action'], ['home', 'acl'])) {
 
 if (!isset($loggeduser) || !group_is_admin($loggeduser->groups)) {
 	$ret = 'admin.php&action='.$action;
-	$__script = '_unauthorized';
+	$__template = '_unauthorized';
 	require '../inc/output.php';
 	exit();
 }
@@ -86,5 +86,5 @@ function adminlink($name, $target)
 	}
 }
 
-$__script = '_admin';
+$__template = '_admin';
 require '../inc/output.php';

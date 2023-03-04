@@ -36,5 +36,5 @@ foreach ($db->query('SELECT id,cat,name,title FROM art ORDER BY cat ASC,title AS
 
 unset($subcats);
 
-$__script = '_articleindex';
+$__template = '_articleindex';
 require '../inc/output.php';

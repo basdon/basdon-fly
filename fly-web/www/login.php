@@ -65,5 +65,5 @@ if (!isset($loggeduser) && isset($_POST['_form'], $_POST['usr'], $_POST['pwd']))
 	$attemptedlogin = 1;
 } skiplogin:
 
-$__script = '_login';
+$__template = '_login';
 require '../inc/output.php';

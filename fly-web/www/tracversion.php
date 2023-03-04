@@ -90,5 +90,5 @@ if (count($releaseids)) {
 	}
 }
 
-$__script = '_tracversion';
+$__template = '_tracversion';
 require '../inc/output.php';

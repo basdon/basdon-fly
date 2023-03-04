@@ -214,6 +214,6 @@ function linkuser($user)
 	}
 }
 
-if (isset($__script)) {
+if (isset($__template)) {
 	require '../inc/output.php';
 }

@@ -83,5 +83,5 @@ try {
 	$r = false;
 }
 
-$__script = '_flight';
+$__template = '_flight';
 require '../inc/output.php';

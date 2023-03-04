@@ -1,3 +1,3 @@
 <?php
-$__script = '_contact';
+$__template = '_contact';
 require '../inc/bootstrap.php';

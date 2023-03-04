@@ -19,5 +19,5 @@ if ($totalrows && ($totalrows = $totalrows->fetchAll())) {
 	$totalrows = 0;
 }
 
-$__script = '_trac';
+$__template = '_trac';
 require '../inc/output.php';

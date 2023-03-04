@@ -88,7 +88,7 @@ nextparentcat4catpage:
 
 if (isset($_GET['category'])) {
 	fetch_category_box($_GET['category'], null, $cat, $categories);
-	$__script = '_article_category';
+	$__template = '_article_category';
 	require '../inc/output.php';
 	die();
 }
@@ -144,5 +144,5 @@ if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 include '../inc/aircraftnames.php';
 include '../inc/missiontypes.php';
 
-$__script = '_article';
+$__template = '_article';
 require '../inc/output.php';

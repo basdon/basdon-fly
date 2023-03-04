@@ -43,5 +43,5 @@ if ($wth !== false && ($weathercats = $wth->fetchAll())) {
 arsort($weather_percentage_per_category);
 $last_weathers = $db->query('SELECT w, t FROM wth ORDER BY t DESC LIMIT 10');
 
-$__script = '_stats';
+$__template = '_stats';
 require '../inc/output.php';
