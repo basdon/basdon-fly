@@ -53,14 +53,14 @@ function flight_list_query_mkresult($opts, $fltrs)
 	return $flight_list;
 }
 
-/**delete when all queries are changed to work with ERRMODE_SILENT*/
+/**TODO: delete when all queries are changed to work with ERRMODE_SILENT*/
 function flight_list_query($opts)
 {
 	global $db;
 
-	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+	if (!is_null($db)) $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 	$res = _flight_list_query($opts);
-	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	if (!is_null($db)) $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	return $res;
 }
 
@@ -163,14 +163,14 @@ function _flight_list_query($opts)
 	return $flight_list;
 }
 
-/**delete when all queries are changed to work with ERRMODE_SILENT*/
+/**TODO: delete when all queries are changed to work with ERRMODE_SILENT*/
 function homepage_flight_list_query()
 {
 	global $db;
 
-	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+	if (!is_null($db)) $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 	$res = _homepage_flight_list_query();
-	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	if (!is_null($db)) $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	return $res;
 }
 

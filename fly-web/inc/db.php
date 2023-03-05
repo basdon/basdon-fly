@@ -17,6 +17,8 @@ try {
  */
 class DBQ
 {
+	public static $last_error;
+
 	public $stmt;
 	public $executed;
 	/**may be SQLSTATE code or other string*/
@@ -30,8 +32,9 @@ class DBQ
 		$this->stmt = null;
 		$this->executed = false;
 		$this->error = null;
+		self::$last_error = null;
 		if (is_null($db)) {
-			$this->error = 'No db connection';
+			$this->set_error('', 'No db connection');
 		} else {
 			++$db_querycount;
 			$this->stmt = $db->query($sql);
@@ -52,8 +55,9 @@ class DBQ
 		$this->stmt = null;
 		$this->executed = false;
 		$this->error = null;
+		self::$last_error = null;
 		if (is_null($db)) {
-			$this->error = 'No db connection';
+			$this->set_error('', 'No db connection');
 		} else {
 			$this->stmt = $db->prepare($sql);
 			if ($this->stmt === false) {
@@ -82,6 +86,7 @@ class DBQ
 		if (!is_null($this->stmt)) {
 			$this->executed = false;
 			$this->error = null;
+			self::$last_error = null;
 			$this->num_rows_fetched = 0;
 			++$db_querycount;
 			$this->executed = $this->stmt->execute();
@@ -102,6 +107,7 @@ class DBQ
 	{
 		if ($this->executed) {
 			$this->error = null;
+			self::$last_error = null;
 			$res = $this->stmt->fetchAll();
 			if ($res !== false) {
 				$this->num_rows_fetched = count($res);
@@ -116,6 +122,7 @@ class DBQ
 	{
 		if ($this->executed) {
 			$this->error = null;
+			self::$last_error = null;
 			$res = $this->stmt->fetch();
 			if ($res !== false) {
 				$this->num_rows_fetched++;
@@ -146,5 +153,11 @@ class DBQ
 		} else {
 			$this->error = "{$human} ({$code})";
 		}
+		self::$last_error = $this->error;
 	}
+}
+
+function dbquery($query)
+{
+	return (new DBQ())->query($query);
 }

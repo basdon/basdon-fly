@@ -24,57 +24,59 @@
 	<main>
 		<h2 id=main>Stats</h2>
 		<p>This page needs more content :)</p>
-		{@if $weather_totalcount > 0}
-			<h3>Weather</h3>
-			<div class=floatingbox>
-				<h4 class=center>Recent weather</h4>
-				<table class="rowseps extrapadding">
-					<thead>
-						<tr><th>Weather<th>When
-					<tbody>
-						{@foreach $last_weathers as $w}
-							{@eval $icon = $weather_iconnames[$weather_categorymapping[$w->w]]}
+		<h3>Weather</h3>
+		<div class=floatingbox>
+			<h4 class=center>Recent weather</h4>
+			<table class="rowseps extrapadding">
+				<thead>
+					<tr><th>Weather<th>When
+				<tbody>
+					{@foreach stats_query_last_weathers() as $w}
+						<tr>
+							<td>
+								<img src=/s/weather_{@unsafe $w->icon}.png aria-hidden=true alt=""> 
+								{@unsafe $w->name}
+							<td>
+								{@unsafe format_duration_short($w->when)} ago
+					{@endforeach}
+			</table>
+			{@if !is_null(DBQ::$last_error)}
+				<p class="msg error hmargin">
+					{@unsafe DBQ::$last_error}
+			{@endif}
+		</div>
+		<div class=floatingbox>
+			<h4 class=center>All time stats</h4>
+			<table class="rowseps extrapadding">
+				<thead>
+					<tr><th>Weather<th>Percentage
+				<tbody>
+					{@foreach stats_query_weather_percentages() as $category}
+						<tr>
+							<td colspan=2 style=padding:0>
+						<tr>
+							<td>
+								<img src=/s/weather_{@unsafe $category->icon}.png aria-hidden=true alt=""> 
+								<strong>{@unsafe $category->name}</strong>
+							<td>
+								<strong>{@unsafe $category->percentage}%</strong>
+						<tr>
+							<td colspan=2 style=padding:0>
+						{@foreach $category->entries as $weather}
 							<tr>
+								<td style=text-indent:20px>
+									{@unsafe $weather->name}
 								<td>
-									<img src=/s/weather_{@unsafe $icon}.png aria-hidden=true alt=""> 
-									{@unsafe $weather_categorynames[$weather_categorymapping[$w->w]]}
-								<td>
-									{@unsafe format_duration_short(time() - $w->t)} ago
+									{@unsafe $weather->percentage}%
 						{@endforeach}
-				</table>
-			</div>
-			<div class=floatingbox>
-				<h4 class=center>All time stats</h4>
-				<table class="rowseps extrapadding">
-					<thead>
-						<tr><th>Weather<th>Percentage
-					<tbody>
-						{@foreach $weather_percentage_per_category as $cat => $value}
-							<tr>
-								<td colspan=2 style=padding:0>
-							<tr>
-								<td>
-									{@eval $icon = $weather_iconnames[$cat]}
-									<img src=/s/weather_{@unsafe $icon}.png aria-hidden=true alt=""> 
-									<strong>{@unsafe $weather_categorynames[$cat]}</strong>
-								<td>
-									<strong>{@unsafe round(100 * $value / $weather_totalcount, 2)}%</strong>
-							<tr>
-								<td colspan=2 style=padding:0>
-							{@foreach $weather_percentage_per_weather as $weather => $val}
-								{@if $cat == $weather_categorymapping[$weather]}
-									<tr>
-										<td style=text-indent:20px>
-											{@unsafe $weather_names[$weather]}
-										<td>
-											{@unsafe round(100 * $val / $weather_totalcount, 2)}%
-								{@endif}
-							{@endforeach}
-						{@endforeach}
-				</table>
-			</div>
-			<div class=clear></div>
-		{@endif}
+					{@endforeach}
+			</table>
+			{@if !is_null(DBQ::$last_error)}
+				<p class="msg error hmargin">
+					{@unsafe DBQ::$last_error}
+			{@endif}
+		</div>
+		<div class=clear></div>
 	</main>
 	{@render defaultfooter.tpl}
 </body>

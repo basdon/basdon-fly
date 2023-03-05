@@ -224,6 +224,10 @@ p.msg.success {
 	border: 1px solid #060;
 	background: #bfb;
 }
+p.msg.hmargin {
+	margin-left: 1em;
+	margin-right: 1em;
+}
 .center {
 	text-align: center;
 }
