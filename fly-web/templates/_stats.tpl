@@ -34,7 +34,7 @@
 					{@foreach stats_query_last_weathers() as $w}
 						<tr>
 							<td>
-								<img src=/s/weather_{@unsafe $w->icon}.png aria-hidden=true alt=""> 
+								<img src=/s/fff-weather_{@unsafe $w->icon}.png aria-hidden=true alt=""> 
 								{@unsafe $w->name}
 							<td>
 								{@unsafe format_duration_short($w->when)} ago
@@ -56,7 +56,7 @@
 							<td colspan=2 style=padding:0>
 						<tr>
 							<td>
-								<img src=/s/weather_{@unsafe $category->icon}.png aria-hidden=true alt=""> 
+								<img src=/s/fff-weather_{@unsafe $category->icon}.png aria-hidden=true alt=""> 
 								<strong>{@unsafe $category->name}</strong>
 							<td>
 								<strong>{@unsafe $category->percentage}%</strong>
