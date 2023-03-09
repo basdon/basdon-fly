@@ -100,6 +100,11 @@ function spate_generate($template_dir, $template)
 				$c = $in[++$i];
 			} while ($c != ' ' && $c != '}');
 			switch ($directive) {
+			case "@escape":
+				$result .= '<?=htmlspecialchars(';
+				$j += 20;
+				$suffix = ',ENT_QUOTES|ENT_HTML5|ENT_SUBSTITUTE)~>';
+				goto directive_parse_conditionbody__start;
 			case "@globe":
 				$result .= '<img src=/s/moin-www.png alt="external link" title="external link">';
 				$j += 67;

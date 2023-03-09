@@ -42,7 +42,7 @@
 			</table>
 			{@if !is_null(DBQ::$last_error)}
 				<p class="msg error hmargin">
-					{@unsafe DBQ::$last_error}
+					{@escape DBQ::$last_error}
 			{@endif}
 		</div>
 		<div class=floatingbox>
@@ -73,7 +73,7 @@
 			</table>
 			{@if !is_null(DBQ::$last_error)}
 				<p class="msg error hmargin">
-					{@unsafe DBQ::$last_error}
+					{@escape DBQ::$last_error}
 			{@endif}
 		</div>
 		<div class=clear></div>
