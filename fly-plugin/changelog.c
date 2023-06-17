@@ -1,4 +1,3 @@
-#define CHANGELOG_ENTRIES_TO_SHOW_ON_CONNECT 3
 /*And +2 entries for previous/next page.*/
 #define CHANGELOG_ENTRIES_PER_DIALOG_PAGE 8
 #define CHANGELOG_ENTRY_MAXLEN 144
@@ -7,8 +6,7 @@
 #error "too many changelog entries per dialog page, exceeding dialog info length limit"
 #endif
 
-static char changelog_entry[CHANGELOG_ENTRIES_TO_SHOW_ON_CONNECT][CHANGELOG_ENTRY_MAXLEN];
-static char num_changelog_entries;
+static char changelog_onconnect_line[2048];
 /**
 Since changelog data is loaded with async queries,
 this value is incremented every time a player requests a page.
@@ -20,18 +18,18 @@ static unsigned char changelog_request_id[MAX_PLAYERS];
 static
 void changelog_init()
 {
-	int dbcache, i;
+	int dbcache;
 
-	atoc(buf4096, "SELECT stamp,entry FROM chg ORDER BY id DESC LIMIT "EQ(CHANGELOG_ENTRIES_TO_SHOW_ON_CONNECT), 4096);
+	atoc(buf4096, "SELECT stamp,entry FROM chg ORDER BY id DESC LIMIT 1", 4096);
 	dbcache = NC_mysql_query(buf4096a);
-	num_changelog_entries = NC_cache_get_row_count();
-	for (i = 0; i < num_changelog_entries; i++) {
-		NC_cache_get_field_str(i, 0, buf4096a);
-		ctoa(changelog_entry[i], buf4096, 12);
-		changelog_entry[i][11] = ':';
-		changelog_entry[i][12] = ' ';
-		NC_cache_get_field_str(i, 1, buf4096a);
-		ctoa(changelog_entry[i] + 13, buf4096, sizeof(changelog_entry[i]) - 13);
+	if (NC_cache_get_row_count()) {
+		memcpy(changelog_onconnect_line, "Last update (/updates): ", 24);
+		NC_cache_get_field_str(0, 0, buf4096a);
+		ctoa(changelog_onconnect_line + 24, buf4096, 12);
+		changelog_onconnect_line[24 + 11] = ':';
+		changelog_onconnect_line[24 + 12] = ' ';
+		NC_cache_get_field_str(0, 1, buf4096a);
+		ctoa(changelog_onconnect_line + 24 + 13, buf4096, sizeof(changelog_onconnect_line) - 24 - 13);
 	}
 	NC_cache_delete(dbcache);
 }
@@ -39,11 +37,8 @@ void changelog_init()
 static
 void changelog_on_player_connect(int playerid)
 {
-	int i;
-
-	SendClientMessage(playerid, COL_CHANGELOG, INFO"Last updates (for more, see /updates):");
-	for (i = 0; i < num_changelog_entries; i++) {
-		SendClientMessage(playerid, COL_CHANGELOG, changelog_entry[i]);
+	if (changelog_onconnect_line[0]) {
+		SendClientMessage(playerid, COL_CHANGELOG, changelog_onconnect_line);
 	}
 
 	changelog_request_id[playerid]++;
