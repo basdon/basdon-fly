@@ -39,7 +39,7 @@ int cmd_dev_crashme(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-#define CMD_DRVC_SYNTAX ""
+#define CMD_DRVC_SYNTAX "<disable rvc>"
 #define CMD_DRVC_DESC "calls DisableRemoteVehicleCollisions"
 static
 int cmd_dev_disableremotevehiclecollisions(struct COMMANDCONTEXT cmdctx)
