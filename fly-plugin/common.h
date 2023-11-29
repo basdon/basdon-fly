@@ -62,13 +62,19 @@ void ctoai(char *dstsrc);
 #define INFO "* "
 #define SUCC "" /*This used to be a plus symbol, but that might confuse people.*/
 
+/* XXX: don't use white as a color for system messages. abusive users can take advantage of
+        chatmessage wrapping and timestamps not showing by default and naivity to trick users
+        into believing their wrapped message (in white color) is a system message.
+        That's also why I should revert disabling the text filter that removed embedded
+        colors from user chat messages*/
+
 #define COL_SAMP_GREEN 0x88aa62ff /*as in username error message*/
 #define COL_SAMP_GREY 0xa9c4e4ff /*as in 'Connected to..'*/
 #define COL_SAMP_BLUE 0x2587ceff /*as in '* Admin:'*/
 #define COL_INFO 0x3498dbff
 #define COL_WARN 0xe84c3dff
 #define COL_SUCC 0x2cc36bff
-#define COL_INFO_GENERIC 0xffffffff
+#define COL_INFO_GENERIC 0xcee21bff
 #define COL_INFO_LIGHT 0x33ccffff
 #define COL_INFO_BROWN 0xcc9966ff
 #define COL_PRIVMSG 0xffff00ff
@@ -78,6 +84,7 @@ void ctoai(char *dstsrc);
 #define COL_JOIN 0x1b8ae4ff
 #define COL_QUIT 0x1674Bcff
 #define COL_METAR COL_INFO_LIGHT
+#define COL_IRC COL_INFO_GENERIC
 #define COL_IRC_MODE 0x22ffffff
 #define COL_IRC_ACTION 0xff66ffff
 #define COL_RADIO 0xccccccff
