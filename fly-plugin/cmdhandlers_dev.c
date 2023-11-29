@@ -371,32 +371,22 @@ int cmd_dev_tweather(struct COMMANDCONTEXT cmdctx)
 	return CMD_SYNTAX_ERR;
 }
 
-/**
-Dev vehicle id spawned by the /v command.
-*/
-static int devvehicle = INVALID_VEHICLE_ID;
-
 #define CMD_V_SYNTAX "<modelid|modelname>"
 #define CMD_V_DESC "Spawns a dev vehicle"
 static
 int cmd_dev_v(struct COMMANDCONTEXT cmdctx)
 {
 	struct vec4 pos;
-	int modelid = -1;
+	int modelid, vehicleid;
 	char msg144[144];
 
 	if (!cmd_get_vehiclemodel_param(&cmdctx, &modelid)) {
 		return CMD_SYNTAX_ERR;
 	}
 
-	if (devvehicle != INVALID_VEHICLE_ID) {
-		NC_PARS(1);
-		nc_params[1] = devvehicle;
-		NC(n_DestroyVehicle_);
-	}
 	GetPlayerPosRot(cmdctx.playerid, &pos);
-	devvehicle = CreateVehicle(modelid, &pos, 126, 126, -1);
-	natives_PutPlayerInVehicle(cmdctx.playerid, devvehicle, 0);
+	vehicleid = CreateVehicle(modelid, &pos, 126, 126, -1);
+	natives_PutPlayerInVehicle(cmdctx.playerid, vehicleid, 0);
 	sprintf(msg144, "%d - %s - %s", modelid, vehmodelnames[modelid - 400], vehnames[modelid - 400]);
 	SendClientMessage(cmdctx.playerid, -1, msg144);
 	return CMD_OK;
