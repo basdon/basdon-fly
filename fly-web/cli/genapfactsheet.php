@@ -90,11 +90,9 @@ echo '<tr><td colspan="2"><strong>Elevation</strong></td><td>' . round($apt->z) 
 echo '<tr><td colspan="2"><strong>Mission points</strong></td><td>' . $missionpointcount . '</td></tr>';
 echo '<tr><td colspan="2"><strong>Service points</strong></td><td>' . $servicepointcount . '</td></tr>';
 echo '<tr><td colspan="2"><strong>Vehicle spawns</strong></td><td>' . $vehiclecount . '</td></tr>';
-echo '<tr class="fsh"><td colspan="3">Location</td></tr>';
-echo '<tr class="center"><td><strong>X:</strong> ' . round($apt->x) . '</td><td><strong>Y:</strong> ' . round($apt->y) . '</td><td><strong>Z:</strong> ' . round($apt->z) . '</td></tr>';
 if (count($runways)) {
 	echo '<tr class="fsh"><td colspan="3">Runways</td></tr>';
-	echo '<tr style="text-align:center;background:#dddddd;font-size:90%"><td><strong>Direction</strong></td><td><strong>Length/Width</strong></td><td><strong>Surface</strong></td></tr>';
+	echo '<tr style="text-align:center;background:#ddd;font-size:90%"><td><strong>Direction</strong></td><td><strong>Length/Width</strong></td><td><strong>Surface</strong></td></tr>';
 	foreach ($runways as $r) {
 		$rnw0 = rnw($r[0]->h, $r[0]->s);
 		$rnw1 = rnw($r[1]->h, $r[1]->s);
@@ -117,7 +115,7 @@ if (count($runways)) {
 }
 if (count($helipads)) {
 	echo '<tr class="fsh"><td colspan="3">Helipads/platforms</td></tr>';
-	echo '<tr style="text-align:center;background:#dddddd;font-size:90%"><td colspan="2"><strong>Size</strong></td><td><strong>Surface</strong></td></tr>';
+	echo '<tr style="text-align:center;background:#ddd;font-size:90%"><td colspan="2"><strong>Size</strong></td><td><strong>Surface</strong></td></tr>';
 	foreach ($helipads as $h) {
 		echo '<tr style="text-align:center"><td colspan="2">';
 		echo round($h->w) . 'x' . round($h->w);
@@ -134,6 +132,22 @@ if (count($nav)) {
 		echo $apt->c . $n . '<br/>';
 	}
 	echo '</td></tr>';
+}
+echo '<tr class=fsh><td colspan=3>Coordinates';
+echo '<tr style=text-align:center;background:#ddd;font-size:90%><td colspan=3><strong>NDB</strong>';
+echo '<tr class=center><td><strong>X:</strong> ' . round($apt->x) . '<td><strong>Y:</strong> ' . round($apt->y) . '<td><strong>Z:</strong> ' . round($apt->z);
+if (count($runways)) {
+	echo '<tr style=text-align:center;background:#ddd;font-size:90%><td colspan=3><strong>Runways</strong>';
+	foreach ($runways as $r) {
+		echo '<tr class=center><td colspan=3><strong>' . rnw($r[0]->h, $r[0]->s) . ':</strong> ' . round($r[0]->x) . ', ' . round($r[0]->y) . ', ' . round($r[0]->z);
+		echo '<tr class=center><td colspan=3><strong>' . rnw($r[1]->h, $r[1]->s) . ':</strong> ' . round($r[1]->x) . ', ' . round($r[1]->y) . ', ' . round($r[1]->z);
+	}
+}
+if (count($helipads)) {
+	echo '<tr style=text-align:center;background:#ddd;font-size:90%><td colspan=3><strong>Helipads</strong>';
+	foreach ($helipads as $h) {
+		echo '<tr class=center><td colspan=3><strong>' . $h->s . $h->i . ':</strong> ' . round($h->x) . ', ' . round($h->y) . ', ' . round($h->z);
+	}
 }
 echo '</tbody>';
 echo '</table>';
