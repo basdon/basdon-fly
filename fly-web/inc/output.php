@@ -1,5 +1,5 @@
 <?php
-if ($__REPARSE__) {
+if ($__REPARSE_TEMPLATES_EVERY_PAGE_LOAD__) {
 	require_once('../inc/spate.php');
 	spate_default_generate($__template);
 }

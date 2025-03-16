@@ -21,7 +21,7 @@ default: templates aerodromecharts all_airport_codes apfactsheets apvehiclelist 
 inc/__settings.php: ../settings.ini cli/gensettings.php
 	cd cli && php gensettings.php
 	@# Regenerating the file resets the file's permissions,
-	@# which means the reparsing them in dev (with $__REPARSE__ in conf.php) will fail.
+	@# which means the reparsing them in dev (with $__REPARSE_TEMPLATES_EVERY_PAGE_LOAD__ in conf.php) will fail.
 	@# The SGID bit should be set on the inc folder,
 	@# then this will add write permissions for the httpd user again.
 	[ -z "$(BASDONDEV)" ] || chmod g+w inc/__settings.php
@@ -32,7 +32,7 @@ gen/%.php: templates/%.tpl cleantemplates
 	cd cli && php parsetemplate.php $<
 templates: $(TEMPLATE_OBJECTS_FULL) $(TEMPLATE_OBJECTS_PART)
 	@# Regenerating templates resets their permissions,
-	@# which means the reparsing them in dev (with $__REPARSE__ in conf.php) will fail.
+	@# which means the reparsing them in dev (with $__REPARSE_TEMPLATES_EVERY_PAGE_LOAD__ in conf.php) will fail.
 	@# The SGID bit should be set on the templates/gen folder,
 	@# then this will add write permissions for the httpd user again.
 	[ -z "$(BASDONDEV)" ] || chmod g+w templates/gen/*

@@ -10,7 +10,7 @@ if (!file_exists('../inc/conf.php')) {
 require '../inc/conf.php';
 require '../inc/db.php';
 require '../inc/funcs.php';
-if ($__REPARSE__) {
+if ($__REPARSE_TEMPLATES_EVERY_PAGE_LOAD__) {
 	require '../cli/gensettings.php';
 } else if (!file_exists('../inc/__settings.php')) {
 	die('missing "inc/__settings.php" file, run "make web" first');
