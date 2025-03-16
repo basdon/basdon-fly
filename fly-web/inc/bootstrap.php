@@ -118,7 +118,7 @@ function simple_pagination($urlWithParam, $currentPageFromOne, $totalItems, $ite
 function format_datetime($time)
 {
 	global $datetimeformat;
-	return date($datetimeformat, $time) . ' (GMT' . date('O') . ')';
+	return date($datetimeformat, $time);
 }
 
 function format_duration_short($time)

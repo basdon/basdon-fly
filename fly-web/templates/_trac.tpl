@@ -11,6 +11,12 @@
 		table.trac td {
 			text-align: center;
 		}
+		table.trac td:last-child {
+			text-align: left;
+		}
+		table.trac td:first-child {
+			white-space: nowrap;
+		}
 	</style>
 </head>
 <body>
@@ -30,16 +36,18 @@
 		<table class="trac">
 			<thead>
 				<tr>
-					<th>Last update</th><th>Impact</th><th>Status</th><th>Summary</th>
-				</tr>
+					<th width=1%>Last update
+					<th width=1%>Impact
+					<th width=1%>Status
+					<th>Summary
 			</thead>
 			<tbody>
 				{@foreach $tracthreads as $t}
 					<tr class="state{@unsafe $t->state}">
-						<td>{@unsafe format_time_since($t->updated)}</td>
+						<td>{@unsafe format_datetime($t->updated)}</td>
 						<td class="severity{@unsafe $t->severity}">{@unsafe $trac_severities[$t->severity]}</td>
 						<td>{@unsafe $trac_states[$t->state]}</td>
-						<td style="text-align:left;"><a href="tracview.php?id={@unsafe $t->id}#u{@unsafe $t->updated}">{$t->summary}</a></td>
+						<td><a href="tracview.php?id={@unsafe $t->id}#u{@unsafe $t->updated}">{$t->summary}</a>
 					</tr>
 				{@endforeach}
 			</tbody>

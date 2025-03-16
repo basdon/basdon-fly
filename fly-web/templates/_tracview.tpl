@@ -29,23 +29,28 @@
 			<h2 id="main">Tracker: {$trac->summary}</h2>
 			<table id="main" class="trac">
 				<tr>
-					<td class="label">Summary</td><td colspan="3">{$trac->summary}</td>
+					<td class=label colspan=4>
+						{@unsafe linkuser($trac)} {@unsafe format_datetime($trac->stamp)}
+						{@if $trac->stamp != $trac->updated}
+							<em>(updated {@unsafe format_datetime($trac->updated)})</em>
+						{@endif}
+						<span style=float:right><a href="tracview.php?id={@unsafe $id}">#0</a></span>
 				</tr>
 				<tr>
 					<td class="label">Status</td><td class="state{@unsafe $trac->state}">{@unsafe $trac_states[$trac->state]}</td>
-					<td class="label">Reporter</td><td>{@unsafe linkuser($trac)}</td>
-				</tr>
-				<tr>
 					<td class="label">Impact</td><td class="severity{@unsafe $trac->severity}">{@unsafe $trac_severities[$trac->severity]}</td>
-					<td class="label">Reported</td><td>{@unsafe format_datetime($trac->stamp)}</td>
-				</tr>
 				<tr>
+					<td class=label>
+						Released
+					<td>
+						{@if $trac_released}
+							<a href="tracversion.php?rel={@unsafe $trac_released}">
+								{@unsafe $trac_released_display}
+							</a>
+						{@else}
+							-
+						{@endif}
 					<td class="label">Visibility</td><td class="visibility{@unsafe $trac->visibility}">{@unsafe $trac_visibility}</td>
-					<td class="label">Updated</td><td>{@unsafe format_datetime($trac->updated)}</td>
-				</tr>
-				<tr>
-					<td class="label">Released</td><td colspan="3">{@if $trac_released != null}<a href="tracversion.php?rel={@unsafe $trac_released}">{@unsafe $trac_released_display}</a>{@else}-{@endif}</td>
-				</tr>
 				<tr>
 					<td class="label" colspan="4">Description</td>
 				</tr>
