@@ -79,12 +79,12 @@ haverel:
 		}
 	}
 
-	$readytickets = $db->query('SELECT id,severity,updated,summary FROM tract WHERE state=3 AND (visibility&'.$usergroups.' OR op='.$userid.') ORDER BY severity DESC')->fetchAll();
+	$readytickets = $db->query('SELECT id,severity,state,stamp,updated,summary FROM tract WHERE state=3 AND (visibility&'.$usergroups.' OR op='.$userid.') ORDER BY severity DESC')->fetchAll();
 }
 
 if (count($releaseids)) {
 	++$db_querycount;
-	foreach ($db->query('SELECT id,released,severity,updated,summary FROM tract WHERE (visibility&'.$usergroups.' OR op='.$userid.') AND released IN ('.implode(',', $releaseids).') ORDER BY released DESC, severity DESC') as $r)
+	foreach ($db->query('SELECT id,released,severity,state,stamp,updated,summary FROM tract WHERE (visibility&'.$usergroups.' OR op='.$userid.') AND released IN ('.implode(',', $releaseids).') ORDER BY released DESC, severity DESC') as $r)
 	{
 		$mapping[$r->released][] = $r;
 	}

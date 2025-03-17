@@ -6,10 +6,16 @@ table.trac {
 	border: 1px solid #000;
 	margin:1em 0;
 }
+table.trac th {
+	background: #c8c8e8;
+}
 table.trac td {
 	padding: .1em .5em;
 	background: #eee;
 	vertical-align: top;
+}
+table.trac p {
+	margin: .5em 0;
 }
 table.trac .state0,
 table.trac .state0 td {
@@ -40,7 +46,4 @@ table.trac .severity6, table.trac .severity7, table.trac .severity8 {
 }
 table.trac .severity8 {
 	color: #f00;
-}
-table.trac + table.trac {
-	margin-top: 1.5em;
 }

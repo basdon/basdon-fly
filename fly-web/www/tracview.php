@@ -15,7 +15,11 @@ function trac_releasetime($t)
 
 $id = intval($_GET['id']);
 
-if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comment'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
+if (isset($_POST['_form'], $_POST['comment'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
+	if (!isset($loggeduser) || group_is_banned($usergroups)) {
+		$__msgs[] = 'You are not logged in or do not have permissions to comment on this ticket';
+		goto reject;
+	}
 	$t = time();
 	++$db_querycount;
 	$res = $db->query('UPDATE tract SET updated='.$t.' WHERE id='.$id);
@@ -113,21 +117,16 @@ if (group_is_user_notbanned($usergroups) && isset($_POST['_form'], $_POST['comme
 	}
 } reject:
 
-$trac_summary = '[unknown ticket]';
+$trac_summary = 'Unknown ticket';
 $trac_released = null;
 ++$db_querycount;
-$trac = $db->query('SELECT _u.name,_u.i,stamp,updated,released,state,severity,visibility,summary,description FROM tract JOIN usr _u ON _u.i=tract.op WHERE (visibility&'.$usergroups.' OR op='.$userid.') AND id='.$id);
+$trac = $db->query('SELECT _u.name,_u.i,stamp,released,state,severity,visibility,summary,description FROM tract JOIN usr _u ON _u.i=tract.op WHERE (visibility&'.$usergroups.' OR op='.$userid.') AND id='.$id);
 if ($trac && ($trac = $trac->fetchAll()) && count($trac)) {
 	$trac = $trac[0];
 
 	$trac_summary = $trac->summary;
 	$trac_released = $trac->released;
 	$trac_released_display = trac_releasetime($trac_released);
-
-	$trac_visibility = $trac->visibility;
-	if (array_key_exists($trac->visibility, $trac_visibilities)) {
-		$trac_visibility = $trac_visibilities[$trac->visibility];
-	}
 
 	$comments = $db->query('SELECT _u.name,_u.i,id,usr,ip,stamp,type,comment FROM tracc JOIN usr _u ON tracc.usr=_u.i WHERE parent='.$id);
 } else {

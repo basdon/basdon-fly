@@ -9,14 +9,23 @@
 			background: #c8c8e8;
 			font-weight: bold;
 		}
-		table.trac.respond input:not([type=submit]), table.trac.respond textarea, table.trac.respond select, table.trac.respond td:last-child {
-			width: 100%;
+		table.trac.respond td:first-child {
+			width: 1%;
+			white-space: nowrap;
 		}
-		textarea {
+		table.trac.respond input[type=text] {
+			min-width: 70%;
+		}
+		table.trac textarea {
+			width: 100%;
 			height: 8em;
 		}
-		table.trac p {
-			margin: .5em 0;
+		table.trac td.visibility:not(.v{@unsafe $GROUPS_ALL}) {
+			background: #fff1d4;
+			font-weight: bold;
+		}
+		table.trac + table.trac {
+			margin-top: 1.5em;
 		}
 	</style>
 </head>
@@ -24,16 +33,22 @@
 	{@render skip.tpl}
 	{@render defaultheader.tpl}
 	<main>
-		<p><a href="trac.php">Tracker</a> {@if $trac_released != null}&gt; <a href="tracversion.php?rel={@unsafe $trac_released}">Release {@unsafe $trac_released_display}</a> {@endif}&gt; {$trac_summary}</p>
+		<p>
+			<a href=trac.php>Tracker</a>
+			{@if $trac_released}
+				&#32;&gt;&#32;
+				<a href="tracversion.php?rel={@unsafe $trac_released}">Release {@unsafe $trac_released_display}</a>
+			{@endif}
+			&#32;&gt;&#32;
+			Ticket: "{$trac_summary}"
+
+		<h2 id=main>Tracker ticket: {$trac_summary}</h2>
+
 		{@if isset($trac)}
-			<h2 id="main">Tracker: {$trac->summary}</h2>
 			<table id="main" class="trac">
 				<tr>
 					<td class=label colspan=4>
 						{@unsafe linkuser($trac)} {@unsafe format_datetime($trac->stamp)}
-						{@if $trac->stamp != $trac->updated}
-							<em>(updated {@unsafe format_datetime($trac->updated)})</em>
-						{@endif}
 						<span style=float:right><a href="tracview.php?id={@unsafe $id}">#0</a></span>
 				</tr>
 				<tr>
@@ -50,7 +65,14 @@
 						{@else}
 							-
 						{@endif}
-					<td class="label">Visibility</td><td class="visibility{@unsafe $trac->visibility}">{@unsafe $trac_visibility}</td>
+					<td class=label>
+						Visibility
+					<td class="visibility v{@unsafe $trac->visibility}">
+						{@if array_key_exists($trac->visibility, $trac_visibilities)}
+							{@unsafe $trac_visibilities[$trac->visibility]}
+						{@else}
+							[invalid value: {@unsafe $trac->visibility}]
+						{@endif}
 				<tr>
 					<td class="label" colspan="4">Description</td>
 				</tr>
@@ -81,44 +103,44 @@
 					</tr>
 				</table>
 			{@endforeach}
-			{@if group_is_user_notbanned($usergroups)}
-				<h4>Add comment</h4>
-				<form method="post" action="tracview.php?id={@unsafe $id}">
-					{@input HAARP}
-					<table class="trac respond">
-						<tr>
-							<td>{@input area comment}</td>
-						</tr>
-						<tr>
-							<td style="text-align:center">{@input submit Comment}</td>
-						</tr>
-					</table>
-				</form>
-				{@if group_is_admin($usergroups)}
-					<h4>Admin: Update ticket</h4>
-					<form method="post" action="tracview.php?id={@unsafe $id}">
-						{@input HAARP}
-						<table class="trac respond">
-							{@eval $form_defaults['summary'] = $trac->summary}
-							{@eval $form_defaults['state'] = $trac->state}
-							{@eval $form_defaults['severity'] = $trac->severity}
-							{@eval $form_defaults['visibility'] = $trac->visibility}
-							<tr><td class="label">Summary</td><td>{@input text summary maxlength="80"}</td></tr>
-							{@if group_is_owner($usergroups)}
-								<tr><td class="label">Owner: status</td><td>{@input combo state $trac_states}</td></tr>
-							{@endif}
-							<tr><td class="label">Impact</td><td>{@input combo severity $trac_severities}</td></tr>
-							<tr><td class="label">Visibility</td><td>{@input combo visibility $trac_visibilities}</td></tr>
-							<tr>
-								<td></td><td style="text-align:center">{@input submit Update}</td>
-							</tr>
-						</table>
-					</form>
-				{@endif}
-			{@endif}
 		{@else}
-			<h2 id="main">Tracker</h2>
-			<p>This ticket does not exist or is not visible for you.</p>
+			<p class="msg error">This ticket does not exist or is not visible for you.</p>
+		{@endif}
+
+		<h3>Add comment</h3>
+		<form method=post action="tracview.php?id={@unsafe $id}">
+			{@input HAARP}
+			<table class="trac respond">
+				<tr>
+					<td>{@input area comment}
+				<tr>
+					<td style=text-align:center>
+						{@if isset($trac) && group_is_user_notbanned($usergroups)}
+							{@input submit Comment}
+						{@else}
+							<p class="msg warning">You are not logged in or do not have permissions to place comments on this ticket
+						{@endif}
+			</table>
+		</form>
+
+		{@if isset($trac) && group_is_admin($usergroups)}
+			<h3>Admin: Update ticket</h3>
+			<form method=post action="tracview.php?id={@unsafe $id}">
+				{@input HAARP}
+				<table class="trac respond">
+					{@eval $form_defaults['summary'] = $trac->summary}
+					{@eval $form_defaults['state'] = $trac->state}
+					{@eval $form_defaults['severity'] = $trac->severity}
+					{@eval $form_defaults['visibility'] = $trac->visibility}
+					<tr><td class=label>Summary<td>{@input text summary maxlength=80}
+					{@if group_is_owner($usergroups)}
+						<tr><td class=label>Owner: status<td>{@input combo state $trac_states}
+					{@endif}
+					<tr><td class=label>Impact<td>{@input combo severity $trac_severities}
+					<tr><td class=label>Visibility<td>{@input combo visibility $trac_visibilities}
+					<tr><td><td style=text-align:center>{@input submit Update}
+				</table>
+			</form>
 		{@endif}
 	</main>
 	{@render defaultfooter.tpl}

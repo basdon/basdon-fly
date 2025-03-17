@@ -2,12 +2,12 @@
 require '../inc/bootstrap.php';
 require '../inc/trac_constants.php';
 
-if (!isset($loggeduser)) {
-	$__template = '_unauthorized';
-	$ret = 'tracnew.php';
-} else {
-
-	if (isset($_POST['summary'], $_POST['description'], $_POST['_form'], $_POST['visibility'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
+if (isset($_POST['summary'], $_POST['description'], $_POST['_form'], $_POST['visibility'], $_POST['HAARP']) && $HAARP == $_POST['HAARP']) {
+	if (!isset($loggeduser)) {
+		$__msgs[] = 'You need to log in to create tracker tickets';
+	} else if (group_is_banned($usergroups)) {
+		$__msgs[] = 'You are banned and cannot create tracker tickets';
+	} else {
 		$summary = $_POST['summary'];
 		if (empty($summary)) {
 			$__rawmsgs[] = 'Cannot submit without a summary.';
@@ -68,8 +68,8 @@ if (!isset($loggeduser)) {
 		$__rawmsgs[] = 'Failed to create a ticket. <a href="contact.php">Contact us.</a>';
 	} reject:
 
-	include '../inc/form.php';
-	$__template = '_tracnew';
 }
 
+include '../inc/form.php';
+$__template = '_tracnew';
 require '../inc/output.php';

@@ -5,17 +5,17 @@
 	{@render defaulthead.tpl}
 	<style>
 		{@render trac_inline_style.css}
-		table.trac tr:last-child td {
-			text-align: center;
-		}
 		table.trac td:first-child {
 			background: #c8c8e8;
 			font-weight: bold;
+			width: 1%;
+			white-space: nowrap;
 		}
-		table.trac input:not([type=submit]), table.trac textarea, table.trac select, table.trac td:last-child {
+		table.trac input[type=text] {
+			min-width: 70%;
+		}
+		table.trac textarea {
 			width: 100%;
-		}
-		textarea {
 			height: 8em;
 		}
 	</style>
@@ -25,7 +25,7 @@
 	{@render defaultheader.tpl}
 	<main>
 		<p><a href="trac.php">Tracker</a> &gt; New ticket</p>
-		<h2 id="main">New tracker ticket</h2>
+		<h2 id=main>Tracker: create new ticket</h2>
 		<form method="post" action="tracnew.php">
 			{@input HAARP}
 			<table class="trac">
@@ -40,7 +40,14 @@
 					{@endif}
 				{@endif}
 				<tr><td>Description</td><td>{@input area description maxlength="4096"}</td></tr>
-				<tr><td></td><td>{@input submit Submit}</td></tr>
+				<tr>
+					<td>
+					<td style=text-align:center>
+						{@if isset($trac) && group_is_user_notbanned($usergroups)}
+							{@input submit Comment}
+						{@else}
+							<p class="msg warning">You are not logged in or do not have permissions to create new tickets
+						{@endif}
 			</table>
 		</form>
 	</main>

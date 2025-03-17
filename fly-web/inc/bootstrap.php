@@ -62,6 +62,7 @@ $__clientip = $_SERVER['REMOTE_ADDR'];
 
 $usergroups = $GROUP_GUEST;
 $userid = -1;
+$HAARP = '?'; // forms can be rendered when the user is not logged in (we show as much as possible), so this should be present
 if (isset($_COOKIE[$COOKIENAME]) && strlen($_COOKIE[$COOKIENAME]) == 32) {
 	++$db_querycount;
 	$s = $db->prepare('SELECT stay,u.i,u.name,u.groups,lastfal,falnw,falng FROM webses w JOIN usr u ON w.usr=u.i WHERE id=?');
@@ -78,10 +79,10 @@ if (isset($_COOKIE[$COOKIENAME]) && strlen($_COOKIE[$COOKIENAME]) == 32) {
 		$db->query('UPDATE usr SET lastseenweb=UNIX_TIMESTAMP() WHERE i='.$loggeduser->i);
 		$userid = $loggeduser->i;
 		$usergroups = $loggeduser->groups;
-		$HAARP = $loggeduser->logoutkey; // maybe this should he something different?
+		$HAARP = $loggeduser->logoutkey; // maybe this should be something different?
 	} else {
 		// ideally the 3rd parameter should be ['expires' => 0, 'samesite' => 'Strict'],
-		// but this is done on the webserver level for now
+		// but this is done on the webserver level for now (see apache.conf)
 		setcookie($COOKIENAME, '', 0, $COOKIEPATH, $COOKIEDOMAIN, $COOKIEHTTPS, true);
 	}
 }

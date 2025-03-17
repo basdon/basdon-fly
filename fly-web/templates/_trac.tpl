@@ -5,9 +5,6 @@
 	{@render defaulthead.tpl}
 	<style>
 		{@render trac_inline_style.css}
-		table.trac th {
-			background: #c8c8e8;
-		}
 		table.trac td {
 			text-align: center;
 		}
