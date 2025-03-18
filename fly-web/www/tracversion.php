@@ -9,26 +9,26 @@ function trac_releasetime($t)
 
 if (group_is_owner($usergroups) && isset($_GET['rel'], $_GET['dorelease'])) {
 	$rel = intval($_GET['rel']);
+	++$db_querycount;
 	if ($db->query('SELECT COUNT(id) c FROM tract WHERE released='.$rel)->fetchAll()[0]->c) {
-		$__msgs[] = 'Duplicate release!';
+		$__msgs[] = 'Duplicate release, aborting!';
 		goto skiprelease;
 	}
-	if (!$db->query('SELECT COUNT(id) c FROM tract WHERE state=3')->fetchAll()[0]->c) {
-		$__msgs[] = 'No tickets!';
+	++$db_querycount;
+	$tickets = $db->query('SELECT id FROM tract WHERE state=3')->fetchAll();
+	if (!count($tickets)) {
+		$__msgs[] = 'No tickets, aborting!';
 		goto skiprelease;
 	}
 
 	// THIS MUST BE IN SYNC WITH tracview.php WHEN UPDATING!
 
-	++$db_querycount;
-	$tickets = $db->query('SELECT id FROM tract WHERE state=3')->fetchAll();
-
-	$stmt = $db->prepare('UPDATE tract SET updated='.$rel.',released='.$rel.',state=4 WHERE id=?');
+	$ticketids = [];
 	foreach ($tickets as $t) {
-		++$db_querycount;
-		$stmt->bindValue(1, $t->id);
-		$stmt->execute();
+		$ticketids[] = $t->id;
 	}
+	++$db_querycount;
+	$db->query('UPDATE tract SET updated='.$rel.',released='.$rel.',state=4 WHERE id IN ('.implode(',', $ticketids).')');
 
 	$comment = 'status: <span class="state3">'.$trac_states[3].'</span> => <span class="state4">'.$trac_states[4].'</span>';
 	$comment .= '<br/>release: <a href="tracversion.php?rel='.$rel.'">'.trac_releasetime($rel).'</a>';
