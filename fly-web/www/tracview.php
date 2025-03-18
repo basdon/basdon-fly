@@ -22,7 +22,7 @@ if (isset($_POST['_form'], $_POST['comment'], $_POST['HAARP']) && $HAARP == $_PO
 	}
 	$t = time();
 	++$db_querycount;
-	$res = $db->query('UPDATE tract SET updated='.$t.' WHERE id='.$id);
+	$res = $db->query('UPDATE tract SET updated='.$t.' WHERE id='.$id.' AND (visibility&'.$usergroups.'!=0 OR op='.$userid.')');
 	if ($res !== false && $res->rowCount()) {
 		$stmt = $db->prepare('INSERT INTO tracc(parent,usr,ip,stamp,type,comment) VALUES('.$id.','.$loggeduser->i.',?,'.$t.',0,?)');
 		$stmt->bindValue(1, $__clientip);
