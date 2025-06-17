@@ -1,0 +1,42 @@
+<?php $code='PALO'; ?>
+
+<div class="articleright">
+  <?php readfile('../gen/apfactsheet_'.$code.'.html') ?>
+</div>
+
+This map was mapped by robin_be, with some elements from a different map by an anonymous mapper.
+
+Only runway 27 has VOR and ILS capabilities, as the approach to runway 09 has some large trees in its path. There is still a lot of space but not is not appropriate for IFR, only VFR landings are allowed.
+
+{@h3 Vehicle spawns}
+
+<?php readfile('../gen/apvehiclelist_'.$code.'.html') ?>
+
+{@h3 Service points}
+
+There is one service point, located at the north-west of the small airport.
+
+{@infobox
+  {@aimg(style="width:100%;max-width:250px")=\
+    palo_sp_.jpg;Airport service point;Airport service point}
+  <small>Palomino Creek Airport service point</small>
+}
+
+{@rem island map is either empty, or it contains the h3 header @}
+<?php readfile('../gen/islandmap_'.$code.'.html') ?>
+
+{@h3 Aerodrome Chart}
+
+<?php readfile('../gen/aerodromechart_'.$code.'.html') ?>
+
+{@rem no clear, the dyn-stats template clears (before the flights part) @}
+<?php include '../articles/airport-dyn-stats.php' ?>
+
+{@h3 Gallery}
+
+{@agalleryimg palo_09_.jpg;Runway 09}
+{@agalleryimg palo_27_.jpg;Runway 27}
+{@agalleryimg palo_bld_.jpg;Building}
+{@agalleryimg palo_bld_nite_.jpg;Building at night}
+{@agalleryimg palo_msp_.jpg;Mission points}
+{@agalleryimg palo_cityangle_.jpg;View from the city}

@@ -103,3 +103,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2022 Nov 01', 'New destination: Morrison Airport (MORR)');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2025 Jun 17', 'New destination: Palomino Creek Airport (PALO)');

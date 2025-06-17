@@ -16,6 +16,7 @@
 !/maps/lsa.map
 !/maps/lva.map
 !/maps/sfa.map
+!/maps/palo_*.map
 /server/**
 !/server/gamemodes/
 !/server/gamemodes/**
