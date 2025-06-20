@@ -112,6 +112,15 @@ changed 2020 Jan 27:
 1  2.9%
 34
 
+changed 2026 Jun 20:
+9 29.0%
+9 29.0%
+9 29.0%
+4 12.9%
+0  0.0%
+0  0.0%
+31
+
 wind * 34kts
 
  // from sa-mp forums: https://forum.sa-mp.com/showthread.php?t=285077
@@ -171,7 +180,7 @@ DE | 18, 18, 18, 17, 17, 17, 17, 17, 17, 17, 19, 19, 19, 17
 
 #define WEATHER_INITIAL 255
 
-#define NEXT_WEATHER_POSSIBILITIES (34)
+#define NEXT_WEATHER_POSSIBILITIES (31)
 
 static const char weather_mapping[NEXT_WEATHER_POSSIBILITIES] = {
 	/* 9x clear */
@@ -210,20 +219,12 @@ static const char weather_mapping[NEXT_WEATHER_POSSIBILITIES] = {
 	WEATHER_LV_CLOUDY,
 	WEATHER_CS_CLOUDY,
 
-	/* 5x thunderstorms */
+	/* 4x thunderstorms */
 	WEATHER_SF_RAINY,
 	WEATHER_CS_RAINY,
 
 	WEATHER_SF_RAINY,
 	WEATHER_CS_RAINY,
-
-	WEATHER_SF_RAINY,
-
-	/* 1x thick fog */
-	WEATHER_SF_FOGGY,
-
-	/* 1x sandstorms */
-	WEATHER_DE_SANDSTORMS,
 };
 
 static const char
