@@ -1,6 +1,6 @@
 {@ul
   {@li (Install the game)}
-  {@li <a href="https://www.sa-mp.com/download.php">Download & install SA-MP</a>}
+  {@li <a href="https://dump.robin.basdon.net/sa-mp-0.3.7-R5-1-install.exe">Download & install SA-MP</a>}
   {@li Open SA-MP}
   {@li Press the 'add' button (<img
 src="/s/articles/srvrbrwsr_a.png"

@@ -50,7 +50,7 @@
 
 		<h3 style=border:0>Server IP: basdon.net:7777</h3>
 		<p>
-			<a href=https://files.sa-mp.com/sa-mp-0.3.7-R5-1-install.exe>SA-MP 0.3.7</a> - <a href="article.php?title=How_To_Join">How to join</a>
+			<a href=https://dump.robin.basdon.net/sa-mp-0.3.7-R5-1-install.exe>SA-MP 0.3.7</a> - <a href="article.php?title=How_To_Join">How to join</a>
 		</p>
 		<p>
 			Discord: <a href=https://discordapp.com/invite/w4jFpqd rel=nofollow>https://discordapp.com/invite/w4jFpqd</a>{@globe}
