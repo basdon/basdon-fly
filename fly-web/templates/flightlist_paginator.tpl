@@ -1,7 +1,7 @@
 <form>
 	<p class=center>
 		{@if isset($flight_list->newer_page_query_params)}
-			<a href="flights.php?{@unsafe $flight_list->newer_page_query_params}">&lt newer</a>
+			<a href="flights.php?{@unsafe $flight_list->newer_page_query_params}">&lt; newer</a>
 		{@else}
 			&lt; newer
 		{@endif}
