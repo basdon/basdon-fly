@@ -15,7 +15,7 @@
 				<td>
 					<a href="flight.php?id={@unsafe $f->id}">#{@unsafe $f->id}</a>
 				<td>
-					<img src=/s/s{@unsafe $f->vehmodel}.png title={@unsafe $aircraftname} alt={@unsafe $aircraftname}>
+					<img src=/s/s{@unsafe $f->vehmodel}.png title="{@unsafe $aircraftname}" alt="{@unsafe $aircraftname}">
 				{@if $flight_list->show_pilot}
 					<td>
 						{@unsafe linkuser($f)}
