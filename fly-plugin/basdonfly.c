@@ -339,6 +339,9 @@ static int playercount;
 static struct SampPlayer *player[MAX_PLAYERS];
 static int spawned[MAX_PLAYERS];
 
+/**set in samp.asm*/
+char is_player_using_client_version_DL[MAX_PLAYERS];
+
 /**
 The vehicle the player was last in, as driver.
 This should be set to 0 at the end of OnPlayerUpdate (so all OnPlayerStateChange functions can use it).

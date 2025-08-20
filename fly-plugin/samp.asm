@@ -8,6 +8,7 @@ extern hook_OnPassengerSync
 extern hook_cmd_on_cmdtext
 extern hook_dialog_on_response
 extern printf
+extern is_player_using_client_version_DL
 
 ;prot void printf_logprintf(char *format, ...);
 global printf_logprintf:function
@@ -21,6 +22,31 @@ printf_logprintf:
 	call eax
 	push dword [logprintRetAddr]
 	ret
+
+;prot /**patch to allow both 0.3.7 and 0.3.DL clients to connect*/
+;prot void ClientJoinCheckVersionHook();
+global ClientJoinCheckVersionHook:function
+ClientJoinCheckVersionHook:
+	cmp dword [ebp-0126Ch], 4057 ; version 0.3.7
+	jnz .not037
+	movzx eax, word [ebp-012B0h] ; playerid
+	mov byte [is_player_using_client_version_DL+eax], 0
+	jmp .checkChallenge
+.not037:
+	cmp dword [ebp-0126Ch], 4062 ; version 0.3.DL
+	jnz .reject
+	movzx eax, word [ebp-012B0h] ; playerid
+	mov byte [is_player_using_client_version_DL+eax], 1
+.checkChallenge:
+	mov eax, dword [ebp-0126Ch] ; iVersion
+	xor eax, dword [ebp-01274h] ; uiClientChallengeResponse
+	cmp dword [081AA8A8h], eax ; challenge
+	jnz .reject
+	mov eax, 080B4BCCh ; ok
+	jmp eax
+.reject:
+	mov eax, 080B4BA8h ; nok, bad version
+	jmp eax
 
 ;prot void OnfootSyncHook();
 global OnfootSyncHook:function

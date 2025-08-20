@@ -47,6 +47,17 @@ void SetConsoleVariableString(char *variable_name, char *value)
 }
 
 static
+void AddServerRule(char *rule_name, char *value)
+{
+#ifndef NO_CAST_IMM_FUNCPTR
+	/*this invokes a function to add a "console variable"
+	 *using 4 as flags argument, which means it will be a server rule
+	 *the last argument is a pointer to a procedure that will be called if the variable changes by console commands*/
+	((void (*)(void*,char*,int,char*,void*))0x80A08F0)(samp_pConsole, rule_name, 4, value, 0);
+#endif
+}
+
+static
 void SendRconCommand(char *command)
 {
 #ifndef NO_CAST_IMM_FUNCPTR
@@ -1308,6 +1319,11 @@ void samp_init()
 	mem_mkjmp(0x80AEA7D, &PassengerSyncHook);
 	mem_mkjmp(0x80B1712, &OnPlayerCommandTextHook);
 	mem_mkjmp(0x80B2BA2, &OnDialogResponseHook);
+
+	/*stuff to allow both 0.3.7 and 0.3.DL clients */
+	AddServerRule("artwork", "No"); /*rule that DL added, probably not needed to have but setting it anyways*/
+	AddServerRule("allowed_clients", "0.3.7, 0.3.DL"); /*open.mp started setting this I guess so we roll with it too*/
+	mem_mkjmp(0x80B4B89, &ClientJoinCheckVersionHook);
 }
 #endif
 
