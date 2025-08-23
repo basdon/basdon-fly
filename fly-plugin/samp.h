@@ -556,17 +556,30 @@ struct RPCDATA_HideActor {
 };
 EXPECT_SIZE(struct RPCDATA_HideActor, 2);
 
-struct RPCDATA_ShowActor {
+struct RPCDATA_ShowActor037 {
 	short actorid;
-	int modelid;
+	int skin;
 	float x;
 	float y;
 	float z;
 	float angle;
-	float health;
+	float hp;
 	char invulnerable;
 };
-EXPECT_SIZE(struct RPCDATA_ShowActor, 2 + 4 + 12 + 4 + 4 + 1);
+EXPECT_SIZE(struct RPCDATA_ShowActor037, 2 + 4 + 12 + 4 + 4 + 1);
+
+struct RPCDATA_ShowActor03DL {
+	short actorid;
+	int skin;
+	int customSkin;
+	float x;
+	float y;
+	float z;
+	float angle;
+	float hp;
+	char invulnerable;
+};
+EXPECT_SIZE(struct RPCDATA_ShowActor03DL, 2 + 4 + 4 + 12 + 4 + 4 + 1);
 
 struct RPCDATA_ShowTextDraw {
 	short textdrawid;

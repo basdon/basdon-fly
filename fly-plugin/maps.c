@@ -145,7 +145,8 @@ static int wmre_blade_01_angle, wmre_blade_23_angle;
 /**For each player, how much ms is left for next map streaming tick.*/
 static short next_streaming_tick_delay[MAX_PLAYERS];
 
-static struct RPCDATA_ShowActor rpcdata_show_actor;
+static struct RPCDATA_ShowActor03DL rpcdata_show_actor03DL;
+static struct RPCDATA_ShowActor037 rpcdata_show_actor037;
 static struct RPCDATA_HideActor rpcdata_hide_actor;
 
 #define MAP_LOAD_RESULT_HAS_OBJECTS 1
@@ -520,14 +521,15 @@ void maps_init()
 	maps_load_wmre_blade_template_object();/*jeanine:l:30*/
 	maps_load_from_db();/*jeanine:l:22*/
 
-	rpcdata_show_actor.actorid = OCTA_ACTORID;
-	rpcdata_show_actor.modelid = 141;
-	rpcdata_show_actor.x = 12332.3926f;
-	rpcdata_show_actor.y = 6521.1636f;
-	rpcdata_show_actor.z = 7.0225f;
-	rpcdata_show_actor.angle = 0.0f;
-	rpcdata_show_actor.health = 255.0f;
-	rpcdata_show_actor.invulnerable = 1;
+	rpcdata_show_actor03DL.actorid = rpcdata_show_actor037.actorid = OCTA_ACTORID;
+	rpcdata_show_actor03DL.skin = rpcdata_show_actor037.skin = 141;
+	rpcdata_show_actor03DL.customSkin = 0;
+	rpcdata_show_actor03DL.x = rpcdata_show_actor037.x = 12332.3926f;
+	rpcdata_show_actor03DL.y = rpcdata_show_actor037.y = 6521.1636f;
+	rpcdata_show_actor03DL.z = rpcdata_show_actor037.z = 7.0225f;
+	rpcdata_show_actor03DL.angle = rpcdata_show_actor037.angle = 0.0f;
+	rpcdata_show_actor03DL.hp = rpcdata_show_actor037.hp = 255.0f;
+	rpcdata_show_actor03DL.invulnerable = rpcdata_show_actor037.invulnerable = 1;
 
 	rpcdata_hide_actor.actorid = OCTA_ACTORID;
 
@@ -735,7 +737,11 @@ stop_streaming:
 	/*Map specific things.*/
 	if (mapidx == octavia_island_actor_mapidx) {
 		/*Octavia actor*/
-		SendRPCToPlayer(playerid, RPC_ShowActor, &rpcdata_show_actor, sizeof(rpcdata_show_actor), 2);
+		if (is_player_using_client_version_DL[playerid]) {
+			SendRPCToPlayer(playerid, RPC_ShowActor, &rpcdata_show_actor03DL, sizeof(rpcdata_show_actor03DL), 2);
+		} else {
+			SendRPCToPlayer(playerid, RPC_ShowActor, &rpcdata_show_actor037, sizeof(rpcdata_show_actor037), 2);
+		}
 	} else if (mapidx == wmre_mapidx) {
 		/*WMRE windmill blades*/
 		bitstream.ptrData = wmre_blade_template;
