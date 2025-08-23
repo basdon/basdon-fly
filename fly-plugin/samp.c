@@ -66,6 +66,21 @@ void SendRconCommand(char *command)
 }
 
 static
+void SendRPC_8C(int playerid, int rpc, void *rpcdata, int size_bytes, enum PacketPriority priority, enum PacketReliability reliability, int orderingChannel)
+{
+	struct BitStream bs;
+	struct PlayerID playerID;
+
+	bs.ptrData = rpcdata;
+	bs.numberOfBitsUsed = size_bytes * 8;
+/*TODO get rid of this ifndef*/
+#ifndef NO_CAST_IMM_FUNCPTR
+	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playerid);
+	rakServer->vtable->RPC_8C(rakServer, (void*)rpc, &bs, priority, reliability, orderingChannel, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
+#endif
+}
+
+static
 void SendRPCToPlayer(int playerid, int rpc, void *rpcdata, int size_bytes, int unk)
 {
 	struct BitStream bs;
@@ -101,9 +116,39 @@ void ForceSendPlayerOnfootSyncNow(int playerid)
 }
 
 static
+void convertSpawnInfoToSpawnInfo03DL(struct SpawnInfo *in, struct SpawnInfo03DL *out)
+{
+	out->team = in->team;
+	out->skin = in->skin;
+	out->customSkin = 0;
+	out->_spawnInfoPad5 = in->_pad5;
+	out->pos = in->pos;
+	memcpy(out->weapon, in->weapon, sizeof(in->weapon));
+	memcpy(out->ammo, in->ammo, sizeof(in->ammo));
+}
+
+static
 void SetGameModeText(char *gamemodetext)
 {
 	SetConsoleVariableString("gamemodetext", gamemodetext);
+}
+
+static
+void SetSpawnInfo(int playerid, struct SpawnInfo *spawnInfo)
+{
+	struct RPCDATA_SetSpawnInfo03DL rpcdata03DL;
+	struct RPCDATA_SetSpawnInfo037 rpcdata037;
+
+	if (is_player_using_client_version_DL[playerid]) {
+		convertSpawnInfoToSpawnInfo03DL(spawnInfo, &rpcdata03DL.spawnInfo);
+		SendRPCToPlayer(playerid, RPC_SetSpawnInfo, &rpcdata03DL, sizeof(rpcdata03DL), 2);
+	} else {
+		rpcdata037.spawnInfo = *spawnInfo;
+		SendRPCToPlayer(playerid, RPC_SetSpawnInfo, &rpcdata037, sizeof(rpcdata037), 2);
+	}
+
+	player[playerid]->spawnInfo = *spawnInfo;
+	player[playerid]->hasSpawnInfo = 1; /*otherwise SAMP will ignore client Spawn packets and player will not be marked (not broadcasted) as spawned despited being spawned*/
 }
 
 static
@@ -1099,18 +1144,20 @@ int natives_SetPlayerPos(int playerid, struct vec3 pos)
 /**
 SpawnPlayer kills players that are in vehicles, and spawns them with a bottle.
 
-So this wrapper does SetPlayerPos (directly) if needed, because that will
-eject a player.
+So this wrapper does ClearAnimations first if needed, because that will eject a player.
 */
 static
 void natives_SpawnPlayer(int playerid)
 #ifdef SAMP_NATIVES_IMPL
 {
+	struct SpawnInfo spawnInfo;
+
 	/*eject player first if they're in a vehicle*/
 	if (GetPlayerVehicleID(playerid)) {
 		NC_ClearAnimations(playerid, 1);
 	}
-	spawn_prespawn(playerid);
+	spawn_get_random_spawn(playerid, &spawnInfo);
+	SetSpawnInfo(playerid, &spawnInfo);
 	SpawnPlayer(playerid);
 }
 #endif
@@ -1286,6 +1333,28 @@ void hook_OnPassengerSync(int playerid)
 	/*When wanting to return 0, set CPlayer::updateSyncType to 0.*/
 }
 
+void hook_OnPlayerRequestClass(int playerid, int classid)
+{
+	struct RPCDATA_RequestClass03DL rpcdata03DL;
+	struct RPCDATA_RequestClass037 rpcdata037;
+
+	class_on_player_request_class(playerid, classid);
+	timecyc_on_player_request_class(playerid);
+
+	spawn_get_random_spawn(playerid, &rpcdata037.spawnInfo);
+	if (is_player_using_client_version_DL[playerid]) {
+		rpcdata03DL.response = 1;
+		convertSpawnInfoToSpawnInfo03DL(&rpcdata037.spawnInfo, &rpcdata03DL.spawnInfo);
+		SendRPC_8C(playerid, RPC_RequestClass, &rpcdata03DL, sizeof(rpcdata03DL), HIGH_PRIORITY, RELIABLE, 0);
+	} else {
+		rpcdata037.response = 1;
+		SendRPC_8C(playerid, RPC_RequestClass, &rpcdata037, sizeof(rpcdata037), HIGH_PRIORITY, RELIABLE, 0);
+	}
+
+	player[playerid]->spawnInfo = rpcdata037.spawnInfo;
+	player[playerid]->hasSpawnInfo = 1; /*otherwise SAMP will ignore client Spawn packets and player will not be marked (not broadcasted) as spawned despited being spawned*/
+}
+
 static
 void samp_init()
 {
@@ -1319,6 +1388,7 @@ void samp_init()
 	mem_mkjmp(0x80AEA7D, &PassengerSyncHook);
 	mem_mkjmp(0x80B1712, &OnPlayerCommandTextHook);
 	mem_mkjmp(0x80B2BA2, &OnDialogResponseHook);
+	mem_mkjmp(0x80B09D4, &OnPlayerRequestClassHook);
 
 	/*stuff to allow both 0.3.7 and 0.3.DL clients */
 	AddServerRule("artwork", "No"); /*rule that DL added, probably not needed to have but setting it anyways*/

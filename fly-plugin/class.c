@@ -8,22 +8,9 @@
 static
 void class_init()
 {
-	int i;
-
-	nc_params[0] = 11;
-	nc_paramf[2] = 1488.5236f;
-	nc_paramf[3] = -873.1125f;
-	nc_paramf[4] = 59.3885f;
-	nc_paramf[5] = 232.0f;
-	nc_params[6] = SPAWN_WEAPON_1;
-	nc_params[7] = SPAWN_AMMO_1;
-	nc_params[8] = nc_params[10] = SPAWN_WEAPON_2_3;
-	nc_params[9] = nc_params[11] = SPAWN_AMMO_2_3;
-
-	for (i = 0; i < SETTING__NUM_CLASSES; i++) {
-		nc_params[1] = CLASS_SKINS[i];
-		NC(n_AddPlayerClass);
-	}
+	/*we skip doing AddPlayerClass and just set numAvailableSpawns directly*/
+	/*we overwrote SAMP's OnPlayerRequestClass anyways, so the spawninfo data that AddPlayerClass adds isn't needed*/
+	samp_pNetGame->numAvailableSpawns = SETTING__NUM_CLASSES;
 }
 
 static

@@ -217,6 +217,27 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, paintjob, 0xC5);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, params, 0xEF);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, use_siren, 0x109);
 
+struct SpawnInfo {
+	char team;
+	int skin;
+	char _pad5;
+	struct vec4 pos;
+	int weapon[3];
+	int ammo[3];
+};
+EXPECT_SIZE(struct SpawnInfo, 0x2E); /*Complete.*/
+
+struct SpawnInfo03DL {
+	char team;
+	int skin;
+	int customSkin; /*keep this 0*/
+	char _spawnInfoPad5;
+	struct vec4 pos;
+	int weapon[3];
+	int ammo[3];
+};
+EXPECT_SIZE(struct SpawnInfo03DL, 0x32);
+
 #define UPDATE_SYNC_TYPE_NONE 0
 #define UPDATE_SYNC_TYPE_ONFOOT 1
 #define UPDATE_SYNC_TYPE_INCAR 2
@@ -276,9 +297,9 @@ struct SampPlayer {
 	float raceCheckpointSize;
 	int isCurrentlyInRaceCheckpoint;
 	char _pad2BDF[0x2BFD-0x2BDF];
-	char team;
-	int skin;
-	char _pad2C02[0x2C30-0x2C02];
+	struct SpawnInfo spawnInfo;
+	int hasSpawnInfo;
+	char _pad2C2F;
 	char fightingstyle;
 	char vehicleseat;
 	short vehicleid;
@@ -328,8 +349,8 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, updateSyncType, 0x2969);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, currentState, 0x2BA9);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, raceCheckpointType, 0x2BD6);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, isCurrentlyInRaceCheckpoint, 0x2BDB);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, team, 0x2BFD);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, skin, 0x2BFE);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, spawnInfo, 0x2BFD);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, hasSpawnInfo, 0x2C2B);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, fightingstyle, 0x2C30);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleseat, 0x2C31);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleid, 0x2C32);
@@ -401,6 +422,8 @@ struct SampNetGame {
 	char _pad70;
 	char _pad71;
 	float nametagDrawDistance; /*SetNameTagDrawDistance()*/
+	char _pad76[0x8A-0x76];
+	int numAvailableSpawns; /*AddPlayerClass()*/
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, vehiclePool, 0xC);
@@ -413,6 +436,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, showNametags, 0x58);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, enableStuntBonus, 0x5B);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, usePlayerPedAnims, 0x6D);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, nametagDrawDistance, 0x72);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, numAvailableSpawns, 0x8A);
 
 struct RPCDATA_ShowGangZone {
 	short zoneid;
@@ -752,6 +776,28 @@ struct RPCDATA_PutPlayerInVehicle {
 };
 EXPECT_SIZE(struct RPCDATA_PutPlayerInVehicle, 2 + 1);
 
+struct RPCDATA_RequestClass037 {
+	char response; /*0 disallows the class. if 0, spawnInfo may be omitted*/
+	struct SpawnInfo spawnInfo;
+};
+EXPECT_SIZE(struct RPCDATA_RequestClass037, 0x2F);
+
+struct RPCDATA_RequestClass03DL {
+	char response; /*0 disallows the class. if 0, spawnInfo may be omitted*/
+	struct SpawnInfo03DL spawnInfo;
+};
+EXPECT_SIZE(struct RPCDATA_RequestClass03DL, 0x33);
+
+struct RPCDATA_SetSpawnInfo037 {
+	struct SpawnInfo spawnInfo;
+};
+EXPECT_SIZE(struct RPCDATA_SetSpawnInfo037, 0x2E);
+
+struct RPCDATA_SetSpawnInfo03DL {
+	struct SpawnInfo03DL spawnInfo;
+};
+EXPECT_SIZE(struct RPCDATA_SetSpawnInfo03DL, 0x32);
+
 /**
 DriverSync
 	char packet_id; (200)
@@ -784,8 +830,11 @@ DriverSync
 */
 #pragma pack()
 
-#define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,unk) \
-	((void (*)(void*,void*,struct BitStream*,short,int))0x80AC1D0)((void*)samp_pNetGame,(void*)pRPC,pBS,playerid,unk)
+/*this uses HIGH_PRIORITY
+ *if orderingChannel is 3, reliability will be RELIABLE, else RELIABLE_ORDERED
+ *most usages seem to be using orderingChannel 2*/
+#define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,orderingChannel) \
+	((void (*)(void*,void*,struct BitStream*,short,int))0x80AC1D0)((void*)samp_pNetGame,(void*)pRPC,pBS,playerid,orderingChannel)
 
 #define RPC_ShowGangZone 0x81587A1 /*ptr to 0x6C(108)*/
 #define RPC_HideGangZone 0x8163BA7 /*ptr to 0x78(120)*/
@@ -825,3 +874,5 @@ DriverSync
 #define RPC_PlayerCreate 0x816324E /*ptr to 0x20(32)*/
 #define RPC_PlayerLeave 0x815AA78 /*ptr to 0x8A(138)*/
 #define RPC_PutPlayerInVehicle 0x815A058 /*ptr to 0x46(70)*/
+#define RPC_RequestClass 0x81572DF /*ptr to 0x80(128)*/
+#define RPC_SetSpawnInfo 0x8162624 /*ptr to 0x44(68)*/

@@ -42,6 +42,7 @@ static int userid[MAX_PLAYERS];
 short players[MAX_PLAYERS];
 int playercount;
 unsigned char playeronlineflag[MAX_PLAYERS];
+char is_player_using_client_version_DL[MAX_PLAYERS];
 struct {
 	struct dbvehicle *dbvehicle;
 } gamevehicles[MAX_VEHICLES];

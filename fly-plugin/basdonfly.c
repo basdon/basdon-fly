@@ -266,11 +266,6 @@ static struct {
 } weather;
 EXPECT_SIZE(weather, 4);
 
-#define SPAWN_WEAPON_1 WEAPON_CAMERA
-#define SPAWN_AMMO_1 3036
-#define SPAWN_WEAPON_2_3 0
-#define SPAWN_AMMO_2_3 0
-
 /*See /settings.ini for class stuff */
 static const int CLASS_SKINS[SETTING__NUM_CLASSES] = {
 	61,

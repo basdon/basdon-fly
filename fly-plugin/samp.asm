@@ -5,6 +5,7 @@ extern rakServer;
 extern hook_OnOnfootSync
 extern hook_OnDriverSync
 extern hook_OnPassengerSync
+extern hook_OnPlayerRequestClass
 extern hook_cmd_on_cmdtext
 extern hook_dialog_on_response
 extern printf
@@ -95,6 +96,15 @@ OnDialogResponseHook:
 	mov [esp], ebx ; playerid
 	call hook_dialog_on_response
 	mov eax, 080B2A8Dh
+	jmp eax
+
+;prot void OnPlayerRequestClassHook();
+global OnPlayerRequestClassHook:function
+OnPlayerRequestClassHook:
+	mov [esp+4], edx ; classid
+	mov [esp], ebx ; playerid
+	call hook_OnPlayerRequestClass
+	mov eax, 080B0927h
 	jmp eax
 
 ;prot float* samphost_GetPtrStreamDistance();

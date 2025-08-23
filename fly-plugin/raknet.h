@@ -18,6 +18,21 @@ struct PlayerID {
 EXPECT_SIZE(struct PlayerID, 0x6);
 STATIC_ASSERT_MEMBER_OFFSET(struct PlayerID, port, 0x4);
 
+enum PacketPriority {
+	SYSTEM_PRIORITY = 0,
+	HIGH_PRIORITY = 1,
+	MEDIUM_PRIORITY = 2,
+	LOW_PRIORITY = 3,
+};
+
+enum PacketReliability {
+	UNRELIABLE = 6,
+	UNRELIABLE_SEQUENCED = 7,
+	RELIABLE = 8,
+	RELIABLE_ORDERED = 9,
+	RELIABLE_SEQUENCED = 10,
+};
+
 struct RakNetStatistics {
 	int messageSendBufferPrior0;
 	int messageSendBufferPrior1;
@@ -41,14 +56,16 @@ struct RakServer {
 };
 
 struct RakServer_vtable {
-	int _pad0[60];
+	int _pad0[35];
+	int (*RPC_8C)(struct RakServer *this, char *rpc, struct BitStream *bitStream, enum PacketPriority priority, enum PacketReliability reliability, char orderingChannel, struct PlayerID playerID, int bBroadcast, int bShiftTimestamp);
+	int _pad90[24];
 	/**thiscall with one parameter, use RakServer__GetPlayerIDFromIndex in samp.asm*/
 	void (*GetPlayerIDFromIndex)(struct PlayerID *outPlayerID, struct RakServer *rakServer, short playerIndex);
 	int _padF4[9];
-	/**cdecl*/
 	struct RakNetStatistics *(*GetStatistics)(struct RakServer *rakServer, struct PlayerID playerID);
 };
 #ifndef __TINYC__ /*my tcc binaries are 64bit so ptrs will be 8 bytes instead of 4, disabling these for tcc*/
+STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, RPC_8C, 0x8C);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetPlayerIDFromIndex, 0xF0);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetStatistics, 0x118);
 #endif
