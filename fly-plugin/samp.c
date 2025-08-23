@@ -152,6 +152,40 @@ void SetSpawnInfo(int playerid, struct SpawnInfo *spawnInfo)
 }
 
 static
+void SetPlayerSkin(int playerid, int skin)
+{
+	struct RPCDATA_SetPlayerSkin03DL rpcdata03DL;
+	struct RPCDATA_SetPlayerSkin037 rpcdata037;
+	struct SampPlayer *playa;
+	int i;
+
+	playa = player[playerid];
+	if (!playa) {
+		return;
+	}
+
+	/*this is what SAMP does*/
+	if (!playa->hasSpawnInfo) {
+		playa->spawnInfo.skin = skin;
+		return;
+	}
+
+	rpcdata03DL.playerid = rpcdata037.playerid = playerid;
+	rpcdata03DL.skin = rpcdata037.skin = skin;
+	rpcdata03DL.customSkin = 0;
+
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (i == playerid || (player[i] && player[i]->playerStreamedIn[playerid])) {
+			if (is_player_using_client_version_DL[i]) {
+				SendRPCToPlayer(i, RPC_SetPlayerSkin, &rpcdata03DL, sizeof(rpcdata03DL), 2);
+			} else {
+				SendRPCToPlayer(i, RPC_SetPlayerSkin, &rpcdata037, sizeof(rpcdata037), 2);
+			}
+		}
+	}
+}
+
+static
 void SetPlayerMapIcon(int playerid, char icon_id, struct vec3 *pos, char icon, int color, char style)
 {
 	struct RPCDATA_SetPlayerMapIcon rpcdata;

@@ -365,7 +365,7 @@ struct SampVehiclePool {
 	int virtualworld[2000];
 	int created[2000];
 	struct SampVehicle *vehicles[2000];
-	int poolsize;
+	int highestUsedVehicleid; /*"poolsize" but I find that name confusing because it's 0 if there's 1 vehicle*/
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, created, 0x2014);
@@ -384,6 +384,8 @@ struct SampPlayerPool {
 	char names[1000][25];
 	int isAdmin[1000];
 	int isNpc[1000];
+	char _pad2EA24[0x30968-0x2EA24];
+	int highestUsedPlayerid; /*"poolsize" but I find that name confusing because it's 0 if there's 1 player*/
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, playerDrunkLevel, 0x2EEC);
@@ -394,6 +396,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, created, 0x249FC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, players, 0x2599C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, names, 0x2693C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, isAdmin, 0x2CAE4);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, highestUsedPlayerid, 0x30968);
 
 struct SampNetGame {
 	void *pGameMode;
@@ -838,6 +841,19 @@ struct RPCDATA_WorldPlayerAdd03DL {
 };
 EXPECT_SIZE(struct RPCDATA_WorldPlayerAdd03DL, 0x36);
 
+struct RPCDATA_SetPlayerSkin037 {
+	int playerid;
+	int skin;
+};
+EXPECT_SIZE(struct RPCDATA_SetPlayerSkin037, 0x8);
+
+struct RPCDATA_SetPlayerSkin03DL {
+	short playerid;
+	int skin;
+	int customSkin;
+};
+EXPECT_SIZE(struct RPCDATA_SetPlayerSkin03DL, 0xA);
+
 /**
 DriverSync
 	char packet_id; (200)
@@ -917,3 +933,4 @@ DriverSync
 #define RPC_RequestClass 0x81572DF /*ptr to 0x80(128)*/
 #define RPC_SetSpawnInfo 0x8162624 /*ptr to 0x44(68)*/
 #define RPC_WorldPlayerAdd 0x816324E /*ptr to 0x20(32)*/
+#define RPC_SetPlayerSkin 0x815CCE4 /*ptr to 0x99(153)*/

@@ -230,7 +230,7 @@ VehiclePoolAddVehicleAtIndex:
 ;prot  */
 ;prot int _CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_delay_ms);
 ;test __builtin_offsetof(struct SampNetGame, vehiclePool) == 0xC
-;test __builtin_offsetof(struct SampVehiclePool, poolsize) == 0x5E94
+;test __builtin_offsetof(struct SampVehiclePool, highestUsedVehicleid) == 0x5E94
 ;test __builtin_offsetof(struct vec4, r) == 0xC
 global _CreateVehicle:function
 _CreateVehicle:
