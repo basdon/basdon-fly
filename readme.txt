@@ -234,3 +234,16 @@ Notes
 
 The gamemode script is a stub and is deprecated, and might be removed in
 the future.
+
+Thanks & Acknowledgments
+------------------------
+
+https://github.com/Brunoo16/samp-packet-list
+
+	for being a great resource about the packets (RPCs) data
+
+https://sampwiki.blast.hk/wiki/Main_Page
+
+	for making available an archive of the SA-MP wiki, which
+	contained great resources. mainly the visual things and information
+	tables like weapon ids, gametext style images, vehicle colors, ...
