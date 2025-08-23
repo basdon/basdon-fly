@@ -152,6 +152,7 @@ void SetSpawnInfo(int playerid, struct SpawnInfo *spawnInfo)
 }
 
 static
+__attribute__((unused))
 void SetPlayerSkin(int playerid, int skin)
 {
 	struct RPCDATA_SetPlayerSkin03DL rpcdata03DL;
