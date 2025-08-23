@@ -233,6 +233,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 {
+	struct SpawnInfo spawnInfo;
 	struct vec3 pos;
 	const int playerid = PARAM(1), killerid = PARAM(2);
 	const int reason = PARAM(3);
@@ -255,7 +256,12 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 
 	spawned[playerid] = 0;
 
-	spawn_prespawn(playerid);
+	/*set player spawninfo to a random spawn.
+	 *doing this in OnPlayerDeath allows the client to immediately spawn at the new (random) spawn location,
+	 *as opposed to using SetPosition in OnPlayerSpawn, which would cause an extra teleport that may cause possible map/zone streaming headaches*/
+	spawn_get_random_spawn(playerid, &spawnInfo);
+	SetSpawnInfo(playerid, &spawnInfo);
+
 	timecyc_on_player_death(playerid);
 	GetPlayerPos(playerid, &pos);
 	zones_update(playerid, pos);
@@ -325,10 +331,10 @@ cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
 {
-	const int playerid = PARAM(1), classid = PARAM(2);
-
-	class_on_player_request_class(playerid, classid);
-	timecyc_on_player_request_class(playerid);
+	/*This is unused, OnPlayerRequestClass is hooked (in samp.c) and the
+	 *filterscript/gamemode callbacks are never invoked. This is being kept
+	 *here because otherwise the gamemode script needs to be recompiled and
+	 *I want to wait doing that until I got rid of all callbacks*/
 	return 1;
 }
 
@@ -346,12 +352,8 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 		return 0;
 	}
 
-	if (class_on_player_request_spawn(playerid)) {
-		spawn_prespawn(playerid);
-		return 1;
-	}
-
-	return 0;
+	class_on_player_request_spawn(playerid);
+	return 1;
 }
 
 /* native B_OnPlayerSpawn(playerid) */

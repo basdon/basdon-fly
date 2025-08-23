@@ -1,7 +1,6 @@
 /* Natives ending in _ means that they have
 custom code and shouldn't be used directly.*/
 
-static AMX_NATIVE n_AddPlayerClass;
 static AMX_NATIVE n_ClearAnimations;
 static AMX_NATIVE n_CreatePlayerObject;
 static AMX_NATIVE n_DestroyObject;
@@ -36,7 +35,6 @@ static AMX_NATIVE n_SetPlayerScore;
 static AMX_NATIVE n_SetPlayerSpecialAction;
 static AMX_NATIVE n_SetPlayerTime;
 static AMX_NATIVE n_SetPlayerWeather;
-static AMX_NATIVE n_SetSpawnInfo;
 static AMX_NATIVE n_SetVehiclePos;
 static AMX_NATIVE n_SetVehicleToRespawn;
 static AMX_NATIVE n_SetVehicleZAngle;
@@ -296,7 +294,6 @@ int natives_find()
 		int *var;
 	};
 	struct NATIVE natives[] = {
-		N(AddPlayerClass),
 		N(ClearAnimations),
 		N(CreatePlayerObject),
 		N(DestroyObject),
@@ -331,7 +328,6 @@ int natives_find()
 		N(SetPlayerSpecialAction),
 		N(SetPlayerTime),
 		N(SetPlayerWeather),
-		N(SetSpawnInfo),
 		N(SetVehiclePos),
 		N(SetVehicleToRespawn),
 		N(SetVehicleZAngle),

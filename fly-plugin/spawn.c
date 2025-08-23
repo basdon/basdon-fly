@@ -99,18 +99,11 @@ void spawn_cb_dlg_spawn(int playerid, struct DIALOG_RESPONSE response)
 	}
 }
 
-/**
-Set player spawn info before a player spawns.
-
-To be called from OnPlayerRequestClass and OnPlayerDeath.
-
-Otherwise players get teleported right after spawn, causing updates like map
-streaming and zones twice right after each other.
-*/
 static
-void spawn_prespawn(int playerid)
+void spawn_get_random_spawn(int playerid, struct SpawnInfo *outSpawnInfo)
 {
-	int spawnidx, klass = classid[playerid];
+	int spawnidx = 0;
+	int klass = classid[playerid];
 
 	switch (numspawns[klass]) {
 	/*if no spawns, take first spawn of pilot class*/
@@ -119,24 +112,26 @@ void spawn_prespawn(int playerid)
 	default: spawnidx = NC_random(numspawns[klass]); break;
 	}
 
-	NC_PARS(13);
-	nc_params[1] = playerid;
-	nc_params[2] = NO_TEAM;
-	nc_params[3] = CLASS_SKINS[klass];
-	memcpy(nc_params + 4, spawns[klass] + spawnidx, sizeof(struct vec4));
-	nc_params[8] = SPAWN_WEAPON_1;
-	nc_params[9] = SPAWN_AMMO_1;
-	nc_params[10] = nc_params[12] = SPAWN_WEAPON_2_3;
-	nc_params[11] = nc_params[13] = SPAWN_AMMO_2_3;
-	NC(n_SetSpawnInfo);
+	outSpawnInfo->team = 11; /*using anything but NO_TEAM should make players not able to damage other players, except by slitting throat when having a knife*/
+	outSpawnInfo->skin = CLASS_SKINS[klass];
+	outSpawnInfo->_pad5 = 69;
+	memcpy(&outSpawnInfo->pos, spawns[klass] + spawnidx, sizeof(struct vec4));
+	outSpawnInfo->weapon[0] = WEAPON_CAMERA;
+	outSpawnInfo->weapon[1] = 0;
+	outSpawnInfo->weapon[2] = 0;
+	outSpawnInfo->ammo[0] = 3036; /*one clip is 36, that leaves an extra clean 3000*/
+	outSpawnInfo->ammo[1] = 0;
+	outSpawnInfo->ammo[2] = 0;
 }
 
 /**
 Call on spawn to show a dialog of spawn locations to teleport to.
 
-spawn_prespawn should've been called before, which should've set the player's
-spawninfo before spawning, so player should already have spawned at a location
-of their choice (as set in preferences) by this time.
+Player should already be spawned in their preferred location, because we should
+set spawn info before they spawn so we don't need to teleport players after they
+spawn because that would otherwise cause zone/object streaming headaches. But we
+still show the spawn dialog after spawning in case the player wants to override
+the spawn that they currently got.
 */
 static
 void spawn_on_player_spawn(int playerid)

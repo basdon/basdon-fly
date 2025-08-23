@@ -266,11 +266,6 @@ static struct {
 } weather;
 EXPECT_SIZE(weather, 4);
 
-#define SPAWN_WEAPON_1 WEAPON_CAMERA
-#define SPAWN_AMMO_1 3036
-#define SPAWN_WEAPON_2_3 0
-#define SPAWN_AMMO_2_3 0
-
 /*See /settings.ini for class stuff */
 static const int CLASS_SKINS[SETTING__NUM_CLASSES] = {
 	61,
@@ -338,6 +333,9 @@ amount of playerids in players
 static int playercount;
 static struct SampPlayer *player[MAX_PLAYERS];
 static int spawned[MAX_PLAYERS];
+
+/**set in samp.asm*/
+char is_player_using_client_version_DL[MAX_PLAYERS];
 
 /**
 The vehicle the player was last in, as driver.

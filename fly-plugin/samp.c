@@ -47,10 +47,36 @@ void SetConsoleVariableString(char *variable_name, char *value)
 }
 
 static
+void AddServerRule(char *rule_name, char *value)
+{
+#ifndef NO_CAST_IMM_FUNCPTR
+	/*this invokes a function to add a "console variable"
+	 *using 4 as flags argument, which means it will be a server rule
+	 *the last argument is a pointer to a procedure that will be called if the variable changes by console commands*/
+	((void (*)(void*,char*,int,char*,void*))0x80A08F0)(samp_pConsole, rule_name, 4, value, 0);
+#endif
+}
+
+static
 void SendRconCommand(char *command)
 {
 #ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(void*,char*))0x809FBD0)(samp_pConsole, command);
+#endif
+}
+
+static
+void SendRPC_8C(int playerid, int rpc, void *rpcdata, int size_bytes, enum PacketPriority priority, enum PacketReliability reliability, int orderingChannel)
+{
+	struct BitStream bs;
+	struct PlayerID playerID;
+
+	bs.ptrData = rpcdata;
+	bs.numberOfBitsUsed = size_bytes * 8;
+/*TODO get rid of this ifndef*/
+#ifndef NO_CAST_IMM_FUNCPTR
+	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playerid);
+	rakServer->vtable->RPC_8C(rakServer, (void*)rpc, &bs, priority, reliability, orderingChannel, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
 #endif
 }
 
@@ -90,9 +116,73 @@ void ForceSendPlayerOnfootSyncNow(int playerid)
 }
 
 static
+void convertSpawnInfoToSpawnInfo03DL(struct SpawnInfo *in, struct SpawnInfo03DL *out)
+{
+	out->team = in->team;
+	out->skin = in->skin;
+	out->customSkin = 0;
+	out->_spawnInfoPad5 = in->_pad5;
+	out->pos = in->pos;
+	memcpy(out->weapon, in->weapon, sizeof(in->weapon));
+	memcpy(out->ammo, in->ammo, sizeof(in->ammo));
+}
+
+static
 void SetGameModeText(char *gamemodetext)
 {
 	SetConsoleVariableString("gamemodetext", gamemodetext);
+}
+
+static
+void SetSpawnInfo(int playerid, struct SpawnInfo *spawnInfo)
+{
+	struct RPCDATA_SetSpawnInfo03DL rpcdata03DL;
+	struct RPCDATA_SetSpawnInfo037 rpcdata037;
+
+	if (is_player_using_client_version_DL[playerid]) {
+		convertSpawnInfoToSpawnInfo03DL(spawnInfo, &rpcdata03DL.spawnInfo);
+		SendRPCToPlayer(playerid, RPC_SetSpawnInfo, &rpcdata03DL, sizeof(rpcdata03DL), 2);
+	} else {
+		rpcdata037.spawnInfo = *spawnInfo;
+		SendRPCToPlayer(playerid, RPC_SetSpawnInfo, &rpcdata037, sizeof(rpcdata037), 2);
+	}
+
+	player[playerid]->spawnInfo = *spawnInfo;
+	player[playerid]->hasSpawnInfo = 1; /*otherwise SAMP will ignore client Spawn packets and player will not be marked (not broadcasted) as spawned despited being spawned*/
+}
+
+static
+void SetPlayerSkin(int playerid, int skin)
+{
+	struct RPCDATA_SetPlayerSkin03DL rpcdata03DL;
+	struct RPCDATA_SetPlayerSkin037 rpcdata037;
+	struct SampPlayer *playa;
+	int i;
+
+	playa = player[playerid];
+	if (!playa) {
+		return;
+	}
+
+	/*this is what SAMP does*/
+	if (!playa->hasSpawnInfo) {
+		playa->spawnInfo.skin = skin;
+		return;
+	}
+
+	rpcdata03DL.playerid = rpcdata037.playerid = playerid;
+	rpcdata03DL.skin = rpcdata037.skin = skin;
+	rpcdata03DL.customSkin = 0;
+
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (i == playerid || (player[i] && player[i]->playerStreamedIn[playerid])) {
+			if (is_player_using_client_version_DL[i]) {
+				SendRPCToPlayer(i, RPC_SetPlayerSkin, &rpcdata03DL, sizeof(rpcdata03DL), 2);
+			} else {
+				SendRPCToPlayer(i, RPC_SetPlayerSkin, &rpcdata037, sizeof(rpcdata037), 2);
+			}
+		}
+	}
 }
 
 static
@@ -1088,18 +1178,20 @@ int natives_SetPlayerPos(int playerid, struct vec3 pos)
 /**
 SpawnPlayer kills players that are in vehicles, and spawns them with a bottle.
 
-So this wrapper does SetPlayerPos (directly) if needed, because that will
-eject a player.
+So this wrapper does ClearAnimations first if needed, because that will eject a player.
 */
 static
 void natives_SpawnPlayer(int playerid)
 #ifdef SAMP_NATIVES_IMPL
 {
+	struct SpawnInfo spawnInfo;
+
 	/*eject player first if they're in a vehicle*/
 	if (GetPlayerVehicleID(playerid)) {
 		NC_ClearAnimations(playerid, 1);
 	}
-	spawn_prespawn(playerid);
+	spawn_get_random_spawn(playerid, &spawnInfo);
+	SetSpawnInfo(playerid, &spawnInfo);
 	SpawnPlayer(playerid);
 }
 #endif
@@ -1275,6 +1367,58 @@ void hook_OnPassengerSync(int playerid)
 	/*When wanting to return 0, set CPlayer::updateSyncType to 0.*/
 }
 
+void hook_OnPlayerRequestClass(int playerid, int classid)
+{
+	struct RPCDATA_RequestClass03DL rpcdata03DL;
+	struct RPCDATA_RequestClass037 rpcdata037;
+
+	class_on_player_request_class(playerid, classid);
+	timecyc_on_player_request_class(playerid);
+
+	spawn_get_random_spawn(playerid, &rpcdata037.spawnInfo);
+	if (is_player_using_client_version_DL[playerid]) {
+		rpcdata03DL.response = 1;
+		convertSpawnInfoToSpawnInfo03DL(&rpcdata037.spawnInfo, &rpcdata03DL.spawnInfo);
+		SendRPC_8C(playerid, RPC_RequestClass, &rpcdata03DL, sizeof(rpcdata03DL), HIGH_PRIORITY, RELIABLE, 0);
+	} else {
+		rpcdata037.response = 1;
+		SendRPC_8C(playerid, RPC_RequestClass, &rpcdata037, sizeof(rpcdata037), HIGH_PRIORITY, RELIABLE, 0);
+	}
+
+	player[playerid]->spawnInfo = rpcdata037.spawnInfo;
+	player[playerid]->hasSpawnInfo = 1; /*otherwise SAMP will ignore client Spawn packets and player will not be marked (not broadcasted) as spawned despited being spawned*/
+}
+
+void StreamInPlayer(struct SampPlayer *player, int forplayer)
+{
+	if (is_player_using_client_version_DL[forplayer]) {
+		struct RPCDATA_WorldPlayerAdd03DL rpcdata03DL;
+		rpcdata03DL.playerid = player->playerid;
+		rpcdata03DL.team = player->spawnInfo.team;
+		rpcdata03DL.skin = player->spawnInfo.skin;
+		rpcdata03DL.customSkin = player->spawnInfo.skin; /*Brunoo16's packet list say to keep this 0, but if I make either skin field 0, it will always show a CJ skin...*/
+		rpcdata03DL.pos = player->pos;
+		rpcdata03DL.facingAngle = player->facingAngle;
+		rpcdata03DL.color = player->color;
+		rpcdata03DL.fightingstyle = player->fightingstyle;
+		memcpy(rpcdata03DL.weaponSkill, player->weaponSkill, sizeof(player->weaponSkill));
+		SendRPCToPlayer(forplayer, RPC_WorldPlayerAdd, &rpcdata03DL, sizeof(rpcdata03DL), 2);
+	} else {
+		struct RPCDATA_WorldPlayerAdd037 rpcdata037;
+		rpcdata037.playerid = player->playerid;
+		rpcdata037.team = player->spawnInfo.team;
+		rpcdata037.skin = player->spawnInfo.skin;
+		rpcdata037.pos = player->pos;
+		rpcdata037.facingAngle = player->facingAngle;
+		rpcdata037.color = player->color;
+		rpcdata037.fightingstyle = player->fightingstyle;
+		memcpy(rpcdata037.weaponSkill, player->weaponSkill, sizeof(player->weaponSkill));
+		SendRPCToPlayer(forplayer, RPC_WorldPlayerAdd, &rpcdata037, sizeof(rpcdata037), 2);
+	}
+
+	/*SAMP here also sends RPC_SetPlayerAttachedObject for each slot but we currently don't use player attached objects*/
+}
+
 static
 void samp_init()
 {
@@ -1308,6 +1452,13 @@ void samp_init()
 	mem_mkjmp(0x80AEA7D, &PassengerSyncHook);
 	mem_mkjmp(0x80B1712, &OnPlayerCommandTextHook);
 	mem_mkjmp(0x80B2BA2, &OnDialogResponseHook);
+	mem_mkjmp(0x80B09D4, &OnPlayerRequestClassHook);
+
+	/*stuff to allow both 0.3.7 and 0.3.DL clients */
+	AddServerRule("artwork", "No"); /*rule that DL added, probably not needed to have but setting it anyways*/
+	AddServerRule("allowed_clients", "0.3.7, 0.3.DL"); /*open.mp started setting this I guess so we roll with it too*/
+	mem_mkjmp(0x80B4B89, &ClientJoinCheckVersionHook);
+	mem_mkjmp(0x80D0EF2, &StreamInPlayer);
 }
 #endif
 
