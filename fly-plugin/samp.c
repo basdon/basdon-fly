@@ -1355,6 +1355,36 @@ void hook_OnPlayerRequestClass(int playerid, int classid)
 	player[playerid]->hasSpawnInfo = 1; /*otherwise SAMP will ignore client Spawn packets and player will not be marked (not broadcasted) as spawned despited being spawned*/
 }
 
+void StreamInPlayer(struct SampPlayer *player, int forplayer)
+{
+	if (is_player_using_client_version_DL[forplayer]) {
+		struct RPCDATA_WorldPlayerAdd03DL rpcdata03DL;
+		rpcdata03DL.playerid = player->playerid;
+		rpcdata03DL.team = player->spawnInfo.team;
+		rpcdata03DL.skin = player->spawnInfo.skin;
+		rpcdata03DL.customSkin = player->spawnInfo.skin; /*Brunoo16's packet list say to keep this 0, but if I make either skin field 0, it will always show a CJ skin...*/
+		rpcdata03DL.pos = player->pos;
+		rpcdata03DL.facingAngle = player->facingAngle;
+		rpcdata03DL.color = player->color;
+		rpcdata03DL.fightingstyle = player->fightingstyle;
+		memcpy(rpcdata03DL.weaponSkill, player->weaponSkill, sizeof(player->weaponSkill));
+		SendRPCToPlayer(forplayer, RPC_WorldPlayerAdd, &rpcdata03DL, sizeof(rpcdata03DL), 2);
+	} else {
+		struct RPCDATA_WorldPlayerAdd037 rpcdata037;
+		rpcdata037.playerid = player->playerid;
+		rpcdata037.team = player->spawnInfo.team;
+		rpcdata037.skin = player->spawnInfo.skin;
+		rpcdata037.pos = player->pos;
+		rpcdata037.facingAngle = player->facingAngle;
+		rpcdata037.color = player->color;
+		rpcdata037.fightingstyle = player->fightingstyle;
+		memcpy(rpcdata037.weaponSkill, player->weaponSkill, sizeof(player->weaponSkill));
+		SendRPCToPlayer(forplayer, RPC_WorldPlayerAdd, &rpcdata037, sizeof(rpcdata037), 2);
+	}
+
+	/*SAMP here also sends RPC_SetPlayerAttachedObject for each slot but we currently don't use player attached objects*/
+}
+
 static
 void samp_init()
 {
@@ -1394,6 +1424,7 @@ void samp_init()
 	AddServerRule("artwork", "No"); /*rule that DL added, probably not needed to have but setting it anyways*/
 	AddServerRule("allowed_clients", "0.3.7, 0.3.DL"); /*open.mp started setting this I guess so we roll with it too*/
 	mem_mkjmp(0x80B4B89, &ClientJoinCheckVersionHook);
+	mem_mkjmp(0x80D0EF2, &StreamInPlayer);
 }
 #endif
 

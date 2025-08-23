@@ -296,7 +296,9 @@ struct SampPlayer {
 	char raceCheckpointType;
 	float raceCheckpointSize;
 	int isCurrentlyInRaceCheckpoint;
-	char _pad2BDF[0x2BFD-0x2BDF];
+	int _field2BDF;
+	short weaponSkill[11];
+	int _field2BF9;
 	struct SpawnInfo spawnInfo;
 	int hasSpawnInfo;
 	char _pad2C2F;
@@ -798,6 +800,31 @@ struct RPCDATA_SetSpawnInfo03DL {
 };
 EXPECT_SIZE(struct RPCDATA_SetSpawnInfo03DL, 0x32);
 
+struct RPCDATA_WorldPlayerAdd037 {
+	short playerid;
+	char team;
+	int skin;
+	struct vec3 pos;
+	float facingAngle;
+	int color;
+	char fightingstyle;
+	short weaponSkill[11];
+};
+EXPECT_SIZE(struct RPCDATA_WorldPlayerAdd037, 0x32);
+
+struct RPCDATA_WorldPlayerAdd03DL {
+	short playerid;
+	char team;
+	int skin;
+	int customSkin;
+	struct vec3 pos;
+	float facingAngle;
+	int color;
+	char fightingstyle;
+	short weaponSkill[11];
+};
+EXPECT_SIZE(struct RPCDATA_WorldPlayerAdd03DL, 0x36);
+
 /**
 DriverSync
 	char packet_id; (200)
@@ -876,3 +903,4 @@ DriverSync
 #define RPC_PutPlayerInVehicle 0x815A058 /*ptr to 0x46(70)*/
 #define RPC_RequestClass 0x81572DF /*ptr to 0x80(128)*/
 #define RPC_SetSpawnInfo 0x8162624 /*ptr to 0x44(68)*/
+#define RPC_WorldPlayerAdd 0x816324E /*ptr to 0x20(32)*/
