@@ -346,16 +346,23 @@ void login_create_user(int playerid, char *password, int groups, cb_t callback)
 }
 
 /**
-Formats a query that will create a new game session.
+Execute query to insert a new entry in the 'ses' table
 */
 static
 void login_create_session(int playerid, cb_t callback)
 {
-	sprintf(cbuf4096_,
-	        "INSERT INTO ses(u,s,e,ip) "
-		"VALUES(%d,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'%s')",
-	        unconfirmed_userid[playerid],
-	        pdata[playerid]->ip);
+	char versionstring[25*2];
+
+	common_mysql_escape_string(playerpool->version[playerid], versionstring, sizeof(versionstring));
+	sprintf(
+		cbuf4096_,
+		"INSERT INTO ses(u,s,e,ip,netgameversion,versionstring) "
+			"VALUES(%d,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'%s',%d,'%s')",
+		unconfirmed_userid[playerid], /*TODO: I don't like the name 'unconfirmed_userid' being used here*/
+		pdata[playerid]->ip,
+		player_netgame_version[playerid],
+		versionstring
+	);
 	common_mysql_tquery(cbuf4096_, callback, V_MK_PLAYER_CC(playerid));
 }
 

@@ -336,6 +336,8 @@ static int spawned[MAX_PLAYERS];
 
 /**set in samp.asm*/
 char is_player_using_client_version_DL[MAX_PLAYERS];
+/**set in samp.asm*/
+int player_netgame_version[MAX_PLAYERS];
 
 /**
 The vehicle the player was last in, as driver.

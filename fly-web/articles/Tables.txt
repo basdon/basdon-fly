@@ -29,6 +29,8 @@ ses -- sessions
   s - starttime
   e - endtime
   ip - ip
+  netgameversion - client netgame version
+  versionstring - client reported version string (char24) (or NULL because this was added later)
 </pre>
 
 <pre>

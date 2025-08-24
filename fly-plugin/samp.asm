@@ -10,6 +10,7 @@ extern hook_cmd_on_cmdtext
 extern hook_dialog_on_response
 extern printf
 extern is_player_using_client_version_DL
+extern player_netgame_version;
 
 ;prot void printf_logprintf(char *format, ...);
 global printf_logprintf:function
@@ -32,13 +33,15 @@ ClientJoinCheckVersionHook:
 	jnz .not037
 	movzx eax, word [ebp-012B0h] ; playerid
 	mov byte [is_player_using_client_version_DL+eax], 0
-	jmp .checkChallenge
+	jmp .versionAllowed
 .not037:
 	cmp dword [ebp-0126Ch], 4062 ; version 0.3.DL
 	jnz .reject
 	movzx eax, word [ebp-012B0h] ; playerid
 	mov byte [is_player_using_client_version_DL+eax], 1
-.checkChallenge:
+.versionAllowed:
+	push dword [ebp-0126Ch] ; iVersion
+	pop dword [player_netgame_version+eax*4]
 	mov eax, dword [ebp-0126Ch] ; iVersion
 	xor eax, dword [ebp-01274h] ; uiClientChallengeResponse
 	cmp dword [081AA8A8h], eax ; challenge
