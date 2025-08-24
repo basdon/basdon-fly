@@ -1460,6 +1460,8 @@ void samp_init()
 	AddServerRule("allowed_clients", "0.3.7, 0.3.DL"); /*open.mp started setting this I guess so we roll with it too*/
 	mem_mkjmp(0x80B4B89, &ClientJoinCheckVersionHook);
 	mem_mkjmp(0x80D0EF2, &StreamInPlayer);
+
+	AddServerRule("hotel", "Trivago"); /*be a little silly*/
 }
 #endif
 
