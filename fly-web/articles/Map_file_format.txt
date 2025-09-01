@@ -8,22 +8,22 @@ byte 0-3: spec version
 The rest is dependent on the spec version:
 
 {@ul
-  {@li {@#=v3 Version 0x0350414D (version 3)}}
+  {@li {@#=v3 Version 0x0350414D (MAP3)}}
   {@li {@#=old Old versions}
     {@ul
-      {@li {@#=v2 Version 0x0250414D (version 2)}}
-      {@li {@#=v1 Version 1}}
+      {@li {@#=v2 Version 0x0250414D (MAP2)}}
+      {@li {@#=v1 Version 0x1}}
     }
   }
 }
 
-{@h3(id="v3") Version 0x0350414D (version 3)}
+{@h3(id="v3") Version 0x0350414D (MAP3)}
 
 v3 added material replacements (only textures for now).
 
 The size of an object is now variable, so the zones are now positioned before
-the objects. Total object size is placed in the header. Object data is the data
-that would be used in the RPC packet.
+the objects. Total object size is placed in the header. Object data is now the
+full data that would be used in the RPC packet.
 
 <pre>
 byte 4-7: number of removed buildings [A]
@@ -89,17 +89,17 @@ total file size:
 
 {@h3(id="old") Old versions}
 
-{@h2(id="v2") Version 0x0250414D (version 2)}
+{@h4(id="v2") Version 0x0250414D (MAP2)}
 
-v2 introduced magic number {@code 0x0250414D ("MAP")} because we're cool kids now.
-The fourth byte is the actual version number.
+v2 changed spec number from just a number to a proper 4-byte magic sequence because
+we're cool kids now. The fourth byte (index 3) is the actual version number.
 
 Per-object draw distance in v1 was never used, so now it's global.
 Stream in/out radius was added, because it should be stored together with the
 map instead of in a db. No more "negative model number equals a removed building
 annoyances".
 
-Gang zones were added.
+Gang zones were added. Their data is the same data as what the ShowGangZone RPC needs.
 
 <pre>
 byte 4-7: number of removed buildings [A]
@@ -144,11 +144,13 @@ total file size:
 28 + 20 * num_removed_buildings + 28 * num_objects + 20 * num_gangzones
 </pre>
 
-{@h4(id="v1") Version 1}
+{@h4(id="v1") Version 0x1}
 
 {@ul
   {@li remove buildings}
   {@li per-object drawdistance}
+  {@li the object data is a subset of the data needed for the CreateObject RPC}
+  {@li the remove building data is the same as the data needed for the RemoveBuilding RPC}
 }
 
 <pre>

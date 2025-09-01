@@ -8,10 +8,14 @@ byte 0-3: spec version
 The rest is dependent on the spec version:
 
 {@ul
-  {@li {@#=v1 Version 0x01545854 (version 1)}}
+  {@li {@#=v1 Version 0x01545854 (TXT1)}}
 }
 
-{@h3(id="v1") Version 0x01545854 (version 1)}
+{@h3(id="v1") Version 0x01545854 (TXT1)}
+
+The data (from byte 40) is the same as the data needed for the ShowTextDraw RPC,
+except it needs two more bytes at the start as {@code textdrawid} and it stops
+where the text ends.
 
 <pre>
 > repeated x times
