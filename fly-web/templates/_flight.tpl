@@ -95,7 +95,7 @@
 		<noscript><p>Enable JavaScript to see the detailed flight map/info.</p></noscript>
 		<div id="fm_mapmsg"><p>Loading...</p></div>
 		<div id="fm_mapcanvas"><canvas id="fm_canvas" width="900" height="600" style="width:100%;border:1px solid"></canvas></div>
-		<script src="/s/gen/fm_complete.js?v17"></script>
+		<script src="/s/gen/fm_complete.js?v18"></script>
 		<script>UTCoffset={@unsafe date('Z')};flightmap({@unsafe $id})</script>
 	{@endif}
 	</main>
