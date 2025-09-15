@@ -1309,6 +1309,9 @@ struct REGION {
 #define ZONE_STRS_PIER 188
 #define ZONE_WMRE 189
 #define ZONE_MORR 190
+#define ZONE_STCL 191
+#define ZONE_STCL_AIRPORT 192
+#define ZONE_STCL_CITY 193
 
 /* see info.zon and american.gxt */
 static char *zonenames[] = {
@@ -1503,6 +1506,9 @@ static char *zonenames[] = {
 	"Pier",
 	"Windmill Resort",
 	"Morrison Airport",
+	"Santiago de Chile City",
+	"Airport",
+	"City",
 };
 
 static struct REGION regions[] = {
@@ -1524,6 +1530,7 @@ static struct REGION regions[] = {
 	R(-12495.4f, -11942.8f, -242.99f, -9188.9f, -4947.3f, 900.0f, ZONE_STRS),
 	R(-8749.75f, 2049.53f, -242.99f, -5855.87f, 4094.04f, 900.0f, ZONE_WMRE),
 	R(-17208.88f, 11002.07f, -242.99f, -14165.53f, 13927.73f, 900.0f, ZONE_MORR),
+	R(23535.30f, -271.16f, -242.99f, 26031.99f, 3363.98f, 900.0f, ZONE_STCL),
 	#undef R
 };
 
@@ -1968,6 +1975,10 @@ static struct ZONE zones[] = {
 	/* start MORR region zones */
 	{ -15996.48f, 11704.42f, 0.0f, -15112.28f, 13016.90f, 200.0f, ZONE_MORR },
 	/* end MORR region zones */
+	/* start STCL region zones */
+	{ 24247.81f, 1247.81f, 0.0f, 24962.48f, 2373.96f, 200.0f, ZONE_STCL_AIRPORT },
+	{ 24325.67f, 929.68f, 0.0f, 24891.08f, 1106.90f, 200.0f, ZONE_STCL_CITY },
+	/* end STCL region zones */
 };
 
 static int regioncount = sizeof(regions)/sizeof(regions[0]);

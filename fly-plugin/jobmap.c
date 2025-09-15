@@ -49,7 +49,7 @@ static struct TEXTDRAW td_jobmap_optdists = { "optdists", JOBMAP_DISTANCE_MAX_TE
 static struct TEXTDRAW td_jobmap_selection_left = { "selection-left", JOBMAP_ENTRY_MAX_TEXT_LENGTH, NULL };
 static struct TEXTDRAW td_jobmap_selection_right = { "selection-right", JOBMAP_DISTANCE_MAX_TEXT_LENGTH, NULL };
 /*Island/location texts*/
-STATIC_ASSERT(NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS == 11);
+STATIC_ASSERT(NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS == 12);
 static struct TEXTDRAW td_jobmap_island_mainland = { "mapsqfull", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobmap_island_octa = { "mapsqmintopleft", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobmap_island_cata = { "mapsqminbotright", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
@@ -59,6 +59,7 @@ static struct TEXTDRAW td_jobmap_island_dune = { NULL, TEXTDRAW_ALLOC_AS_NEEDED,
 static struct TEXTDRAW td_jobmap_island_strs = { NULL, TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobmap_island_wmre = { NULL, TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobmap_island_morr = { NULL, TEXTDRAW_ALLOC_AS_NEEDED, NULL };
+static struct TEXTDRAW td_jobmap_island_stcl = { NULL, TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 STATIC_ASSERT(AIRPORT_CODE_LEN == 4); /*mapmin/mapmax text alloc depend on airport code being 4 chars at most*/
 static struct TEXTDRAW td_jobmap_from = { "mapmin", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 static struct TEXTDRAW td_jobmap_to = { "mapmax", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
@@ -447,14 +448,15 @@ void jobmap_show(int playerid, unsigned int mission_type, struct MISSIONPOINT *m
 	td_jobmap_from.rpcdata->x = map_text_x_base + map_text_x_unit * (msp->pos.x + JOBMAP_HALFSIZE);
 	td_jobmap_from.rpcdata->y = map_text_y_base + map_text_y_unit * (-msp->pos.y + JOBMAP_HALFSIZE);
 
-#if NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS - 1 != 10
+#if NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS - 1 != 11
 #error
 #endif
 	/*Showing all but "to" textdraws.*/
-	textdraws_show(playerid, 10,
+	textdraws_show(playerid, 11,
 		&td_jobmap_island_mainland, &td_jobmap_island_octa, &td_jobmap_island_cata,
 		&td_jobmap_island_igzu, &td_jobmap_island_bnsa, &td_jobmap_island_dune,
 		&td_jobmap_island_strs, &td_jobmap_island_wmre, &td_jobmap_island_morr,
+		&td_jobmap_island_stcl,
 		&td_jobmap_from);
 
 	jobmap_update_selection_textdraws(playerid, jobmapdata);
@@ -489,6 +491,7 @@ void jobmap_dispose()
 	free(td_jobmap_island_strs.rpcdata);
 	free(td_jobmap_island_wmre.rpcdata);
 	free(td_jobmap_island_morr.rpcdata);
+	free(td_jobmap_island_stcl.rpcdata);
 	free(td_jobmap_from.rpcdata);
 	free(td_jobmap_to.rpcdata);
 }
@@ -509,7 +512,7 @@ void jobmap_set_island_textdraw_properties()
 	int zoneindex, maxzoneindex;
 	int regionindex;
 	int octa_region_found, cata_region_found, igzu_region_found, bnsa_region_found, dune_region_found, strs_region_found;
-	int wmre_region_found, morr_region_found;
+	int wmre_region_found, morr_region_found, stcl_region_found;
 	float min_x, min_y, max_x, max_y;
 
 	map_text_x_base = td_jobmap_from.rpcdata->x;
@@ -545,6 +548,7 @@ void jobmap_set_island_textdraw_properties()
 	strs_region_found = 0;
 	wmre_region_found = 0;
 	morr_region_found = 0;
+	stcl_region_found = 0;
 	for (regionindex = 0; regionindex < regioncount; regionindex++) {
 		switch (regions[regionindex].zone.id) {
 		case ZONE_OCTA:
@@ -583,6 +587,10 @@ void jobmap_set_island_textdraw_properties()
 		case ZONE_MORR:
 			morr_region_found = 1;
 			txtdraw = td_jobmap_island_morr.rpcdata;
+			break;
+		case ZONE_STCL:
+			stcl_region_found = 1;
+			txtdraw = td_jobmap_island_stcl.rpcdata;
 			break;
 		default:
 			continue;
@@ -623,6 +631,7 @@ have_coords:
 	assert(strs_region_found);
 	assert(wmre_region_found);
 	assert(morr_region_found);
+	assert(stcl_region_found);
 }
 
 static
@@ -657,6 +666,7 @@ void jobmap_init()
 	textdraws_initialize_from(&td_jobmap_island_cata, &td_jobmap_island_strs, TEXTDRAW_MISSIONMAP_ISLAND_STRS);
 	textdraws_initialize_from(&td_jobmap_island_cata, &td_jobmap_island_wmre, TEXTDRAW_MISSIONMAP_ISLAND_WMRE);
 	textdraws_initialize_from(&td_jobmap_island_cata, &td_jobmap_island_morr, TEXTDRAW_MISSIONMAP_ISLAND_MORR);
+	textdraws_initialize_from(&td_jobmap_island_cata, &td_jobmap_island_stcl, TEXTDRAW_MISSIONMAP_ISLAND_STCL);
 
 	jobmap_set_island_textdraw_properties();
 }

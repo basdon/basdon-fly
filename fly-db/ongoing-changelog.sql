@@ -109,3 +109,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2025 Aug 23', 'The server can now also be joined with the SA-MP 0.3.DL client');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2025 Sep 15', 'New destination: Santiago de Chile City (STCL)');
