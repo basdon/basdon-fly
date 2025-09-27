@@ -1,0 +1,17 @@
+# m     h       dom     mon     dow     cmd
+
+BASDON_HOME=/basdon-fly
+
+# regenerate the "online players" graph that is shown on the web homepage every 5 minutes
+*/5     *       *       *       *       cd $BASDON_HOME/fly-web/cli; php genplayergraph.php
+
+# some of these variables are only used in the referenced scripts and not directly in this file
+BASDON_REMOTE_BACKUP_DIR=/backups/basdon-fly
+BASDON_BACKUP_TARGET=user@remotehost:$BASDON_REMOTE_BACKUP_DIR
+
+# backup flight data recorder files to remote
+*/20    *       *       *       *       source $BASDON_HOME/cron/backup-fdr.sh
+# backup chatlogs to remote
+26,56   *       *       *       *       source $BASDON_HOME/cron/backup-chatlogs.sh
+# backup db dump to remote. user should only have access to basdon-fly db with "SELECT, LOCK TABLES, SHOW VIEW" permissions
+53      */2     *       *       *       DB_USER_NAME=basdonreadonly DB_USER_PW='verystrong' SCP_OPTIONS=-P21 source $BASDON_HOME/cron/backup-db.sh

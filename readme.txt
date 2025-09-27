@@ -120,6 +120,13 @@ Installation/configuration
 		Changes made in this file will only be applied after rebuilding
 		plugin and web (run 'make').
 
+	cron:
+		/cron/crontab-example.txt contains an example
+		of cron configuration
+
+		At minimum, the jobs to regenerate graphs for the website should
+		be enabled.
+
 	anna:
 		For chatlogs, enable the packaged mod_log and set the path.
 		For example, if the IRC channel is #basdon and the echo channel
@@ -174,10 +181,8 @@ Installation/configuration
 		Copy fly-web/inc/conf.sample.php to fly-web/inc/conf.php and
 		edit as needed.
 
-		Add a cron job to regenerate the player graph image every
-		5 minutes:
-
-			*/5 * * * * cd /basdon-fly/fly-web/cli; php genplayergraph.php
+		Read the 'cron' section for the regenerations of the
+		player graph image that is used on the homepage.
 
 		In dev, set the SGID sticky bit (g+s) on the fly-web/inc and
 		fly-web/gen folders. Otherwise it won't be able to regenerate
@@ -202,12 +207,6 @@ Installation/configuration
 		in 00 for the default dev/prov cfg files) to ensure an order.
 		Settings can be specified multiple times, SA-MP uses the last
 		supplied one.
-
-	Things to backup periodically
-	=============================
-	The database
-	Flight files: /basdon-fly/fly-web/s/fdr/*
-	Chatlogs: /basdon-fly/fly-web/s/chatlogs/*
 
 Running
 -------
