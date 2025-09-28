@@ -14,6 +14,8 @@
 #undef ILS_PRINT_UPDATES
 /*define to test vehicle owner label allocation*/
 #undef VEHICLE_PRINT_OWNER_LABEL_ALLOCATIONS
+/*define to print info while zones are being assigned to regions*/
+#undef ZONES_DEBUG
 
 
 

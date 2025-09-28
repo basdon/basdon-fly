@@ -13,9 +13,6 @@ void zones_init()
 	struct REGION *region, *region_end;
 	struct ZONE *pz = zones;
 	int z = 0, zmax = zonecount;
-#ifdef ZONES_DEBUG
-	int zonesinregion = 0;
-#endif /*ZONES_DEBUG*/
 
 	region = regions;
 	region_end = regions + regioncount;
@@ -25,26 +22,25 @@ nr:
 		if (pz->min_x < region->zone.min_x || region->zone.max_x < pz->max_x ||
 			pz->min_y < region->zone.min_y || region->zone.max_y < pz->max_y)
 		{
-#ifdef ZONES_DEBUG
-			printf("%d zones in region %d\n", zonesinregion, region - regions);
-			zonesinregion = 0;
-#endif /*ZONES_DEBUG*/
 			region->to_zone_idx_exclusive = z;
+#ifdef ZONES_DEBUG
+			printf("%d zones in region %d (%s)\n", region->to_zone_idx_exclusive - region->from_zone_idx, region - regions, zonenames[region->zone.id]);
+#endif /*ZONES_DEBUG*/
 			region++;
 			if (region >= region_end) {
-				logprintf("zones.c error: at zone %d but " "regions are depleted", z);
-				return;
+				logprintf("zones.c error: at zone %d but regions are depleted", z);
+				assert(0);
 			}
 			region->from_zone_idx = z;
 			goto nr;
 		}
 		z++;
 		pz++;
-#ifdef ZONES_DEBUG
-		zonesinregion++;
-#endif /*ZONES_DEBUG*/
 	}
 	region->to_zone_idx_exclusive = z;
+#ifdef ZONES_DEBUG
+	printf("%d zones in region %d (%s)\n", region->to_zone_idx_exclusive - region->from_zone_idx, region - regions, zonenames[region->zone.id]);
+#endif /*ZONES_DEBUG*/
 
 	for (z = 0; z < MAX_PLAYERS; z++) {
 		zone_last_index[z] = zone_last_id[z] = -1;
