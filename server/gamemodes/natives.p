@@ -61,17 +61,11 @@ NATIVE_ENTRY Kick
 NATIVE_ENTRY PutPlayerInVehicle
 NATIVE_ENTRY RepairVehicle
 NATIVE_ENTRY ResetPlayerMoney
-NATIVE_ENTRY SetCameraBehindPlayer
-NATIVE_ENTRY SetPlayerCameraPos
-NATIVE_ENTRY SetPlayerCameraLookAt
 NATIVE_ENTRY SetPlayerColor
-NATIVE_ENTRY SetPlayerFacingAngle
 NATIVE_ENTRY SetPlayerHealth
 NATIVE_ENTRY SetPlayerName
-NATIVE_ENTRY SetPlayerPos
 NATIVE_ENTRY SetPlayerRaceCheckpoint
 NATIVE_ENTRY SetPlayerScore
-NATIVE_ENTRY SetPlayerSpecialAction
 NATIVE_ENTRY SetPlayerTime
 NATIVE_ENTRY SetPlayerWeather
 NATIVE_ENTRY SetSpawnInfo

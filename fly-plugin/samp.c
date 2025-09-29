@@ -327,6 +327,82 @@ void SpawnPlayer(int playerid)
 }
 
 /**
+Only use this if the distance from the player's current position is very small.
+Otherwise, use natives_SetPlayerPos.
+*/
+static
+void SetPlayerPosRaw(int playerid, struct vec3 *pos)
+{
+	struct BitStream bs;
+
+	bs.ptrData = pos;
+	bs.numberOfBitsUsed = sizeof(*pos) * 8;
+	SAMP_SendRPCToPlayer(RPC_SetPlayerPos, &bs, playerid, 2);
+}
+EXPECT_SIZE(struct RPCDATA_SetPlayerPos, sizeof(struct vec3));
+
+static
+void SetPlayerFacingAngle(int playerid, float angle)
+{
+	struct BitStream bs;
+
+	bs.ptrData = &angle;
+	bs.numberOfBitsUsed = sizeof(angle) * 8;
+	SAMP_SendRPCToPlayer(RPC_SetPlayerFacingAngle, &bs, playerid, 2);
+}
+EXPECT_SIZE(struct RPCDATA_SetPlayerFacingAngle, sizeof(float));
+
+static
+void SetPlayerCameraPos(int playerid, struct vec3 *pos)
+{
+	struct BitStream bs;
+
+	bs.ptrData = pos;
+	bs.numberOfBitsUsed = sizeof(*pos) * 8;
+	SAMP_SendRPCToPlayer(RPC_SetCameraPos, &bs, playerid, 2);
+}
+EXPECT_SIZE(struct RPCDATA_SetCameraPos, sizeof(struct vec3));
+
+/**
+ * @param switchstyle see CAMERA_ definitions
+ */
+static
+void SetPlayerCameraLookAt(int playerid, struct vec3 *at, char switchstyle)
+{
+	struct RPCDATA_SetCameraLookAt rpcdata;
+	struct BitStream bs;
+
+	rpcdata.at = *at;
+	rpcdata.switchstyle = switchstyle;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	SAMP_SendRPCToPlayer(RPC_SetCameraLookAt, &bs, playerid, 2);
+}
+
+static
+void SetCameraBehindPlayer(int playerid)
+{
+	struct BitStream bs;
+
+	bs.numberOfBitsUsed = 0;
+	SAMP_SendRPCToPlayer(RPC_SetCameraBehind, &bs, playerid, 2);
+}
+
+/**
+ * @param actionid see SPECIAL_ACTION_ definitions
+ */
+static
+void SetPlayerSpecialAction(int playerid, char actionid)
+{
+	struct BitStream bs;
+
+	bs.ptrData = &actionid;
+	bs.numberOfBitsUsed = sizeof(actionid) * 8;
+	SAMP_SendRPCToPlayer(RPC_SetSpecialAction, &bs, playerid, 2);
+}
+EXPECT_SIZE(struct RPCDATA_SetSpecialAction, sizeof(char));
+
+/**
 When respawning, the player will always regain control.
 
 Player's vehicle will not get damage when a player is not controllable.
@@ -1139,28 +1215,10 @@ int natives_SetPlayerName(int playerid, char *name)
 ;
 
 /**
-Only use this if the distance from the player's current position is very small.
-Otherwise, use natives_SetPlayerPos.
-*/
-static
-int SetPlayerPosRaw(int playerid, struct vec3 *pos)
-#ifdef SAMP_NATIVES_IMPL
-{
-	NC_PARS(4);
-	nc_params[1] = playerid;
-	nc_paramf[2] = pos->x;
-	nc_paramf[3] = pos->y;
-	nc_paramf[4] = pos->z;
-	return NC(n_SetPlayerPos_);
-}
-#endif
-;
-
-/**
 Done here to do stuff, like streaming maps, anticheat?
 */
 static
-int natives_SetPlayerPos(int playerid, struct vec3 pos)
+void natives_SetPlayerPos(int playerid, struct vec3 pos)
 #ifdef SAMP_NATIVES_IMPL
 {
 	GameTextForPlayer(playerid, 0x80000, 3, "Loading objects...");
@@ -1171,7 +1229,7 @@ int natives_SetPlayerPos(int playerid, struct vec3 pos)
 	nametags_update_for_player(playerid);
 	zones_update(playerid, pos);
 
-	return SetPlayerPosRaw(playerid, &pos);
+	SetPlayerPosRaw(playerid, &pos);
 }
 #endif
 ;

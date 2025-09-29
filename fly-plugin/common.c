@@ -105,12 +105,8 @@ int strhashcode(char *text)
 void common_tp_player(int playerid, struct vec4 pos)
 {
 	natives_SetPlayerPos(playerid, pos.coords);
-	NC_PARS(2);
-	nc_params[1] = playerid;
-	nc_paramf[2] = pos.r;
-	NC(n_SetPlayerFacingAngle);
-	NC_PARS(1);
-	NC(n_SetCameraBehindPlayer);
+	SetPlayerFacingAngle(playerid, pos.r);
+	SetCameraBehindPlayer(playerid);
 }
 
 float common_dist_sq(struct vec3 a, struct vec3 b)

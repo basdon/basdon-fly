@@ -89,7 +89,7 @@ int cmd_dev_gt(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_jetpack(struct COMMANDCONTEXT cmdctx)
 {
-	NC_SetPlayerSpecialAction(cmdctx.playerid, SPECIAL_ACTION_USEJETPACK);
+	SetPlayerSpecialAction(cmdctx.playerid, SPECIAL_ACTION_USEJETPACK);
 	return CMD_OK;
 }
 

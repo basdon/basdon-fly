@@ -757,6 +757,11 @@ struct RPCDATA_SetPlayerPos {
 };
 EXPECT_SIZE(struct RPCDATA_SetPlayerPos, 12);
 
+struct RPCDATA_SetPlayerFacingAngle {
+	float angle;
+};
+EXPECT_SIZE(struct RPCDATA_SetPlayerFacingAngle, 4);
+
 struct RPCDATA_PlayerJoin {
 	short playerid;
 	int unkAlwaysOne;
@@ -854,6 +859,31 @@ struct RPCDATA_SetPlayerSkin03DL {
 };
 EXPECT_SIZE(struct RPCDATA_SetPlayerSkin03DL, 0xA);
 
+struct RPCDATA_SetCameraPos {
+	struct vec3 at;
+};
+EXPECT_SIZE(struct RPCDATA_SetCameraPos, 12);
+
+/*
+ * note on camera switchstyles:
+ * SetCameraLookAt uses opcode 0160 (https://gtag.sannybuilder.com/opcode-database/opcode/0160/)
+ * it has two known switchstyles: smooth (1) and jump cut (2)
+ * the server pawn native changes any value that is not 1 to 2
+ * the client also changes any value that is not 1 to 2
+ */
+#define CAMERA_SMOOTH 1 /*(this is not lerp but a smooth easing) (this is CAMERA_MOVE in a_players.inc)*/
+#define CAMERA_JUMPCUT 2 /*(this is CAMERA_CUT in a_players.inc)*/
+struct RPCDATA_SetCameraLookAt {
+	struct vec3 at;
+	char switchstyle; /*see CAMERA_ definitions*/
+};
+EXPECT_SIZE(struct RPCDATA_SetCameraLookAt, 12 + 1);
+
+struct RPCDATA_SetSpecialAction {
+	char actionid; /*see SPECIAL_ACTION_ definitions*/
+};
+EXPECT_SIZE(struct RPCDATA_SetSpecialAction, 1);
+
 /**
 DriverSync
 	char packet_id; (200)
@@ -925,7 +955,8 @@ DriverSync
 #define RPC_DeleteVehicle 0x816622C /*ptr to 0xA5(165)*/
 #define RPC_SetVehicleNumberplate 0x816622A /*ptr to  0x7B(123)*/
 #define RPC_SetVehiclePos 0x8166224 /*ptr to 0x9F(159)*/
-#define RPC_SetPlayerPos 0x815CCEC /*ptr to 0xC(12)*/
+#define RPC_SetPlayerPos 0x815CCEC /*ptr to 0xC(12), orderingChannel 2*/
+#define RPC_SetPlayerFacingAngle 0x815CD04 /*ptr to 0x13(19), orderingChannel 2*/
 #define RPC_PlayerJoin 0x815AA76 /*ptr to 0x89(137)*/
 #define RPC_PlayerCreate 0x816324E /*ptr to 0x20(32)*/
 #define RPC_PlayerLeave 0x815AA78 /*ptr to 0x8A(138)*/
@@ -934,3 +965,7 @@ DriverSync
 #define RPC_SetSpawnInfo 0x8162624 /*ptr to 0x44(68)*/
 #define RPC_WorldPlayerAdd 0x816324E /*ptr to 0x20(32)*/
 #define RPC_SetPlayerSkin 0x815CCE4 /*ptr to 0x99(153)*/
+#define RPC_SetCameraPos 0x815CCF4 /*ptr to 0x9D(157), orderingChannel 2*/
+#define RPC_SetCameraLookAt 0x815CCF6 /*ptr to 0x9E(158), orderingChannel 2*/
+#define RPC_SetCameraBehind 0x815CCF8 /*ptr to 0xA2(162), orderingChannel 2 (rpc has no data)*/
+#define RPC_SetSpecialAction 0x815ABC5 /*ptr to 0x58(88), orderingChannel 2*/

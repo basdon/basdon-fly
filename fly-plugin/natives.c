@@ -23,16 +23,10 @@ static AMX_NATIVE n_IsValidVehicle;
 static AMX_NATIVE n_Kick_;
 static AMX_NATIVE n_PutPlayerInVehicle_;
 static AMX_NATIVE n_ResetPlayerMoney_;
-static AMX_NATIVE n_SetCameraBehindPlayer;
-static AMX_NATIVE n_SetPlayerCameraPos;
-static AMX_NATIVE n_SetPlayerCameraLookAt;
 static AMX_NATIVE n_SetPlayerColor;
-static AMX_NATIVE n_SetPlayerFacingAngle;
 static AMX_NATIVE n_SetPlayerHealth;
 static AMX_NATIVE n_SetPlayerName_;
-static AMX_NATIVE n_SetPlayerPos_;
 static AMX_NATIVE n_SetPlayerScore;
-static AMX_NATIVE n_SetPlayerSpecialAction;
 static AMX_NATIVE n_SetPlayerTime;
 static AMX_NATIVE n_SetPlayerWeather;
 static AMX_NATIVE n_SetVehiclePos;
@@ -161,27 +155,13 @@ static cell tmpfloat;
 
 #define NC_PutPlayerInVehicle __USE__natives_PutPlayerInVehicle__
 
-#define NC_SetCameraBehindPlayer(PLAYERID) \
-	(NC_PARS_(1)nc_params[1]=PLAYERID,\
-	n_SetCameraBehindPlayer(amx,nc_params))
-
-#define NC_SetPlayerFacingAngle(PLAYERID,FR) (NC_PARS_(2)\
-	nc_params[1]=PLAYERID,nc_params[2]=FR,\
-	n_SetPlayerFacingAngle(amx,nc_params))
-
 #define NC_SetPlayerHealth(PLAYERID,FHEALTH) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_paramf[2]=FHEALTH,\
 	n_SetPlayerHealth(amx,nc_params))
 
-#define NC_SetPlayerPos __USE__natives_SetPlayerPos__
-
 #define NC_SetPlayerScore(PLAYERID,SCORE) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=SCORE,\
 	n_SetPlayerScore(amx,nc_params))
-
-#define NC_SetPlayerSpecialAction(PLAYERID,ACTION) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=ACTION,\
-	n_SetPlayerSpecialAction(amx,nc_params))
 
 #define NC_SetPlayerTime(PLAYERID,H,M) \
 	(NC_PARS_(3)nc_params[1]=PLAYERID,nc_params[2]=H,nc_params[3]=M,\
@@ -316,16 +296,10 @@ int natives_find()
 		N_(Kick),
 		N_(PutPlayerInVehicle),
 		N_(ResetPlayerMoney),
-		N(SetCameraBehindPlayer),
-		N(SetPlayerCameraPos),
-		N(SetPlayerCameraLookAt),
 		N(SetPlayerColor),
-		N(SetPlayerFacingAngle),
 		N(SetPlayerHealth),
 		N_(SetPlayerName),
-		N_(SetPlayerPos),
 		N(SetPlayerScore),
-		N(SetPlayerSpecialAction),
 		N(SetPlayerTime),
 		N(SetPlayerWeather),
 		N(SetVehiclePos),
