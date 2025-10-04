@@ -187,6 +187,22 @@ void SetPlayerSkin(int playerid, int skin)
 }
 
 static
+void SetPlayerColor(int playerid, int color)
+{
+	struct RPCDATA_SetPlayerColor rpcdata;
+	int i;
+
+	rpcdata.playerid = playerid;
+	rpcdata.color = color;
+
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (player[i]) {
+			SendRPC_8C(i, RPC_SetPlayerColor, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+		}
+	}
+}
+
+static
 void SetPlayerMapIcon(int playerid, char icon_id, struct vec3 *pos, char icon, int color, char style)
 {
 	struct RPCDATA_SetPlayerMapIcon rpcdata;
@@ -351,6 +367,84 @@ void SetPlayerFacingAngle(int playerid, float angle)
 	SAMP_SendRPCToPlayer(RPC_SetPlayerFacingAngle, &bs, playerid, 2);
 }
 EXPECT_SIZE(struct RPCDATA_SetPlayerFacingAngle, sizeof(float));
+
+static
+void SetPlayerHealth(int playerid, float health)
+{
+	SendRPC_8C(playerid, RPC_SetHealth, &health, sizeof(float), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+}
+STATIC_ASSERT(sizeof(struct RPCDATA_SetHealth) == sizeof(float));
+
+/**use money_give instead*/
+static
+void GivePlayerMoneyRaw(int playerid, int amount)
+{
+	if (playerpool->created[playerid]) {
+		playerpool->playerMoney[playerid] += amount;
+		SendRPC_8C(playerid, RPC_MoneyGive, &amount, sizeof(int), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+	}
+}
+STATIC_ASSERT(sizeof(struct RPCDATA_MoneyGive) == sizeof(int));
+
+/**use money_set instead*/
+static
+void SetPlayerMoneyRaw(int playerid, int amount)
+{
+	if (playerpool->created[playerid]) {
+		playerpool->playerMoney[playerid] = amount;
+		SendRPC_8C(playerid, RPC_MoneyReset, NULL, 0, HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+		SendRPC_8C(playerid, RPC_MoneyGive, &amount, sizeof(int), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+	}
+}
+STATIC_ASSERT(sizeof(struct RPCDATA_MoneyGive) == sizeof(int));
+
+static
+void SetPlayerScore(int playerid, int score)
+{
+	/*this does not send RPCs, scoreboard stuff is just updated regularly*/
+	playerpool->playerScore[playerid] = score;
+}
+
+static
+int GetPlayerScore(int playerid)
+{
+	return playerpool->playerScore[playerid];
+}
+
+static
+void SetPlayerTime(int playerid, char hour, char minute)
+{
+	struct RPCDATA_SetTime rpcdata;
+	struct SampPlayer *playa;
+
+	playa = player[playerid];
+	if (playa) {
+		playa->worldTime = hour * 60.0f + minute; /*TODO: can probably get rid of this, samp doesn't need to interfere with our timecyc*/
+		rpcdata.hour = hour;
+		rpcdata.minute = minute;
+		SendRPC_8C(playerid, RPC_SetTime, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+	}
+}
+
+static
+void SetPlayerWeather(int playerid, char weather)
+{
+	SendRPC_8C(playerid, RPC_SetWeather, &weather, sizeof(char), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+}
+EXPECT_SIZE(struct RPCDATA_SetWeather, sizeof(char));
+
+static
+void TogglePlayerClock(int playerid, char enabled)
+{
+	struct SampPlayer *playa;
+
+	playa = player[playerid];
+	if (playa) {
+		playa->isClockEnabled = enabled; /*TODO: should get rid of this, see SetPlayerTime*/
+		SendRPC_8C(playerid, RPC_ToggleClock, &enabled, sizeof(char), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+	}
+}
+EXPECT_SIZE(struct RPCDATA_ToggleClock, sizeof(char));
 
 static
 void SetPlayerCameraPos(int playerid, struct vec3 *pos)

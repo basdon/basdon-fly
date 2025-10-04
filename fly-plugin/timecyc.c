@@ -388,14 +388,11 @@ void timecyc_set_weather(int newweather)
 
 	if (weather.locked != newweather) {
 		weather.locked = newweather;
-		NC_PARS(2);
-		nc_params[2] = newweather;
 		i = playercount;
 		while (i--) {
 			playerid = players[i];
 			if (spawned[playerid] && !isafk[playerid]) {
-				nc_params[1] = playerid;
-				NC(n_SetPlayerWeather);
+				SetPlayerWeather(playerid, newweather);
 			}
 		}
 	}
@@ -491,17 +488,17 @@ void timecyc_sync(int playerid)
 	/*Set current weather to all.
 	Setting the weather without having a clock changes all three of
 	current, upcoming, locked.*/
-	NC_TogglePlayerClock(playerid, 0);
-	NC_SetPlayerWeather(playerid, weather.current);
+	TogglePlayerClock(playerid, 0);
+	SetPlayerWeather(playerid, weather.current);
 	/*No delay needed here^.*/
 
 	if (weather.current == weather.upcoming) {
 		/*Not in a transition, can just set the time right.*/
-		NC_SetPlayerTime(playerid, time_h, time_m);
-		NC_TogglePlayerClock(playerid, 1);
+		SetPlayerTime(playerid, time_h, time_m);
+		TogglePlayerClock(playerid, 1);
 		if (weather.upcoming != weather.locked) {
 			/*Transition is in queue, let player know.*/
-			NC_SetPlayerWeather(playerid, weather.locked);
+			SetPlayerWeather(playerid, weather.locked);
 			/*No delay needed here^.*/
 		}
 		timecycstate[playerid] = SYNC_STATE_NONE;
@@ -509,9 +506,9 @@ void timecyc_sync(int playerid)
 		/*Need to change upcoming, so force a transition cycle.
 		Setting minutes to 30, to later set back to 0
 		(in timecyc_on_player_update), which will force a cycle.*/
-		NC_SetPlayerTime(playerid, time_h, 30);
-		NC_TogglePlayerClock(playerid, 1);
-		NC_SetPlayerWeather(playerid, weather.upcoming);
+		SetPlayerTime(playerid, time_h, 30);
+		TogglePlayerClock(playerid, 1);
+		SetPlayerWeather(playerid, weather.upcoming);
 		/*This sets lockedweather^.*/
 		timecycstate[playerid] = SYNC_STATE_TIME1;
 		timecycsignature[playerid] = WEATHERSIGNATURE();
@@ -529,15 +526,15 @@ void timecyc_on_player_connect(int playerid)
 static
 void timecyc_on_player_death(int playerid)
 {
-	NC_TogglePlayerClock(playerid, 0);
+	TogglePlayerClock(playerid, 0); /*this will instantly change the skybox for the player, but we kinda need it..*/
 }
 
 static
 void timecyc_on_player_request_class(int playerid)
 {
-	NC_TogglePlayerClock(playerid, 0);
-	NC_SetPlayerTime(playerid, 12, 0);
-	NC_SetPlayerWeather(playerid, 1);
+	TogglePlayerClock(playerid, 0);
+	SetPlayerTime(playerid, 12, 0);
+	SetPlayerWeather(playerid, 1);
 }
 
 static
@@ -545,14 +542,14 @@ void timecyc_on_player_update(int playerid)
 {
 	switch (timecycstate[playerid]) {
 	case SYNC_STATE_TIME1:
-		NC_SetPlayerTime(playerid, time_h, 0);
+		SetPlayerTime(playerid, time_h, 0);
 		timecycstate[playerid] = SYNC_STATE_TIME2;
 		break;
 	case SYNC_STATE_TIME2:
 		if (timecycsignature[playerid] == WEATHERSIGNATURE()) {
-			NC_SetPlayerTime(playerid, time_h, time_m);
+			SetPlayerTime(playerid, time_h, time_m);
 			if (weather.locked != weather.upcoming) {
-				NC_SetPlayerWeather(playerid, weather.locked);
+				SetPlayerWeather(playerid, weather.locked);
 			}
 			timecycstate[playerid] = SYNC_STATE_NONE;
 		} else {
@@ -593,17 +590,13 @@ void timecyc_sync_clocks()
 	if (weather.current == weather.upcoming &&
 		weather.current == weather.locked)
 	{
-		NC_PARS(3);
-		nc_params[2] = time_h;
-		nc_params[3] = time_m;
 		i = playercount;
 		while (i--) {
 			playerid = players[i];
 			if (spawned[playerid] && !isafk[playerid] &&
 				timecycstate[playerid] == SYNC_STATE_NONE)
 			{
-				nc_params[1] = playerid;
-				NC(n_SetPlayerTime);
+				SetPlayerTime(playerid, time_h, time_m);
 			}
 		}
 	}

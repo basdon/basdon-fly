@@ -309,16 +309,16 @@ struct SampPlayer {
 	int isCheckpointEnabled;
 	int isRaceCheckpointEnabled;
 	int interior;
-	int _field2C44[13];
-	char _field2C78[13];
-	char _field2C85;
+	int weaponAmmoInSlot[13];
+	char weaponIdInSlot[13];
+	char currentWeaponId;
 	short _field2C86;
 	short _field2C88;
 	int _field2C8A;
 	char _field2C8E;
 	int _field2C8F[10];
-	char _field2CB7;
-	int _field2CB8;
+	char isClockEnabled; /*TogglePlayerClock(playerid, enabled) if 1, this will advance worldTime, and sync it every 5 minutes to the player*/
+	float worldTime; /*the ingame time for player. initialized to 720.0f (12:00) hour*60+minute. used if isClockEnabled is 1*/
 	char _field2CBC;
 	int _field2CBD;
 	int lastStreamingTick;
@@ -373,7 +373,9 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, vehicles, 0x3F54);
 
 struct SampPlayerPool {
 	int virtualworld[1000];
-	int _padFA0[2003];
+	int _padFA0[3];
+	int playerScore[1000];
+	int playerMoney[1000];
 	int playerDrunkLevel[1000];
 	int _pad3E8C[1000];
 	char gpci[1000][101];
@@ -388,7 +390,7 @@ struct SampPlayerPool {
 	int highestUsedPlayerid; /*"poolsize" but I find that name confusing because it's 0 if there's 1 player*/
 	/*Incomplete.*/
 };
-STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, playerDrunkLevel, 0x2EEC);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, playerScore, 0xFAC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, gpci, 0x4E2C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, version, 0x1D8B4);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, playerSlotState_, 0x23A5C);
@@ -411,24 +413,39 @@ struct SampNetGame {
 	void *actorPool;
 	int _pad2C[5];
 	struct RakServer *rakServer;
-	int _pad44[5];
+	int _pad44;
+	int _pad48;
+	int tickRate; /*GetServerTickRate()*/
+	int _pad50;
+	int playerMarkerMode; /*ShowPlayerMarkers(mode) (0: off, 1: global, 2: streamed)*/
 	char showNametags; /*Should be set before anyone connects.*/
-	char _pad59;
-	char _pad5A;
+	char worldTimeHour; /*SetWorldTime(hour)*/
+	char allowInteriorWeapons; /*AllowEnteriorWeapons(enabled)*/
 	char enableStuntBonus; /*EnableStuntBonusForAll()*/
-	int _pad5C;
-	int _pad60;
-	int _pad64;
-	int _pad68;
-	char _pad6C;
+	char _pad5C;
+	char _pad5D;
+	int gamestate;
+	float gravity;
+	int deathDropAmount; /*SetDeathDropAmount(amount)*/
+	char _pad6A;
+	char mod; /*the mod that we are using. the client mod must match in RPCClientJoin*/
+	char isGlobalChatRadiusLimitEnabled; /*LimitGlobalChatRadius(float)*/
 	char usePlayerPedAnims; /*UsePlayerPedAnims()*/
-	char _pad6E;
-	char _pad6F;
-	char _pad70;
-	char _pad71;
-	float nametagDrawDistance; /*SetNameTagDrawDistance()*/
-	char _pad76[0x8A-0x76];
+	float globalChatRadiusLimit; /*LimitGlobalChatRadius(float), only if isGlobalChatRadiusLimitEnabled is 1*/
+	float nametagDrawDistance; /*SetNameTagDrawDistance(float)*/
+	char interiorEnterExitsDisabled; /*DisableInteriorEnterExits()*/
+	char nameTagLOSDisabled; /*DisableNameTagLOS()*/
+	char manualVehicleEngineAndLights; /*ManualVehicleEngineAndLights()*/
+	char isPlayerMarkerRadiusLimitEnabled; /*LimitPlayerMarkerRadius(float)*/
+	float playerMarkerRadiusLimit; /*LimitPlayerMarkerRadius(float), only if isPlayerMarkerRadiusLimitEnabled is 1*/
+	int vehicleFriendlyFire; /*EnableVehicleFriendlyFire() (yes this really is an int)*/
+	int _pad82;
+	int _pad86;
 	int numAvailableSpawns; /*AddPlayerClass()*/
+	char _pad8B;
+	char _pad8C;
+	char _pad8D;
+	struct SpawnInfo availableSpawns[318];
 	/*Incomplete.*/
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, vehiclePool, 0xC);
@@ -762,6 +779,32 @@ struct RPCDATA_SetPlayerFacingAngle {
 };
 EXPECT_SIZE(struct RPCDATA_SetPlayerFacingAngle, 4);
 
+struct RPCDATA_SetHealth {
+	float health;
+};
+EXPECT_SIZE(struct RPCDATA_SetHealth, 4);
+
+struct RPCDATA_MoneyGive {
+	int amount;
+};
+EXPECT_SIZE(struct RPCDATA_MoneyGive, 4);
+
+struct RPCDATA_SetTime {
+	char hour;
+	char minute;
+};
+EXPECT_SIZE(struct RPCDATA_SetTime, 2);
+
+struct RPCDATA_SetWeather {
+	char weather;
+};
+EXPECT_SIZE(struct RPCDATA_SetWeather, 1);
+
+struct RPCDATA_ToggleClock {
+	char enabled;
+};
+EXPECT_SIZE(struct RPCDATA_ToggleClock, 1);
+
 struct RPCDATA_PlayerJoin {
 	short playerid;
 	int unkAlwaysOne;
@@ -859,6 +902,12 @@ struct RPCDATA_SetPlayerSkin03DL {
 };
 EXPECT_SIZE(struct RPCDATA_SetPlayerSkin03DL, 0xA);
 
+struct RPCDATA_SetPlayerColor {
+	short playerid;
+	int color;
+};
+EXPECT_SIZE(struct RPCDATA_SetPlayerColor, 0x6);
+
 struct RPCDATA_SetCameraPos {
 	struct vec3 at;
 };
@@ -918,7 +967,8 @@ DriverSync
 
 /*this uses HIGH_PRIORITY
  *if orderingChannel is 3, reliability will be RELIABLE, else RELIABLE_ORDERED
- *most usages seem to be using orderingChannel 2*/
+ *most usages seem to be using orderingChannel 2
+ *in the end it does the same as SendRPC_8C, but with that additional logic and checking if the player is connected first*/
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,orderingChannel) \
 	((void (*)(void*,void*,struct BitStream*,short,int))0x80AC1D0)((void*)samp_pNetGame,(void*)pRPC,pBS,playerid,orderingChannel)
 
@@ -957,6 +1007,12 @@ DriverSync
 #define RPC_SetVehiclePos 0x8166224 /*ptr to 0x9F(159)*/
 #define RPC_SetPlayerPos 0x815CCEC /*ptr to 0xC(12), orderingChannel 2*/
 #define RPC_SetPlayerFacingAngle 0x815CD04 /*ptr to 0x13(19), orderingChannel 2*/
+#define RPC_SetHealth 0x815CCF0 /*ptr to 0xE(14), orderingChannel 2*/
+#define RPC_MoneyGive 0x815CCFE /*ptr to 0x12(18), orderingChannel 2*/
+#define RPC_MoneyReset 0x815CD00 /*ptr to 0x14(20), orderingChannel 2 (rpc has no data)*/
+#define RPC_SetTime 0x815A832 /*ptr to 0x1D(29), orderingChannel 2*/
+#define RPC_SetWeather 0x815A00F /*ptr to 0x98(152), orderingChannel 2*/
+#define RPC_ToggleClock 0x815A875 /*ptr to 0x1E(30), orderingChannel 2*/
 #define RPC_PlayerJoin 0x815AA76 /*ptr to 0x89(137)*/
 #define RPC_PlayerCreate 0x816324E /*ptr to 0x20(32)*/
 #define RPC_PlayerLeave 0x815AA78 /*ptr to 0x8A(138)*/
@@ -965,6 +1021,7 @@ DriverSync
 #define RPC_SetSpawnInfo 0x8162624 /*ptr to 0x44(68)*/
 #define RPC_WorldPlayerAdd 0x816324E /*ptr to 0x20(32)*/
 #define RPC_SetPlayerSkin 0x815CCE4 /*ptr to 0x99(153)*/
+#define RPC_SetPlayerColor 0x8163C35 /*ptr to 0x48(72), orderingChannel 2*/
 #define RPC_SetCameraPos 0x815CCF4 /*ptr to 0x9D(157), orderingChannel 2*/
 #define RPC_SetCameraLookAt 0x815CCF6 /*ptr to 0x9E(158), orderingChannel 2*/
 #define RPC_SetCameraBehind 0x815CCF8 /*ptr to 0xA2(162), orderingChannel 2 (rpc has no data)*/

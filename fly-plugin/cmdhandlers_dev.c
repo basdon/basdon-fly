@@ -124,7 +124,7 @@ int cmd_dev_kickme(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_kill(struct COMMANDCONTEXT cmdctx)
 {
-	NC_SetPlayerHealth(cmdctx.playerid, 0.0f);
+	SetPlayerHealth(cmdctx.playerid, 0.0f);
 	return CMD_OK;
 }
 
@@ -362,7 +362,7 @@ int cmd_dev_timex(struct COMMANDCONTEXT cmdctx)
 		cmd_get_int_param(&cmdctx, &m);
 		time_h = h;
 		time_m = m;
-		NC_SetPlayerTime(cmdctx.playerid, h, m);
+		SetPlayerTime(cmdctx.playerid, h, m);
 		panel_day_night_changed();
 		return CMD_OK;
 	}

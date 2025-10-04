@@ -17,6 +17,6 @@ int score_update_score(int playerid)
 	pt = score_play_time[playerid];
 
 	score = (ft + (pt - ft) / 5) / 60;
-	NC_SetPlayerScore(playerid, score);
+	SetPlayerScore(playerid, score);
 	return score;
 }

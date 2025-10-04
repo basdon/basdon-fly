@@ -26,11 +26,11 @@ enum PacketPriority {
 };
 
 enum PacketReliability {
-	UNRELIABLE = 6,
-	UNRELIABLE_SEQUENCED = 7,
-	RELIABLE = 8,
-	RELIABLE_ORDERED = 9,
-	RELIABLE_SEQUENCED = 10,
+	UNRELIABLE = 6, /*regular UDP*/
+	UNRELIABLE_SEQUENCED = 7, /*regular UDP, but ignored if a newer sequenced packet was acted upon first*/
+	RELIABLE = 8, /*gets resent until acknowledged*/
+	RELIABLE_ORDERED = 9, /*gets resent until acknowledged, not acted upon until all earlier ordered messages are acted upon*/
+	RELIABLE_SEQUENCED = 10, /*gets resent until acknowledged, but ignored if a newer sequenced packet was acted upon first*/
 };
 
 struct RakNetStatistics {

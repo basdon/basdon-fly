@@ -13,27 +13,18 @@ static AMX_NATIVE n_GetConsoleVarAsInt;
 static AMX_NATIVE n_GetPlayerIp;
 static AMX_NATIVE n_GetPlayerName;
 static AMX_NATIVE n_GetPlayerPing;
-static AMX_NATIVE n_GetPlayerScore;
 static AMX_NATIVE n_GetServerTickRate;
 static AMX_NATIVE n_GetVehicleDamageStatus;
 static AMX_NATIVE n_GetVehiclePoolSize;
-static AMX_NATIVE n_GivePlayerMoney_;
 static AMX_NATIVE n_GivePlayerWeapon;
 static AMX_NATIVE n_IsValidVehicle;
 static AMX_NATIVE n_Kick_;
 static AMX_NATIVE n_PutPlayerInVehicle_;
-static AMX_NATIVE n_ResetPlayerMoney_;
-static AMX_NATIVE n_SetPlayerColor;
-static AMX_NATIVE n_SetPlayerHealth;
 static AMX_NATIVE n_SetPlayerName_;
-static AMX_NATIVE n_SetPlayerScore;
-static AMX_NATIVE n_SetPlayerTime;
-static AMX_NATIVE n_SetPlayerWeather;
 static AMX_NATIVE n_SetVehiclePos;
 static AMX_NATIVE n_SetVehicleToRespawn;
 static AMX_NATIVE n_SetVehicleZAngle;
 static AMX_NATIVE n_UpdateVehicleDamageStatus;
-static AMX_NATIVE n_TogglePlayerClock;
 static AMX_NATIVE n_TogglePlayerControllable;
 static AMX_NATIVE n_TogglePlayerSpectating;
 static AMX_NATIVE n_bcrypt_check;
@@ -135,9 +126,6 @@ static cell tmpfloat;
 #define NC_GetPlayerPing(PLAYERID) (NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_GetPlayerPing(amx,nc_params))
 
-#define NC_GetPlayerScore(PLAYERID) (NC_PARS_(1)nc_params[1]=PLAYERID,\
-	n_GetPlayerScore(amx,nc_params))
-
 #define NC_GetServerTickRate() (NC_PARS_(0)\
 	n_GetServerTickRate(amx,nc_params))
 
@@ -155,22 +143,6 @@ static cell tmpfloat;
 
 #define NC_PutPlayerInVehicle __USE__natives_PutPlayerInVehicle__
 
-#define NC_SetPlayerHealth(PLAYERID,FHEALTH) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_paramf[2]=FHEALTH,\
-	n_SetPlayerHealth(amx,nc_params))
-
-#define NC_SetPlayerScore(PLAYERID,SCORE) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=SCORE,\
-	n_SetPlayerScore(amx,nc_params))
-
-#define NC_SetPlayerTime(PLAYERID,H,M) \
-	(NC_PARS_(3)nc_params[1]=PLAYERID,nc_params[2]=H,nc_params[3]=M,\
-	n_SetPlayerTime(amx,nc_params))
-
-#define NC_SetPlayerWeather(PLAYERID,WEATHER) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=WEATHER,\
-	n_SetPlayerWeather(amx,nc_params))
-
 #define NC_SetVehicleToRespawn(VEHICLEID) \
 	(NC_PARS_(1)nc_params[1]=VEHICLEID,\
 	n_SetVehicleToRespawn(amx,nc_params))
@@ -178,10 +150,6 @@ static cell tmpfloat;
 #define NC_SetVehicleZAngle(VEHICLEID,FROT) \
 	(NC_PARS_(2)nc_params[1]=VEHICLEID,nc_paramf[2]=FROT,\
 	n_SetVehicleZAngle(amx,nc_params))
-
-#define NC_TogglePlayerClock(PLAYERID,FLAG) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
-	n_TogglePlayerClock(amx,nc_params))
 
 #define NC_TogglePlayerControllable(PLAYERID,FLAG) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
@@ -286,26 +254,17 @@ int natives_find()
 		N(GetPlayerIp),
 		N(GetPlayerName),
 		N(GetPlayerPing),
-		N(GetPlayerScore),
 		N(GetServerTickRate),
 		N(GetVehicleDamageStatus),
 		N(GetVehiclePoolSize),
-		N_(GivePlayerMoney),
 		N(GivePlayerWeapon),
 		N(IsValidVehicle),
 		N_(Kick),
 		N_(PutPlayerInVehicle),
-		N_(ResetPlayerMoney),
-		N(SetPlayerColor),
-		N(SetPlayerHealth),
 		N_(SetPlayerName),
-		N(SetPlayerScore),
-		N(SetPlayerTime),
-		N(SetPlayerWeather),
 		N(SetVehiclePos),
 		N(SetVehicleToRespawn),
 		N(SetVehicleZAngle),
-		N(TogglePlayerClock),
 		N(TogglePlayerSpectating),
 		N(TogglePlayerControllable),
 		N(UpdateVehicleDamageStatus),

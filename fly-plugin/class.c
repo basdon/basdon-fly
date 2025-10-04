@@ -15,10 +15,7 @@ static
 void class_on_player_connect(int playerid)
 {
 	classid[playerid] = 0;
-	nc_params[0] = 2;
-	nc_params[1] = playerid;
-	nc_params[2] = 0x888888FF;
-	NC(n_SetPlayerColor);
+	SetPlayerColor(playerid, 0x888888FF);
 }
 
 static
@@ -51,11 +48,7 @@ void class_on_player_request_class(int playerid, int _classid)
 		return;
 	}
 
-	NC_PARS(2);
-	nc_params[1] = playerid;
-	nc_params[2] = CLASS_COLORS[_classid];
-	NC(n_SetPlayerColor);
-
+	SetPlayerColor(playerid, CLASS_COLORS[_classid]);
 	/*This facing angle may seem a bit strange but it's adjusted for when the dancing animation is applied.*/
 	SetPlayerFacingAngle(playerid, 236.0f);
 

@@ -1,5 +1,6 @@
 /**
 Money per player.
+TODO: check if we can use playerpool->playerMoney (need to check if client messages affects its value)
 */
 static int playermoney[MAX_PLAYERS];
 
@@ -34,10 +35,7 @@ int money_give(int playerid, int amount)
 		return 0;
 	}
 	playermoney[playerid] += amount;
-	NC_PARS(2);
-	nc_params[1] = playerid;
-	nc_params[2] = amount;
-	NC(n_GivePlayerMoney_);
+	GivePlayerMoneyRaw(playerid, amount);
 	return 1;
 }
 
@@ -60,10 +58,7 @@ int money_take(int playerid, int amount)
 		return 0;
 	}
 	playermoney[playerid] -= amount;
-	NC_PARS(2);
-	nc_params[1] = playerid;
-	nc_params[2] = -amount;
-	NC(n_GivePlayerMoney_);
+	GivePlayerMoneyRaw(playerid, -amount);
 	return 1;
 }
 
@@ -74,12 +69,7 @@ static
 void money_on_player_spawn(int playerid)
 {
 	/*spawning might take $100 randomly, so reset it here just in case*/
-	NC_PARS(1);
-	nc_params[1] = playerid;
-	NC(n_ResetPlayerMoney_);
-	NC_PARS(2);
-	nc_params[2] = playermoney[playerid];
-	NC(n_GivePlayerMoney_);
+	SetPlayerMoneyRaw(playerid, playermoney[playerid]);
 }
 
 /**
@@ -88,11 +78,5 @@ Set a player's money.
 static
 void money_set(int playerid, int amount)
 {
-	NC_PARS(1);
-	nc_params[1] = playerid;
-	NC(n_ResetPlayerMoney_);
-	NC_PARS(2);
-	nc_params[2] = amount;
-	NC(n_GivePlayerMoney_);
-	playermoney[playerid] = amount;
+	SetPlayerMoneyRaw(playerid, playermoney[playerid] = amount);
 }
