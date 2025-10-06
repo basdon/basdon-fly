@@ -24,7 +24,7 @@ foreach ($db->query('SELECT id,parent,name,color FROM artcat ORDER BY parent ASC
 }
 
 ++$db_querycount;
-foreach ($db->query('SELECT id,cat,name,title FROM art ORDER BY cat ASC,title ASC') as $art) {
+foreach ($db->query('SELECT id,cat,name,title FROM art WHERE ISNULL(deleted_at) ORDER BY cat ASC,title ASC') as $art) {
 	if (array_key_exists($art->cat, $cats)) {
 		$cats[$art->cat]->articles[] = $art;
 	} else if (array_key_exists($art->cat, $subcats)) {

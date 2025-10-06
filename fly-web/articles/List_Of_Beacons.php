@@ -1,0 +1,29 @@
+<p>
+	This article contains a list of all active beacons and their runway angles.
+	These beacons can be used for <?php link_article('ADF'); ?> navigation,
+	and combined with the runway angles they can be used for
+	<?php link_article('VOR'); ?> navigation.
+<style>
+	table.beaconlist {
+		border-spacing: 0;
+	}
+	table.beaconlist th {
+		padding: .3em;
+		border-bottom: 1px solid #a2a9b1;
+	}
+	table.beaconlist td {
+		padding: .3em;
+	}
+	table.beaconlist td:nth-child(2) {
+		text-align: right;
+	}
+	table.beaconlist tr :nth-child(4),
+	table.beaconlist tr :nth-child(7) {
+		background: #e7eeee;
+	}
+	table.beaconlist tr th + th,
+	table.beaconlist tr td + td {
+		border-left: 1px solid #a2a9b1;
+	}
+</style>
+<?php readfile('../gen/beaconlist.html') ?>

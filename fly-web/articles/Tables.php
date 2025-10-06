@@ -1,0 +1,352 @@
+<p>
+	Collation <code>utf8mb4</code> should be used for all non-samp stuff.
+
+<pre>usr -- users
+  i - id
+  name - name
+  pw - pw
+  registertime - registertime
+  lastseenweb - last seen on web (default 0)
+  lastseengame - last seen in game
+  onlinetime - total online time (seconds) (default 0)
+  playtime - actual playtime (seconds) (default 0)
+  groups - group(s)
+  flighttime - flight time (seconds) (default 0)
+  distance - total distance flown, km (float) (default 0)
+  score - score (default 0)
+  cash - money (default 15000)
+  prefs - preferences (see PREF_* in basdonfly.c)
+  lastfal - last failed login (default 0)
+  falng - failedloginsnotifygame, last time failed logins were shown ingame (default 0)
+  falnw - failedloginsnotifyweb, last time failed logins were shown ingame (default 0)
+</pre>
+
+<pre>ses -- sessions
+  i - id
+  u - uid (usr.i)
+  s - starttime
+  e - endtime
+  ip - ip
+  netgameversion - client netgame version
+  versionstring - client reported version string (char24) (or NULL because this was added later)
+</pre>
+
+<pre>fal -- failed logins
+  u - uid (usr.i) (NULL for when user gets deleted, SET NULL)
+  stamp - timestamp
+  ip - ip
+  isweb - int (0: samp, 1: website)
+</pre>
+
+<pre>apt -- airports
+  i - id (from 0, cannot contain holes)
+  c - code (char4)
+  e - enabled
+  n - name (char24)
+  x - beacon x
+  y - beacon y
+  z - beacon z
+  flags - (see APT_FLAG_* in basdonfly.c) (int) (default 1)
+</pre>
+
+<pre>rnw -- runways
+  id - rowid
+  a - airport (apt.i)
+  i - runway id (matches on end to the other)
+  s - specifier (as in L/C/R/H(helipad)/nothing)
+  h - heading
+  x - x
+  y - y
+  z - z
+  w - runway width
+  n - navigation types (VOR(2) | ILS(6))
+  type - runway type (see RUNWAY_TYPE_* in basdonfly.c) (default 1)
+  surf - runway surface (see RUNWAY_SURFACE_* in basdonfly.c)
+</pre>
+
+<pre>msp -- mission points
+  i - id
+  a - airport (apt.i)
+  x - x
+  y - y
+  z - z
+  t - type of mission (mission-types.txt)
+  name - name of point (varchar MAX_MSP_NAME(9))
+  o - outbound flights (default 0)
+  p - inbound flights (default 0)
+</pre>
+
+<pre>flg -- flights
+  id - id
+  player - player (usr.i) (or NULL)
+  vehicle - vehicle (veh.i)
+  missiontype -
+  fapt - (apt.i)
+  tapt - (apt.i)
+  fmsp - (msp.i)
+  tmsp - (msp.i)
+  distance - checkpoint-to-checkpoint distance, m (float)
+  adistance - actually travelled distance, m (float) (default 0)
+  state - status, see flight-statuses.txt (default 1)
+  tstart -
+  tlastupdate -
+  tload - (default 0)
+  tunload - (default 0)
+  duration - in seconds, total time mission has been active while player is online (default 0)
+  satisfaction - passenger satisfaction (default 100)
+  ptax - airport tax (default 0)
+  pweatherbonus - (default 0)
+  psatisfaction - satisfaction bonus (default 0)
+  pdistance - distance pay (default 0)
+  paymp - distance pay multiplier (default 0)
+  pdamage - damage penalty (default 0)
+  pcheat - cheating penalty (default 0)
+  pbonus - extra bonus (default 0)
+  ptotal - total pay (default 0)
+  fuel - percentage fuel used [0-1] (may be more than 1 because one can refuel) (float) (default 0)
+  damage - total damage taken (default 0)
+</pre>
+
+<pre>pfl -- paused flights
+  fid - flight id (flg.id)
+  t - timestamp
+  x - pos x (float)
+  y - pos y (float)
+  z - pos z (float)
+  qw - rotation w (float)
+  qx - rotation x (float)
+  qy - rotation y (float)
+  qz - rotation z (float)
+  vx - velocity x (float)
+  vy - velocity y (float)
+  vz - velocity z (float)
+  fuel - percentage of fuel left (percentage just in case fuel capacity changes) (float)
+  hp - (float)
+  gear_keys - gear state (0x100000, additional keys (0x30000) and partial keys (0xFFFF)
+  udlrkeys - udkey (0xFFFF) and lrkey (0xFFFF0000)
+  misc - for driversync packet
+  reason - OnPlayerDisconnect reason (0 timeout, 1 quit, 2 kicked)
+</pre>
+
+<pre>wth -- weathers
+  w - weather id
+  l - last weather id
+  t - timestamp
+</pre>
+
+<pre>veh -- vehicles
+  i - id
+  m - model
+  ownerplayer - owner (usr.i) or NULL if not owned by a player (default NULL)
+  e - enabled (default 1)
+  ap - related airport (apt.i) (default NULL)
+  x - x
+  y - y
+  z - z
+  r - rotation
+  col1 - color 1
+  col2 - color 2
+  inusedate - timestamp of existence
+  odo - odo, km (float) (default 0)
+</pre>
+
+<pre>acl -- anticheat etc log
+  t - timestamp
+  u - userid (usr.i) (or NULL)
+  l - logged in status (0-2, see login.pwn)
+  type - type of event (see AC_* in basdonfly.c) (default 0)
+  e - log content (varchar, 2048)
+</pre>
+
+<pre>art -- site articles
+  id -
+  cat - article category (artcat.id) or NULL (default NULL)
+  name - url name (varchar, 64)
+  title - actual title (varchar, 64)
+  pageviews - (default 0)
+</pre>
+
+<pre>artcat -- site articles categories
+  id -
+  parent - parent category (artcat.id) or NULL (default NULL)
+  name - (char, 16)
+  color - (char, 6)
+</pre>
+
+<pre>artalt -- alternative art names
+  art - article id (art.id)
+  alt - alternative url name (varchar, 64)
+</pre>
+
+<pre>cmdlog -- commands log
+  id - rowid
+  player - player (usr.i) or NULL (default NULL)
+  loggedstatus - one of LOGGED_NO(0) LOGGED_IN(1) LOGGED_GUEST(2)
+  stamp - timestamp
+  cmd - command (varchar 128)
+</pre>
+
+<pre>svp -- servicepoints
+  id - rowid
+  apt - belonging airport (apt.id) or NULL
+  x -
+  y -
+  z -
+</pre>
+
+<pre>repairlog --
+  id - rowid
+  stamp - timestamp
+  vehicle - (veh.i) NULL
+  driver - (usr.i) NULL
+  invokr - (usr.i)
+  svp - (svp.id)
+  paid -
+  damage - repaired damage points
+</pre>
+
+<pre>refuellog --
+  id - rowid
+  stamp - timestamp
+  vehicle - (veh.i) NULL
+  driver - (usr.i) NULL
+  invokr - (usr.i)
+  svp - (svp.id)
+  paid -
+  fuel - percentage refueled [0-1] (float)
+</pre>
+
+<pre>heartbeat --
+  id - rowid
+  tstart - boot time
+  tlast - last update
+  cleanexit - if session was ended nicely
+</pre>
+
+<pre>webses -- website sessions
+  id - (char, 32)
+  usr - (usr.i)
+  stamp - session start
+  lastupdate - last update
+  stay - stay logged in (0/1)
+  ip - (char, 45)
+</pre>
+
+<pre>map -- maps
+  id - rowid
+  ap - linked airport (apt.id) (default NULL)
+  filename - filename of the map (without .map extension) (varchar 24)
+</pre>
+
+<pre>spw -- spawns
+  id - rowid
+  ap - linked airport (apt.i)
+  class - class types that can spawn here (bitfield)
+  sx - x coord
+  sy - y coord
+  sz - z coord
+  sr - z-angle
+</pre>
+
+<pre>kck -- kicks
+  id - rowid
+  usr - (usr.i) NULL
+  ip - (varchar, 45)
+  stamp - timestamp
+  issuer - (usr.i) NULL
+  reason - (varchar, 144) NULL
+</pre>
+
+<pre>gpci -- gpci values
+  u - (usr.i)           v primkey
+  v - value (char, 100) ^ primkey
+  c - count
+  first - stamp of first use
+  last - stamp of last use
+</pre>
+
+<pre>tract -- tracker tickets
+  id - rowid
+  op - (usr.i)
+  stamp - timestamp
+  updated - timestamp
+  state - int (default 0)
+  severity - int (default 0)
+  visibility - int (default 2147483647)
+  released - int (default NULL) when resolution for this ticket got released
+  summary - (varchar utf8mb4, 80)
+  description - (varchar utf8mb4, 4096)
+</pre>
+
+<pre>tracc -- tracker comments
+  id - rowid
+  parent - (tract.id)
+  usr - (usr.i)
+  ip - (varchar, 45)
+  stamp - timestamp
+  type - (0 normal 1 raw)
+  comment - (varchar utf8mb4, 4096)
+</pre>
+
+<pre>deathlog -- death log
+  id - rowid
+  stamp - timestamp
+  killee - (usr.i) NULL
+  killer - (usr.i) NULL
+  reason - int
+</pre>
+
+<pre>modelstats -- flighttime/odo per player per model
+  usr - (usr.i)
+  t417 - int 0
+  o417 - float 0
+  t425
+  o425
+  t447
+  o447
+  t460
+  o460
+  t464
+  o464
+  t465
+  o465
+  t469
+  o469
+  t476
+  o476
+  t487
+  o487
+  t488
+  o488
+  t497
+  o497
+  t501
+  o501
+  t511
+  o511
+  t512
+  o512
+  t513
+  o513
+  t519
+  o519
+  t520
+  o520
+  t548
+  o548
+  t553
+  o553
+  t563
+  o563
+  t577
+  o577
+  t592
+  o592
+  t593
+  o593
+</pre>
+
+<pre>chg -- changelogs
+  stamp - date (char 11)
+  entry - summary (char(128))
+</pre>

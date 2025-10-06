@@ -7,9 +7,6 @@ TEMPLATE_OBJECTS_FULL := $(patsubst templates/%.tpl, gen/%.php, $(TEMPLATE_SOURC
 TEMPLATE_SOURCES_PART := $(wildcard templates/^*.tpl)
 TEMPLATE_OBJECTS_PART := $(patsubst templates/%.tpl, gen/%.php, $(TEMPLATE_SOURCES_PART))
 
-ARTICLE_SOURCES := $(wildcard articles/*.txt)
-ARTICLE_OBJECTS := $(patsubst articles/%.txt, gen/article_%.html, $(ARTICLE_SOURCES))
-
 .PHONY: templates aerodromcharts all_airport_codes apfactsheets apvehicelist \
 	articles ensureplayergraph islandmapdata islandmaps flightmapjs \
 	clean cleantemplates cleanarticles \
@@ -38,14 +35,9 @@ templates: $(TEMPLATE_OBJECTS_FULL) $(TEMPLATE_OBJECTS_PART)
 	[ -z "$(BASDONDEV)" ] || chmod g+w templates/gen/*
 
 cleanarticles:
-	rm -f gen/article_*
 	rm -f gen/articlemap.php
 	rm -f gen/beaconlist.html
-gen/tohtml.sed: articles/tohtml.source.sed articles/tohtml.gen.sed
-	sed -f articles/tohtml.gen.sed < articles/tohtml.source.sed > gen/tohtml.sed
-gen/article_%.html: articles/%.txt cleanarticles gen/tohtml.sed
-	sed -f gen/tohtml.sed < $< > $@
-articles: $(ARTICLE_OBJECTS) inc/__settings.php
+articles: inc/__settings.php
 	cd cli && php genarticlemap.php
 	cd cli && php genbeaconlist.php
 	cd cli && php ensureairportcodearticlelinking.php

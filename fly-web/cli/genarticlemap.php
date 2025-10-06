@@ -18,27 +18,6 @@ foreach ($db->query('SELECT name FROM artcat') as $a) {
 	$articlecatmap[$a->name] = $a->name;
 }
 
-// don't add closing </a> tag, article gen takes care of that
-$output = '<?php function map_article($name){$articlemap=' . var_export($articlemap, true) . ';';
-$output .= <<<'EOD'
-	$a='<a href="article.php?title='.$name;
-	if(!array_key_exists($name,$articlemap)){
-		$a.='" style="color:#c22';
-	} else {
-		$name=$articlemap[$name];
-	}
-	return $a.'">'.$name;
-}
-EOD;
-$output .= 'function map_article_cat($name){$articlecatmap=' . var_export($articlecatmap, true) . ';';
-$output .= <<<'EOD'
-	$a='<a href="article.php?category='.$name;
-	if(!array_key_exists($name,$articlecatmap)){
-		$a.='" style="color:#c22';
-	} else {
-		$name=$articlecatmap[$name];
-	}
-	return $a.'">'.$name;
-}
-EOD;
+$output = '<?php $articlemap=' . var_export($articlemap, true) . '; $articlecatmap=' . var_export($articlecatmap, true) . ';';
+
 file_put_contents('../gen/articlemap.php', $output);

@@ -73,14 +73,14 @@ nextparentcat4catpage:
 
 		// fetch all articles (either in category or in subcategories)
 		++$db_querycount;
-		foreach ($db->query('SELECT id,name,title,cat FROM art WHERE cat IN ('.implode(',',$category_ids).') ORDER BY name ASC') as $r) {
+		foreach ($db->query('SELECT id,name,title,cat FROM art WHERE ISNULL(deleted_at) AND cat IN ('.implode(',',$category_ids).') ORDER BY name ASC') as $r) {
 			$catmapping[$r->cat]->articles[] = $r;
 		}
 		unset($catmapping);
 		unset($category_ids);
 	} else {
 		++$db_querycount;
-		foreach ($db->query('SELECT id,name,title FROM art WHERE ISNULL(cat) ORDER BY name ASC') as $a) {
+		foreach ($db->query('SELECT id,name,title FROM art WHERE ISNULL(deleted_at) AND ISNULL(cat) ORDER BY name ASC') as $a) {
 			$cat->articles[] = $a;
 		}
 	}
@@ -103,18 +103,26 @@ $article_redirected_from = null;
 
 $categories = [];
 ++$db_querycount;
-$stmt = $db->prepare('SELECT id,name,title,pageviews,cat FROM art WHERE name=? LIMIT 1');
+$stmt = $db->prepare('SELECT id,name,title,pageviews,deleted_at,cat FROM art WHERE name=? LIMIT 1');
 $stmt->bindValue(1, $article_name);
 if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 	$r = $r[0];
 
-	++$db_querycount;
-	$db->exec('UPDATE art SET pageviews=pageviews+1 WHERE id=' . $r->id);
 
 	$article_id = $r->id;
 	$article_name = $r->name;
 	$article_title = $r->title;
+	if ($r->deleted_at) {
+		http_response_code(410);
+		$__template = '_article_deleted';
+		require '../inc/output.php';
+		die();
+	}
 	$article_pageviews = $r->pageviews + 1;
+	$article_filename = '../articles/' . $article_name . '.php';
+
+	++$db_querycount;
+	$db->exec('UPDATE art SET pageviews=pageviews+1 WHERE id=' . $r->id);
 
 	if (isset($_GET['from'])) {
 		$stmt = $db->prepare('SELECT art,alt FROM artalt WHERE alt=?');
@@ -143,6 +151,31 @@ if ($stmt->execute() && ($r = $stmt->fetchAll()) && count($r)) {
 // TODO: airport articles should really be moved back to airport.php instead of article.php
 include '../inc/aircraftnames.php';
 include '../inc/missiontypes.php';
+include '../gen/articlemap.php';
+
+function link_article($name, $hash = '', $manual = false)
+{
+	global $articlemap;
+
+	echo '<a href="article.php?title='.$name.$hash.'"';
+	if (!array_key_exists($name, $articlemap)) {
+		echo ' style=color:#c22';
+	} else {
+		$name = $articlemap[$name];
+	}
+	echo '>';
+	if (!$manual) {
+		echo $name.'</a>';
+	}
+}
+function link_article_cat($name)
+{
+	global $articlecatmap;
+
+	echo '<a href="article.php?category='.$name.'"';
+	echo array_key_exists($name, $articlecatmap) ? '>'.$articlecatmap[$name] : ' style=color:#c22>'.$name;
+	echo '</a>';
+}
 
 $__template = '_article';
 require '../inc/output.php';

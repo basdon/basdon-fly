@@ -2,7 +2,7 @@
 <html lang=en>
 <head>
 	<title>{$article_title} :: basdon.net aviation server</title>
-	<link rel=stylesheet href=/s/article.css?v2 type=text/css>
+	<link rel=stylesheet href=/s/article.css?v3 type=text/css>
 	{@render defaulthead.tpl}
 </head>
 <body>
@@ -21,17 +21,15 @@
 				<small> (Redirected from {@unsafe $article_redirected_from})</small>
 			{@endif}
 		</p>
-		{@if !isset($article_pageviews)}
+		{@if !isset($article_filename)}
 			<h2 id=main>Article not found!</h2>
 			<p>The article with name '{$article_name}' was not found.</p>
 		{@else}
 			<h2 id=main>{@unsafe $article_title}</h2>
-			{@eval $file = '../gen/article_' . $article_name . '.html'}
-			{@if !is_file($file)}
+			{@if !is_file($article_filename)}
 				<p class="msg error">Failed to get article contents.</p>
 			{@else}
-				{@eval include '../gen/articlemap.php'}
-				{@eval include $file}
+				{@eval include $article_filename}
 			{@endif}
 			{@if isset($cat)}
 				{@rem don't show category box on uncategorized pages @}

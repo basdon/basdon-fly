@@ -1,13 +1,19 @@
-.infobox {
+figure, .infobox {
 	background: #f6f6ff;
 	border: 1px solid #b5cdff;
 	margin: .4em;
 	padding: .4em;
 	display: inline-block;
 }
-.infobox .img {
-	padding: 0;
-	margin: 0;
+figure > img {
+	max-width: 100%;
+}
+figure > img:not(.fullsize) {
+	width: 100%;
+	max-width: 250px;
+}
+figcaption {
+	font-size: small;
 }
 .article table.artcat {
 	width: 100%;
@@ -58,9 +64,6 @@ dt {
 }
 dd {
 	margin-bottom: .5em;
-}
-.article .small {
-	font-size: small;
 }
 .article .s {
 	text-decoration: line-through;

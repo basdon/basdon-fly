@@ -1,0 +1,52 @@
+<p>
+	This is the specification of the <code>.text</code> file format used to
+	store/load textdraws.
+
+<pre>byte 0-3: spec version</pre>
+
+<p>
+	The rest is dependent on the spec version:
+<ul>
+	<li><a href="#v1">Version 0x01545854 (TXT1)</a>
+</ul>
+
+<h3 id=v1>Version 0x01545854 (TXT1)</h3>
+
+<p>
+	The data (from byte 40) is the same as the data needed for the ShowTextDraw RPC,
+	except it needs two more bytes at the start as <code>textdrawid</code> and it stops
+	where the text ends.
+
+<pre>&gt; repeated x times
+byte 0-49: arbitrary name of the textdraw
+byte 40: flags
+         0x01 box
+         0x02 left aligned
+         0x04 right aligned
+         0x08 center aligned
+         0x10 proportional font
+byte 41-44: letter size x (FLOAT)
+byte 45-48: letter size y (FLOAT)
+byte 49-52: font color ABGR (DWORD)
+byte 53-56: box x (FLOAT)
+byte 37-60: box y (FLOAT)
+byte 61-64: box color ABGR (DWORD)
+byte 65: shadow size
+byte 66: outline size
+byte 67-70: shadow/outline color ABGR (DWORD)
+byte 71: font
+byte 72: selectable
+byte 73-76: x (FLOAT)
+byte 77-80: y (FLOAT)
+byte 81-82: preview model (SHORT)
+byte 83-86: preview rotation x (FLOAT)
+byte 87-90: preview rotation y (FLOAT)
+byte 91-94: preview rotation z (FLOAT)
+byte 95-98: preview zoom (FLOAT)
+byte 99-100: preview color 1 (SHORT)
+byte 101-102: preview color 2 (SHORT)
+byte 103-104: text length, without zero terminator (SHORT)
+byte 105-904: text
+-------------
+size 905 bytes
+</pre>
