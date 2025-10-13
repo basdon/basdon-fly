@@ -2,13 +2,9 @@
 custom code and shouldn't be used directly.*/
 
 static AMX_NATIVE n_ClearAnimations;
-static AMX_NATIVE n_CreatePlayerObject;
-static AMX_NATIVE n_DestroyObject;
-static AMX_NATIVE n_DestroyPlayerObject;
 static AMX_NATIVE n_DestroyVehicle_;
 static AMX_NATIVE n_DisablePlayerCheckpoint;
 static AMX_NATIVE n_DisablePlayerRaceCheckpoint;
-static AMX_NATIVE n_ForceClassSelection;
 static AMX_NATIVE n_GetConsoleVarAsInt;
 static AMX_NATIVE n_GetPlayerIp;
 static AMX_NATIVE n_GetPlayerName;
@@ -26,7 +22,6 @@ static AMX_NATIVE n_SetVehicleToRespawn;
 static AMX_NATIVE n_SetVehicleZAngle;
 static AMX_NATIVE n_UpdateVehicleDamageStatus;
 static AMX_NATIVE n_TogglePlayerControllable;
-static AMX_NATIVE n_TogglePlayerSpectating;
 static AMX_NATIVE n_bcrypt_check;
 static AMX_NATIVE n_bcrypt_get_hash;
 static AMX_NATIVE n_bcrypt_hash;
@@ -95,22 +90,11 @@ static cell tmpfloat;
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FORCESYNC,\
 	n_ClearAnimations(amx,nc_params))
 
-#define NC_DestroyObject(OBJECTID) (NC_PARS_(1)nc_params[1]=OBJECTID,\
-	n_DestroyObject(amx,nc_params))
-
-#define NC_DestroyPlayerObject(PLAYERID,OBJECTID) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=OBJECTID,\
-	n_DestroyPlayerObject(amx,nc_params))
-
 #define NC_DestroyVehicle __USE__veh_DestroyVehicle__
 
 #define NC_DisablePlayerRaceCheckpoint(PLAYERID) \
 	(NC_PARS_(1)nc_params[1]=PLAYERID,\
 	n_DisablePlayerRaceCheckpoint(amx,nc_params))
-
-#define NC_ForceClassSelection(PLAYERID) \
-	(NC_PARS_(1)nc_params[1]=PLAYERID,\
-	n_ForceClassSelection(amx,nc_params))
 
 #define NC_GetConsoleVarAsInt(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
 	n_GetConsoleVarAsInt(amx,nc_params))
@@ -154,10 +138,6 @@ static cell tmpfloat;
 #define NC_TogglePlayerControllable(PLAYERID,FLAG) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
 	n_TogglePlayerControllable(amx,nc_params))
-
-#define NC_TogglePlayerSpectating(PLAYERID,FLAG) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
-	n_TogglePlayerSpectating(amx,nc_params))
 
 /*bcrypt_get_hash fails when argument size does not match*/
 #define NC_bcrypt_get_hash(BUF) (nc_params[0]=4,nc_params[1]=BUF,\
@@ -243,13 +223,9 @@ int natives_find()
 	};
 	struct NATIVE natives[] = {
 		N(ClearAnimations),
-		N(CreatePlayerObject),
-		N(DestroyObject),
-		N(DestroyPlayerObject),
 		N_(DestroyVehicle),
 		N(DisablePlayerCheckpoint),
 		N(DisablePlayerRaceCheckpoint),
-		N(ForceClassSelection),
 		N(GetConsoleVarAsInt),
 		N(GetPlayerIp),
 		N(GetPlayerName),
@@ -265,7 +241,6 @@ int natives_find()
 		N(SetVehiclePos),
 		N(SetVehicleToRespawn),
 		N(SetVehicleZAngle),
-		N(TogglePlayerSpectating),
 		N(TogglePlayerControllable),
 		N(UpdateVehicleDamageStatus),
 		N(bcrypt_check),

@@ -447,6 +447,22 @@ void TogglePlayerClock(int playerid, char enabled)
 EXPECT_SIZE(struct RPCDATA_ToggleClock, sizeof(char));
 
 static
+void TogglePlayerSpectating(int playerid, int enabled)
+{
+	struct SampPlayer *playa;
+
+	playa = player[playerid];
+	if (playa) {
+		playa->spectatingTargetKind = SPECTATING_TARGET_UNSET;
+		playa->spectatingTargetId = -1;
+		SendRPC_8C(playerid, RPC_ToggleSpectating, &enabled, sizeof(int), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+		/*this doesn't actually affect player state somehow, only with PlayerSpectatePlayer/PlayerSpectateVehicle
+		will player's state be changed to PLAYER_STATE_SPECTATING*/
+	}
+}
+EXPECT_SIZE(struct RPCDATA_ToggleSpectating, sizeof(int));
+
+static
 void SetPlayerCameraPos(int playerid, struct vec3 *pos)
 {
 	struct BitStream bs;
@@ -495,6 +511,12 @@ void SetPlayerSpecialAction(int playerid, char actionid)
 	SAMP_SendRPCToPlayer(RPC_SetSpecialAction, &bs, playerid, 2);
 }
 EXPECT_SIZE(struct RPCDATA_SetSpecialAction, sizeof(char));
+
+static
+void ForceClassSelection(int playerid)
+{
+	SendRPC_8C(playerid, RPC_ForceClassSelection, NULL, 0, HIGH_PRIORITY, RELIABLE, 2);
+}
 
 /**
 When respawning, the player will always regain control.

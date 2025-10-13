@@ -941,10 +941,9 @@ int cmd_reclass(struct COMMANDCONTEXT cmdctx)
 		SendClientMessage(cmdctx.playerid, COL_WARN, NO_RECLASSSPAWN);
 	} else {
 		spawned[cmdctx.playerid] = 0;
-		NC_ForceClassSelection(cmdctx.playerid);
-		NC_TogglePlayerSpectating(cmdctx.playerid, 1);
-		nc_params[2] = 0;
-		NC(n_TogglePlayerSpectating);
+		ForceClassSelection(cmdctx.playerid);
+		TogglePlayerSpectating(cmdctx.playerid, 1);
+		TogglePlayerSpectating(cmdctx.playerid, 0);
 	}
 	return CMD_OK;
 }

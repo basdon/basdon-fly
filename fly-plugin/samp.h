@@ -319,8 +319,11 @@ struct SampPlayer {
 	int _field2C8F[10];
 	char isClockEnabled; /*TogglePlayerClock(playerid, enabled) if 1, this will advance worldTime, and sync it every 5 minutes to the player*/
 	float worldTime; /*the ingame time for player. initialized to 720.0f (12:00) hour*60+minute. used if isClockEnabled is 1*/
-	char _field2CBC;
-	int _field2CBD;
+#define SPECTATING_TARGET_UNSET 0
+#define SPECTATING_TARGET_PLAYER 1
+#define SPECTATING_TARGET_VEHICLE 2
+	char spectatingTargetKind;
+	int spectatingTargetId; /*playerid or vehicleid (or -1), depending on value of spectatingTargetKind*/
 	int lastStreamingTick;
 	int _field2CC5;
 	int _field2CC9;
@@ -805,6 +808,20 @@ struct RPCDATA_ToggleClock {
 };
 EXPECT_SIZE(struct RPCDATA_ToggleClock, 1);
 
+struct RPCDATA_ToggleSpectating {
+	int enabled;
+};
+EXPECT_SIZE(struct RPCDATA_ToggleSpectating, 4);
+
+/*used for both RPC_SpectatePlayer and RPC_SpectateVehicle*/
+struct RPCDATA_Spectate {
+	/*playerid or vehicleid, depending on RPC used*/
+	short targetid;
+	/** see SPECTATE_MODE_* */
+	char mode;
+};
+EXPECT_SIZE(struct RPCDATA_Spectate, 3);
+
 struct RPCDATA_PlayerJoin {
 	short playerid;
 	int unkAlwaysOne;
@@ -1013,6 +1030,9 @@ DriverSync
 #define RPC_SetTime 0x815A832 /*ptr to 0x1D(29), orderingChannel 2*/
 #define RPC_SetWeather 0x815A00F /*ptr to 0x98(152), orderingChannel 2*/
 #define RPC_ToggleClock 0x815A875 /*ptr to 0x1E(30), orderingChannel 2*/
+#define RPC_ToggleSpectating 0x815CCE6 /*ptr to 0x7C(124), orderingChannel 2*/
+#define RPC_SpectatePlayer 0x815CCEA /*ptr to 0x7E(126), orderingChannel 2*/
+#define RPC_SpectateVehicle 0x815CCE8 /*ptr to 0x7F(127), orderingChannel 2*/
 #define RPC_PlayerJoin 0x815AA76 /*ptr to 0x89(137)*/
 #define RPC_PlayerCreate 0x816324E /*ptr to 0x20(32)*/
 #define RPC_PlayerLeave 0x815AA78 /*ptr to 0x8A(138)*/
@@ -1026,3 +1046,4 @@ DriverSync
 #define RPC_SetCameraLookAt 0x815CCF6 /*ptr to 0x9E(158), orderingChannel 2*/
 #define RPC_SetCameraBehind 0x815CCF8 /*ptr to 0xA2(162), orderingChannel 2 (rpc has no data)*/
 #define RPC_SetSpecialAction 0x815ABC5 /*ptr to 0x58(88), orderingChannel 2*/
+#define RPC_ForceClassSelection 0x81587AC /*ptr to 0x4A(74), orderingChannel 2 (rpc has no data)*/
