@@ -777,7 +777,7 @@ int cmd_loc(struct COMMANDCONTEXT cmdctx)
 	if (zone_last_id[target] >= 0) {
 		b += sprintf(b, "%s, ", zonenames[zone_last_id[target]]);
 	}
-	b += sprintf(b, "%s ", zonenames[zone_last_region[target]]);
+	b += sprintf(b, "%s ", zone_last_region[target] >= 0 ? zonenames[zone_last_region[target]] : "an unknown place ");
 	veh = GetPlayerVehicle(target);
 	if (veh) {
 		model = veh->model;
