@@ -84,6 +84,12 @@ void zones_update(int playerid, struct vec3 pos)
 	char *target_buffer;
 	short td_text_length;
 
+	if (!spawned[playerid]) {
+		zone_last_index[playerid] = -1;
+		zone_last_id[playerid] = -1;
+		goto hide_if_shown_and_return;
+	}
+
 	if (zone_last_index[playerid] >= 0 && zones_is_in_zone(pos, zones + zone_last_index[playerid])) {
 		if (GPS_SHOULD_SHOW(playerid)) {
 			if (!gps_text_is_shown[playerid]) {

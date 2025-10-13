@@ -944,6 +944,8 @@ int cmd_reclass(struct COMMANDCONTEXT cmdctx)
 		ForceClassSelection(cmdctx.playerid);
 		TogglePlayerSpectating(cmdctx.playerid, 1);
 		TogglePlayerSpectating(cmdctx.playerid, 0);
+		zones_update(cmdctx.playerid, player[cmdctx.playerid]->pos);
+		kneeboard_update_all(cmdctx.playerid, &player[cmdctx.playerid]->pos);
 	}
 	return CMD_OK;
 }
