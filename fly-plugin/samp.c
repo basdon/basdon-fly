@@ -498,6 +498,47 @@ void SetCameraBehindPlayer(int playerid)
 	SAMP_SendRPCToPlayer(RPC_SetCameraBehind, &bs, playerid, 2);
 }
 
+static
+void InterpolateCamera(int playerid, char position, struct vec3 *from, struct vec3 *to, int timeMs)
+{
+	volatile struct RPCDATA_InterpolateCamera rpcdata;
+	unsigned char *aligned, shifted[30];
+	struct BitStream bs;
+	int i;
+
+	rpcdata.from = *from;
+	rpcdata.to = *to;
+	rpcdata.timeMs = timeMs;
+	rpcdata.switchstyle = 0; /*this has no effect, see definition of the struct*/
+
+	aligned = 1 + (unsigned char*) &rpcdata;
+	shifted[0] = position ? 0x80 : 0;
+	for (i = 0; i < 29; i++) {
+		shifted[i] |= (*aligned & 0xFE) >> 1;
+		shifted[i + 1] = (*aligned & 1) << 7;
+		aligned++;
+	}
+
+	bs.ptrData = shifted;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8 - 7;
+	SAMP_SendRPCToPlayer(RPC_InterpolateCamera, &bs, playerid, 2);
+}
+EXPECT_SIZE(struct RPCDATA_InterpolateCamera, 30);
+
+static
+__attribute((unused))
+void InterpolateCameraPos(int playerid, struct vec3 *from, struct vec3 *to, int timeMs)
+{
+	InterpolateCamera(playerid, 1, from, to, timeMs);
+}
+
+static
+__attribute((unused))
+void InterpolateCameraLookAt(int playerid, struct vec3 *from, struct vec3 *to, int timeMs)
+{
+	InterpolateCamera(playerid, 0, from, to, timeMs);
+}
+
 /**
  * @param actionid see SPECIAL_ACTION_ definitions
  */

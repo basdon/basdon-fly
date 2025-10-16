@@ -936,14 +936,43 @@ EXPECT_SIZE(struct RPCDATA_SetCameraPos, 12);
  * it has two known switchstyles: smooth (1) and jump cut (2)
  * the server pawn native changes any value that is not 1 to 2
  * the client also changes any value that is not 1 to 2
+ *
+ * the smooth movement uses a timing set by opcode 0460, but I don't see sa-mp calling that atm
+ *
+ * calling this with CAMERA_JUMPCUT has no effect if a smooth easing is currently in effect,
+ * but calling with CAMERA_SMOOTH will
  */
 #define CAMERA_SMOOTH 1 /*(this is not lerp but a smooth easing) (this is CAMERA_MOVE in a_players.inc)*/
 #define CAMERA_JUMPCUT 2 /*(this is CAMERA_CUT in a_players.inc)*/
+
 struct RPCDATA_SetCameraLookAt {
 	struct vec3 at;
 	char switchstyle; /*see CAMERA_ definitions*/
 };
 EXPECT_SIZE(struct RPCDATA_SetCameraLookAt, 12 + 1);
+
+/*
+ * first parameter decides if it's the camera position or lookat ('track')
+ * this uses one of following opcodes:
+ * - 0920=8,camera_set_vector_track %1d% %2d% %3d% to %4d% %5d% %6d% time %7d% ease %8h%
+ * - 0936=8,camera_set_vector_move %1d% %2d% %3d% to %4d% %5d% %6d% time %7d% ease %8h%
+ *
+ * ignore the first 7 bits, as the first actual field in the RPC is just a single bit...
+ *
+ * the switchstyle parameter has no effect, as the client only allows 1 or 2 (defaults to 2),
+ * but it's passed to the script command just like that, meaning the movement will always be
+ * eased as there's no way to set it to 0 which would be non-eased lerp.
+ */
+struct RPCDATA_InterpolateCamera {
+	char _pad0 : 7;
+	char position : 1; /*0 to do 'lookAt' 1 to do 'pos'*/
+	struct vec3 from;
+	struct vec3 to;
+	int timeMs;
+	char switchstyle; /*has no effect*/
+};
+EXPECT_SIZE(struct RPCDATA_InterpolateCamera, 1 + 12 + 12 + 4 + 1);
+STATIC_ASSERT_MEMBER_OFFSET(struct RPCDATA_InterpolateCamera, from, 1);
 
 struct RPCDATA_SetSpecialAction {
 	char actionid; /*see SPECIAL_ACTION_ definitions*/
@@ -1045,5 +1074,6 @@ DriverSync
 #define RPC_SetCameraPos 0x815CCF4 /*ptr to 0x9D(157), orderingChannel 2*/
 #define RPC_SetCameraLookAt 0x815CCF6 /*ptr to 0x9E(158), orderingChannel 2*/
 #define RPC_SetCameraBehind 0x815CCF8 /*ptr to 0xA2(162), orderingChannel 2 (rpc has no data)*/
+#define RPC_InterpolateCamera 0x8162B73 /*ptr to 0x52(82), orderingChannel 2*/
 #define RPC_SetSpecialAction 0x815ABC5 /*ptr to 0x58(88), orderingChannel 2*/
 #define RPC_ForceClassSelection 0x81587AC /*ptr to 0x4A(74), orderingChannel 2 (rpc has no data)*/
