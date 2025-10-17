@@ -724,6 +724,28 @@ float GetPlayerFacingAngle(int playerid)
 }
 
 static
+__attribute((unused))
+char GetPlayerCameraMode(int playerid)
+{
+	if (player[playerid]) {
+		return player[playerid]->aimSyncData.cameraMode;
+	}
+	return -1;
+}
+
+static
+__attribute((unused))
+int GetPlayerWeaponState(int playerid)
+{
+	struct SampPlayer *playa = player[playerid];
+
+	if (playa && playa->currentState == PLAYER_STATE_ONFOOT) {
+		return playa->aimSyncData.weaponState;
+	}
+	return WEAPONSTATE_UNKNOWN;
+}
+
+static
 void GetPlayerPosRot(int playerid, struct vec4 *pos)
 {
 	pos->coords = player[playerid]->pos;

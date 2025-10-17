@@ -96,6 +96,27 @@ struct SampVehicleDamageStatus {
 };
 EXPECT_SIZE(struct SampVehicleDamageStatus, 4 + 4 + 1 + 1);
 
+struct SYNCDATA_Aim {
+	unsigned char cameraMode;
+	struct vec3 lookVector;
+	struct vec3 cameraPos;
+	/* 0 is level, 1.5 is straight down, maximum up depends per weapon but is around -.84
+	 * value is not updated for every weapon aim, like camera/sniper/rpg or even uzi somehow
+	 */
+	float aimZ;
+	/**compact value, to get the 'real' value do val/63*35+35. it seems to overflow a lot..*/
+	unsigned char cameraZoom : 6;
+	/**see WEAPONSTATE_*, cannot be -1 but GetPlayerWeaponState returns -1 if player's currentState is PLAYER_STATE_ONFOOT*/
+	unsigned char weaponState : 2;
+	/* compact value, to get the 'real' value do val/255+1. known values:
+	 * 198 (1.77 or 16:9): wide screen turned on, regardless of letterboxing
+	 *  85 (1.33 or 4:3): wide screen turned off, letterboxing disabled
+	 *  63 (1.25 or 5:4): wide screen turned off, letterboxing enabled
+	 */
+	unsigned char aspectRatio;
+};
+EXPECT_SIZE(struct SYNCDATA_Aim, 0x1F);
+
 struct SYNCDATA_Onfoot {
 	short lrkey;
 	short udkey;
@@ -244,7 +265,11 @@ EXPECT_SIZE(struct SpawnInfo03DL, 0x32);
 #define UPDATE_SYNC_TYPE_PASSENGER 3
 
 struct SampPlayer {
-	char _pad0[0x27];
+	struct SYNCDATA_Aim aimSyncData;
+	short _pad1F;
+	short _pad21;
+	short _pad23;
+	short _pad25;
 	struct SYNCDATA_Driver driverSyncData;
 	struct SYNCDATA_Passenger passengerSyncData;
 	struct SYNCDATA_Onfoot onfootSyncData;
@@ -284,7 +309,7 @@ struct SampPlayer {
 	int updateSyncType;
 	int _pad296D[130];
 	int _pad2B75[10];
-	int isAiming;
+	int hasNewAimSyncData; /*if true, broadcast aim sync data and set back to false*/
 	int hasTrailerToSync;
 	int _pad2BA5;
 	char currentState;
