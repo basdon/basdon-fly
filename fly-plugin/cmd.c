@@ -17,6 +17,7 @@ struct COMMAND {
 static struct COMMAND cmds[] = {
 #ifdef DEV
 	{ 0, 0, "/*m", 0, GROUPS_ALL, CMD__M_SYNTAX, CMD__M_DESC, cmd_dev__m },
+	{ 0, 0, "/*w", 0, GROUPS_ALL, CMD__W_SYNTAX, CMD__W_DESC, cmd_dev__w },
 	{ 0, 0, "/cp", 0, GROUPS_ALL, CMD_CP_SYNTAX, CMD_CP_DESC, cmd_dev_cp },
 	{ 0, 0, "/crashme", 0, GROUPS_ALL, CMD_CRASHME_SYNTAX, CMD_CRASHME_DESC, cmd_dev_crashme },
 	{ 0, 0, "/drvc", 0, GROUPS_ALL, CMD_DRVC_SYNTAX, CMD_DRVC_DESC, cmd_dev_disableremotevehiclecollisions },

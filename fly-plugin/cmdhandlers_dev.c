@@ -12,6 +12,20 @@ int cmd_dev__m(struct COMMANDCONTEXT cmdctx)
 	return CMD_SYNTAX_ERR;
 }
 
+#define CMD__W_SYNTAX "[weaponid]"
+#define CMD__W_DESC "Gives a weapon"
+static
+int cmd_dev__w(struct COMMANDCONTEXT cmdctx)
+{
+	int i;
+
+	if (cmd_get_int_param(&cmdctx, &i)) {
+		GivePlayerWeapon(cmdctx.playerid, i, 40);
+		return CMD_OK;
+	}
+	return CMD_SYNTAX_ERR;
+}
+
 #define CMD_CP_SYNTAX ""
 #define CMD_CP_DESC "Spawns a checkpoint"
 static

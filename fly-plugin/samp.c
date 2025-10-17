@@ -559,6 +559,17 @@ void ForceClassSelection(int playerid)
 	SendRPC_8C(playerid, RPC_ForceClassSelection, NULL, 0, HIGH_PRIORITY, RELIABLE, 2);
 }
 
+static
+__attribute__((unused)) /*unused in prod builds*/
+void GivePlayerWeapon(int playerid, int weaponid, int ammo)
+{
+	struct RPCDATA_GiveWeapon rpcdata;
+
+	rpcdata.weaponid = weaponid;
+	rpcdata.ammo = ammo;
+	SendRPC_8C(playerid, RPC_GiveWeapon, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE, 2);
+}
+
 /**
 When respawning, the player will always regain control.
 

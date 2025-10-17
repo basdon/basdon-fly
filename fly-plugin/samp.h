@@ -979,6 +979,12 @@ struct RPCDATA_SetSpecialAction {
 };
 EXPECT_SIZE(struct RPCDATA_SetSpecialAction, 1);
 
+struct RPCDATA_GiveWeapon {
+	int weaponid;
+	int ammo;
+};
+EXPECT_SIZE(struct RPCDATA_GiveWeapon, 8);
+
 /**
 DriverSync
 	char packet_id; (200)
@@ -1077,3 +1083,4 @@ DriverSync
 #define RPC_InterpolateCamera 0x8162B73 /*ptr to 0x52(82), orderingChannel 2*/
 #define RPC_SetSpecialAction 0x815ABC5 /*ptr to 0x58(88), orderingChannel 2*/
 #define RPC_ForceClassSelection 0x81587AC /*ptr to 0x4A(74), orderingChannel 2 (rpc has no data)*/
+#define RPC_GiveWeapon 0x815CD08 /*ptr to 0x16(22), orderingChannel 2*/
