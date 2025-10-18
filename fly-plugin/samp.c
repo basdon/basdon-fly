@@ -742,6 +742,7 @@ int GetPlayerWeaponState(int playerid)
 	if (playa && playa->currentState == PLAYER_STATE_ONFOOT) {
 		return playa->aimSyncData.weaponState;
 	}
+	/*samp returns 0 (WEAPONSTATE_NO_BULLETS) if the player is not connected, but that doesn't make sense*/
 	return WEAPONSTATE_UNKNOWN;
 }
 
