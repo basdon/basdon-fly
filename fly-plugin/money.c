@@ -1,6 +1,6 @@
 /**
 Money per player.
-TODO: check if we can use playerpool->playerMoney (need to check if client messages affects its value)
+TODO: we could use playerpool->playerMoney, if we hook StatsUpdate packet handling because that updates money (and drunk level) with value that client reports
 */
 static int playermoney[MAX_PLAYERS];
 

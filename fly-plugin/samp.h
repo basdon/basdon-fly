@@ -389,13 +389,15 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, interior, 0x2C40);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, _field2CDA, 0x2CDA);
 
 struct SampVehiclePool {
-	char _pad0[0xD4];
+	char numStaticVehiclesForModel[212]; /*do model&0xFF+112 to get the index in this array*/
 	int virtualworld[2000];
 	int created[2000];
 	struct SampVehicle *vehicles[2000];
-	int highestUsedVehicleid; /*"poolsize" but I find that name confusing because it's 0 if there's 1 vehicle*/
-	/*Incomplete.*/
+	int highestUsedVehicleid; /*vehicleids start with 1, so 0 means no vehicles*/
 };
+#ifndef __TINYC__
+EXPECT_SIZE(struct SampVehiclePool, 0x5E98); /*Complete*/
+#endif
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, created, 0x2014);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, vehicles, 0x3F54);
 
@@ -415,9 +417,12 @@ struct SampPlayerPool {
 	int isAdmin[1000];
 	int isNpc[1000];
 	char _pad2EA24[0x30968-0x2EA24];
-	int highestUsedPlayerid; /*"poolsize" but I find that name confusing because it's 0 if there's 1 player*/
-	/*Incomplete.*/
+	int highestUsedPlayerid; /*0 can mean either no players or one player with id 0*/
+	int _field3096C;
 };
+#ifndef __TINYC__
+EXPECT_SIZE(struct SampPlayerPool, 0x30970); /*Complete*/
+#endif
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, playerScore, 0xFAC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, gpci, 0x4E2C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, version, 0x1D8B4);
@@ -428,29 +433,90 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, names, 0x2693C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, isAdmin, 0x2CAE4);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, highestUsedPlayerid, 0x30968);
 
+struct SampObjectMaterial {
+	char materialType; /*1 texture 2 text*/
+	char materialIndex;
+	/*following fields are for texture materials*/
+	short textureModelId;
+	int textureColor;
+	char textureTxdName[65];
+	char textureTexturename[65];
+	/*following fields are for text materials*/
+	char textMaterialSize;
+	char textFontFace[65];
+	char textFontSize;
+	char textBold;
+	int textFontColor;
+	int textBackColor;
+	char textAlignment;
+};
+#ifndef __TINYC__
+EXPECT_SIZE(struct SampObjectMaterial, 0xD7); /*Complete*/
+#endif
+
+struct SampObject {
+	short objectid;
+	int model;
+	int _field6;
+	int _fieldA[12];
+	struct vec3 pos;
+	int _field46;
+	struct vec3 rot;
+	int _field56[12];
+	struct vec3 movingToPos;
+	int _field92;
+	int flags; /*lsb: isCurrentlyMoving*/
+	char noCameraCol;
+	float movementSpeed;
+	int _field9C;
+	float drawDistance;
+	short attachedToObjectId;
+	short attachedToVehiceId;
+	struct vec3 attachOffset;
+	struct vec3 attachRot;
+	char syncObjectRotation;
+	char numMaterials;
+	struct SampObjectMaterial materials[16];
+	char *materialText[16];
+};
+#ifndef __TINYC__
+EXPECT_SIZE(struct SampObject, 0xE75); /*Complete*/
+#endif
+
+struct SampObjectPool {
+	int objectIdSlotUsedForPlayerObject[1000][1000]; /*[playerid][objectid]*/
+	int isObjectIdUsedForPlayerObject[1000];
+	struct SampObject *playerObjects[1000][1000]; /*[playerid][objectid]*/
+	int isObjectIdUsedForGlobalObject[1000];
+	struct SampObject *objects[1000];
+};
+#ifndef __TINYC__
+EXPECT_SIZE(struct SampObjectPool, 0x7A40E0); /*Complete*/
+#endif
+
 struct SampNetGame {
 	void *pGameMode;
 	void *pFilterScripts;
 	struct SampPlayerPool *playerPool;
 	struct SampVehiclePool *vehiclePool;
 	int _pad10;
-	void *objectPool;
+	struct SampObjectPool *objectPool;
 	int _pad18[2];
 	void *textLabelPool;
 	void *gangzonePool;
 	void *actorPool;
 	int _pad2C[5];
 	struct RakServer *rakServer;
-	int _pad44;
-	int _pad48;
+	int timeAtLastTickRateMeasure;
+	int numTicksSinceLastTickRateMeasure;
 	int tickRate; /*GetServerTickRate()*/
-	int _pad50;
+	int isLanMode;
 	int playerMarkerMode; /*ShowPlayerMarkers(mode) (0: off, 1: global, 2: streamed)*/
 	char showNametags; /*Should be set before anyone connects.*/
 	char worldTimeHour; /*SetWorldTime(hour)*/
 	char allowInteriorWeapons; /*AllowEnteriorWeapons(enabled)*/
 	char enableStuntBonus; /*EnableStuntBonusForAll()*/
-	char _pad5C;
+	char objectsDefaultNoCameraCol; /*SetObjectsDefaultCameraCol()*/
 	char _pad5D;
 	int gamestate;
 	float gravity;
@@ -467,15 +533,26 @@ struct SampNetGame {
 	char isPlayerMarkerRadiusLimitEnabled; /*LimitPlayerMarkerRadius(float)*/
 	float playerMarkerRadiusLimit; /*LimitPlayerMarkerRadius(float), only if isPlayerMarkerRadiusLimitEnabled is 1*/
 	int vehicleFriendlyFire; /*EnableVehicleFriendlyFire() (yes this really is an int)*/
-	int _pad82;
-	int _pad86;
+	double totalSecondsProcessed;
 	int numAvailableSpawns; /*AddPlayerClass()*/
-	char _pad8B;
-	char _pad8C;
-	char _pad8D;
 	struct SpawnInfo availableSpawns[318];
-	/*Incomplete.*/
+	int _field39B2;
+	int _field39B6;
+	int _field39BA;
+	int _field39BE;
+	int _field39C2;
+	int _field39C6;
+	int _field39CA;
+	int _field39CE;
+	int _field39D2;
+	int _field39D6;
+	int _field39DA;
+	char _field39DE;
+	char _field39DF;
 };
+#ifndef __TINYC__
+EXPECT_SIZE(struct SampNetGame, 0x39E0); /*Complete*/
+#endif
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, vehiclePool, 0xC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, objectPool, 0x14);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, textLabelPool, 0x20);
@@ -487,6 +564,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, enableStuntBonus, 0x5B);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, usePlayerPedAnims, 0x6D);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, nametagDrawDistance, 0x72);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, numAvailableSpawns, 0x8A);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, availableSpawns, 0x8E);
 
 struct RPCDATA_ShowGangZone {
 	short zoneid;
