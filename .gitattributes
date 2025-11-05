@@ -5,6 +5,8 @@
 *.jpg binary
 *.png binary
 *.tpl linguist-language=HTML
+# github shows usage of "Hack" on this repo for some reason, force PHP
+*.php linguist-language=PHP
 *.pwn linguist-language=PAWN
 *.p linguist-language=PAWN
 /fly-plugin/vendor/* linguist-vendored
