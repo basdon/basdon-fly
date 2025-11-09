@@ -1088,11 +1088,11 @@ struct RPCDATA_GiveWeapon {
 };
 EXPECT_SIZE(struct RPCDATA_GiveWeapon, 8);
 
-struct RPCDATA_UpdateVehicleDamageStatus {
+struct INOUTRPCDATA_UpdateVehicleDamageStatus {
 	short vehicleid;
 	struct SampVehicleDamageStatus status;
 };
-EXPECT_SIZE(struct RPCDATA_UpdateVehicleDamageStatus, 2 + 4 + 4 + 1 + 1);
+EXPECT_SIZE(struct INOUTRPCDATA_UpdateVehicleDamageStatus, 2 + 4 + 4 + 1 + 1);
 
 /**
 DriverSync

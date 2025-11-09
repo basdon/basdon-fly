@@ -13,7 +13,7 @@ struct BitStream {
 
 struct PlayerID {
 	int binaryAddress;
-	short port;
+	unsigned short port;
 };
 EXPECT_SIZE(struct PlayerID, 0x6);
 STATIC_ASSERT_MEMBER_OFFSET(struct PlayerID, port, 0x4);
@@ -58,7 +58,9 @@ struct RakServer {
 struct RakServer_vtable {
 	int _pad0[35];
 	int (*RPC_8C)(struct RakServer *this, char *rpc, struct BitStream *bitStream, enum PacketPriority priority, enum PacketReliability reliability, char orderingChannel, struct PlayerID playerID, int bBroadcast, int bShiftTimestamp);
-	int _pad90[24];
+	int _pad90[22];
+	short (*GetIndexFromPlayerID)(struct RakServer *rakServer, struct PlayerID playerID);
+	int _padEC;
 	/**thiscall with one parameter, use RakServer__GetPlayerIDFromIndex in samp.asm*/
 	void (*GetPlayerIDFromIndex)(struct PlayerID *outPlayerID, struct RakServer *rakServer, short playerIndex);
 	int _padF4[9];
@@ -66,7 +68,14 @@ struct RakServer_vtable {
 };
 #ifndef __TINYC__ /*my tcc binaries are 64bit so ptrs will be 8 bytes instead of 4, disabling these for tcc*/
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, RPC_8C, 0x8C);
-STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetPlayerIDFromIndex, 0xF0);
-STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetStatistics, 0x118);
+STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetIndexFromPlayerID, 0xE8);
+STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetPlayerIDFromIndex, 0xF0); /*TODO: revalidate, as I think this might need to be 0xEC*/
+STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetStatistics, 0x118); /*TODO: revalidate*/
 #endif
+
+struct RakRPCHandlerArg {
+	unsigned char *rpcdata;
+	int numBits;
+	struct PlayerID playerID;
+};
 #pragma pack()

@@ -882,7 +882,7 @@ int GetVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *damage
 static
 void UpdateVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *damage_status)
 {
-	struct RPCDATA_UpdateVehicleDamageStatus rpcdata;
+	struct INOUTRPCDATA_UpdateVehicleDamageStatus rpcdata;
 	struct SampVehicle *vehicle;
 	struct PlayerID playerID;
 	struct BitStream bs;
@@ -1688,6 +1688,66 @@ void StreamInPlayer(struct SampPlayer *player, int forplayer)
 }
 
 static
+void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
+{
+	struct INOUTRPCDATA_UpdateVehicleDamageStatus *rpcdata;
+	struct SampVehicle *vehicle;
+	int playerid, vehicleid, i;
+	struct PlayerID playerID;
+	struct BitStream bs;
+#ifdef DEV
+	char msg144[144];
+#endif
+
+	if (
+		samp_pNetGame->gamestate != 1 ||
+		arg->numBits != sizeof(struct INOUTRPCDATA_UpdateVehicleDamageStatus) * 8
+	) {
+		return;
+	}
+	rpcdata = (void*) arg->rpcdata;
+	vehicleid = rpcdata->vehicleid;
+	playerid = rakServer->vtable->GetIndexFromPlayerID(rakServer, arg->playerID);
+	if (
+		(unsigned int) playerid >= MAX_PLAYERS ||
+		!playerpool->players[playerid] ||
+		(unsigned int) vehicleid >= 2000 ||
+		!(vehicle = vehiclepool->vehicles[vehicleid]) ||
+		vehicle->driverplayerid != playerid
+	) {
+		return;
+	}
+
+#ifdef DEV
+	sprintf(
+		msg144,
+		"UpdateVehicleDamageStatus pid %d vid %d panels %08X->%08X doors %08X->%08X lights %02X->%02X tires %02X->%02X",
+		playerid, vehicleid,
+		vehicle->damageStatus.panels.raw, rpcdata->status.panels.raw,
+		vehicle->damageStatus.doors.raw, rpcdata->status.doors.raw,
+		vehicle->damageStatus.broken_lights, rpcdata->status.broken_lights,
+		vehicle->damageStatus.popped_tires.raw, rpcdata->status.popped_tires.raw
+	);
+	SendClientMessageToAll(COL_SAMP_GREY, msg144);
+#endif
+
+	vehicle->damageStatus = rpcdata->status;
+
+	/*incoming rpcdata is same as outgoing*/
+	bs.ptrData = rpcdata;
+	bs.numberOfBitsUsed = arg->numBits;
+
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (i != playerid && player[i] && player[i]->vehicleStreamedIn[vehicleid]) {
+#ifndef NO_CAST_IMM_FUNCPTR
+			RakServer__GetPlayerIDFromIndex(&playerID, rakServer, i);
+			rakServer->vtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
+#endif
+		}
+	}
+}
+
+static
 void samp_init()
 {
 	samp_pNetGame = *(struct SampNetGame**) 0x81CA4BC;
@@ -1721,6 +1781,7 @@ void samp_init()
 	mem_mkjmp(0x80B1712, &OnPlayerCommandTextHook);
 	mem_mkjmp(0x80B2BA2, &OnDialogResponseHook);
 	mem_mkjmp(0x80B09D4, &OnPlayerRequestClassHook);
+	mem_mkjmp(0x80B1020, &OnRPCUpdateVehicleDamageStatus);
 
 	/*stuff to allow both 0.3.7 and 0.3.DL clients */
 	AddServerRule("artwork", "No"); /*rule that DL added, probably not needed to have but setting it anyways*/
