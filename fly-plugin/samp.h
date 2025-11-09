@@ -82,7 +82,7 @@ struct SampVehicleDamageStatus {
 			unsigned char unk : 4;
 		} structured;
 	} panels;
-	char broken_lights;
+	unsigned char broken_lights;
 	union {
 		unsigned char raw;
 		struct {

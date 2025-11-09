@@ -425,13 +425,13 @@ int cmd_dev_v(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 {
-	struct VEHICLEDAMAGE vdmg;
+	struct SampVehicleDamageStatus vdmg;
 	int vehicleid;
 	char msg144[144];
 
 	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
-	common_GetVehicleDamageStatus(vehicleid, &vdmg);
-	sprintf(msg144, "panels %X doors %X lights %02X tires %02X", vdmg.panels, vdmg.doors, vdmg.lights, vdmg.tires);
+	GetVehicleDamageStatus(vehicleid, &vdmg);
+	sprintf(msg144, "panels %08X doors %08X lights %02X tires %02X", vdmg.panels.raw, vdmg.doors.raw, vdmg.broken_lights, vdmg.popped_tires.raw);
 	SendClientMessageToAll(-1, msg144);
 	return CMD_OK;
 }
