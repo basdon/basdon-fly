@@ -869,24 +869,42 @@ int GetVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *damage
 	return 0;
 }
 
-/*XXX: hasn't really been tested thoroughly for correct functioning.*/
+/**
+ * this could use 0814BB90 ; int __cdecl SampVehicle::UpdateDamageStatus(struct SampVehicle *vehicle, __int16 playerIdThatCausedUpdate, int panels, int doors, char lights, char tires)
+ * which is used for the amx natives UpdateVehicleDamageStatus and RepairVehicle, and received DamageStatusUpdate packages.
+ * It does the following:
+ * - applies the status to the vehicle
+ * - then invokes OnVehicleDamageStatusUpdate (if playerIdThatCausedUpdate is not INVALID_PLAYER_ID)
+ * - then sends an RPC to all players that have the vehicle streamed in
+ *
+ * but I guess I like to do it myself (and so we also skip doing the "invoke script callback" check and params)
+ */
 static
 void UpdateVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *damage_status)
 {
+	struct RPCDATA_UpdateVehicleDamageStatus rpcdata;
 	struct SampVehicle *vehicle;
+	struct PlayerID playerID;
+	struct BitStream bs;
+	int i;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
+		vehicle->damageStatus = *damage_status;
+		rpcdata.vehicleid = vehicleid;
+		rpcdata.status = *damage_status;
+
+		bs.ptrData = &rpcdata;
+		bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+
+		for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+			if (player[i] && player[i]->vehicleStreamedIn[vehicleid]) {
 #ifndef NO_CAST_IMM_FUNCPTR
-		((void (*)(struct SampVehicle*,short,unsigned int,unsigned int,unsigned char,unsigned char))0x814BB90)(
-			vehicle,
-			INVALID_PLAYER_ID, /*The player that caused this update, so gamemode/filterscripts can block it (not applicable here).*/
-			damage_status->panels.raw,
-			damage_status->doors.raw,
-			damage_status->broken_lights,
-			damage_status->popped_tires.raw
-		);
+				RakServer__GetPlayerIDFromIndex(&playerID, rakServer, i);
+				rakServer->vtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
 #endif
+			}
+		}
 	}
 }
 

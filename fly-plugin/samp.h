@@ -1088,6 +1088,12 @@ struct RPCDATA_GiveWeapon {
 };
 EXPECT_SIZE(struct RPCDATA_GiveWeapon, 8);
 
+struct RPCDATA_UpdateVehicleDamageStatus {
+	short vehicleid;
+	struct SampVehicleDamageStatus status;
+};
+EXPECT_SIZE(struct RPCDATA_UpdateVehicleDamageStatus, 2 + 4 + 4 + 1 + 1);
+
 /**
 DriverSync
 	char packet_id; (200)
@@ -1187,3 +1193,4 @@ DriverSync
 #define RPC_SetSpecialAction 0x815ABC5 /*ptr to 0x58(88), orderingChannel 2*/
 #define RPC_ForceClassSelection 0x81587AC /*ptr to 0x4A(74), orderingChannel 2 (rpc has no data)*/
 #define RPC_GiveWeapon 0x815CD08 /*ptr to 0x16(22), orderingChannel 2*/
+#define RPC_UpdateVehicleDamageStatus 0x815A64D /*ptr to 0x6A(106), orderingChannel 2*/
