@@ -65,6 +65,14 @@ dt {
 dd {
 	margin-bottom: .5em;
 }
+kbd {
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	padding: .05em 0.2em;
+	margin: 0 .1em;
+	box-shadow: 1px 1px 0px #cccc;
+	background: #fafafa;
+}
 .article .s {
 	text-decoration: line-through;
 }

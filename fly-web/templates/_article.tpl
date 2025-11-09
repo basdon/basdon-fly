@@ -2,7 +2,7 @@
 <html lang=en>
 <head>
 	<title>{$article_title} :: basdon.net aviation server</title>
-	<link rel=stylesheet href=/s/article.css?v3 type=text/css>
+	<link rel=stylesheet href=/s/article.css?v4 type=text/css>
 	{@render defaulthead.tpl}
 </head>
 <body>
