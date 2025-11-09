@@ -102,6 +102,28 @@ int strhashcode(char *text)
 	return result;
 }
 
+static
+int hexdigit(char c)
+{
+	if ('0' <= c && c <= '9') return c - '0';
+	if ('A' <= c && c <= 'F') return c - 'A' + 10;
+	if ('a' <= c && c <= 'f') return c - 'a' + 10;
+	return 0;
+}
+
+static
+unsigned int hexnum(char *c, int len)
+{
+	unsigned int res = 0;
+
+	while (len-- > 0) {
+		res <<= 4;
+		res |= hexdigit(*c);
+		c++;
+	}
+	return res;
+}
+
 void common_tp_player(int playerid, struct vec4 pos)
 {
 	natives_SetPlayerPos(playerid, pos.coords);

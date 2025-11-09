@@ -154,6 +154,50 @@ int cmd_get_str_param(struct COMMANDCONTEXT *cmdctx, char *buf)
 	return 0;
 }
 
+/*
+Gets next string parameter in cmdtext after parseidx, with a limited output length.
+
+Preceding whitespace(s) are skipped.
+On match, parseidx is the index right after the value, so either space or \0.
+If more characters are present than wanted, this command will still return success. out_actual_length will be higher than out_length
+
+@param max_length maximum amount of characters that will be put in buf, excluding 0 term
+@param out_length will be set the the amount of characters put in buf, excluding 0 term. can be NULL
+@param out_actual_length will be set the length of the actual value that was read. can be NULL
+@return non-zero on success, with filled in buffer.
+*/
+static
+int cmd_get_str_param_n(struct COMMANDCONTEXT *cmdctx, char *buf, int max_length, int *out_length, int *out_actual_length)
+{
+	char *pc = cmdctx->cmdtext + cmdctx->parseidx;
+	char *pos_actual_start;
+	char *b = buf;
+
+	while (*pc == ' ') {
+		pc++;
+	}
+	pos_actual_start = pc;
+	while (max_length-- && (*b = *pc) > ' ') {
+		b++;
+		pc++;
+	}
+	if (out_length) {
+		*out_length = pc - pos_actual_start;
+	}
+	if (b - buf > 0) {
+		*b = 0;
+		while (*pc > ' ') {
+			pc++;
+		}
+		if (out_actual_length) {
+			*out_actual_length = pc - pos_actual_start;
+		}
+		cmdctx->parseidx = pc - cmdctx->cmdtext;
+		return 1;
+	}
+	return 0;
+}
+
 /**
 Gets next vehicle model parameter in cmdtext after parseidx.
 

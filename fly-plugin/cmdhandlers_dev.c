@@ -420,16 +420,35 @@ int cmd_dev_v(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-#define CMD_VDAMAGE_SYNTAX ""
-#define CMD_VDAMAGE_DESC "Prints vehicle damage status"
+#define CMD_VDAMAGE_SYNTAX "[<pppppppp> <dddddddd> <ll> <tt>]"
+#define CMD_VDAMAGE_DESC "Optionally updates, and prints vehicle damage status"
 static
 int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 {
+	char msg144[144], param_panels[9], param_doors[9], param_lights[3], param_tires[3];
 	struct SampVehicleDamageStatus vdmg;
-	int vehicleid;
-	char msg144[144];
+	int vehicleid, param_len;
 
 	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
+
+	if (cmdctx.cmdtext[cmdctx.parseidx]) {
+		if (
+			!cmd_get_str_param_n(&cmdctx, param_panels, 8, &param_len, NULL) || param_len != 8 ||
+			!cmd_get_str_param_n(&cmdctx, param_doors, 8, &param_len, NULL) || param_len != 8 ||
+			!cmd_get_str_param_n(&cmdctx, param_lights, 2, &param_len, NULL) || param_len != 2 ||
+			!cmd_get_str_param_n(&cmdctx, param_tires, 2, &param_len, NULL) || param_len != 2
+		) {
+			return CMD_SYNTAX_ERR;
+		}
+
+		vdmg.panels.raw = hexnum(param_panels, 8);
+		vdmg.doors.raw = hexnum(param_doors, 8);
+		vdmg.broken_lights = (hexdigit(param_lights[0]) << 4) | hexdigit(param_lights[1]);
+		vdmg.popped_tires.raw = (hexdigit(param_tires[0]) << 4) | hexdigit(param_tires[1]);
+
+		UpdateVehicleDamageStatus(vehicleid, &vdmg);
+	}
+
 	GetVehicleDamageStatus(vehicleid, &vdmg);
 	sprintf(msg144, "panels %08X doors %08X lights %02X tires %02X", vdmg.panels.raw, vdmg.doors.raw, vdmg.broken_lights, vdmg.popped_tires.raw);
 	SendClientMessageToAll(-1, msg144);
