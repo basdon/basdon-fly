@@ -106,7 +106,7 @@ struct SYNCDATA_Aim {
 	float aimZ;
 	/**compact value, to get the 'real' value do val/63*35+35. it seems to overflow a lot..*/
 	unsigned char cameraZoom : 6;
-	/**see WEAPONSTATE_*, cannot be -1 but GetPlayerWeaponState returns -1 if player's currentState is PLAYER_STATE_ONFOOT*/
+	/**see WEAPONSTATE_*, cannot be -1 but GetPlayerWeaponState returns -1 if player's currentState is not PLAYER_STATE_ONFOOT*/
 	unsigned char weaponState : 2;
 	/* compact value, to get the 'real' value do val/255+1. known values:
 	 * 198 (1.77 or 16:9): wide screen turned on, regardless of letterboxing
