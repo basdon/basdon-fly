@@ -892,7 +892,10 @@ void UpdateVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *da
 	if (vehicle) {
 		vehicle->damageStatus = *damage_status;
 		rpcdata.vehicleid = vehicleid;
-		rpcdata.status = *damage_status;
+		rpcdata.panels = damage_status->panels.raw;
+		rpcdata.doors = damage_status->doors.raw;
+		rpcdata.broken_lights = damage_status->broken_lights;
+		rpcdata.popped_tires = damage_status->popped_tires.raw;
 
 		bs.ptrData = &rpcdata;
 		bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
@@ -1723,15 +1726,18 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 		msg144,
 		"UpdateVehicleDamageStatus pid %d vid %d panels %08X->%08X doors %08X->%08X lights %02X->%02X tires %02X->%02X",
 		playerid, vehicleid,
-		vehicle->damageStatus.panels.raw, rpcdata->status.panels.raw,
-		vehicle->damageStatus.doors.raw, rpcdata->status.doors.raw,
-		vehicle->damageStatus.broken_lights, rpcdata->status.broken_lights,
-		vehicle->damageStatus.popped_tires.raw, rpcdata->status.popped_tires.raw
+		vehicle->damageStatus.panels.raw, rpcdata->panels,
+		vehicle->damageStatus.doors.raw, rpcdata->doors,
+		vehicle->damageStatus.broken_lights, rpcdata->broken_lights,
+		vehicle->damageStatus.popped_tires.raw, rpcdata->popped_tires
 	);
 	SendClientMessageToAll(COL_SAMP_GREY, msg144);
 #endif
 
-	vehicle->damageStatus = rpcdata->status;
+	vehicle->damageStatus.panels.raw = rpcdata->panels;
+	vehicle->damageStatus.doors.raw = rpcdata->doors;
+	vehicle->damageStatus.broken_lights = rpcdata->broken_lights;
+	vehicle->damageStatus.popped_tires.raw = rpcdata->popped_tires;
 
 	/*incoming rpcdata is same as outgoing*/
 	bs.ptrData = rpcdata;
