@@ -448,7 +448,7 @@ int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 
 		vehicle->damageStatus.panels.raw = hexnum(param_panels, 8);
 		vehicle->damageStatus.doors.raw = hexnum(param_doors, 8);
-		vehicle->damageStatus.broken_lights = (hexdigit(param_lights[0]) << 4) | hexdigit(param_lights[1]);
+		vehicle->damageStatus.broken_lights.raw = (hexdigit(param_lights[0]) << 4) | hexdigit(param_lights[1]);
 		vehicle->damageStatus.popped_tires.raw = (hexdigit(param_tires[0]) << 4) | hexdigit(param_tires[1]);
 		SyncVehicleDamageStatus(vehicle);
 	}
@@ -458,7 +458,7 @@ int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 		"panels %08X doors %08X lights %02X tires %02X",
 		vehicle->damageStatus.panels.raw,
 		vehicle->damageStatus.doors.raw,
-		vehicle->damageStatus.broken_lights,
+		vehicle->damageStatus.broken_lights.raw,
 		vehicle->damageStatus.popped_tires.raw
 	);
 	SendClientMessageToAll(-1, msg144);
