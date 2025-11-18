@@ -426,10 +426,15 @@ static
 int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 {
 	char msg144[144], param_panels[9], param_doors[9], param_lights[3], param_tires[3];
-	struct SampVehicleDamageStatus vdmg;
-	int vehicleid, param_len;
+	struct SampVehicle *vehicle;
+	int param_len;
 
-	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
+	vehicle = vehiclepool->vehicles[GetPlayerVehicleID(cmdctx.playerid)];
+
+	if (!vehicle) {
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"be in a vehicle");
+		return CMD_OK;
+	}
 
 	if (cmdctx.cmdtext[cmdctx.parseidx]) {
 		if (
@@ -441,16 +446,21 @@ int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 			return CMD_SYNTAX_ERR;
 		}
 
-		vdmg.panels.raw = hexnum(param_panels, 8);
-		vdmg.doors.raw = hexnum(param_doors, 8);
-		vdmg.broken_lights = (hexdigit(param_lights[0]) << 4) | hexdigit(param_lights[1]);
-		vdmg.popped_tires.raw = (hexdigit(param_tires[0]) << 4) | hexdigit(param_tires[1]);
-
-		UpdateVehicleDamageStatus(vehicleid, &vdmg);
+		vehicle->damageStatus.panels.raw = hexnum(param_panels, 8);
+		vehicle->damageStatus.doors.raw = hexnum(param_doors, 8);
+		vehicle->damageStatus.broken_lights = (hexdigit(param_lights[0]) << 4) | hexdigit(param_lights[1]);
+		vehicle->damageStatus.popped_tires.raw = (hexdigit(param_tires[0]) << 4) | hexdigit(param_tires[1]);
+		SyncVehicleDamageStatus(vehicle);
 	}
 
-	GetVehicleDamageStatus(vehicleid, &vdmg);
-	sprintf(msg144, "panels %08X doors %08X lights %02X tires %02X", vdmg.panels.raw, vdmg.doors.raw, vdmg.broken_lights, vdmg.popped_tires.raw);
+	sprintf(
+		msg144,
+		"panels %08X doors %08X lights %02X tires %02X",
+		vehicle->damageStatus.panels.raw,
+		vehicle->damageStatus.doors.raw,
+		vehicle->damageStatus.broken_lights,
+		vehicle->damageStatus.popped_tires.raw
+	);
 	SendClientMessageToAll(-1, msg144);
 	return CMD_OK;
 }

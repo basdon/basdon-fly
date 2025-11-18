@@ -856,57 +856,28 @@ void SetVehicleHealth(int vehicleid, float hp)
 }
 
 static
-__attribute__((unused))
-int GetVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *damage_status)
-{
-	struct SampVehicle *vehicle;
-
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
-	if (vehicle) {
-		*damage_status = vehicle->damageStatus;
-		return 1;
-	}
-	return 0;
-}
-
-/**
- * this could use 0814BB90 ; int __cdecl SampVehicle::UpdateDamageStatus(struct SampVehicle *vehicle, __int16 playerIdThatCausedUpdate, int panels, int doors, char lights, char tires)
- * which is used for the amx natives UpdateVehicleDamageStatus and RepairVehicle, and received DamageStatusUpdate packages.
- * It does the following:
- * - applies the status to the vehicle
- * - then invokes OnVehicleDamageStatusUpdate (if playerIdThatCausedUpdate is not INVALID_PLAYER_ID)
- * - then sends an RPC to all players that have the vehicle streamed in
- *
- * but I guess I like to do it myself (and so we also skip doing the "invoke script callback" check and params)
- */
-static
-void UpdateVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *damage_status)
+void SyncVehicleDamageStatus(struct SampVehicle *vehicle)
 {
 	struct INOUTRPCDATA_UpdateVehicleDamageStatus rpcdata;
-	struct SampVehicle *vehicle;
 	struct PlayerID playerID;
 	struct BitStream bs;
 	int i;
 
-	vehicle = vehiclepool->vehicles[vehicleid];
-	if (vehicle) {
-		vehicle->damageStatus = *damage_status;
-		rpcdata.vehicleid = vehicleid;
-		rpcdata.panels = damage_status->panels.raw;
-		rpcdata.doors = damage_status->doors.raw;
-		rpcdata.broken_lights = damage_status->broken_lights;
-		rpcdata.popped_tires = damage_status->popped_tires.raw;
+	rpcdata.vehicleid = vehicle->vehicleid;
+	rpcdata.panels = vehicle->damageStatus.panels.raw;
+	rpcdata.doors = vehicle->damageStatus.doors.raw;
+	rpcdata.broken_lights = vehicle->damageStatus.broken_lights;
+	rpcdata.popped_tires = vehicle->damageStatus.popped_tires.raw;
 
-		bs.ptrData = &rpcdata;
-		bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
 
-		for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
-			if (player[i] && player[i]->vehicleStreamedIn[vehicleid]) {
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (player[i] && player[i]->vehicleStreamedIn[rpcdata.vehicleid]) {
 #ifndef NO_CAST_IMM_FUNCPTR
-				RakServer__GetPlayerIDFromIndex(&playerID, rakServer, i);
-				rakServer->vtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
+			RakServer__GetPlayerIDFromIndex(&playerID, rakServer, i);
+			rakServer->vtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
 #endif
-			}
 		}
 	}
 }
@@ -1026,16 +997,12 @@ void SetVehicleEngineState(int vehicleid, char engine)
 	}
 }
 
-/**
-In the PAWN API, this function would also set the health of the vehicle to 1000.0f. Not here.
-*/
 static
-void RepairVehicle(int vehicleid)
+void RepairVehicleVisualDamage(struct SampVehicle *vehicle)
 {
-	struct SampVehicleDamageStatus damagestatus;
 	int vehiclemodel;
 
-	vehiclemodel = GetVehicleModel(vehicleid);
+	vehiclemodel = vehicle->model;
 	if (vehiclemodel == MODEL_RUSTLER ||
 		vehiclemodel == MODEL_CROPDUST ||
 		vehiclemodel == MODEL_STUNT ||
@@ -1044,14 +1011,14 @@ void RepairVehicle(int vehicleid)
 		vehiclemodel == MODEL_NEVADA)
 	{
 		/*This somehow fixes ghost doors that can happen with some planes. Thanks to Nati_Mage.*/
-		damagestatus.doors.raw = PANEL_STATE_VERYDAMAGED << 16;
+		vehicle->damageStatus.doors.raw = PANEL_STATE_VERYDAMAGED << 16;
 	} else {
-		damagestatus.doors.raw = 0;
+		vehicle->damageStatus.doors.raw = 0;
 	}
-	damagestatus.panels.raw = 0;
-	damagestatus.broken_lights = 0;
-	damagestatus.popped_tires.raw = 0;
-	UpdateVehicleDamageStatus(vehicleid, &damagestatus);
+	vehicle->damageStatus.panels.raw = 0;
+	vehicle->damageStatus.broken_lights = 0;
+	vehicle->damageStatus.popped_tires.raw = 0;
+	SyncVehicleDamageStatus(vehicle);
 }
 
 /**
