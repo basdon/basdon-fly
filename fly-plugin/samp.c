@@ -1000,16 +1000,7 @@ void SetVehicleEngineState(int vehicleid, char engine)
 static
 void RepairVehicleVisualDamage(struct SampVehicle *vehicle)
 {
-	int vehiclemodel;
-
-	vehiclemodel = vehicle->model;
-	if (vehiclemodel == MODEL_RUSTLER ||
-		vehiclemodel == MODEL_CROPDUST ||
-		vehiclemodel == MODEL_STUNT ||
-		vehiclemodel == MODEL_SHAMAL ||
-		vehiclemodel == MODEL_HYDRA ||
-		vehiclemodel == MODEL_NEVADA)
-	{
+	if (vehicleflags[vehicle->model - VEHICLE_MODEL_MIN] & NEEDS_GHOST_DOOR_FIX) {
 		/*This somehow fixes ghost doors that can happen with some planes. Thanks to Nati_Mage.*/
 		vehicle->damageStatus.doors.raw = PANEL_STATE_VERYDAMAGED << 16;
 	} else {
