@@ -1000,16 +1000,30 @@ void SetVehicleEngineState(int vehicleid, char engine)
 static
 void RepairVehicleVisualDamage(struct SampVehicle *vehicle)
 {
-	if (vehicleflags[vehicle->model - VEHICLE_MODEL_MIN] & NEEDS_GHOST_DOOR_FIX) {
-		/*This somehow fixes ghost doors that can happen with some planes. Thanks to Nati_Mage.*/
-		vehicle->damageStatus.doors.raw = PANEL_STATE_VERYDAMAGED << 16;
-	} else {
-		vehicle->damageStatus.doors.raw = 0;
-	}
+	vehicle->damageStatus.doors.raw = 0;
 	vehicle->damageStatus.panels.raw = 0;
-	vehicle->damageStatus.broken_lights.raw = 0;
 	vehicle->damageStatus.popped_tires.raw = 0;
+
+	/*
+	    Thanks to Nati_Mage for initially telling me to put the driver door to damaged to fix the 'ghost door' problem with some planes.
+	    The client calls CAutomobile::Fix when all damage is 0 (only for doors/panels/lights, not tires as those are processed
+	    separately), but for planes this can mess things up since CPlane::Fix is supposed to be used for that.
+	    So put something as damaged to ensure the Fix proc is not used. Usually the driver door is set to damaged because I guess
+	    that's what was initially thought to be the requirement for the fix(1), but since anything works I'd rather set the lights to
+	    broken because it's simpler and light damage also has no effect on planes.
+	    (1) the requirement for the fix is that not everything is 0, and putting the driver door to damaged worked because that
+	        satisfies that requirement but also there is no damaged model for plane doors so the door looks undamaged (while this
+	        state actually marks it as damaged).
+	*/
+	vehicle->damageStatus.broken_lights.raw = vehicleflags[vehicle->model - VEHICLE_MODEL_MIN] & NEEDS_GHOST_DOOR_FIX ? 1 : 0;
+
 	SyncVehicleDamageStatus(vehicle);
+
+	/*
+	    Totally unneeded but by putting the lights back on 0 here removes some client processing when this vehicle is
+	    (re)streamed as it doesn't need to apply damage that won't be visible anyways.
+	*/
+	vehicle->damageStatus.broken_lights.raw = 0;
 }
 
 /**
