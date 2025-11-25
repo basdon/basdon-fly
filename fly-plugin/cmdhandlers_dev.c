@@ -420,18 +420,47 @@ int cmd_dev_v(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-#define CMD_VDAMAGE_SYNTAX ""
-#define CMD_VDAMAGE_DESC "Prints vehicle damage status"
+#define CMD_VDAMAGE_SYNTAX "[<pppppppp> <dddddddd> <ll> <tt>]"
+#define CMD_VDAMAGE_DESC "Optionally updates, and prints vehicle damage status"
 static
 int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 {
-	struct VEHICLEDAMAGE vdmg;
-	int vehicleid;
-	char msg144[144];
+	char msg144[144], param_panels[9], param_doors[9], param_lights[3], param_tires[3];
+	struct SampVehicle *vehicle;
+	int param_len;
 
-	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
-	common_GetVehicleDamageStatus(vehicleid, &vdmg);
-	sprintf(msg144, "panels %X doors %X lights %02X tires %02X", vdmg.panels, vdmg.doors, vdmg.lights, vdmg.tires);
+	vehicle = vehiclepool->vehicles[GetPlayerVehicleID(cmdctx.playerid)];
+
+	if (!vehicle) {
+		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"be in a vehicle");
+		return CMD_OK;
+	}
+
+	if (cmdctx.cmdtext[cmdctx.parseidx]) {
+		if (
+			!cmd_get_str_param_n(&cmdctx, param_panels, 8, &param_len, NULL) || param_len != 8 ||
+			!cmd_get_str_param_n(&cmdctx, param_doors, 8, &param_len, NULL) || param_len != 8 ||
+			!cmd_get_str_param_n(&cmdctx, param_lights, 2, &param_len, NULL) || param_len != 2 ||
+			!cmd_get_str_param_n(&cmdctx, param_tires, 2, &param_len, NULL) || param_len != 2
+		) {
+			return CMD_SYNTAX_ERR;
+		}
+
+		vehicle->damageStatus.panels.raw = hexnum(param_panels, 8);
+		vehicle->damageStatus.doors.raw = hexnum(param_doors, 8);
+		vehicle->damageStatus.broken_lights.raw = (hexdigit(param_lights[0]) << 4) | hexdigit(param_lights[1]);
+		vehicle->damageStatus.popped_tires.raw = (hexdigit(param_tires[0]) << 4) | hexdigit(param_tires[1]);
+		SyncVehicleDamageStatus(vehicle);
+	}
+
+	sprintf(
+		msg144,
+		"panels %08X doors %08X lights %02X tires %02X",
+		vehicle->damageStatus.panels.raw,
+		vehicle->damageStatus.doors.raw,
+		vehicle->damageStatus.broken_lights.raw,
+		vehicle->damageStatus.popped_tires.raw
+	);
 	SendClientMessageToAll(-1, msg144);
 	return CMD_OK;
 }

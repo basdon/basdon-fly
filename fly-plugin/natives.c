@@ -10,7 +10,6 @@ static AMX_NATIVE n_GetPlayerIp;
 static AMX_NATIVE n_GetPlayerName;
 static AMX_NATIVE n_GetPlayerPing;
 static AMX_NATIVE n_GetServerTickRate;
-static AMX_NATIVE n_GetVehicleDamageStatus;
 static AMX_NATIVE n_GetVehiclePoolSize;
 static AMX_NATIVE n_GivePlayerWeapon;
 static AMX_NATIVE n_IsValidVehicle;
@@ -20,7 +19,6 @@ static AMX_NATIVE n_SetPlayerName_;
 static AMX_NATIVE n_SetVehiclePos;
 static AMX_NATIVE n_SetVehicleToRespawn;
 static AMX_NATIVE n_SetVehicleZAngle;
-static AMX_NATIVE n_UpdateVehicleDamageStatus;
 static AMX_NATIVE n_TogglePlayerControllable;
 static AMX_NATIVE n_bcrypt_check;
 static AMX_NATIVE n_bcrypt_get_hash;
@@ -231,7 +229,6 @@ int natives_find()
 		N(GetPlayerName),
 		N(GetPlayerPing),
 		N(GetServerTickRate),
-		N(GetVehicleDamageStatus),
 		N(GetVehiclePoolSize),
 		N(GivePlayerWeapon),
 		N(IsValidVehicle),
@@ -242,7 +239,6 @@ int natives_find()
 		N(SetVehicleToRespawn),
 		N(SetVehicleZAngle),
 		N(TogglePlayerControllable),
-		N(UpdateVehicleDamageStatus),
 		N(bcrypt_check),
 		N(bcrypt_get_hash),
 		N(bcrypt_hash),

@@ -369,6 +369,7 @@ static struct FAKEAMX fakeamx;
 #define PLANE 0x1
 #define HELI 0x2
 #define RETRACTABLE_GEAR 0x4
+#define NEEDS_GHOST_DOOR_FIX 0x8
 
 static unsigned int vehicleflags[VEHICLE_MODEL_TOTAL];
 /**

@@ -30,8 +30,6 @@ NATIVE_ENTRY DestroyPlayerObject
 NATIVE_ENTRY DestroyVehicle
 NATIVE_ENTRY DisablePlayerCheckpoint
 NATIVE_ENTRY DisablePlayerRaceCheckpoint
-NATIVE_ENTRY EnableStuntBonusForAll
-NATIVE_ENTRY ForceClassSelection
 NATIVE_ENTRY GetConsoleVarAsInt
 NATIVE_ENTRY GetPlayerFacingAngle
 NATIVE_ENTRY GetPlayerIp
@@ -43,7 +41,6 @@ NATIVE_ENTRY GetPlayerState
 NATIVE_ENTRY GetPlayerVehicleID
 NATIVE_ENTRY GetPlayerVehicleSeat
 NATIVE_ENTRY GetServerTickRate
-NATIVE_ENTRY GetVehicleDamageStatus
 NATIVE_ENTRY GetVehicleHealth
 NATIVE_ENTRY GetVehicleModel
 NATIVE_ENTRY GetVehicleParamsEx
@@ -69,7 +66,6 @@ NATIVE_ENTRY SetVehicleZAngle
 NATIVE_ENTRY SpawnPlayer
 NATIVE_ENTRY TogglePlayerControllable
 NATIVE_ENTRY TogglePlayerSpectating
-NATIVE_ENTRY UpdateVehicleDamageStatus
 NATIVE_ENTRY random
 NATIVE_ENTRY tickcount
 // bcrypt

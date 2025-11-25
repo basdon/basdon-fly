@@ -102,6 +102,28 @@ int strhashcode(char *text)
 	return result;
 }
 
+static
+int hexdigit(char c)
+{
+	if ('0' <= c && c <= '9') return c - '0';
+	if ('A' <= c && c <= 'F') return c - 'A' + 10;
+	if ('a' <= c && c <= 'f') return c - 'a' + 10;
+	return 0;
+}
+
+static
+unsigned int hexnum(char *c, int len)
+{
+	unsigned int res = 0;
+
+	while (len-- > 0) {
+		res <<= 4;
+		res |= hexdigit(*c);
+		c++;
+	}
+	return res;
+}
+
 void common_tp_player(int playerid, struct vec4 pos)
 {
 	natives_SetPlayerPos(playerid, pos.coords);
@@ -126,34 +148,12 @@ float common_xy_dist_sq(struct vec3 a, struct vec3 b)
 	return dx * dx + dy * dy;
 }
 
-int common_GetVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d)
-{
-	int res;
-	NC_PARS(5);
-	nc_params[1] = vehicleid;
-	nc_params[2] = buf32a;
-	nc_params[3] = buf32a + 0x4;
-	nc_params[4] = buf32a + 0x8;
-	nc_params[5] = buf32a + 0xC;
-	res = NC(n_GetVehicleDamageStatus);
-	memcpy(d, buf32, sizeof(struct VEHICLEDAMAGE));
-	return res;
-}
-
 int common_SetVehiclePos(int vehicleid, struct vec3 *pos)
 {
 	NC_PARS(4);
 	nc_params[1] = vehicleid;
 	memcpy(nc_params + 2, pos, sizeof(struct vec3));
 	return NC(n_SetVehiclePos);
-}
-
-int common_UpdateVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d)
-{
-	NC_PARS(5);
-	nc_params[1] = vehicleid;
-	memcpy(nc_params + 2, d, sizeof(struct VEHICLEDAMAGE));
-	return NC(n_UpdateVehicleDamageStatus);
 }
 
 static

@@ -41,6 +41,8 @@ static unsigned short _cc[MAX_PLAYERS];
 static int userid[MAX_PLAYERS];
 short players[MAX_PLAYERS];
 int playercount;
+int vehicleflags[611];
+#define NEEDS_GHOST_DOOR_FIX 8
 unsigned char playeronlineflag[MAX_PLAYERS];
 char is_player_using_client_version_DL[MAX_PLAYERS];
 struct {

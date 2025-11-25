@@ -4,14 +4,6 @@
 /*prototype for commonly used struct*/
 struct dbvehicle;
 
-struct VEHICLEDAMAGE {
-	unsigned int panels;
-	unsigned int doors;
-	unsigned int lights;
-	unsigned int tires;
-};
-EXPECT_SIZE(struct VEHICLEDAMAGE, 4 * sizeof(cell));
-
 /**
 Convert char string to cell string.
 
@@ -217,23 +209,11 @@ float common_dist_sq(struct vec3 a, struct vec3 b);
 */
 float common_xy_dist_sq(struct vec3 a, struct vec3 b);
 /**
-Convenience method for GetVehicleDamageStatus.
-
-Uses buf32.
-*/
-int common_GetVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d);
-/**
 Convenience method to set a vehicle's pos to given vec3 struct.
 
 Uses buf32 buf64 buf144.
 */
 int common_SetVehiclePos(int vehicleid, struct vec3 *pos);
-/**
-Convenience method for UpdateVehicleDamageStatus.
-
-Uses buf32.
-*/
-int common_UpdateVehicleDamageStatus(int vehicleid, struct VEHICLEDAMAGE *d);
 /**
 Check a string agains its hash.
 

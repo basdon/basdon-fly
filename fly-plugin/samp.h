@@ -50,23 +50,23 @@ EXPECT_SIZE(struct SampVehicleParams, 0x10);
 #define PANEL_STATE_VERYDAMAGED 0x2
 #define PANEL_STATE_REMOVED 0x3
 
-#define LIGHT_STATE_BROKEN_FRONT_LEFT 0x1
-#define LIGHT_STATE_BROKEN_FRONT_RIGHT 0x4
-#define LIGHT_STATE_BROKEN_BACK 0x40
+#define LIGHT_FRONT_LEFT 0x1
+#define LIGHT_FRONT_RIGHT 0x4
+#define LIGHT_BACK 0x40
 
-#define TIRE_STATE_POPPED_BACK_RIGHT 0x1
-#define TIRE_STATE_POPPED_FRONT_RIGHT 0x2
-#define TIRE_STATE_POPPED_BACK_LEFT 0x4
-#define TIRE_STATE_POPPED_FRONT_LEFT 0x8
+#define TIRE_BACK_RIGHT 0x1
+#define TIRE_FRONT_RIGHT 0x2
+#define TIRE_BACK_LEFT 0x4
+#define TIRE_FRONT_LEFT 0x8
 
 struct SampVehicleDamageStatus {
 	union {
 		unsigned int raw;
 		struct {
-			unsigned char passenger;
-			unsigned char driver;
-			unsigned char trunk;
 			unsigned char hood;
+			unsigned char trunk;
+			unsigned char driver;
+			unsigned char passenger;
 		} structured;
 	} doors;
 	union {
@@ -79,10 +79,20 @@ struct SampVehicleDamageStatus {
 			unsigned char windshield : 4;
 			unsigned char front_bumper : 4;
 			unsigned char rear_bumper : 4;
-			unsigned char unk : 4;
+			unsigned char pad : 4;
 		} structured;
 	} panels;
-	char broken_lights;
+	union {
+		unsigned char raw;
+		struct {
+			unsigned char front_left : 1;
+			unsigned char pad0_1 : 1;
+			unsigned char front_right : 1;
+			unsigned char pad0_3 : 3;
+			unsigned char back : 1;
+			unsigned char pad0_7 : 1;
+		} structured;
+	} broken_lights;
 	union {
 		unsigned char raw;
 		struct {
@@ -90,7 +100,7 @@ struct SampVehicleDamageStatus {
 			unsigned char front_right : 1;
 			unsigned char back_left : 1;
 			unsigned char front_left : 1;
-			unsigned char padding : 4;
+			unsigned char pad : 4;
 		} structured;
 	} popped_tires;
 };
@@ -1088,6 +1098,17 @@ struct RPCDATA_GiveWeapon {
 };
 EXPECT_SIZE(struct RPCDATA_GiveWeapon, 8);
 
+struct INOUTRPCDATA_UpdateVehicleDamageStatus {
+	short vehicleid;
+	/*this order is different from SampVehicleDamageStatus, as panels & doors are swapped!
+	 *the CreateVehicle RPC does use the same order as SampVehicleDamageStatus*/
+	unsigned int panels;
+	unsigned int doors;
+	unsigned char broken_lights;
+	unsigned char popped_tires;
+};
+EXPECT_SIZE(struct INOUTRPCDATA_UpdateVehicleDamageStatus, 2 + 4 + 4 + 1 + 1);
+
 /**
 DriverSync
 	char packet_id; (200)
@@ -1187,3 +1208,4 @@ DriverSync
 #define RPC_SetSpecialAction 0x815ABC5 /*ptr to 0x58(88), orderingChannel 2*/
 #define RPC_ForceClassSelection 0x81587AC /*ptr to 0x4A(74), orderingChannel 2 (rpc has no data)*/
 #define RPC_GiveWeapon 0x815CD08 /*ptr to 0x16(22), orderingChannel 2*/
+#define RPC_UpdateVehicleDamageStatus 0x815A64D /*ptr to 0x6A(106), orderingChannel 2*/

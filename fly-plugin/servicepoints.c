@@ -227,6 +227,7 @@ To be called from the /repair or /fix command.
 static
 int svp_repair(int playerid)
 {
+	struct SampVehicle *vehicle;
 	struct dbvehicle *veh;
 	struct vec3 vpos;
 	int vehicleid, driverid, driveruserid, budget, svpid, cost, vehid;
@@ -234,7 +235,8 @@ int svp_repair(int playerid)
 	char msg144[144];
 
 	vehicleid = GetPlayerVehicleID(playerid);
-	if (!vehicleid) {
+	vehicle = vehiclepool->vehicles[vehicleid];
+	if (!vehicle) {
 		return CMD_OK;
 	}
 
@@ -272,7 +274,7 @@ int svp_repair(int playerid)
 	hp += fixamount;
 	money_take(playerid, cost);
 
-	RepairVehicle(vehicleid);
+	RepairVehicleVisualDamage(vehicle);
 	SetVehicleHealth(vehicleid, hp);
 
 	if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {

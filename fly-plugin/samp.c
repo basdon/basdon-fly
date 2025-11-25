@@ -856,37 +856,29 @@ void SetVehicleHealth(int vehicleid, float hp)
 }
 
 static
-__attribute__((unused))
-int GetVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *damage_status)
+void SyncVehicleDamageStatus(struct SampVehicle *vehicle)
 {
-	struct SampVehicle *vehicle;
+	struct INOUTRPCDATA_UpdateVehicleDamageStatus rpcdata;
+	struct PlayerID playerID;
+	struct BitStream bs;
+	int i;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
-	if (vehicle) {
-		*damage_status = vehicle->damageStatus;
-		return 1;
-	}
-	return 0;
-}
+	rpcdata.vehicleid = vehicle->vehicleid;
+	rpcdata.panels = vehicle->damageStatus.panels.raw;
+	rpcdata.doors = vehicle->damageStatus.doors.raw;
+	rpcdata.broken_lights = vehicle->damageStatus.broken_lights.raw;
+	rpcdata.popped_tires = vehicle->damageStatus.popped_tires.raw;
 
-/*XXX: hasn't really been tested thoroughly for correct functioning.*/
-static
-void UpdateVehicleDamageStatus(int vehicleid, struct SampVehicleDamageStatus *damage_status)
-{
-	struct SampVehicle *vehicle;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
-	if (vehicle) {
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (player[i] && player[i]->vehicleStreamedIn[rpcdata.vehicleid]) {
 #ifndef NO_CAST_IMM_FUNCPTR
-		((void (*)(struct SampVehicle*,short,unsigned int,unsigned int,unsigned char,unsigned char))0x814BB90)(
-			vehicle,
-			INVALID_PLAYER_ID, /*The player that caused this update, so gamemode/filterscripts can block it (not applicable here).*/
-			damage_status->panels.raw,
-			damage_status->doors.raw,
-			damage_status->broken_lights,
-			damage_status->popped_tires.raw
-		);
+			RakServer__GetPlayerIDFromIndex(&playerID, rakServer, i);
+			rakServer->vtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
 #endif
+		}
 	}
 }
 
@@ -1005,32 +997,33 @@ void SetVehicleEngineState(int vehicleid, char engine)
 	}
 }
 
-/**
-In the PAWN API, this function would also set the health of the vehicle to 1000.0f. Not here.
-*/
 static
-void RepairVehicle(int vehicleid)
+void RepairVehicleVisualDamage(struct SampVehicle *vehicle)
 {
-	struct SampVehicleDamageStatus damagestatus;
-	int vehiclemodel;
+	vehicle->damageStatus.doors.raw = 0;
+	vehicle->damageStatus.panels.raw = 0;
+	vehicle->damageStatus.popped_tires.raw = 0;
 
-	vehiclemodel = GetVehicleModel(vehicleid);
-	if (vehiclemodel == MODEL_RUSTLER ||
-		vehiclemodel == MODEL_CROPDUST ||
-		vehiclemodel == MODEL_STUNT ||
-		vehiclemodel == MODEL_SHAMAL ||
-		vehiclemodel == MODEL_HYDRA ||
-		vehiclemodel == MODEL_NEVADA)
-	{
-		/*This somehow fixes ghost doors that can happen with some planes. Thanks to Nati_Mage.*/
-		damagestatus.doors.raw = PANEL_STATE_VERYDAMAGED << 16;
-	} else {
-		damagestatus.doors.raw = 0;
-	}
-	damagestatus.panels.raw = 0;
-	damagestatus.broken_lights = 0;
-	damagestatus.popped_tires.raw = 0;
-	UpdateVehicleDamageStatus(vehicleid, &damagestatus);
+	/*
+	    Thanks to Nati_Mage for initially telling me to put the driver door to damaged to fix the 'ghost door' problem with some planes.
+	    The client calls CAutomobile::Fix when all damage is 0 (only for doors/panels/lights, not tires as those are processed
+	    separately), but for planes this can mess things up since CPlane::Fix is supposed to be used for that.
+	    So put something as damaged to ensure the Fix proc is not used. Usually the driver door is set to damaged because I guess
+	    that's what was initially thought to be the requirement for the fix(1), but since anything works I'd rather set the lights to
+	    broken because it's simpler and light damage also has no effect on planes.
+	    (1) the requirement for the fix is that not everything is 0, and putting the driver door to damaged worked because that
+	        satisfies that requirement but also there is no damaged model for plane doors so the door looks undamaged (while this
+	        state actually marks it as damaged).
+	*/
+	vehicle->damageStatus.broken_lights.raw = vehicleflags[vehicle->model - VEHICLE_MODEL_MIN] & NEEDS_GHOST_DOOR_FIX ? 1 : 0;
+
+	SyncVehicleDamageStatus(vehicle);
+
+	/*
+	    Totally unneeded but by putting the lights back on 0 here removes some client processing when this vehicle is
+	    (re)streamed as it doesn't need to apply damage that won't be visible anyways.
+	*/
+	vehicle->damageStatus.broken_lights.raw = 0;
 }
 
 /**
@@ -1670,6 +1663,69 @@ void StreamInPlayer(struct SampPlayer *player, int forplayer)
 }
 
 static
+void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
+{
+	struct INOUTRPCDATA_UpdateVehicleDamageStatus *rpcdata;
+	struct SampVehicle *vehicle;
+	int playerid, vehicleid, i;
+	struct PlayerID playerID;
+	struct BitStream bs;
+#ifdef DEV
+	char msg144[144];
+#endif
+
+	if (
+		samp_pNetGame->gamestate != 1 ||
+		arg->numBits != sizeof(struct INOUTRPCDATA_UpdateVehicleDamageStatus) * 8
+	) {
+		return;
+	}
+	rpcdata = (void*) arg->rpcdata;
+	vehicleid = rpcdata->vehicleid;
+	playerid = rakServer->vtable->GetIndexFromPlayerID(rakServer, arg->playerID);
+	if (
+		(unsigned int) playerid >= MAX_PLAYERS ||
+		!playerpool->players[playerid] ||
+		(unsigned int) vehicleid >= 2000 ||
+		!(vehicle = vehiclepool->vehicles[vehicleid]) ||
+		vehicle->driverplayerid != playerid
+	) {
+		return;
+	}
+
+#ifdef DEV
+	sprintf(
+		msg144,
+		"UpdateVehicleDamageStatus pid %d vid %d panels %08X->%08X doors %08X->%08X lights %02X->%02X tires %02X->%02X",
+		playerid, vehicleid,
+		vehicle->damageStatus.panels.raw, rpcdata->panels,
+		vehicle->damageStatus.doors.raw, rpcdata->doors,
+		vehicle->damageStatus.broken_lights.raw, rpcdata->broken_lights,
+		vehicle->damageStatus.popped_tires.raw, rpcdata->popped_tires
+	);
+	SendClientMessageToAll(COL_SAMP_GREY, msg144);
+#endif
+
+	vehicle->damageStatus.panels.raw = rpcdata->panels;
+	vehicle->damageStatus.doors.raw = rpcdata->doors;
+	vehicle->damageStatus.broken_lights.raw = rpcdata->broken_lights;
+	vehicle->damageStatus.popped_tires.raw = rpcdata->popped_tires;
+
+	/*incoming rpcdata is same as outgoing*/
+	bs.ptrData = rpcdata;
+	bs.numberOfBitsUsed = arg->numBits;
+
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (i != playerid && player[i] && player[i]->vehicleStreamedIn[vehicleid]) {
+#ifndef NO_CAST_IMM_FUNCPTR
+			RakServer__GetPlayerIDFromIndex(&playerID, rakServer, i);
+			rakServer->vtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
+#endif
+		}
+	}
+}
+
+static
 void samp_init()
 {
 	samp_pNetGame = *(struct SampNetGame**) 0x81CA4BC;
@@ -1703,6 +1759,7 @@ void samp_init()
 	mem_mkjmp(0x80B1712, &OnPlayerCommandTextHook);
 	mem_mkjmp(0x80B2BA2, &OnDialogResponseHook);
 	mem_mkjmp(0x80B09D4, &OnPlayerRequestClassHook);
+	mem_mkjmp(0x80B1020, &OnRPCUpdateVehicleDamageStatus);
 
 	/*stuff to allow both 0.3.7 and 0.3.DL clients */
 	AddServerRule("artwork", "No"); /*rule that DL added, probably not needed to have but setting it anyways*/

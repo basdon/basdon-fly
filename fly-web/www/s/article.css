@@ -73,6 +73,19 @@ kbd {
 	box-shadow: 1px 1px 0px #cccc;
 	background: #fafafa;
 }
+details {
+	border: 3px solid transparent;
+}
+details[open] {
+	border: 3px solid #ddd;
+	padding: 0 .5em;
+}
+details[open] > summary {
+	margin: 0 -.5em;
+}
+summary {
+	cursor: pointer;
+}
 .article .s {
 	text-decoration: line-through;
 }
