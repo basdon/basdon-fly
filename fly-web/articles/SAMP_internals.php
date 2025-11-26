@@ -28,8 +28,13 @@
 	<li><code>/pagesize &lt;size&gt;</code> - sets amount of lines that the chat window shows on screen
 	<li><code>/q</code> - alias of <code>/quit</code>
 	<li><code>/quit</code> - quit the game
-	<li><code>/rcon &gt;command&lt;</code> - sends rcon commands to the server
-	<li><code>/rs [comment]</code> - saves current <code>x,y,z,facingAngle</code> position in <code>Documents\GTA San Andreas User Files\SAMP\rawpositions.txt</code>
+	<li><code>/rcon &lt;command&gt;</code> - sends rcon commands to the server
+	<li>
+		<code>/rs [comment]</code> - saves current position, depending on your state:
+		<ul>
+			<li>when on foot, saves <code>x,y,z,facingAngle ; comment</code> in <code>Documents\GTA San Andreas User Files\SAMP\rawpositions.txt</code>
+			<li>when in car, saves <code>model,x,y,z,heading,col1,col2 ; comment</code> in <code>rawvehicles.txt</code> <strong>in your game folder</strong> (this seems like an oversight and was probably supposed to be in User Files too)
+		</ul>
 	<li>
 		<code>/save [comment]</code> - saves current position in <code>Documents\GTA San Andreas User Files\SAMP\savedpositions.txt</code> formatted as a
 		<a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#AddPlayerClass><code>AddPlayerClass</code></a><img src=/s/moin-www.png alt="globe icon" title="external link"> or
@@ -55,14 +60,14 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 	Some vehicle things are handled differently by the client depending on the category of the vehicle.
 	The category of a vehicle is determined at runtime by its vtable. SAMP defines following categories:
 <ul>
-	<li>uncategorized/trailer (0)
-	<li>automobile (1) (vtable <code>0x871120</code>)
-	<li>motorcycle (2) (vtable <code>0x871360</code>)
-	<li>heli (3) (vtable <code>0x871680</code>)
-	<li>boat (4) (vtable <code>0x8721A0</code>)
-	<li>plane (5) (vtable <code>0x871948</code>)
-	<li>bike (6) (vtable <code>0x871528</code>)
-	<li>train (7) (vtable <code>0x872370</code>)
+	<li>0: other, which effectively is: trailer/monstertruck(+dune/dumper)/quadbike<strong><sup>(1)</sup></strong>
+	<li>1: automobile (vtable <code>0x871120</code>)
+	<li>2: motorcycle (vtable <code>0x871360</code>)
+	<li>3: heli (vtable <code>0x871680</code>)
+	<li>4: boat (vtable <code>0x8721A0</code>)
+	<li>5: plane (vtable <code>0x871948</code>)
+	<li>6: bike (vtable <code>0x871528</code>)
+	<li>7: train (vtable <code>0x872370</code>)
 </ul>
 <details>
 	<summary>Full vehicle list</summary>
@@ -77,7 +82,7 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 			<tr><td>403<td>0x871120<td>1<td>Linerunner
 			<tr><td>404<td>0x871120<td>1<td>Perennial
 			<tr><td>405<td>0x871120<td>1<td>Sentinel
-			<tr><td>406<td>0x8717D8<td>0<td>Dumper
+			<tr><td>406<td>0x8717D8<td>0<strong><sup>(1)</sup><td>Dumper
 			<tr><td>407<td>0x871120<td>1<td>Fire Truck
 			<tr><td>408<td>0x871120<td>1<td>Trashmaster
 			<tr><td>409<td>0x871120<td>1<td>Stretch
@@ -115,7 +120,7 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 			<tr><td>441<td>0x871120<td>1<td>RC Bandit
 			<tr><td>442<td>0x871120<td>1<td>Romero
 			<tr><td>443<td>0x871120<td>1<td>Packer
-			<tr><td>444<td>0x8717D8<td>0<td>Monster
+			<tr><td>444<td>0x8717D8<td>0<strong><sup>(1)</sup><td>Monster
 			<tr><td>445<td>0x871120<td>1<td>Admiral
 			<tr><td>446<td>0x8721A0<td>4<td>Squalo
 			<tr><td>447<td>0x871680<td>3<td>Seasparrow
@@ -142,7 +147,7 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 			<tr><td>468<td>0x871360<td>2<td>Sanchez
 			<tr><td>469<td>0x871680<td>3<td>Sparrow
 			<tr><td>470<td>0x871120<td>1<td>Patriot
-			<tr><td>471<td>0x871AE8<td>0<td>Quadbike
+			<tr><td>471<td>0x871AE8<td>0<strong><sup>(1)</sup><td>Quadbike
 			<tr><td>472<td>0x8721A0<td>4<td>Coast Guard
 			<tr><td>473<td>0x8721A0<td>4<td>Dinghy
 			<tr><td>474<td>0x871120<td>1<td>Hermes
@@ -225,8 +230,8 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 			<tr><td>553<td>0x871948<td>5<td>Nevada
 			<tr><td>554<td>0x871120<td>1<td>Yosemite
 			<tr><td>555<td>0x871120<td>1<td>Windsor
-			<tr><td>556<td>0x8717D8<td>0<td>Monster A
-			<tr><td>557<td>0x8717D8<td>0<td>Monster B
+			<tr><td>556<td>0x8717D8<td>0<strong><sup>(1)</sup><td>Monster A
+			<tr><td>557<td>0x8717D8<td>0<strong><sup>(1)</sup><td>Monster B
 			<tr><td>558<td>0x871120<td>1<td>Uranus
 			<tr><td>559<td>0x871120<td>1<td>Jester
 			<tr><td>560<td>0x871120<td>1<td>Sultan
@@ -242,7 +247,7 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 			<tr><td>570<td>0x871120<td>7<td>Brown Streak Carriage
 			<tr><td>571<td>0x871120<td>1<td>Kart
 			<tr><td>572<td>0x871120<td>1<td>Mower
-			<tr><td>573<td>0x8717D8<td>0<td>Dune
+			<tr><td>573<td>0x8717D8<td>0<strong><sup>(1)</sup><td>Dune
 			<tr><td>574<td>0x871120<td>1<td>Sweeper
 			<tr><td>575<td>0x871120<td>1<td>Broadway
 			<tr><td>576<td>0x871120<td>1<td>Tornado
@@ -284,9 +289,15 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 		</tbody>
 	</table>
 </details>
+
+<h4>Notes</h4>
+
 <p>
-	Besides trailers having category 0, following (maybe unexpected) vehicles also have category 0:
-	<strong>Dumper, Monster, Monster A, Monster B, Quadbike, Dune</strong>.
+	<strong><sup>(1)</sup></strong> vehicles with a vtable that isn't one of the explicitely checked values
+	are put in category 0. Besides all trailers, this also (maybe unexpectedly) includes
+	<strong>Dumper, Monster, Monster A, Monster B, Quadbike, Dune</strong>. This is because the Dumper, Dune
+	and all Monster vehicles are instances of <code>CMonsterTruck</code> and the Quadbike has its own unique
+	<code>CQuadBike</code> class.
 
 <h3 id=vehicle_damage_status>Vehicle damage status</h3>
 
