@@ -1002,28 +1002,35 @@ void RepairVehicleVisualDamage(struct SampVehicle *vehicle)
 {
 	vehicle->damageStatus.doors.raw = 0;
 	vehicle->damageStatus.panels.raw = 0;
+	vehicle->damageStatus.broken_lights.raw = 0;
 	vehicle->damageStatus.popped_tires.raw = 0;
-
-	/*
-	    Thanks to Nati_Mage for initially telling me to put the driver door to damaged to fix the 'ghost door' problem with some planes.
-	    The client calls CAutomobile::Fix when all damage is 0 (only for doors/panels/lights, not tires as those are processed
-	    separately), but for planes this can mess things up since CPlane::Fix is supposed to be used for that.
-	    So put something as damaged to ensure the Fix proc is not used. Usually the driver door is set to damaged because I guess
-	    that's what was initially thought to be the requirement for the fix(1), but since anything works I'd rather set the lights to
-	    broken because it's simpler and light damage also has no effect on planes.
-	    (1) the requirement for the fix is that not everything is 0, and putting the driver door to damaged worked because that
-	        satisfies that requirement but also there is no damaged model for plane doors so the door looks undamaged (while this
-	        state actually marks it as damaged).
-	*/
-	vehicle->damageStatus.broken_lights.raw = vehicleflags[vehicle->model - VEHICLE_MODEL_MIN] & NEEDS_GHOST_DOOR_FIX ? 1 : 0;
-
 	SyncVehicleDamageStatus(vehicle);
 
-	/*
-	    Totally unneeded but by putting the lights back on 0 here removes some client processing when this vehicle is
-	    (re)streamed as it doesn't need to apply damage that won't be visible anyways.
-	*/
-	vehicle->damageStatus.broken_lights.raw = 0;
+	/*thanks to Nati_Mage for telling me to put the driver door to damaged to fix the 'ghost door' problem with some planes*/
+	if (vehicleflags[vehicle->model - VEHICLE_MODEL_MIN] & NEEDS_GHOST_DOOR_FIX) {
+		/*
+		    The damage update above results in clients calling the game function CAutomobile::Fix on the vehicle.
+		    (Having all doors+panels+lights on 0 results in CAutomobile::Fix, and otherwise CAutomobile::mCC.)
+		    Since CPlane::Fix is supposed to be used for planes instead (but it isn't), this creates a side-effect for
+		    some plane models: the door will not have an open/close animation anymore and the player will just clip through.
+		    This can be fixed by applying any kind of damage again (no clue why). We can go for damaging the pilot's door,
+		    since plane doors don't have damage models anyways, but just using the light damage status seems simpler.
+		    Note that we cannot immediately do it this way (without doing a damage update with doors+panels+lights all 0)
+		    because while it will functionally fix the handling, it may not completely fix visual damage as ailerons might
+		    still hang loosely if we do not let it call CAutomobile::Fix.
+		*/
+		vehicle->damageStatus.broken_lights.raw = 1;
+
+		SyncVehicleDamageStatus(vehicle);
+
+		/*
+		    Totally unneeded but by putting the lights back on 0 here removes some client processing when this vehicle is
+		    (re)streamed as it doesn't need to apply damage that won't be visible anyways. But it also feels more right
+		    to put this damage back to 0 since we fixed the vehicle, above hack is only to fix quirks for players that have
+		    the vehicle streamed in anyways.
+		*/
+		vehicle->damageStatus.broken_lights.raw = 0;
+	}
 }
 
 /**
