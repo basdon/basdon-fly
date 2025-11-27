@@ -447,6 +447,7 @@ void init_vehicle_msptypes()
 	vehicle_msptypes[MODEL_POLMAV] = SETTING__POLMAV_MSPTYPES;
 	vehicle_msptypes[MODEL_RAINDANC] = SETTING__RAINDANC_MSPTYPES;
 	vehicle_msptypes[MODEL_RUSTLER] = SETTING__RUSTLER_MSPTYPES;
+	vehicle_msptypes[MODEL_SEASPAR] = SETTING__SEASPAR_MSPTYPES;
 	vehicle_msptypes[MODEL_SHAMAL] = SETTING__SHAMAL_MSPTYPES;
 	vehicle_msptypes[MODEL_SKIMMER] = SETTING__SKIMMER_MSPTYPES;
 	vehicle_msptypes[MODEL_SPARROW] = SETTING__SPARROW_MSPTYPES;
