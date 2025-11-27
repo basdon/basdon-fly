@@ -38,9 +38,8 @@ ob_start();
 <style>
 #mpta th,#mpta td {
 	padding: .2em .4em;
-}
-#mpta td, #mpta th {
 	text-align: center;
+	white-space: nowrap;
 }
 #mpta tr>td:first-child {
 	background: #dc6;
