@@ -10,15 +10,15 @@ require '../inc/conf.php';
 require '../inc/db.php';
 
 $ILS_DIST = 1500;
-$imgwh = 900;
-$dim = 40000;
+$imgwh = 3000;
+$dim = 70000;
 if (isset($_GET['s'])) {
 	$dim = 6000;
 }
 if (isset($_GET['dim'])) {
 	$dim = $_GET['dim'];
 }
-if ($dim > 40000) {
+if ($dim > 80000) {
 	die();
 }
 $rwwidth = max(1, (int) (5 - ($dim - 6000) / 32000 * 5));
@@ -28,7 +28,7 @@ $scale = $imgwh / $dim;
 $offx = (($dim / 2) + $centerx) * $scale;
 $offy = (($dim / 2) + $centery) * $scale;
 
-$NDBSIZE = 22 - (12 / (40000 - 6000) * ($dim - 6000));
+$NDBSIZE = 22/* - (12 / (40000 - 6000) * ($dim - 6000))*/;
 $SHOWRUNWAYIDS = $dim < 15000;
 $DRAWTEXT = $dim < 25000;
 
@@ -110,7 +110,7 @@ try {
 	$ox = 0;
 	$oy = 0;
 	$draw = false;
-	foreach ($db->query('SELECT r.x rx,r.y ry,r.n,r.h,r.s,a.c,a.b,a.x ax,a.y ay FROM rnw r JOIN apt a ON r.a=a.i WHERE r.type=1 ORDER BY r.a,r.i') as $r) {
+	foreach ($db->query('SELECT r.x rx,r.y ry,r.n,r.h,r.s,a.c,a.x ax,a.y ay FROM rnw r JOIN apt a ON r.a=a.i WHERE r.type=1 ORDER BY r.a,r.i') as $r) {
 		$code = $r->c;
 		if (array_key_exists($code, $appos)) {
 			$appos[$code][0] = max($appos[$code][0], xcoord($r->rx));
@@ -136,9 +136,9 @@ try {
 
 			if ($DRAWTEXT) {
 				$off = $NDBSIZE * sqrt(2) / 2;
-				$x = $ax - $off - strlen($r->b) * imagefontwidth($codefont);
+				$x = $ax - $off - strlen($code) * imagefontwidth($codefont);
 				$y = $ay - $off - imagefontheight($codefont) + 4;
-				imagestring($im, $codefont, $x, $y, $r->b, $color_ndb_a);
+				imagestring($im, $codefont, $x, $y, $code, $color_ndb_a);
 			}
 
 			/*
@@ -238,7 +238,7 @@ if (!$d) header('Content-Type: image/png');
 
 ob_start();
 imagepng($im);
-file_put_contents('map.png', ob_get_contents());
+file_put_contents('../www/map.png', ob_get_contents());
 ob_end_flush();
 
 imagedestroy($im);
