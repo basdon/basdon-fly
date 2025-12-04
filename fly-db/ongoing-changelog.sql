@@ -112,3 +112,6 @@ INSERT INTO chg(stamp,entry) VALUES
 
 INSERT INTO chg(stamp,entry) VALUES
 ('2025 Sep 15', 'New destination: Santiago de Chile City (STCL)');
+
+INSERT INTO chg(stamp,entry) VALUES
+('2025 Dec 04', 'New destination: Robinson Airport (RBSN)');

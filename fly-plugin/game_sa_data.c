@@ -1312,6 +1312,8 @@ struct REGION {
 #define ZONE_STCL 191
 #define ZONE_STCL_AIRPORT 192
 #define ZONE_STCL_CITY 193
+#define ZONE_RBSN 194
+#define ZONE_RBSN_AIRPORT 195
 
 /* see info.zon and american.gxt */
 static char *zonenames[] = {
@@ -1509,6 +1511,8 @@ static char *zonenames[] = {
 	"Santiago de Chile City",
 	"Airport",
 	"City",
+	"Robinson Airport",
+	"Airport",
 };
 
 static struct REGION regions[] = {
@@ -1531,6 +1535,7 @@ static struct REGION regions[] = {
 	R(-8749.75f, 2049.53f, -242.99f, -5855.87f, 4094.04f, 900.0f, ZONE_WMRE),
 	R(-17208.88f, 11002.07f, -242.99f, -14165.53f, 13927.73f, 900.0f, ZONE_MORR),
 	R(23535.30f, -271.16f, -242.99f, 26031.99f, 3363.98f, 900.0f, ZONE_STCL),
+	R(4229.39f, -24099.54f, -242.99f, 5409.08f, -20143.65f, 900.0f, ZONE_RBSN),
 	#undef R
 };
 
@@ -1979,6 +1984,9 @@ static struct ZONE zones[] = {
 	{ 24247.81f, 1247.81f, 0.0f, 24962.48f, 2373.96f, 200.0f, ZONE_STCL_AIRPORT },
 	{ 24325.67f, 929.68f, 0.0f, 24891.08f, 1106.90f, 200.0f, ZONE_STCL_CITY },
 	/* end STCL region zones */
+	/* start RBSN region zones */
+	{ 4326.06f, -22839.11f, 0.0f, 5341.34f, -21334.56f, 200.0f, ZONE_RBSN_AIRPORT },
+	/* end RBSN region zones */
 };
 
 static int regioncount = sizeof(regions)/sizeof(regions[0]);

@@ -7,7 +7,7 @@ by checking if that entire cluster of objects and zones should be streamed in or
 individual objects/zones are being sent to the client per map tick.
 */
 
-#define MAX_MAPS (50)
+#define MAX_MAPS (51)
 #define MAP_MAX_FILENAME (34) /*see db col*/
 #define MAX_REMOVED_OBJECTS 1000
 

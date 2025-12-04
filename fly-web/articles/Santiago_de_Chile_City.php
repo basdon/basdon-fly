@@ -14,7 +14,7 @@
 <p>
 	There are three service points, two close together at the airport and one at a gas station.
 <figure>
-	<img src=/s/articles/stcl_sp_ap.jpg alt="Airport service point" title="Airport service point">
+	<img src=/s/articles/stcl_sp_ap.jpg alt="Airport service points" title="Airport service points">
 	<figcaption>Airport service points</figcaption>
 </figure><figure>
 	<img src=/s/articles/stcl_sp_gas.jpg alt=">Gas station service point" title=">Gas station service point">
