@@ -1,5 +1,7 @@
 #define CURRENT_SURVEY_ID 1
 
+static char survey_bothered_player[MAX_PLAYERS];
+
 static
 void survey_cb_dlg(int playerid, struct DIALOG_RESPONSE response)
 {
@@ -124,7 +126,16 @@ void survey_review_answer(int playerid)
 static
 void survey_on_player_spawn(int playerid)
 {
-	if (userid[playerid] > 0 && loggedstatus[playerid] == LOGGED_IN) {
-		survey_query_current_answer(playerid, survey_cb_loadquery_show_or_prompt);
+	if (!survey_bothered_player[playerid]) {
+		survey_bothered_player[playerid] = 1;
+		if (userid[playerid] > 0 && loggedstatus[playerid] == LOGGED_IN) {
+			survey_query_current_answer(playerid, survey_cb_loadquery_show_or_prompt);
+		}
 	}
+}
+
+static
+void survey_on_player_connect(int playerid)
+{
+	survey_bothered_player[playerid] = 0;
 }
