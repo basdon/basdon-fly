@@ -386,6 +386,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 	spawn_on_player_spawn(playerid);
 	svp_update_mapicons(playerid, pos.x, pos.y);
 	missions_on_player_spawn(playerid, pos);
+	survey_on_player_spawn(playerid);
 	zones_update(playerid, pos);
 
 	return 1;

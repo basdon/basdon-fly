@@ -540,6 +540,7 @@ int CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_d
 #include "vehicles.c"
 #include "prefs.c"
 #include "help.c"
+#include "survey.c"
 
 #include "cmdhandlers.c"
 #ifdef DEV

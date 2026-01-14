@@ -236,6 +236,7 @@ void common_bcrypt_hash(cell pw, cb_t callback, void *data);
 Uses the mysql plugin escape string routine.
 
 Uses buf4096
+TODO: bad parameter order, i expect dest first then src, is this the only odd one out?
 */
 void common_mysql_escape_string(char *data, char *dest, int maxlen);
 /**

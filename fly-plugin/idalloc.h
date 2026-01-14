@@ -31,6 +31,7 @@ If an airport has more, they are probably split out enough anyways.*/
 #define DLG_TID_CMDLIST 10000
 #define DLG_TID_RADIOMACROS 11000
 #define DLG_TID_PAUSEDMISSION 12000
+#define DLG_TID_SURVEY 13000
 
 /*MAPICON IDS*/
 

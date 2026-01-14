@@ -1016,6 +1016,15 @@ int cmd_spray(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+#define CMD_SURVEY_SYNTAX ""
+#define CMD_SURVEY_DESC "Allows you to review and optionally change your answer for the current survey"
+static
+int cmd_survey(struct COMMANDCONTEXT cmdctx)
+{
+	survey_review_answer(cmdctx.playerid);
+	return CMD_OK;
+}
+
 #define CMD_STOPLOCATE_SYNTAX ""
 #define CMD_STOPLOCATE_DESC "Stops locating a mission point"
 static

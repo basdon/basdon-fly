@@ -117,6 +117,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/spray", 0, GROUPS_ALL, CMD_SPRAY_SYNTAX, CMD_SPRAY_DESC, cmd_spray },
 	{ 0, 0, "/stoplocate", 0, GROUPS_ALL, CMD_STOPLOCATE_SYNTAX, CMD_STOPLOCATE_DESC, cmd_stoplocate },
 	{ 0, 0, "/stopwork", "/s", 0, 0, 0, 0 },
+	{ 0, 0, "/survey", 0, GROUPS_ALL, CMD_SURVEY_SYNTAX, CMD_SURVEY_DESC, cmd_survey },
 	{ 0, 0, "/tickrate", 0, GROUPS_ALL, CMD_TICKRATE_SYNTAX, CMD_TICKRATE_DESC, cmd_tickrate },
 	{ 0, 0, "/tip", 0, GROUPS_ALL, CMD_TIP_SYNTAX, CMD_TIP_DESC, cmd_tip },
 	{ 0, 0, "/updates", "/changelog", 0, 0, 0, 0 },
