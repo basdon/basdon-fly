@@ -350,3 +350,9 @@
   stamp - date (char 11)
   entry - summary (char(128))
 </pre>
+
+<pre>srv -- survey responses
+  u - player (usr.i)
+  s - survey id (int)
+  a - answer varchar(128)
+</pre>
