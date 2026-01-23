@@ -48,6 +48,7 @@ login_dlg_register_confirmpass
 		-> login_cb_member_user_created
 			-> login_spawn_as_guest (when creating user failed)
 			-> login_cb_create_session_new_member
+				-> login_login_player
 
 login_cb_dlg_login_or_namechange
 	-> login_cb_dlg_namechange (on cancel response)
@@ -60,6 +61,7 @@ login_cb_verify_password
 login_cb_load_account_data
 	-> login_spawn_as_guest (when empty response)
 	-> login_cb_create_session_existing_member
+		-> login_login_player
 
 login_cb_dlg_namechange
 	-> login_spawn_as_guest (on cancel)
@@ -417,6 +419,8 @@ alreadyin:
 			samp_pNetGame->playerPool->gpci[playerid]);
 		NC_mysql_tquery_nocb(buf4096a);
 	}
+
+	SendClientMessage(playerid, -1, "Privacy note: game chat is logged and publicly archived and readable on our website. Only /pm and /r are private.");
 
 	if (status == LOGGED_GUEST) {
 		money_set(playerid, MONEY_DEFAULT_AMOUNT);
