@@ -2,16 +2,19 @@ char kick_update_delay[MAX_PLAYERS];
 
 void atoc(cell *dst, char *src, int max)
 {
+	TRACE;
 	while ((--max || (*dst = 0)) && (*dst++ = (cell) *src++));
 }
 
 void ctoa(char *dst, cell *src, int max)
 {
+	TRACE;
 	while ((--max || (*dst = 0)) && (*dst++ = (char) *src++));
 }
 
 void atoci(cell *dstsrc, int len)
 {
+	TRACE;
 	char *src;
 
 	src = ((char*) dstsrc) + len;
@@ -27,6 +30,7 @@ a:
 
 void ctoai(char *dstsrc)
 {
+	TRACE;
 	cell *src;
 
 	src = (cell*) dstsrc;
@@ -36,6 +40,7 @@ void ctoai(char *dstsrc)
 static
 int stricmp(char *a, char *b)
 {
+	TRACE;
 	register int x;
 	register char _a, _b;
 
@@ -60,6 +65,7 @@ int stricmp(char *a, char *b)
 static
 int strincmp(char *a, char *b, int n)
 {
+	TRACE;
 	register int x;
 	register char _a, _b;
 
@@ -88,6 +94,7 @@ Hashes text until a character <= space is found (case-insensitive).
 static
 int strhashcode(char *text)
 {
+	TRACE;
 	register int val;
 	int result = 0;
 
@@ -105,6 +112,7 @@ int strhashcode(char *text)
 static
 int hexdigit(char c)
 {
+	TRACE;
 	if ('0' <= c && c <= '9') return c - '0';
 	if ('A' <= c && c <= 'F') return c - 'A' + 10;
 	if ('a' <= c && c <= 'f') return c - 'a' + 10;
@@ -114,6 +122,7 @@ int hexdigit(char c)
 static
 unsigned int hexnum(char *c, int len)
 {
+	TRACE;
 	unsigned int res = 0;
 
 	while (len-- > 0) {
@@ -126,6 +135,7 @@ unsigned int hexnum(char *c, int len)
 
 void common_tp_player(int playerid, struct vec4 pos)
 {
+	TRACE;
 	natives_SetPlayerPos(playerid, pos.coords);
 	SetPlayerFacingAngle(playerid, pos.r);
 	SetCameraBehindPlayer(playerid);
@@ -133,6 +143,7 @@ void common_tp_player(int playerid, struct vec4 pos)
 
 float common_dist_sq(struct vec3 a, struct vec3 b)
 {
+	TRACE;
 	float dx, dy, dz;
 	dx = a.x - b.x;
 	dy = a.y - b.y;
@@ -142,6 +153,7 @@ float common_dist_sq(struct vec3 a, struct vec3 b)
 
 float common_xy_dist_sq(struct vec3 a, struct vec3 b)
 {
+	TRACE;
 	float dx, dy;
 	dx = a.x - b.x;
 	dy = a.y - b.y;
@@ -150,6 +162,7 @@ float common_xy_dist_sq(struct vec3 a, struct vec3 b)
 
 int common_SetVehiclePos(int vehicleid, struct vec3 *pos)
 {
+	TRACE;
 	NC_PARS(4);
 	nc_params[1] = vehicleid;
 	memcpy(nc_params + 2, pos, sizeof(struct vec3));
@@ -159,6 +172,7 @@ int common_SetVehiclePos(int vehicleid, struct vec3 *pos)
 static
 void common_common_varargs_cb_call(cell p1, cell p2, cb_t callback, void *data)
 {
+	TRACE;
 	buf4096[4088] = 'M';
 	buf4096[4089] = 'M';
 	buf4096[4090] = 0;
@@ -178,18 +192,21 @@ void common_common_varargs_cb_call(cell p1, cell p2, cb_t callback, void *data)
 
 void common_bcrypt_check(cell pw, cell hash, cb_t callback, void *data)
 {
+	TRACE;
 	common_common_varargs_cb_call(pw, hash, callback, data);
 	NC(n_bcrypt_check);
 }
 
 void common_bcrypt_hash(cell pw, cb_t callback, void *data)
 {
+	TRACE;
 	common_common_varargs_cb_call(pw, 12 /*cost*/, callback, data);
 	NC(n_bcrypt_hash);
 }
 
 void common_mysql_escape_string(char *data, char *dest, int maxlen)
 {
+	TRACE;
 	atoc(buf4096, data, 4096);
 	NC_PARS(4);
 	nc_params[1] = nc_params[2] = buf4096a;
@@ -203,6 +220,7 @@ void common_mysql_escape_string(char *data, char *dest, int maxlen)
 #ifdef PRINTQUERIES
 void DEBUG_NC_mysql_tquery_nocb(cell cella)
 {
+	TRACE;
 	char dst[1000];
 	ctoa(dst, (cell*) ((int) &fakeamx_data + (int) cella), 1000);
 	logprintf("%s", dst);
@@ -212,6 +230,7 @@ void DEBUG_NC_mysql_tquery_nocb(cell cella)
 
 void common_mysql_tquery(char *query, cb_t callback, void *data)
 {
+	TRACE;
 #ifdef PRINTQUERIES
 	logprintf("%s", query);
 #endif
@@ -222,5 +241,6 @@ void common_mysql_tquery(char *query, cb_t callback, void *data)
 
 float common_vectorsize_sq(struct vec3 vec)
 {
+	TRACE;
 	return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z;
 }

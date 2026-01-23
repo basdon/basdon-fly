@@ -39,6 +39,7 @@ Adds infraction value, kicking the player if they exceeded the max value.
 static
 void anticheat_infraction(int playerid, int type)
 {
+	TRACE;
 	struct INFRACTIONDATA d = infractiondata[type];
 
 	if ((infractionvalue[type][playerid] += d.increment) >= d.maxvalue) {
@@ -54,6 +55,7 @@ To be called every 100ms
 static
 void anticheat_decrease_flood()
 {
+	TRACE;
 	int playerid, n = playercount;
 
 	while (n--) {
@@ -74,6 +76,7 @@ To be called in timer5000.
 static
 void anticheat_decrease_infractions()
 {
+	TRACE;
 	int playerid, j, i = playercount;
 	int *iv;
 
@@ -94,6 +97,7 @@ void anticheat_decrease_infractions()
 static
 void anticheat_on_player_connect(int playerid)
 {
+	TRACE;
 	int n = INFRACTIONTYPES;
 
 	while (n--) {
@@ -111,6 +115,7 @@ Log some anticheat related thing. Uses buf4096 after info is copied.
 static
 void anticheat_log(int playerid, int eventtype, char *info)
 {
+	TRACE;
 	char buf[2200]; /*Entry has maxlen 2048 in the db.*/
 	char *b;
 
@@ -161,6 +166,7 @@ Player will be kicked on excess flood.
 static
 int anticheat_flood(int playerid, int amount)
 {
+	TRACE;
 	if ((floodcount[playerid] += amount) >= AC_FLOOD_LIMIT) {
 		anticheat_log(playerid, AC_FLOOD, "excess flood");
 		natives_Kick(playerid, "excess flood", NULL, -1);
@@ -177,6 +183,7 @@ Gets vehicle hp, after checking for unnacceptable values and handling offenders.
 static
 float GetVehicleHealth(int vehicleid)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 	float hp;
 	int playerid;
@@ -220,6 +227,7 @@ too often.
 static
 void anticheat_disallowed_vehicle_1s(int playerid)
 {
+	TRACE;
 	anticheat_log(playerid, AC_UNAUTH_VEHICLE_ACCESS,
 		"unauthorized vehicle access");
 	anticheat_infraction(playerid, AC_IF_DISALLOWED_VEHICLE);
@@ -231,6 +239,7 @@ void anticheat_disallowed_vehicle_1s(int playerid)
 static
 int anticheat_on_player_command(int playerid)
 {
+	TRACE;
 	if (anticheat_flood(playerid, AC_FLOOD_AMOUNT_CMD)) {
 		return 1;
 	}
@@ -246,6 +255,7 @@ Ensures the vehicle's health is valid
 static
 void anticheat_on_player_enter_vehicle(int playerid, int vehicleid, int ispassenger)
 {
+	TRACE;
 	register struct SampVehicle *vehicle;
 	register float hp;
 
@@ -263,6 +273,7 @@ void anticheat_on_player_enter_vehicle(int playerid, int vehicleid, int ispassen
 static
 int anticheat_on_player_text(int playerid)
 {
+	TRACE;
 	if (anticheat_flood(playerid, AC_FLOOD_AMOUNT_CHAT)) {
 		return 0;
 	}

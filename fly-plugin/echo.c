@@ -16,6 +16,7 @@ static char echo_is_irc_down;
 
 int echo_init(void *data)
 {
+	TRACE;
 	static const char *BUFLO = "127.0.0.1";
 
 	int sin, timer_interval = 0;
@@ -55,6 +56,7 @@ int echo_init(void *data)
 
 void echo_dispose()
 {
+	TRACE;
 	if (socket_out != SOCKET_INVALID_SOCKET) {
 		buf144[0] = 0x04594C46;
 		NC_ssocket_send(socket_out, buf144a, 4);
@@ -76,6 +78,7 @@ Send player connection packet to IRC echo.
 static
 void echo_on_player_connection(int playerid, int reason)
 {
+	TRACE;
 	int nicklen;
 	struct playerdata *pd = pdata[playerid];
 
@@ -94,6 +97,7 @@ void echo_on_player_connection(int playerid, int reason)
 static
 void echo_send_status_request()
 {
+	TRACE;
 	if (socket_out != SOCKET_INVALID_SOCKET) {
 		buf144[0] = 0x07594C46;
 		NC_ssocket_send(socket_out, buf144a, 4);
@@ -103,6 +107,7 @@ void echo_send_status_request()
 static
 void echo_request_status_for_player(int playerid)
 {
+	TRACE;
 	int i;
 
 	if (echo_is_irc_down) {
@@ -123,6 +128,7 @@ void echo_request_status_for_player(int playerid)
 static
 void echo_on_player_connect(int playerid)
 {
+	TRACE;
 	echo_on_player_connection(playerid, ECHO_CONN_REASON_GAME_CONNECTED);
 
 	if (echo_is_irc_down) {
@@ -136,6 +142,7 @@ void echo_on_player_connect(int playerid)
 static
 void echo_on_player_disconnect(int playerid, int reason)
 {
+	TRACE;
 	int i, popped;
 
 	echo_on_player_connection(playerid, reason);
@@ -161,6 +168,7 @@ Uses buf4096.
 static
 void echo_send_generic_message(char type, char *text)
 {
+	TRACE;
 #pragma pack(push,1)
 	struct GENERIC_MESSAGE {
 		union {
@@ -197,12 +205,14 @@ void echo_send_generic_message(char type, char *text)
 static
 void SendClientMessageToAllAndIRC(char irc_generic_msg_type, int game_color, char *msg)
 {
+	TRACE;
 	SendClientMessageToAll(game_color, msg);
 	echo_send_generic_message(irc_generic_msg_type, msg);
 }
 
 void echo_on_game_chat_or_action(int t, int playerid, char *text)
 {
+	TRACE;
 	int nicklen, msglen;
 	struct playerdata *pd = pdata[playerid];
 
@@ -230,6 +240,7 @@ void echo_on_game_chat_or_action(int t, int playerid, char *text)
 static
 void echo_send_status_message(char is_response_to_status_request)
 {
+	TRACE;
 	int i, playerid;
 	short msglen;
 	char *bufstart;
@@ -263,6 +274,7 @@ void echo_send_status_message(char is_response_to_status_request)
 static
 void echo_on_receive_status_message(char *buf, int len)
 {
+	TRACE;
 #pragma pack(push,1)
 	struct STATUS_MESSAGE {
 		int packet_header;
@@ -285,9 +297,9 @@ void echo_on_receive_status_message(char *buf, int len)
 	num_players_needing_echo_status_message = 0;
 }
 
-void echo_on_receive(cell socket_handle, cell data_a,
-		     char *data, int len)
+void echo_on_receive(cell socket_handle, cell data_a, char *data, int len)
 {
+	TRACE;
 	/*An Echo message can be up to 512 chars*/
 	char msg512[512];
 
@@ -445,6 +457,7 @@ void echo_on_receive(cell socket_handle, cell data_a,
 static
 void echo_tick()
 {
+	TRACE;
 	int time;
 
 	if (!echo_is_irc_down && time_timestamp() - echo_last_ping_received > ECHO_PING_TIMEOUT_THRESHOLD) {

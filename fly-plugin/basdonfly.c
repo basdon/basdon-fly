@@ -24,6 +24,10 @@
 just run the 'build' file with bash (or 'make plugin' in repo root).*/
 #include "__settings.h"
 
+unsigned char stupid_trace_current_index = 63;
+const char *stupid_trace_entries[64];
+#define TRACE stupid_trace_entries[stupid_trace_current_index = (stupid_trace_current_index + 1) & 63] = __FUNCTION__
+
 #define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
 #define EXPECT_SIZE(S,SIZE) STATIC_ASSERT(sizeof(S)==(SIZE))
 /*May also use offsetof(), but that requires stddef.h*/
@@ -483,6 +487,7 @@ static float vehicle_fuel[MAX_VEHICLES], vehicle_fuel_cap[MAX_VEHICLES], vehicle
 static
 int CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_delay_ms)
 {
+	TRACE;
 	register int vehicleid;
 	register float fuel_cap;
 
@@ -603,6 +608,7 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
 
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
+	TRACE;
 	static int count = 0;
 	int elapsed_time;
 #ifdef LOG_SLOW_TICKS

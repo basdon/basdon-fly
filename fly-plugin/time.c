@@ -13,6 +13,7 @@ Get amount of elapsed milliseconds since time_init was called.
 static
 unsigned long time_timestamp()
 {
+	TRACE;
 	unsigned long value;
 	struct timeval tv;
 
@@ -28,6 +29,7 @@ Inits time, must be called before using other time functions.
 static
 void time_init()
 {
+	TRACE;
 	if (!initial_value) {
 		initial_value = time_timestamp();
 		last_value = 0;
@@ -39,6 +41,7 @@ Check if time_init has been called already.
 */
 int time_is_inited()
 {
+	TRACE;
 	return initial_value;
 }
 
@@ -48,6 +51,7 @@ Get amount of elapsed milliseconds since last call.
 static
 int time_elapsed_millis()
 {
+	TRACE;
 	unsigned long now;
 	int diff;
 

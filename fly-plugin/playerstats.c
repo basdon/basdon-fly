@@ -31,6 +31,7 @@ otherwise player's totaltime is set to sum of session times (accurate).
 static
 void playerstats_commit_to_db(int playerid, int isdisconnecting)
 {
+	TRACE;
 	unsigned long now;
 	int temp_ms, playtime_to_add;
 
@@ -102,6 +103,7 @@ void playerstats_commit_to_db(int playerid, int isdisconnecting)
 static
 int playerstats_update_all(void *data)
 {
+	TRACE;
 	int n = playercount;
 	while (n--) {
 		playerstats_commit_to_db(players[n], 0);
@@ -112,11 +114,13 @@ int playerstats_update_all(void *data)
 
 void playerstats_init()
 {
+	TRACE;
 	timer_set(LAST_SEEN_TIMER_VALUE, playerstats_update_all, NULL);
 }
 
 void playerstats_check_for_afk()
 {
+	TRACE;
 	unsigned long now = time_timestamp();
 	unsigned long asecondago = now - 2000;
 	int n, playerid;
@@ -136,6 +140,7 @@ void playerstats_check_for_afk()
 
 void playerstats_on_player_connect(int playerid)
 {
+	TRACE;
 	/*not changing lastupdate because player will be marked afk anyways*/
 	/*player is afk because they're going into class selection*/
 	isafk[playerid] = 1;
@@ -145,6 +150,7 @@ void playerstats_on_player_connect(int playerid)
 
 void playerstats_on_player_disconnect(int playerid)
 {
+	TRACE;
 	playerstats_commit_to_db(playerid, 1);
 }
 
@@ -153,7 +159,7 @@ static void timecyc_on_player_was_afk(int playerid);
 
 void playerstats_on_player_update(int playerid)
 {
-
+	TRACE;
 	unsigned long now = time_timestamp();
 
 	if (isafk[playerid]) {

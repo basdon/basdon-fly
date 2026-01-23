@@ -17,6 +17,7 @@ static char nametags_current_cycle;
 static
 void nametags_update_for_player(int forplayerid)
 {
+	TRACE;
 	struct SampPlayer *forplayer;
 	struct vec3 *playerpos, forplayerpos, d;
 	int playerid, i, bitbuf_bitlength, current_render_dist, vehiclemodel;
@@ -129,6 +130,7 @@ hide:
 static
 int nametags_update(void *data)
 {
+	TRACE;
 	static int next_updating_playeridx = 0;
 
 	int forplayerid;
@@ -156,6 +158,7 @@ int nametags_update(void *data)
 static
 void nametags_on_player_connect(int forplayerid)
 {
+	TRACE;
 	memset(nametag_created[forplayerid], 0, sizeof(nametag_created[forplayerid]));
 	nametags_max_distance[forplayerid] = NAMETAGS_DEFAULT_MAX_DISTANCE;
 }
@@ -163,6 +166,7 @@ void nametags_on_player_connect(int forplayerid)
 static
 void nametags_on_player_disconnect(int playerid)
 {
+	TRACE;
 	int forplayerid, i;
 
 	for (i = 0; i < playercount; i++) {

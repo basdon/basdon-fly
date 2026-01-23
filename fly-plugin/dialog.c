@@ -90,6 +90,7 @@ static struct {
 static
 void dialog_init()
 {
+	TRACE;
 	/*Using a negative dialogid will hide any shown dialog.*/
 	dialog_empty_rpcdata.base.dialog_id = -1;
 	dialog_empty_rpcdata.base.dialog_style = DIALOG_STYLE_MSGBOX;
@@ -103,6 +104,7 @@ void dialog_init()
 static
 void dialog_reset_state(int playerid)
 {
+	TRACE;
 	active_dialog[playerid].expected_dialogid = -1;
 	active_dialog[playerid].transactionid = DLG_TID_NONE;
 	active_dialog[playerid].handler.options = 0;
@@ -112,6 +114,7 @@ void dialog_reset_state(int playerid)
 static
 void dialog_hide_all(int playerid)
 {
+	TRACE;
 	struct BitStream bs;
 
 	dialog_reset_state(playerid);
@@ -125,6 +128,7 @@ void dialog_hide_all(int playerid)
 static
 void dialog_send_abort_result(int playerid, struct DIALOG_HANDLER *handler)
 {
+	TRACE;
 	struct DIALOG_RESPONSE response;
 
 	if (handler->options & DLG_OPT_NOTIFY_ABORTED) {
@@ -137,6 +141,7 @@ void dialog_send_abort_result(int playerid, struct DIALOG_HANDLER *handler)
 static
 void dialog_on_player_connect(int playerid)
 {
+	TRACE;
 	dialog_queue[playerid] = NULL;
 	active_dialog[playerid].last_dialogid = 1;
 	active_dialog[playerid].last_sendtime = 0;
@@ -148,6 +153,7 @@ void dialog_on_player_connect(int playerid)
 static
 void dialog_on_player_disconnect(int playerid)
 {
+	TRACE;
 	register struct DIALOG_QUEUE_ENTRY *current, *next;
 
 	dialog_send_abort_result(playerid, &active_dialog[playerid].handler);
@@ -168,6 +174,7 @@ void dialog_on_player_disconnect(int playerid)
 static
 void dialog_init_info(struct DIALOG_INFO *info)
 {
+	TRACE;
 	info->transactionid = DLG_TID_NONE;
 	info->style = DIALOG_STYLE_MSGBOX;
 	info->handler.options = 0;
@@ -191,6 +198,7 @@ overridden and a warning will be logged.
 static
 void dialog_ensure_transaction(int playerid, int transactionid)
 {
+	TRACE;
 	register struct DIALOG_DATA *data;
 
 	data = &active_dialog[playerid];
@@ -207,6 +215,7 @@ Append a dialog to a player's dialog queue.
 static
 void dialog_append_to_queue(int playerid, struct DIALOG_INFO *dialog)
 {
+	TRACE;
 	register struct DIALOG_INFO *d;
 	struct DIALOG_QUEUE_ENTRY *queue_entry, *prev;
 
@@ -261,6 +270,7 @@ response handler (no matter what transaction id it uses).
 static
 void dialog_show(int playerid, struct DIALOG_INFO *dialog)
 {
+	TRACE;
 	register struct DIALOG_DATA *data;
 	struct BitStream bs;
 	char *ptr, captionlen, button1len, button2len;
@@ -328,6 +338,7 @@ Checks if any dialog is queued for the player, show it if and:
 static
 void dialog_pop_queue(int playerid)
 {
+	TRACE;
 	register struct DIALOG_DATA *data;
 	register struct DIALOG_INFO *dialog;
 	struct DIALOG_QUEUE_ENTRY *peeked;
@@ -349,6 +360,7 @@ void dialog_pop_queue(int playerid)
 static
 void dialog_sanitize_inputtext_log_when_dirty(int playerid, char *raw, char *sanitized)
 {
+	TRACE;
 	char is_inputtext_dirty;
 	char ac_info[LIMIT_DIALOG_INPUTTEXT * 3 + 100];
 	char *in_pos;
@@ -388,6 +400,7 @@ Called from hooked dialog response packet handler.
 */
 void hook_dialog_on_response(short playerid, short dialogid, char resp, short listitem, char *raw_inputtext)
 {
+	TRACE;
 	struct DIALOG_RESPONSE response;
 	struct DIALOG_DATA active_dlg;
 	int diff_last_sent, len;
@@ -458,6 +471,7 @@ ended and a warning will be logged.
 static
 void dialog_end_transaction(int playerid, int transactionid)
 {
+	TRACE;
 	register struct DIALOG_DATA *data;
 
 	data = &active_dialog[playerid];
@@ -474,5 +488,6 @@ void dialog_end_transaction(int playerid, int transactionid)
 static
 int dialog_get_transaction(int playerid)
 {
+	TRACE;
 	return active_dialog[playerid].transactionid;
 }

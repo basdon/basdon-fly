@@ -56,6 +56,7 @@ Enlarges the vehicle database table pointed to by dbvehicles by 100.
 static
 void veh_dbtable_grow_if_needed(int free_space_needed)
 {
+	TRACE;
 	int i;
 
 	if (numdbvehicles + free_space_needed > dbvehiclealloc) {
@@ -70,11 +71,13 @@ void veh_dbtable_grow_if_needed(int free_space_needed)
 static
 void veh_cb_on_new_vehicle_inserted(void *data)
 {
+	TRACE;
 	((struct dbvehicle*) data)->id = NC_cache_insert_id();
 }
 
 struct dbvehicle *veh_create_new_dbvehicle(int model, struct vec4 *pos)
 {
+	TRACE;
 	struct dbvehicle *veh;
 	int col1, col2;
 
@@ -118,6 +121,7 @@ Does not check if the vehicle needs an owner label, use veh_needs_owner_label)
 static
 void veh_create_owner_label(struct dbvehicle *veh, int vehicleid, int playerid)
 {
+	TRACE;
 	short *vehicle_id_for_label_id;
 	int current_num_maybe_used, i, first_available_index;
 
@@ -170,6 +174,7 @@ Nop if no owner 3D text label was created for the vehicle for given player.
 static
 void veh_destroy_owner_label(int vehicleid, int playerid)
 {
+	TRACE;
 	short *vehicle_id_for_label_id;
 	int i;
 
@@ -211,6 +216,7 @@ Creates owner label for all players to which the vehicle is streamed in.
 static
 void veh_create_owner_label_for_all(struct dbvehicle *veh, int vehicleid)
 {
+	TRACE;
 	int n;
 
 	for (n = playercount; n;) {
@@ -226,6 +232,7 @@ Destroys owner label for everyone.
 static
 void veh_destroy_owner_label_for_all(int vehicleid)
 {
+	TRACE;
 	int n;
 
 	for (n = playercount; n;) {
@@ -241,11 +248,13 @@ Checks if a vehicle needs an owner label.
 static
 int veh_needs_owner_label(struct dbvehicle *veh)
 {
+	TRACE;
 	return veh != NULL && veh->owneruserid;
 }
 
 void veh_on_vehicle_stream_in(int vehicleid, int forplayerid)
 {
+	TRACE;
 	struct dbvehicle *veh;
 
 	veh = gamevehicles[vehicleid].dbvehicle;
@@ -257,11 +266,13 @@ void veh_on_vehicle_stream_in(int vehicleid, int forplayerid)
 /*Despawning exploded vehicle is respawning = is also stream out and stream in.*/
 void veh_on_vehicle_stream_out(int vehicleid, int forplayerid)
 {
+	TRACE;
 	veh_destroy_owner_label(vehicleid, forplayerid);
 }
 
 void veh_on_player_connect(int playerid)
 {
+	TRACE;
 	memset(ownerlabels[playerid].vehicle_id_for_label_id, 0, sizeof(ownerlabels[playerid].vehicle_id_for_label_id));
 	ownerlabels[playerid].num_maybe_used_labels = 0;
 
@@ -279,6 +290,7 @@ STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
 static
 void veh_cb_load_user_model_stats(void *data)
 {
+	TRACE;
 	struct PLAYERMODELSTATS *stats;
 	int playerid;
 	int i;
@@ -314,6 +326,7 @@ void veh_cb_load_user_model_stats(void *data)
 STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
 void veh_load_user_model_stats(int playerid)
 {
+	TRACE;
 	void *player_cc;
 
 	player_cc = V_MK_PLAYER_CC(playerid);
@@ -329,6 +342,7 @@ void veh_load_user_model_stats(int playerid)
 STATIC_ASSERT(NUM_AIRCRAFT_MODELS == 23);
 void veh_save_user_model_stats(int playerid)
 {
+	TRACE;
 	/*prevent overwriting data while it hasn't been loaded yet*/
 	if (!player_model_stats_loaded[playerid]) {
 		return;
@@ -453,6 +467,7 @@ void veh_save_user_model_stats(int playerid)
 
 void veh_init()
 {
+	TRACE;
 	struct dbvehicle *veh;
 	struct vec4 pos;
 	int i, owner_name_len, owner_label_buf_size, rowcount, dbcache, vehicleid, *fld = nc_params + 2;
@@ -541,12 +556,14 @@ Check if given player can modify a vehicle (park, spray, ..). Does not check adm
 static
 int veh_can_player_modify_veh(int playerid, struct dbvehicle *veh)
 {
+	TRACE;
 	return veh && userid[playerid] == veh->owneruserid;
 }
 
 static
 void veh_park_from_cmd(struct COMMANDCONTEXT cmdctx, int bypass_permissions)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 	struct dbvehicle *veh;
 	register int vehicleid;
@@ -589,6 +606,7 @@ void veh_park_from_cmd(struct COMMANDCONTEXT cmdctx, int bypass_permissions)
 static
 void veh_spray_from_cmd(struct COMMANDCONTEXT cmdctx, int bypass_permissions)
 {
+	TRACE;
 	struct dbvehicle *veh;
 	register int vehicleid;
 	int col1, col2, *random1, *random2;
@@ -635,6 +653,7 @@ rand2nd:
 
 float model_fuel_capacity(short modelid)
 {
+	TRACE;
 	switch (modelid)
 	{
 	case MODEL_ANDROM: return SETTING__FUEL_CAP_ANDROM;
@@ -663,6 +682,7 @@ float model_fuel_capacity(short modelid)
 
 float model_fuel_usage(short modelid)
 {
+	TRACE;
 	switch (modelid)
 	{
 	case MODEL_ANDROM: return SETTING__FUEL_USE_ANDROM;
@@ -695,6 +715,7 @@ Make given vehicle consumer fuel. Should be called every second while the engine
 static
 void veh_consume_fuel(int playerid, int vehicleid)
 {
+	TRACE;
 	float consumptionmp;
 	float fuel, cap, lastpercentage, newpercentage;
 
@@ -727,6 +748,7 @@ void veh_consume_fuel(int playerid, int vehicleid)
 
 void veh_dispose()
 {
+	TRACE;
 	struct dbvehicle *veh;
 
 	while (dbvehiclealloc--) {
@@ -755,6 +777,7 @@ afterwards.
 static
 int veh_create(struct dbvehicle *veh)
 {
+	TRACE;
 	struct vec4 pos;
 	int vehicleid;
 
@@ -764,7 +787,7 @@ int veh_create(struct dbvehicle *veh)
 	if (vehicleid != INVALID_VEHICLE_ID) {
 		gamevehicles[vehicleid].dbvehicle = veh;
 		veh->spawnedvehicleid = vehicleid;
-		
+
 		NC_PARS(1);
 		nc_params[1] = vehicleid;
 		NC(n_SetVehicleToRespawn);
@@ -780,6 +803,7 @@ If player is already inside, this will instantly eject them.
 static
 void veh_disallow_player_in_vehicle(int playerid, struct dbvehicle *v)
 {
+	TRACE;
 	char msg144[144];
 
 	/*when player is entering, this stops them*/
@@ -792,6 +816,7 @@ void veh_disallow_player_in_vehicle(int playerid, struct dbvehicle *v)
 
 int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh)
 {
+	TRACE;
 	return veh == NULL ||
 		veh->owneruserid == 0 ||
 		veh->owneruserid == userid[playerid];
@@ -799,6 +824,7 @@ int veh_is_player_allowed_in_vehicle(int playerid, struct dbvehicle *veh)
 
 void veh_on_player_disconnect(int playerid)
 {
+	TRACE;
 	struct dbvehicle *veh;
 	int n, vehicleid, driver;
 
@@ -829,6 +855,7 @@ void veh_on_player_disconnect(int playerid)
 
 void veh_on_player_enter_vehicle(int playerid, int vehicleid, int ispassenger)
 {
+	TRACE;
 	struct dbvehicle *veh;
 
 	veh = gamevehicles[vehicleid].dbvehicle;
@@ -839,6 +866,7 @@ void veh_on_player_enter_vehicle(int playerid, int vehicleid, int ispassenger)
 
 void veh_spawn_player_vehicles(int playerid)
 {
+	TRACE;
 	int n;
 	struct dbvehicle *veh;
 
@@ -863,6 +891,7 @@ Pre: playerid is the driver of vehicleid and pressed the engine key.
 static
 void veh_start_or_stop_engine(int playerid, int vehicleid)
 {
+	TRACE;
 	struct vec3 vvel;
 
 	if (GetVehicleEngineState(vehicleid)) {
@@ -889,6 +918,7 @@ Used check if pilots are still controlling the plane, and engine key.
 static
 void veh_on_driver_key_state_change(int playerid, int oldkeys, int newkeys)
 {
+	TRACE;
 	int vehicleid, vehiclemodel;
 
 	lastcontrolactivity[playerid] = time_timestamp();
@@ -904,6 +934,7 @@ void veh_on_driver_key_state_change(int playerid, int oldkeys, int newkeys)
 
 void veh_on_player_now_driving(int playerid, int vehicleid)
 {
+	TRACE;
 	if (GetVehiclePos(vehicleid, &lastvpos[playerid])) {
 		lastcontrolactivity[playerid] = time_timestamp();
 		if (vehicle_fuel[vehicleid] > 0.0f) {
@@ -917,6 +948,7 @@ void veh_on_player_now_driving(int playerid, int vehicleid)
 
 int veh_commit_next_vehicle_odo_to_db()
 {
+	TRACE;
 	struct dbvehicle *veh;
 	struct vehnode *tofree;
 
@@ -938,6 +970,7 @@ int veh_commit_next_vehicle_odo_to_db()
 
 int veh_GetPlayerVehicle(int playerid, struct dbvehicle **veh)
 {
+	TRACE;
 	int vehicleid;
 
 	vehicleid = GetPlayerVehicleID(playerid);
@@ -955,6 +988,7 @@ Given player must be driver of given vehicle.
 static
 void veh_update_odo(int playerid, int vehicleid, struct vec3 pos, struct PLAYERMODELSTATS *model_stats)
 {
+	TRACE;
 	struct vehnode *vuq;
 	struct dbvehicle *veh;
 	float dx, dy, dz, distanceM, distanceKM;
@@ -1007,6 +1041,7 @@ Called when player is still in same in air vehicle as last in update.
 static
 void veh_timed_1s_update_a(int playerid, int vehicleid, struct vec3 *vpos, int engineState)
 {
+	TRACE;
 	struct vec3 vvel;
 	struct quat vrot;
 	float hp;
@@ -1058,6 +1093,7 @@ new Float:toz = v1 * 2 * (q1 * q3 + q0 * q2) + v2 * 2 * (q2 * q3 - q0 * q1) + v3
 
 void veh_timed_1s_update()
 {
+	TRACE;
 	struct dbvehicle *veh;
 	struct vec3 vpos, *ppos = &vpos;
 	int playerid, vehicleid, vehiclemodel, n = playercount;
@@ -1126,6 +1162,7 @@ void veh_timed_1s_update()
 
 int veh_DestroyVehicle(int vehicleid)
 {
+	TRACE;
 	struct dbvehicle *veh;
 
 	nav_disable_for_respawned_or_destroyed_vehicle(vehicleid);
@@ -1145,6 +1182,7 @@ int veh_DestroyVehicle(int vehicleid)
 static
 void veh_on_driver_changed_vehicle_without_state_change(int playerid, int oldvehicleid, int newvehicleid)
 {
+	TRACE;
 	struct dbvehicle *veh;
 	int old_driver;
 
@@ -1167,6 +1205,7 @@ void veh_on_driver_changed_vehicle_without_state_change(int playerid, int oldveh
 static
 void veh_on_player_state_change(int playerid, int from, int to)
 {
+	TRACE;
 	struct dbvehicle *veh;
 	int vehicleid, vehiclemodel;
 	char veh_name_buf[32];
@@ -1214,6 +1253,7 @@ void veh_on_player_state_change(int playerid, int from, int to)
 static
 void veh_timed_speedo_update()
 {
+	TRACE;
 	struct RPCDATA_TextDrawSetString rpcdata;
 	struct BitStream bs;
 	struct vec3 vvel;

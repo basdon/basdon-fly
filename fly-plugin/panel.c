@@ -93,6 +93,7 @@ static int numpanelplayers;
 static
 void panel_remove_panel_player(int playerid)
 {
+	TRACE;
 	int i;
 
 	for (i = numpanelplayers; i > 0; ) {
@@ -110,6 +111,7 @@ void panel_remove_panel_player(int playerid)
 static
 int panel_is_active_for(int playerid)
 {
+	TRACE;
 	int i;
 
 	for (i = 0; i < numpanelplayers; i++) {
@@ -165,6 +167,7 @@ Speed:
 static
 void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed, int is_update)
 {
+	TRACE;
 	static const char SPD_METER_DATA[] =
 		"160-~n~150-~n~140-~n~130-~n~120-~n~110-~n~100-~n~_90-~n~_"
 		"80-~n~_70-~n~_60-~n~_50-~n~_40-~n~_30-~n~_20-~n~_10-~n~___-"
@@ -395,6 +398,7 @@ void panel_update_hdg_alt_spd(int playerid, int heading, int altitude, int speed
 static
 void panel_update_odo_fl_hp_gear(int playerid, int vehicleid, int is_update)
 {
+	TRACE;
 	static char GEAR_STATE_COLOR_CHAR[3] = { 'g', 'r', 'y' };
 
 	struct RPCDATA_TextDrawSetString rpcdata;
@@ -542,6 +546,7 @@ void panel_update_odo_fl_hp_gear(int playerid, int vehicleid, int is_update)
 static
 void panel_update_nav_text_active(int playerid, struct RPCDATA_ShowTextDraw *textrpc, char *format, void *format_data, int is_update)
 {
+	TRACE;
 	struct RPCDATA_TextDrawSetString rpcdata;
 	struct BitStream bs;
 
@@ -560,6 +565,7 @@ void panel_update_nav_text_active(int playerid, struct RPCDATA_ShowTextDraw *tex
 static
 void panel_update_nav_text_inactive(int playerid, struct RPCDATA_ShowTextDraw *textrpc, int is_update)
 {
+	TRACE;
 	struct RPCDATA_TextDrawSetString rpcdata;
 	struct BitStream bs;
 
@@ -583,6 +589,7 @@ void panel_update_nav_text_inactive(int playerid, struct RPCDATA_ShowTextDraw *t
 static
 void panel_update_nav(int playerid, int vehicleid, int is_update)
 {
+	TRACE;
 	#define ILS_TEXT_LEN 141
 
 	static const unsigned char ILS_Z_OFFSETS[] = { 8, 15, 22, 29, 61, 93, 100, 107, 114 };
@@ -855,6 +862,7 @@ void panel_update_nav(int playerid, int vehicleid, int is_update)
 static
 void panel_timed_update()
 {
+	TRACE;
 	struct vec4 vpos;
 	struct vec3 vvel;
 	int playerid, vehicleid, n = numpanelplayers;
@@ -911,6 +919,7 @@ Sure, it's updated on the timed panel update, but it's nice if it could be updat
 static
 void panel_nav_updated(int vehicleid)
 {
+	TRACE;
 	int playerid, i;
 
 	for (i = 0; i < numpanelplayers; i++) {
@@ -924,6 +933,7 @@ void panel_nav_updated(int vehicleid)
 static
 void panel_reshow_if_needed(int playerid)
 {
+	TRACE;
 	struct vec4 vpos;
 	struct vec3 vvel;
 	int vehicleid;
@@ -995,6 +1005,7 @@ void panel_reshow_if_needed(int playerid)
 static
 void panel_add_panel_player_if_applicable(int playerid)
 {
+	TRACE;
 	int vehicleid, vehiclemodel;
 
 	if (!panel_should_hide[playerid]) {
@@ -1013,6 +1024,7 @@ void panel_add_panel_player_if_applicable(int playerid)
 
 void panel_on_player_state_change(int playerid, int from, int to)
 {
+	TRACE;
 	struct vec4 vpos;
 	struct vec3 vvel;
 	int vehicleid;
@@ -1056,6 +1068,7 @@ hide:
 static
 void panel_hide(int playerid, unsigned char hide_reason)
 {
+	TRACE;
 	panel_should_hide[playerid] |= hide_reason;
 	/*TODO: this is duplicate code from on_state_change*/
 	if (shown_panel[playerid]) {
@@ -1071,6 +1084,7 @@ void panel_hide(int playerid, unsigned char hide_reason)
 static
 void panel_unhide(int playerid, unsigned char hide_reason)
 {
+	TRACE;
 	panel_should_hide[playerid] &= ~hide_reason;
 	panel_add_panel_player_if_applicable(playerid);
 }
@@ -1078,6 +1092,7 @@ void panel_unhide(int playerid, unsigned char hide_reason)
 static
 void panel_day_night_changed()
 {
+	TRACE;
 	int i, playerid;
 
 	/*Panel players do not contain afk players, so don't use it here.*/
@@ -1092,17 +1107,20 @@ void panel_day_night_changed()
 static
 void panel_on_player_now_afk(int playerid)
 {
+	TRACE;
 	panel_remove_panel_player(playerid);
 }
 
 static
 void panel_on_player_was_afk(int playerid)
 {
+	TRACE;
 	panel_add_panel_player_if_applicable(playerid);
 }
 
 void panel_on_player_connect(int playerid)
 {
+	TRACE;
 	memset(&caches[playerid], 0xFF, sizeof(struct PANELCACHE));
 	caches[playerid].vor_shown = 0;
 	caches[playerid].ils_shown = 0;
@@ -1113,6 +1131,7 @@ void panel_on_player_connect(int playerid)
 static
 void panel_init()
 {
+	TRACE;
 	struct TEXTDRAW tmp_td_panel_vaiindmax = { "vaiindmax(up)", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 	struct TEXTDRAW tmp_td_panel_vorbarindmax = { "vorbarindmax(left)", TEXTDRAW_ALLOC_AS_NEEDED, NULL };
 

@@ -124,6 +124,7 @@ static int tracker;
 static
 int missions_get_weatherbonus_for_weather(int weather)
 {
+	TRACE;
 	switch (weather) {
 	case WEATHER_SF_RAINY:
 	case WEATHER_CS_RAINY:
@@ -140,6 +141,7 @@ int missions_get_weatherbonus_for_weather(int weather)
 static
 int missions_get_initial_weatherbonus()
 {
+	TRACE;
 	register int a, b, c;
 
 	a = missions_get_weatherbonus_for_weather(weather.current);
@@ -157,6 +159,7 @@ int missions_get_initial_weatherbonus()
 static
 void missions_hide_jobmap_set_stage_set_controllable(int playerid)
 {
+	TRACE;
 	jobmap_hide(playerid);
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	TogglePlayerControllable(playerid, 1);
@@ -169,6 +172,7 @@ Must only be called if the player has a valid active missionpoint.
 static
 void missions_show_jobmap_set_stage_set_controllable(int playerid)
 {
+	TRACE;
 	register struct MISSIONPOINT *msp;
 	register unsigned int mission_type;
 
@@ -190,6 +194,7 @@ TODO: prioritize mission points that have the least amount of active missions
 static
 struct MISSIONPOINT *missions_get_random_msp(struct AIRPORT *airport, unsigned int mission_type_mask)
 {
+	TRACE;
 	register struct MISSIONPOINT *tmp_msp;
 	struct MISSIONPOINT *applicable_missionpoints[MAX_MISSIONPOINTS_PER_AIRPORT];
 	int num_applicable_msp, mspidx;
@@ -217,17 +222,20 @@ struct MISSIONPOINT *missions_get_random_msp(struct AIRPORT *airport, unsigned i
 
 int missions_is_player_on_mission(int playerid)
 {
+	TRACE;
 	return activemission[playerid] != NULL;
 }
 
 static
 int missions_is_player_resuming_mission(int playerid)
 {
+	TRACE;
 	return activemission[playerid] && (activemission[playerid]->flags & MISSION_FLAG_WAS_PAUSED);
 }
 
 void missions_create_tracker_socket()
 {
+	TRACE;
 	tracker = NC_ssocket_create(SOCKET_UDP);
 	if (tracker == SOCKET_INVALID_SOCKET) {
 		logprintf("failed to create flighttracker socket");
@@ -241,6 +249,7 @@ void missions_create_tracker_socket()
 
 void missions_destroy_tracker_socket()
 {
+	TRACE;
 	if (tracker != SOCKET_INVALID_SOCKET) {
 		*buf32 = 0x05594C46;
 		NC_ssocket_send(tracker, buf32a, 4);
@@ -256,6 +265,7 @@ void missions_destroy_tracker_socket()
 static
 void missions_update_missionpoint_indicators(int playerid, float player_x, float player_y, float player_z)
 {
+	TRACE;
 #define AIRPORT_RANGE_SQ (1500.0f * 1500.0f)
 #define POINT_RANGE_SQ (500.0f * 500.0f)
 
@@ -444,18 +454,21 @@ active_msp_changed:
 static
 void cb_missions_post_to_discord_after_finish_query_done(void *data)
 {
+	TRACE;
 	discordflightlog_trigger((int) data);
 }
 
 static
 void missions_dispose()
 {
+	TRACE;
 	free(td_satisfaction.rpcdata);
 }
 
 static
 void missions_init()
 {
+	TRACE;
 	/*textdraws*/
 	textdraws_load_from_file("jobsatisfaction", TEXTDRAW_JOBSATISFACTION, 1, &td_satisfaction);
 
@@ -472,6 +485,7 @@ void missions_init()
 
 void missions_player_traveled_distance_in_vehicle(int playerid, int vehicleid, float distance_in_m)
 {
+	TRACE;
 	/*The state of the mission is not being checked. Being on a mission and in the mission
 	vehicle is enough reason to add the traveled distance to the total distance*/
 	if (activemission[playerid] != NULL && activemission[playerid]->vehicleid == vehicleid) {
@@ -487,6 +501,7 @@ Append a pay description and colorized, formatted number to given buffer.
 static
 int missions_append_pay(char *buf, char *description, int amount)
 {
+	TRACE;
 	char tmp[12], *ptmp;
 	int len, p = sprintf(buf, "%s", description);
 	if (amount < 0) {
@@ -524,6 +539,7 @@ int missions_append_pay(char *buf, char *description, int amount)
 static
 float missions_get_vehicle_maximum_speed(int model)
 {
+	TRACE;
 	/* max horizontal speed is about 81.6 */
 	switch (model) {
 	case MODEL_DODO: return 140.0f / 270.0f * 81.6f;
@@ -556,6 +572,7 @@ Gets the pay multiplier for missions done with given vehicle model.
 static
 float missions_get_vehicle_paymp(int model)
 {
+	TRACE;
 	const float heli_mp = 1.18f;
 
 	switch (model) {
@@ -588,6 +605,7 @@ Calculates airport tax for given missiontype at given airport.
 static
 int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 {
+	TRACE;
 	struct MISSIONPOINT *msp;
 	struct RUNWAY *rnw;
 	int i;
@@ -664,6 +682,7 @@ int calculate_airport_tax(struct AIRPORT *ap, int missiontype)
 static
 struct MISSION *missions_get_mission_from_vehicleid(int vehicleid)
 {
+	TRACE;
 	register int pid;
 	int i;
 
@@ -681,6 +700,7 @@ struct MISSION *missions_get_mission_from_vehicleid(int vehicleid)
 static
 int missions_format_satisfaction_text(int satisfaction, char *out_buf)
 {
+	TRACE;
 	return sprintf(out_buf, "Passenger~n~Satisfaction: %d%%", satisfaction);
 }
 
@@ -692,6 +712,7 @@ int missions_format_satisfaction_text(int satisfaction, char *out_buf)
 static
 void missions_send_rpc_to_player_and_passengers(int rpc, struct BitStream *bs, int playerid, int vehicleid)
 {
+	TRACE;
 	register int pid;
 	int i;
 
@@ -720,6 +741,7 @@ void missions_send_rpc_to_player_and_passengers(int rpc, struct BitStream *bs, i
 static
 void missions_show_passenger_satisfaction_textdraw(int satisfaction, int playerid, int vehicleid)
 {
+	TRACE;
 	struct BitStream bs;
 
 	td_satisfaction.rpcdata->text_length = missions_format_satisfaction_text(satisfaction, td_satisfaction.rpcdata->text);
@@ -737,6 +759,7 @@ void missions_show_passenger_satisfaction_textdraw(int satisfaction, int playeri
 static
 void missions_update_passenger_satisfaction_textdraw(int satisfaction, int playerid, int vehicleid)
 {
+	TRACE;
 	struct RPCDATA_TextDrawSetString rpcdata;
 	struct BitStream bs;
 
@@ -753,6 +776,7 @@ void missions_update_passenger_satisfaction_textdraw(int satisfaction, int playe
 static
 void missions_hide_passenger_satisfaction_textdraw(int playerid, int vehicleid)
 {
+	TRACE;
 	struct RPCDATA_HideTextDraw rpcdata;
 	struct BitStream bs;
 
@@ -773,6 +797,7 @@ Call when ending a mission.
 static
 void missions_cleanup(int playerid)
 {
+	TRACE;
 	int was_paused_mission, missionvehicleid;
 	struct MISSION *mission;
 
@@ -832,6 +857,7 @@ player must be on a mission or get segfault'd.
 static
 void missions_end_unfinished(int playerid, int reason)
 {
+	TRACE;
 	struct MISSION *mission;
 	char query[1024];
 	int duration;
@@ -871,6 +897,7 @@ player must be on a mission or get segfault'd.
 static
 void missions_end_paused(int playerid, int reason)
 {
+	TRACE;
 	struct SYNCDATA_Driver *syncdata;
 	struct MISSION *mission;
 	int gear_keys;
@@ -904,6 +931,7 @@ void missions_end_paused(int playerid, int reason)
 
 void missions_on_vehicle_destroyed_or_respawned(int vehicleid)
 {
+	TRACE;
 	struct MISSION *mission;
 	int i, playerid;
 
@@ -925,6 +953,7 @@ void missions_on_vehicle_destroyed_or_respawned(int vehicleid)
 
 void missions_on_player_connect(int playerid)
 {
+	TRACE;
 	register char *indicator_states;
 	int i;
 
@@ -944,6 +973,7 @@ void missions_on_player_connect(int playerid)
 static
 void missions_on_player_disconnect(int playerid, int reason)
 {
+	TRACE;
 	struct MISSION *miss;
 
 	if (mission_stage[playerid] == MISSION_STAGE_FLIGHT && (miss = activemission[playerid])) {
@@ -981,6 +1011,7 @@ May be called from a timer.
 static
 int missions_start_flight(void *data)
 {
+	TRACE;
 	struct MISSION_CB_DATA *mission_cb_data;
 	int playerid;
 	struct MISSION *mission;
@@ -1029,6 +1060,7 @@ Called when mission create query has been executed.
 static
 void missions_querycb_create(void *data)
 {
+	TRACE;
 	struct MISSION_CB_DATA *mission_cb_data;
 	int playerid;
 	struct MISSION *mission;
@@ -1067,6 +1099,7 @@ Starts a mission for given player.
 static
 void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struct MISSIONPOINT *endpoint, int missiontype)
 {
+	TRACE;
 	struct MISSION_CB_DATA *cbdata;
 	struct MISSION *mission;
 	struct dbvehicle *veh;
@@ -1192,6 +1225,7 @@ Called from timer callback for mission unload checkpoint.
 static
 int missions_after_unload(void *data)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 	struct MISSION_UNLOAD_DATA *mission_cb_data;
 	int playerid;
@@ -1385,6 +1419,7 @@ int missions_after_unload(void *data)
 static
 void missions_start_unload(int playerid)
 {
+	TRACE;
 	struct MISSION_UNLOAD_DATA *cbdata;
 	struct MISSION *mission;
 	struct vec3 vvel;
@@ -1433,6 +1468,7 @@ void missions_start_unload(int playerid)
 static
 void missions_update_available_msptypes(int playerid, int vehicleid)
 {
+	TRACE;
 	register unsigned int mask;
 
 	missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[classid[playerid]];
@@ -1449,6 +1485,7 @@ void missions_update_available_msptypes(int playerid, int vehicleid)
 static
 void missions_on_driver_changed_vehicle_without_state_change(int playerid, int newvehicleid)
 {
+	TRACE;
 	struct vec3 pos;
 
 	missions_update_available_msptypes(playerid, newvehicleid);
@@ -1459,6 +1496,7 @@ void missions_on_driver_changed_vehicle_without_state_change(int playerid, int n
 static
 void missions_stoplocate(int playerid)
 {
+	TRACE;
 	if (locating_msp[playerid]) {
 		locating_msp[playerid] = NULL;
 		DisablePlayerRaceCheckpoint(playerid);
@@ -1468,6 +1506,7 @@ void missions_stoplocate(int playerid)
 static
 void missions_on_player_state_change(int playerid, int from, int to)
 {
+	TRACE;
 	struct MISSION *mission;
 	struct vec3 pos;
 	int vehicleid;
@@ -1548,6 +1587,7 @@ void missions_on_player_state_change(int playerid, int from, int to)
 
 void missions_on_vehicle_stream_in(int vehicleid, int forplayerid)
 {
+	TRACE;
 	struct MISSION *mission;
 
 	mission = activemission[forplayerid];
@@ -1558,6 +1598,7 @@ void missions_on_vehicle_stream_in(int vehicleid, int forplayerid)
 
 void missions_on_weather_changed(int weather)
 {
+	TRACE;
 	register struct MISSION *mission;
 	register int i;
 	int bonusvalue;
@@ -1576,6 +1617,7 @@ void missions_send_tracker_data(
 	int playerid, int vehicleid, float hp,
 	struct vec3 *vpos, struct vec3 *vvel, int engine, float pitch, float roll)
 {
+	TRACE;
 	struct MISSION *mission;
 	unsigned char flags;
 	short spd, alt, hpv, pitch10, roll10;
@@ -1627,6 +1669,7 @@ To be called from the /s command handler.
 static
 void missions_process_cancel_request_by_player(int playerid)
 {
+	TRACE;
 	struct MISSION *mission;
 
 	if ((mission = activemission[playerid]) != NULL) {
@@ -1646,6 +1689,7 @@ void missions_process_cancel_request_by_player(int playerid)
 static
 void missions_locate_closest_mission(int playerid)
 {
+	TRACE;
 	struct MISSIONPOINT *closest;
 	struct dbvehicle *veh;
 	struct vec3 pos;
@@ -1694,6 +1738,7 @@ To be called from the /w command handler.
 static
 void missions_locate_or_show_map(int playerid)
 {
+	TRACE;
 	struct dbvehicle *veh;
 	int vehicleid;
 
@@ -1733,6 +1778,7 @@ void missions_locate_or_show_map(int playerid)
 static
 void missions_driversync_udkeystate_change(int playerid, short udkey)
 {
+	TRACE;
 	if (mission_stage[playerid] == MISSION_STAGE_JOBMAP) {
 		if (udkey) {
 			jobmap_move_updown(playerid, udkey);
@@ -1743,6 +1789,7 @@ void missions_driversync_udkeystate_change(int playerid, short udkey)
 static
 void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 {
+	TRACE;
 	register struct MISSIONPOINT *tomsp;
 	struct MISSIONPOINT *frommsp;
 	struct AIRPORT *selected_airport;
@@ -1781,6 +1828,7 @@ void missions_driversync_keystate_change(int playerid, int oldkeys, int newkeys)
 
 void missions_on_vehicle_refueled(int vehicleid, float refuelamount)
 {
+	TRACE;
 	struct MISSION *miss;
 	int i;
 
@@ -1797,6 +1845,7 @@ void missions_on_vehicle_refueled(int vehicleid, float refuelamount)
 
 void missions_on_vehicle_repaired(int vehicleid, float fixamount, float newhp)
 {
+	TRACE;
 	struct MISSION *miss;
 	int i;
 
@@ -1814,6 +1863,7 @@ void missions_on_vehicle_repaired(int vehicleid, float fixamount, float newhp)
 static
 void missions_on_driversync(int playerid, struct SYNCDATA_Driver *syncdata)
 {
+	TRACE;
 	register struct MISSION *mission;
 
 	if (mission_stage[playerid] == MISSION_STAGE_FLIGHT) {
@@ -1838,6 +1888,7 @@ void missions_on_driversync(int playerid, struct SYNCDATA_Driver *syncdata)
 static
 void missions_resume_mission_create_npc(int forplayerid)
 {
+	TRACE;
 	struct BitStream bitstream;
 	struct RPCDATA_PlayerCreate playercreate;
 	struct RPCDATA_PlayerJoin playerjoin;
@@ -1864,6 +1915,7 @@ void missions_resume_mission_create_npc(int forplayerid)
 static
 void missions_resume_mission_destroy_npc(int forplayerid)
 {
+	TRACE;
 	struct BitStream bitstream;
 	struct RPCDATA_PlayerLeave playerleave;
 
@@ -1890,6 +1942,7 @@ struct MISSION_RESUME_DATA {
 static
 int missions_resume_mission_send_syncdata(void *data)
 {
+	TRACE;
 #pragma pack(push,1)
 	struct {
 		/*Padding to ensure the 'short' members in 'aligned' are aligned on a 2byte address boundary.*/
@@ -2051,6 +2104,7 @@ exit:
 static
 void missions_cb_dlg_paused_mission_introduction(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	struct MISSION_RESUME_DATA *rd;
 
 	rd = response.data;
@@ -2062,6 +2116,7 @@ static void missions_query_paused_missions(int playerid);
 static
 void missions_cb_dlg_continue_paused_mission(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	struct MISSION_RESUME_DATA *rd;
 	struct PAUSED_MISSION *paused;
 	struct SampVehicle *vehicle;
@@ -2171,6 +2226,7 @@ void missions_cb_dlg_continue_paused_mission(int playerid, struct DIALOG_RESPONS
 static
 void missions_prompt_continue_paused_mission(int playerid)
 {
+	TRACE;
 	struct PAUSED_MISSION *paused;
 	struct DIALOG_INFO dialog;
 	char *info;
@@ -2199,6 +2255,7 @@ void missions_prompt_continue_paused_mission(int playerid)
 static
 void missions_cb_load_paused_mission(void *data)
 {
+	TRACE;
 	int playerid, *field, from_msp_id, to_msp_id, missiontype, i, mission_id;
 	struct MISSIONPOINT *msp, *from_msp, *to_msp;
 	struct PAUSED_MISSION *paused;
@@ -2277,6 +2334,7 @@ void missions_cb_load_paused_mission(void *data)
 static
 void missions_query_paused_missions(int playerid)
 {
+	TRACE;
 	sprintf(cbuf4096_,
 		"SELECT v.m,"
 		"p.x,p.y,p.z,p.qw,p.qx,p.qy,p.qz,p.vx,p.vy,p.vz,p.fuel,p.hp,p.gear_keys,p.udlrkeys,p.misc,"
@@ -2296,6 +2354,7 @@ void missions_query_paused_missions(int playerid)
 static
 void missions_on_player_spawn(int playerid, struct vec3 pos)
 {
+	TRACE;
 	missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[classid[playerid]];
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 	if (paused_mission[playerid] && !paused_mission[playerid]->is_cancelled) {
@@ -2307,6 +2366,7 @@ void missions_on_player_spawn(int playerid, struct vec3 pos)
 
 void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
 {
+	TRACE;
 	struct MISSION *miss;
 	int last_satisfaction;
 	float pitchlimit, rolllimit;
@@ -2354,6 +2414,7 @@ void missions_update_satisfaction(int pid, int vid, float pitch, float roll)
 
 int missions_get_distance_to_next_cp(int playerid, struct vec3 *frompos)
 {
+	TRACE;
 	struct MISSION *miss;
 	struct vec3 cp;
 
@@ -2376,6 +2437,7 @@ int missions_get_distance_to_next_cp(int playerid, struct vec3 *frompos)
 static
 int missions_format_kneeboard_info_text(int playerid, char *dest)
 {
+	TRACE;
 	if (mission_stage[playerid] > MISSION_STAGE_LOAD) {
 		return sprintf(dest, "~w~Flight from %s to ~r~%s~w~.",
 			activemission[playerid]->startpoint->ap->name,

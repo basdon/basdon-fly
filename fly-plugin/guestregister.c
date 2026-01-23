@@ -41,6 +41,7 @@ Checks both the characters and the length.
 static
 int guestreg_is_name_valid(char *name)
 {
+	TRACE;
 	static const char *VALIDS = "x___xx____x_xxxxxxxxxx___x__x"
 		"xxxxxxxxxxxxxxxxxxxxxxxxxxx_x_x_xxxxxxxxxxxxxxxxxxxxxxxxxx";
 
@@ -60,6 +61,7 @@ int guestreg_is_name_valid(char *name)
 static
 void guestreg_rollback_name(int playerid, struct REGISTERDATA *rd)
 {
+	TRACE;
 	if (natives_SetPlayerName(playerid, rd->oldname) != 1) {
 		login_give_guest_name(playerid);
 	}
@@ -71,6 +73,7 @@ Shows the dialog to change username.
 static
 void guestreg_show_dialog_namechange(int playerid, int show_invalid_name_error, int show_username_taken_error)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 	char *d;
 
@@ -109,6 +112,7 @@ Show dialog to enter or confirm password to complete guest registration.
 static
 void guestreg_show_dialog_password(int playerid, int step, int pw_mismatch, void (*cb)(int playerid, struct DIALOG_RESPONSE))
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 	char *d;
 
@@ -140,6 +144,7 @@ Callback when the register query executed.
 static
 void guestreg_cb_registered(void *data)
 {
+	TRACE;
 	int playerid;
 	char msg144[144];
 
@@ -163,6 +168,7 @@ Frees given register data.
 static
 void guestreg_do_register(int playerid, struct REGISTERDATA *rd)
 {
+	TRACE;
 	pdata[playerid]->groups &= ~GROUP_GUEST;
 	pdata[playerid]->groups |= GROUP_MEMBER;
 
@@ -183,6 +189,7 @@ Callback for username exist check query.
 static
 void guestreg_cb_check_username_exists(void *data)
 {
+	TRACE;
 	struct REGISTERDATA *d;
 	int player_cc, playerid;
 
@@ -217,6 +224,7 @@ Callback for bcrypt hasing hasspaword after user fills in password first time.
 static
 void guestreg_cb_password_hashed(void *data)
 {
+	TRACE;
 	/*TODO duplicate code (changepassword.c)*/
 	struct REGISTERDATA *rd;
 	int player_cc, playerid;
@@ -249,6 +257,7 @@ void guestreg_cb_password_hashed(void *data)
 static
 void guestreg_dlg_change_name(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	struct REGISTERDATA *rd;
 	struct CBDATA *cd;
 
@@ -285,6 +294,7 @@ void guestreg_dlg_change_name(int playerid, struct DIALOG_RESPONSE response)
 static
 void guestreg_dlg_register_confirmpass(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	/*TODO duplicate code (changepassword)*/
 	struct REGISTERDATA *rd, *oldrd;
 	char tmp_hash_buf[SHA256BUFSIZE];
@@ -328,6 +338,7 @@ void guestreg_dlg_register_confirmpass(int playerid, struct DIALOG_RESPONSE resp
 static
 void guestreg_dlg_register_firstpass(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	struct REGISTERDATA *rd;
 	struct CBDATA *cd;
 

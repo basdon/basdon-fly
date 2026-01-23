@@ -31,12 +31,14 @@ static const int numprotips = sizeof(protips)/sizeof(protips[0]);
 static
 char *protips_get_random_protip()
 {
+	TRACE;
 	return (char*) protips[NC_random(numprotips)];
 }
 
 static
 int protips_timed_broadcast(void *data)
 {
+	TRACE;
 	if (playercount) {
 		SendClientMessageToAllAndIRC(ECHO_PACK12_PROTIP, COL_INFO_LIGHT, protips_get_random_protip());
 	}
@@ -46,5 +48,6 @@ int protips_timed_broadcast(void *data)
 static
 void protips_init()
 {
+	TRACE;
 	timer_set(PROTIPS_INTERVAL, protips_timed_broadcast, NULL);
 }

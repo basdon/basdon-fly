@@ -4,6 +4,7 @@
 
 #define NO_CAST_IMM_FUNCPTR
 
+#define TRACE
 #define cell int
 typedef void (*cb_t)(void* data);
 #define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]

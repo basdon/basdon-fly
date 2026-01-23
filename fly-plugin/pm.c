@@ -12,6 +12,7 @@ Resets the last pm target for given player.
 static
 void pm_on_player_connect(int playerid)
 {
+	TRACE;
 	lastpmtarget[playerid] = -1;
 }
 
@@ -21,6 +22,7 @@ Change every player that has given player as pm target to invalid target id.
 static
 void pm_on_player_disconnect(int playerid)
 {
+	TRACE;
 	int pid, n = playercount;
 
 	while (n--) {
@@ -37,6 +39,7 @@ Sends a pm. Target player is assumed to be online.
 static
 void pm_send(int from, int to, char *msg)
 {
+	TRACE;
 	char msg288[288];
 
 	if (!(prefs[from] & PREF_ENABLE_PM)) {

@@ -5,6 +5,7 @@ static char dfl_enabled;
 static
 void discordflightlog_execve(char *script, char *arg)
 {
+	TRACE;
 	char *argv[4];
 
 	chdir("../fly-web/cli");
@@ -19,6 +20,7 @@ void discordflightlog_execve(char *script, char *arg)
 static
 void discordflightlog_init()
 {
+	TRACE;
 	struct sigaction action;
 	pid_t pid;
 	int status;
@@ -59,6 +61,7 @@ void discordflightlog_init()
 static
 void discordflightlog_trigger(int missionid)
 {
+	TRACE;
 	char missionidbuf[15];
 	pid_t pid;
 

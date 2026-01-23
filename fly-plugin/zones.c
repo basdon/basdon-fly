@@ -10,6 +10,7 @@ static struct TEXTDRAW td_gps = { "gps", 200, NULL };
 static
 void zones_init()
 {
+	TRACE;
 	struct REGION *region, *region_end;
 	struct ZONE *pz = zones;
 	int z = 0, zmax = zonecount;
@@ -56,6 +57,7 @@ Check if given position is inside given zone
 static
 int zones_is_in_zone(struct vec3 pos, struct ZONE *zone)
 {
+	TRACE;
 	return zone->min_x <= pos.x && pos.x <= zone->max_x &&
 		zone->min_y <= pos.y && pos.y <= zone->max_y &&
 		zone->min_z <= pos.z && pos.z <= zone->max_z;
@@ -64,6 +66,7 @@ int zones_is_in_zone(struct vec3 pos, struct ZONE *zone)
 static
 void zones_on_player_connect(int playerid)
 {
+	TRACE;
 	gps_text_is_shown[playerid] = 0;
 	zone_last_index[playerid] = zone_last_id[playerid] = -1;
 	zone_last_region[playerid] = ZONE_INVALID;
@@ -77,6 +80,7 @@ Should also be called when OnPlayerSetPos is called.
 static
 void zones_update(int playerid, struct vec3 pos)
 {
+	TRACE;
 	struct RPCDATA_TextDrawSetString rpcdata;
 	struct REGION *region, *region_end;
 	int zoneindex;

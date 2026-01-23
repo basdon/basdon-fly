@@ -22,6 +22,7 @@ timers.
 static
 void timer_reset()
 {
+	TRACE;
 	time_elapsed_millis();
 }
 
@@ -35,6 +36,7 @@ Don't forget to free data if needed when applicable.
 static
 void timer_set(int interval, timer_cb cb, void *data)
 {
+	TRACE;
 	struct TIMER *timer;
 
 #ifdef DEV
@@ -62,6 +64,7 @@ Process the timers.
 static
 void timer_tick(int elapsed_time)
 {
+	TRACE;
 	struct TIMER *t;
 	int i, new_time;
 

@@ -9,6 +9,7 @@ struct RADIO_MACRO {
 static
 int radio_append_mission_origin(int playerid, char *str)
 {
+	TRACE;
 	struct MISSION *mission;
 
 	mission = activemission[playerid];
@@ -25,6 +26,7 @@ int radio_append_mission_origin(int playerid, char *str)
 static
 int radio_append_mission_destination(int playerid, char *str)
 {
+	TRACE;
 	struct MISSION *mission;
 
 	mission = activemission[playerid];
@@ -100,6 +102,7 @@ static struct RADIO_MACRO radio_macros[] = {
 static
 void radio_init()
 {
+	TRACE;
 	int i, j;
 
 	assert(numairports); /*Airports need to be loaded first.*/
@@ -122,6 +125,7 @@ void radio_init()
 static
 void radio_show_macros_dialog(int playerid)
 {
+	TRACE;
 	register struct RADIO_MACRO *macro;
 	struct DIALOG_INFO dialog;
 	char *b;
@@ -144,6 +148,7 @@ void radio_show_macros_dialog(int playerid)
 static
 void radio_send_radio_msg(int playerid, char *msg)
 {
+	TRACE;
 	register struct RADIO_MACRO *macro;
 	char radiomsg[200];
 	char macrobuf[10];

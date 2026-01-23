@@ -20,6 +20,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/*w", 0, GROUPS_ALL, CMD__W_SYNTAX, CMD__W_DESC, cmd_dev__w },
 	{ 0, 0, "/cp", 0, GROUPS_ALL, CMD_CP_SYNTAX, CMD_CP_DESC, cmd_dev_cp },
 	{ 0, 0, "/crashme", 0, GROUPS_ALL, CMD_CRASHME_SYNTAX, CMD_CRASHME_DESC, cmd_dev_crashme },
+	{ 0, 0, "/crashserver", 0, GROUPS_ALL, CMD_CRASHSERVER_SYNTAX, CMD_CRASHSERVER_DESC, cmd_dev_crashserver },
 	{ 0, 0, "/drvc", 0, GROUPS_ALL, CMD_DRVC_SYNTAX, CMD_DRVC_DESC, cmd_dev_disableremotevehiclecollisions },
 	{ 0, 0, "/fweather", 0, GROUPS_ALL, CMD_FWEATHER_SYNTAX, CMD_FWEATHER_DESC, cmd_dev_fweather },
 	{ 0, 0, "/gt", 0, GROUPS_ALL, CMD_GT_SYNTAX, CMD_GT_DESC, cmd_dev_gt },
@@ -135,6 +136,7 @@ On match, parseidx is the index right after the command, so either space or \0.
 static
 int cmd_is(const char *cmdtext, const char *cmd, int *parseidx)
 {
+	TRACE;
 	int pos = 0;
 
 nextchar:
@@ -159,6 +161,7 @@ Precalcs all command hashes and links aliases.
 static
 void cmd_init()
 {
+	TRACE;
 	register struct COMMAND *cmd, *aliased;
 	int hash;
 
@@ -205,6 +208,7 @@ int cmd_get_by_name_check_permissions(
 	struct COMMAND **out_cmd,
 	struct COMMAND **out_real_cmd)
 {
+	TRACE;
 	register struct COMMAND *cmd, *real_cmd;
 	int hash;
 
@@ -230,6 +234,7 @@ Called from hooked commandtext response packet handler.
 */
 void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 {
+	TRACE;
 	struct COMMAND *cmd, *real_cmd;
 	struct COMMANDCONTEXT cmdctx;
 	char syntaxmsg[144];
@@ -285,6 +290,7 @@ Prints a cmd's syntax and description for a player.
 static
 void cmd_show_help_for(int playerid, char *cmdname)
 {
+	TRACE;
 	struct COMMAND *cmd, *real_cmd;
 	int unused_parseidx;
 	char msg[144];
@@ -319,12 +325,14 @@ static void cmd_show_cmdlist(int playerid, struct CMDLIST_DATA *data);
 static
 void cmd_engage_cmdlist(int playerid)
 {
+	TRACE;
 	cmd_show_cmdlist(playerid, NULL);
 }
 
 static
 void cmd_cb_dlg_cmdlist_detail(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	if (!response.aborted && response.response) {
 		cmd_show_cmdlist(playerid, response.data);
 	} else {
@@ -335,6 +343,7 @@ void cmd_cb_dlg_cmdlist_detail(int playerid, struct DIALOG_RESPONSE response)
 static
 void cmd_cb_dlg_cmdlist(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	register struct COMMAND *cmd, *alias;
 	struct DIALOG_INFO *dialog;
 	struct CMDLIST_DATA *data;
@@ -392,6 +401,7 @@ void cmd_cb_dlg_cmdlist(int playerid, struct DIALOG_RESPONSE response)
 static
 void cmd_show_cmdlist(int playerid, struct CMDLIST_DATA *data)
 {
+	TRACE;
 	register struct COMMAND *cmd;
 	struct DIALOG_INFO dialog;
 	char *b;

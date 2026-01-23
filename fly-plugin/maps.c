@@ -163,6 +163,7 @@ Load a map from file as specified in given map structs.
 static
 int maps_load_from_file(char *name, struct OBJECT_MAP *obj_map, struct ZONE_MAP *zone_map)
 {
+	TRACE;
 	FILE *fs;
 	char filename[22 + MAP_MAX_FILENAME];
 	int i;
@@ -312,6 +313,7 @@ corrupted:
 static
 void maps_print_stats()
 {
+	TRACE;
 	struct OBJECT_MAP *obj_map;
 	struct ZONE_MAP *zone_map;
 	int total_objects, total_gang_zones;
@@ -332,6 +334,7 @@ void maps_print_stats()
 static
 void maps_load_from_db()
 {
+	TRACE;
 	char mapname[MAP_MAX_FILENAME];
 	char q[] =
 		"SELECT filename FROM map "
@@ -383,6 +386,7 @@ void maps_load_from_db()
 static
 int maps_timer_rotate_radar(void *data)
 {
+	TRACE;
 	static float obj_radar_z_rot = 0.0f;
 	static int z_off_i = 0;
 
@@ -427,6 +431,7 @@ int maps_timer_rotate_radar(void *data)
 static
 int maps_timer_rotate_wmre_blades(void *data)
 {
+	TRACE;
 	struct BitStream bitstream;
 	struct RPCDATA_MoveObject rpcdata;
 	int blade, bladeidx, playerindex, playerid;
@@ -486,6 +491,7 @@ int maps_timer_rotate_wmre_blades(void *data)
 static
 void maps_load_wmre_blade_template_object()
 {
+	TRACE;
 	int size, result;
 
 	result = maps_load_from_file("wmre_blades", obj_maps, zone_maps);
@@ -506,6 +512,7 @@ Initialize mapping system. Loads maps from db and reads their files.
 static
 void maps_init()
 {
+	TRACE;
 	octavia_island_actor_mapidx = -1;
 	wmre_mapidx = -1;
 
@@ -543,6 +550,7 @@ void maps_init()
 static
 void maps_continue_stream_in_queued_zones_for_player(int playerid, struct STREAMING_DATA *streamingdata)
 {
+	TRACE;
 	struct BitStream bitstream;
 	struct ZONE_MAP *map;
 	union GANG_ZONE *zone;
@@ -590,6 +598,7 @@ Deletes all the objects from given map for the given player.
 static
 void maps_stream_out_objects_for_player(int playerid, struct OBJECT_MAP *map)
 {
+	TRACE;
 	struct RPCDATA_DestroyObject rpcdata_DestroyObject;
 	struct BitStream bitstream;
 	short *objectid_to_objmapidx;
@@ -638,6 +647,7 @@ Deletes all the gangzones from given map for the given player.
 static
 void maps_stream_out_zones_for_player(int playerid, struct ZONE_MAP *map)
 {
+	TRACE;
 	short *gangzoneid_to_zonemapidx;
 	short zoneid;
 	int mapidx;
@@ -660,6 +670,7 @@ void maps_stream_out_zones_for_player(int playerid, struct ZONE_MAP *map)
 static
 void maps_print_object_breakdown(int playerid)
 {
+	TRACE;
 	int map_loaded[MAX_MAPS];
 	int objects_per_mapidx[MAX_MAPS];
 	int i, mapidx;
@@ -692,6 +703,7 @@ void maps_print_object_breakdown(int playerid)
 static
 int maps_continue_stream_in_queued_objects_for_player(int playerid, struct STREAMING_DATA *streamingdata, int max_objs_to_create)
 {
+	TRACE;
 	struct BitStream bitstream;
 	struct RPCDATA_CreateObject *obj;
 	short tmp_saved_objdata_size;
@@ -796,6 +808,7 @@ skip_wmre_blades:
 static
 struct OBJECT_MAP *maps_find_next_object_map_to_stream_for_player(int playerid, float x, float y)
 {
+	TRACE;
 	float dx, dy;
 	float candidate_distance_sq, selected_stream_in_radius_sq;
 	struct OBJECT_MAP *selected, *candidate;
@@ -838,6 +851,7 @@ struct OBJECT_MAP *maps_find_next_object_map_to_stream_for_player(int playerid, 
 static
 void maps_prepare_streaming_object_map(int playerid, struct OBJECT_MAP *map, struct STREAMING_DATA *streamingdata)
 {
+	TRACE;
 	struct RPCDATA_CreateObject *obj;
 	int i;
 
@@ -861,6 +875,7 @@ void maps_prepare_streaming_object_map(int playerid, struct OBJECT_MAP *map, str
 static
 void maps_stream_out_maps_for_player(int playerid, float posx, float posy)
 {
+	TRACE;
 	struct OBJECT_MAP *obj_map;
 	struct ZONE_MAP *zone_map;
 	float dx, dy, distance;
@@ -898,6 +913,7 @@ void maps_stream_out_maps_for_player(int playerid, float posx, float posy)
 static
 struct ZONE_MAP *maps_find_next_zone_map_to_stream_for_player(int playerid, float x, float y)
 {
+	TRACE;
 	float dx, dy;
 	float selected_distance_sq, candidate_distance_sq;
 	struct ZONE_MAP *selected, *candidate;
@@ -937,6 +953,7 @@ struct ZONE_MAP *maps_find_next_zone_map_to_stream_for_player(int playerid, floa
 static
 int maps_prioritize_closest_objects(struct STREAMING_DATA *streamingdata, float x, float y)
 {
+	TRACE;
 	struct RPCDATA_CreateObject *obj;
 	register float dx, dy;
 	register int dist_sq;
@@ -969,6 +986,7 @@ int maps_prioritize_closest_objects(struct STREAMING_DATA *streamingdata, float 
 static
 void maps_prepare_streaming_zone_map(int playerid, struct ZONE_MAP *map, struct STREAMING_DATA *streamingdata)
 {
+	TRACE;
 	map->stream_status_for_player[playerid] = STREAMING_IN;
 	streamingdata->zone_map = map;
 	streamingdata->next_zone_idx = 0;
@@ -998,6 +1016,7 @@ enum OBJ_STREAM_MODE {
 static
 void maps_stream_for_player(int playerid, float posx, float posy, enum OBJ_STREAM_MODE mode)
 {
+	TRACE;
 	struct OBJECT_MAP *next_object_map;
 	struct ZONE_MAP *next_zone_map;
 	struct STREAMING_DATA *streamingdata;
@@ -1044,6 +1063,7 @@ static
  */
 void maps_process_tick(int elapsed_time)
 {
+	TRACE;
 	register struct vec3 *pos;
 	register int playerid;
 
@@ -1067,6 +1087,7 @@ void maps_process_tick(int elapsed_time)
 static
 void maps_on_player_connect(int playerid)
 {
+	TRACE;
 	struct BitStream bitstream;
 	int i;
 
@@ -1097,6 +1118,7 @@ void maps_on_player_connect(int playerid)
 static
 void maps_on_player_disconnect(int playerid)
 {
+	TRACE;
 	int i;
 
 	for (i = num_obj_maps; i > 0; ) {

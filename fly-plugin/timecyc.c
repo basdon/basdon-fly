@@ -368,6 +368,7 @@ Formats the METAR weather message.
 static
 void timecyc_fmt_metar_msg(char *dest, const char* type, int weather)
 {
+	TRACE;
 	sprintf(dest,
 		"METAR weather %s: %s, "
 		"visibility: %s, winds: %.0fkts, waves: %s",
@@ -384,6 +385,7 @@ Sets the weather, it will be interpolated for players.
 static
 void timecyc_set_weather(int newweather)
 {
+	TRACE;
 	int playerid, i;
 
 	if (weather.locked != newweather) {
@@ -408,6 +410,7 @@ Makes a query to db to update weather stats, except right after initializing.
 static
 int timecyc_next_weather(void *unused)
 {
+	TRACE;
 	int newweather;
 	char msg144[144];
 
@@ -437,6 +440,7 @@ Starts the time and weather system.
 static
 void timecyc_init()
 {
+	TRACE;
 	time_h = 7;
 	time_m = 59;
 	weather.current = WEATHER_INITIAL;
@@ -485,6 +489,7 @@ Weather interpolation:
 static
 void timecyc_sync(int playerid)
 {
+	TRACE;
 	/*Set current weather to all.
 	Setting the weather without having a clock changes all three of
 	current, upcoming, locked.*/
@@ -520,18 +525,21 @@ void timecyc_sync(int playerid)
 static
 void timecyc_on_player_connect(int playerid)
 {
+	TRACE;
 	timecycstate[playerid] = SYNC_STATE_NONE;
 }
 
 static
 void timecyc_on_player_death(int playerid)
 {
+	TRACE;
 	TogglePlayerClock(playerid, 0); /*this will instantly change the skybox for the player, but we kinda need it..*/
 }
 
 static
 void timecyc_on_player_request_class(int playerid)
 {
+	TRACE;
 	TogglePlayerClock(playerid, 0);
 	SetPlayerTime(playerid, 12, 0);
 	SetPlayerWeather(playerid, 1);
@@ -540,6 +548,7 @@ void timecyc_on_player_request_class(int playerid)
 static
 void timecyc_on_player_update(int playerid)
 {
+	TRACE;
 	switch (timecycstate[playerid]) {
 	case SYNC_STATE_TIME1:
 		SetPlayerTime(playerid, time_h, 0);
@@ -564,6 +573,7 @@ void timecyc_on_player_update(int playerid)
 static
 void timecyc_on_player_was_afk(int playerid)
 {
+	TRACE;
 	timecyc_sync(playerid);
 }
 
@@ -573,6 +583,7 @@ Syncs timecyc's tick function.
 static
 void timecyc_reset()
 {
+	TRACE;
 	lasttime = time_timestamp();
 }
 
@@ -585,6 +596,7 @@ doing it here that's being prevented.
 static
 void timecyc_sync_clocks()
 {
+	TRACE;
 	int i, playerid;
 
 	if (weather.current == weather.upcoming &&
@@ -608,6 +620,7 @@ Let the clock tick. This will also call most timed functions. TODO: move those t
 static
 void timecyc_tick()
 {
+	TRACE;
 	unsigned long nowtime;
 	int idx, playerid;
 	struct vec3 pos;
@@ -662,6 +675,7 @@ timer30s:
 static
 int timecyc_get_current_render_distance()
 {
+	TRACE;
 	/*Could interpolate between current and upcoming, but I suspect it's not linear, and it's not always synced.*/
 	return weather_view_distances[weather.upcoming];
 }

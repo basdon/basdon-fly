@@ -3,6 +3,7 @@ static void admin_engage_vehinfo_dialog(int);
 static
 void admin_cb_dlg_vehinfo_assignap_response(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	char *q;
 
 	if (response.response) {
@@ -23,6 +24,7 @@ void admin_cb_dlg_vehinfo_assignap_response(int playerid, struct DIALOG_RESPONSE
 static
 void admin_cb_dlg_vehinfo_response(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 	int i;
 	char *info;
@@ -52,8 +54,9 @@ void admin_show_vehinfo_dialog(playerid, veh, enabled, airport)
 	char *enabled;
 	char *airport;
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
-	
+
 	dialog_init_info(&dialog);
 	sprintf(dialog.info,
 		"Model\t%s\n"
@@ -87,6 +90,7 @@ struct CB_VEHICLEINFO {
 static
 void admin_cb_query_vehinfo(void *data)
 {
+	TRACE;
 	struct dbvehicle *veh;
 	int cc, playerid;
 
@@ -122,6 +126,7 @@ send the same dialog but with filled in data.
 static
 void admin_engage_vehinfo_dialog(int playerid)
 {
+	TRACE;
 	struct DIALOG_INFO *dialog;
 	struct dbvehicle *veh;
 	struct CB_VEHICLEINFO *cbdata;

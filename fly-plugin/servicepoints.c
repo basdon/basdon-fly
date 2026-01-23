@@ -33,6 +33,7 @@ Free memory
 static
 void svp_dispose()
 {
+	TRACE;
 	if (servicepoints != NULL) {
 		free(servicepoints);
 		servicepoints = NULL;
@@ -48,6 +49,7 @@ Finds a service point in range of given coordinates.
 static
 int svp_find_point(struct vec3 pos)
 {
+	TRACE;
 	float dist_sq;
 	int i = numservicepoints;
 
@@ -66,6 +68,7 @@ Load servicepoints from the db.
 static
 void svp_init()
 {
+	TRACE;
 	struct SERVICEPOINT *svp;
 	int cacheid, rowcount;
 
@@ -101,6 +104,7 @@ To be called from the /refuel command.
 static
 int svp_refuel(int playerid)
 {
+	TRACE;
 	int vehicleid, driverid, driveruserid, budget, svpid, cost, refuelpct, vehid;
 	float fuel, fuel_cap, refuelamount;
 	struct dbvehicle *veh;
@@ -227,6 +231,7 @@ To be called from the /repair or /fix command.
 static
 int svp_repair(int playerid)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 	struct dbvehicle *veh;
 	struct vec3 vpos;
@@ -321,6 +326,7 @@ Reset servicepoint map icon streaming for new player.
 static
 void svp_on_player_connect(int playerid)
 {
+	TRACE;
 	memset(player_servicepoints[playerid], 0, sizeof(player_servicepoints[playerid]));
 }
 
@@ -333,6 +339,7 @@ Updates the service point mapicons (and 3D text) for given playerid.
 static
 void svp_update_mapicons(int playerid, float x, float y)
 {
+	TRACE;
 	struct SERVICEPOINT **psvps;
 	struct SERVICEPOINT *svp;
 	float dx, dy;

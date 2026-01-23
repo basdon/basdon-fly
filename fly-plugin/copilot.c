@@ -12,6 +12,7 @@ static int copilot_helptext_showtime[MAX_PLAYERS];
 static
 void copilot_handle_onfoot_fire(int playerid, struct vec3 playerpos)
 {
+	TRACE;
 	struct vec3 vehiclepos, enter_exit_offset;
 	int vehicleid, vehiclemodel, found_vehicle, number_passengerseats, seat;
 	float dx, dy, dz, shortest_distance, tmpdistance;
@@ -75,6 +76,7 @@ void copilot_handle_onfoot_fire(int playerid, struct vec3 playerpos)
 static
 int copilot_is_player_copiloting(int playerid, int vehicleid)
 {
+	TRACE;
 	int vehiclemodel;
 
 	vehiclemodel = GetVehicleModel(vehicleid);
@@ -84,6 +86,7 @@ int copilot_is_player_copiloting(int playerid, int vehicleid)
 static
 void copilot_handler_passenger_brake(int playerid, int vehicleid)
 {
+	TRACE;
 	float enter_exit_angle, enter_exit_distance;
 	struct vec3 pos;
 
@@ -101,6 +104,7 @@ void copilot_handler_passenger_brake(int playerid, int vehicleid)
 static
 void copilot_on_player_state_change(int playerid, int from, int to)
 {
+	TRACE;
 	/*Hide help text when player exits and it's still shown (so unnecessary but a nice detail).*/
 	if (from == PLAYER_STATE_PASSENGER &&
 		time_timestamp() - copilot_helptext_showtime[playerid] < COPILOT_HELPTEXT_SHOW_DURATION)

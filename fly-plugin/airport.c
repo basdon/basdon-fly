@@ -4,6 +4,7 @@ Clears all data and frees all allocated memory.
 static
 void airports_destroy()
 {
+	TRACE;
 	struct AIRPORT *ap = airports;
 
 	while (numairports) {
@@ -11,7 +12,7 @@ void airports_destroy()
 		free(ap->runways);
 		ap++;
 	}
-        free(airports);
+	free(airports);
 	airports = NULL;
 }
 
@@ -19,6 +20,7 @@ void airports_destroy()
 static
 void airports_test_missionpoints()
 {
+	TRACE;
 	struct MISSIONPOINT *msp;
 	int i, vehiclemodel, classid, j;
 	unsigned int type;
@@ -52,6 +54,7 @@ void airports_test_missionpoints()
 static
 void airports_print_stats()
 {
+	TRACE;
 	struct AIRPORT *ap;
 	struct RUNWAY *rnw;
 	struct MISSIONPOINT *msp;
@@ -80,6 +83,7 @@ void airports_print_stats()
 static
 void airports_calculate_runway_length_and_touchdown_points()
 {
+	TRACE;
 	struct RUNWAY *rnw;
 	float t, dx, dy;
 	int i;
@@ -111,6 +115,7 @@ Loads airports/runways/missionpoints (and init other things).
 static
 void airports_init()
 {
+	TRACE;
 	struct AIRPORT *ap;
 	struct RUNWAY *rnw, *prev_rnw;
 	struct MISSIONPOINT *msp;
@@ -281,6 +286,7 @@ Call when getting a response from DIALOG_AIRPORT_NEAREST, to show info dialog.
 static
 void cb_airport_nearest_dialog_response(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	register struct NEAREST_AIRPORT_DATA *data;
 	struct DIALOG_INFO dialog;
 	struct AIRPORT *ap;
@@ -346,6 +352,7 @@ Sort function used to sort airports by distance for the /nearest list dialog.
 static
 int sortaprefs(const void *_a, const void *_b)
 {
+	TRACE;
 	struct APREF *a = (struct APREF*) _a, *b = (struct APREF*) _b;
 	return (int) (10.0f * (a->distance - b->distance));
 }
@@ -353,6 +360,7 @@ int sortaprefs(const void *_a, const void *_b)
 static
 int airport_show_nearest_dialog(int playerid)
 {
+	TRACE;
 	register struct AIRPORT *ap;
 	struct NEAREST_AIRPORT_DATA *data;
 	struct DIALOG_INFO dialog;

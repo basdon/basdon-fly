@@ -18,6 +18,7 @@ static unsigned char changelog_request_id[MAX_PLAYERS];
 static
 void changelog_init()
 {
+	TRACE;
 	int dbcache;
 
 	atoc(buf4096, "SELECT stamp,entry FROM chg ORDER BY id DESC LIMIT 1", 4096);
@@ -37,6 +38,7 @@ void changelog_init()
 static
 void changelog_on_player_connect(int playerid)
 {
+	TRACE;
 	if (changelog_onconnect_line[0]) {
 		SendClientMessage(playerid, COL_CHANGELOG, changelog_onconnect_line);
 	}
@@ -49,6 +51,7 @@ static void changelog_show_dialog(int, int);
 static
 void changelog_cb_dialog_response(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	unsigned int page_from_0;
 	unsigned int has_more_pages;
 
@@ -76,6 +79,7 @@ struct CB_CHANGELOG_LOADINFO {
 static
 void changelog_cb_query_page_loaded(void *data)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 	struct CB_CHANGELOG_LOADINFO cbdata;
 	int playerid;
@@ -130,6 +134,7 @@ void changelog_cb_query_page_loaded(void *data)
 static
 void changelog_show_dialog(int playerid, int page_from_0)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 	struct CB_CHANGELOG_LOADINFO *cbdata;
 	char query[128];

@@ -5,6 +5,7 @@ static char survey_bothered_player[MAX_PLAYERS];
 static
 void survey_cb_dlg(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	if (response.inputtext[0]) {
 		SendClientMessage(playerid, 0x88FF88FF, "Survey: answer recorded, thank you! you can change your answer with /survey");
 		common_mysql_escape_string(response.inputtext, cbuf144, sizeof(cbuf144));
@@ -24,6 +25,7 @@ void survey_cb_dlg(int playerid, struct DIALOG_RESPONSE response)
 static
 void survey_show_dialog(int playerid, char *current_answer)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 	char *info;
 
@@ -49,6 +51,7 @@ void survey_show_dialog(int playerid, char *current_answer)
 static
 void survey_cb_loadquery_review(void *data)
 {
+	TRACE;
 	int playerid;
 
 	playerid = PLAYER_CC_GETID(data);
@@ -73,6 +76,7 @@ void survey_cb_loadquery_review(void *data)
 static
 void survey_cb_loadquery_show_or_prompt(void *data)
 {
+	TRACE;
 	int playerid;
 
 	playerid = PLAYER_CC_GETID(data);
@@ -101,6 +105,7 @@ void survey_cb_loadquery_show_or_prompt(void *data)
 static
 void survey_query_current_answer(int playerid, cb_t callback)
 {
+	TRACE;
 	sprintf(
 		cbuf4096_,
 		"SELECT a "
@@ -116,6 +121,7 @@ void survey_query_current_answer(int playerid, cb_t callback)
 static
 void survey_review_answer(int playerid)
 {
+	TRACE;
 	if (userid[playerid] <= 0) {
 		SendClientMessage(playerid, COL_WARN, WARN"you don't have an active user session");
 	} else {
@@ -126,6 +132,7 @@ void survey_review_answer(int playerid)
 static
 void survey_on_player_spawn(int playerid)
 {
+	TRACE;
 	if (!survey_bothered_player[playerid]) {
 		survey_bothered_player[playerid] = 1;
 		if (userid[playerid] > 0 && loggedstatus[playerid] == LOGGED_IN) {
@@ -137,5 +144,6 @@ void survey_on_player_spawn(int playerid)
 static
 void survey_on_player_connect(int playerid)
 {
+	TRACE;
 	survey_bothered_player[playerid] = 0;
 }

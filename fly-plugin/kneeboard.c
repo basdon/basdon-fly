@@ -19,6 +19,7 @@ static unsigned char kneeboard_should_hide[MAX_PLAYERS];
 static
 void kneeboard_init()
 {
+	TRACE;
 	textdraws_load_from_file("kneeboard",
 		TEXTDRAW_KNEEBOARD_BASE, NUM_KNEEBOARD_TEXTDRAWS,
 		&td_kb_distance, &td_kb_info, &td_kb_header);
@@ -27,6 +28,7 @@ void kneeboard_init()
 static
 void kneeboard_on_player_connect(int playerid)
 {
+	TRACE;
 	kneeboard_is_shown[playerid] = 0;
 	kneeboard_last_distance[playerid] = -1;
 	kneeboard_should_hide[playerid] = 0;
@@ -38,6 +40,7 @@ void kneeboard_on_player_connect(int playerid)
 static
 int kneeboard_format_distance(int playerid, struct vec3 *playerpos, char *out_buf)
 {
+	TRACE;
 	int dist;
 
 	dist = missions_get_distance_to_next_cp(playerid, playerpos);
@@ -62,6 +65,7 @@ int kneeboard_format_distance(int playerid, struct vec3 *playerpos, char *out_bu
 static
 void kneeboard_update_distance(int playerid, struct vec3 *playerpos)
 {
+	TRACE;
 	struct RPCDATA_TextDrawSetString rpcdata;
 	int len;
 
@@ -78,6 +82,7 @@ void kneeboard_update_distance(int playerid, struct vec3 *playerpos)
 static
 void kneeboard_update_all(int playerid, struct vec3 *playerpos)
 {
+	TRACE;
 	struct RPCDATA_TextDrawSetString rpcdata;
 
 	if (!KNEEBOARD_SHOULD_SHOW(playerid)) {
@@ -113,6 +118,7 @@ void kneeboard_update_all(int playerid, struct vec3 *playerpos)
 static
 void kneeboard_hide(int playerid, unsigned char hide_reason)
 {
+	TRACE;
 	struct vec3 pos;
 
 	kneeboard_should_hide[playerid] |= hide_reason;
@@ -126,6 +132,7 @@ void kneeboard_hide(int playerid, unsigned char hide_reason)
 static
 void kneeboard_unhide(int playerid, unsigned char hide_reason)
 {
+	TRACE;
 	struct vec3 pos;
 
 	kneeboard_should_hide[playerid] &= ~hide_reason;

@@ -3,6 +3,7 @@ static void prefs_show_dialog(int playerid);
 static
 void prefs_cb_dlg_nametagdistance(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	unsigned int dist;
 
 	if (response.response && response.inputtext[0]) {
@@ -19,6 +20,7 @@ void prefs_cb_dlg_nametagdistance(int playerid, struct DIALOG_RESPONSE response)
 static
 void prefs_cb_dlg_prefs(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	struct DIALOG_INFO *dialog;
 	struct vec3 pos;
 	int val;
@@ -67,6 +69,7 @@ Format is {description}:\t<color><ENABLED|DISABLED>\n
 static
 char *prefs_append_pref(char *buf, char *description, int state)
 {
+	TRACE;
 	while ((*(buf++) = *(description++)));
 	*(--buf) = ':';
 	buf++;
@@ -88,6 +91,7 @@ Shows a dialog with preferences which the player can modify.
 static
 void prefs_show_dialog(int playerid)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 	register int p;
 	char *bp;
@@ -125,5 +129,6 @@ void prefs_show_dialog(int playerid)
 static
 void prefs_on_player_connect(int playerid)
 {
+	TRACE;
 	prefs[playerid] = DEFAULTPREFS;
 }

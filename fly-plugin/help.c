@@ -175,6 +175,7 @@ static int current_help_tds_shown[MAX_PLAYERS];
 static
 void help_init()
 {
+	TRACE;
 	register int len;
 	char *t;
 
@@ -223,6 +224,7 @@ void help_init()
 static
 void help_dispose()
 {
+	TRACE;
 	int i;
 
 	for (i = 0; i < NUM_HELPMAIN_TDS; i++) {
@@ -260,12 +262,14 @@ void help_dispose()
 static
 void help_on_player_connect(int playerid)
 {
+	TRACE;
 	current_help_tds_shown[playerid] = 0;
 }
 
 static
 void help_hide(int playerid)
 {
+	TRACE;
 	if (current_help_tds_shown[playerid]) {
 		textdraws_hide_consecutive(playerid, current_help_tds_shown[playerid], TEXTDRAW_HELP_BASE);
 		current_help_tds_shown[playerid] = 0;
@@ -278,6 +282,7 @@ void help_hide(int playerid)
 static
 void help_show(int playerid, int num_tds, struct TEXTDRAW **tds)
 {
+	TRACE;
 	register int num_to_hide;
 
 	if (!current_help_tds_shown[playerid]) {

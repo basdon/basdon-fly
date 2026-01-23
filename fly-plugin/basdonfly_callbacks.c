@@ -12,6 +12,7 @@ static char *NOLOG = WARN"Log in first.";
 static
 cell AMX_NATIVE_CALL B_OnCallbackHit(AMX *amx, cell *params)
 {
+	TRACE;
 	/*TODO: maybe I shouldn't be doing it like this*/
 	if (PARAM(1)) {
 		((cb_t) PARAM(1))((void*) PARAM(2));
@@ -23,6 +24,7 @@ cell AMX_NATIVE_CALL B_OnCallbackHit(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 {
+	TRACE;
 	missions_dispose();
 	jobmap_dispose();
 	airports_destroy();
@@ -45,6 +47,7 @@ cell AMX_NATIVE_CALL B_OnGameModeExit(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 {
+	TRACE;
 	unsigned long t;
 	int mysql_errno;
 
@@ -133,6 +136,7 @@ exit:
 static
 int set_minconnectiontime(void *data)
 {
+	TRACE;
 	char buf[100];
 
 	sprintf(buf, "minconnectiontime %d", (int) data);
@@ -144,6 +148,7 @@ int set_minconnectiontime(void *data)
 static
 cell AMX_NATIVE_CALL B_OnIncomingConnection(AMX *amx, cell *params)
 {
+	TRACE;
 	int i, playerid;
 	char msg144[144];
 	short msg_playerids[MAX_PLAYERS];
@@ -176,6 +181,7 @@ cell AMX_NATIVE_CALL B_OnIncomingConnection(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 {
+	TRACE;
 	const int playerid = PARAM(1);
 
 	player[playerid] = samp_pNetGame->playerPool->players[playerid];
@@ -234,6 +240,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 {
+	TRACE;
 	struct SpawnInfo spawnInfo;
 	struct vec3 pos;
 	const int playerid = PARAM(1), killerid = PARAM(2);
@@ -275,6 +282,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 {
+	TRACE;
 	const int playerid = PARAM(1), reason = PARAM(2);
 	int i;
 
@@ -319,6 +327,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 {
+	TRACE;
 	const int playerid = PARAM(1), vehicleid = PARAM(2);
 	const int ispassenger = PARAM(3);
 
@@ -332,6 +341,7 @@ cell AMX_NATIVE_CALL B_OnPlayerEnterVehicle(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
 {
+	TRACE;
 	/*This is unused, OnPlayerRequestClass is hooked (in samp.c) and the
 	 *filterscript/gamemode callbacks are never invoked. This is being kept
 	 *here because otherwise the gamemode script needs to be recompiled and
@@ -346,6 +356,7 @@ Called when trying to spawn from the 'class selection' state.
 static
 cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 {
+	TRACE;
 	const int playerid = PARAM(1);
 
 	if (!ISPLAYING(playerid)) {
@@ -361,6 +372,7 @@ cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 {
+	TRACE;
 	struct RPCDATA_SetWorldBounds rpcdata;
 	struct vec3 pos;
 	const int playerid = PARAM(1);
@@ -397,6 +409,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 {
+	TRACE;
 	const int playerid = PARAM(1);
 	const int newstate = PARAM(2), oldstate = PARAM(3);
 
@@ -411,6 +424,7 @@ cell AMX_NATIVE_CALL B_OnPlayerStateChange(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 {
+	TRACE;
 	cell *addr;
 	char buf[144];
 	const int playerid = PARAM(1);
@@ -440,6 +454,7 @@ cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnPlayerUpdate(AMX *amx, cell *params)
 {
+	TRACE;
 	samp_OnPlayerUpdate(PARAM(1));
 	return 1;
 }
@@ -448,6 +463,7 @@ cell AMX_NATIVE_CALL B_OnPlayerUpdate(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnQueryError(AMX *amx, cell *params)
 {
+	TRACE;
 	const int errorid = PARAM(1);
 	cell *addr;
 
@@ -464,6 +480,7 @@ cell AMX_NATIVE_CALL B_OnQueryError(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnRecv(AMX *amx, cell *params)
 {
+	TRACE;
 	const int len = PARAM(3);
 	cell socket_handle = PARAM(1);
 	cell *addr;
@@ -477,6 +494,7 @@ cell AMX_NATIVE_CALL B_OnRecv(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 {
+	TRACE;
 	struct dbvehicle *veh;
 	int vehicleid = PARAM(1);
 	float min_fuel;
@@ -510,6 +528,7 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnVehicleStreamIn(AMX *amx, cell *params)
 {
+	TRACE;
 	const int vehicleid = PARAM(1), forplayerid = PARAM(2);
 
 	missions_on_vehicle_stream_in(vehicleid, forplayerid);
@@ -521,6 +540,7 @@ cell AMX_NATIVE_CALL B_OnVehicleStreamIn(AMX *amx, cell *params)
 static
 cell AMX_NATIVE_CALL B_OnVehicleStreamOut(AMX *amx, cell *params)
 {
+	TRACE;
 	const int vehicleid = PARAM(1), forplayerid = PARAM(2);
 
 	veh_on_vehicle_stream_out(vehicleid, forplayerid);

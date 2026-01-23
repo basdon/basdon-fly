@@ -3,6 +3,7 @@
 static
 int cmd__getcar(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct vec4 ppos;
 	int vehicleid;
 
@@ -24,6 +25,7 @@ int cmd__getcar(struct COMMANDCONTEXT cmdctx)
 static
 int cmd__goto(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int oldparseidx;
 	int targetplayerid;
 	int x, y, z;
@@ -89,6 +91,7 @@ havecoords:
 static
 int cmd__gotorel(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int x, y, z;
 	struct vec4 pos;
 
@@ -120,6 +123,7 @@ the user really wants to create a new permanent public vehicle.
 static
 int cmd__makeanewpermanentpublicvehiclehere(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct dbvehicle *veh;
 	struct vec4 ppos;
 	int modelid = -1, vehicleid;
@@ -141,6 +145,7 @@ int cmd__makeanewpermanentpublicvehiclehere(struct COMMANDCONTEXT cmdctx)
 static
 int cmd__park(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	veh_park_from_cmd(cmdctx, /*bypass_permissions*/ 1);
 	return CMD_OK;
 }
@@ -150,6 +155,7 @@ int cmd__park(struct COMMANDCONTEXT cmdctx)
 static
 int cmd__respawn(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int vehicleid;
 
 	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
@@ -164,6 +170,7 @@ int cmd__respawn(struct COMMANDCONTEXT cmdctx)
 static
 int cmd__rr(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	static const float RR_SQ = 150.0f * 150.0f;
 
 	struct vec3 ppos, oppos;
@@ -203,6 +210,7 @@ skip_occupied:
 static
 int cmd__spray(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	veh_spray_from_cmd(cmdctx, /*bypass_permissions*/ 1);
 	return CMD_OK;
 }
@@ -212,6 +220,7 @@ int cmd__spray(struct COMMANDCONTEXT cmdctx)
 static
 int cmd__streamdistance(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int newdistance;
 	float *stream_distance;
 	char msg144[144];
@@ -230,6 +239,7 @@ int cmd__streamdistance(struct COMMANDCONTEXT cmdctx)
 static
 int cmd__tocar(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct vec3 vehicle_pos, player_pos;
 	int vehicleid, closest_vehicleid, modelid, seat, jack;
 	float dx, dy;
@@ -283,6 +293,7 @@ int cmd__tocar(struct COMMANDCONTEXT cmdctx)
 static
 int cmd__tomsp(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct vec3 *closest_pos, player_pos;
 	int mspid;
 	float dx, dy;
@@ -339,6 +350,7 @@ int cmd__tomsp(struct COMMANDCONTEXT cmdctx)
 static
 int cmd__vehinfo(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	admin_engage_vehinfo_dialog(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -346,6 +358,7 @@ int cmd__vehinfo(struct COMMANDCONTEXT cmdctx)
 static
 int handle_cmd_at400_androm(struct COMMANDCONTEXT cmdctx, int vehiclemodel)
 {
+	TRACE;
 	struct vec3 playerpos, vehiclepos;
 	int vehicleid, found_vehicle;
 	float dx, dy, dz, shortest_distance, tmpdistance;
@@ -386,6 +399,7 @@ int handle_cmd_at400_androm(struct COMMANDCONTEXT cmdctx, int vehiclemodel)
 static
 int cmd_adf(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct AIRPORT *ap;
 	int vehicleid, len;
 	char beacon[144], *bp;
@@ -436,6 +450,7 @@ unkbeacon:
 static
 int cmd_androm(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	return handle_cmd_at400_androm(cmdctx, MODEL_ANDROM);
 }
 
@@ -444,6 +459,7 @@ int cmd_androm(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_at400(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	return handle_cmd_at400_androm(cmdctx, MODEL_AT400);
 }
 
@@ -452,6 +468,7 @@ int cmd_at400(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_beacons(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 	char *info;
 	struct AIRPORT *ap = airports;
@@ -481,6 +498,7 @@ int cmd_beacons(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_camera(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	NC_GivePlayerWeapon(cmdctx.playerid, WEAPON_CAMERA, 3036);
 	return CMD_OK;
 }
@@ -490,6 +508,7 @@ int cmd_camera(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_changelog(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	changelog_show_dialog(cmdctx.playerid, 0);
 	return CMD_OK;
 }
@@ -499,6 +518,7 @@ int cmd_changelog(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_changepassword(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	chpw_engage(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -508,6 +528,7 @@ int cmd_changepassword(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_chute(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	NC_GivePlayerWeapon(cmdctx.playerid, WEAPON_PARACHUTE, 1);
 	return CMD_OK;
 }
@@ -517,6 +538,7 @@ int cmd_chute(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_close(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	help_hide(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -526,6 +548,7 @@ int cmd_close(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_credits(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (ui_try_show(cmdctx.playerid, ui_help)) {
 		help_show(cmdctx.playerid, NUM_CREDITS_TDS, tds_credits);
 	}
@@ -539,6 +562,7 @@ static void cmd_engage_cmdlist(int playerid);
 static
 int cmd_cmds(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	cmd_engage_cmdlist(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -548,6 +572,7 @@ int cmd_cmds(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_engine(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (GetPlayerState(cmdctx.playerid) == PLAYER_STATE_DRIVER) {
 		veh_start_or_stop_engine(cmdctx.playerid, GetPlayerVehicleID(cmdctx.playerid));
 	}
@@ -559,6 +584,7 @@ int cmd_engine(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_getspray(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 	char buf[144], *b;
 
@@ -582,6 +608,7 @@ int cmd_getspray(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_help(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (ui_try_show(cmdctx.playerid, ui_help)) {
 		help_show(cmdctx.playerid, NUM_HELPMAIN_TDS, tds_helpmain);
 	}
@@ -593,6 +620,7 @@ int cmd_help(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_helpaccount(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (ui_try_show(cmdctx.playerid, ui_help)) {
 		help_show(cmdctx.playerid, NUM_HELPACCOUNT_TDS, tds_helpaccount);
 	}
@@ -604,6 +632,7 @@ int cmd_helpaccount(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_helpadf(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (ui_try_show(cmdctx.playerid, ui_help)) {
 		help_show(cmdctx.playerid, NUM_HELPADF_TDS, tds_helpadf);
 	}
@@ -617,6 +646,7 @@ static void cmd_show_help_for(int,char*);
 static
 int cmd_helpcmd(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	char cmdname_buf[144];
 
 	if (!cmd_get_str_param(&cmdctx, cmdname_buf + 1)) {
@@ -637,6 +667,7 @@ int cmd_helpcmd(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_helpcopilot(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (ui_try_show(cmdctx.playerid, ui_help)) {
 		help_show(cmdctx.playerid, NUM_HELPCOPILOT_TDS, tds_helpcopilot);
 	}
@@ -648,6 +679,7 @@ int cmd_helpcopilot(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_helpils(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (ui_try_show(cmdctx.playerid, ui_help)) {
 		help_show(cmdctx.playerid, NUM_HELPILS_TDS, tds_helpils);
 	}
@@ -659,6 +691,7 @@ int cmd_helpils(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_helpkeys(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	GameTextForPlayer(cmdctx.playerid, 5000, 3,
 		"~w~start/stop engine: ~b~~k~~CONVERSATION_NO~~n~"
 		"~w~landing gear: ~b~~k~~TOGGLE_SUBMISSIONS~~n~"
@@ -672,6 +705,7 @@ int cmd_helpkeys(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_helpmission(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (ui_try_show(cmdctx.playerid, ui_help)) {
 		help_show(cmdctx.playerid, NUM_HELPMISSION_TDS, tds_helpmission);
 	}
@@ -683,6 +717,7 @@ int cmd_helpmission(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_helpnav(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (ui_try_show(cmdctx.playerid, ui_help)) {
 		help_show(cmdctx.playerid, NUM_HELPNAV_TDS, tds_helpnav);
 	}
@@ -694,6 +729,7 @@ int cmd_helpnav(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_helpradio(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (ui_try_show(cmdctx.playerid, ui_help)) {
 		help_show(cmdctx.playerid, NUM_HELPRADIO_TDS, tds_helpradio);
 	}
@@ -705,6 +741,7 @@ int cmd_helpradio(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_helpvor(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (ui_try_show(cmdctx.playerid, ui_help)) {
 		help_show(cmdctx.playerid, NUM_HELPVOR_TDS, tds_helpvor);
 	}
@@ -716,6 +753,7 @@ int cmd_helpvor(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_ils(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct vec4 vpos;
 	struct vec3 vvel;
 	struct NAVDATA *np;
@@ -748,6 +786,7 @@ int cmd_ils(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_irc(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	echo_request_status_for_player(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -757,6 +796,7 @@ int cmd_irc(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_loc(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct SampVehicle *veh;
 	int target, model;
 	char buf[144], *b;
@@ -805,6 +845,7 @@ int cmd_loc(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_nearest(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	airport_show_nearest_dialog(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -814,6 +855,7 @@ int cmd_nearest(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_me(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	char *to, *from;
 	int hascontent = 0;
 	char msg[150 + MAX_PLAYER_NAME];
@@ -841,6 +883,7 @@ int cmd_me(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_metar(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	char msg144[144];
 
 	if (weather.upcoming != weather.current) {
@@ -857,6 +900,7 @@ int cmd_metar(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_park(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	veh_park_from_cmd(cmdctx, /*bypass_permissions*/ 0);
 	return CMD_OK;
 }
@@ -866,6 +910,7 @@ int cmd_park(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_pm(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int targetid;
 
 	if (!cmd_get_player_param(&cmdctx, &targetid)) {
@@ -890,6 +935,7 @@ int cmd_pm(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_prefs(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	prefs_show_dialog(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -899,6 +945,7 @@ int cmd_prefs(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_r(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	while (cmdctx.cmdtext[cmdctx.parseidx] == ' ') {
 		cmdctx.parseidx++;
 	}
@@ -924,6 +971,7 @@ int cmd_r(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_radiomacros(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	radio_show_macros_dialog(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -937,6 +985,7 @@ int cmd_radiomacros(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_reclass(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (missions_is_player_on_mission(cmdctx.playerid)) {
 		SendClientMessage(cmdctx.playerid, COL_WARN, NO_RECLASSSPAWN);
 	} else {
@@ -955,6 +1004,7 @@ int cmd_reclass(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_register(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (sessionid[cmdctx.playerid] == -1 || userid[cmdctx.playerid] == -1) {
 		SendClientMessage(cmdctx.playerid, COL_WARN,
 			WARN"Your guest session is not linked to a guest account. "
@@ -971,6 +1021,7 @@ int cmd_register(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_repair(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	svp_repair(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -980,6 +1031,7 @@ int cmd_repair(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_refuel(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	svp_refuel(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -989,6 +1041,7 @@ int cmd_refuel(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_respawn(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	if (missions_is_player_on_mission(cmdctx.playerid)) {
 		SendClientMessage(cmdctx.playerid, COL_WARN, NO_RECLASSSPAWN);
 	} else {
@@ -1002,6 +1055,7 @@ int cmd_respawn(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_s(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	missions_process_cancel_request_by_player(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -1011,6 +1065,7 @@ int cmd_s(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_spray(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	/*TODO: check OnVehicleRespray to store colors like /spray?*/
 	veh_spray_from_cmd(cmdctx, /*bypass_permissions*/ 0);
 	return CMD_OK;
@@ -1021,6 +1076,7 @@ int cmd_spray(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_survey(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	survey_review_answer(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -1030,6 +1086,7 @@ int cmd_survey(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_stoplocate(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	missions_stoplocate(cmdctx.playerid);
 	return CMD_OK;
 }
@@ -1039,6 +1096,7 @@ int cmd_stoplocate(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_tickrate(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	char msg144[144];
 
 	sprintf(msg144, "%d", (int) NC_GetServerTickRate());
@@ -1051,6 +1109,7 @@ int cmd_tickrate(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_tip(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	SendClientMessage(cmdctx.playerid, COL_INFO_LIGHT, protips_get_random_protip());
 	return CMD_OK;
 }
@@ -1060,6 +1119,7 @@ int cmd_tip(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_vor(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct AIRPORT *ap;
 	struct RUNWAY *rw;
 	int vehicleid;
@@ -1165,6 +1225,7 @@ tellrws:
 static
 int cmd_w(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	missions_locate_or_show_map(cmdctx.playerid);
 	return CMD_OK;
 }

@@ -10,6 +10,7 @@ Get amount of money player has.
 static
 int money_get(int playerid)
 {
+	TRACE;
 	return playermoney[playerid];
 }
 
@@ -26,6 +27,7 @@ Will not actually give anything if it would cause an overflow.
 static
 int money_give(int playerid, int amount)
 {
+	TRACE;
 
 	if (amount < 0) {
 		return money_take(playerid, -amount);
@@ -50,6 +52,7 @@ Will not actually give anything if it would cause an underflow.
 static
 int money_take(int playerid, int amount)
 {
+	TRACE;
 	if (amount < 0) {
 		return money_give(playerid, -amount);
 	}
@@ -68,6 +71,7 @@ Used to set the player their money, to combat random -$100 on spawn.
 static
 void money_on_player_spawn(int playerid)
 {
+	TRACE;
 	/*spawning might take $100 randomly, so reset it here just in case*/
 	SetPlayerMoneyRaw(playerid, playermoney[playerid]);
 }
@@ -78,5 +82,6 @@ Set a player's money.
 static
 void money_set(int playerid, int amount)
 {
+	TRACE;
 	SetPlayerMoneyRaw(playerid, playermoney[playerid] = amount);
 }

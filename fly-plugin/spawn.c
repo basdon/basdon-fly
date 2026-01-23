@@ -23,6 +23,7 @@ Must run after airports_init
 static
 void spawn_init()
 {
+	TRACE;
 	int querycacheid, row, rows, ap, klass = SETTING__NUM_CLASSES;
 	int *field = nc_params + 2;
 	struct vec4 *sp;
@@ -75,6 +76,7 @@ Frees memory.
 static
 void spawn_dispose()
 {
+	TRACE;
 	int i = SETTING__NUM_CLASSES;
 	while (i--) {
 		if (spawns[i]) {
@@ -91,6 +93,7 @@ void spawn_dispose()
 static
 void spawn_cb_dlg_spawn(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	int klass;
 
 	klass = classid[playerid];
@@ -102,6 +105,7 @@ void spawn_cb_dlg_spawn(int playerid, struct DIALOG_RESPONSE response)
 static
 void spawn_get_random_spawn(int playerid, struct SpawnInfo *outSpawnInfo)
 {
+	TRACE;
 	int spawnidx = 0;
 	int klass = classid[playerid];
 
@@ -136,6 +140,7 @@ the spawn that they currently got.
 static
 void spawn_on_player_spawn(int playerid)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 	int klass;
 

@@ -4,6 +4,7 @@ static int score_play_time[MAX_PLAYERS];
 static
 void score_on_player_connect(int playerid)
 {
+	TRACE;
 	score_flight_time[playerid] = 0;
 	score_play_time[playerid] = 0;
 }
@@ -11,6 +12,7 @@ void score_on_player_connect(int playerid)
 static
 int score_update_score(int playerid)
 {
+	TRACE;
 	int ft, pt, score;
 
 	ft = score_flight_time[playerid];

@@ -33,9 +33,10 @@ Show wizard dialog to change password.
 static
 void chpw_show_dialog(int playerid, int step, int pw_mismatch, void (*cb)(int playerid, struct DIALOG_RESPONSE))
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 	char *d;
-	
+
 	dialog_init_info(&dialog);
 	d = dialog.info;
 	if (pw_mismatch) {
@@ -67,6 +68,7 @@ Callback when query that updates the password is done.
 static
 void chpw_cb_password_updated(void *data)
 {
+	TRACE;
 	int playerid;
 
 	playerid = PLAYER_CC_GETID(data);
@@ -87,6 +89,7 @@ Will execute the query to update the user their password.
 static
 void chpw_update_user_password(int playerid, struct NEWPWDATA *data)
 {
+	TRACE;
 	void* player_cc;
 
 	player_cc = V_MK_PLAYER_CC(playerid);
@@ -109,6 +112,7 @@ It can be aborted when confirm pass result differs from new pass result.
 static
 void chpw_cb_new_password_hashed(void *data)
 {
+	TRACE;
 	/*cannot use pwdata here, since if the confirm step does not match,
 	the user can start again and already overwrite pwdata while this still
 	hasn't called*/
@@ -150,6 +154,7 @@ static void chpw_cb_dlg_new_password(int playerid, struct DIALOG_RESPONSE respon
 static
 void chpw_cb_dlg_confirm_password(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	struct NEWPWDATA *d;
 	char tmp_hash_buf[SHA256BUFSIZE];
 
@@ -190,6 +195,7 @@ void chpw_cb_dlg_confirm_password(int playerid, struct DIALOG_RESPONSE response)
 static
 void chpw_cb_dlg_new_password(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	struct NEWPWDATA_PLAYER_CC *pd;
 	struct NEWPWDATA *d;
 
@@ -219,6 +225,7 @@ Callback for bcrypt check to see if old password matches.
 static
 void chpw_cb_verify_old_password(void *data)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 	int playerid;
 
@@ -252,6 +259,7 @@ Callback for query that loads the player's current password.
 static
 void chpw_cb_current_password_loaded(void *data)
 {
+	TRACE;
 	int playerid, size;
 
 	playerid = PLAYER_CC_GETID(data);
@@ -289,6 +297,7 @@ void chpw_cb_current_password_loaded(void *data)
 static
 void chpw_cb_dlg_previous_password(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	/* Next | Cancel */
 	if (response.response) {
 		dialog_ensure_transaction(playerid, DLG_TID_CHANGEPASS);
@@ -331,6 +340,7 @@ Starts the changing password process.
 static
 void chpw_engage(int playerid)
 {
+	TRACE;
 	if (pwdata[playerid]) {
 		return;
 	}
@@ -345,12 +355,14 @@ void chpw_engage(int playerid)
 static
 void chpw_on_player_connect(int playerid)
 {
+	TRACE;
 	pwdata[playerid] = NULL;
 }
 
 static
 void chpw_on_player_disconnect(int playerid)
 {
+	TRACE;
 	if (pwdata[playerid] != NULL) {
 		free(pwdata[playerid]);
 		pwdata[playerid] = NULL;

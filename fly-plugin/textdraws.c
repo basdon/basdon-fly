@@ -46,6 +46,7 @@ Load textdraws from a textdraw file.
 */
 void textdraws_load_from_file_a(char *filename, int base_textdraw_id, int numtextdraws, struct TEXTDRAW **tds)
 {
+	TRACE;
 	struct TEXTDRAW *td;
 	union TEXT_FILE_ENTRY entry;
 	FILE *fs;
@@ -130,6 +131,7 @@ Load textdraws from a textdraw file.
 static
 void textdraws_load_from_file(char *filename, int base_textdraw_id, int numtextdraws, ...)
 {
+	TRACE;
 	struct TEXTDRAW **tds, **tdp;
 	va_list va;
 	int i;
@@ -149,6 +151,7 @@ Will allocate memory.
 static
 void textdraws_initialize_from(struct TEXTDRAW *template, struct TEXTDRAW *td, short textdrawid)
 {
+	TRACE;
 	int allocated_size;
 
 	/*-1 because struct includes a 1-sized char array for the text*/
@@ -163,6 +166,7 @@ void textdraws_initialize_from(struct TEXTDRAW *template, struct TEXTDRAW *td, s
 static
 void textdraws_assert_text_length_within_bounds(struct TEXTDRAW *td)
 {
+	TRACE;
 	int i;
 
 	if (td->rpcdata->text_length > td->allocated_text_length) {
@@ -183,6 +187,7 @@ void textdraws_assert_text_length_within_bounds(struct TEXTDRAW *td)
 static
 void textdraws_strcpy(struct TEXTDRAW *textdraw, char* str)
 {
+	TRACE;
 	textdraw->rpcdata->text_length = sprintf(textdraw->rpcdata->text, "%s", str);
 #ifdef DEV
 	textdraws_assert_text_length_within_bounds(textdraw);
@@ -192,6 +197,7 @@ void textdraws_strcpy(struct TEXTDRAW *textdraw, char* str)
 static
 void textdraws_show(int playerid, int num, ...)
 {
+	TRACE;
 	struct BitStream bs;
 	struct TEXTDRAW *td;
 	va_list va;
@@ -212,6 +218,7 @@ void textdraws_show(int playerid, int num, ...)
 static
 void textdraws_show_a(int playerid, int num, struct TEXTDRAW **tds)
 {
+	TRACE;
 	struct BitStream bs;
 	struct TEXTDRAW *td;
 
@@ -232,6 +239,7 @@ Hides a number of textdraws that all have ids that follow each other.
 static
 void textdraws_hide_consecutive(int playerid, int num, int base_id)
 {
+	TRACE;
 	struct RPCDATA_HideTextDraw rpcdata;
 	struct BitStream bs;
 
@@ -247,6 +255,7 @@ void textdraws_hide_consecutive(int playerid, int num, int base_id)
 static
 void textdraws_init()
 {
+	TRACE;
 	textdraws_load_from_file("help", 0, 1, &td_helpbox_template);
 }
 
@@ -256,6 +265,7 @@ Copies textdraw properties from the textbox template textdraw to the given textd
 static
 void textdraws_set_textbox_properties(struct RPCDATA_ShowTextDraw *textdraw_rpcdata)
 {
+	TRACE;
 	memcpy(
 		(void*) ((int) textdraw_rpcdata + MEMBER_OFFSET(struct RPCDATA_ShowTextDraw, flags)),
 		(void*) ((int) td_helpbox_template.rpcdata + MEMBER_OFFSET(struct RPCDATA_ShowTextDraw, flags)),

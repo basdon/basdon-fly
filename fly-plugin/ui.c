@@ -9,6 +9,7 @@ static char *current_ui[MAX_PLAYERS];
 static
 void ui_on_player_connect(int playerid)
 {
+	TRACE;
 	current_ui[playerid] = NULL;
 }
 
@@ -19,6 +20,7 @@ void ui_on_player_connect(int playerid)
 static
 int ui_try_show(int playerid, char *ui)
 {
+	TRACE;
 	char msg[144];
 
 	if (current_ui[playerid] && current_ui[playerid] != ui) {
@@ -36,6 +38,7 @@ int ui_try_show(int playerid, char *ui)
 static
 void ui_closed(int playerid, char *ui)
 {
+	TRACE;
 	if (current_ui[playerid] != ui) {
 		logprintf("warn: closing ui '%s' while current ui is actually '%s'",
 			ui, current_ui[playerid] ? "(null)" : current_ui[playerid]);

@@ -18,6 +18,7 @@ On match, parseidx is the index right after the value, so either space or \0.
 static
 int cmd_get_int_param(struct COMMANDCONTEXT *cmdctx, int *value)
 {
+	TRACE;
 	char *pc = cmdctx->cmdtext + cmdctx->parseidx;
 	int val = 0, sign = 1;
 
@@ -58,6 +59,7 @@ If a valid player id was given but id is not taken, INVALID_PLAYER_ID is used.
 static
 int cmd_get_player_param(struct COMMANDCONTEXT *cmdctx, int *playerid)
 {
+	TRACE;
 	char name[MAX_PLAYER_NAME + 1], val;
 	char *pc = cmdctx->cmdtext + cmdctx->parseidx;
 	char *n = name, *nend = name + sizeof(name);
@@ -136,6 +138,7 @@ On match, parseidx is the index right after the value, so either space or \0.
 static
 int cmd_get_str_param(struct COMMANDCONTEXT *cmdctx, char *buf)
 {
+	TRACE;
 	char *pc = cmdctx->cmdtext + cmdctx->parseidx;
 	char *b = buf;
 
@@ -169,6 +172,7 @@ If more characters are present than wanted, this command will still return succe
 static
 int cmd_get_str_param_n(struct COMMANDCONTEXT *cmdctx, char *buf, int max_length, int *out_length, int *out_actual_length)
 {
+	TRACE;
 	char *pc = cmdctx->cmdtext + cmdctx->parseidx;
 	char *pos_actual_start;
 	char *b = buf;
@@ -212,6 +216,7 @@ Note: underscores can be used for vehicle names that have spaces.
 static
 int cmd_get_vehiclemodel_param(struct COMMANDCONTEXT *cmdctx, int *modelid)
 {
+	TRACE;
 	int i, matchindex, minimum_pos, startpos, pos;
 	char *b;
 

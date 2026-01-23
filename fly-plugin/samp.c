@@ -16,6 +16,7 @@ static int vehicle_gear_change_time[MAX_VEHICLES];
 static
 int EncodeString(char *dest, char *source, int max_chars)
 {
+	TRACE;
 	struct BitStream bs;
 
 	bs.ptrData = dest;
@@ -33,6 +34,7 @@ Result is the hexadec string representation, so out buf should be at least 65 si
 static
 void SAMP_SHA256(char *out_buf, char *input)
 {
+	TRACE;
 #ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(char*,char*,char*,int))0x80ED230)(input, /*salt*/"", out_buf, 65);
 #endif
@@ -41,6 +43,7 @@ void SAMP_SHA256(char *out_buf, char *input)
 static
 void SetConsoleVariableString(char *variable_name, char *value)
 {
+	TRACE;
 #ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(void*,char*,char*))0x80A0110)(samp_pConsole, variable_name, value);
 #endif
@@ -49,6 +52,7 @@ void SetConsoleVariableString(char *variable_name, char *value)
 static
 void AddServerRule(char *rule_name, char *value)
 {
+	TRACE;
 #ifndef NO_CAST_IMM_FUNCPTR
 	/*this invokes a function to add a "console variable"
 	 *using 4 as flags argument, which means it will be a server rule
@@ -60,6 +64,7 @@ void AddServerRule(char *rule_name, char *value)
 static
 void SendRconCommand(char *command)
 {
+	TRACE;
 #ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(void*,char*))0x809FBD0)(samp_pConsole, command);
 #endif
@@ -68,6 +73,7 @@ void SendRconCommand(char *command)
 static
 void SendRPC_8C(int playerid, int rpc, void *rpcdata, int size_bytes, enum PacketPriority priority, enum PacketReliability reliability, int orderingChannel)
 {
+	TRACE;
 	struct BitStream bs;
 	struct PlayerID playerID;
 
@@ -83,6 +89,7 @@ void SendRPC_8C(int playerid, int rpc, void *rpcdata, int size_bytes, enum Packe
 static
 void SendRPCToPlayer(int playerid, int rpc, void *rpcdata, int size_bytes, int unk)
 {
+	TRACE;
 	struct BitStream bs;
 
 	bs.ptrData = rpcdata;
@@ -93,6 +100,7 @@ void SendRPCToPlayer(int playerid, int rpc, void *rpcdata, int size_bytes, int u
 static
 void ForceSendPlayerOnfootSyncNow(int playerid)
 {
+	TRACE;
 	struct SampPlayer *cplayer;
 	int actual_updateSyncType;
 	int actual_state;
@@ -118,6 +126,7 @@ void ForceSendPlayerOnfootSyncNow(int playerid)
 static
 void convertSpawnInfoToSpawnInfo03DL(struct SpawnInfo *in, struct SpawnInfo03DL *out)
 {
+	TRACE;
 	out->team = in->team;
 	out->skin = in->skin;
 	out->customSkin = 0;
@@ -130,12 +139,14 @@ void convertSpawnInfoToSpawnInfo03DL(struct SpawnInfo *in, struct SpawnInfo03DL 
 static
 void SetGameModeText(char *gamemodetext)
 {
+	TRACE;
 	SetConsoleVariableString("gamemodetext", gamemodetext);
 }
 
 static
 void SetSpawnInfo(int playerid, struct SpawnInfo *spawnInfo)
 {
+	TRACE;
 	struct RPCDATA_SetSpawnInfo03DL rpcdata03DL;
 	struct RPCDATA_SetSpawnInfo037 rpcdata037;
 
@@ -155,6 +166,7 @@ static
 __attribute__((unused))
 void SetPlayerSkin(int playerid, int skin)
 {
+	TRACE;
 	struct RPCDATA_SetPlayerSkin03DL rpcdata03DL;
 	struct RPCDATA_SetPlayerSkin037 rpcdata037;
 	struct SampPlayer *playa;
@@ -189,6 +201,7 @@ void SetPlayerSkin(int playerid, int skin)
 static
 void SetPlayerColor(int playerid, int color)
 {
+	TRACE;
 	struct RPCDATA_SetPlayerColor rpcdata;
 	int i;
 
@@ -205,6 +218,7 @@ void SetPlayerColor(int playerid, int color)
 static
 void SetPlayerMapIcon(int playerid, char icon_id, struct vec3 *pos, char icon, int color, char style)
 {
+	TRACE;
 	struct RPCDATA_SetPlayerMapIcon rpcdata;
 	struct BitStream bs;
 
@@ -222,6 +236,7 @@ static
 __attribute__((unused))
 void RemovePlayerMapIcon(int playerid, char icon_id)
 {
+	TRACE;
 	struct RPCDATA_RemovePlayerMapIcon rpcdata;
 	struct BitStream bs;
 
@@ -236,6 +251,7 @@ void Create3DTextLabel(
 	int playerid, int label_id, int color, struct vec3 *pos, float draw_distance, char test_los,
 	int attached_player_id, int attached_vehicle_id, char *encoded_text_data, int text_bitlength)
 {
+	TRACE;
 	struct {
 		struct RPCDATA_Create3DTextLabelBase rpcdata;
 		char textdata[1]; /*arbitrary size*/
@@ -261,6 +277,7 @@ void Create3DTextLabel(
 static
 void Delete3DTextLabel(int playerid, int label_id)
 {
+	TRACE;
 	struct RPCDATA_Delete3DTextLabel rpcdata;
 	struct BitStream bs;
 
@@ -277,6 +294,7 @@ static
 __attribute__((unused))
 void SetVehicleSiren(int vehicleid, char siren)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
@@ -289,6 +307,7 @@ static
 __attribute__((unused))
 int IsPlayerStreamedIn(int forplayerid, int playerid)
 {
+	TRACE;
 	return playeronlineflag[playerid] && player[forplayerid]->playerStreamedIn[playerid];
 }
 
@@ -296,6 +315,7 @@ static
 __attribute__((unused)) /*unused in prod builds*/
 void DisableRemoteVehicleCollisions(int playerid, char disable)
 {
+	TRACE;
 	struct BitStream bs;
 
 	disable <<= 7;
@@ -307,6 +327,7 @@ void DisableRemoteVehicleCollisions(int playerid, char disable)
 static
 void SetPlayerRaceCheckpointNoDir(int playerid, int type, struct vec3 *pos, float radius)
 {
+	TRACE;
 	struct RPCDATA_SetRaceCheckpoint rpcdata;
 	struct BitStream bs;
 
@@ -321,6 +342,7 @@ void SetPlayerRaceCheckpointNoDir(int playerid, int type, struct vec3 *pos, floa
 static
 void DisablePlayerRaceCheckpoint(int playerid)
 {
+	TRACE;
 	struct BitStream bs;
 
 	bs.numberOfBitsUsed = 0;
@@ -333,6 +355,7 @@ void DisablePlayerRaceCheckpoint(int playerid)
 static
 void SpawnPlayer(int playerid)
 {
+	TRACE;
 	struct RPCDATA_RequestSpawn rpcdata;
 	struct BitStream bs;
 
@@ -349,6 +372,7 @@ Otherwise, use natives_SetPlayerPos.
 static
 void SetPlayerPosRaw(int playerid, struct vec3 *pos)
 {
+	TRACE;
 	struct BitStream bs;
 
 	bs.ptrData = pos;
@@ -360,6 +384,7 @@ EXPECT_SIZE(struct RPCDATA_SetPlayerPos, sizeof(struct vec3));
 static
 void SetPlayerFacingAngle(int playerid, float angle)
 {
+	TRACE;
 	struct BitStream bs;
 
 	bs.ptrData = &angle;
@@ -371,6 +396,7 @@ EXPECT_SIZE(struct RPCDATA_SetPlayerFacingAngle, sizeof(float));
 static
 void SetPlayerHealth(int playerid, float health)
 {
+	TRACE;
 	SendRPC_8C(playerid, RPC_SetHealth, &health, sizeof(float), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
 }
 STATIC_ASSERT(sizeof(struct RPCDATA_SetHealth) == sizeof(float));
@@ -379,6 +405,7 @@ STATIC_ASSERT(sizeof(struct RPCDATA_SetHealth) == sizeof(float));
 static
 void GivePlayerMoneyRaw(int playerid, int amount)
 {
+	TRACE;
 	if (playerpool->created[playerid]) {
 		playerpool->playerMoney[playerid] += amount;
 		SendRPC_8C(playerid, RPC_MoneyGive, &amount, sizeof(int), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
@@ -390,6 +417,7 @@ STATIC_ASSERT(sizeof(struct RPCDATA_MoneyGive) == sizeof(int));
 static
 void SetPlayerMoneyRaw(int playerid, int amount)
 {
+	TRACE;
 	if (playerpool->created[playerid]) {
 		playerpool->playerMoney[playerid] = amount;
 		SendRPC_8C(playerid, RPC_MoneyReset, NULL, 0, HIGH_PRIORITY, RELIABLE_ORDERED, 2);
@@ -401,6 +429,7 @@ STATIC_ASSERT(sizeof(struct RPCDATA_MoneyGive) == sizeof(int));
 static
 void SetPlayerScore(int playerid, int score)
 {
+	TRACE;
 	/*this does not send RPCs, scoreboard stuff is just updated regularly*/
 	playerpool->playerScore[playerid] = score;
 }
@@ -408,12 +437,14 @@ void SetPlayerScore(int playerid, int score)
 static
 int GetPlayerScore(int playerid)
 {
+	TRACE;
 	return playerpool->playerScore[playerid];
 }
 
 static
 void SetPlayerTime(int playerid, char hour, char minute)
 {
+	TRACE;
 	struct RPCDATA_SetTime rpcdata;
 	struct SampPlayer *playa;
 
@@ -429,6 +460,7 @@ void SetPlayerTime(int playerid, char hour, char minute)
 static
 void SetPlayerWeather(int playerid, char weather)
 {
+	TRACE;
 	SendRPC_8C(playerid, RPC_SetWeather, &weather, sizeof(char), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
 }
 EXPECT_SIZE(struct RPCDATA_SetWeather, sizeof(char));
@@ -436,6 +468,7 @@ EXPECT_SIZE(struct RPCDATA_SetWeather, sizeof(char));
 static
 void TogglePlayerClock(int playerid, char enabled)
 {
+	TRACE;
 	struct SampPlayer *playa;
 
 	playa = player[playerid];
@@ -449,6 +482,7 @@ EXPECT_SIZE(struct RPCDATA_ToggleClock, sizeof(char));
 static
 void TogglePlayerSpectating(int playerid, int enabled)
 {
+	TRACE;
 	struct SampPlayer *playa;
 
 	playa = player[playerid];
@@ -465,6 +499,7 @@ EXPECT_SIZE(struct RPCDATA_ToggleSpectating, sizeof(int));
 static
 void SetPlayerCameraPos(int playerid, struct vec3 *pos)
 {
+	TRACE;
 	struct BitStream bs;
 
 	bs.ptrData = pos;
@@ -479,6 +514,7 @@ EXPECT_SIZE(struct RPCDATA_SetCameraPos, sizeof(struct vec3));
 static
 void SetPlayerCameraLookAt(int playerid, struct vec3 *at, char switchstyle)
 {
+	TRACE;
 	struct RPCDATA_SetCameraLookAt rpcdata;
 	struct BitStream bs;
 
@@ -492,6 +528,7 @@ void SetPlayerCameraLookAt(int playerid, struct vec3 *at, char switchstyle)
 static
 void SetCameraBehindPlayer(int playerid)
 {
+	TRACE;
 	struct BitStream bs;
 
 	bs.numberOfBitsUsed = 0;
@@ -501,6 +538,7 @@ void SetCameraBehindPlayer(int playerid)
 static
 void InterpolateCamera(int playerid, char position, struct vec3 *from, struct vec3 *to, int timeMs)
 {
+	TRACE;
 	volatile struct RPCDATA_InterpolateCamera rpcdata;
 	unsigned char *aligned, shifted[30];
 	struct BitStream bs;
@@ -529,6 +567,7 @@ static
 __attribute((unused))
 void InterpolateCameraPos(int playerid, struct vec3 *from, struct vec3 *to, int timeMs)
 {
+	TRACE;
 	InterpolateCamera(playerid, 1, from, to, timeMs);
 }
 
@@ -536,6 +575,7 @@ static
 __attribute((unused))
 void InterpolateCameraLookAt(int playerid, struct vec3 *from, struct vec3 *to, int timeMs)
 {
+	TRACE;
 	InterpolateCamera(playerid, 0, from, to, timeMs);
 }
 
@@ -545,6 +585,7 @@ void InterpolateCameraLookAt(int playerid, struct vec3 *from, struct vec3 *to, i
 static
 void SetPlayerSpecialAction(int playerid, char actionid)
 {
+	TRACE;
 	struct BitStream bs;
 
 	bs.ptrData = &actionid;
@@ -556,6 +597,7 @@ EXPECT_SIZE(struct RPCDATA_SetSpecialAction, sizeof(char));
 static
 void ForceClassSelection(int playerid)
 {
+	TRACE;
 	SendRPC_8C(playerid, RPC_ForceClassSelection, NULL, 0, HIGH_PRIORITY, RELIABLE, 2);
 }
 
@@ -563,6 +605,7 @@ static
 __attribute__((unused)) /*unused in prod builds*/
 void GivePlayerWeapon(int playerid, int weaponid, int ammo)
 {
+	TRACE;
 	struct RPCDATA_GiveWeapon rpcdata;
 
 	rpcdata.weaponid = weaponid;
@@ -580,6 +623,7 @@ uncontrollable and the vehicle hp is < 250 (maybe even when it's < 300?)
 static
 void TogglePlayerControllable(int playerid, char controllable)
 {
+	TRACE;
 	struct BitStream bs;
 
 	bs.ptrData = &controllable;
@@ -590,6 +634,7 @@ void TogglePlayerControllable(int playerid, char controllable)
 static
 void SendClientMessageToBatch(short *playerids, int numplayerids, int color, char *message)
 {
+	TRACE;
 	/*Using 4 packets should handle messages with a length up to 144*4.*/
 	struct RPCDATA_SendClientMessage rpcdata[4];
 	struct BitStream bs;
@@ -680,18 +725,21 @@ not_a_color:
 static
 void SendClientMessageToAll(int color, char *message)
 {
+	TRACE;
 	SendClientMessageToBatch(players, playercount, color, message);
 }
 
 static
 void SendClientMessage(short playerid, int color, char *message)
 {
+	TRACE;
 	SendClientMessageToBatch(&playerid, 1, color, message);
 }
 
 static
 void PlayerPlaySound(int playerid, int soundid)
 {
+	TRACE;
 	struct RPCDATA_PlaySound rpcdata;
 	struct BitStream bs;
 
@@ -707,12 +755,14 @@ void PlayerPlaySound(int playerid, int soundid)
 static
 int IsVehicleStreamedIn(int vehicleid, int forplayerid)
 {
+	TRACE;
 	return player[forplayerid]->vehicleStreamedIn[vehicleid];
 }
 
 static
 void GetPlayerPos(int playerid, struct vec3 *pos)
 {
+	TRACE;
 	*pos = player[playerid]->pos;
 }
 
@@ -720,6 +770,7 @@ static
 __attribute((unused))
 float GetPlayerFacingAngle(int playerid)
 {
+	TRACE;
 	return player[playerid]->facingAngle;
 }
 
@@ -727,6 +778,7 @@ static
 __attribute((unused))
 char GetPlayerCameraMode(int playerid)
 {
+	TRACE;
 	if (player[playerid]) {
 		return player[playerid]->aimSyncData.cameraMode;
 	}
@@ -737,6 +789,7 @@ static
 __attribute((unused))
 int GetPlayerWeaponState(int playerid)
 {
+	TRACE;
 	struct SampPlayer *playa = player[playerid];
 
 	if (playa && playa->currentState == PLAYER_STATE_ONFOOT) {
@@ -749,6 +802,7 @@ int GetPlayerWeaponState(int playerid)
 static
 void GetPlayerPosRot(int playerid, struct vec4 *pos)
 {
+	TRACE;
 	pos->coords = player[playerid]->pos;
 	pos->r = player[playerid]->facingAngle;
 }
@@ -756,6 +810,7 @@ void GetPlayerPosRot(int playerid, struct vec4 *pos)
 static
 short GetPlayerVehicleSeat(int playerid)
 {
+	TRACE;
 	return player[playerid]->vehicleseat;
 }
 
@@ -765,12 +820,14 @@ short GetPlayerVehicleSeat(int playerid)
 static
 short GetPlayerVehicleID(int playerid)
 {
+	TRACE;
 	return player[playerid]->vehicleid;
 }
 
 static
 struct SampVehicle *GetPlayerVehicle(int playerid)
 {
+	TRACE;
 	/*Player's vehicleid will be 0 when not in a vehicle.*/
 	/*Non allocated vehicleids will always have a nullptr in SampVehiclePool::vehicles.*/
 	return vehiclepool->vehicles[player[playerid]->vehicleid];
@@ -779,12 +836,14 @@ struct SampVehicle *GetPlayerVehicle(int playerid)
 static
 char GetPlayerState(int playerid)
 {
+	TRACE;
 	return player[playerid]->currentState;
 }
 
 static
 short GetVehicleModel(int vehicleid)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
@@ -797,6 +856,7 @@ short GetVehicleModel(int vehicleid)
 static
 int GetPlayerInVehicleSeat(int vehicleid, int seat)
 {
+	TRACE;
 	int n, playerid;
 
 	for (n = playercount; n; ) {
@@ -811,6 +871,7 @@ int GetPlayerInVehicleSeat(int vehicleid, int seat)
 static
 int GetVehicleDriver(int vehicleid)
 {
+	TRACE;
 	int n, playerid;
 
 	for (n = playercount; n; ) {
@@ -829,6 +890,7 @@ static
 __attribute__((unused))
 float GetVehicleHealthRaw(int vehicleid)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
@@ -847,6 +909,7 @@ float GetVehicleHealthRaw(int vehicleid)
 static
 void SetVehicleHealth(int vehicleid, float hp)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
@@ -858,6 +921,7 @@ void SetVehicleHealth(int vehicleid, float hp)
 static
 void SyncVehicleDamageStatus(struct SampVehicle *vehicle)
 {
+	TRACE;
 	struct INOUTRPCDATA_UpdateVehicleDamageStatus rpcdata;
 	struct PlayerID playerID;
 	struct BitStream bs;
@@ -888,6 +952,7 @@ TODO: make a GetVehicleParamsExForPlayer? Where objective is set in case they're
 static
 void GetVehicleParamsEx(int vehicleid, struct SampVehicleParams *params)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
@@ -901,6 +966,7 @@ static
 __attribute__((unused))
 void SetVehicleParamsEx(int vehicleid, struct SampVehicleParams *params)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
@@ -914,6 +980,7 @@ void SetVehicleParamsEx(int vehicleid, struct SampVehicleParams *params)
 static
 void SetVehicleParamsExForPlayer(int vehicleid, int playerid, struct SampVehicleParams *params)
 {
+	TRACE;
 	struct RPCDATA_SetVehicleParamsEx rpcdata;
 	struct BitStream bs;
 
@@ -930,6 +997,7 @@ XXX: this resets any player-specific doors_locked state back to the global doors
 static
 void SetVehicleObjectiveForPlayer(int vehicleid, int playerid, char objective)
 {
+	TRACE;
 	struct RPCDATA_SetVehicleParams rpcdata;
 	struct BitStream bs;
 	struct SampVehicleParams params;
@@ -960,6 +1028,7 @@ Crashes when vehicle is not created.
 static
 char GetVehicleEngineState(int vehicleid)
 {
+	TRACE;
 	return samp_pNetGame->vehiclePool->vehicles[vehicleid]->params.engine;
 }
 
@@ -972,6 +1041,7 @@ TODO: it should at least persist player specific objective state by checking the
 static
 void SetVehicleEngineState(int vehicleid, char engine)
 {
+	TRACE;
 	struct RPCDATA_SetVehicleParamsEx rpcdata;
 	struct BitStream bs;
 	struct SampVehicleParams *params;
@@ -1000,6 +1070,7 @@ void SetVehicleEngineState(int vehicleid, char engine)
 static
 void RepairVehicleVisualDamage(struct SampVehicle *vehicle)
 {
+	TRACE;
 	vehicle->damageStatus.doors.raw = 0;
 	vehicle->damageStatus.panels.raw = 0;
 	vehicle->damageStatus.broken_lights.raw = 0;
@@ -1043,6 +1114,7 @@ See also SetVehicleColorPermanent.
 static
 void SetVehicleColorTemporary(int vehicleid, int col1, int col2)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
@@ -1067,6 +1139,7 @@ See also SetVehicleColorTemporary.
 static
 void SetVehicleColorPermanent(int vehicleid, int col1, int col2)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
@@ -1089,6 +1162,7 @@ static
 __attribute__((unused))
 int GetVehicleColor(int vehicleid, int *col1, int *col2)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
@@ -1112,6 +1186,7 @@ static
 __attribute__((unused))
 void SetVehiclePaintjob(int vehicleid, char paintjob)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
@@ -1132,6 +1207,7 @@ In the PAWN API, text is actually the 2nd parameter. Placing it at the end here,
 static
 void GameTextForPlayer(int playerid, int milliseconds, int style, char *text)
 {
+	TRACE;
 	struct RPCDATA_ShowGameText rpcdata;
 	struct BitStream bs;
 	int len;
@@ -1149,12 +1225,14 @@ void GameTextForPlayer(int playerid, int milliseconds, int style, char *text)
 static
 struct SampVehicle *GetSampVehicleByID(int vehicleid)
 {
+	TRACE;
 	return samp_pNetGame->vehiclePool->vehicles[vehicleid];
 }
 
 static
 int GetVehiclePos(int vehicleid, struct vec3 *pos)
 {
+	TRACE;
 	struct SampVehicle *vehicle;
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
@@ -1171,6 +1249,7 @@ Crashes if vehicle does not exist.
 static
 void GetVehiclePosUnsafe(int vehicleid, struct vec3 *pos)
 {
+	TRACE;
 	*pos = samp_pNetGame->vehiclePool->vehicles[vehicleid]->pos;
 }
 
@@ -1180,18 +1259,21 @@ Crashes if vehicle does not exist.
 static
 void GetVehicleVelocityUnsafe(int vehicleid, struct vec3 *vel)
 {
+	TRACE;
 	*vel = samp_pNetGame->vehiclePool->vehicles[vehicleid]->vel;
 }
 
 static
 void HideGameTextForPlayer(int playerid)
 {
+	TRACE;
 	GameTextForPlayer(playerid, 2, 3, "_");
 }
 
 static
 void CrashPlayer(int playerid)
 {
+	TRACE;
 	struct RPCDATA_ShowGangZone rpcdata;
 	struct BitStream bs;
 
@@ -1219,6 +1301,7 @@ static
 int kick_timer_cb(void *data)
 #ifdef SAMP_NATIVES_IMPL
 {
+	TRACE;
 	int playerid;
 
 	playerid = PLAYER_CC_GETID(data);
@@ -1244,6 +1327,7 @@ static
 int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 #ifdef SAMP_NATIVES_IMPL
 {
+	TRACE;
 	const static char *SYSTEM_ISSUER = "system", *REASONNULL = "(NULL)";
 
 	int intv;
@@ -1327,6 +1411,7 @@ static
 int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 #ifdef SAMP_NATIVES_IMPL
 {
+	TRACE;
 	register struct SampVehicle *vehicle;
 	register float hp;
 	struct vec3 pos;
@@ -1384,6 +1469,7 @@ static
 int natives_SetPlayerName(int playerid, char *name)
 #ifdef SAMP_NATIVES_IMPL
 {
+	TRACE;
 	int res;
 	char msg144[144];
 
@@ -1412,6 +1498,7 @@ static
 void natives_SetPlayerPos(int playerid, struct vec3 pos)
 #ifdef SAMP_NATIVES_IMPL
 {
+	TRACE;
 	GameTextForPlayer(playerid, 0x80000, 3, "Loading objects...");
 	maps_stream_for_player(playerid, pos.x, pos.y, OBJ_STREAM_MODE_CLOSEST_NOW);
 	HideGameTextForPlayer(playerid);
@@ -1434,6 +1521,7 @@ static
 void natives_SpawnPlayer(int playerid)
 #ifdef SAMP_NATIVES_IMPL
 {
+	TRACE;
 	struct SpawnInfo spawnInfo;
 
 	/*eject player first if they're in a vehicle*/
@@ -1455,6 +1543,7 @@ static int player_keystates[MAX_PLAYERS];
 static
 void samp_OnPlayerUpdate(int playerid)
 {
+	TRACE;
 	if (kick_update_delay[playerid] > 0) {
 		if (--kick_update_delay[playerid] == 0) {
 			NC_PARS(1);
@@ -1474,6 +1563,7 @@ void samp_OnPlayerUpdate(int playerid)
 
 void hook_OnOnfootSync(int playerid)
 {
+	TRACE;
 	struct SYNCDATA_Onfoot *data;
 	int oldkeys, newkeys;
 
@@ -1509,6 +1599,7 @@ static char drive_udkeystate[MAX_PLAYERS];
 
 void hook_OnDriverSync(int playerid)
 {
+	TRACE;
 	struct SYNCDATA_Driver *data;
 	struct SampVehicle *vehicle;
 	/*TODO reset these keystate variables when player gets into the drive state?*/
@@ -1595,6 +1686,7 @@ void hook_OnDriverSync(int playerid)
 
 void hook_OnPassengerSync(int playerid)
 {
+	TRACE;
 	struct SYNCDATA_Passenger *data;
 	int oldkeys, newkeys;
 
@@ -1619,6 +1711,7 @@ void hook_OnPassengerSync(int playerid)
 
 void hook_OnPlayerRequestClass(int playerid, int classid)
 {
+	TRACE;
 	struct RPCDATA_RequestClass03DL rpcdata03DL;
 	struct RPCDATA_RequestClass037 rpcdata037;
 
@@ -1641,6 +1734,7 @@ void hook_OnPlayerRequestClass(int playerid, int classid)
 
 void StreamInPlayer(struct SampPlayer *player, int forplayer)
 {
+	TRACE;
 	if (is_player_using_client_version_DL[forplayer]) {
 		struct RPCDATA_WorldPlayerAdd03DL rpcdata03DL;
 		rpcdata03DL.playerid = player->playerid;
@@ -1672,6 +1766,7 @@ void StreamInPlayer(struct SampPlayer *player, int forplayer)
 static
 void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 {
+	TRACE;
 	struct INOUTRPCDATA_UpdateVehicleDamageStatus *rpcdata;
 	struct SampVehicle *vehicle;
 	int playerid, vehicleid, i;
@@ -1735,6 +1830,7 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 static
 void samp_init()
 {
+	TRACE;
 	samp_pNetGame = *(struct SampNetGame**) 0x81CA4BC;
 	samp_pConsole = *(int**) 0x81CA4B8;
 	playerpool = samp_pNetGame->playerPool;

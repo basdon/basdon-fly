@@ -2,6 +2,7 @@ struct playerdata *pdata[MAX_PLAYERS];
 
 void pdata_init()
 {
+	TRACE;
 	int i;
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		pdata[i] = NULL;
@@ -10,6 +11,7 @@ void pdata_init()
 
 void pdata_on_name_updated(int playerid)
 {
+	TRACE;
 	char t, *nin, *nout;
 
 	nin = pdata[playerid]->name;
@@ -26,6 +28,7 @@ void pdata_on_name_updated(int playerid)
 
 void pdata_on_player_connect(int playerid)
 {
+	TRACE;
 	struct playerdata *pd;
 
 	if ((pd = pdata[playerid]) == NULL) {
@@ -49,6 +52,7 @@ void pdata_on_player_connect(int playerid)
 
 void pdata_on_player_disconnect(int playerid)
 {
+	TRACE;
 	if (pdata[playerid] != NULL) {
 		free(pdata[playerid]);
 		pdata[playerid] = NULL;

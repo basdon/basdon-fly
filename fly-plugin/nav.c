@@ -38,6 +38,7 @@ static struct NAVDATA {
 static
 void nav_init()
 {
+	TRACE;
 	int i = 0;
 	while (i < MAX_VEHICLES) {
 		nav[i++] = NULL;
@@ -47,6 +48,7 @@ void nav_init()
 static
 void nav_disable(int vehicleid)
 {
+	TRACE;
 	if (nav[vehicleid]) {
 		free(nav[vehicleid]);
 		nav[vehicleid] = NULL;
@@ -60,6 +62,7 @@ void nav_disable(int vehicleid)
 static
 void nav_disable_for_respawned_or_destroyed_vehicle(int vehicleid)
 {
+	TRACE;
 	if (nav[vehicleid]) {
 		free(nav[vehicleid]);
 		nav[vehicleid] = NULL;
@@ -75,6 +78,7 @@ Calculates ILS values.
 static
 void nav_calc_ils_values(struct NAVDATA *n, struct vec3 *player_pos, float dist, const float horiz_dev)
 {
+	TRACE;
 	float xdev;
 	float zdev;
 	float ztarget;
@@ -101,6 +105,7 @@ void nav_calc_ils_values(struct NAVDATA *n, struct vec3 *player_pos, float dist,
 static
 void nav_calc_ils_glideslope_number(struct NAVDATA *n, float crs, float dist, struct vec3 *velocity)
 {
+	TRACE;
 	float horiz_speed, glideslope_angle;
 	int num;
 
@@ -130,6 +135,7 @@ void nav_calc_ils_glideslope_number(struct NAVDATA *n, float crs, float dist, st
 static
 void nav_update(int vehicleid, struct vec4 *pos, struct vec3 *velocity)
 {
+	TRACE;
 	struct NAVDATA *n = nav[vehicleid];
 	float dx, dy;
 	float dist, crs, vorangle, horizontaldeviation;
@@ -182,6 +188,7 @@ void nav_update(int vehicleid, struct vec4 *pos, struct vec3 *velocity)
 static
 void nav_enable(int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 {
+	TRACE;
 	struct vec3 vvel;
 	struct vec4 vpos;
 	struct NAVDATA *navdata;
@@ -211,6 +218,7 @@ Checks if a player can do a nav cmd by checking if the vehicle can do the nav.
 static
 int nav_check_can_do_cmd(int playerid, int navtype, int *vehicleid)
 {
+	TRACE;
 	int vehiclemodel;
 
 	*vehicleid = GetPlayerVehicleID(playerid);
@@ -237,6 +245,7 @@ int nav_check_can_do_cmd(int playerid, int navtype, int *vehicleid)
 
 void nav_navigate_to_airport(int playerid, int vehicleid, int vehiclemodel, struct AIRPORT *ap)
 {
+	TRACE;
 	struct vec3 vpos;
 	struct RUNWAY *rw, *closestrw;
 	float dx, dy, dz, dist, mindist;

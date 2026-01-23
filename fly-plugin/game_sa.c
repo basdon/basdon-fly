@@ -57,6 +57,7 @@ Check if the given vehicle model is an air vehicle (plane or helicopter).
 static
 int game_is_air_vehicle(int model)
 {
+	TRACE;
 	return model && (vehicleflags[model - VEHICLE_MODEL_MIN] & (HELI | PLANE));
 }
 
@@ -66,6 +67,7 @@ Check if the given vehicle model is a helicopter.
 static
 int game_is_heli(int model)
 {
+	TRACE;
 	return model && (vehicleflags[model - VEHICLE_MODEL_MIN] & HELI);
 }
 
@@ -75,6 +77,7 @@ Check if the given vehicle model is a plane.
 static
 int game_is_plane(int model)
 {
+	TRACE;
 	return model && (vehicleflags[model - VEHICLE_MODEL_MIN] & PLANE);
 }
 
@@ -89,6 +92,7 @@ Data is from game's carcols.dat.
 static
 void game_random_carcol(int model, int *col1, int *col2)
 {
+	TRACE;
 	char amount;
 	short position;
 
@@ -111,6 +115,7 @@ void game_random_carcol(int model, int *col1, int *col2)
 static
 int game_get_air_vehicle_passengerseats(int model)
 {
+	TRACE;
 	switch (model)
 	{
 	case MODEL_ANDROM:

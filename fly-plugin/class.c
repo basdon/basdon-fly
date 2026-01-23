@@ -6,6 +6,7 @@ struct vec3 player_pos_infront_camera = { 1486.2727f, -874.0833f, 58.8885f };
 static
 void class_init()
 {
+	TRACE;
 	/*we skip doing AddPlayerClass and just set numAvailableSpawns directly*/
 	/*we overwrote SAMP's OnPlayerRequestClass anyways, so the spawninfo data that AddPlayerClass adds isn't needed*/
 	samp_pNetGame->numAvailableSpawns = SETTING__NUM_CLASSES;
@@ -14,6 +15,7 @@ void class_init()
 static
 void class_on_player_connect(int playerid)
 {
+	TRACE;
 	classid[playerid] = 0;
 	SetPlayerColor(playerid, 0x888888FF);
 }
@@ -21,6 +23,7 @@ void class_on_player_connect(int playerid)
 static
 void class_on_player_request_class(int playerid, int _classid)
 {
+	TRACE;
 	if (_classid < 0 || SETTING__NUM_CLASSES <= _classid) {
 		_classid = classid[playerid];
 	} else {
@@ -58,6 +61,7 @@ void class_on_player_request_class(int playerid, int _classid)
 static
 int class_on_player_request_spawn(int playerid)
 {
+	TRACE;
 	HideGameTextForPlayer(playerid);
 	return 1;
 }

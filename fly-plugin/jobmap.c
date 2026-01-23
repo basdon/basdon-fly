@@ -72,6 +72,7 @@ static float map_list_entry_line_height;
 static
 void jobmap_hide(int playerid)
 {
+	TRACE;
 	textdraws_hide_consecutive(playerid, NUM_MAP_TEXTDRAWS, TEXTDRAW_MISSIONMAP_BASE);
 	textdraws_hide_consecutive(playerid, NUM_MISSIONMAP_LOCATIONS_TEXTDRAWS, TEXTDRAW_MISSIONMAP_LOCATIONS_BASE);
 	free(jobmapdatas[playerid].entries);
@@ -83,12 +84,14 @@ void jobmap_hide(int playerid)
 static
 int jobmap_format_header(char *buffer, struct JOBMAP_DATA *jobmapdata)
 {
+	TRACE;
 	return sprintf(buffer, "Destinations (page %d of %d)", jobmapdata->page + 1, jobmapdata->max_page + 1);
 }
 
 static
 int jobmap_format_distance(char *buffer, int distance)
 {
+	TRACE;
 	if (distance < 1000) {
 		return sprintf(buffer, "%dm", distance);
 	} else {
@@ -126,6 +129,7 @@ Call jobmap_update_entries_textdraws after.
 static
 void jobmap_resort_entries(struct JOBMAP_DATA *jobmapdata)
 {
+	TRACE;
 	qsort(jobmapdata->entries, jobmapdata->num_entries, sizeof(struct JOBMAP_ENTRY), jobmap_sortfuncs[jobmapdata->sort]);
 }
 
@@ -135,6 +139,7 @@ void jobmap_format_entries(
 	char *optdistbuffer, short *out_optdistbuffer_len,
 	struct JOBMAP_DATA *jobmapdata)
 {
+	TRACE;
 	register struct JOBMAP_ENTRY *entry;
 	int i, max_plus_one;
 	char *orig_optbuffer, *orig_optdistbuffer;
@@ -174,6 +179,7 @@ void jobmap_format_entries(
 static
 void jobmap_update_selection_textdraws(int playerid, struct JOBMAP_DATA *jobmapdata)
 {
+	TRACE;
 	register struct JOBMAP_ENTRY *entry;
 	register unsigned char absolute_selected_entry;
 
@@ -217,6 +223,7 @@ void jobmap_update_selection_textdraws(int playerid, struct JOBMAP_DATA *jobmapd
 static
 void jobmap_move_updown(int playerid, int udkey)
 {
+	TRACE;
 	register struct JOBMAP_DATA *jobmapdata = &jobmapdatas[playerid];
 	register int selected_entry;
 	int max_selection_plus_one;
@@ -274,6 +281,7 @@ void jobmap_move_updown(int playerid, int udkey)
 static
 void jobmap_change_page(int playerid, struct JOBMAP_DATA *jobmapdata, int direction)
 {
+	TRACE;
 	struct RPCDATA_TextDrawSetString rpcdata1, rpcdata2;
 	struct BitStream bs;
 	int prev_page;
@@ -333,6 +341,7 @@ void jobmap_change_page(int playerid, struct JOBMAP_DATA *jobmapdata, int direct
 static
 struct AIRPORT *jobmap_do_accept_button(int playerid)
 {
+	TRACE;
 	register struct JOBMAP_DATA *jobmapdata = &jobmapdatas[playerid];
 	register unsigned char entry;
 	struct RPCDATA_TextDrawSetString rpcdata1, rpcdata2;
@@ -376,6 +385,7 @@ struct AIRPORT *jobmap_do_accept_button(int playerid)
 static
 void jobmap_show(int playerid, unsigned int mission_type, struct MISSIONPOINT *msp)
 {
+	TRACE;
 	struct JOBMAP_DATA *jobmapdata = &jobmapdatas[playerid];
 	struct JOBMAP_ENTRY *next_entry;
 	float dx, dy;
@@ -469,6 +479,7 @@ void jobmap_show(int playerid, unsigned int mission_type, struct MISSIONPOINT *m
 static
 void jobmap_dispose()
 {
+	TRACE;
 	free(td_jobmap_keyhelp.rpcdata);
 	free(td_jobmap_title.rpcdata);
 	free(td_jobmap_bg.rpcdata);
@@ -504,6 +515,7 @@ Sizes and positions the textdraws that are used for their box to indicate island
 static
 void jobmap_set_island_textdraw_properties()
 {
+	TRACE;
 	float map_coords_fontheight_base, map_coords_fontheight_unit;
 	float map_coords_y_base, map_coords_y_unit;
 	float map_coords_x_base, map_coords_x_unit;
@@ -645,6 +657,7 @@ have_coords:
 static
 void jobmap_init()
 {
+	TRACE;
 #if NUM_MAP_TEXTDRAWS != 13
 #error
 #endif
@@ -683,6 +696,7 @@ void jobmap_init()
 static
 void jobmap_on_player_connect(int playerid)
 {
+	TRACE;
 	jobmapdatas[playerid].sort = JOBMAP_SORT_NAME_ASCENDING;
 	jobmapdatas[playerid].entries = NULL;
 }
@@ -690,6 +704,7 @@ void jobmap_on_player_connect(int playerid)
 static
 void jobmap_on_player_disconnect(int playerid)
 {
+	TRACE;
 	if (jobmapdatas[playerid].entries) {
 		free(jobmapdatas[playerid].entries);
 		jobmapdatas[playerid].entries = NULL;

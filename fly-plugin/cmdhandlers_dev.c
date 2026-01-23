@@ -3,6 +3,7 @@
 static
 int cmd_dev__m(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int i;
 
 	if (cmd_get_int_param(&cmdctx, &i)) {
@@ -17,6 +18,7 @@ int cmd_dev__m(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev__w(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int i;
 
 	if (cmd_get_int_param(&cmdctx, &i)) {
@@ -31,6 +33,7 @@ int cmd_dev__w(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_cp(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct vec3 pos;
 	int vehicleid;
 
@@ -49,8 +52,29 @@ int cmd_dev_cp(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_crashme(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	CrashPlayer(cmdctx.playerid);
 	return CMD_OK;
+}
+
+#define CMD_CRASHSERVER_SYNTAX ""
+#define CMD_CRASHSERVER_DESC "Crashes the server"
+static
+int cmd_dev_crashserver(struct COMMANDCONTEXT cmdctx)
+{
+	TRACE;
+	static unsigned int *p;
+	unsigned int i, j;
+
+	j = 0;
+	p = &i;
+	while (p) {
+		logprintf("hi %p %p %d", &i, p, j);
+		*p = 0;
+		p++;
+		j++;
+	}
+	return j;
 }
 
 #define CMD_DRVC_SYNTAX "<disable rvc>"
@@ -58,6 +82,7 @@ int cmd_dev_crashme(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_disableremotevehiclecollisions(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int disable;
 
 	if (cmd_get_int_param(&cmdctx, &disable)) {
@@ -72,6 +97,7 @@ int cmd_dev_disableremotevehiclecollisions(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_fweather(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int w;
 
 	if (cmd_get_int_param(&cmdctx, &w)) {
@@ -88,6 +114,7 @@ int cmd_dev_fweather(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_gt(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int style;
 	char textbuf[1024];
 
@@ -103,6 +130,7 @@ int cmd_dev_gt(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_jetpack(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	SetPlayerSpecialAction(cmdctx.playerid, SPECIAL_ACTION_USEJETPACK);
 	return CMD_OK;
 }
@@ -110,6 +138,7 @@ int cmd_dev_jetpack(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_kickme_delayed(void *data)
 {
+	TRACE;
 	int playerid;
 
 	playerid = (int) data;
@@ -123,6 +152,7 @@ int cmd_dev_kickme_delayed(void *data)
 static
 int cmd_dev_kickme(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int delay;
 
 	if (cmd_get_int_param(&cmdctx, &delay)) {
@@ -138,6 +168,7 @@ int cmd_dev_kickme(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_kill(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	SetPlayerHealth(cmdctx.playerid, 0.0f);
 	return CMD_OK;
 }
@@ -147,6 +178,7 @@ int cmd_dev_kill(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_nweather(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	SendClientMessageToAll(-1, "changing weather");
 	timecyc_next_weather(NULL);
 	return CMD_OK;
@@ -157,6 +189,7 @@ int cmd_dev_nweather(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_owner(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	pdata[cmdctx.playerid]->groups ^= GROUP_OWNER;
 	pdata[cmdctx.playerid]->groups |= GROUP_MEMBER;
 	return CMD_OK;
@@ -167,6 +200,7 @@ int cmd_dev_owner(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_platform(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct RPCDATA_CreateObject rpcdata;
 	struct BitStream bs;
 
@@ -190,6 +224,7 @@ int cmd_dev_platform(struct COMMANDCONTEXT cmdctx)
 static
 void dev_show_runway_labels(int playerid)
 {
+	TRACE;
 	struct RUNWAY *rnw;
 	char text[32], text_bits[32];
 	int bitlen;
@@ -223,6 +258,7 @@ void dev_show_runway_labels(int playerid)
 static
 int cmd_dev_rnw(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct RUNWAY *rnw;
 	char arg1[144];
 	int ap;
@@ -284,6 +320,7 @@ int cmd_dev_rnw(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_siren(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int flag;
 
 	if (cmd_get_int_param(&cmdctx, &flag)) {
@@ -298,6 +335,7 @@ int cmd_dev_siren(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_skinx(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int skin;
 
 	if (cmd_get_int_param(&cmdctx, &skin)) {
@@ -312,6 +350,7 @@ int cmd_dev_skinx(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_sound(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int soundid;
 
 	if (cmd_get_int_param(&cmdctx, &soundid)) {
@@ -326,6 +365,7 @@ int cmd_dev_sound(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_testparpl(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int i;
 	char buf[144];
 
@@ -349,6 +389,7 @@ int cmd_dev_testparpl(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_timecyc(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	char msg144[144];
 
 	sprintf(msg144,
@@ -369,6 +410,7 @@ int cmd_dev_timecyc(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_timex(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int h, m;
 
 	if (cmd_get_int_param(&cmdctx, &h)) {
@@ -389,6 +431,7 @@ int cmd_dev_timex(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_tweather(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int w;
 
 	if (cmd_get_int_param(&cmdctx, &w)) {
@@ -404,6 +447,7 @@ int cmd_dev_tweather(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_v(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct vec4 pos;
 	int modelid, vehicleid;
 	char msg144[144];
@@ -425,6 +469,7 @@ int cmd_dev_v(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	char msg144[144], param_panels[9], param_doors[9], param_lights[3], param_tires[3];
 	struct SampVehicle *vehicle;
 	int param_len;
@@ -470,6 +515,7 @@ int cmd_dev_vdamage(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_vfl(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	struct dbvehicle *veh;
 	int vehicleid;
 	int fl_pct;
@@ -502,6 +548,7 @@ int cmd_dev_vfl(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_vhp(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	int vehicleid;
 	int set_hp;
 
@@ -524,6 +571,7 @@ int cmd_dev_vhp(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_vhpnan(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	float hp;
 
 	hp = 0.0 / 0.0;
@@ -537,6 +585,7 @@ int cmd_dev_vhpnan(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_vhpninf(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	SetVehicleHealth(GetPlayerVehicleID(cmdctx.playerid), float_ninf);
 	return CMD_OK;
 }
@@ -546,6 +595,7 @@ int cmd_dev_vhpninf(struct COMMANDCONTEXT cmdctx)
 static
 int cmd_dev_vhppinf(struct COMMANDCONTEXT cmdctx)
 {
+	TRACE;
 	SetVehicleHealth(GetPlayerVehicleID(cmdctx.playerid), float_pinf);
 	return CMD_OK;
 }

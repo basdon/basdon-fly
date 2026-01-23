@@ -86,6 +86,7 @@ field for the user where the failed login was on.
 static
 void login_cb_failed_login_added(void *data)
 {
+	TRACE;
 	csprintf(buf4096,
 		"UPDATE usr "
 		"SET lastfal="
@@ -110,6 +111,7 @@ Formats text to be displayed in the register dialog box.
 static
 void login_format_register_dialog(char *d, int step, int pw_mismatch)
 {
+	TRACE;
 	if (pw_mismatch) {
 		d += sprintf(d, ECOL_WARN"Passwords do not match!\n\n");
 	}
@@ -126,6 +128,7 @@ void login_format_register_dialog(char *d, int step, int pw_mismatch)
 static
 void login_cb_dlg_namechange(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	if (response.response) {
 		if (!response.inputtext[0] || !stricmp(pdata[playerid]->name, response.inputtext)) {
 			/*Edge case: if empty string or same name as current, go back to login dialog.*/
@@ -152,6 +155,7 @@ Shows name change dialog.
 static
 void login_show_dialog_change_name(int playerid, int show_invalid_name_error)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 
 	dialog_init_info(&dialog);
@@ -172,6 +176,7 @@ void login_show_dialog_change_name(int playerid, int show_invalid_name_error)
 static
 void login_cb_dlg_login_or_namechange(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	if (response.response) {
 		GameTextForPlayer(playerid, 0x800000, 3, "~b~Logging in...");
 		if (pwdata[playerid]) {
@@ -199,6 +204,7 @@ Shows the login dialog.
 static
 void login_show_dialog_login(int playerid, int show_invalid_pw_error)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 
 	dialog_init_info(&dialog);
@@ -220,6 +226,7 @@ void login_show_dialog_login(int playerid, int show_invalid_pw_error)
 static
 void login_cb_dlg_register_confirmpass(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	char tmp_hash_buf[SHA256BUFSIZE];
 	register int cmpres;
 
@@ -259,6 +266,7 @@ Shows the register dialog box for the first step (confirm password).
 static
 void login_show_dialog_register_step2(int playerid)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 
 	dialog_init_info(&dialog);
@@ -276,6 +284,7 @@ void login_show_dialog_register_step2(int playerid)
 static
 void login_cb_dlg_register_firstpass(int playerid, struct DIALOG_RESPONSE response)
 {
+	TRACE;
 	/*Next | Play as guest*/
 	if (response.response) {
 		if (pwdata[playerid]) {
@@ -295,6 +304,7 @@ Shows the register dialog box for the first step (enter password).
 static
 void login_show_dialog_register_step1(int playerid, int pw_mismatch)
 {
+	TRACE;
 	struct DIALOG_INFO dialog;
 
 	dialog_init_info(&dialog);
@@ -317,6 +327,7 @@ Sets the player username from user input if it's a valid non-guest username.
 static
 int login_change_name_from_input(int playerid, char *inputtext)
 {
+	TRACE;
 	int len;
 
 	len = strlen(inputtext);
@@ -334,6 +345,7 @@ Execute query to create a user (might be guest user).
 static
 void login_create_user(int playerid, char *password, int groups, cb_t callback)
 {
+	TRACE;
 	sprintf(cbuf4096_,
 	        "INSERT INTO "
 		"usr(name,pw,registertime,lastseengame,groups,prefs) "
@@ -351,6 +363,7 @@ Execute query to insert a new entry in the 'ses' table
 static
 void login_create_session(int playerid, cb_t callback)
 {
+	TRACE;
 	char versionstring[25*2];
 
 	common_mysql_escape_string(playerpool->version[playerid], versionstring, sizeof(versionstring));
@@ -374,6 +387,7 @@ Set the player's status as logged in and spawn them.
 static
 void login_login_player(int playerid, int status)
 {
+	TRACE;
 	int i;
 
 	loggedstatus[playerid] = status;
@@ -418,6 +432,7 @@ Callback for query that creates a session for a guest user.
 static
 void login_cb_create_session_guest(void *data)
 {
+	TRACE;
 	int playerid;
 	char msg144[144];
 
@@ -446,6 +461,7 @@ Callback for query that creates a session for a newly registered member.
 static
 void login_cb_create_session_new_member(void *data)
 {
+	TRACE;
 	int playerid;
 	char msg144[144];
 
@@ -471,6 +487,7 @@ void login_cb_create_session_new_member(void *data)
 static
 void login_append_last_connected(int playerid, char *dest)
 {
+	TRACE;
 	int timespan;
 
 	timespan = unconfirmed_timesincelastseen[playerid];
@@ -489,6 +506,7 @@ Callback for query that creates a session for an existing member.
 static
 void login_cb_create_session_existing_member(void *data)
 {
+	TRACE;
 	int playerid;
 	char msg144[144], *msgptr;
 
@@ -518,6 +536,7 @@ Callback for query that creates a guest user.
 static
 void login_cb_create_guest_usr(void *data)
 {
+	TRACE;
 	int playerid;
 	char msg144[144];
 
@@ -548,6 +567,7 @@ Give the user a name prefixed with an '@' symbol, indicating they're a guest.
 static
 int login_give_guest_name(int playerid)
 {
+	TRACE;
 	struct playerdata *p;
 	char newname[MAX_PLAYER_NAME + 1];
 	int attempts, i;
@@ -590,6 +610,7 @@ failure).
 static
 void login_spawn_as_guest(int playerid)
 {
+	TRACE;
 	if (pdata[playerid]->name[0] != '@' &&
 		!login_give_guest_name(playerid))
 	{
@@ -611,6 +632,7 @@ failure).
 static
 void login_spawn_as_guest_WITHOUT_ACCOUNT(int playerid)
 {
+	TRACE;
 	char msg144[144];
 
 	if (login_give_guest_name(playerid)) {
@@ -626,6 +648,7 @@ Callback when player logged in and account load query is done.
 static
 void login_cb_load_account_data(void *data)
 {
+	TRACE;
 	struct DIALOG_INFO *dialog;
 	int playerid, *f = nc_params + 2, falng, lastfal;
 
@@ -691,6 +714,7 @@ Callback for bcrypt password check when logging in.
 static
 void login_cb_verify_password(void *data)
 {
+	TRACE;
 	int playerid, fal;
 
 	playerid = PLAYER_CC_GETID(data);
@@ -733,6 +757,7 @@ Callback for when member user has been created after registering.
 static
 void login_cb_member_user_created(void *data)
 {
+	TRACE;
 	int playerid;
 
 	playerid = PLAYER_CC_GETID(data);
@@ -760,6 +785,7 @@ Callback for register dialog password hash.
 static
 void login_cb_register_password_hashed(void *data)
 {
+	TRACE;
 	int playerid;
 
 	playerid = PLAYER_CC_GETID(data);
@@ -778,6 +804,7 @@ Callback for login_query_check_user_exists
 static
 void login_cb_check_user_exists(void *data)
 {
+	TRACE;
 	struct DIALOG_INFO *dialog;
 	int playerid, failedattempts, num_rows;
 	char password[PW_HASH_LENGTH];
@@ -850,6 +877,7 @@ Callback will be called with CC
 static
 void login_query_check_user_exists(int playerid)
 {
+	TRACE;
 	GameTextForPlayer(playerid, 0x800000, 3, "~b~Checking username...");
 	sprintf(cbuf4096_,
 		"(SELECT 0,-1,0,count(u) FROM fal WHERE stamp>UNIX_TIMESTAMP()-1800 AND ip='%s')"
@@ -866,6 +894,7 @@ void login_query_check_user_exists(int playerid)
 static
 int login_on_player_connect(int playerid)
 {
+	TRACE;
 	struct playerdata *pd;
 
 	if (pwdata[playerid]) {
@@ -900,6 +929,7 @@ int login_on_player_connect(int playerid)
 
 void login_on_player_disconnect(int playerid, int reason)
 {
+	TRACE;
 	char msg144[144];
 	char *b;
 
