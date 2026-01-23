@@ -238,6 +238,7 @@ void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 	struct COMMAND *cmd, *real_cmd;
 	struct COMMANDCONTEXT cmdctx;
 	char syntaxmsg[144];
+	int is_cmd_resolved;
 
 	if (anticheat_on_player_command(playerid)) {
 		return;
@@ -260,7 +261,15 @@ void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 		return;
 	}
 
-	common_mysql_escape_string(cmdtext, cbuf144, 144 * sizeof(cell));
+	is_cmd_resolved = cmd_get_by_name_check_permissions(playerid, cmdtext, &cmdctx.parseidx, &cmd, &real_cmd);
+
+	if (is_cmd_resolved && real_cmd->handler == cmd_pm) {
+		strcpy(cbuf144, "/pm");
+	} else if (is_cmd_resolved && real_cmd->handler == cmd_r) {
+		strcpy(cbuf144, "/r");
+	} else {
+		common_mysql_escape_string(cmdtext, cbuf144, 144 * sizeof(cell));
+	}
 	csprintf(buf4096,
 		"INSERT INTO cmdlog(player,loggedstatus,stamp,cmd) "
 		"VALUES(IF(%d<1,NULL,%d),%d,UNIX_TIMESTAMP(),'%s')",
@@ -270,7 +279,7 @@ void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 		cbuf144);
 	NC_mysql_tquery_nocb(buf4096a);
 
-	if (cmd_get_by_name_check_permissions(playerid, cmdtext, &cmdctx.parseidx, &cmd, &real_cmd)) {
+	if (is_cmd_resolved) {
 		cmdctx.playerid = playerid;
 		cmdctx.cmdtext = cmdtext;
 		if (real_cmd->handler(cmdctx) == CMD_SYNTAX_ERR) {
