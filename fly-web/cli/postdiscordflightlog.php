@@ -47,7 +47,7 @@ $r = $r[0];
 if ($r->missiontype & $SETTING__PASSENGER_MISSIONTYPES) {
 	$satisfaction = ':ok_hand: ' . $r->satisfaction . '% passenger satisfaction';
 } else {
-	$satisfaction = 'cargo flight';
+	$satisfaction = ':package: cargo flight';
 }
 $escapedname = strtr($r->name, ['_' => '\\_']);
 $status = fmt_flight_status($r->state, $r->tload);
@@ -55,6 +55,11 @@ $diff = $r->tlastupdate - $r->tstart;
 $duration = sprintf('%02d:%02d', floor($diff / 60), $diff % 60);
 $vehname = aircraft_name($r->vehmodel);
 $distance = round($r->adistance);
+
+$helis = [425, 447, 465, 469, 487, 488, 497, 501, 548, 563];
+// skimmer, rcbaron, rustler, cropduster, stuntplane, dodo
+$smallplanes = [460, 464, 476, 512, 513, 593];
+$vehemoji = in_array($r->vehmodel, $helis) ? ':helicopter:' : (in_array($r->vehmodel, $smallplanes) ? ':airplane_small:' : ':airplane:');
 
 $embed = new stdClass();
 $embed->title = "Flight #{$id} by {$escapedname} ({$status})";
@@ -71,7 +76,7 @@ $to->value = "[{$r->toname} ($r->tocode)]({$ABS_URL}/article.php?title={$r->toco
 $to->inline = true;
 $details = new stdClass();
 $details->name = 'Details';
-$details->value = ":straight_ruler: {$distance}m :stopwatch: {$duration} :airplane: {$vehname}\n:hearts: {$r->damage} damage taken\n{$satisfaction}";
+$details->value = ":straight_ruler: {$distance}m :stopwatch: {$duration} {$vehemoji} {$vehname}\n:hearts: {$r->damage} damage taken\n{$satisfaction}";
 $embed->fields = [$from, $to, $details];
 /*The normal status colors are very light (because they're background),
 but these must be pretty strong for the discord embed card (73 saturation instead of 12).*/
