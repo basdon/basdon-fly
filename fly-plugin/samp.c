@@ -205,6 +205,8 @@ void SetPlayerColor(int playerid, int color)
 	struct RPCDATA_SetPlayerColor rpcdata;
 	int i;
 
+	player[playerid]->color = color;
+
 	rpcdata.playerid = playerid;
 	rpcdata.color = color;
 
