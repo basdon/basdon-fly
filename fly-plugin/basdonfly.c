@@ -283,14 +283,6 @@ static const int CLASS_SKINS[SETTING__NUM_CLASSES] = {
 
 static char *CLASS_NAMES[SETTING__NUM_CLASSES];
 
-static const int CLASS_COLORS[SETTING__NUM_CLASSES] = {
-	0xa86efcff,
-	0xfca5ffff,
-	0x7087ffff,
-	0x519c42ff,
-	0xff3740ff,
-};
-
 /**
  * Mission types per class, see init_class_msptypes
  */

@@ -51,7 +51,6 @@ void class_on_player_request_class(int playerid, int _classid)
 		return;
 	}
 
-	SetPlayerColor(playerid, CLASS_COLORS[_classid]);
 	/*This facing angle may seem a bit strange but it's adjusted for when the dancing animation is applied.*/
 	SetPlayerFacingAngle(playerid, 236.0f);
 

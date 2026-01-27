@@ -381,6 +381,17 @@ void login_create_session(int playerid, cb_t callback)
 	common_mysql_tquery(cbuf4096_, callback, V_MK_PLAYER_CC(playerid));
 }
 
+/*color list grabbed from archived samp wiki, with darker colors removed and colors shuffled*/
+static int player_colors[] = {
+	0x10DC29FF,0x05D1CDFF,0xCE79EEFF,0x93B7E4FF,0x93AB1CFF,0xDCDE3DFF,0xFFD720FF,0x11F891FF,0xBCE635FF,0x0C8E5DFF,
+	0x95BAF0FF,0x388EEAFF,0x2FC827FF,0xCF72A9FF,0x9F945CFF,0xC471BDFF,0xB98519FF,0x48C000FF,0x65ADEBFF,0x20D4ADFF,
+	0x0DE018FF,0xFF1493FF,0xF4A460FF,0xEE82EEFF,0xFAFB71FF,0x829DC7FF,0x53EB10FF,0x0FD9FAFF,0xFC42A8FF,0x18F71FFF,
+	0xEF6CE8FF,0xBD34DAFF,0x148B8BFF,0xE9AB2FFF,0xE59338FF,0xF0E68CFF,0x10C9C5FF,0xF2F853FF,0x14ff7fFF,0xEEDC2DFF,
+	0xCEA6DFFF,0x3793FAFF,0xF09F5BFF,0x22F767FF,0x3FE65CFF,0x12D6D4FF,0x0495CDFF,0x247C1BFF,0xC1F7ECFF,0x42ACF5FF,
+	0xCB7ED3FF,0x0BE472FF,0xE3AC12FF,0x2FD9DEFF,0xDFB935FF,0xD8C762FF,0xFA24CCFF,0
+};
+static unsigned char player_colors_last_index_given = -1;
+
 /**
 Set the player's status as logged in and spawn them.
 
@@ -390,7 +401,7 @@ static
 void login_login_player(int playerid, int status)
 {
 	TRACE;
-	int i;
+	int i, color;
 
 	loggedstatus[playerid] = status;
 
@@ -428,6 +439,12 @@ alreadyin:
 		veh_spawn_player_vehicles(playerid);
 	}
 	class_on_player_request_class(playerid, -1);
+
+	color = player_colors[++player_colors_last_index_given];
+	if (color == 0) {
+		color = player_colors[player_colors_last_index_given = 0];
+	}
+	SetPlayerColor(playerid, color);
 }
 
 /**

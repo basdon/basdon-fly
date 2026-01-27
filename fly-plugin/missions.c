@@ -825,7 +825,6 @@ void missions_cleanup(int playerid)
 		if (mission->flags & MISSION_FLAG_CHANGE_CLASS_AFTER_FINISH) {
 			missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[mission->previous_player_class];
 			classid[playerid] = mission->previous_player_class;
-			SetPlayerColor(playerid, CLASS_COLORS[mission->previous_player_class]);
 		}
 
 		if (paused_mission[playerid] && paused_mission[playerid]->id == mission->id) {
@@ -2175,7 +2174,6 @@ void missions_cb_dlg_continue_paused_mission(int playerid, struct DIALOG_RESPONS
 							mission->previous_player_class = classid[playerid];
 							missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[i];
 							classid[playerid] = i;
-							SetPlayerColor(playerid, CLASS_COLORS[i]);
 							break;
 						}
 					}
