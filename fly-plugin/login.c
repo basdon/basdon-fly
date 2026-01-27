@@ -431,7 +431,8 @@ alreadyin:
 		NC_mysql_tquery_nocb(buf4096a);
 	}
 
-	SendClientMessage(playerid, -1, "Privacy note: game chat is logged and publicly archived and readable on our website. Only /pm and /r are private.");
+	SendClientMessage(playerid, COL_SAMP_GREY, "Privacy note: game chat is logged and publicly archived and readable on our website. Only /pm and /r are private.");
+	SendClientMessage(playerid, 0x929BEFFF, "Join our Discord server: https://basdon.net/discord"); /*discord's blue color is too dark to be readable in chat messages, so this a slightly lighter shade of blue*/
 
 	if (status == LOGGED_GUEST) {
 		money_set(playerid, MONEY_DEFAULT_AMOUNT);
