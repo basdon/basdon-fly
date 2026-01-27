@@ -1,18 +1,11 @@
-#define NAMETAGS_UPDATE_INTERVAL 1000
+#define NAMETAGS_UPDATE_INTERVAL 500
 #define NAMETAGS_DEFAULT_MAX_DISTANCE 5000
 
+/**[forplayerid][playerid]*/
 static char nametag_created[MAX_PLAYERS][MAX_PLAYERS];
 
-/*Since nametags update every second, but cycle should be every other second,
-duplicating the states is an easy stupid way to do that.*/
-#define NAMETAG_CYCLE_DISTANCE_1 0
-#define NAMETAG_CYCLE_DISTANCE_2 1
-#define NAMETAG_CYCLE_ALT_1 2
-#define NAMETAG_CYCLE_ALT_2 3
-#define NAMETAG_CYCLE_VEHICLE_1 4
-#define NAMETAG_CYCLE_VEHICLE_2 5
-#define NAMETAG_NUM_CYCLES 6
-static char nametags_current_cycle;
+/** Nametags cycle between showing 2 different values: distance to player + altitude, vehicle model */
+static char nametags_show_distance;
 
 static
 void nametags_update_for_player(int forplayerid)
@@ -34,7 +27,7 @@ void nametags_update_for_player(int forplayerid)
 		max_dist_sq = nametags_max_distance[forplayerid];
 		max_dist_sq *= max_dist_sq;
 	}
-	
+
 	current_render_dist = timecyc_get_current_render_distance() - 80 /*leeway.. this should be big enough..*/;
 	if (current_render_dist < 400) {
 		/*Too close is really bad since the warping gets too much...*/
@@ -65,22 +58,23 @@ void nametags_update_for_player(int forplayerid)
 				d.z = playerpos->z - forplayerpos.z;
 				dist += d.z * d.z;
 				dist = (float) sqrt(dist);
-				switch (nametags_current_cycle) {
-				case NAMETAG_CYCLE_DISTANCE_1:
-				case NAMETAG_CYCLE_DISTANCE_2:
-					sprintf(buf, "%s (%d)\n%.0fm", pdata[playerid]->name, playerid, dist);
-					break;
-				case NAMETAG_CYCLE_ALT_1:
-				case NAMETAG_CYCLE_ALT_2:
-					sprintf(buf, "%s (%d)\n%.0fft", pdata[playerid]->name, playerid, playerpos->z);
-					break;
-				case NAMETAG_CYCLE_VEHICLE_1:
-				case NAMETAG_CYCLE_VEHICLE_2:
-					sprintf(buf, "%s (%d)\n%s",
+				if (nametags_show_distance) {
+					sprintf(
+						buf,
+						"%s (%d)\n%.0fm (%.0fft)",
 						pdata[playerid]->name,
 						playerid,
-						vehnames[vehiclemodel - VEHICLE_MODEL_MIN]);
-					break;
+						dist,
+						playerpos->z
+					);
+				} else {
+					sprintf(
+						buf,
+						"%s (%d)\n%s",
+						pdata[playerid]->name,
+						playerid,
+						vehnames[vehiclemodel - VEHICLE_MODEL_MIN]
+					);
 				}
 				bitbuf_bitlength = EncodeString(bitbuf, buf, sizeof(bitbuf));
 				if (forplayer->playerStreamedIn[playerid] && dist < current_render_dist) {
@@ -127,11 +121,20 @@ hide:
 	}
 }
 
+/**
+ * Called by timer, so return value is the delay until the next call.
+ *
+ * Idea here is that for every call, this will update all nametags for one player (if they're not afk).
+ * So to reach the goal of updating nametags for every player in the target time, the return value should
+ * be the target time divided by the amount of players.
+ */
 static
 int nametags_update(void *data)
 {
 	TRACE;
 	static int next_updating_playeridx = 0;
+	/** Since nametags are updated every 500ms, this keeps count of doing 4 updates before changing what value to show. */
+	static char nametags_updateindex = 0;
 
 	int forplayerid;
 
@@ -141,17 +144,16 @@ int nametags_update(void *data)
 
 	if (++next_updating_playeridx >= playercount) {
 		next_updating_playeridx = 0;
-		nametags_current_cycle++;
-		if (nametags_current_cycle >= NAMETAG_NUM_CYCLES) {
-			nametags_current_cycle = 0;
-		}
+		nametags_updateindex++;
+		nametags_show_distance = (nametags_show_distance + ((nametags_updateindex & 4) >> 2)) & 1;
+		nametags_updateindex &= 3;
 	}
+
 	forplayerid = players[next_updating_playeridx];
 	if (!isafk[forplayerid]) {
 		nametags_update_for_player(forplayerid);
 	}
 
-	/*Calculate delay so that nametags for everyone will update about once a second.*/
 	return NAMETAGS_UPDATE_INTERVAL / playercount;
 }
 
