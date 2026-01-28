@@ -50,11 +50,32 @@ void SetConsoleVariableString(char *variable_name, char *value)
 }
 
 static
+char* GetConsoleVariableString(char *variable_name)
+{
+	TRACE;
+#ifndef NO_CAST_IMM_FUNCPTR
+	return ((char* (*)(void*,char*))0x80A0190)(samp_pConsole, variable_name);
+#else
+	return NULL;
+#endif
+}
+
+static
+void AddConsoleVariableString(char *variable_name, char *value)
+{
+	TRACE;
+#ifndef NO_CAST_IMM_FUNCPTR
+	/*see comment of AddServerRule*/
+	((void (*)(void*,char*,int,char*,void*))0x80A08F0)(samp_pConsole, variable_name, 0, value, 0);
+#endif
+}
+
+static
 void AddServerRule(char *rule_name, char *value)
 {
 	TRACE;
 #ifndef NO_CAST_IMM_FUNCPTR
-	/*this invokes a function to add a "console variable"
+	/*this invokes a function to add a "string console variable"
 	 *using 4 as flags argument, which means it will be a server rule
 	 *the last argument is a pointer to a procedure that will be called if the variable changes by console commands*/
 	((void (*)(void*,char*,int,char*,void*))0x80A08F0)(samp_pConsole, rule_name, 4, value, 0);
@@ -1833,6 +1854,8 @@ static
 void samp_init()
 {
 	TRACE;
+	char *str;
+
 	samp_pNetGame = *(struct SampNetGame**) 0x81CA4BC;
 	samp_pConsole = *(int**) 0x81CA4B8;
 	playerpool = samp_pNetGame->playerPool;
@@ -1848,6 +1871,14 @@ void samp_init()
 	mem_protect(0x80B16D6, 0x14, PROT_READ | PROT_WRITE | PROT_EXEC);
 	*(int*) 0x80B16D6 = 0x90909090;
 	*(unsigned char*) 0x80B16DA = 0x90;
+
+	/*color the hostname that we send to the client, because we can*/
+	/*it will be colorized in the client's "Connected to " message, and in the scoreboard title*/
+	str = GetConsoleVariableString("hostname");
+	sprintf(cbuf144, "{1b8ae4}%s", str);
+	AddConsoleVariableString("coloredhostname", cbuf144);
+	mem_protect(0x80AE1D8, 4, PROT_READ | PROT_WRITE | PROT_EXEC);
+	*((char**) 0x80AE1D8) = "coloredhostname";
 
 	/*Sync data is dropped when coordinates exceed -20k/+20k, update those limits here.
 	See 804B5D0 CheckSyncBounds.*/
