@@ -1077,7 +1077,7 @@ static
 int cmd_survey(struct COMMANDCONTEXT cmdctx)
 {
 	TRACE;
-	survey_review_answer(cmdctx.playerid);
+	survey_review_answer_from_cmd(cmdctx.playerid);
 	return CMD_OK;
 }
 

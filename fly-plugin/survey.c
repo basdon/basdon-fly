@@ -1,5 +1,7 @@
-#define CURRENT_SURVEY_ID 1
+/*#define SURVEY_ACTIVE*/
+#define SURVEY_CURRENT_ID 1
 
+#ifdef SURVEY_ACTIVE
 static char survey_bothered_player[MAX_PLAYERS];
 
 static
@@ -14,7 +16,7 @@ void survey_cb_dlg(int playerid, struct DIALOG_RESPONSE response)
 				"VALUES (%d,%d,'%s')"
 				"ON DUPLICATE KEY UPDATE a='%s'",
 			userid[playerid],
-			CURRENT_SURVEY_ID,
+			SURVEY_CURRENT_ID,
 			cbuf144,
 			cbuf144
 		);
@@ -101,7 +103,7 @@ void survey_cb_loadquery_show_or_prompt(void *data)
 	SendClientMessage(playerid, 0x88FF88FF, cbuf144);
 	SendClientMessage(playerid, 0x88FF88FF, "Survey: if you want to change your answer, use /survey");
 }
-#
+
 static
 void survey_query_current_answer(int playerid, cb_t callback)
 {
@@ -112,26 +114,32 @@ void survey_query_current_answer(int playerid, cb_t callback)
 			"FROM srv "
 			"WHERE s=%d AND u=%d "
 			"LIMIT 1",
-		CURRENT_SURVEY_ID,
+		SURVEY_CURRENT_ID,
 		userid[playerid]
 	);
 	common_mysql_tquery(cbuf4096_, callback, V_MK_PLAYER_CC(playerid));
 }
+#endif
 
 static
-void survey_review_answer(int playerid)
+void survey_review_answer_from_cmd(int playerid)
 {
 	TRACE;
+#ifdef SURVEY_ACTIVE
 	if (userid[playerid] <= 0) {
 		SendClientMessage(playerid, COL_WARN, WARN"you don't have an active user session");
 	} else {
 		survey_query_current_answer(playerid, survey_cb_loadquery_review);
 	}
+#else
+	SendClientMessage(playerid, COL_WARN, WARN"no survey active currently");
+#endif
 }
 
 static
 void survey_on_player_spawn(int playerid)
 {
+#ifdef SURVEY_ACTIVE
 	TRACE;
 	if (!survey_bothered_player[playerid]) {
 		survey_bothered_player[playerid] = 1;
@@ -139,11 +147,14 @@ void survey_on_player_spawn(int playerid)
 			survey_query_current_answer(playerid, survey_cb_loadquery_show_or_prompt);
 		}
 	}
+#endif
 }
 
 static
 void survey_on_player_connect(int playerid)
 {
+#ifdef SURVEY_ACTIVE
 	TRACE;
 	survey_bothered_player[playerid] = 0;
+#endif
 }
