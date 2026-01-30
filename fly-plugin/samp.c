@@ -105,6 +105,17 @@ void SendRconCommand(char *command)
 }
 
 static
+int samp_GetTime()
+{
+	TRACE;
+#ifndef NO_CAST_IMM_FUNCPTR
+	return ((int (*)(void*))0x80AAF40)(samp_pNetGame);
+#else
+	return 0;
+#endif
+}
+
+static
 void SendRPC_8C(int playerid, int rpc, void *rpcdata, int size_bytes, enum PacketPriority priority, enum PacketReliability reliability, int orderingChannel)
 {
 	TRACE;

@@ -1,4 +1,5 @@
 #define TRACKER_PORT 7766
+#define SYNC_RECORDING_ENABLE
 
 #define MAX_SPEED_SQ ((3.0f / VEL_TO_KPH) * (3.0f / VEL_TO_KPH))
 
@@ -120,6 +121,26 @@ static int tracker;
 #define TRACKER_HDR_FLAG_CANARY 0x1
 #define TRACKER_HDR_FLAG_HAS_BANK_PITCH 0x2
 #define TRACKER_HDR_FLAG_HAS_ALTITUDE 0x4
+
+#ifdef SYNC_RECORDING_ENABLE
+#define SYNC_RECORDING_MAX_FRAMES 2000 
+#pragma pack(1)
+struct SyncRecordingFrame {
+	struct SYNCDATA_Driver sync;
+	char _pad3F;
+	int time;
+};
+struct SyncRecording {
+	int starttime;
+	struct SyncRecordingFrame frames[SYNC_RECORDING_MAX_FRAMES];
+	int frames_used;
+	FILE *file;
+};
+static struct SyncRecording sync_recording[MAX_PLAYERS];
+#pragma pack()
+EXPECT_SIZE(struct SyncRecordingFrame, 0x44);
+EXPECT_SIZE(((struct SyncRecording*)NULL)->frames, 0x44 * SYNC_RECORDING_MAX_FRAMES);
+#endif
 
 static
 int missions_get_weatherbonus_for_weather(int weather)
@@ -800,6 +821,9 @@ void missions_cleanup(int playerid)
 	TRACE;
 	int was_paused_mission, missionvehicleid;
 	struct MISSION *mission;
+#ifdef SYNC_RECORDING_ENABLE
+	struct SyncRecording *syncrec;
+#endif
 
 	mission = activemission[playerid];
 
@@ -815,6 +839,16 @@ void missions_cleanup(int playerid)
 	if (GetPlayerVehicleID(playerid) != mission->vehicleid) {
 		SetVehicleObjectiveForPlayer(mission->vehicleid, playerid, 0);
 	}
+
+#ifdef SYNC_RECORDING_ENABLE
+	syncrec = sync_recording + playerid;
+	if (syncrec->starttime && syncrec->file) {
+		fwrite(syncrec->frames, syncrec->frames_used, sizeof(syncrec->frames[0]), syncrec->file);
+		fclose(syncrec->file);
+		syncrec->starttime = 0;
+		syncrec->file = NULL;
+	}
+#endif
 
 	if ((was_paused_mission = (mission->flags & MISSION_FLAG_WAS_PAUSED))) {
 		missionvehicleid = mission->vehicleid;
@@ -967,6 +1001,9 @@ void missions_on_player_connect(int playerid)
 	activemission[playerid] = NULL;
 	paused_mission[playerid] = NULL;
 	number_missions_started_stopped[playerid]++;
+#ifdef SYNC_RECORDING_ENABLE
+	sync_recording[playerid].starttime = 0;
+#endif
 }
 
 static
@@ -1864,6 +1901,10 @@ void missions_on_driversync(int playerid, struct SYNCDATA_Driver *syncdata)
 {
 	TRACE;
 	register struct MISSION *mission;
+#ifdef SYNC_RECORDING_ENABLE
+	struct SyncRecording *syncrec;
+	int tc;
+#endif
 
 	if (mission_stage[playerid] == MISSION_STAGE_FLIGHT) {
 		mission = activemission[playerid];
@@ -1875,6 +1916,28 @@ void missions_on_driversync(int playerid, struct SYNCDATA_Driver *syncdata)
 				csprintf(buf4096, "UPDATE flg SET state=%d WHERE id=%d", MISSION_STATE_INPROGRESS, mission->id);
 				NC_mysql_tquery_nocb(buf4096a);
 			}
+
+#ifdef SYNC_RECORDING_ENABLE
+			tc = samp_GetTime();
+			syncrec = sync_recording + playerid;
+			if (!syncrec->starttime) {
+				syncrec->starttime = tc;
+				syncrec->frames_used = 0;
+				sprintf(cbuf144, "flightsyncrec/%d.syncrec", mission->id);
+				syncrec->file = fopen(cbuf144, "w");
+			}
+			if (syncrec->file) {
+				if (syncrec->frames_used < SYNC_RECORDING_MAX_FRAMES) {
+					syncrec->frames[syncrec->frames_used].sync = *syncdata;
+					syncrec->frames[syncrec->frames_used].time = tc;
+					syncrec->frames_used++;
+				}
+				if (syncrec->frames_used >= SYNC_RECORDING_MAX_FRAMES) {
+					fwrite(syncrec->frames, syncrec->frames_used, sizeof(syncrec->frames[0]), syncrec->file);
+					syncrec->frames_used = 0;
+				}
+			}
+#endif
 		}
 	}
 }

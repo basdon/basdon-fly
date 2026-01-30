@@ -20,6 +20,8 @@
 /server/**
 !/server/gamemodes/
 !/server/gamemodes/**
+!/server/flightsyncrec/
+!/server/flightsyncrec/.gitkeep
 !/server/conf.sample.ini
 !/server/servercfg-common.cfg
 !/server/servercfg-dev-00-default.cfg
