@@ -857,8 +857,12 @@ void missions_cleanup(int playerid)
 		infinite loop*/
 
 		if (mission->flags & MISSION_FLAG_CHANGE_CLASS_AFTER_FINISH) {
-			missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[mission->previous_player_class];
 			classid[playerid] = mission->previous_player_class;
+			if (classid[playerid] < 0 || classid[playerid] >= SETTING__NUM_CLASSES) {
+				/*XXX: check why this goes wrong*/
+				classid[playerid] = 0;
+			}
+			missions_available_msptype_mask[playerid] = CLASS_MSPTYPES[classid[playerid]];
 		}
 
 		if (paused_mission[playerid] && paused_mission[playerid]->id == mission->id) {
