@@ -28,6 +28,19 @@ int EncodeString(char *dest, char *source, int max_chars)
 	return bs.numberOfBitsUsed;
 }
 
+/**additional_keys in the sync packets stores 3 keystates in 2 bits, need to unpack it to get a proper key bitmask value*/
+static
+int samp_combine_keys(int basekeys, int additional_keys)
+{
+	/*return basekeys | ((additional_keys == 3 ? 4 : additional_keys) << 16);*/
+
+	register int thirdkey;
+
+	thirdkey = (additional_keys << 1) & (additional_keys << 2) & 4;
+	additional_keys = (additional_keys & ~((thirdkey >> 1) | (thirdkey >> 2))) | thirdkey;
+	return basekeys | (additional_keys << 16);
+}
+
 /**
 Result is the hexadec string representation, so out buf should be at least 65 size.
 */
@@ -1594,8 +1607,7 @@ void hook_OnOnfootSync(int playerid)
 
 	/*keystate change*/
 	oldkeys = player_keystates[playerid];
-	/*newkeys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF*/;
-	newkeys = data->partial_keys; /*not needing KEY_YES/KEY_NO for now*/
+	newkeys = samp_combine_keys(data->partial_keys, data->additional_keys & 3);
 	if (oldkeys != newkeys) {
 		if (KEY_JUST_DOWN(KEY_FIRE) && data->weapon_id == 0) {
 			copilot_handle_onfoot_fire(playerid, data->pos);
@@ -1658,7 +1670,7 @@ void hook_OnDriverSync(int playerid)
 
 	/*keystate change*/
 	oldkeys = player_keystates[playerid];
-	newkeys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF;
+	newkeys = samp_combine_keys(data->partial_keys, data->additional_keys & 3);
 	if (oldkeys != newkeys) {
 		if (KEY_JUST_DOWN(KEY_SUBMISSION)) {
 			vehicle_gear_change_time[data->vehicle_id] = time_timestamp();
@@ -1717,8 +1729,7 @@ void hook_OnPassengerSync(int playerid)
 
 	/*keystate change*/
 	oldkeys = player_keystates[playerid];
-	/*newkeys = (data->partial_keys | (data->additional_keys << 16)) & 0x0003FFFF*/;
-	newkeys = data->partial_keys; /*not needing KEY_YES/KEY_NO for now*/
+	newkeys = samp_combine_keys(data->partial_keys, data->additional_keys & 3);
 	if (oldkeys != newkeys) {
 		if (KEY_JUST_DOWN(KEY_JUMP)) {
 			copilot_handler_passenger_brake(playerid, data->vehicle_id);

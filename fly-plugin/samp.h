@@ -140,7 +140,9 @@ struct SYNCDATA_Onfoot {
 	char player_hp;
 	char player_armor;
 	unsigned char weapon_id : 6;
-	/*two extra bits for YES/NO keys*/
+	/* two extra bits for KEY_YES/KEY_NO/KEY_CTRL_BACK.
+	 * a value of 3 should be changed to 4, because these are two bits representing three keys
+	 */
 	unsigned char additional_keys : 2;
 	char special_action;
 	struct vec3 vel;
@@ -172,7 +174,9 @@ struct SYNCDATA_Driver {
 	char player_hp;
 	char player_armor;
 	unsigned char weapon_id : 6;
-	/*two extra bits for YES/NO keys*/
+	/* two extra bits for KEY_YES/KEY_NO/KEY_CTRL_BACK.
+	 * a value of 3 should be changed to 4, because these are two bits representing three keys
+	 */
 	unsigned char additional_keys : 2;
 	char siren_state;
 	char landing_gear_state; /*0 down 1 up (or transitioning)*/
@@ -187,7 +191,9 @@ struct SYNCDATA_Passenger {
 	unsigned char seat_id : 6;
 	unsigned char drive_by : 2;
 	unsigned char weapon_id : 6;
-	/*two extra bits for YES/NO keys*/
+	/* two extra bits for KEY_YES/KEY_NO/KEY_CTRL_BACK.
+	 * a value of 3 should be changed to 4, because these are two bits representing three keys
+	 */
 	unsigned char additional_keys : 2;
 	char player_hp;
 	char player_armor;
