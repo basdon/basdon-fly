@@ -46,6 +46,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/vhpninf", 0, GROUPS_ALL, CMD_VHPNINF_SYNTAX, CMD_VHPNINF_DESC, cmd_dev_vhpninf },
 	{ 0, 0, "/vhppinf", 0, GROUPS_ALL, CMD_VHPPINF_SYNTAX, CMD_VHPPINF_DESC, cmd_dev_vhppinf },
 #endif /*DEV*/
+	{ 0, 0, "//crash", 0, GROUPS_ADMIN, CMD__CRASH_SYNTAX, CMD__CRASH_DESC, cmd__crash },
 	{ 0, 0, "//getcar", 0, GROUPS_ADMIN, CMD__GETCAR_SYNTAX, CMD__GETCAR_DESC, cmd__getcar },
 	{ 0, 0, "//goto", 0, GROUPS_ADMIN, CMD__GOTO_SYNTAX, CMD__GOTO_DESC, cmd__goto },
 	{ 0, 0, "//gotorel", 0, GROUPS_ADMIN, CMD__GOTOREL_SYNTAX, CMD__GOTOREL_DESC, cmd__gotorel },

@@ -1,3 +1,18 @@
+#define CMD__CRASH_SYNTAX "<playerid|(partial)name>"
+#define CMD__CRASH_DESC "Crash a player's game"
+static
+int cmd__crash(struct COMMANDCONTEXT cmdctx)
+{
+	TRACE;
+	int targetplayerid;
+
+	if (cmd_get_player_param(&cmdctx, &targetplayerid)) {
+		CrashPlayer(targetplayerid);
+		return CMD_OK;
+	}
+	return CMD_SYNTAX_ERR;
+}
+
 #define CMD__GETCAR_SYNTAX "<vehicleid>"
 #define CMD__GETCAR_DESC "Teleports a vehicle to you"
 static
