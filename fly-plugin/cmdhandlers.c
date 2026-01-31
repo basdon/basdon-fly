@@ -1057,10 +1057,16 @@ static
 int cmd_respawn(struct COMMANDCONTEXT cmdctx)
 {
 	TRACE;
+	int vehicleid;
+
 	if (missions_is_player_on_mission(cmdctx.playerid)) {
 		SendClientMessage(cmdctx.playerid, COL_WARN, NO_RECLASSSPAWN);
 	} else {
 		natives_SpawnPlayer(cmdctx.playerid);
+		vehicleid = GetPlayerVehicleID(cmdctx.playerid);
+		if (vehicleid) {
+			NC_SetVehicleToRespawn(vehicleid);
+		}
 	}
 	return CMD_OK;
 }
