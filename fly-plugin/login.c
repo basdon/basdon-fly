@@ -402,21 +402,6 @@ void login_login_player(int playerid, int status)
 {
 	TRACE;
 	int i, color;
-	struct DIALOG_INFO dialog;
-	char *info;
-
-	dialog_init_info(&dialog);
-	info = dialog.info;
-	info += sprintf(info, "%s", ECOL_DIALOG_TEXT);
-	info += sprintf(info, "%s", "2026 kick-off groupflight!\n");
-	info += sprintf(info, "%s", "We are doing group flights on Saturday\n");
-	info += sprintf(info, "%s", "at 3AM GMT+1 and 6PM GMT+1\n\n");
-	info += sprintf(info, "%s", "I (robin_be) will try to be online as\nmuch as possible throughout the day\nSee you then!");
-	dialog.transactionid = DLG_TID_NONE;
-	dialog.style = DIALOG_STYLE_MSGBOX;
-	dialog.caption = "{00ff00}G R O U P   F L I G H T";
-	dialog.button1 = "Ok";
-	dialog_show(playerid, &dialog);
 
 	loggedstatus[playerid] = status;
 
