@@ -17,7 +17,7 @@ static const char *protips[] = {
 	"Tip: Can't get into an AT-400? We got you covered, just type /at400 when near one. (we also have /androm)",
 	"Tip: Can't get into an Andromada? We got you covered, just type /androm when near one. (we also have /at400)",
 	"Tip: Lost? Use /respawn to respawn.",
-	"Tip: Always try to land on the back wheels.",
+	"Tip: Always try to land on the back wheels (or front wheels for Rustler/Nevada/Cropduster/Stuntplane and helicopters).",
 	"Tip: Use /reclass to change into a different class.",
 	"Tip: All flights while on a mission are recorded, you can view them on the website!",
 	"Tip: Want to fly as passenger in a plane without seats? Press 'FIRE' (default: lmb) while carrying no weapons to warp into the plane. See /helpcopilot",
