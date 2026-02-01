@@ -1081,6 +1081,26 @@ int cmd_s(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
+#define CMD_SKIN_SYNTAX "<skinid>"
+#define CMD_SKIN_DESC "Changes your skin (player model)"
+static
+int cmd_dev_skin(struct COMMANDCONTEXT cmdctx)
+{
+	TRACE;
+	int skinid;
+
+	if (cmd_get_int_param(&cmdctx, &skinid)) {
+		if (skinid < 0 || skinid > 311) {
+			SendClientMessage(cmdctx.playerid, COL_WARN, WARN"invalid skin, must be 0-311");
+		} else {
+			/*74 does not exist, use CJ*/
+			SetPlayerSkin(cmdctx.playerid, skinid == 74 ? 0 : skinid);
+		}
+		return CMD_OK;
+	}
+	return CMD_SYNTAX_ERR;
+}
+
 #define CMD_SPRAY_SYNTAX "[col1] [col2]"
 #define CMD_SPRAY_DESC "Respray your vehicle. Colors may be omitted to use a fully random color, or use -1 for a normal random color fit for the vehicle."
 static

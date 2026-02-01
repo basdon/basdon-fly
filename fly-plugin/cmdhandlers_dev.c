@@ -330,21 +330,6 @@ int cmd_dev_siren(struct COMMANDCONTEXT cmdctx)
 	return CMD_SYNTAX_ERR;
 }
 
-#define CMD_SKINX_SYNTAX "<skin>"
-#define CMD_SKINX_DESC "Changes your skin"
-static
-int cmd_dev_skinx(struct COMMANDCONTEXT cmdctx)
-{
-	TRACE;
-	int skin;
-
-	if (cmd_get_int_param(&cmdctx, &skin)) {
-		SetPlayerSkin(cmdctx.playerid, skin);
-		return CMD_OK;
-	}
-	return CMD_SYNTAX_ERR;
-}
-
 #define CMD_SOUND_SYNTAX "<soundid>"
 #define CMD_SOUND_DESC "Plays a sound"
 static
