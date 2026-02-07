@@ -46,6 +46,8 @@ require '../inc/aircraftnames.php';
 $r = $r[0];
 if ($r->missiontype & $SETTING__PASSENGER_MISSIONTYPES) {
 	$satisfaction = ':ok_hand: ' . $r->satisfaction . '% passenger satisfaction';
+} else if ($r->missiontype & ($SETTING__MISSION_TYPE_MIL | $SETTING__MISSION_TYPE_MIL_HELI)) {
+	$satisfaction = ':military_helmet: military flight';
 } else {
 	$satisfaction = ':package: cargo flight';
 }
