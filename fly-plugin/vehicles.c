@@ -1116,6 +1116,9 @@ void veh_timed_1s_update()
 		}
 
 		vehicleid = GetPlayerVehicleID(playerid);
+		if (vehicleid == 0) {
+			continue;
+		}
 		veh = gamevehicles[vehicleid].dbvehicle;
 		if (!veh_is_player_allowed_in_vehicle(playerid, veh)) {
 			veh_disallow_player_in_vehicle(playerid, veh);
