@@ -449,7 +449,7 @@ int cmd_adf(struct COMMANDCONTEXT cmdctx)
 	len = numairports;
 	while (len--) {
 		if (strcmp(beacon, ap->code) == 0) {
-			nav_enable(vehicleid, &ap->pos, NULL);
+			nav_enable(vehicleid, ap, &ap->pos, NULL);
 			PlayerPlaySound(cmdctx.playerid, NAV_SET_SOUND);
 			return 1;
 		}
@@ -1233,7 +1233,7 @@ haveairport:
 	rw = ap->runways;
 	while (rw != ap->runwaysend) {
 		if (rw->type == RUNWAY_TYPE_RUNWAY && strcmp(rw->id, b) == 0) {
-			nav_enable(vehicleid, NULL, rw);
+			nav_enable(vehicleid, ap, NULL, rw);
 			PlayerPlaySound(cmdctx.playerid, NAV_SET_SOUND);
 			return 1;
 		}

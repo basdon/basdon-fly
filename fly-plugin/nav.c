@@ -2,6 +2,7 @@
 static void panel_nav_updated(int vehicleid);
 
 static struct NAVDATA {
+	struct AIRPORT *ap;
 	struct vec3 *beacon;
 	struct RUNWAY *vor;
 	int ils;
@@ -185,8 +186,12 @@ void nav_update(int vehicleid, struct vec4 *pos, struct vec3 *velocity)
 	n->crs = (int) (crs - floor((crs + 180.0f) / 360.0f) * 360.0f);
 }
 
+/**
+ * either adf or vor must be set.
+ * ap must be the airport that the adf/vor target belongs to (unless adf is a random beacon)
+ */
 static
-void nav_enable(int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
+void nav_enable(int vehicleid, struct AIRPORT *ap, struct vec3 *adf, struct RUNWAY *vor)
 {
 	TRACE;
 	struct vec3 vvel;
@@ -198,6 +203,7 @@ void nav_enable(int vehicleid, struct vec3 *adf, struct RUNWAY *vor)
 		nav[vehicleid] = navdata = malloc(sizeof(struct NAVDATA));
 		navdata->alt = navdata->crs = navdata->dist = 0;
 	}
+	navdata->ap = ap;
 	navdata->beacon = adf;
 	navdata->vor = vor;
 	navdata->ils = 0;
@@ -243,6 +249,7 @@ int nav_check_can_do_cmd(int playerid, int navtype, int *vehicleid)
 	return 1;
 }
 
+/**finds the closest, most suitable runway and delegates to nav_enable*/
 void nav_navigate_to_airport(int playerid, int vehicleid, int vehiclemodel, struct AIRPORT *ap)
 {
 	TRACE;
@@ -271,7 +278,7 @@ void nav_navigate_to_airport(int playerid, int vehicleid, int vehiclemodel, stru
 			rw++;
 		}
 		if (closestrw != NULL) {
-			nav_enable(vehicleid, NULL, closestrw);
+			nav_enable(vehicleid, ap, NULL, closestrw);
 			sprintf(cbuf144, "Navigation set to %s runway %s", ap->code, closestrw->id);
 			SendClientMessage(playerid, COL_SAMP_GREY, cbuf144);
 			return;
@@ -291,10 +298,10 @@ void nav_navigate_to_airport(int playerid, int vehicleid, int vehiclemodel, stru
 			rw++;
 		}
 		if (closestrw != NULL) {
-			nav_enable(vehicleid, &closestrw->pos, NULL);
+			nav_enable(vehicleid, ap, &closestrw->pos, NULL);
 			return;
 		}
 	}
 
-	nav_enable(vehicleid, &ap->pos, NULL);
+	nav_enable(vehicleid, ap, &ap->pos, NULL);
 }

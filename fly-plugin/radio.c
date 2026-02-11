@@ -40,6 +40,26 @@ int radio_append_mission_destination(int playerid, char *str)
 	return sprintf(str, "%s", "(no mission destination)");
 }
 
+static
+int radio_append_navigation_target(int playerid, char *str)
+{
+	TRACE;
+	int vehicleid;
+	struct NAVDATA *n;
+
+	vehicleid = GetPlayerVehicleID(playerid);
+	if (vehicleid) {
+		n = nav[vehicleid];
+		if (n && n->ap) {
+			if (n->vor) {
+				return sprintf(str, "%s Runway %s", n->ap->name, n->vor->id);
+			}
+			return sprintf(str, "%s", n->ap->name);
+		}
+	}
+	return sprintf(str, "%s", "(no navigation active)");
+}
+
 static struct RADIO_MACRO radio_macros[] = {
 	{ 0, "l", "Landing", 0 },
 	{ 0, "l2", "Landed", 0 },
@@ -69,6 +89,7 @@ static struct RADIO_MACRO radio_macros[] = {
 	{ 0, "rw", "Runway", 0 },
 	{ 0, "tw", "Tower", 0 },
 	{ 0, "gr", "Ground", 0 },
+	{ 0, "nav", "(current navigation target)", radio_append_navigation_target },
 	{ 0, "mo", "(current mission origin)", radio_append_mission_origin },
 	{ 0, "md", "(current mission destination)", radio_append_mission_destination },
 #if MAX_AIRPORTS != 20
