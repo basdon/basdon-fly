@@ -45,7 +45,7 @@ static struct RADIO_MACRO radio_macros[] = {
 	{ 0, "l2", "Landed", 0 },
 	{ 0, "t", "Taking off", 0 },
 	{ 0, "t2", "Took off", 0 },
-	{ 0, "ab", "Airborn", 0 },
+	{ 0, "ab", "Airborne", 0 },
 	{ 0, "rf", "Refueling", 0 },
 	{ 0, "ga", "Go around", 0 },
 	{ 0, "ga2", "Going around", 0 },
