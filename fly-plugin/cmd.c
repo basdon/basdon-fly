@@ -59,6 +59,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "//tocar", 0, GROUPS_ADMIN, CMD__TOCAR_SYNTAX, CMD__TOCAR_DESC, cmd__tocar },
 	{ 0, 0, "//tomsp", 0, GROUPS_ADMIN, CMD__TOMSP_SYNTAX, CMD__TOMSP_DESC, cmd__tomsp },
 	{ 0, 0, "//vehinfo", 0, GROUP_OWNER, CMD__VEHINFO_SYNTAX, CMD__VEHINFO_DESC, cmd__vehinfo },
+	{ 0, 0, "/%", "/radiomacros", 0, 0, 0, 0 },
 	{ 0, 0, "/adf", 0, GROUPS_ALL, CMD_ADF_SYNTAX, CMD_ADF_DESC, cmd_adf },
 	{ 0, 0, "/andro", "/androm", 0, 0, 0, 0 },
 	{ 0, 0, "/androm", 0, GROUPS_ALL, CMD_ANDROM_SYNTAX, CMD_ANDROM_DESC, cmd_androm },
