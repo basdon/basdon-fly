@@ -1058,6 +1058,7 @@ int cmd_respawn(struct COMMANDCONTEXT cmdctx)
 {
 	TRACE;
 	int vehicleid;
+	int p;
 
 	if (missions_is_player_on_mission(cmdctx.playerid)) {
 		SendClientMessage(cmdctx.playerid, COL_WARN, NO_RECLASSSPAWN);
@@ -1065,7 +1066,14 @@ int cmd_respawn(struct COMMANDCONTEXT cmdctx)
 		natives_SpawnPlayer(cmdctx.playerid);
 		vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 		if (vehicleid) {
+			for (p = 0; p < playercount; p++) {
+				if (players[p] != cmdctx.playerid && player[p]->vehicleid == vehicleid) {
+					goto skip_respawn;
+				}
+			}
 			NC_SetVehicleToRespawn(vehicleid);
+skip_respawn:
+			;
 		}
 	}
 	return CMD_OK;
