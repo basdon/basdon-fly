@@ -185,14 +185,18 @@
 				</div>
 			</form>
 			<p>
-				Showing results
+				Showing
 				{@unsafe " {$flight_list->view_from}-{$flight_list->view_to} of {$flight_list->total} "}
 				flights.
 			</p>
 		</div>
-		{@render flightlist_paginator.tpl}
+		{@if $flight_list->last_page > 1}
+			{@render flightlist_paginator.tpl}
+		{@endif}
 		{@render flightlist.tpl}
-		{@render flightlist_paginator.tpl}
+		{@if $flight_list->last_page > 1}
+			{@render flightlist_paginator.tpl}
+		{@endif}
 	</main>
 	{@render defaultfooter.tpl}
 </body>

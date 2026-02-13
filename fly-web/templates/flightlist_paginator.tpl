@@ -2,10 +2,8 @@
 	<p class=center>
 		{@if isset($flight_list->newer_page_query_params)}
 			<a href="flights.php?{@unsafe $flight_list->newer_page_query_params}">&lt; newer</a>
-		{@else}
-			&lt; newer
+			<span aria-hidden=true>&#32;|&#32;</span>
 		{@endif}
-		&#32;|&#32;
 		{@foreach $flight_list->filters as $filter_name => $filter_value}
 			{@if is_array($filter_value)}
 				{@foreach $filter_value as $value}
@@ -23,11 +21,9 @@
 			{@endfor}
 		</select>
 		<input type=submit value=go>
-		&#32;|&#32;
 		{@if isset($flight_list->older_page_query_params)}
+			<span aria-hidden=true>&#32;|&#32;</span>
 			<a href="flights.php?{@unsafe $flight_list->older_page_query_params}">older &gt;</a>
-		{@else}
-			older &gt;
 		{@endif}
 	</p>
 </form>

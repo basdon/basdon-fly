@@ -305,11 +305,13 @@ ul.compact {
 		padding: 0;
 	}
 	.flightlist td:first-child {
-		border-radius: .5em 0 0 .5em;
+		border-top-left-radius: .5em;
+		border-bottom-left-radius: .5em;
 		padding-left: 1.3em;
 	}
 	.flightlist td:last-child {
-		border-radius: 0 .5em .5em 0;
+		border-top-right-radius: .5em;
+		border-bottom-right-radius: .5em;
 		padding-right: 1.3em;
 	}
 	.flightlist .route {

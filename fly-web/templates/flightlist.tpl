@@ -35,9 +35,11 @@
 				<td>
 					{@unsafe date($flight_list->date_format, $f->tlastupdate)}
 		{@endforeach}
+		{@if !empty($flight_list->dbq->error)}
+			<tr>
+				<td colspan=7 style=line-height:27px>Could not load flight list: {$flight_list->dbq->error}
+		{@elseif $flight_list->dbq->num_rows_fetched == 0}
+			<tr>
+				<td colspan=7 style=line-height:27px>No flights!
+		{@endif}
 </table>
-{@if !empty($flight_list->dbq->error)}
-	<p class="msg error">Could not load flight list: {$flight_list->dbq->error}</p>
-{@elseif $flight_list->dbq->num_rows_fetched == 0}
-	<p class=center>None!</p>
-{@endif}

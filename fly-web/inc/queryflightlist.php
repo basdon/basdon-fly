@@ -143,7 +143,7 @@ function _flight_list_query($opts)
 			$flight_list->view_to = min($flight_list->total, $offset + $limit);
 		}
 
-		$flight_list->last_page = ceil($count / $limit);
+		$flight_list->last_page = max(1, ceil($count / $limit));
 
 		if (isset($page) && $page > 1) {
 			// Check the last page, so the 'newer' link always links to a page that is not empty,
