@@ -58,10 +58,32 @@ $duration = sprintf('%02d:%02d', floor($diff / 60), $diff % 60);
 $vehname = aircraft_name($r->vehmodel);
 $distance = round($r->adistance);
 
-$helis = [425, 447, 465, 469, 487, 488, 497, 501, 548, 563];
-// skimmer, rcbaron, rustler, cropduster, stuntplane, dodo
-$smallplanes = [460, 464, 476, 512, 513, 593];
-$vehemoji = in_array($r->vehmodel, $helis) ? ':helicopter:' : (in_array($r->vehmodel, $smallplanes) ? ':airplane_small:' : ':airplane:');
+switch ($r->vehmodel) {
+case 417: // leviathan
+case 425: // hunter
+case 447: // seasparrow
+case 465: // rc raider
+case 469: // sparrow
+case 487: // maverick
+case 488: // news chopper
+case 497: // police maverick
+case 501: // rc goblin
+case 548: // cargobob
+case 563: // raindance
+	$vehemoji = ':helicopter:';
+	break;
+case 460: // skimmer
+case 464: // rc baron
+case 476: // rustler
+case 512: // cropduster
+case 513: // stuntplane
+case 593: // dodo
+	$vehemoji = ':airplane_small:';
+	break;
+default:
+	$vehemoji = ':airplane:';
+	break;
+}
 
 $embed = new stdClass();
 $embed->title = "Flight #{$id} by {$escapedname} ({$status})";
