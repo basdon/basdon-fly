@@ -1,5 +1,5 @@
 #define TRACKER_PORT 7766
-#define SYNC_RECORDING_ENABLE
+#undef SYNC_RECORDING_ENABLE
 
 #define MAX_SPEED_SQ ((3.0f / VEL_TO_KPH) * (3.0f / VEL_TO_KPH))
 
