@@ -388,9 +388,8 @@ static int player_colors[] = {
 	0x0DE018FF,0xFF1493FF,0xF4A460FF,0xEE82EEFF,0xFAFB71FF,0x829DC7FF,0x53EB10FF,0x0FD9FAFF,0xFC42A8FF,0x18F71FFF,
 	0xEF6CE8FF,0xBD34DAFF,0x148B8BFF,0xE9AB2FFF,0xE59338FF,0xF0E68CFF,0x10C9C5FF,0xF2F853FF,0x14ff7fFF,0xEEDC2DFF,
 	0xCEA6DFFF,0x3793FAFF,0xF09F5BFF,0x22F767FF,0x3FE65CFF,0x12D6D4FF,0x0495CDFF,0x247C1BFF,0xC1F7ECFF,0x42ACF5FF,
-	0xCB7ED3FF,0x0BE472FF,0xE3AC12FF,0x2FD9DEFF,0xDFB935FF,0xD8C762FF,0xFA24CCFF,0
+	0xCB7ED3FF,0x0BE472FF,0xE3AC12FF,0x2FD9DEFF,0xDFB935FF,0xD8C762FF,0xFA24CCFF
 };
-static unsigned char player_colors_last_index_given = -1;
 
 /**
 Set the player's status as logged in and spawn them.
@@ -401,7 +400,7 @@ static
 void login_login_player(int playerid, int status)
 {
 	TRACE;
-	int i, color;
+	int i;
 
 	loggedstatus[playerid] = status;
 
@@ -441,11 +440,7 @@ alreadyin:
 	}
 	class_on_player_request_class(playerid, -1);
 
-	color = player_colors[++player_colors_last_index_given];
-	if (color == 0) {
-		color = player_colors[player_colors_last_index_given = 0];
-	}
-	SetPlayerColor(playerid, color);
+	SetPlayerColor(playerid, player_colors[NC_random(sizeof(player_colors)/sizeof(player_colors[0]))]);
 }
 
 /**
