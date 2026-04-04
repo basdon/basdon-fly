@@ -1,24 +1,13 @@
 /* Natives ending in _ means that they have
 custom code and shouldn't be used directly.*/
 
-static AMX_NATIVE n_ClearAnimations;
 static AMX_NATIVE n_DestroyVehicle_;
-static AMX_NATIVE n_DisablePlayerCheckpoint;
-static AMX_NATIVE n_DisablePlayerRaceCheckpoint;
 static AMX_NATIVE n_GetConsoleVarAsInt;
-static AMX_NATIVE n_GetPlayerIp;
-static AMX_NATIVE n_GetPlayerName;
-static AMX_NATIVE n_GetPlayerPing;
-static AMX_NATIVE n_GetServerTickRate;
-static AMX_NATIVE n_GetVehiclePoolSize;
-static AMX_NATIVE n_GivePlayerWeapon;
-static AMX_NATIVE n_IsValidVehicle;
 static AMX_NATIVE n_Kick_;
 static AMX_NATIVE n_PutPlayerInVehicle_;
 static AMX_NATIVE n_SetPlayerName_;
 static AMX_NATIVE n_SetVehiclePos;
 static AMX_NATIVE n_SetVehicleToRespawn;
-static AMX_NATIVE n_SetVehicleZAngle;
 static AMX_NATIVE n_TogglePlayerControllable;
 static AMX_NATIVE n_bcrypt_check;
 static AMX_NATIVE n_bcrypt_get_hash;
@@ -84,42 +73,10 @@ static cell tmpfloat;
 #define NC(NATIVE) NATIVE(amx,nc_params)
 #define NCF(NATIVE) (tmpfloat=NATIVE(amx,nc_params),amx_ctof(tmpfloat))
 
-#define NC_ClearAnimations(PLAYERID,FORCESYNC) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FORCESYNC,\
-	n_ClearAnimations(amx,nc_params))
-
 #define NC_DestroyVehicle __USE__veh_DestroyVehicle__
-
-#define NC_DisablePlayerRaceCheckpoint(PLAYERID) \
-	(NC_PARS_(1)nc_params[1]=PLAYERID,\
-	n_DisablePlayerRaceCheckpoint(amx,nc_params))
 
 #define NC_GetConsoleVarAsInt(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
 	n_GetConsoleVarAsInt(amx,nc_params))
-
-#define NC_GetPlayerIp(PLAYERID,BUF,LEN) (NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=BUF,nc_params[3]=LEN,\
-	n_GetPlayerIp(amx,nc_params))
-
-#define NC_GetPlayerName(PLAYERID,BUF,LEN) (NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=BUF,nc_params[3]=LEN,\
-	n_GetPlayerName(amx,nc_params))
-
-#define NC_GetPlayerPing(PLAYERID) (NC_PARS_(1)nc_params[1]=PLAYERID,\
-	n_GetPlayerPing(amx,nc_params))
-
-#define NC_GetServerTickRate() (NC_PARS_(0)\
-	n_GetServerTickRate(amx,nc_params))
-
-#define NC_GetVehiclePoolSize() (NC_PARS_(0)\
-	n_GetVehiclePoolSize(amx,nc_params))
-
-#define NC_GivePlayerWeapon(PLAYERID,WEAPONID,AMMO) (NC_PARS_(3)\
-	nc_params[1]=PLAYERID,nc_params[2]=WEAPONID,nc_params[3]=AMMO,\
-	n_GivePlayerWeapon(amx,nc_params))
-
-#define NC_IsValidVehicle(VEHICLEID) (NC_PARS_(1)nc_params[1]=VEHICLEID,\
-	n_IsValidVehicle(amx,nc_params))
 
 #define NC_Kick(PLAYERID) __USE__natives_Kick__
 
@@ -128,10 +85,6 @@ static cell tmpfloat;
 #define NC_SetVehicleToRespawn(VEHICLEID) \
 	(NC_PARS_(1)nc_params[1]=VEHICLEID,\
 	n_SetVehicleToRespawn(amx,nc_params))
-
-#define NC_SetVehicleZAngle(VEHICLEID,FROT) \
-	(NC_PARS_(2)nc_params[1]=VEHICLEID,nc_paramf[2]=FROT,\
-	n_SetVehicleZAngle(amx,nc_params))
 
 #define NC_TogglePlayerControllable(PLAYERID,FLAG) \
 	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
@@ -220,24 +173,13 @@ int natives_find()
 		int *var;
 	};
 	struct NATIVE natives[] = {
-		N(ClearAnimations),
 		N_(DestroyVehicle),
-		N(DisablePlayerCheckpoint),
-		N(DisablePlayerRaceCheckpoint),
 		N(GetConsoleVarAsInt),
-		N(GetPlayerIp),
-		N(GetPlayerName),
-		N(GetPlayerPing),
-		N(GetServerTickRate),
-		N(GetVehiclePoolSize),
-		N(GivePlayerWeapon),
-		N(IsValidVehicle),
 		N_(Kick),
 		N_(PutPlayerInVehicle),
 		N_(SetPlayerName),
 		N(SetVehiclePos),
 		N(SetVehicleToRespawn),
-		N(SetVehicleZAngle),
 		N(TogglePlayerControllable),
 		N(bcrypt_check),
 		N(bcrypt_get_hash),

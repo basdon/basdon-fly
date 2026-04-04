@@ -56,7 +56,9 @@ struct RakServer {
 };
 
 struct RakServer_vtable {
-	int _pad0[35];
+	int _pad0[20];
+	int (*GetLastPing)(struct RakServer *this, struct PlayerID playerID);
+	int _pad54[14];
 	int (*RPC_8C)(struct RakServer *this, char *rpc, struct BitStream *bitStream, enum PacketPriority priority, enum PacketReliability reliability, char orderingChannel, struct PlayerID playerID, int bBroadcast, int bShiftTimestamp);
 	int _pad90[22];
 	short (*GetIndexFromPlayerID)(struct RakServer *rakServer, struct PlayerID playerID);
@@ -67,6 +69,7 @@ struct RakServer_vtable {
 	struct RakNetStatistics *(*GetStatistics)(struct RakServer *rakServer, struct PlayerID playerID);
 };
 #ifndef __TINYC__ /*my tcc binaries are 64bit so ptrs will be 8 bytes instead of 4, disabling these for tcc*/
+STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetLastPing, 0x50);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, RPC_8C, 0x8C);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetIndexFromPlayerID, 0xE8);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetPlayerIDFromIndex, 0xF0); /*TODO: revalidate, as I think this might need to be 0xEC*/

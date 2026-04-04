@@ -405,6 +405,7 @@ just run the 'build' file with bash (or 'make plugin' in repo root).*/
 #undef __USE_BSD
 #undef __USE_MISC
 #include <wait.h>
+#include <arpa/inet.h>
 extern char **environ; /*see 'man environ'*/
 
 static unsigned int vehicle_msptypes[VEHICLE_MODEL_MAX + 1];

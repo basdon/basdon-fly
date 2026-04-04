@@ -22,7 +22,6 @@ NATIVE_ENTRY B_OnVehicleStreamOut
 NATIVE_ENTRY AddPlayerClass
 NATIVE_ENTRY AddStaticVehicleEx
 NATIVE_ENTRY ChangeVehicleColor
-NATIVE_ENTRY ClearAnimations
 NATIVE_ENTRY CreatePlayerObject
 NATIVE_ENTRY CreateVehicle
 NATIVE_ENTRY DestroyObject
@@ -32,10 +31,7 @@ NATIVE_ENTRY DisablePlayerCheckpoint
 NATIVE_ENTRY DisablePlayerRaceCheckpoint
 NATIVE_ENTRY GetConsoleVarAsInt
 NATIVE_ENTRY GetPlayerFacingAngle
-NATIVE_ENTRY GetPlayerIp
 NATIVE_ENTRY GetPlayerKeys
-NATIVE_ENTRY GetPlayerName
-NATIVE_ENTRY GetPlayerPing
 NATIVE_ENTRY GetPlayerPos
 NATIVE_ENTRY GetPlayerState
 NATIVE_ENTRY GetPlayerVehicleID
@@ -48,9 +44,6 @@ NATIVE_ENTRY GetVehiclePos
 NATIVE_ENTRY GetVehiclePoolSize
 NATIVE_ENTRY GetVehicleRotationQuat
 NATIVE_ENTRY GetVehicleVelocity
-NATIVE_ENTRY GetVehicleZAngle
-NATIVE_ENTRY GivePlayerWeapon
-NATIVE_ENTRY IsValidVehicle
 NATIVE_ENTRY IsVehicleStreamedIn
 NATIVE_ENTRY Kick
 NATIVE_ENTRY PutPlayerInVehicle
@@ -61,8 +54,6 @@ NATIVE_ENTRY SetVehicleHealth
 NATIVE_ENTRY SetVehicleParamsEx
 NATIVE_ENTRY SetVehicleParamsForPlayer
 NATIVE_ENTRY SetVehiclePos
-NATIVE_ENTRY SetVehicleToRespawn
-NATIVE_ENTRY SetVehicleZAngle
 NATIVE_ENTRY SpawnPlayer
 NATIVE_ENTRY TogglePlayerControllable
 NATIVE_ENTRY TogglePlayerSpectating

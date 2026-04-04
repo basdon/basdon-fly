@@ -20,7 +20,7 @@ void copilot_handle_onfoot_fire(int playerid, struct vec3 playerpos)
 
 	found_vehicle = 0;
 	shortest_distance = float_pinf;
-	for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
+	for (vehicleid = vehiclepool->highestUsedVehicleid; vehicleid >= 0; vehicleid--) {
 		if (!IsVehicleStreamedIn(vehicleid, playerid)) {
 			continue;
 		}

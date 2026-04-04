@@ -980,7 +980,7 @@ void missions_on_vehicle_destroyed_or_respawned(int vehicleid)
 				WARN" Your mission vehicle has been destroyed, "
 				"your mission has been aborted and you have "
 				"been fined $"SETTING__MISSION_CANCEL_FEE_STR".");
-			NC_DisablePlayerRaceCheckpoint(playerid);
+			DisablePlayerRaceCheckpoint(playerid);
 			money_take(playerid, SETTING__MISSION_CANCEL_FEE_INT);
 			missions_end_unfinished(playerid, MISSION_STATE_ABANDONED_VEHICLE_DESTROYED);
 			return;
@@ -1717,7 +1717,7 @@ void missions_process_cancel_request_by_player(int playerid)
 			NC_TogglePlayerControllable(playerid, 1);
 			HideGameTextForPlayer(playerid);
 		} else {
-			NC_DisablePlayerRaceCheckpoint(playerid);
+			DisablePlayerRaceCheckpoint(playerid);
 		}
 		money_take(playerid, SETTING__MISSION_CANCEL_FEE_INT);
 		missions_end_unfinished(playerid, MISSION_STATE_ABORTED);

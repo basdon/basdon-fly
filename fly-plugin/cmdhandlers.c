@@ -26,7 +26,7 @@ int cmd__getcar(struct COMMANDCONTEXT cmdctx)
 		GetPlayerPosRot(cmdctx.playerid, &ppos);
 		if (common_SetVehiclePos(vehicleid, &ppos.coords)) {
 			natives_PutPlayerInVehicle(cmdctx.playerid, vehicleid, 0);
-			NC_SetVehicleZAngle(vehicleid, ppos.r);
+			SetVehicleZAngle(vehicleid, ppos.r);
 		} else {
 			SendClientMessage(cmdctx.playerid, COL_WARN, WARN" Invalid vehicleid");
 		}
@@ -205,7 +205,7 @@ int cmd__rr(struct COMMANDCONTEXT cmdctx)
 			}
 		}
 	}
-	for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
+	for (vehicleid = vehiclepool->highestUsedVehicleid; vehicleid >= 0; vehicleid--) {
 		for (i = 0; i < numov; i++) {
 			if (vehicleid == occupied_vehicles[i]) {
 				goto skip_occupied;
@@ -276,7 +276,7 @@ int cmd__tocar(struct COMMANDCONTEXT cmdctx)
 		closest_vehicleid = -1;
 		min_distance_sq = float_pinf;
 		GetPlayerPos(cmdctx.playerid, &player_pos);
-		for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
+		for (vehicleid = vehiclepool->highestUsedVehicleid; vehicleid >= 0; vehicleid--) {
 			if (GetVehicleModel(vehicleid) == modelid) {
 				GetVehiclePosUnsafe(vehicleid, &vehicle_pos);
 				dx = player_pos.x - vehicle_pos.x;
@@ -386,7 +386,7 @@ int handle_cmd_at400_androm(struct COMMANDCONTEXT cmdctx, int vehiclemodel)
 	found_vehicle = 0;
 	shortest_distance = float_pinf;
 	GetPlayerPos(cmdctx.playerid, &playerpos);
-	for (vehicleid = NC_GetVehiclePoolSize(); vehicleid >= 0; vehicleid--) {
+	for (vehicleid = vehiclepool->highestUsedVehicleid; vehicleid >= 0; vehicleid--) {
 		if (GetVehicleModel(vehicleid) == vehiclemodel &&
 			IsVehicleStreamedIn(vehicleid, cmdctx.playerid) &&
 			veh_is_player_allowed_in_vehicle(cmdctx.playerid, gamevehicles[vehicleid].dbvehicle))
@@ -514,7 +514,7 @@ static
 int cmd_camera(struct COMMANDCONTEXT cmdctx)
 {
 	TRACE;
-	NC_GivePlayerWeapon(cmdctx.playerid, WEAPON_CAMERA, 3036);
+	GivePlayerWeapon(cmdctx.playerid, WEAPON_CAMERA, 3036);
 	return CMD_OK;
 }
 
@@ -544,7 +544,7 @@ static
 int cmd_chute(struct COMMANDCONTEXT cmdctx)
 {
 	TRACE;
-	NC_GivePlayerWeapon(cmdctx.playerid, WEAPON_PARACHUTE, 1);
+	GivePlayerWeapon(cmdctx.playerid, WEAPON_PARACHUTE, 1);
 	return CMD_OK;
 }
 
@@ -1148,7 +1148,7 @@ int cmd_tickrate(struct COMMANDCONTEXT cmdctx)
 	TRACE;
 	char msg144[144];
 
-	sprintf(msg144, "%d", (int) NC_GetServerTickRate());
+	sprintf(msg144, "%d", samp_pNetGame->tickRate);
 	SendClientMessage(cmdctx.playerid, -1, msg144);
 	return CMD_OK;
 }

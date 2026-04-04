@@ -891,6 +891,12 @@ struct RPCDATA_SetVehiclePos {
 };
 EXPECT_SIZE(struct RPCDATA_SetVehiclePos, 2 + 12);
 
+struct RPCDATA_SetVehicleZAngle {
+	short vehicleid;
+	float angle;
+};
+EXPECT_SIZE(struct RPCDATA_SetVehicleZAngle, 2 + 4);
+
 struct RPCDATA_SetPlayerPos {
 	struct vec3 pos;
 };
@@ -1104,6 +1110,10 @@ struct RPCDATA_GiveWeapon {
 };
 EXPECT_SIZE(struct RPCDATA_GiveWeapon, 8);
 
+struct RPCDATA_ClearAnimations {
+	short playerid;
+};
+
 struct INOUTRPCDATA_UpdateVehicleDamageStatus {
 	short vehicleid;
 	/*this order is different from SampVehicleDamageStatus, as panels & doors are swapped!
@@ -1187,6 +1197,7 @@ DriverSync
 #define RPC_DeleteVehicle 0x816622C /*ptr to 0xA5(165)*/
 #define RPC_SetVehicleNumberplate 0x816622A /*ptr to  0x7B(123)*/
 #define RPC_SetVehiclePos 0x8166224 /*ptr to 0x9F(159)*/
+#define RPC_SetVehicleZAngle 0x815CD0A /*ptr to 0xA0(160), orderingChannel 2*/
 #define RPC_SetPlayerPos 0x815CCEC /*ptr to 0xC(12), orderingChannel 2*/
 #define RPC_SetPlayerFacingAngle 0x815CD04 /*ptr to 0x13(19), orderingChannel 2*/
 #define RPC_SetHealth 0x815CCF0 /*ptr to 0xE(14), orderingChannel 2*/
@@ -1215,3 +1226,4 @@ DriverSync
 #define RPC_ForceClassSelection 0x81587AC /*ptr to 0x4A(74), orderingChannel 2 (rpc has no data)*/
 #define RPC_GiveWeapon 0x815CD08 /*ptr to 0x16(22), orderingChannel 2*/
 #define RPC_UpdateVehicleDamageStatus 0x815A64D /*ptr to 0x6A(106), orderingChannel 2*/
+#define RPC_ClearAnimations 0x816322A /*ptr to 0x57(87), orderingChannel 2*/

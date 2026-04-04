@@ -261,6 +261,49 @@ void SetPlayerColor(int playerid, int color)
 	}
 }
 
+/**
+ * reset a player's animation, which cancels their current action like:
+ * - stops parachuting
+ * - stops having a jetpack
+ * - stops entering a vehicle
+ * - stops driving a vehicle (will put the player immediately on top of the vehicle at their seat coordinates),
+ *   will also immediately stop the vehicle
+ *
+ * in the PAWN API, there is a 'forcesync' parameter which will also send the ClearAnimations RPC for that player
+ * to all players that have the player streamed in. Wanting to do that here requires an additional call to
+ * ClearAnimationsForStreamedInPlayers.
+ *
+ * Note that SAMP also does the forcesync when this is called for NPCs, regardless of the argument passed.
+ */
+static
+void ClearAnimations(int playerid)
+{
+	TRACE;
+	struct RPCDATA_ClearAnimations rpcdata;
+
+	rpcdata.playerid = playerid;
+	SendRPC_8C(playerid, RPC_ClearAnimations, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+}
+
+/**
+ * See ClearAnimations
+ */
+static
+__attribute__((unused))
+void ClearAnimationsForStreamedInPlayers(int playerid)
+{
+	TRACE;
+	struct RPCDATA_ClearAnimations rpcdata;
+	int i;
+
+	rpcdata.playerid = playerid;
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (player[i] && player[i]->playerStreamedIn[playerid]) {
+			SendRPC_8C(i, RPC_ClearAnimations, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+		}
+	}
+}
+
 static
 void SetPlayerMapIcon(int playerid, char icon_id, struct vec3 *pos, char icon, int color, char style)
 {
@@ -648,7 +691,6 @@ void ForceClassSelection(int playerid)
 }
 
 static
-__attribute__((unused)) /*unused in prod builds*/
 void GivePlayerWeapon(int playerid, int weaponid, int ammo)
 {
 	TRACE;
@@ -920,6 +962,7 @@ int GetVehicleDriver(int vehicleid)
 	TRACE;
 	int n, playerid;
 
+	/*TODO: check if vehicle->driverplayerid can be used instead (probably?)*/
 	for (n = playercount; n; ) {
 		playerid = players[--n];
 		if (player[playerid]->vehicleid == vehicleid && player[playerid]->vehicleseat == 0) {
@@ -1299,6 +1342,21 @@ void GetVehiclePosUnsafe(int vehicleid, struct vec3 *pos)
 	*pos = samp_pNetGame->vehiclePool->vehicles[vehicleid]->pos;
 }
 
+static
+void SetVehicleZAngle(int vehicleid, float angle)
+{
+	TRACE;
+	struct RPCDATA_SetVehicleZAngle rpcdata;
+	struct SampVehicle *vehicle;
+
+	vehicle = vehiclepool->vehicles[vehicleid];
+	if (vehicle && vehicle->driverplayerid != INVALID_PLAYER_ID) {
+		rpcdata.vehicleid = vehicleid;
+		rpcdata.angle = angle;
+		SendRPC_8C(vehicle->driverplayerid, RPC_SetVehicleZAngle, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE, 0);
+	}
+}
+
 /**
 Crashes if vehicle does not exist.
 */
@@ -1376,6 +1434,7 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 	TRACE;
 	const static char *SYSTEM_ISSUER = "system", *REASONNULL = "(NULL)";
 
+	struct PlayerID playerID;
 	int intv;
 	char *escapedreason;
 	char msg[144];
@@ -1424,7 +1483,8 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 		/*Interval should be smaller than 1000, since if it's a kick
 		caused by system, player should be gone before the next
 		check (since most of them run at 1Hz).*/
-		intv = NC_GetPlayerPing(playerid) * 2;
+		RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playerid);
+		intv = 2 * rakServer->vtable->GetLastPing(rakServer, playerID);
 		if (intv > 970) {
 			intv = 970;
 		}
@@ -1572,7 +1632,8 @@ void natives_SpawnPlayer(int playerid)
 
 	/*eject player first if they're in a vehicle*/
 	if (GetPlayerVehicleID(playerid)) {
-		NC_ClearAnimations(playerid, 1);
+		ClearAnimations(playerid);
+		ClearAnimationsForStreamedInPlayers(playerid);
 	}
 	spawn_get_random_spawn(playerid, &spawnInfo);
 	SetSpawnInfo(playerid, &spawnInfo);
@@ -1869,6 +1930,12 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 #endif
 		}
 	}
+}
+
+static
+void ProcessStreamingForPlayer(int playerid)
+{
+	TRACE;
 }
 
 static
