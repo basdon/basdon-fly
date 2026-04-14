@@ -1377,17 +1377,24 @@ static
 void CrashPlayer(int playerid)
 {
 	TRACE;
-	struct RPCDATA_ShowGangZone rpcdata;
+	struct RPCDATA_ClearAnimations rpcdata_ca;
+	struct RPCDATA_ShowGangZone rpcdata_sgz;
 	struct BitStream bs;
 
 	GameTextForPlayer(playerid, 5, 5, "Wasted~k~SWITCH_DEBUG_CAM_ON~~k~~TOGGLE_DPAD~~k~~NETWORK_TALK~~k~~SHOW_MOUSE_POINTER_TOGGLE~");
 
-	bs.ptrData = &rpcdata;
-	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
-	rpcdata.zoneid = 65535;
+	bs.ptrData = &rpcdata_sgz;
+	bs.numberOfBitsUsed = sizeof(rpcdata_sgz) * 8;
+	rpcdata_sgz.zoneid = 65535;
 	SAMP_SendRPCToPlayer(RPC_ShowGangZone, &bs, playerid, 2);
-	rpcdata.zoneid = -2700;
+	rpcdata_sgz.zoneid = -2700;
 	SAMP_SendRPCToPlayer(RPC_ShowGangZone, &bs, playerid, 2);
+
+	/*sending ApplyAnimation with a payload of only the playerid crashes client, that's why ClearAnimations rpcdata is used here*/
+	bs.ptrData = &rpcdata_ca;
+	bs.numberOfBitsUsed = sizeof(rpcdata_ca) * 8;
+	rpcdata_ca.playerid = playerid;
+	SAMP_SendRPCToPlayer(RPC_ApplyAnimation, &bs, playerid, 2);
 }
 #endif
 
