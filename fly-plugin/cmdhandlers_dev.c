@@ -109,6 +109,20 @@ int cmd_dev_fweather(struct COMMANDCONTEXT cmdctx)
 	return CMD_SYNTAX_ERR;
 }
 
+#define CMD_GETLASTPING_SYNTAX ""
+#define CMD_GETLASTPING_DESC "Shows your last ping value"
+static
+int cmd_dev_getlastping(struct COMMANDCONTEXT cmdctx)
+{
+	TRACE;
+	struct PlayerID playerID;
+
+	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, cmdctx.playerid);
+	sprintf(cbuf32, "%d", rakServer->vtable->GetLastPing(rakServer, playerID));
+	SendClientMessage(cmdctx.playerid, -1, cbuf32);
+	return CMD_OK;
+}
+
 #define CMD_GT_SYNTAX "<style> <text>"
 #define CMD_GT_DESC "Shows game text"
 static
