@@ -1368,6 +1368,56 @@ void GetVehicleVelocityUnsafe(int vehicleid, struct vec3 *vel)
 }
 
 static
+void PutPlayerInVehicleRaw(int playerid, int vehicleid, int seat)
+{
+	TRACE;
+	struct RPCDATA_PutPlayerInVehicle rpcdata;
+	struct SampVehicle *vehicle;
+	struct SampPlayer *player;
+
+	vehicle = vehiclepool->vehicles[vehicleid];
+	player = playerpool->players[playerid];
+	if (!vehicle || !player) {
+		return;
+	}
+
+#ifndef NO_CAST_IMM_FUNCPTR
+	/*SampPlayer__StreamInVehicle*/
+	((void (*)(struct SampPlayer*,int,int))0x80C9CA0)(player, vehicleid, /*ignore streaming distance*/ 1);
+#endif
+
+	if (seat == 0) {
+		vehicle->driverplayerid = playerid;
+	}
+	player->vehicleid = vehicleid;
+
+#ifndef NO_CAST_IMM_FUNCPTR
+	/*SampPlayer__StorePositionProcessStreamingAndCheckpoints*/
+	((void (*)(struct SampPlayer*,float,float,float,int))0x80CBCB0)(
+		player,
+		vehicle->matrix.pos.x,
+		vehicle->matrix.pos.y,
+		vehicle->matrix.pos.z,
+		/*process streaming immediately*/ 1
+	);
+#endif
+
+#ifndef NO_CAST_IMM_FUNCPTR
+	/*SampPlayer__SetExpectedLocationAfterTeleport*/
+	((void (*)(struct SampPlayer*,float,float,float))0x80CC020)(
+		player,
+		vehicle->matrix.pos.x,
+		vehicle->matrix.pos.y,
+		vehicle->matrix.pos.z
+	);
+#endif
+
+	rpcdata.vehicleid = vehicleid;
+	rpcdata.seat = seat;
+	SendRPC_8C(playerid, RPC_PutPlayerInVehicle, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE, 2);
+}
+
+static
 void HideGameTextForPlayer(int playerid)
 {
 	TRACE;
@@ -1511,10 +1561,14 @@ Puts a player in vehicle, updating map, zone, vehiclestuff ...
 
 putting in driverseat: won't work if there already is a driver
 putting in passengerseat: ejects existing passenger in that seat
-putting in invalid passengerseat: nop with cars, works with planes (does not eject existing passenger)
-warping seats/cars: Players still shows in original one,
-                    keypresses are handled in original one. (can make ghost car like this).
-                    A fix is in place in this function to prevent this.
+putting in invalid passengerseat:
+- cars/bikes: nop
+- planes: works, player will be invisible, does not eject existing passenger, player will crash if they try to exit
+- boats: works, player will be invisible, does not eject existing passenger, player will NOT crash if they try to exit
+- quadbike: same effect as using seat 1 (the only valid passenger seat)
+warping seats/cars:
+- Players still shows in original one, keypresses are handled in original one. (can make ghost car like this).
+- A best-effort fix is in place in this function to prevent this (forces onfoot sync to players).
 
 Also resets the vehicle HP to 1000.0 when it's invalid.
 
@@ -1543,6 +1597,8 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 		}
 	}
 
+	/*TODO: return if seat is invalid and would result in nop (= for vehicles that are not planes,boats,quadbike)*/
+
 	GetVehiclePos(vehicleid, &pos);
 	GameTextForPlayer(playerid, 0x80000, 3, "Loading objects...");
 	maps_stream_for_player(playerid, pos.x, pos.y, OBJ_STREAM_MODE_CLOSEST_NOW);
@@ -1566,11 +1622,8 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 	missions_update_missionpoint_indicators(playerid, pos.x, pos.y, pos.z);
 	zones_update(playerid, pos);
 
-	NC_PARS(3);
-	nc_params[1] = playerid;
-	nc_params[2] = vehicleid;
-	nc_params[3] = seat;
-	return NC(n_PutPlayerInVehicle_);
+	PutPlayerInVehicleRaw(playerid, vehicleid, seat);
+	return 1;
 }
 #endif
 ;

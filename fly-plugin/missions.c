@@ -2055,6 +2055,7 @@ exit:
 		/*This is probably not needed, but if it finally works I'm not touching it anymore*/
 		/*Using samp's PutPlayerInVehicle also makes sure the vehicle is streamed in, and
 		  some checkpoint shenanigans it seems like.*/
+		/*TODO: come back to this and clean it up*/
 		ppiv.vehicleid = mission->vehicleid;
 		ppiv.seat = 0;
 		vehicle = samp_pNetGame->vehiclePool->vehicles[mission->vehicleid];

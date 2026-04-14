@@ -4,7 +4,6 @@ custom code and shouldn't be used directly.*/
 static AMX_NATIVE n_DestroyVehicle_;
 static AMX_NATIVE n_GetConsoleVarAsInt;
 static AMX_NATIVE n_Kick_;
-static AMX_NATIVE n_PutPlayerInVehicle_;
 static AMX_NATIVE n_SetPlayerName_;
 static AMX_NATIVE n_SetVehiclePos;
 static AMX_NATIVE n_SetVehicleToRespawn;
@@ -79,8 +78,6 @@ static cell tmpfloat;
 	n_GetConsoleVarAsInt(amx,nc_params))
 
 #define NC_Kick(PLAYERID) __USE__natives_Kick__
-
-#define NC_PutPlayerInVehicle __USE__natives_PutPlayerInVehicle__
 
 #define NC_SetVehicleToRespawn(VEHICLEID) \
 	(NC_PARS_(1)nc_params[1]=VEHICLEID,\
@@ -176,7 +173,6 @@ int natives_find()
 		N_(DestroyVehicle),
 		N(GetConsoleVarAsInt),
 		N_(Kick),
-		N_(PutPlayerInVehicle),
 		N_(SetPlayerName),
 		N(SetVehiclePos),
 		N(SetVehicleToRespawn),
