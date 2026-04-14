@@ -808,8 +808,8 @@ void veh_disallow_player_in_vehicle(int playerid, struct dbvehicle *v)
 
 	/*when player is entering, this stops them*/
 	/*when player is already in, this should instantly eject the player*/
-	ClearAnimations(playerid);
 	ClearAnimationsForStreamedInPlayers(playerid);
+	ClearAnimations(playerid);
 
 	sprintf(msg144, WARN"This vehicle belongs to %s!", v->owner_name);
 	SendClientMessage(playerid, COL_WARN, msg144);

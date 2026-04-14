@@ -289,7 +289,6 @@ void ClearAnimations(int playerid)
  * See ClearAnimations
  */
 static
-__attribute__((unused))
 void ClearAnimationsForStreamedInPlayers(int playerid)
 {
 	TRACE;
@@ -1353,7 +1352,7 @@ void SetVehicleZAngle(int vehicleid, float angle)
 	if (vehicle && vehicle->driverplayerid != INVALID_PLAYER_ID) {
 		rpcdata.vehicleid = vehicleid;
 		rpcdata.angle = angle;
-		SendRPC_8C(vehicle->driverplayerid, RPC_SetVehicleZAngle, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE, 0);
+		SendRPC_8C(vehicle->driverplayerid, RPC_SetVehicleZAngle, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE, 2);
 	}
 }
 
@@ -1633,7 +1632,6 @@ void natives_SpawnPlayer(int playerid)
 	/*eject player first if they're in a vehicle*/
 	if (GetPlayerVehicleID(playerid)) {
 		ClearAnimations(playerid);
-		ClearAnimationsForStreamedInPlayers(playerid);
 	}
 	spawn_get_random_spawn(playerid, &spawnInfo);
 	SetSpawnInfo(playerid, &spawnInfo);

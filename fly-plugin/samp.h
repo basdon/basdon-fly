@@ -1226,4 +1226,4 @@ DriverSync
 #define RPC_ForceClassSelection 0x81587AC /*ptr to 0x4A(74), orderingChannel 2 (rpc has no data)*/
 #define RPC_GiveWeapon 0x815CD08 /*ptr to 0x16(22), orderingChannel 2*/
 #define RPC_UpdateVehicleDamageStatus 0x815A64D /*ptr to 0x6A(106), orderingChannel 2*/
-#define RPC_ClearAnimations 0x816322A /*ptr to 0x57(87), orderingChannel 2*/
+#define RPC_ClearAnimations 0x816322D /*ptr to 0x57(87), orderingChannel 2*/
