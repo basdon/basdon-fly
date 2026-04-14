@@ -105,6 +105,7 @@ void SendRconCommand(char *command)
 }
 
 static
+__attribute__((unused))
 int samp_GetTime()
 {
 	TRACE;
