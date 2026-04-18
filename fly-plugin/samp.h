@@ -224,9 +224,15 @@ struct SampVehicle {
 	int interior;
 	float health;
 	struct SampVehicleDamageStatus damageStatus;
-	char _padB4;
+	char isDead;
 	short _padB5;
 	char modslots[14];
+	/*0 is no paintjob, 1/2/3 are actual paintjobs*/
+	/*PAWN ChangeVehiclePaintjob uses 0/1/2 and 3 for no paintjob, stores value+1 in here and syncs original value*/
+	/*ScmEvent RPC uses same as ^*/
+	/*CreateVehicle RPC uses this field value as paintjob, meaning 0 is no paintjob*/
+	/*I suppose all of this means using 3 in PAWN API to unset paintjob will set this field to 4 which client will try to use
+	  but it's invalid painjob so it won't have any effect*/
 	char paintjob;
 	/*Primary color after ChangeVehicleColor or TransFender garage has been used.
 	When not set yet, this is -1. This gets reset to -1 when the vehicle is respawned.
@@ -236,9 +242,10 @@ struct SampVehicle {
 	When not set yet, this is -1. This gets reset to -1 when the vehicle is respawned.
 	A value of -1 means the spawnColor2 will be used instead.*/
 	int moddedColor2;
-	char numberplate[33]; /*32 + 1 pad*/
+	char numberplate[33]; /*32 + 0 term*/
 	struct SampVehicleParams params;
-	char _padFF[0x101-0xFF];
+	char hasSentVehicleDeathEvent;
+	char field_100;
 	int lastRespawnTickCount; /*GetTickCount() at time of last respawn*/
 	int lastSpawnTickCount; /*GetTickCount() at time of last (re)spawn*/
 	char use_siren;
@@ -1031,6 +1038,16 @@ struct RPCDATA_WorldPlayerAdd03DL {
 };
 EXPECT_SIZE(struct RPCDATA_WorldPlayerAdd03DL, 0x36);
 
+struct RPCDATA_SetPlayerName {
+	short playerid;
+	char nameLength;
+	char name[24]; /*actual length of this field is nameLength*/
+	/*If name contains invalid characters, SAMP does still send the SetPlayerName RPC to everyone,
+	 *but with this field having value 0. No clue why, maybe that had meaning in older versions.
+	 */
+	char nameIsNotAlreadyInUse;
+};
+
 struct RPCDATA_SetPlayerSkin037 {
 	int playerid;
 	int skin;
@@ -1216,6 +1233,7 @@ DriverSync
 #define RPC_RequestClass 0x81572DF /*ptr to 0x80(128)*/
 #define RPC_SetSpawnInfo 0x8162624 /*ptr to 0x44(68)*/
 #define RPC_WorldPlayerAdd 0x816324E /*ptr to 0x20(32)*/
+#define RPC_SetPlayerName 0x815CCC5 /*ptr to 0xB(11), orderingChannel 2*/
 #define RPC_SetPlayerSkin 0x815CCE4 /*ptr to 0x99(153)*/
 #define RPC_SetPlayerColor 0x8163C35 /*ptr to 0x48(72), orderingChannel 2*/
 #define RPC_SetCameraPos 0x815CCF4 /*ptr to 0x9D(157), orderingChannel 2*/

@@ -337,7 +337,7 @@ int login_change_name_from_input(int playerid, char *inputtext)
 	length is at max 20*/
 	return 2 < len && len < MAX_PLAYER_NAME - 3 &&
 		inputtext[0] != '@' &&
-		natives_SetPlayerName(playerid, inputtext) == 1;
+		SetPlayerName(playerid, inputtext) == 1;
 }
 
 
@@ -440,7 +440,7 @@ alreadyin:
 	}
 	class_on_player_request_class(playerid, -1);
 
-	SetPlayerColor(playerid, player_colors[NC_random(sizeof(player_colors)/sizeof(player_colors[0]))]);
+	SetPlayerColor(playerid, player_colors[amxrandom(sizeof(player_colors)/sizeof(player_colors[0]))]);
 }
 
 /**
@@ -596,19 +596,17 @@ int login_give_guest_name(int playerid)
 	if (p->namelen < MAX_PLAYER_NAME - 4) {
 		memcpy(newname + 1, p->name, p->namelen);
 		newname[p->namelen + 1] = 0;
-		if (natives_SetPlayerName(playerid, newname) == 1) {
+		if (SetPlayerName(playerid, newname) == 1) {
 			return 1;
 		}
 	}
 	newname[11] = 0;
 	attempts = 5;
 	while (attempts-- > 0) {
-		NC_PARS(1);
-		nc_params[1] = 'z' - 'a' + 1;
 		for (i = 1; i < 10; i++) {
-			newname[i] = 'a' + (char) NC(n_random);
+			newname[i] = 'a' + (char) amxrandom('z' - 'a' + 1);
 		}
-		if (natives_SetPlayerName(playerid, newname) == 1) {
+		if (SetPlayerName(playerid, newname) == 1) {
 			return 1;
 		}
 	}
@@ -932,7 +930,7 @@ int login_on_player_connect(int playerid)
 		/*wiki states that SetPlayerName does not propagate for the user
 		when used in OnPlayerConnect, but tests have proven otherwise.*/
 		if (pd->namelen <= 3 ||
-			natives_SetPlayerName(playerid, pd->name + 1) != 1)
+			SetPlayerName(playerid, pd->name + 1) != 1)
 		{
 			SendClientMessage(playerid, COL_WARN, WARN"Failed to change your nickname. Please come back with a different name.");
 			natives_Kick(playerid, "invalid name", NULL, -1);

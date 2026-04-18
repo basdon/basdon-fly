@@ -210,12 +210,6 @@ float common_dist_sq(struct vec3 a, struct vec3 b);
 */
 float common_xy_dist_sq(struct vec3 a, struct vec3 b);
 /**
-Convenience method to set a vehicle's pos to given vec3 struct.
-
-Uses buf32 buf64 buf144.
-*/
-int common_SetVehiclePos(int vehicleid, struct vec3 *pos);
-/**
 Check a string agains its hash.
 
 Uses the last 8 components of buf4096 for callback stuff.

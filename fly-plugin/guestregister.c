@@ -62,7 +62,7 @@ static
 void guestreg_rollback_name(int playerid, struct REGISTERDATA *rd)
 {
 	TRACE;
-	if (natives_SetPlayerName(playerid, rd->oldname) != 1) {
+	if (SetPlayerName(playerid, rd->oldname) != 1) {
 		login_give_guest_name(playerid);
 	}
 }
@@ -209,7 +209,7 @@ void guestreg_cb_check_username_exists(void *data)
 		return;
 	}
 
-	if (natives_SetPlayerName(playerid, d->newname) == 1) {
+	if (SetPlayerName(playerid, d->newname) == 1) {
 		guestreg_show_dialog_password(playerid, 0, 0, guestreg_dlg_register_firstpass);
 		return;
 	}

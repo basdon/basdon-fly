@@ -113,7 +113,7 @@ void spawn_get_random_spawn(int playerid, struct SpawnInfo *outSpawnInfo)
 	/*if no spawns, take first spawn of pilot class*/
 	case 0: klass = 0;
 	case 1: spawnidx = 0; break;
-	default: spawnidx = NC_random(numspawns[klass]); break;
+	default: spawnidx = amxrandom(numspawns[klass]); break;
 	}
 
 	outSpawnInfo->team = 11; /*using anything but NO_TEAM should make players not able to damage other players, except by slitting throat when having a knife*/

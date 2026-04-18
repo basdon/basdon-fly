@@ -24,7 +24,7 @@ int cmd__getcar(struct COMMANDCONTEXT cmdctx)
 
 	if (cmd_get_int_param(&cmdctx, &vehicleid)) {
 		GetPlayerPosRot(cmdctx.playerid, &ppos);
-		if (common_SetVehiclePos(vehicleid, &ppos.coords)) {
+		if (SetVehiclePos(vehicleid, &ppos.coords)) {
 			natives_PutPlayerInVehicle(cmdctx.playerid, vehicleid, 0);
 			SetVehicleZAngle(vehicleid, ppos.r);
 		} else {
@@ -93,7 +93,7 @@ int cmd__goto(struct COMMANDCONTEXT cmdctx)
 
 havecoords:
 	if (GetPlayerState(cmdctx.playerid) == PLAYER_STATE_DRIVER) {
-		common_SetVehiclePos(GetPlayerVehicleID(cmdctx.playerid), &pos.coords);
+		SetVehiclePos(GetPlayerVehicleID(cmdctx.playerid), &pos.coords);
 	} else {
 		common_tp_player(cmdctx.playerid, pos);
 	}
@@ -120,7 +120,7 @@ int cmd__gotorel(struct COMMANDCONTEXT cmdctx)
 	pos.coords.z += (float) z;
 
 	if (GetPlayerState(cmdctx.playerid) == PLAYER_STATE_DRIVER) {
-		common_SetVehiclePos(GetPlayerVehicleID(cmdctx.playerid), &pos.coords);
+		SetVehiclePos(GetPlayerVehicleID(cmdctx.playerid), &pos.coords);
 	} else {
 		common_tp_player(cmdctx.playerid, pos);
 	}
@@ -175,7 +175,7 @@ int cmd__respawn(struct COMMANDCONTEXT cmdctx)
 
 	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 	if (vehicleid) {
-		NC_SetVehicleToRespawn(vehicleid);
+		RespawnVehicle(vehicleid);
 	}
 	return CMD_OK;
 }
@@ -212,7 +212,7 @@ int cmd__rr(struct COMMANDCONTEXT cmdctx)
 			}
 		}
 		if (GetVehiclePos(vehicleid, &oppos) && common_xy_dist_sq(ppos, oppos) < RR_SQ) {
-			NC_SetVehicleToRespawn(vehicleid);
+			RespawnVehicle(vehicleid);
 		}
 skip_occupied:
 		;
@@ -349,7 +349,7 @@ int cmd__tomsp(struct COMMANDCONTEXT cmdctx)
 
 	if (closest_pos) {
 		if (vehicleid) {
-			common_SetVehiclePos(vehicleid, closest_pos);
+			SetVehiclePos(vehicleid, closest_pos);
 		} else {
 			natives_SetPlayerPos(cmdctx.playerid, *closest_pos);
 		}
@@ -1071,7 +1071,7 @@ int cmd_respawn(struct COMMANDCONTEXT cmdctx)
 					goto skip_respawn;
 				}
 			}
-			NC_SetVehicleToRespawn(vehicleid);
+			RespawnVehicle(vehicleid);
 skip_respawn:
 			;
 		}

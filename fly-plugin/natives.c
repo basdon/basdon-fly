@@ -1,13 +1,6 @@
 /* Natives ending in _ means that they have
 custom code and shouldn't be used directly.*/
 
-static AMX_NATIVE n_DestroyVehicle_;
-static AMX_NATIVE n_GetConsoleVarAsInt;
-static AMX_NATIVE n_Kick_;
-static AMX_NATIVE n_SetPlayerName_;
-static AMX_NATIVE n_SetVehiclePos;
-static AMX_NATIVE n_SetVehicleToRespawn;
-static AMX_NATIVE n_TogglePlayerControllable;
 static AMX_NATIVE n_bcrypt_check;
 static AMX_NATIVE n_bcrypt_get_hash;
 static AMX_NATIVE n_bcrypt_hash;
@@ -30,8 +23,6 @@ static AMX_NATIVE n_ssocket_create;
 static AMX_NATIVE n_ssocket_destroy;
 static AMX_NATIVE n_ssocket_listen;
 static AMX_NATIVE n_ssocket_send;
-static AMX_NATIVE n_random;
-static AMX_NATIVE n_tickcount;
 
 #define n_cache_get_field_s n_cache_get_row
 #define n_cache_get_field_i n_cache_get_row_int
@@ -71,21 +62,6 @@ static cell tmpfloat;
 
 #define NC(NATIVE) NATIVE(amx,nc_params)
 #define NCF(NATIVE) (tmpfloat=NATIVE(amx,nc_params),amx_ctof(tmpfloat))
-
-#define NC_DestroyVehicle __USE__veh_DestroyVehicle__
-
-#define NC_GetConsoleVarAsInt(BUF) (NC_PARS_(1)nc_params[1]=BUF,\
-	n_GetConsoleVarAsInt(amx,nc_params))
-
-#define NC_Kick(PLAYERID) __USE__natives_Kick__
-
-#define NC_SetVehicleToRespawn(VEHICLEID) \
-	(NC_PARS_(1)nc_params[1]=VEHICLEID,\
-	n_SetVehicleToRespawn(amx,nc_params))
-
-#define NC_TogglePlayerControllable(PLAYERID,FLAG) \
-	(NC_PARS_(2)nc_params[1]=PLAYERID,nc_params[2]=FLAG,\
-	n_TogglePlayerControllable(amx,nc_params))
 
 /*bcrypt_get_hash fails when argument size does not match*/
 #define NC_bcrypt_get_hash(BUF) (nc_params[0]=4,nc_params[1]=BUF,\
@@ -133,9 +109,6 @@ static cell tmpfloat;
 #define NC_mysql_tquery_nocb(BUF) _NC_mysql_tquery_nocb(BUF)
 #endif
 
-#define NC_random(MAX) (NC_PARS_(1)nc_params[1]=MAX,\
-	n_random(amx,nc_params))
-
 #define NC_ssocket_connect(SOCKET,HOST,PORT) (NC_PARS_(3)\
 	nc_params[1]=SOCKET,nc_params[2]=HOST,nc_params[3]=PORT,\
 	n_ssocket_connect(amx,nc_params))
@@ -154,9 +127,6 @@ static cell tmpfloat;
 	nc_params[1]=SOCKET,nc_params[2]=DATA,nc_params[3]=LEN,\
 	n_ssocket_send(amx,nc_params))
 
-#define NC_tickcount() (NC_PARS_(0)\
-	n_tickcount(amx,nc_params))
-
 /**
 Loads natives.
 */
@@ -170,13 +140,6 @@ int natives_find()
 		int *var;
 	};
 	struct NATIVE natives[] = {
-		N_(DestroyVehicle),
-		N(GetConsoleVarAsInt),
-		N_(Kick),
-		N_(SetPlayerName),
-		N(SetVehiclePos),
-		N(SetVehicleToRespawn),
-		N(TogglePlayerControllable),
 		N(bcrypt_check),
 		N(bcrypt_get_hash),
 		N(bcrypt_hash),
@@ -194,13 +157,11 @@ int natives_find()
 		N(mysql_log),
 		N(mysql_query),
 		N(mysql_tquery),
-		N(random),
 		N(ssocket_connect),
 		N(ssocket_create),
 		N(ssocket_destroy),
 		N(ssocket_listen),
 		N(ssocket_send),
-		N(tickcount),
 	};
 	struct NATIVE *n = natives + sizeof(natives)/sizeof(struct NATIVE);
 	AMX_HEADER *header;

@@ -32,7 +32,7 @@ static
 char *protips_get_random_protip()
 {
 	TRACE;
-	return (char*) protips[NC_random(numprotips)];
+	return (char*) protips[amxrandom(numprotips)];
 }
 
 static

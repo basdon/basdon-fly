@@ -101,7 +101,7 @@ void game_random_carcol(int model, int *col1, int *col2)
 		amount = carcoldata[model].amount;
 		position = carcoldata[model].position;
 		if (amount > 1) {
-			position += NC_random(amount) * 2;
+			position += amxrandom(amount) * 2;
 		}
 		if (col1 != NULL) {
 			*col1 = carcols[position];

@@ -506,12 +506,7 @@ cell AMX_NATIVE_CALL B_OnVehicleSpawn(AMX *amx, cell *params)
 		return 1;
 	}
 
-	NC_PARS(4);
-	nc_params[1] = vehicleid;
-	nc_paramf[2] = veh->pos.coords.x;
-	nc_paramf[3] = veh->pos.coords.y;
-	nc_paramf[4] = veh->pos.coords.z;
-	NC(n_SetVehiclePos);
+	SetVehiclePos(vehicleid, &veh->pos.coords);
 
 	missions_on_vehicle_destroyed_or_respawned(vehicleid);
 	nav_disable_for_respawned_or_destroyed_vehicle(vehicleid);

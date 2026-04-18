@@ -742,25 +742,6 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *a)
 			playeronlineflag[tmp] = 0;
 		}
 		playercount = 0;
-
-		B144("sleep");
-		tmp = NC_GetConsoleVarAsInt(buf144a);
-		if (tmp != SLEEP) {
-			logprintf(
-				"ERR: sleep value %d should be %d",
-				tmp,
-				SLEEP);
-			return 0;
-		}
-
-		B144("maxplayers");
-		tmp = NC_GetConsoleVarAsInt(buf144a);
-		if (tmp > MAX_PLAYERS) {
-			logprintf("ERR: slots (%d > %d)", tmp, MAX_PLAYERS);
-			return 0;
-		} else if (tmp < MAX_PLAYERS) {
-			logprintf("INFO: slots (%d < %d)", tmp, MAX_PLAYERS);
-		}
 	}
 	return amx_Register(a, PluginNatives, -1);
 }

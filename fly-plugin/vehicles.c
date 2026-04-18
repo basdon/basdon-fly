@@ -537,9 +537,8 @@ void veh_init()
 			if (vehicleid != INVALID_VEHICLE_ID) {
 				veh->spawnedvehicleid = vehicleid;
 				gamevehicles[vehicleid].dbvehicle = veh;
-				NC_PARS(1);
-				nc_params[1] = vehicleid;
-				NC(n_SetVehicleToRespawn);
+				/*TODO: why respawn right after creating? I guess to do things that respawn would do, like resetting fuel etc. But maybe that just means I need a more specialized CreateVehicle*/
+				RespawnVehicle(vehicleid);
 			}
 		}
 		veh++;
@@ -631,9 +630,9 @@ void veh_spray_from_cmd(struct COMMANDCONTEXT cmdctx, int bypass_permissions)
 					col1 &= 0xFF;
 				}
 			} else {
-				col1 = NC_random(256);
+				col1 = amxrandom(256);
 rand2nd:
-				col2 = NC_random(256);
+				col2 = amxrandom(256);
 			}
 			if (random1 != NULL || random2 != NULL) {
 				game_random_carcol(GetVehicleModel(vehicleid), random1, random2);
@@ -787,10 +786,7 @@ int veh_create(struct dbvehicle *veh)
 	if (vehicleid != INVALID_VEHICLE_ID) {
 		gamevehicles[vehicleid].dbvehicle = veh;
 		veh->spawnedvehicleid = vehicleid;
-
-		NC_PARS(1);
-		nc_params[1] = vehicleid;
-		NC(n_SetVehicleToRespawn);
+		RespawnVehicle(vehicleid);
 	}
 	return vehicleid;
 }
@@ -847,7 +843,7 @@ void veh_on_player_disconnect(int playerid)
 		/*driver actually still is playerid at this point*/
 		if (driver == playerid || driver == INVALID_PLAYER_ID) {
 			/*If not respawning here, create ownership label again.*/
-			NC_SetVehicleToRespawn(vehicleid);
+			RespawnVehicle(vehicleid);
 		}
 	}
 
@@ -1176,10 +1172,8 @@ int veh_DestroyVehicle(int vehicleid)
 		veh->spawnedvehicleid = 0;
 		gamevehicles[vehicleid].dbvehicle = NULL;
 	}
-	NC_PARS(1);
-	nc_params[1] = vehicleid;
-	return NC(n_DestroyVehicle_);
-	/*DestroyVehicle triggers OnVehicleStreamOut,
+	return DestroyVehicleRaw(vehicleid);
+	/*DestroyVehicleRaw triggers OnVehicleStreamOut,
 	so no need to destroy labels here*/
 }
 

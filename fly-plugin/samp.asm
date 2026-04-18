@@ -229,7 +229,7 @@ VehiclePoolAddVehicleAtIndex:
 ;prot  * This also means the client will crash when creating the train as vehicleid higher than 1996, since the carriage(s)
 ;prot  * will exceed the limit of 2000. Did not test on the server, but it won't do anything good either.
 ;prot  *
-;prot  * TODO: create DestroyVehicle that will also delete the carriages (samp doesn't even do this)
+;prot  * TODO: delete the carriages in DestroyVehicle (samp doesn't even do this)
 ;prot  */
 ;prot int _CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_delay_ms);
 ;test __builtin_offsetof(struct SampNetGame, vehiclePool) == 0xC

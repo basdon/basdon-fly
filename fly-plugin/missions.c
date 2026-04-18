@@ -149,11 +149,11 @@ int missions_get_weatherbonus_for_weather(int weather)
 	switch (weather) {
 	case WEATHER_SF_RAINY:
 	case WEATHER_CS_RAINY:
-		return MISSION_WEATHERBONUS_RAINY + NC_random(MISSION_WEATHERBONUS_DEVIATION);
+		return MISSION_WEATHERBONUS_RAINY + amxrandom(MISSION_WEATHERBONUS_DEVIATION);
 	case WEATHER_SF_FOGGY:
-		return MISSION_WEATHERBONUS_FOGGY + NC_random(MISSION_WEATHERBONUS_DEVIATION);
+		return MISSION_WEATHERBONUS_FOGGY + amxrandom(MISSION_WEATHERBONUS_DEVIATION);
 	case WEATHER_DE_SANDSTORMS:
-		return MISSION_WEATHERBONUS_SANDSTORM + NC_random(MISSION_WEATHERBONUS_DEVIATION);
+		return MISSION_WEATHERBONUS_SANDSTORM + amxrandom(MISSION_WEATHERBONUS_DEVIATION);
 	default:
 		return 0;
 	}
@@ -236,7 +236,7 @@ struct MISSIONPOINT *missions_get_random_msp(struct AIRPORT *airport, unsigned i
 	/*Select one.*/
 	mspidx = 0;
 	if (num_applicable_msp > 1) {
-		mspidx = NC_random(num_applicable_msp);
+		mspidx = amxrandom(num_applicable_msp);
 	}
 	return applicable_missionpoints[mspidx];
 }
@@ -1714,7 +1714,7 @@ void missions_process_cancel_request_by_player(int playerid)
 
 	if ((mission = activemission[playerid]) != NULL) {
 		if (mission_stage[playerid] == MISSION_STAGE_LOAD || mission_stage[playerid] == MISSION_STAGE_UNLOAD) {
-			NC_TogglePlayerControllable(playerid, 1);
+			TogglePlayerControllable(playerid, 1);
 			HideGameTextForPlayer(playerid);
 		} else {
 			DisablePlayerRaceCheckpoint(playerid);

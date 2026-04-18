@@ -160,15 +160,6 @@ float common_xy_dist_sq(struct vec3 a, struct vec3 b)
 	return dx * dx + dy * dy;
 }
 
-int common_SetVehiclePos(int vehicleid, struct vec3 *pos)
-{
-	TRACE;
-	NC_PARS(4);
-	nc_params[1] = vehicleid;
-	memcpy(nc_params + 2, pos, sizeof(struct vec3));
-	return NC(n_SetVehiclePos);
-}
-
 static
 void common_common_varargs_cb_call(cell p1, cell p2, cb_t callback, void *data)
 {

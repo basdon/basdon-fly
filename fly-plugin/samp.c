@@ -9,6 +9,22 @@ static void* samp_pConsole;
 static unsigned char vehicle_gear_state[MAX_VEHICLES];
 static int vehicle_gear_change_time[MAX_VEHICLES];
 
+/**calls the random() function that comes with the pawn abstract machine*/
+static
+int amxrandom(int maxExclusive)
+{
+	int args[2];
+
+	/*args[0] is likely amount of arguments, but it's not being checked so not assigning it*/
+	args[1] = maxExclusive;
+
+#ifndef NO_CAST_IMM_FUNCPTR
+	return ((int (*)(void*,void*))0x809B3B0)(NULL, args);
+#else
+	return 1;
+#endif
+}
+
 /**
  * @param max_chars sizeof(dest)
  * @return amount of _bits_ written.
@@ -105,7 +121,6 @@ void SendRconCommand(char *command)
 }
 
 static
-__attribute__((unused))
 int samp_GetTime()
 {
 	TRACE;
@@ -141,6 +156,21 @@ void SendRPCToPlayer(int playerid, int rpc, void *rpcdata, int size_bytes, int u
 	bs.ptrData = rpcdata;
 	bs.numberOfBitsUsed = size_bytes * 8;
 	SAMP_SendRPCToPlayer(rpc, &bs, playerid, unk);
+}
+
+/**use natives_Kick*/
+static
+void KickRaw(int playerid)
+{
+	TRACE;
+	struct PlayerID playerID;
+
+#ifndef NO_CAST_IMM_FUNCPTR
+	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playerid);
+	rakServer->vtable->Kick(rakServer, playerID);
+	/*SampPlayerPool::RemovePlayer*/
+	((void (*)(struct SampPlayerPool*,int,int)) 0x80D0A90)(playerpool,playerid,/*reason_kick*/2);
+#endif
 }
 
 static
@@ -928,6 +958,72 @@ char GetPlayerState(int playerid)
 	return player[playerid]->currentState;
 }
 
+/**
+ * Use veh_DestroyVehicle
+ * Calls SampVehiclePool::Remove
+ * This will trigger OnVehicleStreamOut
+ */
+static
+int DestroyVehicleRaw(int vehicleid)
+{
+	TRACE;
+#ifndef NO_CAST_IMM_FUNCPTR
+	return ((int (*)(struct SampVehiclePool*,int))0x814CC10)(vehiclepool, vehicleid);
+#else
+	return 1;
+#endif
+}
+
+/**
+ * SetVehicleToRespawn in PAWN API
+ * does not reset mod slots/color like SAMP does
+ */
+static
+void RespawnVehicle(int vehicleid)
+{
+	TRACE;
+	struct SampVehicle *vehicle;
+
+	vehicle = vehiclepool->vehicles[vehicleid];
+	if (!vehicle) {
+		return;
+	}
+
+	memset(&vehicle->matrix, 0, sizeof(vehicle->matrix));
+	memset(&vehicle->vel, 0, sizeof(vehicle->vel));
+	vehicle->field_58[0] = 0;
+	vehicle->field_58[1] = 0;
+	vehicle->field_58[2] = 0;
+	vehicle->matrix.pos = vehicle->spawnPos.coords;
+	vehicle->pos = vehicle->spawnPos.coords;
+
+	/*SAMP empties modslots, but we don't actually want to do that*/
+	/*
+	memset(vehicle->modslots, 0, sizeof(vehicle->modslots));
+	vehicle->paintjob = 0;
+	vehicle->moddedColor1 = -1;
+	vehicle->moddedColor2 = -1;
+	*/
+
+	memset(&vehicle->damageStatus, 0, sizeof(vehicle->damageStatus));
+	vehicle->health = 1000.0f;
+	vehicle->isDead = 0;
+	vehicle->hasSentVehicleDeathEvent = 0;
+	vehicle->field_100 = 0;
+	vehicle->lastSpawnTickCount = samp_GetTime();
+	vehicle->lastRespawnTickCount = samp_GetTime();
+	memset(&vehicle->params, -1, sizeof(vehicle->params));
+
+#ifndef NO_CAST_IMM_FUNCPTR
+	/*SampPlayerPool::DeleteVehicle, deletes the vehicle for all players that has the vehicle streamed in*/
+	/*this also streams out the vehicle. Vehicle will be streamed back in after respawning during normal streaming operations/timers*/
+	((void (*)(struct SampPlayerPool*,int))0x80D1480)(playerpool, vehicleid);
+
+	/*GameMode::Event_OnVehicleSpawn*/
+	((void (*)(void*,int))0x80A5350)(samp_pNetGame->pGameMode, vehicleid);
+#endif
+}
+
 static
 short GetVehicleModel(int vehicleid)
 {
@@ -1343,6 +1439,41 @@ void GetVehiclePosUnsafe(int vehicleid, struct vec3 *pos)
 }
 
 static
+int SetVehiclePos(int vehicleid, struct vec3 *pos)
+{
+	TRACE;
+	struct RPCDATA_SetVehiclePos rpcdata;
+	struct SampVehicle *vehicle;
+	struct BitStream bs;
+	int i;
+
+	vehicle = vehiclepool->vehicles[vehicleid];
+	if (!vehicle) {
+		return 0;
+	}
+	vehicle->pos = *pos;
+	vehicle->matrix.pos = *pos;
+
+	rpcdata.vehicleid = vehicleid;
+	rpcdata.pos = *pos;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
+
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (player[i] && player[i]->vehicleStreamedIn[vehicleid]) {
+			SAMP_SendRPCToPlayer(RPC_SetVehiclePos, &bs, i, 2);
+			if (vehicle->driverplayerid == i) {
+#ifndef NO_CAST_IMM_FUNCPTR
+				/*SampPlayer__SetExpectedLocationAfterTeleport*/
+				((void (*)(struct SampPlayer*,struct vec3))0x80CC020)(player[i], *pos);
+#endif
+			}
+		}
+	}
+	return 1;
+}
+
+static
 void SetVehicleZAngle(int vehicleid, float angle)
 {
 	TRACE;
@@ -1467,9 +1598,7 @@ int kick_timer_cb(void *data)
 
 	playerid = PLAYER_CC_GETID(data);
 	if (PLAYER_CC_CHECK(data, playerid)) {
-		NC_PARS(1);
-		nc_params[1] = playerid;
-		NC(n_Kick_);
+		KickRaw(playerid);
 	}
 	return 0;
 }
@@ -1632,27 +1761,56 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 To store player name and normalized name in plugin.
 */
 static
-int natives_SetPlayerName(int playerid, char *name)
+int SetPlayerName(int playerid, char *name)
 #ifdef SAMP_NATIVES_IMPL
 {
 	TRACE;
-	int res;
-	char msg144[144];
+	struct RPCDATA_SetPlayerName rpcdata;
+	struct BitStream bs;
+	int len, i;
 
-	atoc(buf32, name, 32);
-	NC_PARS(2);
-	nc_params[1] = playerid;
-	nc_params[2] = buf32a;
-	res = NC(n_SetPlayerName_);
-	if (res) {
-		if (pdata[playerid]->name != name) {
-			strcpy(pdata[playerid]->name, name);
-		}
-		pdata_on_name_updated(playerid);
-		sprintf(msg144, "Your name has been changed to '%s'", pdata[playerid]->name);
-		SendClientMessage(playerid, COL_SAMP_GREEN, msg144);
+	if (!player[playerid]) {
+		return 0;
 	}
-	return res;
+
+	/*PlayerPool::IsNickInUse*/
+	if (((int (*)(struct SampPlayerPool*,char*))0x80D1410)(playerpool, name)) {
+		return 1;
+	}
+
+	len = strlen(name);
+	if (len > MAX_PLAYER_NAME /*|| ContainsInvalidNickChars(name)*/) {
+		return -1;
+	}
+
+	/*If name contains invalid characters, SAMP does still send the SetPlayerName RPC to everyone,*/
+	/*but with the last field (nameIsNotAlreadyInUse) having value 0.*/
+	/*No clue why, maybe that had meaning in older versions.*/
+
+	/*
+	if (Console::GetVarInt("chatlogging")) {
+		logprintf("[nick] %s nick changed to %s", oldnick, newnick);
+	}
+	*/
+
+	rpcdata.playerid = playerid;
+	rpcdata.nameLength = len;
+	memcpy(rpcdata.name, name, len);
+	rpcdata.name[len] = 1; /*this is field nameIsNotAlreadyInUse*/
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = 16 + 8 + len * 8 + 8;
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (player[i]) {
+			SAMP_SendRPCToPlayer(RPC_SetPlayerName, &bs, i, 2);
+		}
+	}
+
+	memcpy(playerpool->names[playerid], name, len + 1);
+	memcpy(pdata[playerid]->name, name, len + 1); /*TODO: stop doing this because we can access playerpool.names now*/
+	pdata_on_name_updated(playerid);
+	sprintf(cbuf144, "Your name has been changed to '%s'", name);
+	SendClientMessage(playerid, COL_SAMP_GREEN, cbuf144);
+	return 1;
 }
 #endif
 ;
@@ -1712,9 +1870,7 @@ void samp_OnPlayerUpdate(int playerid)
 	TRACE;
 	if (kick_update_delay[playerid] > 0) {
 		if (--kick_update_delay[playerid] == 0) {
-			NC_PARS(1);
-			nc_params[1] = playerid;
-			NC(n_Kick_);
+			KickRaw(playerid);
 		}
 		player[playerid]->updateSyncType = 0; /*Reject update, equivalent to 'return 0' in OnPlayerUpdate.*/
 		return;

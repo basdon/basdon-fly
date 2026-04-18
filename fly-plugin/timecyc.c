@@ -414,7 +414,7 @@ int timecyc_next_weather(void *unused)
 	int newweather;
 	char msg144[144];
 
-	newweather = weather_mapping[NC_random(NEXT_WEATHER_POSSIBILITIES)];
+	newweather = weather_mapping[amxrandom(NEXT_WEATHER_POSSIBILITIES)];
 	if (weather.current != WEATHER_INITIAL) {
 		csprintf(buf144,
 			"INSERT INTO wth(w,l,t) "
@@ -431,7 +431,7 @@ int timecyc_next_weather(void *unused)
 		echo_send_generic_message(ECHO_PACK12_METAR, msg144);
 	}
 
-	return WEATHER_TIMER_INTERVAL + NC_random(WEATHER_TIMER_DEVIATION);
+	return WEATHER_TIMER_INTERVAL + amxrandom(WEATHER_TIMER_DEVIATION);
 }
 
 /**
