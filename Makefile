@@ -13,7 +13,7 @@ flighttracker:
 	(cd fly-flighttracker && make)
 
 plugin:
-	@(cd fly-plugin && . build)
+	@(cd fly-plugin && make)
 
 web:
 	@(cd fly-web && make)
