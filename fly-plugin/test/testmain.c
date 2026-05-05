@@ -2,68 +2,21 @@
 #include <stdio.h>
 #include <string.h>
 
-#define NO_CAST_IMM_FUNCPTR
-
 #define TRACE
-#define cell int
-typedef void (*cb_t)(void* data);
+
 #define STATIC_ASSERT(E) typedef char __static_assert_[(E)?1:-1]
 #define EXPECT_SIZE(S,SIZE) STATIC_ASSERT(sizeof(S)==(SIZE))
-/*May also use offsetof(), but that requires stddef.h*/
-#define MEMBER_OFFSET(S,M) (offsetof(S,M))
-/*Not defining this one, because a few fail because the used tcc is 64 bit, meaning ptrs will take 4 extra bytes...*/
-#define STATIC_ASSERT_MEMBER_OFFSET(S,M,O)
 EXPECT_SIZE(char, 1);
 EXPECT_SIZE(short, 2);
 EXPECT_SIZE(int, 4);
 EXPECT_SIZE(float, 4);
-struct vec3 {
-	float x, y, z;
-};
-EXPECT_SIZE(struct vec3, 3 * sizeof(int));
-struct vec4 {
-	struct vec3 coords;
-	float r;
-};
-EXPECT_SIZE(struct vec4, 4 * sizeof(int));
-struct quat {
-	/*The w component comes first in SAMP, do not change this order.*/
-	float qw, qx, qy, qz;
-};
-EXPECT_SIZE(struct quat, 4 * sizeof(int));
-#define NC_PARS(X)
-#include "../game_sa_data.c"
-#include "../a_samp.h"
-#include "../raknet.h"
-#include "../samp.h"
-#define csprintf(DST,FMT,...) atoci(DST,sprintf((char*)DST,FMT,__VA_ARGS__))
-struct SampPlayer *player[MAX_PLAYERS];
-static unsigned short _cc[MAX_PLAYERS];
-static int userid[MAX_PLAYERS];
-short players[MAX_PLAYERS];
-int playercount;
-int vehicleflags[611];
-#define NEEDS_GHOST_DOOR_FIX 8
-unsigned char playeronlineflag[MAX_PLAYERS];
-char is_player_using_client_version_DL[MAX_PLAYERS];
-struct {
-	struct dbvehicle *dbvehicle;
-} gamevehicles[MAX_VEHICLES];
 
-char *_test_name;
-
-void test();
-
-int main(int argc, char **argv)
-{
-	test();
-	return 0;
-}
+char *_test_suite, *_test_name;
 
 void _test_exit_failure()
 {
 	if (_test_name[0]) {
-		printf("failed test: %s\n", _test_name);
+		printf("failed test: %s: %s\n", _test_suite, _test_name);
 	}
 	exit(1);
 }
@@ -117,4 +70,12 @@ void _assert_strcmpex_(char *file, int line, char *a, char *b)
 		printf("failed: _assert_strcmpex at %s:%d\n>>> expected\n%s\n=== actual\n%s\n<<<\n", file, line, a, zero_terminated_b);
 		_test_exit_failure();
 	}
+}
+
+#include "test_splitclientmessage.c"
+
+int main(int argc, char **argv)
+{
+	test_splitclientmessage();
+	return 0;
 }

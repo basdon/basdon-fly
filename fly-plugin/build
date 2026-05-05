@@ -21,5 +21,5 @@ gcc -ggdb -Wall -Wno-strict-aliasing -fno-pic -m32 -std=c89 $EXTRA_OPTS $1 $2 $3
 #ld -m elf_i386 -shared --no-undefined -o out/basdonfly.so out/samphost.o out/basdonfly.o &&
 gcc -ggdb -Wall -m32 -shared -lm -Xlinker --no-undefined -o out/$OUTPUT_NAME out/samp.o out/basdonfly.o &&
 echo "running tests" &&
-tcc -Wall -run test/test_samp.c &&
+tcc -Wall -run test/testmain.c &&
 echo "ok") || (echo "" && echo "" && echo "FAILURE")

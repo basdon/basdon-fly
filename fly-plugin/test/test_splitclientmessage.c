@@ -1,11 +1,10 @@
-#include "_test_api.c"
-
-#include "_test_mock_samp_h.c"
+struct RPCDATA_SendClientMessage {
+	int color;
+	int message_length;
+	char message[144];
+};
 
 #include "../util_splitclientmessage.c"
-
-#define SAMP_C_SKIP_MIXED_NATIVES
-#include "../samp.c"
 
 static
 void test_splitclientmessage()
@@ -387,9 +386,4 @@ void test_splitclientmessage()
 			rpcdata[1].message
 		);
 	}
-}
-
-void test()
-{
-	test_splitclientmessage();
 }

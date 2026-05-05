@@ -1511,8 +1511,6 @@ void CrashPlayer(int playerid)
 }
 #endif
 
-#ifndef SAMP_C_SKIP_MIXED_NATIVES /*This is just used to make testing easier, but should be maybe removed at some point...*/
-
 /*-----------------------------------------------------------------------------*/
 
 /*TODO: convert these natives_ funcs to non-amx things*/
@@ -2139,6 +2137,4 @@ void samp_init()
 
 	AddServerRule("hotel", "Trivago"); /*be a little silly*/
 }
-#endif
-
-#endif /*SAMP_C_SKIP_MIXED_NATIVES*/
+#endif /*SAMP_NATIVES_IMPL*/
