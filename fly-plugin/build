@@ -15,11 +15,11 @@ fi
 
 echo building plugin $OUTPUT_NAME with opts: $EXTRA_OPTS $1 $2 $3 $4 $5 $6 $7
 
-(tcc -Wall -run _preprocess.c &&
+(gcc -Wall -x c --std=c89 _preprocess.c -o out/_preprocess && chmod +x out/_preprocess && out/_preprocess &&
 nasm -f elf32 samp.asm -o out/samp.o &&
 gcc -ggdb -Wall -Wno-strict-aliasing -fno-pic -m32 -std=c89 $EXTRA_OPTS $1 $2 $3 $4 $5 $6 $7 -x c -c basdonfly.c -o out/basdonfly.o &&
 #ld -m elf_i386 -shared --no-undefined -o out/basdonfly.so out/samphost.o out/basdonfly.o &&
 gcc -ggdb -Wall -m32 -shared -lm -Xlinker --no-undefined -o out/$OUTPUT_NAME out/samp.o out/basdonfly.o &&
 echo "running tests" &&
-tcc -Wall -run test/testmain.c &&
+gcc -Wall -x c --std=c89 test/testmain.c -o out/testmain && chmod +x out/testmain && out/testmain &&
 echo "ok") || (echo "" && echo "" && echo "FAILURE")

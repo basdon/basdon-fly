@@ -1,3 +1,4 @@
+#include <alloca.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -23,6 +24,7 @@ void _test_exit_failure()
 
 #define _assert(X) _assert_(__FILE__,__LINE__,X)
 static
+__attribute__((unused))
 void _assert_(char *file, int line, int condition)
 {
 	if (!condition) {
@@ -43,6 +45,7 @@ void _assert_equals_(char *file, int line, int a, int b)
 
 #define _assert_strcmp(X,Y) _assert_strcmp_(__FILE__,__LINE__,X,Y)
 static
+__attribute__((unused))
 void _assert_strcmp_(char *file, int line, char *a, char *b)
 {
 	if (strcmp(a, b)) {
