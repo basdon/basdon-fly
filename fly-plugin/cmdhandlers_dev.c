@@ -359,30 +359,6 @@ int cmd_dev_sound(struct COMMANDCONTEXT cmdctx)
 	return CMD_SYNTAX_ERR;
 }
 
-#define CMD_TESTPARPL_SYNTAX ""
-#define CMD_TESTPARPL_DESC "Test parameter parsing"
-static
-int cmd_dev_testparpl(struct COMMANDCONTEXT cmdctx)
-{
-	TRACE;
-	int i;
-	char buf[144];
-
-	if (cmd_get_int_param(&cmdctx, &i)) {
-		printf("int %d\n", i);
-	}
-	if (cmd_get_player_param(&cmdctx, &i)) {
-		printf("player %d\n", i);
-	}
-	if (cmd_get_str_param(&cmdctx, buf)) {
-		printf("str -%s-\n", buf);
-	}
-	if (cmd_get_int_param(&cmdctx, &i)) {
-		printf("int %d\n", i);
-	}
-	return CMD_OK;
-}
-
 #define CMD_TIMECYC_SYNTAX ""
 #define CMD_TIMECYC_DESC "Prints current timecyc data"
 static

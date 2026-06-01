@@ -76,9 +76,11 @@ void _assert_strcmpex_(char *file, int line, char *a, char *b)
 }
 
 #include "test_splitclientmessage.c"
+#include "test_cmd_utils.c"
 
 int main(int argc, char **argv)
 {
 	test_splitclientmessage();
+	test_cmd_utils();
 	return 0;
 }

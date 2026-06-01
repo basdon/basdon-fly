@@ -57,7 +57,7 @@ out/$(binaryname).so: out/$(binaryname).o out/samp.o
 	gcc -ggdb -m32 -Wall -shared -lm -Xlinker --no-undefined out/samp.o out/$(binaryname).o -o out/$(binaryname).so
 	echo "link ok ($(binaryname))"
 
-out/testmain: test/testmain.c test/test_splitclientmessage.c util_splitclientmessage.c
+out/testmain: test/testmain.c test/test_splitclientmessage.c util_splitclientmessage.c test/test_cmd_utils.c cmd_utils.c game_sa_data.c playerdata.h a_samp.h
 	gcc -Wall -x c -std=c89 test/testmain.c -o out/testmain
 	chmod +x out/testmain
 	echo recompiled testmain
