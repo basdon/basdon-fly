@@ -9,6 +9,7 @@ SHELL=bash
 # The alternative to using .SILENT is to prefix commands with an @ symbol.
 .SILENT:
 
+# (the first target in the file will be ran when 'make' is ran without an explicit target argument)
 .PHONY: all
 all: so test
 
@@ -37,12 +38,13 @@ ifdef EXTRAFLAGS
 $(info using extraflags: $(EXTRAFLAGS))
 endif
 
+# NOTE: indenting this with tab will break it silently. indenting with space works.
 ifdef BASDONDEV
-binaryname = basdonfly-dev
-cflags = -DDEV $(EXTRAFLAGS)
+  binaryname = basdonfly-dev
+  cflags = -DDEV $(EXTRAFLAGS)
 else
-binaryname = basdonfly-prod
-cflags = -O2 $(EXTRAFLAGS)
+  binaryname = basdonfly-prod
+  cflags = -O2 $(EXTRAFLAGS)
 endif
 
 ofile = out/$(binaryname).o
@@ -60,6 +62,11 @@ $(sofile): $(ofile) out/samp.o
 	gcc -ggdb -m32 -Wall -shared -lm -Xlinker --no-undefined out/samp.o out/$(binaryname).o -o $(sofile)
 	echo "link ok ($(sofile))"
 
+.PHONY: so
+so: out/$(binaryname).so
+
+### below here is test stuffs
+
 out/test_cmd_utils: test/testapi.c test/test_cmd_utils.c cmd_utils.c game_sa_data.c playerdata.h a_samp.h
 	gcc -Wall -x c -std=c89 test/test_cmd_utils.c -o out/test_cmd_utils
 	chmod +x out/test_cmd_utils
@@ -76,6 +83,3 @@ test: out/test_splitclientmessage out/test_cmd_utils
 	out/test_cmd_utils
 	# tests print summaries at the end, so no need for echoing here
 	#echo test ok
-
-.PHONY: so
-so: out/$(binaryname).so
