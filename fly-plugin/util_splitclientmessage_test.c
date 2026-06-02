@@ -1,4 +1,4 @@
-#include "testapi.c"
+#include "_testapi.c"
 
 struct RPCDATA_SendClientMessage {
 	int color;
@@ -6,7 +6,7 @@ struct RPCDATA_SendClientMessage {
 	char message[144];
 };
 
-#include "../util_splitclientmessage.c"
+#include "util_splitclientmessage.c"
 
 int main(int argc, char **argv)
 {

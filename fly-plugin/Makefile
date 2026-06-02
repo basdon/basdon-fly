@@ -67,13 +67,13 @@ so: out/$(binaryname).so
 
 ### below here is test stuffs
 
-out/test_cmd_utils: test/testapi.c test/test_cmd_utils.c cmd_utils.c game_sa_data.c playerdata.h a_samp.h
-	gcc -Wall -x c -std=c89 test/test_cmd_utils.c -o out/test_cmd_utils
+out/test_cmd_utils: _testapi.c cmd_utils_test.c cmd_utils.c game_sa_data.c playerdata.h a_samp.h
+	gcc -Wall -x c -std=c89 cmd_utils_test.c -o out/test_cmd_utils
 	chmod +x out/test_cmd_utils
 	echo recompiled out/test_cmd_utils
 
-out/test_splitclientmessage: test/testapi.c test/test_splitclientmessage.c util_splitclientmessage.c
-	gcc -Wall -x c -std=c89 test/test_splitclientmessage.c -o out/test_splitclientmessage
+out/test_splitclientmessage: _testapi.c util_splitclientmessage_test.c util_splitclientmessage.c
+	gcc -Wall -x c -std=c89 util_splitclientmessage_test.c -o out/test_splitclientmessage
 	chmod +x out/test_splitclientmessage
 	echo recompiled out/test_splitclientmessage
 

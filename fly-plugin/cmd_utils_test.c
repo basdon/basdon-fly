@@ -1,12 +1,12 @@
-#include "testapi.c"
-#include "../a_samp.h"
-#include "../playerdata.h"
+#include "_testapi.c"
+#include "a_samp.h"
+#include "playerdata.h"
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-variable"
-#include "../game_sa_data.c"
+#include "game_sa_data.c"
 #pragma GCC diagnostic warning "-Wunused-function"
 #pragma GCC diagnostic warning "-Wunused-variable"
-#include "../cmd_utils.c"
+#include "cmd_utils.c"
 
 struct playerdata *pdata[MAX_PLAYERS];
 
