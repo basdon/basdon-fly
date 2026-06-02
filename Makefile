@@ -15,6 +15,10 @@ flighttracker:
 plugin:
 	@(cd fly-plugin && make)
 
+rundev:
+	@(cd fly-plugin && BASDONDEV=yeah make)
+	BASDONDEV=yeah bash start || true
+
 web:
 	@(cd fly-web && make)
 
