@@ -12,13 +12,36 @@ EXPECT_SIZE(short, 2);
 EXPECT_SIZE(int, 4);
 EXPECT_SIZE(float, 4);
 
-char *_test_name;
+char *_test_name, *_last_test_name;
+const char *_last_test_func;
+int num_tests, num_functions;
+
+static
+void count_test(const char *func)
+{
+	if (_last_test_func != func) {
+		_last_test_func = func;
+		num_functions++;
+	}
+	if (_last_test_name != _test_name) {
+		_last_test_name = _test_name;
+		num_tests++;
+	}
+}
+
+#define _print_tests_summary() _print_tests_summary_(__FILE__)
+static
+void _print_tests_summary_(char *file)
+{
+	printf("tests ok: %d passed, %d suites (%s)\n", num_tests, num_functions, file);
+}
 
 #define _assert(X) _assert_(__FILE__,__FUNCTION__,__LINE__,X)
 static
 __attribute__((unused))
 void _assert_(char *file, const char *func, int line, int condition)
 {
+	count_test(func);
 	if (!condition) {
 		printf("\nTEST FAILED\n");
 		printf("%s:%d \"%s: %s\"\n", file, line, func, _test_name);
@@ -32,6 +55,7 @@ static
 __attribute__((unused))
 void _assert_equals_(char *file, const char *func, int line, int a, int b)
 {
+	count_test(func);
 	if (a != b) {
 		printf("\nTEST FAILED\n");
 		printf("%s:%d \"%s: %s\"\n", file, line, func, _test_name);
@@ -45,6 +69,7 @@ static
 __attribute__((unused))
 void _assert_strcmp_(char *file, const char *func, int line, char *a, char *b)
 {
+	count_test(func);
 	if (strcmp(a, b)) {
 		printf("\nTEST FAILED\n");
 		printf("%s:%d \"%s: %s\"\n", file, line, func, _test_name);
@@ -66,6 +91,7 @@ void _assert_strcmpex_(char *file, const char *func, int line, char *a, char *b)
 	char *zero_terminated_b;
 	int len, i;
 
+	count_test(func);
 	len = strlen(a);
 	if (strncmp(a, b, len)) {
 		zero_terminated_b = alloca(len + 1);

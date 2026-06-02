@@ -74,7 +74,8 @@ out/test_splitclientmessage: test/testapi.c test/test_splitclientmessage.c util_
 test: out/test_splitclientmessage out/test_cmd_utils
 	out/test_splitclientmessage
 	out/test_cmd_utils
-	echo test ok
+	# tests print summaries at the end, so no need for echoing here
+	#echo test ok
 
 .PHONY: so
 so: out/$(binaryname).so

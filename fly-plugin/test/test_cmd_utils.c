@@ -299,5 +299,7 @@ int main(int argc, char **argv)
 	test_cmd_get_str_param();
 	test_cmd_get_str_param_n();
 	test_cmd_get_vehiclemodel_param();
+
+	_print_tests_summary();
 	return 0;
 }

@@ -387,5 +387,7 @@ int main(int argc, char **argv)
 			rpcdata[1].message
 		);
 	}
+
+	_print_tests_summary();
 	return 0;
 }
