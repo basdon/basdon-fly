@@ -22,7 +22,6 @@ void test_cmd_get_int_param()
 	struct COMMANDCONTEXT cmdctx;
 	int result, value;
 
-	_test_suite = "cmd_get_int_param";
 	_test_name = "empty input";
 	{
 		reset_cmdctx(&cmdctx, "");
@@ -78,7 +77,6 @@ void test_cmd_get_player_param()
 	struct COMMANDCONTEXT cmdctx;
 	int result, value;
 
-	_test_suite = "cmd_get_player_param";
 	_test_name = "empty input";
 	{
 		reset_cmdctx(&cmdctx, "");
@@ -135,7 +133,6 @@ void test_cmd_get_str_param()
 	char value[144];
 	int result;
 
-	_test_suite = "cmd_get_str_param";
 	_test_name = "empty input";
 	{
 		reset_cmdctx(&cmdctx, "");
@@ -176,7 +173,6 @@ void test_cmd_get_str_param_n()
 	int result, out_len, out_actual_len;
 	char value[144];
 
-	_test_suite = "cmd_get_str_param_n";
 	_test_name = "empty input";
 	{
 		reset_cmdctx(&cmdctx, "");
@@ -222,7 +218,6 @@ void test_cmd_get_vehiclemodel_param()
 	struct COMMANDCONTEXT cmdctx;
 	int result, value;
 
-	_test_suite = "cmd_get_vehiclemodel_param";
 	_test_name = "empty input";
 	{
 		reset_cmdctx(&cmdctx, "");

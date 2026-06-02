@@ -12,53 +12,56 @@ EXPECT_SIZE(short, 2);
 EXPECT_SIZE(int, 4);
 EXPECT_SIZE(float, 4);
 
-char *_test_suite, *_test_name;
+char *_test_name;
 
-void _test_exit_failure()
-{
-	if (_test_name[0]) {
-		printf("failed test: %s: %s\n", _test_suite, _test_name);
-	}
-	exit(1);
-}
-
-#define _assert(X) _assert_(__FILE__,__LINE__,X)
+#define _assert(X) _assert_(__FILE__,__FUNCTION__,__LINE__,X)
 static
 __attribute__((unused))
-void _assert_(char *file, int line, int condition)
+void _assert_(char *file, const char *func, int line, int condition)
 {
 	if (!condition) {
-		printf("failed: _assert at %s:%d\n", file, line);
-		_test_exit_failure();
+		printf("\nTEST FAILED\n");
+		printf("%s:%d \"%s: %s\"\n", file, line, func, _test_name);
+		printf("_assert condition failed\n\n");
+		exit(1);
 	}
 }
 
-#define _assert_equals(X,Y) _assert_equals_(__FILE__,__LINE__,X,Y)
+#define _assert_equals(X,Y) _assert_equals_(__FILE__,__FUNCTION__,__LINE__,X,Y)
 static
 __attribute__((unused))
-void _assert_equals_(char *file, int line, int a, int b)
+void _assert_equals_(char *file, const char *func, int line, int a, int b)
 {
 	if (a != b) {
-		printf("failed: _assert_equals at %s:%d, expected %d got %d\n", file, line, a, b);
-		_test_exit_failure();
+		printf("\nTEST FAILED\n");
+		printf("%s:%d \"%s: %s\"\n", file, line, func, _test_name);
+		printf("_assert_equals expected %d got %d\n\n", a, b);
+		exit(1);
 	}
 }
 
-#define _assert_strcmp(X,Y) _assert_strcmp_(__FILE__,__LINE__,X,Y)
+#define _assert_strcmp(X,Y) _assert_strcmp_(__FILE__,__FUNCTION__,__LINE__,X,Y)
 static
 __attribute__((unused))
-void _assert_strcmp_(char *file, int line, char *a, char *b)
+void _assert_strcmp_(char *file, const char *func, int line, char *a, char *b)
 {
 	if (strcmp(a, b)) {
-		printf("failed: _assert_strcmp at %s:%d\n>>>\n%s\n===\n%s\n<<<\n", file, line, a, b);
-		_test_exit_failure();
+		printf("\nTEST FAILED\n");
+		printf("%s:%d \"%s: %s\"\n", file, line, func, _test_name);
+		printf("_assert_strcmp\n");
+		printf(">>> expected\n");
+		printf("%s\n", a);
+		printf("=== actual\n");
+		printf("%s\n", b);
+		printf("<<<\n\n");
+		exit(1);
 	}
 }
 
-#define _assert_strcmpex(X,Y) _assert_strcmpex_(__FILE__,__LINE__,X,Y)
+#define _assert_strcmpex(X,Y) _assert_strcmpex_(__FILE__,__FUNCTION__,__LINE__,X,Y)
 static
 __attribute__((unused))
-void _assert_strcmpex_(char *file, int line, char *a, char *b)
+void _assert_strcmpex_(char *file, const char *func, int line, char *a, char *b)
 {
 	char *zero_terminated_b;
 	int len, i;
@@ -72,7 +75,14 @@ void _assert_strcmpex_(char *file, int line, char *a, char *b)
 				break;
 			}
 		}
-		printf("failed: _assert_strcmpex at %s:%d\n>>> expected\n%s\n=== actual\n%s\n<<<\n", file, line, a, zero_terminated_b);
-		_test_exit_failure();
+		printf("\nTEST FAILED\n");
+		printf("%s:%d \"%s: %s\"\n", file, line, func, _test_name);
+		printf("_assert_strcmpex\n");
+		printf(">>> expected\n");
+		printf("%s\n", a);
+		printf("=== actual\n");
+		printf("%s\n", zero_terminated_b);
+		printf("<<<\n\n");
+		exit(1);
 	}
 }

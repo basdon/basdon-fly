@@ -13,7 +13,6 @@ int main(int argc, char **argv)
 	struct RPCDATA_SendClientMessage rpcdata[4];
 	int res;
 
-	_test_suite = "splitclientmessage";
 	_test_name = "shorter than 144";
 	{
 		res = util_splitclientmessage(
