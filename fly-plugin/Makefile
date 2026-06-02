@@ -33,7 +33,7 @@ out/samp.o: samp.asm
 	nasm -f elf32 samp.asm -o out/samp.o
 	echo recompiled samp.asm
 
-# EXTRAFLAGS is intended for optional extra flags passed while invoking make from commandline
+# EXTRAFLAGS can be used to pass extra flags to gcc during compilation, when invoking make from commandline
 ifdef EXTRAFLAGS
 $(info using extraflags: $(EXTRAFLAGS))
 endif
