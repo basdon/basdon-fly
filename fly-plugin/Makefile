@@ -45,17 +45,20 @@ binaryname = basdonfly-prod
 cflags = -O2 $(EXTRAFLAGS)
 endif
 
+ofile = out/$(binaryname).o
+sofile = out/$(binaryname).so
+
 # This could not be phony, if we'd want to, but that requires listing (and constantly updating)
 # all their dependencies, which is work I'd rather not do. Nearly all make invocations will be
 # because a source file is updated anyways, so don't bother.
-.PHONY: out/$(binaryname).o
-out/$(binaryname).o: __settings.h __sampasm.h
-	gcc -ggdb -m32 -Wall -Wno-strict-aliasing -fno-pic -c -x c -std=c89 $(cflags) basdonfly.c -o out/$(binaryname).o
-	echo "compile ok ($(binaryname))"
+.PHONY: $(ofile)
+$(ofile): __settings.h __sampasm.h
+	gcc -ggdb -m32 -Wall -Wno-strict-aliasing -fno-pic -c -x c -std=c89 $(cflags) basdonfly.c -o $(ofile)
+	echo "compile ok ($(ofile))"
 
-out/$(binaryname).so: out/$(binaryname).o out/samp.o
-	gcc -ggdb -m32 -Wall -shared -lm -Xlinker --no-undefined out/samp.o out/$(binaryname).o -o out/$(binaryname).so
-	echo "link ok ($(binaryname))"
+$(sofile): $(ofile) out/samp.o
+	gcc -ggdb -m32 -Wall -shared -lm -Xlinker --no-undefined out/samp.o out/$(binaryname).o -o $(sofile)
+	echo "link ok ($(sofile))"
 
 out/testmain: test/testmain.c test/test_splitclientmessage.c util_splitclientmessage.c test/test_cmd_utils.c cmd_utils.c game_sa_data.c playerdata.h a_samp.h
 	gcc -Wall -x c -std=c89 test/testmain.c -o out/testmain

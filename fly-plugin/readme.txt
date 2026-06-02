@@ -14,7 +14,7 @@ If a BASDONDEV environment variable is non-empty, a production build will be mad
 with extra optimization without development code.
 Contents of an optional EXTRAFLAGS environment variable is passed to gcc during
 compilation phase.
-Output in out/ (basdonfly-dev.so or basdonfly-prod.so)
+Output will be out/basdonfly-dev.so or out/basdonfly-prod.so
 
 Running 'make' will compile the .so and run tests.
 These two actions can also be done on their own:
