@@ -35,6 +35,7 @@ void _assert_(char *file, int line, int condition)
 
 #define _assert_equals(X,Y) _assert_equals_(__FILE__,__LINE__,X,Y)
 static
+__attribute__((unused))
 void _assert_equals_(char *file, int line, int a, int b)
 {
 	if (a != b) {
@@ -56,6 +57,7 @@ void _assert_strcmp_(char *file, int line, char *a, char *b)
 
 #define _assert_strcmpex(X,Y) _assert_strcmpex_(__FILE__,__LINE__,X,Y)
 static
+__attribute__((unused))
 void _assert_strcmpex_(char *file, int line, char *a, char *b)
 {
 	char *zero_terminated_b;
@@ -73,14 +75,4 @@ void _assert_strcmpex_(char *file, int line, char *a, char *b)
 		printf("failed: _assert_strcmpex at %s:%d\n>>> expected\n%s\n=== actual\n%s\n<<<\n", file, line, a, zero_terminated_b);
 		_test_exit_failure();
 	}
-}
-
-#include "test_splitclientmessage.c"
-#include "test_cmd_utils.c"
-
-int main(int argc, char **argv)
-{
-	test_splitclientmessage();
-	test_cmd_utils();
-	return 0;
 }

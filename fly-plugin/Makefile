@@ -60,14 +60,20 @@ $(sofile): $(ofile) out/samp.o
 	gcc -ggdb -m32 -Wall -shared -lm -Xlinker --no-undefined out/samp.o out/$(binaryname).o -o $(sofile)
 	echo "link ok ($(sofile))"
 
-out/testmain: test/testmain.c test/test_splitclientmessage.c util_splitclientmessage.c test/test_cmd_utils.c cmd_utils.c game_sa_data.c playerdata.h a_samp.h
-	gcc -Wall -x c -std=c89 test/testmain.c -o out/testmain
-	chmod +x out/testmain
-	echo recompiled testmain
+out/test_cmd_utils: test/testapi.c test/test_cmd_utils.c cmd_utils.c game_sa_data.c playerdata.h a_samp.h
+	gcc -Wall -x c -std=c89 test/test_cmd_utils.c -o out/test_cmd_utils
+	chmod +x out/test_cmd_utils
+	echo recompiled out/test_cmd_utils
+
+out/test_splitclientmessage: test/testapi.c test/test_splitclientmessage.c util_splitclientmessage.c
+	gcc -Wall -x c -std=c89 test/test_splitclientmessage.c -o out/test_splitclientmessage
+	chmod +x out/test_splitclientmessage
+	echo recompiled out/test_splitclientmessage
 
 .PHONY: test
-test: out/testmain
-	out/testmain
+test: out/test_splitclientmessage out/test_cmd_utils
+	out/test_splitclientmessage
+	out/test_cmd_utils
 	echo test ok
 
 .PHONY: so

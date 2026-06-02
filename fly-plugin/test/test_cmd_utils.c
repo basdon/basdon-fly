@@ -1,3 +1,4 @@
+#include "testapi.c"
 #include "../a_samp.h"
 #include "../playerdata.h"
 #pragma GCC diagnostic ignored "-Wunused-function"
@@ -296,11 +297,12 @@ void test_cmd_get_vehiclemodel_param()
 	}
 }
 /*jeanine:p:i:1;p:0;a:b;y:1.00;*/
-void test_cmd_utils()
+int main(int argc, char **argv)
 {
 	test_cmd_get_int_param();
 	test_cmd_get_player_param();
 	test_cmd_get_str_param();
 	test_cmd_get_str_param_n();
 	test_cmd_get_vehiclemodel_param();
+	return 0;
 }

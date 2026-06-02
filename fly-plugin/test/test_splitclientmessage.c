@@ -1,3 +1,5 @@
+#include "testapi.c"
+
 struct RPCDATA_SendClientMessage {
 	int color;
 	int message_length;
@@ -6,8 +8,7 @@ struct RPCDATA_SendClientMessage {
 
 #include "../util_splitclientmessage.c"
 
-static
-void test_splitclientmessage()
+int main(int argc, char **argv)
 {
 	struct RPCDATA_SendClientMessage rpcdata[4];
 	int res;
@@ -387,4 +388,5 @@ void test_splitclientmessage()
 			rpcdata[1].message
 		);
 	}
+	return 0;
 }
