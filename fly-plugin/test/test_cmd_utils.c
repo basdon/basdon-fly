@@ -239,6 +239,14 @@ void test_cmd_get_vehiclemodel_param()
 		_assert_equals(11, cmdctx.parseidx);
 	}
 
+	_test_name = "by model id";
+	{
+		reset_cmdctx(&cmdctx, " 411");
+		result = cmd_get_vehiclemodel_param(&cmdctx, &value);
+		_assert_equals(1, result);
+		_assert_equals(MODEL_INFERNUS, value);
+	}
+
 	_test_name = "partial match";
 	{
 		reset_cmdctx(&cmdctx, "qui");
