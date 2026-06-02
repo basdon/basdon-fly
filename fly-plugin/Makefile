@@ -9,8 +9,8 @@ SHELL=bash
 # The alternative to using .SILENT is to prefix commands with an @ symbol.
 .SILENT:
 
-.PHONY: default build_so_and_test
-default: build_so_and_test
+.PHONY: all
+all: so test
 
 ###
 
@@ -62,6 +62,10 @@ out/testmain: test/testmain.c test/test_splitclientmessage.c util_splitclientmes
 	chmod +x out/testmain
 	echo recompiled testmain
 
-build_so_and_test: out/$(binaryname).so out/testmain
+.PHONY: test
+test: out/testmain
 	out/testmain
 	echo test ok
+
+.PHONY: so
+so: out/$(binaryname).so
