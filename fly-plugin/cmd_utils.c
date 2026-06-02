@@ -74,7 +74,7 @@ nextchar:
 		/*longer than allowed player name length*/
 		return 0;
 	}
-	val = *pc++;
+	val = *pc;
 	if (val <= ' ') {
 		if (n == name) {
 			/*zero length*/
@@ -83,6 +83,7 @@ nextchar:
 		*n = 0; /*add zero term to name buffer*/
 		goto gotvalue;
 	}
+	pc++;
 	*n++ = val;
 	if (isnumeric && '0' <= val && val <= '9') {
 		if ((maybe_id = maybe_id * 10 + val - '0') >= MAX_PLAYERS) {
@@ -109,15 +110,13 @@ nextchar:
 gotvalue:
 	cmdctx->parseidx = pc - cmdctx->cmdtext;
 	*playerid = INVALID_PLAYER_ID;
-	if (isnumeric) {
-		if (IsPlayerConnected(maybe_id)) {
-			*playerid = maybe_id;
-		}
+	if (isnumeric && pdata[maybe_id]) {
+		*playerid = maybe_id;
 		return 1;
 	}
 
 	for (i = 0; i < MAX_PLAYERS; i++) {
-		if (IsPlayerConnected(i) &&
+		if (pdata[i] &&
 			strstr(pdata[i]->normname, name) != NULL)
 		{
 			*playerid = i;
@@ -132,6 +131,7 @@ Gets next string parameter in cmdtext after parseidx.
 
 Preceding whitespace(s) are skipped.
 On match, parseidx is the index right after the value, so either space or \0.
+Passed buffer should be 144 in length for worst case scenario.
 
 @return non-zero on success, with filled in buffer.
 */
@@ -218,7 +218,7 @@ int cmd_get_vehiclemodel_param(struct COMMANDCONTEXT *cmdctx, int *modelid)
 {
 	TRACE;
 	int i, matchindex, minimum_pos, startpos, pos;
-	char *b;
+	char *b, strparam[144];
 
 	if (cmd_get_int_param(cmdctx, modelid)) {
 		if (VEHICLE_MODEL_MIN <= *modelid && *modelid <= VEHICLE_MODEL_MAX) {
@@ -227,9 +227,9 @@ int cmd_get_vehiclemodel_param(struct COMMANDCONTEXT *cmdctx, int *modelid)
 		return 0;
 	}
 
-	if (cmd_get_str_param(cmdctx, cbuf144)) {
+	if (cmd_get_str_param(cmdctx, strparam)) {
 		/*Lowercase, replace _ with space.*/
-		b = cbuf144;
+		b = strparam;
 		while (*b) {
 			if (*b == '_') {
 				*b = ' ';
@@ -241,7 +241,7 @@ int cmd_get_vehiclemodel_param(struct COMMANDCONTEXT *cmdctx, int *modelid)
 
 		/*Modelnames, full match.*/
 		for (i = 0; i < VEHICLE_MODEL_TOTAL; i++) {
-			if (!strcmp(vehmodelnames[i], cbuf144)) {
+			if (!strcmp(vehmodelnames[i], strparam)) {
 				*modelid =  i + VEHICLE_MODEL_MIN;
 				return 1;
 			}
@@ -259,9 +259,10 @@ int cmd_get_vehiclemodel_param(struct COMMANDCONTEXT *cmdctx, int *modelid)
 				/*Fun fun, "Monster","Admiral" 0|0x20 = ' '
 				Thus 'monster_a' matches 'monster\0a', giving monster instead of monster A.
 				So, need to check for zero term explicitly...*/
-				while (vehnames[i][startpos + pos] && (vehnames[i][startpos + pos] | 0x20) == cbuf144[pos]) {
+				/*TODO: just save normalized names as well and use that instead of lowercasing here?*/
+				while (vehnames[i][startpos + pos] && (vehnames[i][startpos + pos] | 0x20) == strparam[pos]) {
 					pos++;
-					if (cbuf144[pos] == 0) {
+					if (strparam[pos] == 0) {
 						if (startpos == 0) {
 							*modelid = i + VEHICLE_MODEL_MIN;
 							return 1;

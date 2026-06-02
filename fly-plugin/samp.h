@@ -321,13 +321,8 @@ struct SampPlayer {
 	int isEditingObject;
 	int _pad2959;
 	short lastSentDialogID;
-#ifdef __TINYC__
-	int textdrawpool;
-	int textlabelPool;
-#else
 	void *textdrawpool;
 	void *textlabelPool;
-#endif
 	short playerid;
 	int updateSyncType;
 	int _pad296D[130];
@@ -418,9 +413,7 @@ struct SampVehiclePool {
 	struct SampVehicle *vehicles[2000];
 	int highestUsedVehicleid; /*vehicleids start with 1, so 0 means no vehicles*/
 };
-#ifndef __TINYC__
 EXPECT_SIZE(struct SampVehiclePool, 0x5E98); /*Complete*/
-#endif
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, created, 0x2014);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehiclePool, vehicles, 0x3F54);
 
@@ -443,9 +436,7 @@ struct SampPlayerPool {
 	int highestUsedPlayerid; /*0 can mean either no players or one player with id 0*/
 	int _field3096C;
 };
-#ifndef __TINYC__
 EXPECT_SIZE(struct SampPlayerPool, 0x30970); /*Complete*/
-#endif
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, playerScore, 0xFAC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, gpci, 0x4E2C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, version, 0x1D8B4);
@@ -473,9 +464,7 @@ struct SampObjectMaterial {
 	int textBackColor;
 	char textAlignment;
 };
-#ifndef __TINYC__
 EXPECT_SIZE(struct SampObjectMaterial, 0xD7); /*Complete*/
-#endif
 
 struct SampObject {
 	short objectid;
@@ -502,9 +491,7 @@ struct SampObject {
 	struct SampObjectMaterial materials[16];
 	char *materialText[16];
 };
-#ifndef __TINYC__
 EXPECT_SIZE(struct SampObject, 0xE75); /*Complete*/
-#endif
 
 struct SampObjectPool {
 	int objectIdSlotUsedForPlayerObject[1000][1000]; /*[playerid][objectid]*/
@@ -513,9 +500,7 @@ struct SampObjectPool {
 	int isObjectIdUsedForGlobalObject[1000];
 	struct SampObject *objects[1000];
 };
-#ifndef __TINYC__
 EXPECT_SIZE(struct SampObjectPool, 0x7A40E0); /*Complete*/
-#endif
 
 struct SampNetGame {
 	void *pGameMode;
@@ -573,9 +558,7 @@ struct SampNetGame {
 	char _field39DE;
 	char _field39DF;
 };
-#ifndef __TINYC__
 EXPECT_SIZE(struct SampNetGame, 0x39E0); /*Complete*/
-#endif
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, vehiclePool, 0xC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, objectPool, 0x14);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, textLabelPool, 0x20);

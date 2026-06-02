@@ -70,14 +70,12 @@ struct RakServer_vtable {
 	int _padF4[9];
 	struct RakNetStatistics *(*GetStatistics)(struct RakServer *rakServer, struct PlayerID playerID);
 };
-#ifndef __TINYC__ /*my tcc binaries are 64bit so ptrs will be 8 bytes instead of 4, disabling these for tcc*/
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, Kick, 0x30);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetLastPing, 0x50);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, RPC_8C, 0x8C);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetIndexFromPlayerID, 0xE8);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetPlayerIDFromIndex, 0xF0); /*TODO: revalidate, as I think this might need to be 0xEC*/
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetStatistics, 0x118); /*TODO: revalidate*/
-#endif
 
 struct RakRPCHandlerArg {
 	unsigned char *rpcdata;

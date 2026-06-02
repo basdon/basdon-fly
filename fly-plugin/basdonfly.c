@@ -495,6 +495,7 @@ int CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_d
 #include "conf.c"
 #include "memstuff.c"
 #include "natives.c"
+#include "util_splitclientmessage.c"
 #include "samp.c"
 #include "textdraws.c"
 #include "common.c"

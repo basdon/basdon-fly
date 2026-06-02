@@ -18,11 +18,7 @@ int amxrandom(int maxExclusive)
 	/*args[0] is likely amount of arguments, but it's not being checked so not assigning it*/
 	args[1] = maxExclusive;
 
-#ifndef NO_CAST_IMM_FUNCPTR
 	return ((int (*)(void*,void*))0x809B3B0)(NULL, args);
-#else
-	return 1;
-#endif
 }
 
 /**
@@ -38,9 +34,7 @@ int EncodeString(char *dest, char *source, int max_chars)
 	bs.ptrData = dest;
 	bs.numberOfBitsUsed = 0;
 	bs.numberOfBitsAllocated = max_chars * 8;
-#ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(void*,char*,int,struct BitStream*,char))0x808EF80)(*(int**) 0x81AA744, source, max_chars, &bs, 0);
-#endif
 	return bs.numberOfBitsUsed;
 }
 
@@ -64,71 +58,53 @@ static
 void SAMP_SHA256(char *out_buf, char *input)
 {
 	TRACE;
-#ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(char*,char*,char*,int))0x80ED230)(input, /*salt*/"", out_buf, 65);
-#endif
 }
 
 static
 void SetConsoleVariableString(char *variable_name, char *value)
 {
 	TRACE;
-#ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(void*,char*,char*))0x80A0110)(samp_pConsole, variable_name, value);
-#endif
 }
 
 static
 char* GetConsoleVariableString(char *variable_name)
 {
 	TRACE;
-#ifndef NO_CAST_IMM_FUNCPTR
 	return ((char* (*)(void*,char*))0x80A0190)(samp_pConsole, variable_name);
-#else
-	return NULL;
-#endif
 }
 
 static
 void AddConsoleVariableString(char *variable_name, char *value)
 {
 	TRACE;
-#ifndef NO_CAST_IMM_FUNCPTR
 	/*see comment of AddServerRule*/
 	((void (*)(void*,char*,int,char*,void*))0x80A08F0)(samp_pConsole, variable_name, 0, value, 0);
-#endif
 }
 
 static
 void AddServerRule(char *rule_name, char *value)
 {
 	TRACE;
-#ifndef NO_CAST_IMM_FUNCPTR
 	/*this invokes a function to add a "string console variable"
 	 *using 4 as flags argument, which means it will be a server rule
 	 *the last argument is a pointer to a procedure that will be called if the variable changes by console commands*/
 	((void (*)(void*,char*,int,char*,void*))0x80A08F0)(samp_pConsole, rule_name, 4, value, 0);
-#endif
 }
 
 static
 void SendRconCommand(char *command)
 {
 	TRACE;
-#ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(void*,char*))0x809FBD0)(samp_pConsole, command);
-#endif
 }
 
 static
 int samp_GetTime()
 {
 	TRACE;
-#ifndef NO_CAST_IMM_FUNCPTR
 	return ((int (*)(void*))0x80AAF40)(samp_pNetGame);
-#else
-	return 0;
-#endif
 }
 
 static
@@ -140,11 +116,8 @@ void SendRPC_8C(int playerid, int rpc, void *rpcdata, int size_bytes, enum Packe
 
 	bs.ptrData = rpcdata;
 	bs.numberOfBitsUsed = size_bytes * 8;
-/*TODO get rid of this ifndef*/
-#ifndef NO_CAST_IMM_FUNCPTR
 	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playerid);
 	rakServer->vtable->RPC_8C(rakServer, (void*)rpc, &bs, priority, reliability, orderingChannel, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
-#endif
 }
 
 static
@@ -165,12 +138,10 @@ void KickRaw(int playerid)
 	TRACE;
 	struct PlayerID playerID;
 
-#ifndef NO_CAST_IMM_FUNCPTR
 	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playerid);
 	rakServer->vtable->Kick(rakServer, playerID);
 	/*SampPlayerPool::RemovePlayer*/
 	((void (*)(struct SampPlayerPool*,int,int)) 0x80D0A90)(playerpool,playerid,/*reason_kick*/2);
-#endif
 }
 
 static
@@ -189,11 +160,9 @@ void ForceSendPlayerOnfootSyncNow(int playerid)
 	cplayer->updateSyncType = UPDATE_SYNC_TYPE_ONFOOT;
 	cplayer->currentState = PLAYER_STATE_ONFOOT;
 	/*Three times because it's an unreliable packet[citation needed] but it's important that players receive it.*/
-#ifndef NO_CAST_IMM_FUNCPTR
 	((void (*)(struct SampPlayer*)) 0x80C9DB0)(cplayer);
 	((void (*)(struct SampPlayer*)) 0x80C9DB0)(cplayer);
 	((void (*)(struct SampPlayer*)) 0x80C9DB0)(cplayer);
-#endif
 
 	cplayer->updateSyncType = actual_updateSyncType;
 	cplayer->currentState = actual_state;
@@ -756,80 +725,11 @@ void SendClientMessageToBatch(short *playerids, int numplayerids, int color, cha
 	/*Using 4 packets should handle messages with a length up to 144*4.*/
 	struct RPCDATA_SendClientMessage rpcdata[4];
 	struct BitStream bs;
-	int i, j, packetidx;
+	int packetidx;
 	int num_packets;
-	char *msg_start;
-	int msglen;
-	int cut_pos, min_cut_pos;
-	int pos_inc;
-	char colorpart;
-	int newcolor;
+	int i;
 
-	msglen = strlen(message);
-
-	/*(Probably unneeded) optimization to skip cutting and looping stuff.*/
-	if (msglen < 145) {
-		rpcdata[0].color = color;
-		rpcdata[0].message_length = msglen;
-		memcpy(rpcdata[0].message, message, msglen);
-		bs.ptrData = &rpcdata[0];
-		bs.numberOfBitsUsed = 32 + 32 + msglen * 8;
-		for (i = 0; i < numplayerids; i++) {
-			SAMP_SendRPCToPlayer(RPC_SendClientMessage, &bs, playerids[i], 3);
-		}
-		return;
-	}
-
-	num_packets = 0;
-	msg_start = message;
-
-	/*See /testmsgsplit command.*/
-	while (msglen > 0 && num_packets < 4) {
-		if (msglen > 144) {
-			/*Try to split on whitespace or color boundaries.*/
-			for (cut_pos = 144, min_cut_pos = 144 - 15; cut_pos > min_cut_pos; cut_pos--) {
-				if (msg_start[cut_pos] == ' ') {
-					pos_inc = cut_pos + 1;
-					goto have_cut_pos;
-				} else if (cut_pos <= msglen - 7 && msg_start[cut_pos] == '{' && msg_start[cut_pos + 7] == '}') {
-					pos_inc = cut_pos;
-					goto have_cut_pos;
-				}
-			}
-			cut_pos = pos_inc = 144;
-		} else {
-			cut_pos = pos_inc = msglen;
-		}
-have_cut_pos:
-		rpcdata[num_packets].color = color;
-		rpcdata[num_packets].message_length = cut_pos;
-		memcpy(rpcdata[num_packets].message, msg_start, cut_pos);
-		num_packets++;
-		/*Find the last embedded color to use for the next packet.*/
-		for (i = cut_pos - 1; i >= 7; i--) {
-			if (msg_start[i] == '}' && msg_start[i - 7] == '{') {
-				newcolor = color & 0xFF;
-				for (j = 0; j < 6; j++) {
-					colorpart = msg_start[i - 6 + j];
-					if ('0' <= colorpart && colorpart <= '9') {
-						newcolor |= (colorpart - '0') << (28 - j * 4);
-					} else if ('a' <= colorpart && colorpart <= 'f') {
-						newcolor |= (colorpart - 'a' + 10) << (28 - j * 4);
-					} else if ('A' <= colorpart && colorpart <= 'F') {
-						newcolor |= (colorpart - 'A' + 10) << (28 - j * 4);
-					} else {
-						goto not_a_color;
-					}
-				}
-				color = newcolor;
-				break;
-			}
-not_a_color:
-			;
-		}
-		msglen -= pos_inc;
-		msg_start += pos_inc;
-	}
+	num_packets = util_splitclientmessage(rpcdata, sizeof(rpcdata)/sizeof(rpcdata[0]), color, message);
 
 	for (i = 0; i < numplayerids; i++) {
 		for (packetidx = 0; packetidx < num_packets; packetidx++) {
@@ -967,11 +867,7 @@ static
 int DestroyVehicleRaw(int vehicleid)
 {
 	TRACE;
-#ifndef NO_CAST_IMM_FUNCPTR
 	return ((int (*)(struct SampVehiclePool*,int))0x814CC10)(vehiclepool, vehicleid);
-#else
-	return 1;
-#endif
 }
 
 /**
@@ -1014,14 +910,12 @@ void RespawnVehicle(int vehicleid)
 	vehicle->lastRespawnTickCount = samp_GetTime();
 	memset(&vehicle->params, -1, sizeof(vehicle->params));
 
-#ifndef NO_CAST_IMM_FUNCPTR
 	/*SampPlayerPool::DeleteVehicle, deletes the vehicle for all players that has the vehicle streamed in*/
 	/*this also streams out the vehicle. Vehicle will be streamed back in after respawning during normal streaming operations/timers*/
 	((void (*)(struct SampPlayerPool*,int))0x80D1480)(playerpool, vehicleid);
 
 	/*GameMode::Event_OnVehicleSpawn*/
 	((void (*)(void*,int))0x80A5350)(samp_pNetGame->pGameMode, vehicleid);
-#endif
 }
 
 static
@@ -1085,11 +979,7 @@ float GetVehicleHealthRaw(int vehicleid)
 	return 0;
 }
 
-#ifndef NO_CAST_IMM_FUNCPTR
 #define SAMP_SetVehicleHealth(VEHICLE,HP) ((void (*)(struct SampVehicle*,float))0x814B860)(VEHICLE,HP);
-#else
-#define SAMP_SetVehicleHealth(VEHICLE,HP)
-#endif
 
 static
 void SetVehicleHealth(int vehicleid, float hp)
@@ -1123,10 +1013,8 @@ void SyncVehicleDamageStatus(struct SampVehicle *vehicle)
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (player[i] && player[i]->vehicleStreamedIn[rpcdata.vehicleid]) {
-#ifndef NO_CAST_IMM_FUNCPTR
 			RakServer__GetPlayerIDFromIndex(&playerID, rakServer, i);
 			rakServer->vtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
-#endif
 		}
 	}
 }
@@ -1156,9 +1044,7 @@ void SetVehicleParamsEx(int vehicleid, struct SampVehicleParams *params)
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
 	if (vehicle) {
-#ifndef NO_CAST_IMM_FUNCPTR
 		((int (*)(struct SampVehicle*,struct SampVehicleParams*))0x814C7A0)(vehicle, params);
-#endif
 	}
 }
 
@@ -1304,14 +1190,12 @@ void SetVehicleColorTemporary(int vehicleid, int col1, int col2)
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
 	if (vehicle) {
-#ifndef NO_CAST_IMM_FUNCPTR
 		((void (*)(struct SampVehicle*,short,int,int))0x814C510)(
 			vehicle,
 			INVALID_PLAYER_ID, /*The player that caused this update, so gamemode/filterscripts can block it (not applicable here).*/
 			col1,
 			col2
 		);
-#endif
 	}
 }
 
@@ -1376,13 +1260,11 @@ void SetVehiclePaintjob(int vehicleid, char paintjob)
 
 	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
 	if (vehicle) {
-#ifndef NO_CAST_IMM_FUNCPTR
 		((void (*)(struct SampVehicle*,short,int))0x814C2F0)(
 			vehicle,
 			INVALID_PLAYER_ID, /*The player that caused this update, so gamemode/filterscripts can block it (not applicable here).*/
 			paintjob
 		);
-#endif
 	}
 }
 
@@ -1463,10 +1345,8 @@ int SetVehiclePos(int vehicleid, struct vec3 *pos)
 		if (player[i] && player[i]->vehicleStreamedIn[vehicleid]) {
 			SAMP_SendRPCToPlayer(RPC_SetVehiclePos, &bs, i, 2);
 			if (vehicle->driverplayerid == i) {
-#ifndef NO_CAST_IMM_FUNCPTR
 				/*SampPlayer__SetExpectedLocationAfterTeleport*/
 				((void (*)(struct SampPlayer*,struct vec3))0x80CC020)(player[i], *pos);
-#endif
 			}
 		}
 	}
@@ -1512,17 +1392,14 @@ void PutPlayerInVehicleRaw(int playerid, int vehicleid, int seat)
 		return;
 	}
 
-#ifndef NO_CAST_IMM_FUNCPTR
 	/*SampPlayer__StreamInVehicle*/
 	((void (*)(struct SampPlayer*,int,int))0x80C9CA0)(player, vehicleid, /*ignore streaming distance*/ 1);
-#endif
 
 	if (seat == 0) {
 		vehicle->driverplayerid = playerid;
 	}
 	player->vehicleid = vehicleid;
 
-#ifndef NO_CAST_IMM_FUNCPTR
 	/*SampPlayer__StorePositionProcessStreamingAndCheckpoints*/
 	((void (*)(struct SampPlayer*,float,float,float,int))0x80CBCB0)(
 		player,
@@ -1531,9 +1408,7 @@ void PutPlayerInVehicleRaw(int playerid, int vehicleid, int seat)
 		vehicle->matrix.pos.z,
 		/*process streaming immediately*/ 1
 	);
-#endif
 
-#ifndef NO_CAST_IMM_FUNCPTR
 	/*SampPlayer__SetExpectedLocationAfterTeleport*/
 	((void (*)(struct SampPlayer*,float,float,float))0x80CC020)(
 		player,
@@ -1541,7 +1416,6 @@ void PutPlayerInVehicleRaw(int playerid, int vehicleid, int seat)
 		vehicle->matrix.pos.y,
 		vehicle->matrix.pos.z
 	);
-#endif
 
 	rpcdata.vehicleid = vehicleid;
 	rpcdata.seat = seat;
@@ -1579,8 +1453,6 @@ void CrashPlayer(int playerid)
 	SAMP_SendRPCToPlayer(RPC_ApplyAnimation, &bs, playerid, 2);
 }
 #endif
-
-#ifndef SAMP_C_SKIP_MIXED_NATIVES /*This is just used to make testing easier, but should be maybe removed at some point...*/
 
 /*-----------------------------------------------------------------------------*/
 
@@ -2139,10 +2011,8 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (i != playerid && player[i] && player[i]->vehicleStreamedIn[vehicleid]) {
-#ifndef NO_CAST_IMM_FUNCPTR
 			RakServer__GetPlayerIDFromIndex(&playerID, rakServer, i);
 			rakServer->vtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
-#endif
 		}
 	}
 }
@@ -2208,6 +2078,4 @@ void samp_init()
 
 	AddServerRule("hotel", "Trivago"); /*be a little silly*/
 }
-#endif
-
-#endif /*SAMP_C_SKIP_MIXED_NATIVES*/
+#endif /*SAMP_NATIVES_IMPL*/
