@@ -305,7 +305,7 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 	See
 	<a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#Appendix_Vehicle_Damage_Status>
 		https://basdon.github.io/documented-samp-pawn-api/main.xml#Appendix_Vehicle_Damage_Status
-	</a>
+	</a><img src=/s/moin-www.png alt="globe icon" title="external link">
 	for an overview of vehicle support, behavior, and some quirks.
 
 <h4>Server receiving damage from client</h4>
@@ -370,7 +370,10 @@ else if (pModelInfo->IsBike())
     dwFunc = FUNC_CBike_Fix<strong><sup>(3)</sup></strong>;
 </pre>
 <p>
-	Source: <a href=https://github.com/multitheftauto/mtasa-blue/blob/bb0b32cb90f3379853fb9eab0a651caabd837d6f/Client/game_sa/CVehicleSA.cpp#L1120>https://github.com/multitheftauto/mtasa-blue/blob/bb0b32cb90f3379853fb9eab0a651caabd837d6f/Client/game_sa/CVehicleSA.cpp#L1120</a>.
+	Source:
+	<a href=https://github.com/multitheftauto/mtasa-blue/blob/bb0b32cb90f3379853fb9eab0a651caabd837d6f/Client/game_sa/CVehicleSA.cpp#L1120>
+		https://github.com/multitheftauto/mtasa-blue/blob/bb0b32cb90f3379853fb9eab0a651caabd837d6f/Client/game_sa/CVehicleSA.cpp#L1120
+	</a><img src=/s/moin-www.png alt="globe icon" title="external link">.
 <p>
 	It also defines <code>FUNC_CQuadBike__Fix</code><strong><sup>(3)</sup></strong>, yet that is not used in the above.
 <p>
@@ -427,4 +430,4 @@ else if (pModelInfo->IsBike())
 	<strong><sup>(6)</sup></strong>
 	<a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#Appendix_Vehicle_Damage_Status_planeghostdoors>
 		https://basdon.github.io/documented-samp-pawn-api/main.xml#Appendix_Vehicle_Damage_Status_planeghostdoors
-	</a>
+	</a><img src=/s/moin-www.png alt="globe icon" title="external link">
