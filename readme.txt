@@ -223,18 +223,18 @@ Run the server by executing:
 If a BASDONDEV environment variable is non-empty, the dev configuration will
 be used.
 
-Alternatively there is a special make target:
-
-	make rundev
-
-which will compile the plugin with a dev configuration and run it in
-development mode.
-
 Running the server without the dev settings will start it using nohup and run
 it in the background. When a segfault happens and a core dump file is found,
 it will be zipped together with the plugin and moved to the
 fly-web/www/s/coredumps folder. A message will be posted to Discord, if
 configured, and the server should restart.
+
+Alternatively, for development, there is a special make target:
+
+	make rundev
+
+which will compile the plugin with a dev configuration and run it in
+development mode.
 
 Notes
 -----
