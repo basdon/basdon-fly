@@ -5,6 +5,7 @@
 	<li><a href=#client_console_commands>Client console commands</a>
 	<li><a href=#vehicle_categories_(client)>Vehicle categories (client)</a>
 	<li><a href=#vehicle_damage_status>Vehicle damage status</a>
+	<li><a href=#player_pos_server_streaming>Player position and server streaming</a>
 </ul>
 
 <h3 id=client_console_commands>Client console commands</h3>
@@ -431,3 +432,97 @@ else if (pModelInfo->IsBike())
 	<a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#Appendix_Vehicle_Damage_Status_planeghostdoors>
 		https://basdon.github.io/documented-samp-pawn-api/main.xml#Appendix_Vehicle_Damage_Status_planeghostdoors
 	</a><img src=/s/moin-www.png alt="globe icon" title="external link">
+
+<h3 id=player_pos_server_streaming>Player position and server streaming</h3>
+
+<p>
+	Player position and streaming is processed when:
+<ul>
+	<li>receiving spectating sync data from that player
+	<li>receiving passenger sync data from that player
+	<li>receiving driver sync data from that player
+	<li>receiving onfoot sync data from that player
+	<li><a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#PlayerSpectateVehicle><code>PlayerSpectateVehicle</code></a><img src=/s/moin-www.png alt="globe icon" title="external link"> is called
+	<li><a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#PlayerSpectatePlayer><code>PlayerSpectatePlayer</code></a><img src=/s/moin-www.png alt="globe icon" title="external link"> is called
+	<li><a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#PutPlayerInVehicle><code>PutPlayerInVehicle</code></a><img src=/s/moin-www.png alt="globe icon" title="external link"> is called
+</ul>
+
+<p>
+	First it will unconditionally store the passed position into the player's data.
+
+<p>
+	Then it checks if the player has an expected location after being teleported (which gets set when calling either of:
+	<a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#PlayerSpectateVehicle><code>PlayerSpectateVehicle</code></a><img src=/s/moin-www.png alt="globe icon" title="external link">
+	/
+	<a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#PlayerSpectatePlayer><code>PlayerSpectatePlayer</code></a><img src=/s/moin-www.png alt="globe icon" title="external link">
+	/
+	<a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#PutPlayerInVehicle><code>PutPlayerInVehicle</code></a><img src=/s/moin-www.png alt="globe icon" title="external link">
+	/
+	<a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#SetVehiclePos><code>SetVehiclePos</code></a><img src=/s/moin-www.png alt="globe icon" title="external link">
+	(only for the driver of the vehicle)).
+	If the expected position has been set less than 5000ms ago (not configurable), streaming will be
+	aborted if the player is not yet within <code>stream_distance</code> of it.
+
+<p>
+	When triggered by receiving sync data, it will first check if enough time has passed since the last
+	time streaming was processed (<code>stream_rate</code> console/server.cfg variable) and skip if this
+	is not the case.
+
+<p>
+	When triggered by the script functions, streaming is processed immediately. Note that this completely
+	bypasses the stream rate check, so it is possible that next streaming processing will occur much earlier
+	than what the normal <code>stream_rate</code> delay would be from this moment.
+
+<p>
+	After streaming, the checkpoint and race checkpoint are tested. If one is active and the player is now inside and
+	was not before, the appropriate callback is called (<code>OnPlayerEnterCheckpoint</code>/<code>OnPlayerEnterRaceCheckpoint</code>).
+	If one is active and the player is not inside, and was before, the "<code>Leave</code>" callback is called. Note that state seems
+	to be reset when disabling a checkpoint, so disabling the checkpoint while a player is in it will not trigger the
+	"<code>Leave</code>" callback.
+
+<h4>Streaming</h4>
+
+<h5>Player markers</h5>
+<p>
+	Player markers are streamed if the global setting for marker mode is not set to 0.
+	Markers are updated every 2500ms (not configurable). Markers are included of players who are
+	in the same virtual world, not spectating, not NPCs, and within the distance limit if marker mode is "streamed".
+
+<h5>Vehicles</h5>
+<p>
+	A vehicle is streamed in when it exists, has field_7A set to 1, is in the same virtual world, is not of model
+	FREIFLAT or STREAKC (those are never streamed to the client, the client always automatically creates 3 carriages
+	when the train engine vehicle is created), and is within <code>stream_distance</code>.
+<p>
+	If that is not the case and the vehicle is still streamed in, it will be streamed out.
+<p>
+	(note that no more vehicles will be streamed in if a client already has 700 vehicles streamed in)
+
+<h5>Players</h5>
+<p>
+	A player is streamed in when they exist, are not in state "none" or "spectating", are in the same virtual world,
+	and is within <code>stream_distance</code> (calculated from the player position, except if the player is a passenger
+	of a vehicle because then the position of the vehicle is used).
+<p>
+	If that is not the case and the player is still streamed in, they will be streamed out.
+<p>
+	(note that no more players will be streamed in if a client already has 200 players streamed in)
+
+<h5>TextLabels</h5>
+<p>
+	A 3D text label is streamed in when it is in use and, if attached to a player or vehicle: if that player or vehicle
+	is streamed in, if not attached: if the label is in the same virtual world and the player is within its draw distance.
+<p>
+	If that is not the case and the text label is still streamed in, it will be streamed out.
+
+<h5>Pickups</h5>
+<p>
+	A pickup is streamed in when it is in use, is in the same virtual world, and within <code>stream_distance</code>.
+<p>
+	If that is not the case and the pickup is still streamed in, it will be streamed out.
+
+<h5>Actors</h5>
+<p>
+	An actor is streamed in when they are in use, are in the same virtual world, and within <code>stream_distance</code>.
+<p>
+	If that is not the case and the actor is still streamed in, they will be streamed out.
