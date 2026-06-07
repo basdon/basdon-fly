@@ -459,9 +459,14 @@ else if (pModelInfo->IsBike())
 	<a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#PutPlayerInVehicle><code>PutPlayerInVehicle</code></a><img src=/s/moin-www.png alt="globe icon" title="external link">
 	/
 	<a href=https://basdon.github.io/documented-samp-pawn-api/main.xml#SetVehiclePos><code>SetVehiclePos</code></a><img src=/s/moin-www.png alt="globe icon" title="external link">
-	(only for the driver of the vehicle)).
+	(only for the driver of the vehicle*)).
 	If the expected position has been set less than 5000ms ago (not configurable), streaming will be
 	aborted if the player is not yet within <code>stream_distance</code> of it.
+<p>
+	*there is some inconsistent/unexpected behavior regarding this, it seems that tracking of who is driver of the vehicle isn't
+	always reset correctly (it seems to be relying on receiving onuccupied sync packets). This results in the following behavior:
+	when teleporting a vehicle with SetVehiclePos to a location further than the configured stream distance from the last driver
+	of that vehicle, that player may experience a 5 second period where streaming may not be processed.
 
 <p>
 	When triggered by receiving sync data, it will first check if enough time has passed since the last
@@ -497,6 +502,10 @@ else if (pModelInfo->IsBike())
 	If that is not the case and the vehicle is still streamed in, it will be streamed out.
 <p>
 	(note that no more vehicles will be streamed in if a client already has 700 vehicles streamed in)
+<p>
+	Trivia: when it decides to stream in a vehicle, the function to stream in the vehicle checks the stream
+	distance condition again even though we know it already passed that check. This doesn't happen for any of
+	the other elements being streamed in this section.
 
 <h5>Players</h5>
 <p>
