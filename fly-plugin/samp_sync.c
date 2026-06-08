@@ -2,6 +2,7 @@
 float *stream_distance = (float*) 0x8197DD8;
 /*ms delay between checks for player/vehicle/etc streaming*/
 int *stream_rate = (int*) 0x8197DD4;
+#define PLAYER_MARKER_UPDATE_DELAY 2500 /*SAMP: 2500*/
 
 static
 int samp_GetTime()
@@ -20,6 +21,57 @@ int IsWithinStreamDistance(struct vec3 *a, struct vec3 *b)
 	dy = a->y - b->y;
 	dz = a->z - b->z;
 	return dx * dx + dy * dy + dz * dz < *stream_distance * *stream_distance;
+}
+/*jeanine:p:i:5;p:1;a:r;x:8.00;y:-60.00;n:UpdatePlayerMarkersForPlayer;*/
+static
+void UpdatePlayerMarkersForPlayer(struct SampPlayer *playa)
+{
+	TRACE;
+	struct BitStream bs;
+	struct PlayerID playerID;
+	struct SampPlayer *otherplayer;
+#pragma pack(1)
+	struct {
+		unsigned char packetId;
+		int numPlayers;
+		/*then for each player: playerid(16) 1/0 (1) + if 1: xyz (16+16+16)*/
+		char unstructured[MAX_PLAYERS * (2 + 1 + 2 + 2 + 2)];
+	} packetdata;
+#pragma pack()
+	int i;
+
+	/* SAMP also checks marker streaming mode: off/streamed/global. We always do global. */
+
+	playa->markersLastStreamedAtTickCount = samp_GetTime();
+
+	packetdata.packetId = 208;
+	packetdata.numPlayers = 0;
+	bs.ptrData = &packetdata;
+	bs.numberOfBitsUsed = 8 + 32;
+	bs.numberOfBitsAllocated = sizeof(packetdata) * 8;
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		otherplayer = player[i];
+		if (otherplayer && otherplayer != playa) {
+			packetdata.numPlayers++;
+			bitstream_write_bits(&bs, i, 16);
+			if (
+				otherplayer->currentState != PLAYER_STATE_NONE &&
+				otherplayer->currentState != PLAYER_STATE_SPECTATING &&
+				playerpool->virtualworld[i] == playerpool->virtualworld[playa->playerid]
+				/*SAMP also checks distance if LimitPlayerMarkerRadius was used*/
+			) {
+				/*NOTE: max value is +-32k, so markers for players near CATA will be wrong :(*/
+				bitstream_write_one(&bs);
+				bitstream_write_bits(&bs, (short) otherplayer->pos.x, 16);
+				bitstream_write_bits(&bs, (short) otherplayer->pos.y, 16);
+				bitstream_write_bits(&bs, (short) otherplayer->pos.z, 16);
+			} else {
+				bitstream_write_zero(&bs);
+			}
+		}
+	}
+	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playa->playerid);
+	rakServer->vtable->SendBitStream(rakServer, &bs, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 1, playerID, 0);
 }
 /*jeanine:p:i:4;p:1;a:r;x:8.00;y:-8.00;n:StreamVehiclesForPlayer;*/
 static
@@ -133,8 +185,9 @@ processStreamingNow:
 	/* was just reset, but it seems more logical to do set it. */
 	player->lastStreamingTick = tickCount;
 
-	/*SampPlayer::ProcessMarkerStreaming*/
-	((void (*)(struct SampPlayer*))0x80C91D0)(player);
+	if (tickCount - player->markersLastStreamedAtTickCount > PLAYER_MARKER_UPDATE_DELAY) {
+		UpdatePlayerMarkersForPlayer(player);/*jeanine:r:i:5;*/
+	}
 	StreamVehiclesForPlayer(player);/*jeanine:r:i:4;*/
 	StreamPlayersForPlayer(player);/*jeanine:r:i:3;*/
 
