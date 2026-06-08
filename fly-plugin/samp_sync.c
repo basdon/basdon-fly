@@ -22,7 +22,7 @@ int IsWithinStreamDistance(struct vec3 *a, struct vec3 *b)
 	dz = a->z - b->z;
 	return dx * dx + dy * dy + dz * dz < *stream_distance * *stream_distance;
 }
-/*jeanine:p:i:5;p:1;a:r;x:8.00;y:-60.00;n:UpdatePlayerMarkersForPlayer;*/
+/*jeanine:p:i:5;p:1;a:r;x:11.00;y:21.00;n:UpdatePlayerMarkersForPlayer;*/
 static
 void UpdatePlayerMarkersForPlayer(struct SampPlayer *playa)
 {
@@ -73,7 +73,7 @@ void UpdatePlayerMarkersForPlayer(struct SampPlayer *playa)
 	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playa->playerid);
 	rakServer->vtable->SendBitStream(rakServer, &bs, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 1, playerID, 0);
 }
-/*jeanine:p:i:4;p:1;a:r;x:8.00;y:-8.00;n:StreamVehiclesForPlayer;*/
+/*jeanine:p:i:4;p:1;a:r;x:11.00;y:-44.00;n:StreamVehiclesForPlayer;*/
 static
 void StreamVehiclesForPlayer(struct SampPlayer *player)
 {
@@ -122,14 +122,18 @@ struct vec3 *GetOtherPlayerPosition(struct SampPlayer *player)
 	}
 	return &player->pos;
 }
-/*jeanine:p:i:3;p:1;a:r;x:8.00;y:25.00;n:StreamPlayersForPlayer;*/
+/*jeanine:p:i:3;p:1;a:r;x:11.00;y:-12.00;n:StreamPlayersForPlayer;*/
+/**
+ * returns true if at least one player was freshly streamed out
+ */
 static
-void StreamPlayersForPlayer(struct SampPlayer *playa)
+int StreamPlayersForPlayer(struct SampPlayer *playa)
 {
 	TRACE;
 	struct SampPlayer *otherplayer;
-	int i;
+	int i, didStreamOutSomeone;
 
+	didStreamOutSomeone = 0;
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		otherplayer = player[i];
 		if (
@@ -147,16 +151,18 @@ void StreamPlayersForPlayer(struct SampPlayer *playa)
 			if (playa->playerStreamedIn[i]) {
 				/*SampPlayer::StreamOutPlayer*/
 				((void (*)(struct SampPlayer*,int))0x80CAFC0)(playa, i);
+				didStreamOutSomeone = 1;
 			}
 		}
 	}
+	return didStreamOutSomeone;
 }
 /*jeanine:p:i:1;p:2;a:r;x:3.75;n:DoStreamingAfterPlayerLocationUpdate;*/
 static
 void DoStreamingAfterPlayerLocationUpdate(struct SampPlayer *player, float x, float y, float z, char processStreamingImmediately)
 {
 	TRACE;
-	int tickCount;
+	int tickCount, didStreamOutPlayer;
 
 	player->pos.x = x;
 	player->pos.y = y;
@@ -185,11 +191,15 @@ processStreamingNow:
 	/* was just reset, but it seems more logical to do set it. */
 	player->lastStreamingTick = tickCount;
 
-	if (tickCount - player->markersLastStreamedAtTickCount > PLAYER_MARKER_UPDATE_DELAY) {
+	StreamVehiclesForPlayer(player);/*jeanine:r:i:4;*/
+	didStreamOutPlayer = StreamPlayersForPlayer(player);/*jeanine:r:i:3;*/
+
+	/* Marker data includes players that are streamed in. When a player is/gets streamed in, their marker just */
+	/* gets suppressed in the client I guess. But when streaming out, the marker is not immediately reshown. */
+	/* Try to fix that by forcing a marker update right after a player was just streamed out. */
+	if (didStreamOutPlayer || tickCount - player->markersLastStreamedAtTickCount > PLAYER_MARKER_UPDATE_DELAY) {
 		UpdatePlayerMarkersForPlayer(player);/*jeanine:r:i:5;*/
 	}
-	StreamVehiclesForPlayer(player);/*jeanine:r:i:4;*/
-	StreamPlayersForPlayer(player);/*jeanine:r:i:3;*/
 
 	/* pickup streaming is also done here, but we don't use those yet */
 	/* 3D text label streaming is also done here, but we don't stream them */
