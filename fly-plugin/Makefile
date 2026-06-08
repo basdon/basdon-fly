@@ -58,7 +58,7 @@ $(ofile): __settings.h __sampasm.h
 	gcc -ggdb -m32 -Wall -Wno-strict-aliasing -fno-pic -c -x c -std=c89 $(cflags) basdonfly.c -o $(ofile)
 	echo "compile ok ($(ofile))"
 
-$(sofile): $(ofile) out/samp.o
+$(sofile): out/samp.o $(ofile)
 	gcc -ggdb -m32 -Wall -shared -lm -Xlinker --no-undefined out/samp.o out/$(binaryname).o -o $(sofile)
 	echo "link ok ($(sofile))"
 
