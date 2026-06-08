@@ -1,14 +1,5 @@
 #ifndef SAMP_NATIVES_IMPL
 
-struct SampNetGame *samp_pNetGame;
-struct SampPlayerPool *playerpool;
-struct SampVehiclePool *vehiclepool;
-
-static void* samp_pConsole;
-
-static unsigned char vehicle_gear_state[MAX_VEHICLES];
-static int vehicle_gear_change_time[MAX_VEHICLES];
-
 /**calls the random() function that comes with the pawn abstract machine*/
 static
 int amxrandom(int maxExclusive)
@@ -98,13 +89,6 @@ void SendRconCommand(char *command)
 {
 	TRACE;
 	((void (*)(void*,char*))0x809FBD0)(samp_pConsole, command);
-}
-
-static
-int samp_GetTime()
-{
-	TRACE;
-	return ((int (*)(void*))0x80AAF40)(samp_pNetGame);
 }
 
 static
@@ -2018,22 +2002,10 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 }
 
 static
-void ProcessStreamingForPlayer(int playerid)
-{
-	TRACE;
-}
-
-static
 void samp_init()
 {
 	TRACE;
 	char *str;
-
-	samp_pNetGame = *(struct SampNetGame**) 0x81CA4BC;
-	samp_pConsole = *(int**) 0x81CA4B8;
-	playerpool = samp_pNetGame->playerPool;
-	vehiclepool = samp_pNetGame->vehiclePool;
-	rakServer = samp_pNetGame->rakServer;
 
 	/*Remove filtering in chat messages coming from clients.*/
 	/*OnPlayerText*/

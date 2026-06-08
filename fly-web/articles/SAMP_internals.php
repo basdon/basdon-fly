@@ -491,7 +491,8 @@ else if (pModelInfo->IsBike())
 <p>
 	Player markers are streamed if the global setting for marker mode is not set to 0.
 	Markers are updated every 2500ms (not configurable). Markers are included of players who are
-	in the same virtual world, not spectating, not NPCs, and within the distance limit if marker mode is "streamed".
+	in the same virtual world, are not in state "none" or "spectating", not NPCs, and within the distance
+	limit if marker mode is "streamed".
 
 <h5>Vehicles</h5>
 <p>

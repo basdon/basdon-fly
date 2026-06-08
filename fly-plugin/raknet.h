@@ -56,7 +56,10 @@ struct RakServer {
 };
 
 struct RakServer_vtable {
-	int _pad0[12];
+	int _pad0[9];
+	int (*SendBitStream)(struct RakServer *this, struct BitStream *bs, enum PacketPriority prio, enum PacketReliability rel, char orderingChannel, struct PlayerID playerID, int bBroadcast);
+	int _pad28;
+	int _pad2C;
 	int (*Kick)(struct RakServer *this, struct PlayerID playerID);
 	int _pad34[7];
 	int (*GetLastPing)(struct RakServer *this, struct PlayerID playerID);
@@ -70,6 +73,7 @@ struct RakServer_vtable {
 	int _padF4[9];
 	struct RakNetStatistics *(*GetStatistics)(struct RakServer *rakServer, struct PlayerID playerID);
 };
+STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, SendBitStream, 0x24);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, Kick, 0x30);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetLastPing, 0x50);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, RPC_8C, 0x8C);

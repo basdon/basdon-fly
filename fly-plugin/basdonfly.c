@@ -329,6 +329,7 @@ static short players[MAX_PLAYERS];
 amount of playerids in players
 */
 static int playercount;
+/*just a quick access to playerpool->players*/
 static struct SampPlayer *player[MAX_PLAYERS];
 static int spawned[MAX_PLAYERS];
 
@@ -496,6 +497,8 @@ int CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_d
 #include "memstuff.c"
 #include "natives.c"
 #include "util_splitclientmessage.c"
+#include "samp_core.c"
+#include "samp_sync.c"
 #include "samp.c"
 #include "textdraws.c"
 #include "common.c"

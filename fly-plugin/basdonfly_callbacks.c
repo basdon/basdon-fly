@@ -51,6 +51,8 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 	unsigned long t;
 	int mysql_errno;
 
+	samp_core_init();
+	samp_sync_init();
 	samp_init();
 
 	t = time_timestamp();

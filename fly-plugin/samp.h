@@ -213,7 +213,9 @@ struct SampVehicle {
 	short vehicleid;
 	int _pad66;
 	short driverplayerid;
-	char _pad6C[0x82-0x6C];
+	char _pad6C[0x7A-0x6C];
+	int _pad7A;
+	int _pad7E;
 	int model;
 	struct vec4 spawnPos;
 	/*Primary color, set when creating the vehicle. This color will be used when respawning. See moddedColor1.*/
@@ -307,7 +309,12 @@ struct SampPlayer {
 	int numVehiclesStreamedIn;
 	int _pad28E5;
 	int numTextLabelsStreamedIn;
-	char _pad28ED[0x2915-0x28ED];
+	int numPickupsStreamedIn;
+	int numActorsStreamedIn;
+	int hasExpectedLocationAfterTeleport;
+	int expectedLocationSetAtTickCount;
+	struct vec3 expectedLocationAfterTeleport;
+	char _pad2909[0x2915-0x2909];
 	struct vec3 pos;
 	float hp;
 	float armor;
@@ -341,7 +348,7 @@ struct SampPlayer {
 	int isCurrentlyInRaceCheckpoint;
 	int _field2BDF;
 	short weaponSkill[11];
-	int _field2BF9;
+	int markersLastStreamedAtTickCount;
 	struct SpawnInfo spawnInfo;
 	int hasSpawnInfo;
 	char _pad2C2F;
