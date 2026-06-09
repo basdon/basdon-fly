@@ -25,6 +25,16 @@ static
 void class_on_player_request_class(int playerid, int _classid)
 {
 	TRACE;
+
+	/* If we do ForceClassSelection, the player kind of keeps existing in their current position but they don't send syncs. */
+	/* This is especially weird if they are in a vehicle (though we force them out of a vehicle on ForceClassSelection). */
+	/* Force their state to "none" when players are in class selection, then they will be streamed out for other players. */
+	if (sampPlayer[playerid]->currentState != PLAYER_STATE_NONE) {
+		/*GameMode::Event_OnPlayerStateChange*/
+		((void (*)(void*,int,int,int))0x80A5940)(samp->pGameMode, playerid, PLAYER_STATE_NONE, sampPlayer[playerid]->currentState);
+		sampPlayer[playerid]->currentState = PLAYER_STATE_NONE;
+	}
+
 	if (_classid < 0 || SETTING__NUM_CLASSES <= _classid) {
 		_classid = classid[playerid];
 	} else {
