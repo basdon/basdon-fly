@@ -151,7 +151,7 @@ static struct RPCDATA_HideActor rpcdata_hide_actor;
 
 #define MAP_LOAD_RESULT_HAS_OBJECTS 1
 #define MAP_LOAD_RESULT_HAS_ZONES 2
-/*jeanine:p:i:24;p:22;a:r;x:766;y:-654;*/
+/*jeanine:p:i:24;p:22;a:r;x:95.75;y:-40.88;*/
 /**
 Load a map from file as specified in given map structs.
 
@@ -308,7 +308,7 @@ corrupted:
 	logprintf("corrupted map %s", filename);
 	return 0;
 }
-/*jeanine:p:i:25;p:22;a:r;x:30;y:0;*/
+/*jeanine:p:i:25;p:22;a:r;x:3.75;*/
 #ifdef MAPS_PRINT_STATS
 static
 void maps_print_stats()
@@ -330,7 +330,7 @@ void maps_print_stats()
 	printf("%d removes\n", num_removed_objects);
 }
 #endif
-/*jeanine:p:i:22;p:20;a:r;x:400;y:-984;*/
+/*jeanine:p:i:22;p:20;a:r;x:50.00;y:-61.50;*/
 static
 void maps_load_from_db()
 {
@@ -361,7 +361,7 @@ void maps_load_from_db()
 			nc_params[2] = 0;
 			NC(n_cache_get_field_s);
 			ctoa(mapname, buf32, MAP_MAX_FILENAME);
-			load_result = maps_load_from_file(mapname, &obj_maps[num_obj_maps], &zone_maps[num_zone_maps]);/*jeanine:l:24*/
+			load_result = maps_load_from_file(mapname, &obj_maps[num_obj_maps], &zone_maps[num_zone_maps]);/*jeanine:r:i:24;*/
 			if (load_result & MAP_LOAD_RESULT_HAS_OBJECTS) {
 				if (!strcmp("octa_lod", mapname)) {
 					octavia_island_actor_mapidx = num_obj_maps;
@@ -379,10 +379,10 @@ void maps_load_from_db()
 	NC_cache_delete(cacheid);
 
 #ifdef MAPS_PRINT_STATS
-	maps_print_stats();/*jeanine:l:25*/
+	maps_print_stats();/*jeanine:r:i:25;*/
 #endif
 }
-/*jeanine:p:i:23;p:20;a:r;x:1232;y:65;*/
+/*jeanine:p:i:23;p:20;a:r;x:154.00;y:4.06;*/
 static
 int maps_timer_rotate_radar(void *data)
 {
@@ -427,7 +427,7 @@ int maps_timer_rotate_radar(void *data)
 
 	return 2500;
 }
-/*jeanine:p:i:31;p:20;a:r;x:397;y:87;*/
+/*jeanine:p:i:31;p:20;a:r;x:49.63;y:5.44;*/
 static
 int maps_timer_rotate_wmre_blades(void *data)
 {
@@ -481,7 +481,7 @@ int maps_timer_rotate_wmre_blades(void *data)
 
 	return 2000;
 }
-/*jeanine:p:i:30;p:20;a:r;x:395;y:-110;*/
+/*jeanine:p:i:30;p:20;a:r;x:49.38;y:-6.88;*/
 /**
  * Loads the "wmre_blades.map" mapfile to copy the first object as template for the windmill's blades.
  *
@@ -505,7 +505,7 @@ void maps_load_wmre_blade_template_object()
 	memcpy(wmre_blade_template, obj_maps->objects, size);
 	free(obj_maps->objects);
 }
-/*jeanine:p:i:20;p:0;a:b;x:0;y:30;*/
+/*jeanine:p:i:20;p:0;a:b;y:1.88;*/
 /**
 Initialize mapping system. Loads maps from db and reads their files.
 */
@@ -525,8 +525,8 @@ void maps_init()
 	removed_objects[0].radius = 0.25f;
 	num_removed_objects = 1;
 
-	maps_load_wmre_blade_template_object();/*jeanine:l:30*/
-	maps_load_from_db();/*jeanine:l:22*/
+	maps_load_wmre_blade_template_object();/*jeanine:r:i:30;*/
+	maps_load_from_db();/*jeanine:r:i:22;*/
 
 	rpcdata_show_actor03DL.actorid = rpcdata_show_actor037.actorid = OCTA_ACTORID;
 	rpcdata_show_actor03DL.skin = rpcdata_show_actor037.skin = 141;
@@ -540,10 +540,10 @@ void maps_init()
 
 	rpcdata_hide_actor.actorid = OCTA_ACTORID;
 
-	timer_set(2500, maps_timer_rotate_radar, NULL);/*jeanine:l:23*/
-	timer_set(2000, maps_timer_rotate_wmre_blades, NULL);/*jeanine:l:31*/
+	timer_set(2500, maps_timer_rotate_radar, NULL);/*jeanine:r:i:23;*/
+	timer_set(2000, maps_timer_rotate_wmre_blades, NULL);/*jeanine:r:i:31;*/
 }
-/*jeanine:p:i:21;p:27;a:r;x:28;y:619;*/
+/*jeanine:p:i:21;p:27;a:r;x:3.50;y:38.69;*/
 /**
 *
 */
@@ -591,7 +591,7 @@ stop_streaming:
 	streamingdata->zone_map->stream_status_for_player[playerid] = STREAMED_IN;
 	streamingdata->zone_map = NULL;
 }
-/*jeanine:p:i:11;p:17;a:r;x:106;y:-297;*/
+/*jeanine:p:i:11;p:17;a:r;x:13.25;y:-18.56;*/
 /**
 Deletes all the objects from given map for the given player.
 */
@@ -640,7 +640,7 @@ void maps_stream_out_objects_for_player(int playerid, struct OBJECT_MAP *map)
 		memset(wmre_blades_objectids[playerid], -1, sizeof(wmre_blades_objectids[playerid]));
 	}
 }
-/*jeanine:p:i:19;p:17;a:r;x:106;y:274;*/
+/*jeanine:p:i:19;p:17;a:r;x:13.25;y:17.13;*/
 /**
 Deletes all the gangzones from given map for the given player.
 */
@@ -666,7 +666,7 @@ void maps_stream_out_zones_for_player(int playerid, struct ZONE_MAP *map)
 		}
 	}
 }
-/*jeanine:p:i:9;p:28;a:r;x:50;y:242;*/
+/*jeanine:p:i:9;p:28;a:r;x:6.25;y:15.13;*/
 static
 void maps_print_object_breakdown(int playerid)
 {
@@ -696,7 +696,7 @@ void maps_print_object_breakdown(int playerid)
 		}
 	}
 }
-/*jeanine:p:i:28;p:27;a:r;x:944;y:-2;*/
+/*jeanine:p:i:28;p:27;a:r;x:118.00;y:-0.13;*/
 /**
  * @return amount of objects created
  */
@@ -721,7 +721,7 @@ int maps_continue_stream_in_queued_objects_for_player(int playerid, struct STREA
 			objectid++;
 			if (objectid >= MAX_MAPSYSTEM_OBJECTS) {
 				logprintf("object limit hit while streaming map %s", streamingdata->obj_map->name);
-				maps_print_object_breakdown(playerid);/*jeanine:l:9*/
+				maps_print_object_breakdown(playerid);/*jeanine:r:i:9;*/
 				goto stop_streaming;
 			}
 		}
@@ -804,7 +804,7 @@ skip_wmre_blades:
 
 	return num_created_objects;
 }
-/*jeanine:p:i:16;p:27;a:r;x:3802;y:13;*/
+/*jeanine:p:i:16;p:27;a:r;x:475.25;y:0.81;*/
 static
 struct OBJECT_MAP *maps_find_next_object_map_to_stream_for_player(int playerid, float x, float y)
 {
@@ -840,7 +840,7 @@ struct OBJECT_MAP *maps_find_next_object_map_to_stream_for_player(int playerid, 
 
 	return selected;
 }
-/*jeanine:p:i:7;p:27;a:r;x:2860;y:-2;*/
+/*jeanine:p:i:7;p:27;a:r;x:357.50;y:-0.13;*/
 /**
  * Does not check if a map is already being streamed in.
  * Does not check if objects in the map are already streamed in.
@@ -868,7 +868,7 @@ void maps_prepare_streaming_object_map(int playerid, struct OBJECT_MAP *map, str
 	logprintf("queued %d objects for map %s", streamingdata->num_queued_objects, map->name);
 #endif
 }
-/*jeanine:p:i:17;p:27;a:r;x:4712;y:3;*/
+/*jeanine:p:i:17;p:27;a:r;x:589.00;y:0.19;*/
 /**
  * Both objects and zones.
  */
@@ -890,7 +890,7 @@ void maps_stream_out_maps_for_player(int playerid, float posx, float posy)
 					streaming_data[playerid].obj_map = NULL;
 				}
 				obj_map->stream_status_for_player[playerid] = STREAMED_OUT;
-				maps_stream_out_objects_for_player(playerid, obj_map);/*jeanine:l:11*/
+				maps_stream_out_objects_for_player(playerid, obj_map);/*jeanine:r:i:11;*/
 			}
 		}
 	}
@@ -904,12 +904,12 @@ void maps_stream_out_maps_for_player(int playerid, float posx, float posy)
 					streaming_data[playerid].zone_map = NULL;
 				}
 				zone_map->stream_status_for_player[playerid] = STREAMED_OUT;
-				maps_stream_out_zones_for_player(playerid, zone_map);/*jeanine:l:19*/
+				maps_stream_out_zones_for_player(playerid, zone_map);/*jeanine:r:i:19;*/
 			}
 		}
 	}
 }
-/*jeanine:p:i:18;p:27;a:r;x:124;y:-7;*/
+/*jeanine:p:i:18;p:27;a:r;x:15.50;y:-0.44;*/
 static
 struct ZONE_MAP *maps_find_next_zone_map_to_stream_for_player(int playerid, float x, float y)
 {
@@ -945,7 +945,7 @@ struct ZONE_MAP *maps_find_next_zone_map_to_stream_for_player(int playerid, floa
 
 	return selected;
 }
-/*jeanine:p:i:15;p:27;a:r;x:2089;y:-9;*/
+/*jeanine:p:i:15;p:27;a:r;x:261.13;y:-0.56;*/
 /**
  * Moves objects within {@link IMM_STREAMING_RADIUS_SQ} to the front of the queue (which is
  * actually at the end), and returns the amount of objects that is.
@@ -982,7 +982,7 @@ int maps_prioritize_closest_objects(struct STREAMING_DATA *streamingdata, float 
 
 	return count;
 }
-/*jeanine:p:i:5;p:27;a:r;x:38;y:506;*/
+/*jeanine:p:i:5;p:27;a:r;x:4.75;y:31.63;*/
 static
 void maps_prepare_streaming_zone_map(int playerid, struct ZONE_MAP *map, struct STREAMING_DATA *streamingdata)
 {
@@ -991,7 +991,7 @@ void maps_prepare_streaming_zone_map(int playerid, struct ZONE_MAP *map, struct 
 	streamingdata->zone_map = map;
 	streamingdata->next_zone_idx = 0;
 }
-/*jeanine:p:i:27;p:29;a:b;x:4;y:783;*/
+/*jeanine:p:i:27;p:29;a:b;x:0.50;y:48.94;*/
 enum OBJ_STREAM_MODE {
 	OBJ_STREAM_MODE_ANY,
 	OBJ_STREAM_MODE_CLOSEST_NOW,
@@ -1026,37 +1026,37 @@ void maps_stream_for_player(int playerid, float posx, float posy, enum OBJ_STREA
 
 	streamingdata = &streaming_data[playerid];
 
-	maps_stream_out_maps_for_player(playerid, posx, posy);/*jeanine:l:17*/
+	maps_stream_out_maps_for_player(playerid, posx, posy);/*jeanine:r:i:17;*/
 
 	max_objs_to_create = MAX_OBJECTS_TO_CREATE_PER_TICK;
 	num_objs_created = 0;
 	do {
 		if (!streamingdata->obj_map) {
-			next_object_map = maps_find_next_object_map_to_stream_for_player(playerid, posx, posy);/*jeanine:l:16*/
+			next_object_map = maps_find_next_object_map_to_stream_for_player(playerid, posx, posy);/*jeanine:r:i:16;*/
 			if (!next_object_map) {
 				break;
 			}
-			maps_prepare_streaming_object_map(playerid, next_object_map, streamingdata);/*jeanine:l:7*/
+			maps_prepare_streaming_object_map(playerid, next_object_map, streamingdata);/*jeanine:r:i:7;*/
 		}
 		if (mode == OBJ_STREAM_MODE_CLOSEST_NOW) {
-			num_prioritized_objs = maps_prioritize_closest_objects(streamingdata, posx, posy);/*jeanine:l:15*/
+			num_prioritized_objs = maps_prioritize_closest_objects(streamingdata, posx, posy);/*jeanine:r:i:15;*/
 			if (num_prioritized_objs > MAX_OBJECTS_TO_CREATE_PER_TICK) {
 				max_objs_to_create = num_prioritized_objs;
 			}
 		}
-		num_objs_created += maps_continue_stream_in_queued_objects_for_player(playerid, streamingdata, max_objs_to_create);/*jeanine:l:28*/
+		num_objs_created += maps_continue_stream_in_queued_objects_for_player(playerid, streamingdata, max_objs_to_create);/*jeanine:r:i:28;*/
 	} while (num_objs_created < MAX_OBJECTS_TO_CREATE_PER_TICK);
 
 	if (!streamingdata->zone_map) {
-		next_zone_map = maps_find_next_zone_map_to_stream_for_player(playerid, posx, posy);/*jeanine:l:18*/
+		next_zone_map = maps_find_next_zone_map_to_stream_for_player(playerid, posx, posy);/*jeanine:r:i:18;*/
 		if (!next_zone_map) {
 			return;
 		}
-		maps_prepare_streaming_zone_map(playerid, next_zone_map, streamingdata);/*jeanine:l:5*/
+		maps_prepare_streaming_zone_map(playerid, next_zone_map, streamingdata);/*jeanine:r:i:5;*/
 	}
-	maps_continue_stream_in_queued_zones_for_player(playerid, streamingdata);/*jeanine:l:21*/
+	maps_continue_stream_in_queued_zones_for_player(playerid, streamingdata);/*jeanine:r:i:21;*/
 }
-/*jeanine:p:i:26;p:20;a:b;x:0;y:30;*/
+/*jeanine:p:i:26;p:20;a:b;y:1.88;*/
 static
 /**
  *Should be called from ProcessTick()
@@ -1083,7 +1083,7 @@ void maps_process_tick(int elapsed_time)
 		}
 	}
 }
-/*jeanine:p:i:2;p:26;a:b;x:0;y:30;*/
+/*jeanine:p:i:2;p:26;a:b;y:1.88;*/
 static
 void maps_on_player_connect(int playerid)
 {
@@ -1111,7 +1111,7 @@ void maps_on_player_connect(int playerid)
 	streaming_data[playerid].zone_map = NULL;
 	next_streaming_tick_delay[playerid] = 3000; /*Initial delay, different from repeating delay.*/
 }
-/*jeanine:p:i:29;p:2;a:b;x:0;y:30;*/
+/*jeanine:p:i:29;p:2;a:b;y:1.88;*/
 /**
  * To reset map stream states for player.
  */
