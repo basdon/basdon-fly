@@ -187,7 +187,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	const int playerid = PARAM(1);
 
 	sampPlayer[playerid] = playerpool->players[playerid];
-	RakServer__GetPlayerIDFromIndex(&rakPlayerID[playerid], rakServer, playerid);
+	rakPlayerID[playerid] = rakServerVtable->GetPlayerIDFromIndex(rakServer, playerid);
 
 #ifdef DEV
 	SendClientMessage(playerid, COL_WARN, "DEVELOPMENT BUILD");

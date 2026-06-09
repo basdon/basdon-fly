@@ -289,17 +289,6 @@ end:
 	pop ebp
 	ret
 
-;prot void RakServer__GetPlayerIDFromIndex(struct PlayerID *outPlayerId, struct RakServer *rakServer, short playerIndex);
-global RakServer__GetPlayerIDFromIndex:function
-RakServer__GetPlayerIDFromIndex:
-	push dword [esp+0Ch] ; playerIndex
-	push dword [esp+0Ch] ; rakServer
-	push dword [esp+0Ch] ; outPlayerId
-	mov eax, 0807C720h
-	call eax ; thiscall with 1 parameter; pops 1 arg
-	add esp, 08h
-	ret
-
 ;prot /**
 ;prot  * Need to ensure that {@code struct PlayerID playerID} is equivalent to {@code int binaryAddress, short port}.
 ;prot  */

@@ -17,4 +17,5 @@ void samp_core_init()
 	playerpool = samp->playerPool;
 	vehiclepool = samp->vehiclePool;
 	rakServer = samp->rakServer;
+	rakServerVtable = rakServer->vtable;
 }

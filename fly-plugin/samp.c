@@ -96,12 +96,10 @@ void SendRPC_8C(int playerid, int rpc, void *rpcdata, int size_bytes, enum Packe
 {
 	TRACE;
 	struct BitStream bs;
-	struct PlayerID playerID;
 
 	bs.ptrData = rpcdata;
 	bs.numberOfBitsUsed = size_bytes * 8;
-	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playerid);
-	rakServer->vtable->RPC_8C(rakServer, (void*)rpc, &bs, priority, reliability, orderingChannel, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
+	rakServerVtable->RPC_8C(rakServer, (void*)rpc, &bs, priority, reliability, orderingChannel, rakPlayerID[playerid], /*broadcast*/ 0, /*shiftTimestamp*/ 0);
 }
 
 static
@@ -120,10 +118,8 @@ static
 void KickRaw(int playerid)
 {
 	TRACE;
-	struct PlayerID playerID;
 
-	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playerid);
-	rakServer->vtable->Kick(rakServer, playerID);
+	rakServerVtable->Kick(rakServer, rakPlayerID[playerid]);
 	/*SampPlayerPool::RemovePlayer*/
 	((void (*)(struct SampPlayerPool*,int,int)) 0x80D0A90)(playerpool,playerid,/*reason_kick*/2);
 }
@@ -979,7 +975,6 @@ void SyncVehicleDamageStatus(struct SampVehicle *vehicle)
 {
 	TRACE;
 	struct INOUTRPCDATA_UpdateVehicleDamageStatus rpcdata;
-	struct PlayerID playerID;
 	struct BitStream bs;
 	int i;
 
@@ -994,8 +989,7 @@ void SyncVehicleDamageStatus(struct SampVehicle *vehicle)
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[rpcdata.vehicleid]) {
-			RakServer__GetPlayerIDFromIndex(&playerID, rakServer, i);
-			rakServer->vtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
+			rakServerVtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, rakPlayerID[i], /*broadcast*/ 0, /*shiftTimestamp*/ 0);
 		}
 	}
 }
@@ -1473,7 +1467,6 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 	TRACE;
 	const static char *SYSTEM_ISSUER = "system", *REASONNULL = "(NULL)";
 
-	struct PlayerID playerID;
 	int intv;
 	char *escapedreason;
 	char msg[144];
@@ -1522,8 +1515,7 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 		/*Interval should be smaller than 1000, since if it's a kick
 		caused by system, player should be gone before the next
 		check (since most of them run at 1Hz).*/
-		RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playerid);
-		intv = 2 * rakServer->vtable->GetLastPing(rakServer, playerID);
+		intv = 2 * rakServerVtable->GetLastPing(rakServer, rakPlayerID[playerid]);
 		if (intv > 970) {
 			intv = 970;
 		}
@@ -1943,7 +1935,6 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 	struct INOUTRPCDATA_UpdateVehicleDamageStatus *rpcdata;
 	struct SampVehicle *vehicle;
 	int playerid, vehicleid, i;
-	struct PlayerID playerID;
 	struct BitStream bs;
 #ifdef DEV
 	char msg144[144];
@@ -1992,8 +1983,7 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (i != playerid && sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[vehicleid]) {
-			RakServer__GetPlayerIDFromIndex(&playerID, rakServer, i);
-			rakServer->vtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
+			rakServerVtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, rakPlayerID[i], /*broadcast*/ 0, /*shiftTimestamp*/ 0);
 		}
 	}
 }

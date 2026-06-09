@@ -115,10 +115,8 @@ static
 int cmd_dev_getlastping(struct COMMANDCONTEXT cmdctx)
 {
 	TRACE;
-	struct PlayerID playerID;
 
-	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, cmdctx.playerid);
-	sprintf(cbuf32, "%d", rakServer->vtable->GetLastPing(rakServer, playerID));
+	sprintf(cbuf32, "%d", rakServerVtable->GetLastPing(rakServer, rakPlayerID[cmdctx.playerid]));
 	SendClientMessage(cmdctx.playerid, -1, cbuf32);
 	return CMD_OK;
 }

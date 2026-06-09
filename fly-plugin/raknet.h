@@ -67,10 +67,9 @@ struct RakServer_vtable {
 	int (*RPC_8C)(struct RakServer *this, char *rpc, struct BitStream *bitStream, enum PacketPriority priority, enum PacketReliability reliability, char orderingChannel, struct PlayerID playerID, int bBroadcast, int bShiftTimestamp);
 	int _pad90[22];
 	short (*GetIndexFromPlayerID)(struct RakServer *rakServer, struct PlayerID playerID);
-	int _padEC;
-	/**thiscall with one parameter, use RakServer__GetPlayerIDFromIndex in samp.asm*/
-	void (*GetPlayerIDFromIndex)(struct PlayerID *outPlayerID, struct RakServer *rakServer, short playerIndex);
-	int _padF4[9];
+	/** equal to actual signature: void (*GetPlayerIDFromIndex)(struct PlayerID *outPlayerId, struct RakServer *rakServer, short playerIndex)*/
+	struct PlayerID (*GetPlayerIDFromIndex)(struct RakServer *rakServer, short playerIndex);
+	int _padF0[10];
 	struct RakNetStatistics *(*GetStatistics)(struct RakServer *rakServer, struct PlayerID playerID);
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, SendBitStream, 0x24);
@@ -78,7 +77,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, Kick, 0x30);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetLastPing, 0x50);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, RPC_8C, 0x8C);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetIndexFromPlayerID, 0xE8);
-STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetPlayerIDFromIndex, 0xF0); /*TODO: revalidate, as I think this might need to be 0xEC*/
+STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetPlayerIDFromIndex, 0xEC);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetStatistics, 0x118); /*TODO: revalidate*/
 
 struct RakRPCHandlerArg {

@@ -32,7 +32,6 @@ void UpdatePlayerMarkersForPlayer(struct SampPlayer *player)
 {
 	TRACE;
 	struct BitStream bs;
-	struct PlayerID playerID;
 	struct SampPlayer *otherplayer;
 #pragma pack(1)
 	struct {
@@ -74,8 +73,7 @@ void UpdatePlayerMarkersForPlayer(struct SampPlayer *player)
 			}
 		}
 	}
-	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, player->playerid);
-	rakServer->vtable->SendBitStream(rakServer, &bs, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 1, playerID, 0);
+	rakServerVtable->SendBitStream(rakServer, &bs, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 1, rakPlayerID[player->playerid], 0);
 }
 /*jeanine:p:i:4;p:1;a:r;x:11.00;y:-44.00;n:StreamVehiclesForPlayer;*/
 static
@@ -107,7 +105,7 @@ void StreamVehiclesForPlayer(struct SampPlayer *player)
 		}
 	}
 }
-/*jeanine:p:i:6;p:3;a:r;x:2.00;n:GetOtherPlayerPosition;*/
+/*jeanine:p:i:6;p:3;a:r;x:8.00;n:GetOtherPlayerPosition;*/
 static
 struct vec3 *GetOtherPlayerPositionForStreamDistanceCheck(struct SampPlayer *player)
 {

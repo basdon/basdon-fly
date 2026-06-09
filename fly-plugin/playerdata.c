@@ -30,15 +30,13 @@ void pdata_on_player_connect(int playerid)
 {
 	TRACE;
 	struct playerdata *pd;
-	struct PlayerID playerID;
 	struct in_addr in_addr;
 
 	if ((pd = pdata[playerid]) == NULL) {
 		pd = pdata[playerid] = malloc(sizeof(struct playerdata));
 	}
 
-	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playerid);
-	in_addr.s_addr = playerID.binaryAddress;
+	in_addr.s_addr = rakPlayerID[playerid].binaryAddress;
 	strcpy(pd->ip, inet_ntoa(in_addr));
 	strcpy(pd->name, playerpool->names[playerid]); /*TODO: don't need to copy this if we just use the pool's value*/
 	pdata_on_name_updated(playerid);
