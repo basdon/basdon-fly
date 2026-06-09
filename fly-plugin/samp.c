@@ -664,6 +664,9 @@ static
 void ForceClassSelection(int playerid)
 {
 	TRACE;
+
+	/* if player is in a vehicle, they will keep hearing the radio. do ClearAnimations to remove them from vehicle */
+	ClearAnimations(playerid);
 	SendRPC_8C(playerid, RPC_ForceClassSelection, NULL, 0, HIGH_PRIORITY, RELIABLE_ORDERED, 2);
 }
 
