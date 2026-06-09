@@ -6,6 +6,7 @@
 	<li><a href=#vehicle_categories_(client)>Vehicle categories (client)</a>
 	<li><a href=#vehicle_damage_status>Vehicle damage status</a>
 	<li><a href=#player_pos_server_streaming>Player position and server streaming</a>
+	<li><a href=#packet_priority_reliability_ordering>Packet priority, reliability, ordering channel</a>
 </ul>
 
 <h3 id=client_console_commands>Client console commands</h3>
@@ -536,3 +537,13 @@ else if (pModelInfo->IsBike())
 	An actor is streamed in when they are in use, are in the same virtual world, and within <code>stream_distance</code>.
 <p>
 	If that is not the case and the actor is still streamed in, they will be streamed out.
+
+<h3 id=packet_priority_reliability_ordering>Packet priority, reliability, ordering channel</h3>
+
+<table class=new>
+	<thead>
+		<tr><th>packet<th>priority<th>reliability<th>ord
+	<tbody>
+		<tr><td>Request Class<td>HIGH_PRIORITY<td>RELIABLE<td>0
+		<tr><td>(all other scripting functions)<td>HIGH_PRIORITY<td>RELIABLE_ORDERED<td>2
+</table>

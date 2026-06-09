@@ -670,7 +670,7 @@ static
 void ForceClassSelection(int playerid)
 {
 	TRACE;
-	SendRPC_8C(playerid, RPC_ForceClassSelection, NULL, 0, HIGH_PRIORITY, RELIABLE, 2);
+	SendRPC_8C(playerid, RPC_ForceClassSelection, NULL, 0, HIGH_PRIORITY, RELIABLE_ORDERED, 2);
 }
 
 static
@@ -681,7 +681,7 @@ void GivePlayerWeapon(int playerid, int weaponid, int ammo)
 
 	rpcdata.weaponid = weaponid;
 	rpcdata.ammo = ammo;
-	SendRPC_8C(playerid, RPC_GiveWeapon, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE, 2);
+	SendRPC_8C(playerid, RPC_GiveWeapon, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
 }
 
 /**
@@ -1348,7 +1348,7 @@ void SetVehicleZAngle(int vehicleid, float angle)
 	if (vehicle && vehicle->driverplayerid != INVALID_PLAYER_ID) {
 		rpcdata.vehicleid = vehicleid;
 		rpcdata.angle = angle;
-		SendRPC_8C(vehicle->driverplayerid, RPC_SetVehicleZAngle, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE, 2);
+		SendRPC_8C(vehicle->driverplayerid, RPC_SetVehicleZAngle, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
 	}
 }
 
@@ -1403,7 +1403,7 @@ void PutPlayerInVehicleRaw(int playerid, int vehicleid, int seat)
 
 	rpcdata.vehicleid = vehicleid;
 	rpcdata.seat = seat;
-	SendRPC_8C(playerid, RPC_PutPlayerInVehicle, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE, 2);
+	SendRPC_8C(playerid, RPC_PutPlayerInVehicle, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
 }
 
 static

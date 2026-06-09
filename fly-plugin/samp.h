@@ -1172,6 +1172,8 @@ DriverSync
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,orderingChannel) \
 	((void (*)(void*,void*,struct BitStream*,short,int))0x80AC1D0)((void*)samp_pNetGame,(void*)pRPC,pBS,playerid,orderingChannel)
 
+/*all packets use HIGH_PRIORITY RELIABLE_ORDERED orderingChannel 2 unless otherwise specified*/
+
 #define RPC_ShowGangZone 0x81587A1 /*ptr to 0x6C(108)*/
 #define RPC_HideGangZone 0x8163BA7 /*ptr to 0x78(120)*/
 #define RPC_CreateObject 0x815A7F8 /*ptr to 0x2C(44)*/
@@ -1221,7 +1223,7 @@ DriverSync
 #define RPC_PlayerCreate 0x816324E /*ptr to 0x20(32)*/
 #define RPC_PlayerLeave 0x815AA78 /*ptr to 0x8A(138)*/
 #define RPC_PutPlayerInVehicle 0x815A058 /*ptr to 0x46(70)*/
-#define RPC_RequestClass 0x81572DF /*ptr to 0x80(128)*/
+#define RPC_RequestClass 0x81572DF /*ptr to 0x80(128), orderingChannel 0, RELIABLE*/
 #define RPC_SetSpawnInfo 0x8162624 /*ptr to 0x44(68)*/
 #define RPC_WorldPlayerAdd 0x816324E /*ptr to 0x20(32)*/
 #define RPC_SetPlayerName 0x815CCC5 /*ptr to 0xB(11), orderingChannel 2*/
