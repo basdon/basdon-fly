@@ -2088,7 +2088,7 @@ exit:
 		bitstream_write_velocity(&bitstream, 0.0f, 0.0f, 0.0f);
 		bitstream_write_zero(&bitstream); /*not surfing a vehicle*/
 		bitstream_write_zero(&bitstream); /*no animation*/
-		/*See 0x80AC4F9 (CNetGame::BroadCastPlayerSyncData+129)*/
+		/*See 0x80AC4F9 (Samp::BroadCastPlayerSyncData+129)*/
 		rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
 		/*send it 3x because it's important :D*/
 		/*TODO: experiment with making this RELIABLE (but maybe with a different orderingchannel if it would give issues)*/
@@ -2133,7 +2133,7 @@ exit:
 			bitstream_write_zero(&bitstream); /*has_misc*/
 		}
 		bitstream_write_zero(&bitstream); /*has_trailer_id*/
-		/*See 0x80AC4F9 (CNetGame::BroadCastPlayerSyncData+129)*/
+		/*See 0x80AC4F9 (Samp::BroadCastPlayerSyncData+129)*/
 		rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
 
 		if (rd->last_invehicle_packet) {

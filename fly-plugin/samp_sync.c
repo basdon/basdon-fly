@@ -23,11 +23,11 @@ int IsWithinStreamDistance(struct vec3 *a, struct vec3 *b)
 	return dx * dx + dy * dy + dz * dz < *stream_distance * *stream_distance;
 }
 /*jeanine:p:i:5;p:1;a:r;x:11.00;y:21.00;n:UpdatePlayerMarkersForPlayer;*/
-static
 /**
  * sending markers of players that don't exist for the client has no effect (of course because the
  * client also wouldn't know what color to use). sending markers for npc players does work.
  */
+static
 void UpdatePlayerMarkersForPlayer(struct SampPlayer *player)
 {
 	TRACE;
