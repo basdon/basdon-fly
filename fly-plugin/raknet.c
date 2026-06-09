@@ -1,5 +1,4 @@
-/**not static because it's used in samp.asm*/
-struct RakServer *rakServer;
+static struct RakServer *rakServer;
 static struct RakServer_vtable *rakServerVtable;
 static struct PlayerID rakPlayerID[MAX_PLAYERS];
 

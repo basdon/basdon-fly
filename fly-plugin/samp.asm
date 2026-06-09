@@ -1,6 +1,5 @@
 extern logprintf
 extern samp
-extern rakServer;
 
 extern hook_OnOnfootSync
 extern hook_OnDriverSync
@@ -287,27 +286,6 @@ end:
 	pop esi
 	pop edi
 	pop ebp
-	ret
-
-;prot /**
-;prot  * Need to ensure that {@code struct PlayerID playerID} is equivalent to {@code int binaryAddress, short port}.
-;prot  */
-;prot void RakServer__Send(struct RakServer *rakServer, struct BitStream *bitstream, int priority, int reliability, int orderStream, struct PlayerID playerID, int broadcast);
-global RakServer__Send:function
-RakServer__Send:
-	push dword [esp+020h] ; broadcast
-	push dword [esp+020h] ; playerID.port
-	push dword [esp+020h] ; playerID.binaryAddress
-	push dword [esp+020h] ; orderStream
-	push dword [esp+020h] ; reliability
-	push dword [esp+020h] ; priority
-	push dword [esp+020h] ; bitstream
-	mov eax, [esp+020h] ; rakServer
-	push eax
-	mov eax, [eax] ; vtable
-	mov eax, [eax+024h] ; SendFunc, most likely 0807BB60h
-	call eax ; thiscall with 6 parameters; pops 7 (1 parameter is a struct)
-	add esp, 020h
 	ret
 
 ;prot void QuaternionToMatrix(struct Quaternion *quat, struct SampMatrix *mat);

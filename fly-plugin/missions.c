@@ -2089,10 +2089,11 @@ exit:
 		bitstream_write_zero(&bitstream); /*not surfing a vehicle*/
 		bitstream_write_zero(&bitstream); /*no animation*/
 		/*See 0x80AC4F9 (CNetGame::BroadCastPlayerSyncData+129)*/
-		RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+		rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
 		/*send it 3x because it's important :D*/
-		RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
-		RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+		/*TODO: experiment with making this RELIABLE (but maybe with a different orderingchannel if it would give issues)*/
+		rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+		rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
 		return 20; /*wait less long to exit*/
 	} else {
 		bitstream.numberOfBitsUsed = sizeof(syncdata.aligned.structured) * 8;
@@ -2107,6 +2108,8 @@ exit:
 		if (rd->send_initial || rd->last_invehicle_packet) {
 			bitstream_write_velocity(&bitstream, paused->vel.x, paused->vel.y, paused->vel.z);
 		} else {
+			/* can't use all 0 because then player's client will put the vehicle on fire if the plane is inverted.. */
+			/* any kind of non-0 velocity prevents this (TODO: recheck because I just now experienced otherwise I think) */
 			bitstream_write_velocity(&bitstream, 0.0f, 0.0f, 0.01f);
 		}
 		if (rd->last_invehicle_packet) {
@@ -2131,12 +2134,12 @@ exit:
 		}
 		bitstream_write_zero(&bitstream); /*has_trailer_id*/
 		/*See 0x80AC4F9 (CNetGame::BroadCastPlayerSyncData+129)*/
-		RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+		rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
 
 		if (rd->last_invehicle_packet) {
 			/*send it 3x because it's important to have these delivered :D*/
-			RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
-			RakServer__Send(rakServer, &bitstream, /*prio*/1, /*rel*/7, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+			rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+			rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
 			rd->send_onfoot = 1;
 			return 30; /*wait less long to exit after sending the last driversync*/
 		}

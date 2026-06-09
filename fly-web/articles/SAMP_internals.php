@@ -545,5 +545,6 @@ else if (pModelInfo->IsBike())
 		<tr><th>packet<th>priority<th>reliability<th>ord
 	<tbody>
 		<tr><td>Request Class<td>HIGH_PRIORITY<td>RELIABLE<td>0
+		<tr><td>On foot sync<td>HIGH_PRIORITY<td>UNRELIABLE_SEQUENCED<td>1
 		<tr><td>(all other scripting functions)<td>HIGH_PRIORITY<td>RELIABLE_ORDERED<td>2
 </table>
