@@ -83,7 +83,7 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 			<tr><td>403<td>0x871120<td>1<td>Linerunner
 			<tr><td>404<td>0x871120<td>1<td>Perennial
 			<tr><td>405<td>0x871120<td>1<td>Sentinel
-			<tr><td>406<td>0x8717D8<td>0<strong><sup>(1)</sup><td>Dumper
+			<tr><td>406<td>0x8717D8<td>0<strong><sup>(1)</sup></strong><td>Dumper
 			<tr><td>407<td>0x871120<td>1<td>Fire Truck
 			<tr><td>408<td>0x871120<td>1<td>Trashmaster
 			<tr><td>409<td>0x871120<td>1<td>Stretch
@@ -121,7 +121,7 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 			<tr><td>441<td>0x871120<td>1<td>RC Bandit
 			<tr><td>442<td>0x871120<td>1<td>Romero
 			<tr><td>443<td>0x871120<td>1<td>Packer
-			<tr><td>444<td>0x8717D8<td>0<strong><sup>(1)</sup><td>Monster
+			<tr><td>444<td>0x8717D8<td>0<strong><sup>(1)</sup></strong><td>Monster
 			<tr><td>445<td>0x871120<td>1<td>Admiral
 			<tr><td>446<td>0x8721A0<td>4<td>Squalo
 			<tr><td>447<td>0x871680<td>3<td>Seasparrow
@@ -148,7 +148,7 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 			<tr><td>468<td>0x871360<td>2<td>Sanchez
 			<tr><td>469<td>0x871680<td>3<td>Sparrow
 			<tr><td>470<td>0x871120<td>1<td>Patriot
-			<tr><td>471<td>0x871AE8<td>0<strong><sup>(1)</sup><td>Quadbike
+			<tr><td>471<td>0x871AE8<td>0<strong><sup>(1)</sup></strong><td>Quadbike
 			<tr><td>472<td>0x8721A0<td>4<td>Coast Guard
 			<tr><td>473<td>0x8721A0<td>4<td>Dinghy
 			<tr><td>474<td>0x871120<td>1<td>Hermes
@@ -231,8 +231,8 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 			<tr><td>553<td>0x871948<td>5<td>Nevada
 			<tr><td>554<td>0x871120<td>1<td>Yosemite
 			<tr><td>555<td>0x871120<td>1<td>Windsor
-			<tr><td>556<td>0x8717D8<td>0<strong><sup>(1)</sup><td>Monster A
-			<tr><td>557<td>0x8717D8<td>0<strong><sup>(1)</sup><td>Monster B
+			<tr><td>556<td>0x8717D8<td>0<strong><sup>(1)</sup></strong><td>Monster A
+			<tr><td>557<td>0x8717D8<td>0<strong><sup>(1)</sup></strong><td>Monster B
 			<tr><td>558<td>0x871120<td>1<td>Uranus
 			<tr><td>559<td>0x871120<td>1<td>Jester
 			<tr><td>560<td>0x871120<td>1<td>Sultan
@@ -248,7 +248,7 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 			<tr><td>570<td>0x871120<td>7<td>Brown Streak Carriage
 			<tr><td>571<td>0x871120<td>1<td>Kart
 			<tr><td>572<td>0x871120<td>1<td>Mower
-			<tr><td>573<td>0x8717D8<td>0<strong><sup>(1)</sup><td>Dune
+			<tr><td>573<td>0x8717D8<td>0<strong><sup>(1)</sup></strong><td>Dune
 			<tr><td>574<td>0x871120<td>1<td>Sweeper
 			<tr><td>575<td>0x871120<td>1<td>Broadway
 			<tr><td>576<td>0x871120<td>1<td>Tornado
@@ -324,7 +324,7 @@ When launching SA-MP Debug (<code>samp_debug.exe</code>), following commands are
 	"unknown", meaning none of their damage gets synced. The bumper may get damaged in the driver's game (or tires of a quad bike),
 	but none of the other players will see any damage to that vehicle.
 <p>
-	Client applies tire damage at <code>CSampVehicle::ApplyVehicleDamageTires(char)</code></summary> with
+	Client applies tire damage at <code>CSampVehicle::ApplyVehicleDamageTires(char)</code> with
 	following behavior:
 <ul>
 	<li>for <strong>CHeli/CPlane/CBmx/CBoat/CTrain/Unknown</strong>: nop
