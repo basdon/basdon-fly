@@ -18,6 +18,7 @@
 		}
 		#showcase img{
 			width: 175px;
+			aspect-ratio: 640/480;
 		}
 		@media(max-width:800px){
 			#showcase img{

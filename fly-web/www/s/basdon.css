@@ -60,6 +60,11 @@ nav a {
 nav a:hover, header h1 a:hover {
 	background:#0004;
 }
+img[src^="/s/fff-"] {
+	/*set explicit size on famfamfam icons to prevent layout jumps once they load*/
+	width: 16px;
+	height: 16px;
+}
 #ip {
 	float:left;
 }
@@ -254,6 +259,7 @@ p.msg.hmargin {
 }
 .airportlist img{
 	width:100px;
+	aspect-ratio:640/480;
 	border:1px solid #000
 }
 .navinfo{
@@ -276,6 +282,8 @@ p.msg.hmargin {
 	border-collapse:collapse
 }
 .navinfo table.box img{
+	width:100px;
+	height:56px;
 	border:1px solid #000;
 	vertical-align:middle
 }
@@ -303,6 +311,11 @@ ul.compact {
 	.flightlist td {
 		background: #eee;
 		padding: 0;
+	}
+	.flightlist img[src^="/s/s"] {
+		/*set explicit size to prevent layout jumps once images do load*/
+		width: 73px;
+		height: 24px;
 	}
 	.flightlist td:first-child {
 		border-top-left-radius: .5em;
