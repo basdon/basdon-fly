@@ -330,7 +330,7 @@ amount of playerids in players
 */
 static int playercount;
 /*just a quick access to playerpool->players*/
-static struct SampPlayer *player[MAX_PLAYERS];
+static struct SampPlayer *sampPlayer[MAX_PLAYERS];
 static int spawned[MAX_PLAYERS];
 
 /**set in samp.asm*/

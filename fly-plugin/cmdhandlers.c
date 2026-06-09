@@ -824,7 +824,7 @@ int cmd_loc(struct COMMANDCONTEXT cmdctx)
 		SendClientMessage(cmdctx.playerid, COL_WARN, WARN"That player is not online.");
 		return CMD_OK;
 	}
-	zones_update(target, player[target]->pos);
+	zones_update(target, sampPlayer[target]->pos);
 
 	b = buf;
 	b += sprintf(buf, "%s(%d) is located in ",
@@ -842,7 +842,7 @@ int cmd_loc(struct COMMANDCONTEXT cmdctx)
 				"traveling at %.0f kts in a %s (%.0f ft)",
 				VEL_TO_KTS * vel,
 				vehnames[model - 400],
-				player[target]->pos.z
+				sampPlayer[target]->pos.z
 			);
 		} else {
 			sprintf(b, "traveling at %.0f kph in a %s", VEL_TO_KPH * vel, vehnames[model - 400]);
@@ -1008,8 +1008,8 @@ int cmd_reclass(struct COMMANDCONTEXT cmdctx)
 		ForceClassSelection(cmdctx.playerid);
 		TogglePlayerSpectating(cmdctx.playerid, 1);
 		TogglePlayerSpectating(cmdctx.playerid, 0);
-		zones_update(cmdctx.playerid, player[cmdctx.playerid]->pos);
-		kneeboard_update_all(cmdctx.playerid, &player[cmdctx.playerid]->pos);
+		zones_update(cmdctx.playerid, sampPlayer[cmdctx.playerid]->pos);
+		kneeboard_update_all(cmdctx.playerid, &sampPlayer[cmdctx.playerid]->pos);
 	}
 	return CMD_OK;
 }
@@ -1067,7 +1067,7 @@ int cmd_respawn(struct COMMANDCONTEXT cmdctx)
 		vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 		if (vehicleid) {
 			for (p = 0; p < playercount; p++) {
-				if (players[p] != cmdctx.playerid && player[p]->vehicleid == vehicleid) {
+				if (players[p] != cmdctx.playerid && sampPlayer[players[p]]->vehicleid == vehicleid) {
 					goto skip_respawn;
 				}
 			}

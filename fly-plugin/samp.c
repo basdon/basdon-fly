@@ -132,24 +132,24 @@ static
 void ForceSendPlayerOnfootSyncNow(int playerid)
 {
 	TRACE;
-	struct SampPlayer *cplayer;
+	struct SampPlayer *player;
 	int actual_updateSyncType;
 	int actual_state;
 
-	cplayer = player[playerid];
+	player = sampPlayer[playerid];
 
-	actual_updateSyncType = cplayer->updateSyncType;
-	actual_state = cplayer->currentState;
+	actual_updateSyncType = player->updateSyncType;
+	actual_state = player->currentState;
 
-	cplayer->updateSyncType = UPDATE_SYNC_TYPE_ONFOOT;
-	cplayer->currentState = PLAYER_STATE_ONFOOT;
+	player->updateSyncType = UPDATE_SYNC_TYPE_ONFOOT;
+	player->currentState = PLAYER_STATE_ONFOOT;
 	/*Three times because it's an unreliable packet[citation needed] but it's important that players receive it.*/
-	((void (*)(struct SampPlayer*)) 0x80C9DB0)(cplayer);
-	((void (*)(struct SampPlayer*)) 0x80C9DB0)(cplayer);
-	((void (*)(struct SampPlayer*)) 0x80C9DB0)(cplayer);
+	((void (*)(struct SampPlayer*)) 0x80C9DB0)(player);
+	((void (*)(struct SampPlayer*)) 0x80C9DB0)(player);
+	((void (*)(struct SampPlayer*)) 0x80C9DB0)(player);
 
-	cplayer->updateSyncType = actual_updateSyncType;
-	cplayer->currentState = actual_state;
+	player->updateSyncType = actual_updateSyncType;
+	player->currentState = actual_state;
 }
 
 static
@@ -187,8 +187,8 @@ void SetSpawnInfo(int playerid, struct SpawnInfo *spawnInfo)
 		SendRPCToPlayer(playerid, RPC_SetSpawnInfo, &rpcdata037, sizeof(rpcdata037), 2);
 	}
 
-	player[playerid]->spawnInfo = *spawnInfo;
-	player[playerid]->hasSpawnInfo = 1; /*otherwise SAMP will ignore client Spawn packets and player will not be marked (not broadcasted) as spawned despited being spawned*/
+	sampPlayer[playerid]->spawnInfo = *spawnInfo;
+	sampPlayer[playerid]->hasSpawnInfo = 1; /*otherwise SAMP will ignore client Spawn packets and player will not be marked (not broadcasted) as spawned despited being spawned*/
 }
 
 static
@@ -197,17 +197,17 @@ void SetPlayerSkin(int playerid, int skin)
 	TRACE;
 	struct RPCDATA_SetPlayerSkin03DL rpcdata03DL;
 	struct RPCDATA_SetPlayerSkin037 rpcdata037;
-	struct SampPlayer *playa;
+	struct SampPlayer *player;
 	int i;
 
-	playa = player[playerid];
-	if (!playa) {
+	player = sampPlayer[playerid];
+	if (!player) {
 		return;
 	}
 
 	/*this is what SAMP does*/
-	if (!playa->hasSpawnInfo) {
-		playa->spawnInfo.skin = skin;
+	if (!player->hasSpawnInfo) {
+		player->spawnInfo.skin = skin;
 		return;
 	}
 
@@ -216,7 +216,7 @@ void SetPlayerSkin(int playerid, int skin)
 	rpcdata03DL.customSkin = 0;
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
-		if (i == playerid || (player[i] && player[i]->playerStreamedIn[playerid])) {
+		if (i == playerid || (sampPlayer[i] && sampPlayer[i]->playerStreamedIn[playerid])) {
 			if (is_player_using_client_version_DL[i]) {
 				SendRPCToPlayer(i, RPC_SetPlayerSkin, &rpcdata03DL, sizeof(rpcdata03DL), 2);
 			} else {
@@ -233,13 +233,13 @@ void SetPlayerColor(int playerid, int color)
 	struct RPCDATA_SetPlayerColor rpcdata;
 	int i;
 
-	player[playerid]->color = color;
+	sampPlayer[playerid]->color = color;
 
 	rpcdata.playerid = playerid;
 	rpcdata.color = color;
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
-		if (player[i]) {
+		if (sampPlayer[i]) {
 			SendRPC_8C(i, RPC_SetPlayerColor, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
 		}
 	}
@@ -281,7 +281,7 @@ void ClearAnimationsForStreamedInPlayers(int playerid)
 
 	rpcdata.playerid = playerid;
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
-		if (player[i] && player[i]->playerStreamedIn[playerid]) {
+		if (sampPlayer[i] && sampPlayer[i]->playerStreamedIn[playerid]) {
 			SendRPC_8C(i, RPC_ClearAnimations, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
 		}
 	}
@@ -380,7 +380,7 @@ __attribute__((unused))
 int IsPlayerStreamedIn(int forplayerid, int playerid)
 {
 	TRACE;
-	return playeronlineflag[playerid] && player[forplayerid]->playerStreamedIn[playerid];
+	return playeronlineflag[playerid] && sampPlayer[forplayerid]->playerStreamedIn[playerid];
 }
 
 static
@@ -518,11 +518,9 @@ void SetPlayerTime(int playerid, char hour, char minute)
 {
 	TRACE;
 	struct RPCDATA_SetTime rpcdata;
-	struct SampPlayer *playa;
 
-	playa = player[playerid];
-	if (playa) {
-		playa->worldTime = hour * 60.0f + minute; /*TODO: can probably get rid of this, samp doesn't need to interfere with our timecyc*/
+	if (sampPlayer[playerid]) {
+		sampPlayer[playerid]->worldTime = hour * 60.0f + minute; /*TODO: can probably get rid of this, samp doesn't need to interfere with our timecyc*/
 		rpcdata.hour = hour;
 		rpcdata.minute = minute;
 		SendRPC_8C(playerid, RPC_SetTime, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
@@ -541,11 +539,9 @@ static
 void TogglePlayerClock(int playerid, char enabled)
 {
 	TRACE;
-	struct SampPlayer *playa;
 
-	playa = player[playerid];
-	if (playa) {
-		playa->isClockEnabled = enabled; /*TODO: should get rid of this, see SetPlayerTime*/
+	if (sampPlayer[playerid]) {
+		sampPlayer[playerid]->isClockEnabled = enabled; /*TODO: should get rid of this, see SetPlayerTime*/
 		SendRPC_8C(playerid, RPC_ToggleClock, &enabled, sizeof(char), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
 	}
 }
@@ -555,12 +551,10 @@ static
 void TogglePlayerSpectating(int playerid, int enabled)
 {
 	TRACE;
-	struct SampPlayer *playa;
 
-	playa = player[playerid];
-	if (playa) {
-		playa->spectatingTargetKind = SPECTATING_TARGET_UNSET;
-		playa->spectatingTargetId = -1;
+	if (sampPlayer[playerid]) {
+		sampPlayer[playerid]->spectatingTargetKind = SPECTATING_TARGET_UNSET;
+		sampPlayer[playerid]->spectatingTargetId = -1;
 		SendRPC_8C(playerid, RPC_ToggleSpectating, &enabled, sizeof(int), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
 		/*this doesn't actually affect player state somehow, only with PlayerSpectatePlayer/PlayerSpectateVehicle
 		will player's state be changed to PLAYER_STATE_SPECTATING*/
@@ -758,14 +752,14 @@ static
 int IsVehicleStreamedIn(int vehicleid, int forplayerid)
 {
 	TRACE;
-	return player[forplayerid]->vehicleStreamedIn[vehicleid];
+	return sampPlayer[forplayerid]->vehicleStreamedIn[vehicleid];
 }
 
 static
 void GetPlayerPos(int playerid, struct vec3 *pos)
 {
 	TRACE;
-	*pos = player[playerid]->pos;
+	*pos = sampPlayer[playerid]->pos;
 }
 
 static
@@ -773,7 +767,7 @@ __attribute((unused))
 float GetPlayerFacingAngle(int playerid)
 {
 	TRACE;
-	return player[playerid]->facingAngle;
+	return sampPlayer[playerid]->facingAngle;
 }
 
 static
@@ -781,8 +775,8 @@ __attribute((unused))
 char GetPlayerCameraMode(int playerid)
 {
 	TRACE;
-	if (player[playerid]) {
-		return player[playerid]->aimSyncData.cameraMode;
+	if (sampPlayer[playerid]) {
+		return sampPlayer[playerid]->aimSyncData.cameraMode;
 	}
 	return -1;
 }
@@ -792,10 +786,10 @@ __attribute((unused))
 int GetPlayerWeaponState(int playerid)
 {
 	TRACE;
-	struct SampPlayer *playa = player[playerid];
+	struct SampPlayer *player = sampPlayer[playerid];
 
-	if (playa && playa->currentState == PLAYER_STATE_ONFOOT) {
-		return playa->aimSyncData.weaponState;
+	if (player && player->currentState == PLAYER_STATE_ONFOOT) {
+		return player->aimSyncData.weaponState;
 	}
 	/*samp returns 0 (WEAPONSTATE_NO_BULLETS) if the player is not connected, but that doesn't make sense*/
 	return WEAPONSTATE_UNKNOWN;
@@ -805,15 +799,15 @@ static
 void GetPlayerPosRot(int playerid, struct vec4 *pos)
 {
 	TRACE;
-	pos->coords = player[playerid]->pos;
-	pos->r = player[playerid]->facingAngle;
+	pos->coords = sampPlayer[playerid]->pos;
+	pos->r = sampPlayer[playerid]->facingAngle;
 }
 
 static
 short GetPlayerVehicleSeat(int playerid)
 {
 	TRACE;
-	return player[playerid]->vehicleseat;
+	return sampPlayer[playerid]->vehicleseat;
 }
 
 /**
@@ -823,7 +817,7 @@ static
 short GetPlayerVehicleID(int playerid)
 {
 	TRACE;
-	return player[playerid]->vehicleid;
+	return sampPlayer[playerid]->vehicleid;
 }
 
 static
@@ -832,14 +826,14 @@ struct SampVehicle *GetPlayerVehicle(int playerid)
 	TRACE;
 	/*Player's vehicleid will be 0 when not in a vehicle.*/
 	/*Non allocated vehicleids will always have a nullptr in SampVehiclePool::vehicles.*/
-	return vehiclepool->vehicles[player[playerid]->vehicleid];
+	return vehiclepool->vehicles[sampPlayer[playerid]->vehicleid];
 }
 
 static
 char GetPlayerState(int playerid)
 {
 	TRACE;
-	return player[playerid]->currentState;
+	return sampPlayer[playerid]->currentState;
 }
 
 /**
@@ -923,7 +917,7 @@ int GetPlayerInVehicleSeat(int vehicleid, int seat)
 
 	for (n = playercount; n; ) {
 		playerid = players[--n];
-		if (player[playerid]->vehicleid == vehicleid && player[playerid]->vehicleseat == seat) {
+		if (sampPlayer[playerid]->vehicleid == vehicleid && sampPlayer[playerid]->vehicleseat == seat) {
 			return playerid;
 		}
 	}
@@ -936,10 +930,10 @@ int GetVehicleDriver(int vehicleid)
 	TRACE;
 	int n, playerid;
 
-	/*TODO: check if vehicle->driverplayerid can be used instead (probably?)*/
+	/*vehicle->driverplayerid can not be used (yet) as it's not always correctly reset*/
 	for (n = playercount; n; ) {
 		playerid = players[--n];
-		if (player[playerid]->vehicleid == vehicleid && player[playerid]->vehicleseat == 0) {
+		if (sampPlayer[playerid]->vehicleid == vehicleid && sampPlayer[playerid]->vehicleseat == 0) {
 			return playerid;
 		}
 	}
@@ -996,7 +990,7 @@ void SyncVehicleDamageStatus(struct SampVehicle *vehicle)
 	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
-		if (player[i] && player[i]->vehicleStreamedIn[rpcdata.vehicleid]) {
+		if (sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[rpcdata.vehicleid]) {
 			RakServer__GetPlayerIDFromIndex(&playerID, rakServer, i);
 			rakServer->vtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
 		}
@@ -1326,11 +1320,11 @@ int SetVehiclePos(int vehicleid, struct vec3 *pos)
 	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
-		if (player[i] && player[i]->vehicleStreamedIn[vehicleid]) {
+		if (sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[vehicleid]) {
 			SAMP_SendRPCToPlayer(RPC_SetVehiclePos, &bs, i, 2);
 			if (vehicle->driverplayerid == i) {
 				/*SampPlayer__SetExpectedLocationAfterTeleport*/
-				((void (*)(struct SampPlayer*,struct vec3))0x80CC020)(player[i], *pos);
+				((void (*)(struct SampPlayer*,struct vec3))0x80CC020)(sampPlayer[i], *pos);
 			}
 		}
 	}
@@ -1625,7 +1619,7 @@ int SetPlayerName(int playerid, char *name)
 	struct BitStream bs;
 	int len, i;
 
-	if (!player[playerid]) {
+	if (!sampPlayer[playerid]) {
 		return 0;
 	}
 
@@ -1656,7 +1650,7 @@ int SetPlayerName(int playerid, char *name)
 	bs.ptrData = &rpcdata;
 	bs.numberOfBitsUsed = 16 + 8 + len * 8 + 8;
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
-		if (player[i]) {
+		if (sampPlayer[i]) {
 			SAMP_SendRPCToPlayer(RPC_SetPlayerName, &bs, i, 2);
 		}
 	}
@@ -1728,7 +1722,7 @@ void samp_OnPlayerUpdate(int playerid)
 		if (--kick_update_delay[playerid] == 0) {
 			KickRaw(playerid);
 		}
-		player[playerid]->updateSyncType = 0; /*Reject update, equivalent to 'return 0' in OnPlayerUpdate.*/
+		sampPlayer[playerid]->updateSyncType = 0; /*Reject update, equivalent to 'return 0' in OnPlayerUpdate.*/
 		return;
 	}
 	playerstats_on_player_update(playerid);
@@ -1745,7 +1739,7 @@ void hook_OnOnfootSync(int playerid)
 	struct SYNCDATA_Onfoot *data;
 	int oldkeys, newkeys;
 
-	data = &player[playerid]->onfootSyncData;
+	data = &sampPlayer[playerid]->onfootSyncData;
 
 	/*keystate change*/
 	oldkeys = player_keystates[playerid];
@@ -1784,12 +1778,12 @@ void hook_OnDriverSync(int playerid)
 	int storedlastvehicleid;
 	short vehiclemodel;
 
-	data = &player[playerid]->driverSyncData;
+	data = &sampPlayer[playerid]->driverSyncData;
 	vehicle = vehiclepool->vehicles[data->vehicle_id];
 
 	if (!vehicle) {
 		/*It sometimes happens that driversync packets of just deleted vehicles are sent/arrive late.*/
-		player[playerid]->updateSyncType = 0;
+		sampPlayer[playerid]->updateSyncType = 0;
 		samp_OnPlayerUpdate(playerid); /*TODO: what to do with this...*/
 		lastvehicle_asdriver[playerid] = data->vehicle_id; /*because ^ OnPlayerUpdate resets it..*/
 		return;
@@ -1867,7 +1861,7 @@ void hook_OnPassengerSync(int playerid)
 	struct SYNCDATA_Passenger *data;
 	int oldkeys, newkeys;
 
-	data = &player[playerid]->passengerSyncData;
+	data = &sampPlayer[playerid]->passengerSyncData;
 
 	/*keystate change*/
 	oldkeys = player_keystates[playerid];
@@ -1904,8 +1898,8 @@ void hook_OnPlayerRequestClass(int playerid, int classid)
 		SendRPC_8C(playerid, RPC_RequestClass, &rpcdata037, sizeof(rpcdata037), HIGH_PRIORITY, RELIABLE, 0);
 	}
 
-	player[playerid]->spawnInfo = rpcdata037.spawnInfo;
-	player[playerid]->hasSpawnInfo = 1; /*otherwise SAMP will ignore client Spawn packets and player will not be marked (not broadcasted) as spawned despited being spawned*/
+	sampPlayer[playerid]->spawnInfo = rpcdata037.spawnInfo;
+	sampPlayer[playerid]->hasSpawnInfo = 1; /*otherwise SAMP will ignore client Spawn packets and player will not be marked (not broadcasted) as spawned despited being spawned*/
 }
 
 void StreamInPlayer(struct SampPlayer *player, int forplayer)
@@ -1994,7 +1988,7 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 	bs.numberOfBitsUsed = arg->numBits;
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
-		if (i != playerid && player[i] && player[i]->vehicleStreamedIn[vehicleid]) {
+		if (i != playerid && sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[vehicleid]) {
 			RakServer__GetPlayerIDFromIndex(&playerID, rakServer, i);
 			rakServer->vtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, playerID, /*broadcast*/ 0, /*shiftTimestamp*/ 0);
 		}

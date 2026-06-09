@@ -18,7 +18,7 @@ void nametags_update_for_player(int forplayerid)
 	char buf[128];
 	char bitbuf[150];
 
-	forplayer = player[forplayerid];
+	forplayer = sampPlayer[forplayerid];
 	forplayerpos = forplayer->pos;
 
 	if (nametags_max_distance[forplayerid] > 50000) {
@@ -42,7 +42,7 @@ void nametags_update_for_player(int forplayerid)
 		if (!spawned[forplayerid] || !spawned[playerid]) {
 			goto hide;
 		}
-		playerpos = &player[playerid]->pos;
+		playerpos = &sampPlayer[playerid]->pos;
 
 		d.x = playerpos->x - forplayerpos.x;
 		d.y = playerpos->y - forplayerpos.y;
@@ -79,7 +79,7 @@ void nametags_update_for_player(int forplayerid)
 				bitbuf_bitlength = EncodeString(bitbuf, buf, sizeof(bitbuf));
 				if (forplayer->playerStreamedIn[playerid] && dist < current_render_dist) {
 					Create3DTextLabel(
-						forplayerid, NAMETAG_TEXTLABEL_ID_BASE + playerid, player[playerid]->color, vec3_zero,
+						forplayerid, NAMETAG_TEXTLABEL_ID_BASE + playerid, sampPlayer[playerid]->color, vec3_zero,
 						nametags_max_distance[forplayerid], 1, playerid, INVALID_VEHICLE_ID, bitbuf, bitbuf_bitlength
 					);
 				} else {
@@ -94,7 +94,7 @@ void nametags_update_for_player(int forplayerid)
 						d.z = forplayerpos.z + d.z * lerp_dist;
 					}
 					Create3DTextLabel(
-						forplayerid, NAMETAG_TEXTLABEL_ID_BASE + playerid, player[playerid]->color, &d,
+						forplayerid, NAMETAG_TEXTLABEL_ID_BASE + playerid, sampPlayer[playerid]->color, &d,
 						float_pinf, 1, INVALID_PLAYER_ID, INVALID_VEHICLE_ID, bitbuf, bitbuf_bitlength
 					);
 				}
@@ -107,7 +107,7 @@ void nametags_update_for_player(int forplayerid)
 			sprintf(buf, "%s (%d)", pdata[playerid]->name, playerid);
 			bitbuf_bitlength = EncodeString(bitbuf, buf, sizeof(bitbuf));
 			Create3DTextLabel(
-				forplayerid, NAMETAG_TEXTLABEL_ID_BASE + playerid, player[playerid]->color, vec3_zero,
+				forplayerid, NAMETAG_TEXTLABEL_ID_BASE + playerid, sampPlayer[playerid]->color, vec3_zero,
 				nametags_max_distance[forplayerid], 1, playerid, INVALID_VEHICLE_ID, bitbuf, bitbuf_bitlength
 			);
 			nametag_created[forplayerid][playerid] = 1;

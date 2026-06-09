@@ -722,7 +722,7 @@ void veh_consume_fuel(int playerid, int vehicleid)
 	fuel = vehicle_fuel[vehicleid];
 	lastpercentage = fuel / cap;
 	/*KEY_SPRINT is vehicle acceleration key*/
-	consumptionmp = (player[playerid]->keys & KEY_SPRINT) ? 1.0f : (float) SETTING__FUEL_USAGE_IDLE_MODIFIER;
+	consumptionmp = (sampPlayer[playerid]->keys & KEY_SPRINT) ? 1.0f : (float) SETTING__FUEL_USAGE_IDLE_MODIFIER;
 	fuel -= vehicle_fuel_usage[vehicleid] * consumptionmp;
 	if (fuel < 0.0f) {
 		fuel = 0.0f;

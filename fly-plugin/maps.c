@@ -1073,7 +1073,7 @@ void maps_process_tick(int elapsed_time)
 		playerid = players[i];
 		next_streaming_tick_delay[playerid] -= elapsed_time;
 		if (next_streaming_tick_delay[playerid] <= 0) {
-			pos = &player[playerid]->pos;
+			pos = &sampPlayer[playerid]->pos;
 			maps_stream_for_player(playerid, pos->x, pos->y, OBJ_STREAM_MODE_ANY);
 			/*Do this in a loop to ensure we don't overload
 			the streamer if some hang occurred.*/

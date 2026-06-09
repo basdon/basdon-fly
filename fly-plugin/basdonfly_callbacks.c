@@ -186,7 +186,7 @@ cell AMX_NATIVE_CALL B_OnPlayerConnect(AMX *amx, cell *params)
 	TRACE;
 	const int playerid = PARAM(1);
 
-	player[playerid] = samp_pNetGame->playerPool->players[playerid];
+	sampPlayer[playerid] = playerpool->players[playerid];
 	RakServer__GetPlayerIDFromIndex(&rakPlayerID[playerid], rakServer, playerid);
 
 #ifdef DEV
@@ -320,7 +320,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 	}
 
 	nametags_on_player_disconnect(playerid); /*Needs to be after player was removed from players array.*/
-	player[playerid] = 0;
+	sampPlayer[playerid] = NULL;
 
 	return 1;
 }

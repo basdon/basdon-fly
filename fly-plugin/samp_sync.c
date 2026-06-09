@@ -28,7 +28,7 @@ static
  * sending markers of players that don't exist for the client has no effect (of course because the
  * client also wouldn't know what color to use). sending markers for npc players does work.
  */
-void UpdatePlayerMarkersForPlayer(struct SampPlayer *playa)
+void UpdatePlayerMarkersForPlayer(struct SampPlayer *player)
 {
 	TRACE;
 	struct BitStream bs;
@@ -46,7 +46,7 @@ void UpdatePlayerMarkersForPlayer(struct SampPlayer *playa)
 
 	/* SAMP also checks marker streaming mode: off/streamed/global. We always do global. */
 
-	playa->markersLastStreamedAtTickCount = samp_GetTime();
+	player->markersLastStreamedAtTickCount = samp_GetTime();
 
 	packetdata.packetId = 208;
 	packetdata.numPlayers = 0;
@@ -54,14 +54,14 @@ void UpdatePlayerMarkersForPlayer(struct SampPlayer *playa)
 	bs.numberOfBitsUsed = 8 + 32;
 	bs.numberOfBitsAllocated = sizeof(packetdata) * 8;
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
-		otherplayer = player[i];
-		if (otherplayer && otherplayer != playa) {
+		otherplayer = sampPlayer[i];
+		if (otherplayer && otherplayer != player) {
 			packetdata.numPlayers++;
 			bitstream_write_bits(&bs, i, 16);
 			if (
 				otherplayer->currentState != PLAYER_STATE_NONE &&
 				otherplayer->currentState != PLAYER_STATE_SPECTATING &&
-				playerpool->virtualworld[i] == playerpool->virtualworld[playa->playerid]
+				playerpool->virtualworld[i] == playerpool->virtualworld[player->playerid]
 				/*SAMP also checks distance if LimitPlayerMarkerRadius was used*/
 			) {
 				/*NOTE: max value is +-32k, so markers for players near CATA will be wrong :(*/
@@ -74,7 +74,7 @@ void UpdatePlayerMarkersForPlayer(struct SampPlayer *playa)
 			}
 		}
 	}
-	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, playa->playerid);
+	RakServer__GetPlayerIDFromIndex(&playerID, rakServer, player->playerid);
 	rakServer->vtable->SendBitStream(rakServer, &bs, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 1, playerID, 0);
 }
 /*jeanine:p:i:4;p:1;a:r;x:11.00;y:-44.00;n:StreamVehiclesForPlayer;*/
@@ -131,7 +131,7 @@ struct vec3 *GetOtherPlayerPosition(struct SampPlayer *player)
  * returns true if at least one player was freshly streamed out
  */
 static
-int StreamPlayersForPlayer(struct SampPlayer *playa)
+int StreamPlayersForPlayer(struct SampPlayer *player)
 {
 	TRACE;
 	struct SampPlayer *otherplayer;
@@ -139,22 +139,22 @@ int StreamPlayersForPlayer(struct SampPlayer *playa)
 
 	didStreamOutSomeone = 0;
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
-		otherplayer = player[i];
+		otherplayer = sampPlayer[i];
 		if (
 			otherplayer &&
 			otherplayer->currentState != PLAYER_STATE_NONE &&
 			otherplayer->currentState != PLAYER_STATE_SPECTATING &&
-			playerpool->virtualworld[i] == playerpool->virtualworld[playa->playerid] &&
-			IsWithinStreamDistance(GetOtherPlayerPosition(otherplayer), &playa->pos)/*jeanine:r:i:6;*/
+			playerpool->virtualworld[i] == playerpool->virtualworld[player->playerid] &&
+			IsWithinStreamDistance(GetOtherPlayerPosition(otherplayer), &player->pos)/*jeanine:r:i:6;*/
 		) {
-			if (!playa->playerStreamedIn[i]) {
+			if (!player->playerStreamedIn[i]) {
 				/*SampPlayer::StreamInPlayer*/
-				((void (*)(struct SampPlayer*,int,int))0x80CAF00)(playa, i, /*ignore streaming distance*/ 1);
+				((void (*)(struct SampPlayer*,int,int))0x80CAF00)(player, i, /*ignore streaming distance*/ 1);
 			}
 		} else {
-			if (playa->playerStreamedIn[i]) {
+			if (player->playerStreamedIn[i]) {
 				/*SampPlayer::StreamOutPlayer*/
-				((void (*)(struct SampPlayer*,int))0x80CAFC0)(playa, i);
+				((void (*)(struct SampPlayer*,int))0x80CAFC0)(player, i);
 				didStreamOutSomeone = 1;
 			}
 		}

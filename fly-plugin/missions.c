@@ -741,7 +741,7 @@ void missions_send_rpc_to_player_and_passengers(int rpc, struct BitStream *bs, i
 	if (vehicleid) {
 		for (i = 0; i < playercount; i++) {
 			pid = players[i];
-			if (player[pid]->vehicleid == vehicleid &&
+			if (sampPlayer[pid]->vehicleid == vehicleid &&
 				pid != playerid &&
 				/*Check mission stage, in case the passenger is also on their own mission
 				(we don't want to show the satisfaction of the mission of the vehicle
@@ -882,7 +882,7 @@ void missions_cleanup(int playerid)
 			natives_SpawnPlayer(playerid);
 		}
 	} else {
-		kneeboard_update_all(playerid, &player[playerid]->pos);
+		kneeboard_update_all(playerid, &sampPlayer[playerid]->pos);
 	}
 }
 
