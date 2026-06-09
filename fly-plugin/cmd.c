@@ -242,6 +242,14 @@ void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 	char syntaxmsg[144];
 	int is_cmd_resolved;
 
+#if DEV
+	if (!strcmp(cmdtext, "/state")) {
+		sprintf(cbuf144, "state: %d", sampPlayer[playerid]->currentState);
+		SendClientMessage(playerid, -1, cbuf144);
+		return;
+	}
+#endif
+
 	if (anticheat_on_player_command(playerid)) {
 		return;
 	}
@@ -265,6 +273,7 @@ void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 
 	is_cmd_resolved = cmd_get_by_name_check_permissions(playerid, cmdtext, &cmdctx.parseidx, &cmd, &real_cmd);
 
+	/* log all command executions (even failures) but strip the message for private messages, as players may expect them to be private */
 	if (is_cmd_resolved && real_cmd->handler == cmd_pm) {
 		strcpy(cbuf144, "/pm");
 	} else if (is_cmd_resolved && real_cmd->handler == cmd_r) {
