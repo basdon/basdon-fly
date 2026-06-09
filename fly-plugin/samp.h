@@ -946,7 +946,8 @@ EXPECT_SIZE(struct RPCDATA_Spectate, 3);
 
 struct RPCDATA_PlayerJoin {
 	short playerid;
-	int unkAlwaysOne;
+	/**RGBA. SAMP always sends 0, resulting in the client picking a preset (per id) color*/
+	int color;
 	/**NPCs don't have nametags and are not shown in the TAB list (scoreboard?),
 	NPCs also have different physics, they will barely fall when hanging in the sky.*/
 	char npc;

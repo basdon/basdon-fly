@@ -1960,7 +1960,7 @@ void missions_resume_mission_create_npc(int forplayerid)
 	struct RPCDATA_PlayerJoin playerjoin;
 
 	playerjoin.playerid = FAKE_PLAYER_ID_RESUME_MISSION;
-	playerjoin.unkAlwaysOne = 1;
+	playerjoin.color = 1;
 	playerjoin.npc = 1;
 	playerjoin.namelen = 1;
 	playerjoin.name[0] = 'x';
