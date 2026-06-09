@@ -603,7 +603,7 @@ int cmd_getspray(struct COMMANDCONTEXT cmdctx)
 	struct SampVehicle *vehicle;
 	char buf[144], *b;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[GetPlayerVehicleID(cmdctx.playerid)];
+	vehicle = vehiclepool->vehicles[GetPlayerVehicleID(cmdctx.playerid)];
 	if (vehicle) {
 		b = buf;
 		b += sprintf(b, "primary: %d, secondary: %d", vehicle->spawnColor1, vehicle->spawnColor2);
@@ -1148,7 +1148,7 @@ int cmd_tickrate(struct COMMANDCONTEXT cmdctx)
 	TRACE;
 	char msg144[144];
 
-	sprintf(msg144, "%d", samp_pNetGame->tickRate);
+	sprintf(msg144, "%d", samp->tickRate);
 	SendClientMessage(cmdctx.playerid, -1, msg144);
 	return CMD_OK;
 }

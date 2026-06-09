@@ -1,5 +1,5 @@
 extern logprintf
-extern samp_pNetGame
+extern samp
 extern rakServer;
 
 extern hook_OnOnfootSync
@@ -132,7 +132,7 @@ GetVehiclePosRotUnsafe:
 	push ebx
 	sub esp, 024h
 	;
-	mov eax, [samp_pNetGame]
+	mov eax, [samp]
 	mov ebx, [eax+0Ch]
 	mov eax, [ebp+08h] ;vehicleid
 	mov ebx, [ebx+eax*4+03F54h]
@@ -159,7 +159,7 @@ GetVehiclePosRotUnsafe:
 global GetVehicleRotationQuatUnsafe:function
 GetVehicleRotationQuatUnsafe:
 	push ebx
-	mov eax, [samp_pNetGame]
+	mov eax, [samp]
 	mov ebx, [eax+0Ch]
 	mov eax, [esp+08h] ;vehicleid
 	mov ebx, [ebx+eax*4+03F54h]
@@ -177,7 +177,7 @@ GetVehicleRotationQuatUnsafe:
 ;prot Crashes if vehicle does not exist.
 ;prot */
 ;prot void GetVehicleZAngleUnsafe(int vehicleid, float *angle);
-;test __builtin_offsetof(struct SampNetGame, vehiclePool) == 0xC
+;test __builtin_offsetof(struct Samp, vehiclePool) == 0xC
 global GetVehicleZAngleUnsafe:function
 GetVehicleZAngleUnsafe:
 	push ebp
@@ -187,7 +187,7 @@ GetVehicleZAngleUnsafe:
 	;
 	mov eax, [ebp+0Ch] ;*angle
 	mov [ebp-0Ch], eax ;phys_addr
-	mov eax, [samp_pNetGame]
+	mov eax, [samp]
 	mov ebx, [eax+0Ch]
 	mov eax, [ebp+08h] ;vehicleid
 	mov ebx, [ebx+eax*4+03F54h]
@@ -232,7 +232,7 @@ VehiclePoolAddVehicleAtIndex:
 ;prot  * TODO: delete the carriages in DestroyVehicle (samp doesn't even do this)
 ;prot  */
 ;prot int _CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_delay_ms);
-;test __builtin_offsetof(struct SampNetGame, vehiclePool) == 0xC
+;test __builtin_offsetof(struct Samp, vehiclePool) == 0xC
 ;test __builtin_offsetof(struct SampVehiclePool, highestUsedVehicleid) == 0x5E94
 ;test __builtin_offsetof(struct vec4, r) == 0xC
 global _CreateVehicle:function
@@ -250,7 +250,7 @@ _CreateVehicle:
 	push eax ; pos
 	mov esi, [ebp+04h] ; model
 	push esi
-	mov eax, [samp_pNetGame]
+	mov eax, [samp]
 	mov edx, [eax+0Ch] ; vehiclepool
 	push edx
 	lea eax, [esi-537] ; freight=537, streak=538

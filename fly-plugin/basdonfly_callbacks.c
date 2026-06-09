@@ -119,9 +119,9 @@ exit:
 	veh_init();
 
 	SetGameModeText("Aviation/Piloting/Flying plane server");
-	samp_pNetGame->usePlayerPedAnims = 1;
-	samp_pNetGame->enableStuntBonus = 0;
-	samp_pNetGame->showNametags = 0;
+	samp->usePlayerPedAnims = 1;
+	samp->enableStuntBonus = 0;
+	samp->showNametags = 0;
 
 	logprintf("  Loaded gamemode basdon-fly in %ldms\n", time_timestamp() - t);
 

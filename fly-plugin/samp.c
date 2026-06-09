@@ -369,7 +369,7 @@ void SetVehicleSiren(int vehicleid, char siren)
 	TRACE;
 	struct SampVehicle *vehicle;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
 		vehicle->use_siren = siren;
 	}
@@ -893,7 +893,7 @@ void RespawnVehicle(int vehicleid)
 	((void (*)(struct SampPlayerPool*,int))0x80D1480)(playerpool, vehicleid);
 
 	/*GameMode::Event_OnVehicleSpawn*/
-	((void (*)(void*,int))0x80A5350)(samp_pNetGame->pGameMode, vehicleid);
+	((void (*)(void*,int))0x80A5350)(samp->pGameMode, vehicleid);
 }
 
 static
@@ -902,7 +902,7 @@ short GetVehicleModel(int vehicleid)
 	TRACE;
 	struct SampVehicle *vehicle;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
 		return vehicle->model;
 	}
@@ -950,7 +950,7 @@ float GetVehicleHealthRaw(int vehicleid)
 	TRACE;
 	struct SampVehicle *vehicle;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
 		return vehicle->health;
 	}
@@ -965,7 +965,7 @@ void SetVehicleHealth(int vehicleid, float hp)
 	TRACE;
 	struct SampVehicle *vehicle;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
 		SAMP_SetVehicleHealth(vehicle, hp);
 	}
@@ -1006,7 +1006,7 @@ void GetVehicleParamsEx(int vehicleid, struct SampVehicleParams *params)
 	TRACE;
 	struct SampVehicle *vehicle;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
 		*params = vehicle->params;
 	}
@@ -1020,7 +1020,7 @@ void SetVehicleParamsEx(int vehicleid, struct SampVehicleParams *params)
 	TRACE;
 	struct SampVehicle *vehicle;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
 		((int (*)(struct SampVehicle*,struct SampVehicleParams*))0x814C7A0)(vehicle, params);
 	}
@@ -1078,7 +1078,7 @@ static
 char GetVehicleEngineState(int vehicleid)
 {
 	TRACE;
-	return samp_pNetGame->vehiclePool->vehicles[vehicleid]->params.engine;
+	return vehiclepool->vehicles[vehicleid]->params.engine;
 }
 
 /*
@@ -1096,7 +1096,7 @@ void SetVehicleEngineState(int vehicleid, char engine)
 	struct SampVehicleParams *params;
 	int playerid, n;
 
-	params = &samp_pNetGame->vehiclePool->vehicles[vehicleid]->params;
+	params = &vehiclepool->vehicles[vehicleid]->params;
 	if (params->engine == engine) {
 		return;
 	}
@@ -1166,7 +1166,7 @@ void SetVehicleColorTemporary(int vehicleid, int col1, int col2)
 	TRACE;
 	struct SampVehicle *vehicle;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
 		((void (*)(struct SampVehicle*,short,int,int))0x814C510)(
 			vehicle,
@@ -1189,7 +1189,7 @@ void SetVehicleColorPermanent(int vehicleid, int col1, int col2)
 	TRACE;
 	struct SampVehicle *vehicle;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
 		/*Setting temporary color is needed for the color to change for the players that have the vehicle streamed in.*/
 		SetVehicleColorTemporary(vehicleid, col1, col2);
@@ -1212,7 +1212,7 @@ int GetVehicleColor(int vehicleid, int *col1, int *col2)
 	TRACE;
 	struct SampVehicle *vehicle;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
 		if (vehicle->moddedColor1 != -1) {
 			*col1 = vehicle->moddedColor1;
@@ -1236,7 +1236,7 @@ void SetVehiclePaintjob(int vehicleid, char paintjob)
 	TRACE;
 	struct SampVehicle *vehicle;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
 		((void (*)(struct SampVehicle*,short,int))0x814C2F0)(
 			vehicle,
@@ -1271,7 +1271,7 @@ static
 struct SampVehicle *GetSampVehicleByID(int vehicleid)
 {
 	TRACE;
-	return samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	return vehiclepool->vehicles[vehicleid];
 }
 
 static
@@ -1280,7 +1280,7 @@ int GetVehiclePos(int vehicleid, struct vec3 *pos)
 	TRACE;
 	struct SampVehicle *vehicle;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
 		*pos = vehicle->pos;
 		return 1;
@@ -1295,7 +1295,7 @@ static
 void GetVehiclePosUnsafe(int vehicleid, struct vec3 *pos)
 {
 	TRACE;
-	*pos = samp_pNetGame->vehiclePool->vehicles[vehicleid]->pos;
+	*pos = vehiclepool->vehicles[vehicleid]->pos;
 }
 
 static
@@ -1353,7 +1353,7 @@ static
 void GetVehicleVelocityUnsafe(int vehicleid, struct vec3 *vel)
 {
 	TRACE;
-	*vel = samp_pNetGame->vehiclePool->vehicles[vehicleid]->vel;
+	*vel = vehiclepool->vehicles[vehicleid]->vel;
 }
 
 static
@@ -1564,7 +1564,7 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 	int oldvehicleid;
 	int playerstate;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (!vehicle) {
 		return 0;
 	}
@@ -1947,7 +1947,7 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 #endif
 
 	if (
-		samp_pNetGame->gamestate != 1 ||
+		samp->gamestate != 1 ||
 		arg->numBits != sizeof(struct INOUTRPCDATA_UpdateVehicleDamageStatus) * 8
 	) {
 		return;

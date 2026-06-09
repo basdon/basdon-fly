@@ -7,9 +7,10 @@ static
 void class_init()
 {
 	TRACE;
+
 	/*we skip doing AddPlayerClass and just set numAvailableSpawns directly*/
 	/*we overwrote SAMP's OnPlayerRequestClass anyways, so the spawninfo data that AddPlayerClass adds isn't needed*/
-	samp_pNetGame->numAvailableSpawns = SETTING__NUM_CLASSES;
+	samp->numAvailableSpawns = SETTING__NUM_CLASSES;
 }
 
 static

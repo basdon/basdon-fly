@@ -8,7 +8,7 @@ static
 int samp_GetTime()
 {
 	TRACE;
-	return ((int (*)(void*))0x80AAF40)(samp_pNetGame);
+	return ((int (*)(void*))0x80AAF40)(samp);
 }
 
 static
@@ -109,14 +109,16 @@ void StreamVehiclesForPlayer(struct SampPlayer *player)
 }
 /*jeanine:p:i:6;p:3;a:r;x:2.00;n:GetOtherPlayerPosition;*/
 static
-struct vec3 *GetOtherPlayerPosition(struct SampPlayer *player)
+struct vec3 *GetOtherPlayerPositionForStreamDistanceCheck(struct SampPlayer *player)
 {
 	TRACE;
 	struct SampVehicle *vehicle;
 
-	/* not entirely sure why SAMP does this, I can't think of */
+	/* Not entirely sure why SAMP does this, I can't think of */
 	/* a vehicle where the position of a passenger would be that */
 	/* different from the vehicle's position.. */
+	/* Also it doesn't do this adjustment for the player for whom */
+	/* the streaming is currently being processed... curious...*/
 	if (
 		player->currentState == PLAYER_STATE_PASSENGER &&
 		(unsigned int) player->vehicleid < MAX_VEHICLES &&
@@ -145,7 +147,7 @@ int StreamPlayersForPlayer(struct SampPlayer *player)
 			otherplayer->currentState != PLAYER_STATE_NONE &&
 			otherplayer->currentState != PLAYER_STATE_SPECTATING &&
 			playerpool->virtualworld[i] == playerpool->virtualworld[player->playerid] &&
-			IsWithinStreamDistance(GetOtherPlayerPosition(otherplayer), &player->pos)/*jeanine:r:i:6;*/
+			IsWithinStreamDistance(GetOtherPlayerPositionForStreamDistanceCheck(otherplayer), &player->pos)/*jeanine:r:i:6;*/
 		) {
 			if (!player->playerStreamedIn[i]) {
 				/*SampPlayer::StreamInPlayer*/

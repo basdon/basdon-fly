@@ -426,7 +426,7 @@ alreadyin:
 			"VALUES(%d,'%s',1,UNIX_TIMESTAMP(),UNIX_TIMESTAMP()) "
 			"ON DUPLICATE KEY UPDATE c=c+1,last=UNIX_TIMESTAMP()",
 			userid[playerid],
-			samp_pNetGame->playerPool->gpci[playerid]);
+			playerpool->gpci[playerid]);
 		NC_mysql_tquery_nocb(buf4096a);
 	}
 

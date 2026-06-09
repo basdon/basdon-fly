@@ -2058,7 +2058,7 @@ exit:
 		/*TODO: come back to this and clean it up*/
 		ppiv.vehicleid = mission->vehicleid;
 		ppiv.seat = 0;
-		vehicle = samp_pNetGame->vehiclePool->vehicles[mission->vehicleid];
+		vehicle = vehiclepool->vehicles[mission->vehicleid];
 		bitstream.ptrData = &ppiv;
 		bitstream.numberOfBitsUsed = sizeof(ppiv) * 8;
 		SAMP_SendRPCToPlayer(RPC_PutPlayerInVehicle, &bitstream, playerid, 2);

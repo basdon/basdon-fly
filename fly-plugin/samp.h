@@ -509,7 +509,7 @@ struct SampObjectPool {
 };
 EXPECT_SIZE(struct SampObjectPool, 0x7A40E0); /*Complete*/
 
-struct SampNetGame {
+struct Samp {
 	void *pGameMode;
 	void *pFilterScripts;
 	struct SampPlayerPool *playerPool;
@@ -565,19 +565,19 @@ struct SampNetGame {
 	char _field39DE;
 	char _field39DF;
 };
-EXPECT_SIZE(struct SampNetGame, 0x39E0); /*Complete*/
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, vehiclePool, 0xC);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, objectPool, 0x14);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, textLabelPool, 0x20);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, gangzonePool, 0x24);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, actorPool, 0x28);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, rakServer, 0x40);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, showNametags, 0x58);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, enableStuntBonus, 0x5B);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, usePlayerPedAnims, 0x6D);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, nametagDrawDistance, 0x72);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, numAvailableSpawns, 0x8A);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampNetGame, availableSpawns, 0x8E);
+EXPECT_SIZE(struct Samp, 0x39E0); /*Complete*/
+STATIC_ASSERT_MEMBER_OFFSET(struct Samp, vehiclePool, 0xC);
+STATIC_ASSERT_MEMBER_OFFSET(struct Samp, objectPool, 0x14);
+STATIC_ASSERT_MEMBER_OFFSET(struct Samp, textLabelPool, 0x20);
+STATIC_ASSERT_MEMBER_OFFSET(struct Samp, gangzonePool, 0x24);
+STATIC_ASSERT_MEMBER_OFFSET(struct Samp, actorPool, 0x28);
+STATIC_ASSERT_MEMBER_OFFSET(struct Samp, rakServer, 0x40);
+STATIC_ASSERT_MEMBER_OFFSET(struct Samp, showNametags, 0x58);
+STATIC_ASSERT_MEMBER_OFFSET(struct Samp, enableStuntBonus, 0x5B);
+STATIC_ASSERT_MEMBER_OFFSET(struct Samp, usePlayerPedAnims, 0x6D);
+STATIC_ASSERT_MEMBER_OFFSET(struct Samp, nametagDrawDistance, 0x72);
+STATIC_ASSERT_MEMBER_OFFSET(struct Samp, numAvailableSpawns, 0x8A);
+STATIC_ASSERT_MEMBER_OFFSET(struct Samp, availableSpawns, 0x8E);
 
 struct RPCDATA_ShowGangZone {
 	short zoneid;
@@ -1170,7 +1170,7 @@ DriverSync
  *most usages seem to be using orderingChannel 2
  *in the end it does the same as SendRPC_8C, but with that additional logic and checking if the player is connected first*/
 #define SAMP_SendRPCToPlayer(pRPC,pBS,playerid,orderingChannel) \
-	((void (*)(void*,void*,struct BitStream*,short,int))0x80AC1D0)((void*)samp_pNetGame,(void*)pRPC,pBS,playerid,orderingChannel)
+	((void (*)(void*,void*,struct BitStream*,short,int))0x80AC1D0)((void*)samp,(void*)pRPC,pBS,playerid,orderingChannel)
 
 /*all packets use HIGH_PRIORITY RELIABLE_ORDERED orderingChannel 2 unless otherwise specified*/
 

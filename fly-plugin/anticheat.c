@@ -188,7 +188,7 @@ float GetVehicleHealth(int vehicleid)
 	float hp;
 	int playerid;
 
-	vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+	vehicle = vehiclepool->vehicles[vehicleid];
 	if (!vehicle) {
 		return 0.0f;
 	}
@@ -260,7 +260,7 @@ void anticheat_on_player_enter_vehicle(int playerid, int vehicleid, int ispassen
 	register float hp;
 
 	if (!ispassenger) {
-		vehicle = samp_pNetGame->vehiclePool->vehicles[vehicleid];
+		vehicle = vehiclepool->vehicles[vehicleid];
 		if (vehicle) {
 			hp = vehicle->health;
 			if (hp != hp || hp < 0.0f || 1000.0f < hp) {

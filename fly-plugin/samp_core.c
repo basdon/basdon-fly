@@ -1,4 +1,4 @@
-struct SampNetGame *samp_pNetGame;
+struct Samp *samp;
 struct SampPlayerPool *playerpool;
 struct SampVehiclePool *vehiclepool;
 
@@ -12,9 +12,9 @@ void samp_core_init()
 {
 	TRACE;
 
-	samp_pNetGame = *(struct SampNetGame**) 0x81CA4BC;
+	samp = *(struct Samp**) 0x81CA4BC;
 	samp_pConsole = *(int**) 0x81CA4B8;
-	playerpool = samp_pNetGame->playerPool;
-	vehiclepool = samp_pNetGame->vehiclePool;
-	rakServer = samp_pNetGame->rakServer;
+	playerpool = samp->playerPool;
+	vehiclepool = samp->vehiclePool;
+	rakServer = samp->rakServer;
 }
