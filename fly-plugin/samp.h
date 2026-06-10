@@ -946,7 +946,13 @@ EXPECT_SIZE(struct RPCDATA_Spectate, 3);
 
 struct RPCDATA_PlayerJoin {
 	short playerid;
-	/**RGBA. SAMP always sends 0, resulting in the client picking a preset (per id) color*/
+	/**
+	 *RGBA.
+	 * When a player joins, SAMP always sends this rpc to existing player with color 0 which results
+	 * in the client picking a preset (per id) color.
+	 * This rpc is also sent to the joining player with all already-connected players, in that case
+	 * the color is set to that player's color (which can still be 0 if the script never set it).
+	 */
 	int color;
 	/**NPCs don't have nametags and are not shown in the TAB list (scoreboard?),
 	NPCs also have different physics, they will barely fall when hanging in the sky.*/
