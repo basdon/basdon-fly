@@ -186,6 +186,18 @@ struct SYNCDATA_Driver {
 EXPECT_SIZE(struct SYNCDATA_Driver, 2 + 2 + 2 + 2 + 16 + 12 + 12 + 4 + 1 + 1 + 1 + 1 + 1 + 2 + 4);
 EXPECT_SIZE(struct SYNCDATA_Driver, 0x3F);
 
+struct SYNCDATA_Trailer {
+	short trailer_id;
+	struct vec3 pos;
+	float quat_w;
+	float quat_x;
+	float quat_y;
+	float quat_z;
+	struct vec3 vel;
+	struct vec3 angularVel;
+};
+EXPECT_SIZE(struct SYNCDATA_Trailer, 0x36);
+
 struct SYNCDATA_Passenger {
 	short vehicle_id;
 	unsigned char seat_id : 6;
@@ -205,13 +217,22 @@ struct SYNCDATA_Passenger {
 EXPECT_SIZE(struct SYNCDATA_Passenger, 2 + 1 + 1 + 1 + 1 + 2 + 2 + 2 + 12);
 EXPECT_SIZE(struct SYNCDATA_Passenger, 0x18);
 
+struct SYNCDATA_Spectating {
+	short lrkey;
+	short udkey;
+	short keys;
+	struct vec3 pos;
+};
+EXPECT_SIZE(struct SYNCDATA_Spectating, 0x12);
+
 struct SampVehicle {
 	struct vec3 pos;
 	struct SampMatrix matrix;
 	struct vec3 vel;
 	int field_58[3];
 	short vehicleid;
-	int _pad66;
+	short trailervehicleid;
+	short _pad68;
 	short driverplayerid;
 	char _pad6C[0x7A-0x6C];
 	int _pad7A;
@@ -227,7 +248,7 @@ struct SampVehicle {
 	float health;
 	struct SampVehicleDamageStatus damageStatus;
 	char isDead;
-	short _padB5;
+	short playeridWhoReportedVehicleDeath;
 	char modslots[14];
 	/*0 is no paintjob, 1/2/3 are actual paintjobs*/
 	/*PAWN ChangeVehiclePaintjob uses 0/1/2 and 3 for no paintjob, stores value+1 in here and syncs original value*/
@@ -247,13 +268,13 @@ struct SampVehicle {
 	char numberplate[33]; /*32 + 0 term*/
 	struct SampVehicleParams params;
 	char hasSentVehicleDeathEvent;
-	char field_100;
-	int lastRespawnTickCount; /*GetTickCount() at time of last respawn*/
+	/**to know if we need to check if the vehicle has been unoccupied long enough to respawn it*/
+	char hasBeenDriverSyncedSinceRespawn;
+	int lastOccupiedSyncTickCount; /*GetTickCount() at time of last occupied sync or respawn*/
 	int lastSpawnTickCount; /*GetTickCount() at time of last (re)spawn*/
 	char use_siren;
-	char _pad10A;
+	char sirenState;
 };
-EXPECT_SIZE(struct SampVehicle, 0x10B); /*Complete.*/
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, vehicleid, 0x64);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, model, 0x82);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, respawn_delay_ms, 0x9E);
@@ -262,6 +283,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, damageStatus, 0xAA);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, paintjob, 0xC5);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, params, 0xEF);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampVehicle, use_siren, 0x109);
+EXPECT_SIZE(struct SampVehicle, 0x10B); /*Complete.*/
 
 struct SpawnInfo {
 	char team;
@@ -291,22 +313,30 @@ EXPECT_SIZE(struct SpawnInfo03DL, 0x32);
 
 struct SampPlayer {
 	struct SYNCDATA_Aim aimSyncData;
-	short _pad1F;
-	short _pad21;
-	short _pad23;
-	short _pad25;
+	/** sent by client CameraTarget rpc, if EnableCameraTarget is used for player, + see field cameraTargetEnabled */
+	short cameraObjectTarget;
+	/** sent by client CameraTarget rpc, if EnableCameraTarget is used for player, + see field cameraTargetEnabled */
+	short cameraVehicleTarget;
+	/** sent by client CameraTarget rpc, if EnableCameraTarget is used for player, + see field cameraTargetEnabled */
+	short cameraPlayerTarget;
+	/** sent by client CameraTarget rpc, if EnableCameraTarget is used for player, + see field cameraTargetEnabled */
+	short cameraActorTarget;
 	struct SYNCDATA_Driver driverSyncData;
 	struct SYNCDATA_Passenger passengerSyncData;
 	struct SYNCDATA_Onfoot onfootSyncData;
-	char _padC2[0x155-0xC2];
+	char _padC2[0x105-0xC2];
+	struct SYNCDATA_Spectating spectatingSyncData;
+	struct SYNCDATA_Trailer trailerSyncData;
+	int _pad14D;
+	int _pad151;
 	char playerStreamedIn[1000]; /*Does this get reset when player disconnects?*/
 	char vehicleStreamedIn[2000];
 	char _padD0D[1000];
-	char textLabelCreated[1024];
-	char pickupCreated[4096];
+	char textLabelStreamedIn[1024];
+	char pickupStreamedIn[4096];
 	char actorStreamedIn[1000];
-	int numPlayersStreamedIn; /**Samp doesn't stream in new players if this is 200.*/
-	int numVehiclesStreamedIn;
+	int numPlayersStreamedIn; /**SAMP doesn't stream in new players if this is 200*/
+	int numVehiclesStreamedIn; /**SAMP doesn't stream in new vehicles if this is 700*/
 	int _pad28E5;
 	int numTextLabelsStreamedIn;
 	int numPickupsStreamedIn;
@@ -314,26 +344,31 @@ struct SampPlayer {
 	int hasExpectedLocationAfterTeleport;
 	int expectedLocationSetAtTickCount;
 	struct vec3 expectedLocationAfterTeleport;
-	char _pad2909[0x2915-0x2909];
+	int cameraTargetEnabled;
+	int spawned_; /* TBC */
+	int _pad2911;
 	struct vec3 pos;
 	float hp;
 	float armor;
-	char _pad2929[0x2939-0x2929];
+	float onfootRotW;
+	float onfootRotX;
+	float onfootRotY;
+	float onfootRotZ;
 	float facingAngle;
 	struct vec3 onfootvelocity;
 	short lrkey;
 	short udkey;
 	int keys;
-	int _pad2951;
+	int oldkeys;
 	int isEditingObject;
-	int _pad2959;
+	int isEditingAttachedObject;
 	short lastSentDialogID;
 	void *textdrawpool;
 	void *textlabelPool;
 	short playerid;
 	int updateSyncType;
-	int _pad296D[130];
-	int _pad2B75[10];
+	char attachedObjects[10][0x34];
+	int attachedObjectSlotUsed[10];
 	int hasNewAimSyncData; /*if true, broadcast aim sync data and set back to false*/
 	int hasTrailerToSync;
 	int _pad2BA5;
@@ -346,7 +381,7 @@ struct SampPlayer {
 	char raceCheckpointType;
 	float raceCheckpointSize;
 	int isCurrentlyInRaceCheckpoint;
-	int _field2BDF;
+	int isCurrentlyInModShop; /*TBC*/
 	short weaponSkill[11];
 	int markersLastStreamedAtTickCount;
 	struct SpawnInfo spawnInfo;
@@ -362,8 +397,8 @@ struct SampPlayer {
 	int weaponAmmoInSlot[13];
 	char weaponIdInSlot[13];
 	char currentWeaponId;
-	short _field2C86;
-	short _field2C88;
+	short targetPlayerFromWeaponsUpdatePacket;
+	short targetActorFromWeaponsUpdatePacket;
 	int _field2C8A;
 	char _field2C8E;
 	int _field2C8F[10];
@@ -375,14 +410,13 @@ struct SampPlayer {
 	char spectatingTargetKind;
 	int spectatingTargetId; /*playerid or vehicleid (or -1), depending on value of spectatingTargetKind*/
 	int lastStreamingTick;
-	int _field2CC5;
-	int _field2CC9;
-	int _field2CCD;
+	int currentNpcRecordingType;
+	int currentNpcRecordingFilePointer;
+	int currentNpcRecordingStartTickCount;
 	char _field2CD1;
 	char _pad2CD2[8];
 	int _field2CDA;
 };
-EXPECT_SIZE(struct SampPlayer, 0x2CDE); /*Complete.*/
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, driverSyncData, 0x27);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, passengerSyncData, 0x66);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, onfootSyncData, 0x7E);
@@ -412,6 +446,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, vehicleid, 0x2C32);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, color, 0x2C34);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, interior, 0x2C40);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayer, _field2CDA, 0x2CDA);
+EXPECT_SIZE(struct SampPlayer, 0x2CDE); /*Complete.*/
 
 struct SampVehiclePool {
 	char numStaticVehiclesForModel[212]; /*do model&0xFF+112 to get the index in this array*/
@@ -430,7 +465,8 @@ struct SampPlayerPool {
 	int playerScore[1000];
 	int playerMoney[1000];
 	int playerDrunkLevel[1000];
-	int _pad3E8C[1000];
+	/** since SAMP throttles this to max once per 2000ms */
+	int scoresAndPingsLastRequestAtTickCount[1000];
 	char gpci[1000][101];
 	char version[1000][25];
 	int playerSlotState_[1000]; /*?unsure*/
@@ -514,7 +550,7 @@ struct Samp {
 	void *pFilterScripts;
 	struct SampPlayerPool *playerPool;
 	struct SampVehiclePool *vehiclePool;
-	int _pad10;
+	void *pPickupPool;
 	struct SampObjectPool *objectPool;
 	int _pad18[2];
 	void *textLabelPool;
@@ -536,7 +572,7 @@ struct Samp {
 	int gamestate;
 	float gravity;
 	int deathDropAmount; /*SetDeathDropAmount(amount)*/
-	char _pad6A;
+	char enableZoneNames; /*EnableZoneNames (removed)*/
 	char mod; /*the mod that we are using. the client mod must match in RPCClientJoin*/
 	char isGlobalChatRadiusLimitEnabled; /*LimitGlobalChatRadius(float)*/
 	char usePlayerPedAnims; /*UsePlayerPedAnims()*/

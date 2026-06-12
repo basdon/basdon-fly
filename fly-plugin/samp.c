@@ -882,9 +882,9 @@ void RespawnVehicle(int vehicleid)
 	vehicle->health = 1000.0f;
 	vehicle->isDead = 0;
 	vehicle->hasSentVehicleDeathEvent = 0;
-	vehicle->field_100 = 0;
+	vehicle->hasBeenDriverSyncedSinceRespawn = 0;
+	vehicle->lastOccupiedSyncTickCount = samp_GetTime();
 	vehicle->lastSpawnTickCount = samp_GetTime();
-	vehicle->lastRespawnTickCount = samp_GetTime();
 	memset(&vehicle->params, -1, sizeof(vehicle->params));
 
 	/*SampPlayerPool::DeleteVehicle, deletes the vehicle for all players that has the vehicle streamed in*/

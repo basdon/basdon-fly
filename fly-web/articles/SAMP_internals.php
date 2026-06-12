@@ -7,6 +7,7 @@
 	<li><a href=#vehicle_damage_status>Vehicle damage status</a>
 	<li><a href=#player_pos_server_streaming>Player position and server streaming</a>
 	<li><a href=#packet_priority_reliability_ordering>Packet priority, reliability, ordering channel</a>
+	<li><a href=#misc>Misc</a>
 </ul>
 
 <h3 id=client_console_commands>Client console commands</h3>
@@ -546,8 +547,25 @@ else if (pModelInfo->IsBike())
 	<tbody>
 		<tr><td>Connection rejected<td>HIGH_PRIORITY<td>UNRELIABLE<td>0
 		<tr><td>Legacy destroy pickup (151)<td>HIGH_PRIORITY<td>RELIABLE<td>0
+		<tr><td>Scores & pings update<td>HIGH_PRIORITY<td>RELIABLE<td>0
 		<tr><td>Request Class<td>HIGH_PRIORITY<td>RELIABLE<td>0
 		<tr><td>On foot sync<td>HIGH_PRIORITY<td>UNRELIABLE_SEQUENCED<td>1
 		<tr><td>(all other scripting functions)<td>HIGH_PRIORITY<td>RELIABLE_ORDERED<td>2
 		<tr><td>Chat message<td>HIGH_PRIORITY<td>RELIABLE<td>3
 </table>
+
+<h3 id=misc>Misc</h3>
+
+<p>
+	<strong>Scoreboard:</strong> the client periodically requests an update for player scores & pings (rpc 155).
+	The server only responds if it has been more than 2000ms since the last request.
+
+<p>
+	<strong>Legacy pickup rpcs:</strong> the server can receive rpc 97 which reads a single 2-byte pickup id,
+	to which the server will broadcast rpc 151 to all clients (containing that 2-byte pickup id). Clients receiving
+	rpc 151 will read a 1-byte value and delete a pickup identified by that value. It doesn't seem like clients ever
+	send rpc 97.
+
+<p>
+	<strong>rpc 102:</strong> when sent by the client (no payload), the server will respond (if player is rcon admin)
+	with 196 bytes of raknet stats (assumption) (stats of UNASSIGNED_PLAYER_ID, so does this mean global stats?).
