@@ -568,4 +568,4 @@ else if (pModelInfo->IsBike())
 
 <p>
 	<strong>rpc 102:</strong> when sent by the client (no payload), the server will respond (if player is rcon admin)
-	with 196 bytes of raknet stats (assumption) (stats of UNASSIGNED_PLAYER_ID, so does this mean global stats?).
+	with 296 bytes of raknet stats (assumption) (stats of UNASSIGNED_PLAYER_ID, so does this mean global stats?).
