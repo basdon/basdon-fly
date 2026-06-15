@@ -60,10 +60,14 @@ nav a {
 nav a:hover, header h1 a:hover {
 	background:#0004;
 }
+/*set explicit size on icons to prevent layout jumps once they load*/
 img[src^="/s/fff-"] {
-	/*set explicit size on famfamfam icons to prevent layout jumps once they load*/
 	width: 16px;
 	height: 16px;
+}
+img[src="/s/moin-www.png"] {
+	width: 12px;
+	height: 12px;
 }
 #ip {
 	float:left;
