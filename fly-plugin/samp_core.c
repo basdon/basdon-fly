@@ -1,3 +1,4 @@
+struct SampPlugins *sampPlugins;
 struct Samp *samp;
 struct SampPlayerPool *playerpool;
 struct SampVehiclePool *vehiclepool;
@@ -12,10 +13,10 @@ void samp_core_init()
 {
 	TRACE;
 
-	samp = *(struct Samp**) 0x81CA4BC;
-	samp_pConsole = *(int**) 0x81CA4B8;
+	samp = sampPlugins->GetSamp();
+	samp_pConsole = sampPlugins->GetSampConsole();
 	playerpool = samp->playerPool;
 	vehiclepool = samp->vehiclePool;
-	rakServer = samp->rakServer;
+	rakServer = samp->rakServer; /*also exposed at sampPlugins->GetRakServer()*/
 	rakServerVtable = rakServer->vtable;
 }

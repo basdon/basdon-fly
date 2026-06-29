@@ -559,7 +559,7 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES | SUPPORTS_PROCESS_TICK;
 }
 
-PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
+PLUGIN_EXPORT int PLUGIN_CALL Load(struct SampPlugins *lSampPlugins)
 {
 	char sha256buf[SHA256BUFSIZE + 1];
 
@@ -568,9 +568,13 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(void **ppData)
 	init_class_msptypes();
 	init_class_names();
 
-	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
+	sampPlugins = lSampPlugins;
+	pAMXFunctions = sampPlugins->pAmxFunctionTable;
 #undef logprintf
-	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
+	logprintf = sampPlugins->Logprintf;
+
+	/* NOTE: SAMP is not initialized at this point, sampPlugins->GetSamp() returns NULL. */
+	/*       It gets initialized right after plugins finish loading.*/
 
 	*(int*) &float_pinf = 0x7F800000;
 	*(int*) &float_ninf = 0xFF800000;

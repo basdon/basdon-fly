@@ -615,6 +615,73 @@ STATIC_ASSERT_MEMBER_OFFSET(struct Samp, nametagDrawDistance, 0x72);
 STATIC_ASSERT_MEMBER_OFFSET(struct Samp, numAvailableSpawns, 0x8A);
 STATIC_ASSERT_MEMBER_OFFSET(struct Samp, availableSpawns, 0x8E);
 
+struct SampAmxFunctions {
+	amx_Align16_t *pAlign16;
+	amx_Align32_t *pAlign32;
+	void *pAlign64;
+	amx_Allot_t *pAllot;
+	amx_Callback_t *pCallback;
+	amx_Cleanup_t *pCleanup;
+	amx_Clone_t *pClone;
+	amx_Exec_t *pExec;
+	amx_FindNative_t *pFindNative;
+	amx_FindPublic_t *pFindPublic;
+	amx_FindPubVar_t *pFindPubVar;
+	amx_FindTagId_t *pFindTagId;
+	amx_Flags_t *pFlags;
+	amx_GetAddr_t *pGetAddr;
+	amx_GetNative_t *pGetNative;
+	amx_GetPublic_t *pGetPublic;
+	amx_GetPubVar_t *pGetPubVar;
+	amx_GetString_t *pGetString;
+	amx_GetTag_t *pGetTag;
+	amx_GetUserData_t *pGetUserData;
+	amx_Init_t *pInit;
+	amx_InitJIT_t *pInitJIT;
+	amx_MemInfo_t *pMemInfo;
+	amx_NameLength_t *pNameLength;
+	amx_NativeInfo_t *pNativeInfo;
+	amx_NumNatives_t *pNumNatives;
+	amx_NumPublics_t *pNumPublics;
+	amx_NumPubVars_t *pNumPubVars;
+	amx_NumTags_t *pNumTags;
+	amx_Push_t *pPush;
+	amx_PushArray_t *pPushArray;
+	amx_PushString_t *pPushString;
+	amx_RaiseError_t *pRaiseError;
+	amx_Register_t *pRegister;
+	amx_Release_t *pRelease;
+	amx_SetCallback_t *pSetCallback;
+	amx_SetDebugHook_t *pSetDebugHook;
+	amx_SetString_t *pSetString;
+	amx_SetUserData_t *pSetUserData;
+	amx_StrLen_t *pStrLen;
+	amx_UTF8Check_t *pUTF8Check;
+	amx_UTF8Get_t *pUTF8Get;
+	amx_UTF8Len_t *pUTF8Len;
+	amx_UTF8Put_t *pUTF8Put;
+};
+
+struct SampPlugins {
+	void (*Logprintf)(char* format, ...);
+	char _pad4[0x40-0x4];
+	struct SampAmxFunctions *pAmxFunctionTable; /*just a pointer to this at offset 0x400 (amxFunctionTable)*/
+	int (*CallFsPublic)(char *name);
+	int (*CallGmPublic)(char *name);
+	char _pad4C[0x384-0x4C];
+	struct Samp* (*GetSamp)();
+	struct RakServer* (*GetRakServer)();
+	void (*LoadFilterScript)(char *path);
+	void* (*GetSampConsole)();
+	void (*UnloadFilterScript)(char *path);
+	char _pad398[0x400-0x398];
+	struct SampAmxFunctions amxFunctionTable;
+	/*pluginlist*/
+};
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlugins, pAmxFunctionTable, 0x40);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlugins, GetSamp, 0x384);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlugins, amxFunctionTable, 0x400);
+
 struct RPCDATA_ShowGangZone {
 	short zoneid;
 	float min_x;
