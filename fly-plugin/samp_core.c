@@ -1,13 +1,73 @@
-struct SampPlugins *sampPlugins;
-struct Samp *samp;
-struct SampPlayerPool *playerpool;
-struct SampVehiclePool *vehiclepool;
+static void samp_core_init();
+static void StreamPlayerIn(struct SampPlayer *player, ushort subjectplayeridx);
+static void StreamPlayerOut(struct SampPlayer *player, ushort subjectplayeridx);
 
-static void* samp_pConsole;
+#ifdef SAMP_CORE_IMPL
 
-static unsigned char vehicle_gear_state[MAX_VEHICLES];
-static int vehicle_gear_change_time[MAX_VEHICLES];
+static
+void Crash()
+{
+	TRACE;
 
+	asmcrash();
+}
+/*jeanine:p:i:4;p:0;a:b;y:1.88;n:StreamPlayerIn;*/
+static
+void StreamPlayerIn(struct SampPlayer *player, ushort subjectplayeridx)
+{
+	TRACE;
+#pragma pack(push,1)
+	union {
+		struct RPCDATA_WorldPlayerAdd03DL rpcdata03DL;
+		struct RPCDATA_WorldPlayerAdd037 rpcdata037;
+		struct {
+			int _pad0;
+			struct RPCDATA_WorldPlayerAdd037 rpcdata037;
+		} shifted;
+	} data;
+	EXPECT_SIZE(data, sizeof(struct RPCDATA_WorldPlayerAdd03DL));
+#pragma pack(pop)
+	struct RPCDATA_WorldPlayerAdd037 *writeptr;
+	struct BitStream bs;
+
+	bs.ptrData = &data;
+	bs.numberOfBitsUsed = sizeof(struct RPCDATA_WorldPlayerAdd037);
+	writeptr = &data.rpcdata037;
+	writeptr->playerid = player->playerid;
+	writeptr->team = player->spawnInfo.team;
+	writeptr->skin = player->spawnInfo.skin;
+	if (is_player_using_client_version_DL[player->playerid]) {
+		writeptr = &data.shifted.rpcdata037;
+		/* This field is used for "custom skin".*/
+		/*Brunoo16's packet list says to keep this 0 if it's not a default skin,*/
+		/* but if I make either skin field 0, it always shows a CJ skin..*/
+		writeptr->skin = player->spawnInfo.skin;
+		bs.numberOfBitsUsed = sizeof(struct RPCDATA_WorldPlayerAdd03DL);
+	}
+	writeptr->pos = player->pos;
+	writeptr->facingAngle = player->facingAngle;
+	writeptr->color = player->color;
+	memcpy(&writeptr->weaponSkill, player->weaponSkill, sizeof(player->weaponSkill));
+	EXPECT_SIZE(player->weaponSkill, sizeof(writeptr->weaponSkill));
+	rakServerVtable->RPC_8C(rakServer, (void*) RPC_WorldPlayerAdd, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 2, rakPlayerID[player->playerid], 0, 0);
+
+	/*SAMP here also sends RPC_SetPlayerAttachedObject for each slot but we currently don't use player attached objects*/
+
+	/*OnPlayerStreamIn happens here*/
+}
+/*jeanine:p:i:3;p:4;a:b;y:1.88;n:StreamPlayerOut;*/
+static
+void StreamPlayerOut(struct SampPlayer *player, ushort subjectplayeridx)
+{
+	TRACE;
+	struct RPCDATA_WorldPlayerRemove rpcdata;
+
+	rpcdata.playerid = subjectplayeridx;
+	SendRPCToPlayer(player->playerid, RPC_WorldPlayerRemove, &rpcdata, sizeof(rpcdata), 2);
+
+	/*OnPlayerStreamOut happens here*/
+}
+/*jeanine:p:i:5;p:3;a:b;y:1.88;n:samp_core_init;*/
 static
 void samp_core_init()
 {
@@ -19,4 +79,13 @@ void samp_core_init()
 	vehiclepool = samp->vehiclePool;
 	rakServer = samp->rakServer; /*also exposed at sampPlugins->GetRakServer()*/
 	rakServerVtable = rakServer->vtable;
+
+	/*Following functions are supposed to be replaced with our code.*/
+	/*Ensure calls to them result in a crash instead of hard-to-trace corruption.*/
+	mem_mkjmp(0x80CAF00, Crash); /*SampPlayer::StreamInPlayer*/
+	mem_mkjmp(0x80CAFC0, Crash); /*SampPlayer::StreamOutPlayer*/
+	mem_mkjmp(0x80D0EC0, Crash); /*SampPlayerPool::StreamInPlayer*/
+	mem_mkjmp(0x80D0F00, Crash); /*SampPlayerPool::StreamOutPlayer*/
 }
+
+#endif /*SAMP_CORE_IMPL*/

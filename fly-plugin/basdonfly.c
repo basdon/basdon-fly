@@ -33,6 +33,8 @@ const char *stupid_trace_entries[64];
 /*May also use offsetof(), but that requires stddef.h*/
 #define MEMBER_OFFSET(S,M) (__builtin_offsetof(S,M))
 #define STATIC_ASSERT_MEMBER_OFFSET(S,M,O) STATIC_ASSERT(MEMBER_OFFSET(S,M)==(O))
+/*And silent gcc warning about unused local typedefs so it doesn't warn when using these assertions inside functions*/
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 
 typedef void (*cb_t)(void* data);
 
@@ -48,6 +50,10 @@ EXPECT_SIZE(short, 2);
 EXPECT_SIZE(int, 4);
 EXPECT_SIZE(cell, 4);
 EXPECT_SIZE(float, 4);
+
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
 
 #define PW_HASH_LENGTH (65) /*Including zero term. This is for bcrypt.*/
 #define SHA256BUFSIZE (65) /*Including zero term as well.*/
@@ -311,6 +317,16 @@ static unsigned short _cc[MAX_PLAYERS];
 static int joinpressure = 0;
 static int minconnectiontime = 0;
 
+struct SampPlugins *sampPlugins;
+struct Samp *samp;
+struct SampPlayerPool *playerpool;
+struct SampVehiclePool *vehiclepool;
+
+static void* samp_pConsole;
+
+static unsigned char vehicle_gear_state[MAX_VEHICLES];
+static int vehicle_gear_change_time[MAX_VEHICLES];
+
 /**
 Set as soon as a player is connected.
 */
@@ -555,6 +571,8 @@ static void samp_incoming_init();
 #define SAMP_NATIVES_IMPL
 #include "samp.c"
 #include "basdonfly_callbacks.c"
+#define SAMP_CORE_IMPL
+#include "samp_core.c"
 #include "samp_incoming.c"
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()

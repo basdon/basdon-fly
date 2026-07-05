@@ -1141,6 +1141,12 @@ struct RPCDATA_WorldPlayerAdd03DL {
 };
 EXPECT_SIZE(struct RPCDATA_WorldPlayerAdd03DL, 0x36);
 
+struct RPCDATA_WorldPlayerRemove {
+	ushort playerid;
+};
+EXPECT_SIZE(struct RPCDATA_WorldPlayerRemove, 2);
+
+EXPECT_SIZE(struct RPCDATA_WorldPlayerAdd037, 0x32);
 struct RPCDATA_SetPlayerName {
 	short playerid;
 	char nameLength;
@@ -1337,7 +1343,8 @@ DriverSync
 #define RPC_PutPlayerInVehicle 0x815A058 /*ptr to 0x46(70)*/
 #define RPC_RequestClass 0x81572DF /*ptr to 0x80(128), orderingChannel 0, RELIABLE*/
 #define RPC_SetSpawnInfo 0x8162624 /*ptr to 0x44(68)*/
-#define RPC_WorldPlayerAdd 0x816324E /*ptr to 0x20(32)*/
+#define RPC_WorldPlayerAdd 0x816324E /*ptr to 0x20(32), orderingChannel 2*/
+#define RPC_WorldPlayerRemove 0x815AA7A /*ptr to 0xA3(163), orderingChannel 2*/
 #define RPC_SetPlayerName 0x815CCC5 /*ptr to 0xB(11), orderingChannel 2*/
 #define RPC_SetPlayerSkin 0x815CCE4 /*ptr to 0x99(153)*/
 #define RPC_SetPlayerColor 0x8163C35 /*ptr to 0x48(72), orderingChannel 2*/

@@ -295,6 +295,13 @@ QuaternionToMatrix:
 	mov eax, 0804BB30h
 	jmp eax
 
+;prot void asmcrash();
+global asmcrash:function
+asmcrash:
+	xor eax, eax
+	mov dword [eax], 0
+	call eax
+
 segment .data
 logprintRetAddr	dd 00h
 

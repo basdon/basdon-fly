@@ -22,7 +22,7 @@ int IsWithinStreamDistance(struct vec3 *a, struct vec3 *b)
 	dz = a->z - b->z;
 	return dx * dx + dy * dy + dz * dz < *stream_distance * *stream_distance;
 }
-/*jeanine:p:i:5;p:1;a:r;x:11.00;y:21.00;n:UpdatePlayerMarkersForPlayer;*/
+/*jeanine:p:i:5;p:1;a:r;x:11.00;y:25.00;n:UpdatePlayerMarkersForPlayer;*/
 /**
  * sending markers of players that don't exist for the client has no effect (of course because the
  * client also wouldn't know what color to use). sending markers for npc players does work.
@@ -147,14 +147,19 @@ int StreamPlayersForPlayer(struct SampPlayer *player)
 			playerpool->virtualworld[i] == playerpool->virtualworld[player->playerid] &&
 			IsWithinStreamDistance(GetOtherPlayerPositionForStreamDistanceCheck(otherplayer), &player->pos)/*jeanine:r:i:6;*/
 		) {
-			if (!player->playerStreamedIn[i]) {
-				/*SampPlayer::StreamInPlayer*/
-				((void (*)(struct SampPlayer*,int,int))0x80CAF00)(player, i, /*ignore streaming distance*/ 1);
+			if (
+				!player->playerStreamedIn[i] &&
+				player->numPlayersStreamedIn < 200 /*limit copied from original SAMP server*/
+			) {
+				player->playerStreamedIn[i] = 1;
+				player->numPlayersStreamedIn++;
+				StreamPlayerIn(player, i);
 			}
 		} else {
 			if (player->playerStreamedIn[i]) {
-				/*SampPlayer::StreamOutPlayer*/
-				((void (*)(struct SampPlayer*,int))0x80CAFC0)(player, i);
+				player->playerStreamedIn[i] = 0;
+				player->numPlayersStreamedIn--;
+				StreamPlayerOut(player, i);
 				didStreamOutSomeone = 1;
 			}
 		}
