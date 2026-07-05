@@ -1478,7 +1478,7 @@ int natives_Kick(int playerid, char *reason, char *issuer, int issuer_userid)
 
 		if (reason != NULL) {
 			sprintf(msg,
-				"%s[%d] was kicked by %s (%s)",
+				WARN"%s[%d] was kicked by %s (%s)",
 				pdata[playerid]->name,
 				playerid,
 				issuer,
