@@ -1,11 +1,11 @@
 static void samp_core_init();
-static void StreamPlayerIn(struct SampPlayer *player, ushort subjectplayeridx);
+static void StreamPlayerIn(struct SampPlayer *player, struct SampPlayer *subjectplayer);
 static void StreamPlayerOut(struct SampPlayer *player, ushort subjectplayeridx);
 
 #ifdef SAMP_CORE_IMPL
 /*jeanine:p:i:4;p:0;a:b;y:1.88;n:StreamPlayerIn;*/
 static
-void StreamPlayerIn(struct SampPlayer *player, ushort subjectplayeridx)
+void StreamPlayerIn(struct SampPlayer *player, struct SampPlayer *subject)
 {
 	TRACE;
 #pragma pack(push,1)
@@ -25,22 +25,22 @@ void StreamPlayerIn(struct SampPlayer *player, ushort subjectplayeridx)
 	bs.ptrData = &data;
 	bs.numberOfBitsUsed = sizeof(struct RPCDATA_WorldPlayerAdd037);
 	writeptr = &data.rpcdata037;
-	writeptr->playerid = player->playerid;
-	writeptr->team = player->spawnInfo.team;
-	writeptr->skin = player->spawnInfo.skin;
+	writeptr->playerid = subject->playerid;
+	writeptr->team = subject->spawnInfo.team;
+	writeptr->skin = subject->spawnInfo.skin;
 	if (is_player_using_client_version_DL[player->playerid]) {
 		writeptr = &data.shifted.rpcdata037;
 		/* This field is used for "custom skin".*/
 		/*Brunoo16's packet list says to keep this 0 if it's not a default skin,*/
 		/* but if I make either skin field 0, it always shows a CJ skin..*/
-		writeptr->skin = player->spawnInfo.skin;
+		writeptr->skin = subject->spawnInfo.skin;
 		bs.numberOfBitsUsed = sizeof(struct RPCDATA_WorldPlayerAdd03DL);
 	}
-	writeptr->pos = player->pos;
-	writeptr->facingAngle = player->facingAngle;
-	writeptr->color = player->color;
-	memcpy(&writeptr->weaponSkill, player->weaponSkill, sizeof(player->weaponSkill));
-	EXPECT_SIZE(player->weaponSkill, sizeof(writeptr->weaponSkill));
+	writeptr->pos = subject->pos;
+	writeptr->facingAngle = subject->facingAngle;
+	writeptr->color = subject->color;
+	memcpy(&writeptr->weaponSkill, subject->weaponSkill, sizeof(subject->weaponSkill));
+	EXPECT_SIZE(writeptr->weaponSkill, sizeof(subject->weaponSkill));
 	rakServerVtable->RPC_8C(rakServer, (void*) RPC_WorldPlayerAdd, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 2, rakPlayerID[player->playerid], 0, 0);
 
 	/*SAMP here also sends RPC_SetPlayerAttachedObject for each slot but we currently don't use player attached objects*/

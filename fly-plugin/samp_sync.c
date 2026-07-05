@@ -153,7 +153,7 @@ int StreamPlayersForPlayer(struct SampPlayer *player)
 			) {
 				player->playerStreamedIn[i] = 1;
 				player->numPlayersStreamedIn++;
-				StreamPlayerIn(player, i);
+				StreamPlayerIn(player, otherplayer);
 			}
 		} else {
 			if (player->playerStreamedIn[i]) {
