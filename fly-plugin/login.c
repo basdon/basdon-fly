@@ -849,6 +849,8 @@ void login_cb_check_user_exists(void *data)
 	failedattempts = (nc_params[2] = 3, NC(n_cache_get_field_i));
 	
 	if (failedattempts > MAX_ALLOWED_FAILED_LOGINS_IN_30_MINUTES) {
+		/*TODO: send a message to all online admins about this, because users might be confused about skipping login*/
+		/*TODO: change this to a dialog so the user cannot be confused why they can't login*/
 asguest:
 		SendClientMessage(playerid, COL_SAMP_GREEN, "You will be spawned as a guest.");
 		login_spawn_as_guest(playerid);
