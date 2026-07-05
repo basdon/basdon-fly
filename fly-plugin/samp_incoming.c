@@ -96,8 +96,6 @@ void samp_incoming_init()
 
 	mem_mkjmp(0x80B0D90, &HandleRpcPlayerSpawned);
 
-	/*Following functions are supposed to be replaced with our code.*/
-	/*Ensure calls to them result in a crash instead of hard-to-trace corruption.*/
-	mem_mkjmp(0x80CCFC0, Crash); /*SampPlayer::Spawn*/
-	mem_mkjmp(0x80D1580, Crash); /*SampPlayerPool::StreamOutAllPlayersForPlayer*/
+	mem_mkjmp(0x80CCFC0, crash__this_codepath_should_be_unreachable); /*SampPlayer::Spawn*/
+	mem_mkjmp(0x80D1580, crash__this_codepath_should_be_unreachable); /*SampPlayerPool::StreamOutAllPlayersForPlayer*/
 }

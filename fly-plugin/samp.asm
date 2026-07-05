@@ -295,7 +295,7 @@ QuaternionToMatrix:
 	mov eax, 0804BB30h
 	jmp eax
 
-;prot void asmcrash();
+;prot __attribute__((noreturn)) void asmcrash();
 global asmcrash:function
 asmcrash:
 	xor eax, eax

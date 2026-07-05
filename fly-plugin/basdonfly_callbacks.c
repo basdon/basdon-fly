@@ -377,8 +377,7 @@ cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 {
 	TRACE;
 
-	asmcrash(); /*player spawning was replaced so this should never be called anymore*/
-	return 1;
+	crash__this_codepath_should_be_unreachable(); /*SendSpawn RPC is replaced*/
 }
 
 /* native B_OnPlayerStateChange(playerid, newstate, oldstate) */

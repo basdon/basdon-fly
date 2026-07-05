@@ -3,14 +3,6 @@ static void StreamPlayerIn(struct SampPlayer *player, ushort subjectplayeridx);
 static void StreamPlayerOut(struct SampPlayer *player, ushort subjectplayeridx);
 
 #ifdef SAMP_CORE_IMPL
-
-static
-void Crash()
-{
-	TRACE;
-
-	asmcrash();
-}
 /*jeanine:p:i:4;p:0;a:b;y:1.88;n:StreamPlayerIn;*/
 static
 void StreamPlayerIn(struct SampPlayer *player, ushort subjectplayeridx)
@@ -80,12 +72,10 @@ void samp_core_init()
 	rakServer = samp->rakServer; /*also exposed at sampPlugins->GetRakServer()*/
 	rakServerVtable = rakServer->vtable;
 
-	/*Following functions are supposed to be replaced with our code.*/
-	/*Ensure calls to them result in a crash instead of hard-to-trace corruption.*/
-	mem_mkjmp(0x80CAF00, Crash); /*SampPlayer::StreamInPlayer*/
-	mem_mkjmp(0x80CAFC0, Crash); /*SampPlayer::StreamOutPlayer*/
-	mem_mkjmp(0x80D0EC0, Crash); /*SampPlayerPool::StreamInPlayer*/
-	mem_mkjmp(0x80D0F00, Crash); /*SampPlayerPool::StreamOutPlayer*/
+	mem_mkjmp(0x80CAF00, crash__this_codepath_should_be_unreachable); /*SampPlayer::StreamInPlayer*/
+	mem_mkjmp(0x80CAFC0, crash__this_codepath_should_be_unreachable); /*SampPlayer::StreamOutPlayer*/
+	mem_mkjmp(0x80D0EC0, crash__this_codepath_should_be_unreachable); /*SampPlayerPool::StreamInPlayer*/
+	mem_mkjmp(0x80D0F00, crash__this_codepath_should_be_unreachable); /*SampPlayerPool::StreamOutPlayer*/
 }
 
 #endif /*SAMP_CORE_IMPL*/
