@@ -69,7 +69,9 @@ struct RakServer_vtable {
 	short (*GetIndexFromPlayerID)(struct RakServer *rakServer, struct PlayerID playerID);
 	/** equal to actual signature: void (*GetPlayerIDFromIndex)(struct PlayerID *outPlayerId, struct RakServer *rakServer, short playerIndex)*/
 	struct PlayerID (*GetPlayerIDFromIndex)(struct RakServer *rakServer, short playerIndex);
-	int _padF0[10];
+	int _padF0;
+	void (*AddToBanList)(struct RakServer *rakServer, char *dottedIpAddr, int unkMaybeDurationMs);
+	char _padF8[0x118-0xF8];
 	struct RakNetStatistics *(*GetStatistics)(struct RakServer *rakServer, struct PlayerID playerID);
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, SendBitStream, 0x24);
@@ -78,6 +80,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetLastPing, 0x50);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, RPC_8C, 0x8C);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetIndexFromPlayerID, 0xE8);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetPlayerIDFromIndex, 0xEC);
+STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, AddToBanList, 0xF4);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetStatistics, 0x118); /*TODO: revalidate*/
 
 struct RakRPCHandlerArg {

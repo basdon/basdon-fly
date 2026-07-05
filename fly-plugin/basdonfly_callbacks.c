@@ -53,6 +53,7 @@ cell AMX_NATIVE_CALL B_OnGameModeInit(AMX *amx, cell *params)
 
 	samp_core_init();
 	samp_sync_init();
+	samp_incoming_init();
 	samp_init();
 
 	t = time_timestamp();
@@ -375,35 +376,8 @@ static
 cell AMX_NATIVE_CALL B_OnPlayerSpawn(AMX *amx, cell *params)
 {
 	TRACE;
-	struct RPCDATA_SetWorldBounds rpcdata;
-	struct vec3 pos;
-	const int playerid = PARAM(1);
 
-	/*SetWorldBounds doesn't (always) work in OnPlayerConnect, so this is a good location I suppose.*/
-	if (need_adjust_world_bounds[playerid]) {
-		need_adjust_world_bounds[playerid] = 0;
-		*(int*)&rpcdata.x_max = *(int*)&rpcdata.y_max = WORLD_XY_MAX;
-		*(int*)&rpcdata.x_min = *(int*)&rpcdata.y_min = WORLD_XY_MIN;
-		SendRPCToPlayer(playerid, RPC_SetWorldBounds, &rpcdata, sizeof(rpcdata), 2);
-	}
-
-	if (!ISPLAYING(playerid)) {
-		return 0;
-	}
-
-	spawned[playerid] = 1;
-
-	GetPlayerPos(playerid, &pos);
-	kneeboard_update_all(playerid, &pos);
-	maps_stream_for_player(playerid, pos.x, pos.y, OBJ_STREAM_MODE_CLOSEST_NOW);
-	money_on_player_spawn(playerid);
-	nametags_update_for_player(playerid);
-	spawn_on_player_spawn(playerid);
-	svp_update_mapicons(playerid, pos.x, pos.y);
-	missions_on_player_spawn(playerid, pos);
-	survey_on_player_spawn(playerid);
-	zones_update(playerid, pos);
-
+	asmcrash(); /*player spawning was replaced so this should never be called anymore*/
 	return 1;
 }
 

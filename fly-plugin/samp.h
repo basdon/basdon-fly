@@ -345,7 +345,10 @@ struct SampPlayer {
 	int expectedLocationSetAtTickCount;
 	struct vec3 expectedLocationAfterTeleport;
 	int cameraTargetEnabled;
-	int spawned_; /* TBC */
+	/*Set to 1 on SpawnPlayer() or when OnRequestSpawn() returns successfully.*/
+	/*Ensures players can't spawn by manually sending the 'i spawned' packet (the check will kick them if they do).*/
+	/*This only applies to the first spawn after joining, as this field is never reset to 0 for the same player.*/
+	int isAllowedToSpawn;
 	int _pad2911;
 	struct vec3 pos;
 	float hp;

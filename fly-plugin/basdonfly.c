@@ -493,6 +493,8 @@ int CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_d
 	return vehicleid;
 }
 
+static void samp_incoming_init();
+
 #include "conf.c"
 #include "memstuff.c"
 #include "natives.c"
@@ -553,6 +555,7 @@ int CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_d
 #define SAMP_NATIVES_IMPL
 #include "samp.c"
 #include "basdonfly_callbacks.c"
+#include "samp_incoming.c"
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 {
