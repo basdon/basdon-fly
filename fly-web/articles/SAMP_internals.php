@@ -548,6 +548,7 @@ else if (pModelInfo->IsBike())
 		<tr><td>Connection rejected<td>HIGH_PRIORITY<td>UNRELIABLE<td>0
 		<tr><td>Legacy destroy pickup (151)<td>HIGH_PRIORITY<td>RELIABLE<td>0
 		<tr><td>Scores & pings update<td>HIGH_PRIORITY<td>RELIABLE<td>0
+		<tr><td>Stats update</td>HIGH_PRIORITY</td>UNRELIABLE<td>0
 		<tr><td>Request Class<td>HIGH_PRIORITY<td>RELIABLE<td>0
 		<tr><td>On foot sync<td>HIGH_PRIORITY<td>UNRELIABLE_SEQUENCED<td>1
 		<tr><td>(all other scripting functions)<td>HIGH_PRIORITY<td>RELIABLE_ORDERED<td>2
@@ -557,8 +558,11 @@ else if (pModelInfo->IsBike())
 <h3 id=misc>Misc</h3>
 
 <p>
-	<strong>Scoreboard:</strong> the client periodically requests an update for player scores & pings (rpc 155).
-	The server only responds if it has been more than 2000ms since the last request.
+	<strong>Scoreboard:</strong> the client requests an update for player scores & pings (rpc 155) every 3000ms while
+	the scoreboard is shown. The server only responds if the last request from the player has been more than 2000ms ago.
+
+<p>
+	<strong>Stats update:</strong> sent by the client every 1000ms (player money and drunk level).
 
 <p>
 	<strong>Legacy pickup rpcs:</strong> the server can receive rpc 97 which reads a single 2-byte pickup id,
