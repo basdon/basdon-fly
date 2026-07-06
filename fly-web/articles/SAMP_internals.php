@@ -548,7 +548,7 @@ else if (pModelInfo->IsBike())
 		<tr><td>Connection rejected<td>HIGH_PRIORITY<td>UNRELIABLE<td>0
 		<tr><td>Legacy destroy pickup (151)<td>HIGH_PRIORITY<td>RELIABLE<td>0
 		<tr><td>Scores & pings update<td>HIGH_PRIORITY<td>RELIABLE<td>0
-		<tr><td>Stats update</td>HIGH_PRIORITY</td>UNRELIABLE<td>0
+		<tr><td>Stats update<td>HIGH_PRIORITY<td>UNRELIABLE<td>0
 		<tr><td>Request Class<td>HIGH_PRIORITY<td>RELIABLE<td>0
 		<tr><td>On foot sync<td>HIGH_PRIORITY<td>UNRELIABLE_SEQUENCED<td>1
 		<tr><td>(all other scripting functions)<td>HIGH_PRIORITY<td>RELIABLE_ORDERED<td>2
