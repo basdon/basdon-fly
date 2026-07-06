@@ -75,7 +75,7 @@ void UpdatePlayerMarkersForPlayer(struct SampPlayer *player)
 	}
 	rakServerVtable->SendBitStream(rakServer, &bs, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 1, rakPlayerID[player->playerid], 0);
 }
-/*jeanine:p:i:4;p:1;a:r;x:11.00;y:-44.00;n:StreamVehiclesForPlayer;*/
+/*jeanine:p:i:4;p:1;a:r;x:11.00;y:-52.00;n:StreamVehiclesForPlayer;*/
 static
 void StreamVehiclesForPlayer(struct SampPlayer *player)
 {
@@ -89,18 +89,27 @@ void StreamVehiclesForPlayer(struct SampPlayer *player)
 			vehicle &&
 			vehicle->_pad7A &&
 			vehiclepool->virtualworld[i] == playerpool->virtualworld[player->playerid] &&
+			/*TODO: lets do something smart with train vehicle ids so we can get rid of this condition*/
 			vehicle->model != MODEL_FREIFLAT &&
 			vehicle->model != MODEL_STREAKC &&
 			IsWithinStreamDistance(&vehicle->pos, &player->pos)
 		) {
-			if (!player->vehicleStreamedIn[i]) {
-				/*SampPlayer::StreamInVehicle*/
-				((void (*)(struct SampPlayer*,int,int))0x80C9CA0)(player, i, /*ignore streaming distance*/ 1);
+			if (
+				!player->vehicleStreamedIn[i] &&
+				/*TODO: this could (should?) do some prioritizing: stream*/
+				/*out a random (or the furthest) unoccupied vehicle so we*/
+				/*can stream in a vehicle that is occupied.*/
+				player->numVehiclesStreamedIn < LIMIT_VEHICLES_STREAMED_IN
+			) {
+				player->vehicleStreamedIn[i] = 1;
+				player->numVehiclesStreamedIn++;
+				StreamVehicleIn(player, vehicle);
 			}
 		} else {
 			if (player->vehicleStreamedIn[i]) {
-				/*SampPlayer::StreamOutVehicle*/
-				((void (*)(struct SampPlayer*,int))0x80C9BF0)(player, i);
+				player->vehicleStreamedIn[i] = 0;
+				player->numVehiclesStreamedIn--;
+				StreamVehicleOut(player, vehicle);
 			}
 		}
 	}
@@ -142,6 +151,7 @@ int StreamPlayersForPlayer(struct SampPlayer *player)
 		otherplayer = sampPlayer[i];
 		if (
 			otherplayer &&
+			/*TODO: lets combine all non-streaming states at the start of the enum so this can be a single GT check*/
 			otherplayer->currentState != PLAYER_STATE_NONE &&
 			otherplayer->currentState != PLAYER_STATE_SPECTATING &&
 			playerpool->virtualworld[i] == playerpool->virtualworld[player->playerid] &&
@@ -149,7 +159,7 @@ int StreamPlayersForPlayer(struct SampPlayer *player)
 		) {
 			if (
 				!player->playerStreamedIn[i] &&
-				player->numPlayersStreamedIn < 200 /*limit copied from original SAMP server*/
+				player->numPlayersStreamedIn < LIMIT_PLAYERS_STREAMED_IN
 			) {
 				player->playerStreamedIn[i] = 1;
 				player->numPlayersStreamedIn++;
@@ -167,21 +177,20 @@ int StreamPlayersForPlayer(struct SampPlayer *player)
 	return didStreamOutSomeone;
 }
 /*jeanine:p:i:1;p:2;a:r;x:3.75;n:DoStreamingAfterPlayerLocationUpdate;*/
+/*Note: also triggered by PutPlayerInVehicle, PlayerSpectateVehicle, PlayerSpectatePlayer*/
 static
-void DoStreamingAfterPlayerLocationUpdate(struct SampPlayer *player, float x, float y, float z, char processStreamingImmediately)
+void DoStreamingAfterPlayerLocationUpdate(struct SampPlayer *player, struct vec3 pos, char processStreamingImmediately)
 {
 	TRACE;
 	int tickCount, didStreamOutPlayer;
 
-	player->pos.x = x;
-	player->pos.y = y;
-	player->pos.z = z;
+	player->pos = pos;
 
 	tickCount = samp_GetTime();
 
 	if (player->hasExpectedLocationAfterTeleport) {
 		if (
-			IsWithinStreamDistance(&player->pos, &player->expectedLocationAfterTeleport) ||
+			IsWithinStreamDistance(&pos, &player->expectedLocationAfterTeleport) ||
 			tickCount - player->expectedLocationSetAtTickCount >= 5000
 		) {
 			player->hasExpectedLocationAfterTeleport = 0;
@@ -225,5 +234,5 @@ void samp_sync_init()
 {
 	TRACE;
 
-	mem_mkjmp(0x80CBCB0, &DoStreamingAfterPlayerLocationUpdate);/*jeanine:r:i:1;*/
+	mem_mkjmp(0x80CBCB0, &DoStreamingAfterPlayerLocationUpdate); /*SampPlayer::StorePositionProcessStreamingAndCheckpoints*//*jeanine:r:i:1;*/
 }

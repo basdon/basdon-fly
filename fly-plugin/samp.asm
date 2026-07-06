@@ -302,9 +302,35 @@ asmcrash:
 	mov dword [eax], 0
 	call eax
 
+;prot float CalcVehicleStreamInAngle(float matrixUpX, float matrixUpY);
+global CalcVehicleStreamInAngle:function
+CalcVehicleStreamInAngle:
+	; if i'm not misreading the disasm, this is what samp does:
+	; ---
+	; angle = (float) atan2(-vehicle->matrix.up.x, vehicle->matrix.up.y) * 180.0f / MATH_PI;
+	; if (angle >= 360.0f) angle -= 360.0f;
+	; if (angle < 0.0f) angle += 360.0f;
+	; ---
+	; - i assume the -x is because SA's angles are backwards (east is 180° instead of 0°)
+	; - idk how the result could possibly be >= 360, so i'm skipping that
+	; - the client doesn't seem to care if it's negative (and why should it), so i'm skipping that too
+	; i'm doing this in asm because gcc generates way too many instructions to my likings and since i'm
+	; stupid and using c89 there's no atan2f so atan2 converts to doubles first which is also stupid
+	fldz
+	fld dword [esp+4] ; st(0)=matrixUpX
+	fsubp ; st(0)=-matrixUpX
+	fld dword [esp+8] ; st(1)=matrixUpX st(0)=matrixUpY
+	fpatan ; this is actualy atan2 (and pops)
+	fldpi
+	fdivp
+	fld dword [oneEighty]
+	fmulp
+	ret
+
 segment .data
 logprintRetAddr	dd 00h
 
 segment .rdata
+oneEighty	dd 180.0
 aStreamDistance	db "stream_distance", 00h
 aNewline	db 0Ah, 00h

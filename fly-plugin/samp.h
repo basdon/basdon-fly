@@ -20,25 +20,43 @@ struct SampMatrix {
 };
 EXPECT_SIZE(struct SampMatrix, 0x40);
 
-struct SampVehicleParamsDoorsWindows {
-	char frontleft; /*-1 unset, 0 closed, 1 open*/
-	char frontright; /*-1 unset, 0 closed, 1 open*/
-	char backleft; /*-1 unset, 0 closed, 1 open*/
-	char backright; /*-1 unset, 0 closed, 1 open*/
-};
-EXPECT_SIZE(struct SampVehicleParamsDoorsWindows, 0x4);
-
 struct SampVehicleParams {
-	char engine; /*0 off, 1 on*/
-	char lights; /*0 off, 1 on*/
-	char alarm; /*0 off, 1 on (or it was on and has finished)*/
-	char doors_locked; /*0 unlocked, 1 locked*/
-	char bonnet; /*0 closed, 1 open*/
-	char boot; /*0 closed, 1 open*/
-	char objective;
-	char siren_state; /*-1 unset (off), 0 off, 1 on*/
-	struct SampVehicleParamsDoorsWindows doors;
-	struct SampVehicleParamsDoorsWindows windows;
+	union {
+		int raw0;
+		struct {
+			char engine; /*0 off, 1 on*/
+			char lights; /*0 off, 1 on*/
+			char alarm; /*0 off, 1 on (or it was on and has finished)*/
+			char doors_locked; /*0 unlocked, 1 locked*/
+		};
+	};
+	union {
+		int raw1;
+		struct {
+			char bonnet; /*-1 unset, 0 closed, 1 open*/
+			char boot; /*-1 unset, 0 closed, 1 open*/
+			char objective; /*-1 unset, 0 no, 1 yes*/
+			char siren_state; /*-1 unset (off), 0 off, 1 on*/
+		};
+	};
+	union {
+		int raw2;
+		struct {
+			char frontleft; /*-1 unset, 0 closed, 1 open*/
+			char frontright; /*-1 unset, 0 closed, 1 open*/
+			char backleft; /*-1 unset, 0 closed, 1 open*/
+			char backright; /*-1 unset, 0 closed, 1 open*/
+		} doors;
+	};
+	union {
+		int raw3;
+		struct {
+			char frontleft; /*-1 unset, 0 closed, 1 open*/
+			char frontright; /*-1 unset, 0 closed, 1 open*/
+			char backleft; /*-1 unset, 0 closed, 1 open*/
+			char backright; /*-1 unset, 0 closed, 1 open*/
+		} windows;
+	};
 };
 EXPECT_SIZE(struct SampVehicleParams, 0x10);
 

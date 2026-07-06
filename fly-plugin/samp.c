@@ -1360,6 +1360,7 @@ void PutPlayerInVehicleRaw(int playerid, int vehicleid, int seat)
 	struct RPCDATA_PutPlayerInVehicle rpcdata;
 	struct SampVehicle *vehicle;
 	struct SampPlayer *player;
+	int i, j;
 
 	vehicle = vehiclepool->vehicles[vehicleid];
 	player = playerpool->players[playerid];
@@ -1367,30 +1368,58 @@ void PutPlayerInVehicleRaw(int playerid, int vehicleid, int seat)
 		return;
 	}
 
-	/*SampPlayer__StreamInVehicle*/
-	((void (*)(struct SampPlayer*,int,int))0x80C9CA0)(player, vehicleid, /*ignore streaming distance*/ 1);
+	/*TODO: remove the call to DoStreamingAfterPlayerLocationUpdate and instead stream out all players/vehicles that are not*/
+	/*going to be within streaming distance anymore, but do not stream in new ones (let the normal streaming update handle that)*/
+	/*this way we further minimize the need of having to streaming out a random vehicle in case the limit is reached (just below this)*/
+	/*Also do immediate player marked update ofc*/
+
+	if (!player->vehicleStreamedIn[vehicleid]) {
+		if (player->numVehiclesStreamedIn == LIMIT_VEHICLES_STREAMED_IN) {
+			/*find a random unoccupied vehicle to stream out*/
+			/*TODO: might be better to take the furthest vehicle, but:*/
+			/*- I don't want to do that calculation*/
+			/*- we might be teleporting the player far away*/
+			for (i = vehiclepool->highestUsedVehicleid; i >= 0; i--) {
+				if (player->vehicleStreamedIn[i]) {
+					/*TODO: this is a horrible loop, replace once we keep better track of vehicle occupation*/
+					for (j = playerpool->highestUsedPlayerid; j >= 0; j--) {
+						if (j != playerid && sampPlayer[j] && sampPlayer[j]->vehicleid == vehicleid) {
+							goto findNextVehicleToStreamOut;
+						}
+					}
+					player->vehicleStreamedIn[i] = 0;
+					StreamVehicleOut(player, vehiclepool->vehicles[i]);
+					goto didStreamOutVehicleToNotReachLimit;
+				}
+findNextVehicleToStreamOut:
+				;
+			}
+			/*Getting here means the player is fucked because we couldn't stream out a vehicle so the new vehicle*/
+			/*won't be streamed in for them because they hit the limit. This should actually not be a possible branch,*/
+			/*because the vehicle stream in limit is higher than the max players we currently allow on the server, so*/
+			/*assume this path is impossible and don't care.*/
+		} else {
+			player->numVehiclesStreamedIn++;
+		}
+didStreamOutVehicleToNotReachLimit:
+		player->vehicleStreamedIn[vehicleid] = 1;
+		StreamVehicleIn(player, vehicle);
+	}
 
 	if (seat == 0) {
 		vehicle->driverplayerid = playerid;
 	}
 	player->vehicleid = vehicleid;
 
-	/*SampPlayer__StorePositionProcessStreamingAndCheckpoints*/
-	((void (*)(struct SampPlayer*,float,float,float,int))0x80CBCB0)(
-		player,
-		vehicle->matrix.pos.x,
-		vehicle->matrix.pos.y,
-		vehicle->matrix.pos.z,
-		/*process streaming immediately*/ 1
-	);
+	/*TODO: here we should not do streaming immediately but first load the map, though*/
+	/*this is currently only called from PutPlayerInVehicle, which starts loading the map before calling this.*/
+	/*TODO: loading map is now chunked I believe, so maybe revert that since we fully control expected locations now?*/
+	DoStreamingAfterPlayerLocationUpdate(player, vehicle->matrix.pos, /*process streaming immediately*/ 1);
 
-	/*SampPlayer__SetExpectedLocationAfterTeleport*/
-	((void (*)(struct SampPlayer*,float,float,float))0x80CC020)(
-		player,
-		vehicle->matrix.pos.x,
-		vehicle->matrix.pos.y,
-		vehicle->matrix.pos.z
-	);
+	/*This must be done after the above call, because it would immediately clear this again.*/
+	player->hasExpectedLocationAfterTeleport = 1;
+	player->expectedLocationAfterTeleport = vehicle->matrix.pos;
+	player->expectedLocationSetAtTickCount = samp_GetTime();
 
 	rpcdata.vehicleid = vehicleid;
 	rpcdata.seat = seat;

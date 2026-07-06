@@ -499,11 +499,8 @@ static
 cell AMX_NATIVE_CALL B_OnVehicleStreamIn(AMX *amx, cell *params)
 {
 	TRACE;
-	const int vehicleid = PARAM(1), forplayerid = PARAM(2);
 
-	missions_on_vehicle_stream_in(vehicleid, forplayerid);
-	veh_on_vehicle_stream_in(vehicleid, forplayerid);
-	return 1;
+	crash__this_codepath_should_be_unreachable(); /*Vehicle streaming is replaced*/
 }
 
 /* native B_OnVehicleStreamOut(vehicleid, forplayerid) */
@@ -511,8 +508,6 @@ static
 cell AMX_NATIVE_CALL B_OnVehicleStreamOut(AMX *amx, cell *params)
 {
 	TRACE;
-	const int vehicleid = PARAM(1), forplayerid = PARAM(2);
 
-	veh_on_vehicle_stream_out(vehicleid, forplayerid);
-	return 1;
+	crash__this_codepath_should_be_unreachable(); /*Vehicle streaming is replaced*/
 }
