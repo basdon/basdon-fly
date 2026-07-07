@@ -2014,10 +2014,8 @@ int missions_resume_mission_send_syncdata(void *data)
 	} syncdata;
 #pragma pack(pop)
 	struct RPCDATA_ShowGameText100 rpcdata_gametext;
-	struct RPCDATA_PutPlayerInVehicle ppiv;
 	struct MISSION_RESUME_DATA *rd;
 	struct PAUSED_MISSION *paused;
-	struct SampVehicle *vehicle;
 	struct BitStream bitstream;
 	struct MISSION *mission;
 	int playerid;
@@ -2038,18 +2036,7 @@ exit:
 	if (rd->done) {
 		missions_resume_mission_destroy_npc(playerid);
 		GameTextForPlayer(playerid, 2000, 3, "~n~~n~~g~You have control!");
-		/*PutPlayerInVehicle is failing me, so sending the raw packet now*/
-		/*This is probably not needed, but if it finally works I'm not touching it anymore*/
-		/*Using samp's PutPlayerInVehicle also makes sure the vehicle is streamed in, and
-		  some checkpoint shenanigans it seems like.*/
-		/*TODO: come back to this and clean it up*/
-		ppiv.vehicleid = mission->vehicleid;
-		ppiv.seat = 0;
-		vehicle = vehiclepool->vehicles[mission->vehicleid];
-		SendRPC(playerid, RPC_PutPlayerInVehicle, &ppiv, sizeof(ppiv) * 8);
-		if (vehicle) {
-			vehicle->driverplayerid = playerid; /*probably not needed but... meh*/
-		}
+		PutPlayerInVehicleRaw(playerid, mission->vehicleid, 0);
 		goto exit;
 	}
 
