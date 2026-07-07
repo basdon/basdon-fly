@@ -493,6 +493,9 @@ static unsigned short nametags_max_distance[MAX_PLAYERS];
 
 static float vehicle_fuel[MAX_VEHICLES], vehicle_fuel_cap[MAX_VEHICLES], vehicle_fuel_usage[MAX_VEHICLES];
 
+/*0 when not on a mission*/
+static int player_mission_vehicleid[MAX_PLAYERS];
+
 /*TODO: move this elsewhere*/
 static
 int CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_delay_ms)

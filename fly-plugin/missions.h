@@ -82,7 +82,6 @@ void missions_on_vehicle_refueled(int vehicleid, float refuelamount);
 Call when the vehicle was repaired.
 */
 void missions_on_vehicle_repaired(int vehicleid, float fixamount, float newhp);
-void missions_on_vehicle_stream_in(int vehicleid, int forplayerid);
 /**
 Call when weather changed to add dangerous weather bonus to missions if needed.
 */

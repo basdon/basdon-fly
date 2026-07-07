@@ -75,15 +75,23 @@ void UpdatePlayerMarkersForPlayer(struct SampPlayer *player)
 	}
 	SendSyncPacket(player->playerid, &bs);
 }
-/*jeanine:p:i:4;p:1;a:r;x:11.00;y:-52.00;n:StreamVehiclesForPlayer;*/
+/*jeanine:p:i:4;p:1;a:r;x:11.00;y:-61.00;n:StreamVehiclesForPlayer;*/
 static
 void StreamVehiclesForPlayer(struct SampPlayer *player)
 {
 	TRACE;
 	struct SampVehicle *vehicle;
-	int i;
+	int i, mission_vehicleid;
+
+	mission_vehicleid = player_mission_vehicleid[player->playerid]; /*TODO put this on the player object*/
 
 	for (i = vehiclepool->highestUsedVehicleid; i > 0; i--) {
+		if (__builtin_expect(i == mission_vehicleid, 0)) {
+			/*Keep player's mission's vehicleid streamed in, so its objective will keep showing*/
+			/*on their radar. If player is far enough, vehicle physics should freeze so the vehicle*/
+			/*should not be at risk of falling through the map or any other funky stuff.*/
+			continue;
+		}
 		vehicle = vehiclepool->vehicles[i];
 		if (
 			vehicle &&

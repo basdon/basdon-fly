@@ -869,6 +869,7 @@ void missions_cleanup(int playerid)
 	activemission[playerid] = NULL;
 	mission_stage[playerid] = MISSION_STAGE_NOMISSION;
 	number_missions_started_stopped[playerid]++;
+	player_mission_vehicleid[playerid] = 0;
 
 	if (was_paused_mission) {
 		veh_DestroyVehicle(missionvehicleid);
@@ -1184,6 +1185,7 @@ void missions_start_mission(int playerid, struct MISSIONPOINT *startpoint, struc
 	dx = startpoint->pos.x - endpoint->pos.x;
 	dy = startpoint->pos.y - endpoint->pos.y;
 
+	player_mission_vehicleid[playerid] = vehicleid;
 	mission_stage[playerid] = MISSION_STAGE_LOAD;
 	activemission[playerid] = mission = malloc(sizeof(struct MISSION));
 	number_missions_started_stopped[playerid]++;
@@ -1617,17 +1619,6 @@ void missions_on_player_state_change(int playerid, int from, int to)
 		mission->vehicleid == GetPlayerVehicleID(playerid))
 	{
 		SetVehicleObjectiveForPlayer(mission->vehicleid, playerid, 0);
-	}
-}
-
-void missions_on_vehicle_stream_in(int vehicleid, int forplayerid)
-{
-	TRACE;
-	struct MISSION *mission;
-
-	mission = activemission[forplayerid];
-	if (mission != NULL && mission->vehicleid == vehicleid) {
-		SetVehicleObjectiveForPlayer(vehicleid, forplayerid, 1);
 	}
 }
 
@@ -2191,6 +2182,7 @@ void missions_cb_dlg_continue_paused_mission(int playerid, struct DIALOG_RESPONS
 				pos.r = 0.0f;
 				vehicleid = CreateVehicle(paused->vehmodel, &pos, 1, 1, 1000000);
 				vehicle_fuel[vehicleid] = paused->fuel_percentage * vehicle_fuel_cap[vehicleid];
+				player_mission_vehicleid[playerid] = vehicleid;
 				mission_stage[playerid] = MISSION_STAGE_FLIGHT;
 				activemission[playerid] = mission = malloc(sizeof(struct MISSION));
 				mission->id = paused->id;

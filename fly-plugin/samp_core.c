@@ -112,7 +112,6 @@ void StreamVehicleIn(struct SampPlayer *player, struct SampVehicle *vehicle)
 	}
 
 	/*OnVehicleStreamIn happens here*/
-	missions_on_vehicle_stream_in(vehicle->vehicleid, playerid);
 	veh_on_vehicle_stream_in(vehicle->vehicleid, playerid);
 }
 /*jeanine:p:i:7;p:9;a:b;y:1.88;n:StreamVehicleOut;*/
