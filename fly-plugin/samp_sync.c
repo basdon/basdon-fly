@@ -73,7 +73,7 @@ void UpdatePlayerMarkersForPlayer(struct SampPlayer *player)
 			}
 		}
 	}
-	rakServerVtable->SendBitStream(rakServer, &bs, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 1, rakPlayerID[player->playerid], 0);
+	SendSyncPacket(player->playerid, &bs);
 }
 /*jeanine:p:i:4;p:1;a:r;x:11.00;y:-52.00;n:StreamVehiclesForPlayer;*/
 static

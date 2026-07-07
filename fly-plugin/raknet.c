@@ -12,6 +12,15 @@ static int (*rakRPC_8C)(
 	int bBroadcast,
 	int bShiftTimestamp
 );
+static int (*rakSendBitStream)(
+	struct RakServer *this,
+	struct BitStream *bs,
+	enum PacketPriority priority,
+	enum PacketReliability reliability,
+	char orderingChannel,
+	struct PlayerID playerID,
+	int bBroadcast
+);
 
 static
 __attribute__((unused))
@@ -183,4 +192,11 @@ void SendRPC_ex(ushort playerid, enum SampRPC rpc, void *rpcdata, int size_bytes
 	bs.ptrData = rpcdata;
 	bs.numberOfBitsUsed = size_bytes * 8;
 	rakRPC_8C(rakServer, (void*) rpc, &bs, priority, reliability, orderingChannel, rakPlayerID[playerid], /*broadcast*/ 0, /*shiftTimestamp*/ 0);
+}
+
+/*Uses HIGH_PRIORITY, UNRELIABLE_SEQUENCED, orderingchannel 1.*/
+static
+void SendSyncPacket(ushort playerid, struct BitStream *bs)
+{
+	rakSendBitStream(rakServer, bs, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*orderingchannel*/ 1, rakPlayerID[playerid], /*broadcast*/ 0);
 }

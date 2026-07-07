@@ -2073,12 +2073,11 @@ exit:
 		bitstream_write_velocity(&bitstream, 0.0f, 0.0f, 0.0f);
 		bitstream_write_zero(&bitstream); /*not surfing a vehicle*/
 		bitstream_write_zero(&bitstream); /*no animation*/
-		/*See 0x80AC4F9 (Samp::BroadCastPlayerSyncData+129)*/
-		rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+		SendSyncPacket(playerid, &bitstream);
 		/*send it 3x because it's important :D*/
 		/*TODO: experiment with making this RELIABLE (but maybe with a different orderingchannel if it would give issues)*/
-		rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
-		rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+		SendSyncPacket(playerid, &bitstream);
+		SendSyncPacket(playerid, &bitstream);
 		return 20; /*wait less long to exit*/
 	} else {
 		bitstream.numberOfBitsUsed = sizeof(syncdata.aligned.structured) * 8;
@@ -2118,13 +2117,12 @@ exit:
 			bitstream_write_zero(&bitstream); /*has_misc*/
 		}
 		bitstream_write_zero(&bitstream); /*has_trailer_id*/
-		/*See 0x80AC4F9 (Samp::BroadCastPlayerSyncData+129)*/
-		rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+		SendSyncPacket(playerid, &bitstream);
 
 		if (rd->last_invehicle_packet) {
 			/*send it 3x because it's important to have these delivered :D*/
-			rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
-			rakServerVtable->SendBitStream(rakServer, &bitstream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*stream*/1, rakPlayerID[playerid], /*broadcast*/0);
+			SendSyncPacket(playerid, &bitstream);
+			SendSyncPacket(playerid, &bitstream);
 			rd->send_onfoot = 1;
 			return 30; /*wait less long to exit after sending the last driversync*/
 		}
