@@ -200,3 +200,10 @@ void SendSyncPacket(ushort playerid, struct BitStream *bs)
 {
 	rakSendBitStream(rakServer, bs, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, /*orderingchannel*/ 1, rakPlayerID[playerid], /*broadcast*/ 0);
 }
+
+/*Uses same config as SendRPC*/
+static
+void SendSyncPacketReliableOrdered(ushort playerid, struct BitStream *bs)
+{
+	rakSendBitStream(rakServer, bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingchannel*/ 2, rakPlayerID[playerid], /*broadcast*/ 0);
+}

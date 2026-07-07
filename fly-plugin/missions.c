@@ -2073,11 +2073,8 @@ exit:
 		bitstream_write_velocity(&bitstream, 0.0f, 0.0f, 0.0f);
 		bitstream_write_zero(&bitstream); /*not surfing a vehicle*/
 		bitstream_write_zero(&bitstream); /*no animation*/
-		SendSyncPacket(playerid, &bitstream);
-		/*send it 3x because it's important :D*/
-		/*TODO: experiment with making this RELIABLE (but maybe with a different orderingchannel if it would give issues)*/
-		SendSyncPacket(playerid, &bitstream);
-		SendSyncPacket(playerid, &bitstream);
+		/*normal sync packets are UNRELIABLE_SEQUENCED but it's important that the client gets this, use RELIABLE_ORDERED*/
+		SendSyncPacketReliableOrdered(playerid, &bitstream);
 		return 20; /*wait less long to exit*/
 	} else {
 		bitstream.numberOfBitsUsed = sizeof(syncdata.aligned.structured) * 8;
@@ -2117,14 +2114,14 @@ exit:
 			bitstream_write_zero(&bitstream); /*has_misc*/
 		}
 		bitstream_write_zero(&bitstream); /*has_trailer_id*/
-		SendSyncPacket(playerid, &bitstream);
 
 		if (rd->last_invehicle_packet) {
-			/*send it 3x because it's important to have these delivered :D*/
-			SendSyncPacket(playerid, &bitstream);
-			SendSyncPacket(playerid, &bitstream);
+			/*normal sync packets are UNRELIABLE_SEQUENCED but it's important that the client gets this, use RELIABLE_ORDERED*/
+			SendSyncPacketReliableOrdered(playerid, &bitstream);
 			rd->send_onfoot = 1;
 			return 30; /*wait less long to exit after sending the last driversync*/
+		} else {
+			SendSyncPacket(playerid, &bitstream);
 		}
 	}
 
