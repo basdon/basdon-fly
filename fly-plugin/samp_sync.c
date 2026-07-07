@@ -243,4 +243,5 @@ void samp_sync_init()
 	TRACE;
 
 	mem_mkjmp(0x80CBCB0, &DoStreamingAfterPlayerLocationUpdate); /*SampPlayer::StorePositionProcessStreamingAndCheckpoints*//*jeanine:r:i:1;*/
+	mem_mkjmp(0x80CC020, crash__this_codepath_should_be_unreachable); /*SampPlayer::SetExpectedLocationAfterTeleport*/
 }

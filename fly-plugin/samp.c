@@ -1267,8 +1267,9 @@ int SetVehiclePos(int vehicleid, struct vec3 *pos)
 		if (sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[vehicleid]) {
 			SendRPC_bs(i, RPC_SetVehiclePos, &bs);
 			if (vehicle->driverplayerid == i) {
-				/*SampPlayer::SetExpectedLocationAfterTeleport*/
-				((void (*)(struct SampPlayer*,struct vec3))0x80CC020)(sampPlayer[i], *pos);
+				sampPlayer[i]->hasExpectedLocationAfterTeleport = 1;
+				sampPlayer[i]->expectedLocationAfterTeleport = *pos;
+				sampPlayer[i]->expectedLocationSetAtTickCount = samp_GetTime();
 			}
 		}
 	}
