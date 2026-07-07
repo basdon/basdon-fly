@@ -913,6 +913,14 @@ struct RPCDATA_ShowGameText {
 };
 EXPECT_SIZE(struct RPCDATA_ShowGameText, 4 + 4 + 4 + 800);
 
+struct RPCDATA_ShowGameText100 {
+	int style;
+	int time;
+	int message_length;
+	char message[100];
+};
+EXPECT_SIZE(struct RPCDATA_ShowGameText100, 4 + 4 + 4 + 100);
+
 struct RPCDATA_SetCheckpoint {
 	struct vec3 pos;
 	float size;

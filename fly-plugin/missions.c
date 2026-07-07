@@ -2013,13 +2013,13 @@ int missions_resume_mission_send_syncdata(void *data)
 		} aligned;
 	} syncdata;
 #pragma pack(pop)
+	struct RPCDATA_ShowGameText100 rpcdata_gametext;
 	struct RPCDATA_PutPlayerInVehicle ppiv;
 	struct MISSION_RESUME_DATA *rd;
 	struct PAUSED_MISSION *paused;
 	struct SampVehicle *vehicle;
 	struct BitStream bitstream;
 	struct MISSION *mission;
-	char text[100];
 	int playerid;
 
 	rd = data;
@@ -2149,8 +2149,15 @@ exit:
 			rd->last_invehicle_packet = 1;
 		}
 
-		sprintf(text, "~n~~n~~b~Handing over control, get ready!~n~%.1fs", rd->ms_left / 1000.0f);
-		GameTextForPlayer(playerid, 1000, 3, text);
+		rpcdata_gametext.style = 3;
+		rpcdata_gametext.time = 1000;
+		rpcdata_gametext.message_length = sprintf(
+			rpcdata_gametext.message,
+			"~n~~n~~b~Handing over control, get ready!~n~%.1fs",
+			rd->ms_left / 1000.0f
+		);
+		/*using UNRELIABLE on purpose here, because we spam these packets*/
+		SendRPC_ex(playerid, RPC_ShowGameText, &rpcdata_gametext, (4 + 4 + 4 + rpcdata_gametext.message_length) * 8, HIGH_PRIORITY, UNRELIABLE, 0);
 	}
 
 	return MISSION_RESUME_SYNCDATA_TIMEOUT;
