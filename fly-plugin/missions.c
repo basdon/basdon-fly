@@ -292,7 +292,6 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 
 	struct RPCDATA_CreateObject rpcdata_CreateObject;
 	struct RPCDATA_DestroyObject rpcdata_DestroyObject;
-	struct BitStream bitstream;
 	register struct MISSIONPOINT *msp;
 	struct MSP_INDICATOR *indicators;
 	unsigned int vehicle_msptype_mask, class_msptype_mask;
@@ -383,9 +382,7 @@ void missions_update_missionpoint_indicators(int playerid, float player_x, float
 					rpcdata_CreateObject.attached_object_id = -1;
 					rpcdata_CreateObject.attached_vehicle_id = -1;
 					rpcdata_CreateObject.num_materials = 0;
-					bitstream.ptrData = &rpcdata_CreateObject;
-					bitstream.numberOfBitsUsed = sizeof(rpcdata_CreateObject) * 8;
-					SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
+					SendRPC(playerid, RPC_CreateObject, &rpcdata_CreateObject, sizeof(rpcdata_CreateObject) * 8);
 					indicators->state[idxtouse] = MISSIONPOINT_INDICATOR_STATE_USED;
 					indicators->color[idxtouse] = color;
 					indicators->msp[idxtouse] = msp;
@@ -403,9 +400,7 @@ next:
 	for (indicatoridx = 0; indicatoridx < MAX_MISSION_INDICATORS; indicatoridx++) {
 		if (indicators->state[indicatoridx] == MISSIONPOINT_INDICATOR_STATE_AVAILABLE) {
 			rpcdata_DestroyObject.objectid = OBJECT_MISSION_INDICATOR_BASE + indicatoridx;
-			bitstream.ptrData = &rpcdata_DestroyObject;
-			bitstream.numberOfBitsUsed = sizeof(rpcdata_DestroyObject) * 8;
-			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream, playerid, 2);
+			SendRPC(playerid, RPC_DestroyObject, &rpcdata_DestroyObject, sizeof(rpcdata_DestroyObject) * 8);
 			indicators->state[indicatoridx] = MISSIONPOINT_INDICATOR_STATE_FREE;
 #ifdef MISSIONS_LOG_POINT_INDICATOR_ALLOC
 			printf("%d %p destroyed %lu\n", indicatoridx, indicators->msp[indicatoridx], time_timestamp());
@@ -731,13 +726,13 @@ int missions_format_satisfaction_text(int satisfaction, char *out_buf)
  * @param vehicleid use {@code 0} to not send it to all passengers in the vehicle.
  */
 static
-void missions_send_rpc_to_player_and_passengers(int rpc, struct BitStream *bs, int playerid, int vehicleid)
+void missions_send_rpc_to_player_and_passengers(enum SampRPC rpc, struct BitStream *bs, int playerid, int vehicleid)
 {
 	TRACE;
 	register int pid;
 	int i;
 
-	SAMP_SendRPCToPlayer(rpc, bs, playerid, 2);
+	SendRPC_bs(playerid, rpc, bs);
 	if (vehicleid) {
 		for (i = 0; i < playercount; i++) {
 			pid = players[i];
@@ -748,7 +743,7 @@ void missions_send_rpc_to_player_and_passengers(int rpc, struct BitStream *bs, i
 				they're in instead of the satisfaction of their own current mission).*/
 				mission_stage[pid] != MISSION_STAGE_FLIGHT)
 			{
-				SAMP_SendRPCToPlayer(rpc, bs, pid, 2);
+				SendRPC_bs(pid, rpc, bs);
 			}
 		}
 	}
@@ -1955,7 +1950,6 @@ static
 void missions_resume_mission_create_npc(int forplayerid)
 {
 	TRACE;
-	struct BitStream bitstream;
 	struct RPCDATA_PlayerCreate playercreate;
 	struct RPCDATA_PlayerJoin playerjoin;
 
@@ -1964,15 +1958,11 @@ void missions_resume_mission_create_npc(int forplayerid)
 	playerjoin.npc = 1;
 	playerjoin.namelen = 1;
 	playerjoin.name[0] = 'x';
-	bitstream.ptrData = &playerjoin;
-	bitstream.numberOfBitsUsed = sizeof(playerjoin) * 8;
-	SAMP_SendRPCToPlayer(RPC_PlayerJoin, &bitstream, forplayerid, 2);
+	SendRPC(forplayerid, RPC_PlayerJoin, &playerjoin, sizeof(playerjoin) * 8);
 
 	memset(&playercreate, 0, sizeof(playercreate));
 	playercreate.playerid = FAKE_PLAYER_ID_RESUME_MISSION;
-	bitstream.ptrData = &playercreate;
-	bitstream.numberOfBitsUsed = sizeof(playercreate) * 8;
-	SAMP_SendRPCToPlayer(RPC_PlayerCreate, &bitstream, forplayerid, 2);
+	SendRPC(forplayerid, RPC_PlayerCreate, &playercreate, sizeof(playercreate) * 8);
 }
 
 /**
@@ -1982,14 +1972,11 @@ static
 void missions_resume_mission_destroy_npc(int forplayerid)
 {
 	TRACE;
-	struct BitStream bitstream;
 	struct RPCDATA_PlayerLeave playerleave;
 
 	playerleave.playerid = FAKE_PLAYER_ID_RESUME_MISSION;
 	playerleave.reason = 1; /*quit*/
-	bitstream.ptrData = &playerleave;
-	bitstream.numberOfBitsUsed = sizeof(playerleave) * 8;
-	SAMP_SendRPCToPlayer(RPC_PlayerLeave, &bitstream, forplayerid, 2);
+	SendRPC(forplayerid, RPC_PlayerLeave, &playerleave, sizeof(playerleave) * 8);
 }
 
 #define MISSION_RESUME_SYNCDATA_TIMEOUT 50
@@ -2059,9 +2046,7 @@ exit:
 		ppiv.vehicleid = mission->vehicleid;
 		ppiv.seat = 0;
 		vehicle = vehiclepool->vehicles[mission->vehicleid];
-		bitstream.ptrData = &ppiv;
-		bitstream.numberOfBitsUsed = sizeof(ppiv) * 8;
-		SAMP_SendRPCToPlayer(RPC_PutPlayerInVehicle, &bitstream, playerid, 2);
+		SendRPC(playerid, RPC_PutPlayerInVehicle, &ppiv, sizeof(ppiv) * 8);
 		if (vehicle) {
 			vehicle->driverplayerid = playerid; /*probably not needed but... meh*/
 		}

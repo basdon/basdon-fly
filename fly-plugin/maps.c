@@ -421,7 +421,7 @@ int maps_timer_rotate_radar(void *data)
 			rpcdata.to_x = object->x;
 			rpcdata.to_y = object->y;
 			rpcdata.to_z = object->z + zoffset;
-			SAMP_SendRPCToPlayer(RPC_MoveObject, &bitstream, playerid, 2);
+			SendRPC_bs(playerid, RPC_MoveObject, &bitstream);
 		}
 	}
 
@@ -474,7 +474,7 @@ int maps_timer_rotate_wmre_blades(void *data)
 			playerid = players[playerindex];
 			rpcdata.objectid = wmre_blades_objectids[playerid][blade];
 			if (rpcdata.objectid != -1) {
-				SAMP_SendRPCToPlayer(RPC_MoveObject, &bitstream, playerid, 2);
+				SendRPC_bs(playerid, RPC_MoveObject, &bitstream);
 			}
 		}
 	}
@@ -575,7 +575,7 @@ void maps_continue_stream_in_queued_zones_for_player(int playerid, struct STREAM
 		gangzoneid_to_zonemapidx[zoneid] = map - zone_maps;
 		zone->rpcdata.zoneid = zoneid;
 		bitstream.ptrData = &zone->rpcdata;
-		SAMP_SendRPCToPlayer(RPC_ShowGangZone, &bitstream, playerid, 2);
+		SendRPC_bs(playerid, RPC_ShowGangZone, &bitstream);
 		if (++num_created_zones >= MAX_ZONES_TO_CREATE_PER_TICK) {
 			return;
 		}
@@ -618,7 +618,7 @@ void maps_stream_out_objects_for_player(int playerid, struct OBJECT_MAP *map)
 		if (objectid_to_objmapidx[objectid] == mapidx) {
 			objectid_to_objmapidx[objectid] = -1;
 			rpcdata_DestroyObject.objectid = objectid;
-			SAMP_SendRPCToPlayer(RPC_DestroyObject, &bitstream, playerid, 2);
+			SendRPC_bs(playerid, RPC_DestroyObject, &bitstream);
 		}
 	}
 
@@ -630,7 +630,7 @@ void maps_stream_out_objects_for_player(int playerid, struct OBJECT_MAP *map)
 
 	/*Octavia actor*/
 	if (mapidx == octavia_island_actor_mapidx) {
-		SendRPCToPlayer(playerid, RPC_HideActor, &rpcdata_hide_actor, sizeof(rpcdata_hide_actor), 2);
+		SendRPC(playerid, RPC_HideActor, &rpcdata_hide_actor, sizeof(rpcdata_hide_actor) * 8);
 	}
 
 	/*WMRE windmill blades*/
@@ -733,7 +733,7 @@ int maps_continue_stream_in_queued_objects_for_player(int playerid, struct STREA
 		obj->objectid = objectid;
 		bitstream.ptrData = obj;
 		bitstream.numberOfBitsUsed = tmp_saved_objdata_size * 8;
-		SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
+		SendRPC_bs(playerid, RPC_CreateObject, &bitstream);
 		/*Reset the object data size field.*/
 		obj->objectid = tmp_saved_objdata_size;
 		if (++num_created_objects > max_objs_to_create) {
@@ -750,9 +750,9 @@ stop_streaming:
 	if (mapidx == octavia_island_actor_mapidx) {
 		/*Octavia actor*/
 		if (is_player_using_client_version_DL[playerid]) {
-			SendRPCToPlayer(playerid, RPC_ShowActor, &rpcdata_show_actor03DL, sizeof(rpcdata_show_actor03DL), 2);
+			SendRPC(playerid, RPC_ShowActor, &rpcdata_show_actor03DL, sizeof(rpcdata_show_actor03DL) * 8);
 		} else {
-			SendRPCToPlayer(playerid, RPC_ShowActor, &rpcdata_show_actor037, sizeof(rpcdata_show_actor037), 2);
+			SendRPC(playerid, RPC_ShowActor, &rpcdata_show_actor037, sizeof(rpcdata_show_actor037) * 8);
 		}
 	} else if (mapidx == wmre_mapidx) {
 		/*WMRE windmill blades*/
@@ -782,7 +782,7 @@ stop_streaming:
 			wmre_blade_template->ry = 180.0f;
 			wmre_blade_template->rz = -160.0f;
 			wmre_blade_template->objectid = objectid;
-			SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
+			SendRPC_bs(playerid, RPC_CreateObject, &bitstream);
 			wmre_blades_objectids[playerid][i] = objectid;
 			num_created_objects++;
 		}
@@ -794,9 +794,7 @@ skip_wmre_blades:
 	/*This will override the existing object if it exists, but no maps with radars should have intersecting stream radii anyways.*/
 	if (streamingdata->obj_map->radar_object) {
 		radar_object_for_player[playerid] = streamingdata->obj_map->radar_object;
-		bitstream.ptrData = streamingdata->obj_map->radar_object;
-		bitstream.numberOfBitsUsed = sizeof(struct RPCDATA_CreateObject) * 8;
-		SAMP_SendRPCToPlayer(RPC_CreateObject, &bitstream, playerid, 2);
+		SendRPC(playerid, RPC_CreateObject, streamingdata->obj_map->radar_object, sizeof(struct RPCDATA_CreateObject) * 8);
 	}
 
 	streamingdata->obj_map->stream_status_for_player[playerid] = STREAMED_IN;
@@ -1094,7 +1092,7 @@ void maps_on_player_connect(int playerid)
 	bitstream.numberOfBitsUsed = sizeof(struct RPCDATA_RemoveBuilding) * 8;
 	for (i = 0; i < num_removed_objects; i++) {
 		bitstream.ptrData = &removed_objects[i];
-		SAMP_SendRPCToPlayer(RPC_RemoveBuilding, &bitstream, playerid, 2);
+		SendRPC_bs(playerid, RPC_RemoveBuilding, &bitstream);
 	}
 
 	memset(player_objectid_to_objmapidx[playerid], -1, sizeof(player_objectid_to_objmapidx[playerid]));

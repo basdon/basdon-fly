@@ -91,28 +91,6 @@ void SendRconCommand(char *command)
 	((void (*)(void*,char*))0x809FBD0)(samp_pConsole, command);
 }
 
-static
-void SendRPC_8C(int playerid, int rpc, void *rpcdata, int size_bytes, enum PacketPriority priority, enum PacketReliability reliability, int orderingChannel)
-{
-	TRACE;
-	struct BitStream bs;
-
-	bs.ptrData = rpcdata;
-	bs.numberOfBitsUsed = size_bytes * 8;
-	rakServerVtable->RPC_8C(rakServer, (void*)rpc, &bs, priority, reliability, orderingChannel, rakPlayerID[playerid], /*broadcast*/ 0, /*shiftTimestamp*/ 0);
-}
-
-static
-void SendRPCToPlayer(int playerid, int rpc, void *rpcdata, int size_bytes, int unk)
-{
-	TRACE;
-	struct BitStream bs;
-
-	bs.ptrData = rpcdata;
-	bs.numberOfBitsUsed = size_bytes * 8;
-	SAMP_SendRPCToPlayer(rpc, &bs, playerid, unk);
-}
-
 /**use natives_Kick*/
 static
 void KickRaw(int playerid)
@@ -177,10 +155,10 @@ void SetSpawnInfo(int playerid, struct SpawnInfo *spawnInfo)
 
 	if (is_player_using_client_version_DL[playerid]) {
 		convertSpawnInfoToSpawnInfo03DL(spawnInfo, &rpcdata03DL.spawnInfo);
-		SendRPCToPlayer(playerid, RPC_SetSpawnInfo, &rpcdata03DL, sizeof(rpcdata03DL), 2);
+		SendRPC(playerid, RPC_SetSpawnInfo, &rpcdata03DL, sizeof(rpcdata03DL) * 8);
 	} else {
 		rpcdata037.spawnInfo = *spawnInfo;
-		SendRPCToPlayer(playerid, RPC_SetSpawnInfo, &rpcdata037, sizeof(rpcdata037), 2);
+		SendRPC(playerid, RPC_SetSpawnInfo, &rpcdata037, sizeof(rpcdata037) * 8);
 	}
 
 	sampPlayer[playerid]->spawnInfo = *spawnInfo;
@@ -193,6 +171,7 @@ void SetPlayerSkin(int playerid, int skin)
 	TRACE;
 	struct RPCDATA_SetPlayerSkin03DL rpcdata03DL;
 	struct RPCDATA_SetPlayerSkin037 rpcdata037;
+	struct BitStream bs03DL, bs037;
 	struct SampPlayer *player;
 	int i;
 
@@ -210,13 +189,17 @@ void SetPlayerSkin(int playerid, int skin)
 	rpcdata03DL.playerid = rpcdata037.playerid = playerid;
 	rpcdata03DL.skin = rpcdata037.skin = skin;
 	rpcdata03DL.customSkin = 0;
+	bs03DL.ptrData = &rpcdata03DL;
+	bs03DL.numberOfBitsUsed = sizeof(rpcdata03DL) * 8;
+	bs037.ptrData = &rpcdata037;
+	bs037.numberOfBitsUsed = sizeof(rpcdata037) * 8;
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (i == playerid || (sampPlayer[i] && sampPlayer[i]->playerStreamedIn[playerid])) {
 			if (is_player_using_client_version_DL[i]) {
-				SendRPCToPlayer(i, RPC_SetPlayerSkin, &rpcdata03DL, sizeof(rpcdata03DL), 2);
+				SendRPC_bs(i, RPC_SetPlayerSkin, &bs03DL);
 			} else {
-				SendRPCToPlayer(i, RPC_SetPlayerSkin, &rpcdata037, sizeof(rpcdata037), 2);
+				SendRPC_bs(i, RPC_SetPlayerSkin, &bs037);
 			}
 		}
 	}
@@ -236,7 +219,7 @@ void SetPlayerColor(int playerid, int color)
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (sampPlayer[i]) {
-			SendRPC_8C(i, RPC_SetPlayerColor, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+			SendRPC(i, RPC_SetPlayerColor, &rpcdata, sizeof(rpcdata) * 8);
 		}
 	}
 }
@@ -262,7 +245,7 @@ void ClearAnimations(int playerid)
 	struct RPCDATA_ClearAnimations rpcdata;
 
 	rpcdata.playerid = playerid;
-	SendRPC_8C(playerid, RPC_ClearAnimations, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+	SendRPC(playerid, RPC_ClearAnimations, &rpcdata, sizeof(rpcdata) * 8);
 }
 
 /**
@@ -273,12 +256,15 @@ void ClearAnimationsForStreamedInPlayers(int playerid)
 {
 	TRACE;
 	struct RPCDATA_ClearAnimations rpcdata;
+	struct BitStream bs;
 	int i;
 
 	rpcdata.playerid = playerid;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (sampPlayer[i] && sampPlayer[i]->playerStreamedIn[playerid]) {
-			SendRPC_8C(i, RPC_ClearAnimations, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+			SendRPC_bs(i, RPC_ClearAnimations, &bs);
 		}
 	}
 }
@@ -288,16 +274,13 @@ void SetPlayerMapIcon(int playerid, char icon_id, struct vec3 *pos, char icon, i
 {
 	TRACE;
 	struct RPCDATA_SetPlayerMapIcon rpcdata;
-	struct BitStream bs;
 
 	rpcdata.icon_id = icon_id;
 	rpcdata.pos = *pos;
 	rpcdata.icon = icon;
 	rpcdata.color = color;
 	rpcdata.style = style;
-	bs.ptrData = &rpcdata;
-	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
-	SAMP_SendRPCToPlayer(RPC_SetPlayerMapIcon, &bs, playerid, 2);
+	SendRPC(playerid, RPC_SetPlayerMapIcon, &rpcdata, sizeof(rpcdata) * 8);
 }
 
 static
@@ -306,12 +289,9 @@ void RemovePlayerMapIcon(int playerid, char icon_id)
 {
 	TRACE;
 	struct RPCDATA_RemovePlayerMapIcon rpcdata;
-	struct BitStream bs;
 
 	rpcdata.icon_id = icon_id;
-	bs.ptrData = &rpcdata;
-	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
-	SAMP_SendRPCToPlayer(RPC_RemovePlayerMapIcon, &bs, playerid, 2);
+	SendRPC(playerid, RPC_RemovePlayerMapIcon, &rpcdata, sizeof(rpcdata) * 8);
 }
 
 static
@@ -324,7 +304,6 @@ void Create3DTextLabel(
 		struct RPCDATA_Create3DTextLabelBase rpcdata;
 		char textdata[1]; /*arbitrary size*/
 	} *data;
-	struct BitStream bs;
 	int text_bytelength;
 
 	text_bytelength = (text_bitlength + 7) / 8;
@@ -337,9 +316,7 @@ void Create3DTextLabel(
 	data->rpcdata.attached_player_id = attached_player_id;
 	data->rpcdata.attached_vehicle_id = attached_vehicle_id;
 	memcpy(data->textdata, encoded_text_data, text_bytelength);
-	bs.ptrData = data;
-	bs.numberOfBitsUsed = sizeof(data->rpcdata) * 8 + text_bitlength;
-	SAMP_SendRPCToPlayer(RPC_Create3DTextLabel, &bs, playerid, 2);
+	SendRPC(playerid, RPC_Create3DTextLabel, data, sizeof(data->rpcdata) * 8 + text_bitlength);
 }
 
 static
@@ -347,12 +324,9 @@ void Delete3DTextLabel(int playerid, int label_id)
 {
 	TRACE;
 	struct RPCDATA_Delete3DTextLabel rpcdata;
-	struct BitStream bs;
 
 	rpcdata.label_id = label_id;
-	bs.ptrData = &rpcdata;
-	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
-	SAMP_SendRPCToPlayer(RPC_Delete3DTextLabel, &bs, playerid, 2);
+	SendRPC(playerid, RPC_Delete3DTextLabel, &rpcdata, sizeof(rpcdata) * 8);
 }
 
 /**
@@ -384,12 +358,9 @@ __attribute__((unused)) /*unused in prod builds*/
 void DisableRemoteVehicleCollisions(int playerid, char disable)
 {
 	TRACE;
-	struct BitStream bs;
 
 	disable <<= 7;
-	bs.ptrData = &disable;
-	bs.numberOfBitsUsed = 1;
-	SAMP_SendRPCToPlayer(RPC_DisableRemoteVehicleCollisions, &bs, playerid, 2);
+	SendRPC(playerid, RPC_DisableRemoteVehicleCollisions, &disable, 1);
 }
 
 static
@@ -397,24 +368,19 @@ void SetPlayerRaceCheckpointNoDir(int playerid, int type, struct vec3 *pos, floa
 {
 	TRACE;
 	struct RPCDATA_SetRaceCheckpoint rpcdata;
-	struct BitStream bs;
 
 	rpcdata.type = type;
 	rpcdata.pos = *pos;
 	rpcdata.radius = radius;
-	bs.ptrData = &rpcdata;
-	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
-	SAMP_SendRPCToPlayer(RPC_SetRaceCheckpoint, &bs, playerid, 2);
+	SendRPC(playerid, RPC_SetRaceCheckpoint, &rpcdata, sizeof(rpcdata) * 8);
 }
 
 static
 void DisablePlayerRaceCheckpoint(int playerid)
 {
 	TRACE;
-	struct BitStream bs;
 
-	bs.numberOfBitsUsed = 0;
-	SAMP_SendRPCToPlayer(RPC_DisableRaceCheckpoint, &bs, playerid, 2);
+	SendRPC(playerid, RPC_DisableRaceCheckpoint, NULL, 0);
 }
 
 /**
@@ -425,12 +391,9 @@ void SpawnPlayer(int playerid)
 {
 	TRACE;
 	struct RPCDATA_RequestSpawn rpcdata;
-	struct BitStream bs;
 
 	rpcdata.type = 2;
-	bs.ptrData = &rpcdata;
-	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
-	SAMP_SendRPCToPlayer(RPC_RequestSpawn, &bs, playerid, 2);
+	SendRPC(playerid, RPC_RequestSpawn, &rpcdata, sizeof(rpcdata) * 8);
 }
 
 /**
@@ -441,11 +404,8 @@ static
 void SetPlayerPosRaw(int playerid, struct vec3 *pos)
 {
 	TRACE;
-	struct BitStream bs;
 
-	bs.ptrData = pos;
-	bs.numberOfBitsUsed = sizeof(*pos) * 8;
-	SAMP_SendRPCToPlayer(RPC_SetPlayerPos, &bs, playerid, 2);
+	SendRPC(playerid, RPC_SetPlayerPos, pos, sizeof(*pos) * 8);
 }
 EXPECT_SIZE(struct RPCDATA_SetPlayerPos, sizeof(struct vec3));
 
@@ -453,11 +413,8 @@ static
 void SetPlayerFacingAngle(int playerid, float angle)
 {
 	TRACE;
-	struct BitStream bs;
 
-	bs.ptrData = &angle;
-	bs.numberOfBitsUsed = sizeof(angle) * 8;
-	SAMP_SendRPCToPlayer(RPC_SetPlayerFacingAngle, &bs, playerid, 2);
+	SendRPC(playerid, RPC_SetPlayerFacingAngle, &angle, sizeof(float) * 8);
 }
 EXPECT_SIZE(struct RPCDATA_SetPlayerFacingAngle, sizeof(float));
 
@@ -465,7 +422,8 @@ static
 void SetPlayerHealth(int playerid, float health)
 {
 	TRACE;
-	SendRPC_8C(playerid, RPC_SetHealth, &health, sizeof(float), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+
+	SendRPC(playerid, RPC_SetHealth, &health, sizeof(health) * 8);
 }
 STATIC_ASSERT(sizeof(struct RPCDATA_SetHealth) == sizeof(float));
 
@@ -474,9 +432,10 @@ static
 void GivePlayerMoneyRaw(int playerid, int amount)
 {
 	TRACE;
+
 	if (playerpool->created[playerid]) {
 		playerpool->playerMoney[playerid] += amount;
-		SendRPC_8C(playerid, RPC_MoneyGive, &amount, sizeof(int), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+		SendRPC(playerid, RPC_MoneyGive, &amount, sizeof(int) * 8);
 	}
 }
 STATIC_ASSERT(sizeof(struct RPCDATA_MoneyGive) == sizeof(int));
@@ -486,10 +445,11 @@ static
 void SetPlayerMoneyRaw(int playerid, int amount)
 {
 	TRACE;
+
 	if (playerpool->created[playerid]) {
 		playerpool->playerMoney[playerid] = amount;
-		SendRPC_8C(playerid, RPC_MoneyReset, NULL, 0, HIGH_PRIORITY, RELIABLE_ORDERED, 2);
-		SendRPC_8C(playerid, RPC_MoneyGive, &amount, sizeof(int), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+		SendRPC(playerid, RPC_MoneyReset, NULL, 0);
+		SendRPC(playerid, RPC_MoneyGive, &amount, sizeof(int));
 	}
 }
 STATIC_ASSERT(sizeof(struct RPCDATA_MoneyGive) == sizeof(int));
@@ -498,7 +458,8 @@ static
 void SetPlayerScore(int playerid, int score)
 {
 	TRACE;
-	/*this does not send RPCs, scoreboard stuff is just updated regularly*/
+
+	/*this does not send RPCs, scoreboard is updated on client's request*/
 	playerpool->playerScore[playerid] = score;
 }
 
@@ -506,6 +467,8 @@ static
 int GetPlayerScore(int playerid)
 {
 	TRACE;
+
+	/*this does not send RPCs, scoreboard is updated on client's request*/
 	return playerpool->playerScore[playerid];
 }
 
@@ -519,7 +482,7 @@ void SetPlayerTime(int playerid, char hour, char minute)
 		sampPlayer[playerid]->worldTime = hour * 60.0f + minute; /*TODO: can probably get rid of this, samp doesn't need to interfere with our timecyc*/
 		rpcdata.hour = hour;
 		rpcdata.minute = minute;
-		SendRPC_8C(playerid, RPC_SetTime, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+		SendRPC(playerid, RPC_SetTime, &rpcdata, sizeof(rpcdata) * 8);
 	}
 }
 
@@ -527,7 +490,8 @@ static
 void SetPlayerWeather(int playerid, char weather)
 {
 	TRACE;
-	SendRPC_8C(playerid, RPC_SetWeather, &weather, sizeof(char), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+
+	SendRPC(playerid, RPC_SetWeather, &weather, sizeof(char) * 8);
 }
 EXPECT_SIZE(struct RPCDATA_SetWeather, sizeof(char));
 
@@ -538,7 +502,7 @@ void TogglePlayerClock(int playerid, char enabled)
 
 	if (sampPlayer[playerid]) {
 		sampPlayer[playerid]->isClockEnabled = enabled; /*TODO: should get rid of this, see SetPlayerTime*/
-		SendRPC_8C(playerid, RPC_ToggleClock, &enabled, sizeof(char), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+		SendRPC(playerid, RPC_ToggleClock, &enabled, sizeof(char) * 8);
 	}
 }
 EXPECT_SIZE(struct RPCDATA_ToggleClock, sizeof(char));
@@ -551,7 +515,7 @@ void TogglePlayerSpectating(int playerid, int enabled)
 	if (sampPlayer[playerid]) {
 		sampPlayer[playerid]->spectatingTargetKind = SPECTATING_TARGET_UNSET;
 		sampPlayer[playerid]->spectatingTargetId = -1;
-		SendRPC_8C(playerid, RPC_ToggleSpectating, &enabled, sizeof(int), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+		SendRPC(playerid, RPC_ToggleSpectating, &enabled, sizeof(int) * 8);
 		/*this doesn't actually affect player state somehow, only with PlayerSpectatePlayer/PlayerSpectateVehicle
 		will player's state be changed to PLAYER_STATE_SPECTATING*/
 	}
@@ -562,11 +526,8 @@ static
 void SetPlayerCameraPos(int playerid, struct vec3 *pos)
 {
 	TRACE;
-	struct BitStream bs;
 
-	bs.ptrData = pos;
-	bs.numberOfBitsUsed = sizeof(*pos) * 8;
-	SAMP_SendRPCToPlayer(RPC_SetCameraPos, &bs, playerid, 2);
+	SendRPC(playerid, RPC_SetCameraPos, pos, sizeof(*pos) * 8);
 }
 EXPECT_SIZE(struct RPCDATA_SetCameraPos, sizeof(struct vec3));
 
@@ -578,23 +539,18 @@ void SetPlayerCameraLookAt(int playerid, struct vec3 *at, char switchstyle)
 {
 	TRACE;
 	struct RPCDATA_SetCameraLookAt rpcdata;
-	struct BitStream bs;
 
 	rpcdata.at = *at;
 	rpcdata.switchstyle = switchstyle;
-	bs.ptrData = &rpcdata;
-	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
-	SAMP_SendRPCToPlayer(RPC_SetCameraLookAt, &bs, playerid, 2);
+	SendRPC(playerid, RPC_SetCameraLookAt, &rpcdata, sizeof(rpcdata) * 8);
 }
 
 static
 void SetCameraBehindPlayer(int playerid)
 {
 	TRACE;
-	struct BitStream bs;
 
-	bs.numberOfBitsUsed = 0;
-	SAMP_SendRPCToPlayer(RPC_SetCameraBehind, &bs, playerid, 2);
+	SendRPC(playerid, RPC_SetCameraBehind, NULL, 0);
 }
 
 static
@@ -603,7 +559,6 @@ void InterpolateCamera(int playerid, char position, struct vec3 *from, struct ve
 	TRACE;
 	volatile struct RPCDATA_InterpolateCamera rpcdata;
 	unsigned char *aligned, shifted[30];
-	struct BitStream bs;
 	int i;
 
 	rpcdata.from = *from;
@@ -619,9 +574,7 @@ void InterpolateCamera(int playerid, char position, struct vec3 *from, struct ve
 		aligned++;
 	}
 
-	bs.ptrData = shifted;
-	bs.numberOfBitsUsed = sizeof(rpcdata) * 8 - 7;
-	SAMP_SendRPCToPlayer(RPC_InterpolateCamera, &bs, playerid, 2);
+	SendRPC(playerid, RPC_InterpolateCamera, shifted, sizeof(rpcdata) * 8 - 7);
 }
 EXPECT_SIZE(struct RPCDATA_InterpolateCamera, 30);
 
@@ -630,6 +583,7 @@ __attribute((unused))
 void InterpolateCameraPos(int playerid, struct vec3 *from, struct vec3 *to, int timeMs)
 {
 	TRACE;
+
 	InterpolateCamera(playerid, 1, from, to, timeMs);
 }
 
@@ -638,6 +592,7 @@ __attribute((unused))
 void InterpolateCameraLookAt(int playerid, struct vec3 *from, struct vec3 *to, int timeMs)
 {
 	TRACE;
+
 	InterpolateCamera(playerid, 0, from, to, timeMs);
 }
 
@@ -648,11 +603,8 @@ static
 void SetPlayerSpecialAction(int playerid, char actionid)
 {
 	TRACE;
-	struct BitStream bs;
 
-	bs.ptrData = &actionid;
-	bs.numberOfBitsUsed = sizeof(actionid) * 8;
-	SAMP_SendRPCToPlayer(RPC_SetSpecialAction, &bs, playerid, 2);
+	SendRPC(playerid, RPC_SetSpecialAction, &actionid, sizeof(char) * 8);
 }
 EXPECT_SIZE(struct RPCDATA_SetSpecialAction, sizeof(char));
 
@@ -663,7 +615,7 @@ void ForceClassSelection(int playerid)
 
 	/* if player is in a vehicle, they will keep hearing the radio. do ClearAnimations to remove them from vehicle */
 	ClearAnimations(playerid);
-	SendRPC_8C(playerid, RPC_ForceClassSelection, NULL, 0, HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+	SendRPC(playerid, RPC_ForceClassSelection, NULL, 0);
 }
 
 static
@@ -674,7 +626,7 @@ void GivePlayerWeapon(int playerid, int weaponid, int ammo)
 
 	rpcdata.weaponid = weaponid;
 	rpcdata.ammo = ammo;
-	SendRPC_8C(playerid, RPC_GiveWeapon, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+	SendRPC(playerid, RPC_GiveWeapon, &rpcdata, sizeof(rpcdata) * 8);
 }
 
 /**
@@ -688,11 +640,8 @@ static
 void TogglePlayerControllable(int playerid, char controllable)
 {
 	TRACE;
-	struct BitStream bs;
 
-	bs.ptrData = &controllable;
-	bs.numberOfBitsUsed = 8;
-	SAMP_SendRPCToPlayer(RPC_TogglePlayerControllable, &bs, playerid, 2);
+	SendRPC(playerid, RPC_TogglePlayerControllable, &controllable, sizeof(char) * 8);
 }
 
 static
@@ -708,11 +657,11 @@ void SendClientMessageToBatch(short *playerids, int numplayerids, int color, cha
 
 	num_packets = util_splitclientmessage(rpcdata, sizeof(rpcdata)/sizeof(rpcdata[0]), color, message);
 
-	for (i = 0; i < numplayerids; i++) {
-		for (packetidx = 0; packetidx < num_packets; packetidx++) {
-			bs.ptrData = &rpcdata[packetidx];
-			bs.numberOfBitsUsed = 32 + 32 + rpcdata[packetidx].message_length * 8;
-			SAMP_SendRPCToPlayer(RPC_SendClientMessage, &bs, playerids[i], 3);
+	for (packetidx = 0; packetidx < num_packets; packetidx++) {
+		bs.ptrData = &rpcdata[packetidx];
+		bs.numberOfBitsUsed = (4 + 4 + rpcdata[packetidx].message_length) * 8;
+		for (i = 0; i < numplayerids; i++) {
+			SendRPC_bs(playerids[i], RPC_SendClientMessage, &bs);
 		}
 	}
 }
@@ -721,6 +670,7 @@ static
 void SendClientMessageToAll(int color, char *message)
 {
 	TRACE;
+
 	SendClientMessageToBatch(players, playercount, color, message);
 }
 
@@ -728,6 +678,7 @@ static
 void SendClientMessage(short playerid, int color, char *message)
 {
 	TRACE;
+
 	SendClientMessageToBatch(&playerid, 1, color, message);
 }
 
@@ -736,21 +687,19 @@ void PlayerPlaySound(int playerid, int soundid)
 {
 	TRACE;
 	struct RPCDATA_PlaySound rpcdata;
-	struct BitStream bs;
 
 	rpcdata.soundid = soundid;
 	*(int*)&rpcdata.pos.x = 0;
 	*(int*)&rpcdata.pos.y = 0;
 	*(int*)&rpcdata.pos.z = 0;
-	bs.ptrData = &rpcdata;
-	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
-	SAMP_SendRPCToPlayer(RPC_PlaySound, &bs, playerid, 2);
+	SendRPC(playerid, RPC_PlaySound, &rpcdata, sizeof(rpcdata) * 8);
 }
 
 static
 int IsVehicleStreamedIn(int vehicleid, int forplayerid)
 {
 	TRACE;
+
 	return sampPlayer[forplayerid]->vehicleStreamedIn[vehicleid];
 }
 
@@ -758,6 +707,7 @@ static
 void GetPlayerPos(int playerid, struct vec3 *pos)
 {
 	TRACE;
+
 	*pos = sampPlayer[playerid]->pos;
 }
 
@@ -766,6 +716,7 @@ __attribute((unused))
 float GetPlayerFacingAngle(int playerid)
 {
 	TRACE;
+
 	return sampPlayer[playerid]->facingAngle;
 }
 
@@ -774,6 +725,7 @@ __attribute((unused))
 char GetPlayerCameraMode(int playerid)
 {
 	TRACE;
+
 	if (sampPlayer[playerid]) {
 		return sampPlayer[playerid]->aimSyncData.cameraMode;
 	}
@@ -798,6 +750,7 @@ static
 void GetPlayerPosRot(int playerid, struct vec4 *pos)
 {
 	TRACE;
+
 	pos->coords = sampPlayer[playerid]->pos;
 	pos->r = sampPlayer[playerid]->facingAngle;
 }
@@ -806,6 +759,7 @@ static
 short GetPlayerVehicleSeat(int playerid)
 {
 	TRACE;
+
 	return sampPlayer[playerid]->vehicleseat;
 }
 
@@ -816,6 +770,7 @@ static
 short GetPlayerVehicleID(int playerid)
 {
 	TRACE;
+
 	return sampPlayer[playerid]->vehicleid;
 }
 
@@ -823,6 +778,7 @@ static
 struct SampVehicle *GetPlayerVehicle(int playerid)
 {
 	TRACE;
+
 	/*Player's vehicleid will be 0 when not in a vehicle.*/
 	/*Non allocated vehicleids will always have a nullptr in SampVehiclePool::vehicles.*/
 	return vehiclepool->vehicles[sampPlayer[playerid]->vehicleid];
@@ -832,6 +788,7 @@ static
 char GetPlayerState(int playerid)
 {
 	TRACE;
+
 	return sampPlayer[playerid]->currentState;
 }
 
@@ -844,6 +801,8 @@ static
 int DestroyVehicleRaw(int vehicleid)
 {
 	TRACE;
+
+	/*SampVehiclePool::Remove*/
 	return ((int (*)(struct SampVehiclePool*,int))0x814CC10)(vehiclepool, vehicleid);
 }
 
@@ -989,7 +948,7 @@ void SyncVehicleDamageStatus(struct SampVehicle *vehicle)
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[rpcdata.vehicleid]) {
-			rakServerVtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, rakPlayerID[i], /*broadcast*/ 0, /*shiftTimestamp*/ 0);
+			SendRPC_bs(i, RPC_UpdateVehicleDamageStatus, &bs);
 		}
 	}
 }
@@ -1028,13 +987,10 @@ void SetVehicleParamsExForPlayer(int vehicleid, int playerid, struct SampVehicle
 {
 	TRACE;
 	struct RPCDATA_SetVehicleParamsEx rpcdata;
-	struct BitStream bs;
 
 	rpcdata.vehicleid = (short) vehicleid;
 	rpcdata.params = *params;
-	bs.ptrData = &rpcdata;
-	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
-	SAMP_SendRPCToPlayer(RPC_SetVehicleParamsEx, &bs, playerid, 2);
+	SendRPC(playerid, RPC_SetVehicleParamsEx, &rpcdata, sizeof(rpcdata) * 8);
 }
 
 /*
@@ -1045,7 +1001,6 @@ void SetVehicleObjectiveForPlayer(int vehicleid, int playerid, char objective)
 {
 	TRACE;
 	struct RPCDATA_SetVehicleParams rpcdata;
-	struct BitStream bs;
 	struct SampVehicleParams params;
 
 	GetVehicleParamsEx(vehicleid, &params);
@@ -1062,9 +1017,7 @@ void SetVehicleObjectiveForPlayer(int vehicleid, int playerid, char objective)
 			but using -1 for non-global (non-SetVehicleParamsEx) will lock the doors.*/
 			rpcdata.doors_locked = 0;
 		}
-		bs.ptrData = &rpcdata;
-		bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
-		SAMP_SendRPCToPlayer(RPC_SetVehicleParams, &bs, playerid, 2);
+		SendRPC(playerid, RPC_SetVehicleParams, &rpcdata, sizeof(rpcdata) * 8);
 	}
 }
 
@@ -1075,6 +1028,7 @@ static
 char GetVehicleEngineState(int vehicleid)
 {
 	TRACE;
+
 	return vehiclepool->vehicles[vehicleid]->params.engine;
 }
 
@@ -1108,7 +1062,7 @@ void SetVehicleEngineState(int vehicleid, char engine)
 	for (n = playercount; n; ) {
 		playerid = players[--n];
 		if (IsVehicleStreamedIn(vehicleid, playerid)) {
-			SAMP_SendRPCToPlayer(RPC_SetVehicleParamsEx, &bs, playerid, 2);
+			SendRPC_bs(playerid, RPC_SetVehicleParamsEx, &bs);
 		}
 	}
 }
@@ -1165,6 +1119,7 @@ void SetVehicleColorTemporary(int vehicleid, int col1, int col2)
 
 	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
+		/*SampVehicle::SetColor*/
 		((void (*)(struct SampVehicle*,short,int,int))0x814C510)(
 			vehicle,
 			INVALID_PLAYER_ID, /*The player that caused this update, so gamemode/filterscripts can block it (not applicable here).*/
@@ -1235,6 +1190,7 @@ void SetVehiclePaintjob(int vehicleid, char paintjob)
 
 	vehicle = vehiclepool->vehicles[vehicleid];
 	if (vehicle) {
+		/*SampVehicle::SetPaintjob*/
 		((void (*)(struct SampVehicle*,short,int))0x814C2F0)(
 			vehicle,
 			INVALID_PLAYER_ID, /*The player that caused this update, so gamemode/filterscripts can block it (not applicable here).*/
@@ -1251,7 +1207,6 @@ void GameTextForPlayer(int playerid, int milliseconds, int style, char *text)
 {
 	TRACE;
 	struct RPCDATA_ShowGameText rpcdata;
-	struct BitStream bs;
 	int len;
 
 	len = strlen(text);
@@ -1259,15 +1214,14 @@ void GameTextForPlayer(int playerid, int milliseconds, int style, char *text)
 	rpcdata.time = milliseconds;
 	rpcdata.message_length = len;
 	memcpy(&rpcdata.message, text, len);
-	bs.ptrData = &rpcdata;
-	bs.numberOfBitsUsed = (4 + 4 + 4 + len) * 8;
-	SAMP_SendRPCToPlayer(RPC_ShowGameText, &bs, playerid, 3);
+	SendRPC_unordered(playerid, RPC_ShowGameText, &rpcdata, (4 + 4 + 4 + len) * 8);
 }
 
 static
 struct SampVehicle *GetSampVehicleByID(int vehicleid)
 {
 	TRACE;
+
 	return vehiclepool->vehicles[vehicleid];
 }
 
@@ -1292,6 +1246,7 @@ static
 void GetVehiclePosUnsafe(int vehicleid, struct vec3 *pos)
 {
 	TRACE;
+
 	*pos = vehiclepool->vehicles[vehicleid]->pos;
 }
 
@@ -1318,9 +1273,9 @@ int SetVehiclePos(int vehicleid, struct vec3 *pos)
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[vehicleid]) {
-			SAMP_SendRPCToPlayer(RPC_SetVehiclePos, &bs, i, 2);
+			SendRPC_bs(i, RPC_SetVehiclePos, &bs);
 			if (vehicle->driverplayerid == i) {
-				/*SampPlayer__SetExpectedLocationAfterTeleport*/
+				/*SampPlayer::SetExpectedLocationAfterTeleport*/
 				((void (*)(struct SampPlayer*,struct vec3))0x80CC020)(sampPlayer[i], *pos);
 			}
 		}
@@ -1328,6 +1283,7 @@ int SetVehiclePos(int vehicleid, struct vec3 *pos)
 	return 1;
 }
 
+/*Only works if the vehicle has a driver, will apply by driver's sync data.*/
 static
 void SetVehicleZAngle(int vehicleid, float angle)
 {
@@ -1339,7 +1295,7 @@ void SetVehicleZAngle(int vehicleid, float angle)
 	if (vehicle && vehicle->driverplayerid != INVALID_PLAYER_ID) {
 		rpcdata.vehicleid = vehicleid;
 		rpcdata.angle = angle;
-		SendRPC_8C(vehicle->driverplayerid, RPC_SetVehicleZAngle, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+		SendRPC(vehicle->driverplayerid, RPC_SetVehicleZAngle, &rpcdata, sizeof(rpcdata) * 8);
 	}
 }
 
@@ -1350,6 +1306,7 @@ static
 void GetVehicleVelocityUnsafe(int vehicleid, struct vec3 *vel)
 {
 	TRACE;
+
 	*vel = vehiclepool->vehicles[vehicleid]->vel;
 }
 
@@ -1423,13 +1380,14 @@ didStreamOutVehicleToNotReachLimit:
 
 	rpcdata.vehicleid = vehicleid;
 	rpcdata.seat = seat;
-	SendRPC_8C(playerid, RPC_PutPlayerInVehicle, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE_ORDERED, 2);
+	SendRPC(playerid, RPC_PutPlayerInVehicle, &rpcdata, sizeof(rpcdata) * 8);
 }
 
 static
 void HideGameTextForPlayer(int playerid)
 {
 	TRACE;
+
 	GameTextForPlayer(playerid, 2, 3, "_");
 }
 
@@ -1439,22 +1397,17 @@ void CrashPlayer(int playerid)
 	TRACE;
 	struct RPCDATA_ClearAnimations rpcdata_ca;
 	struct RPCDATA_ShowGangZone rpcdata_sgz;
-	struct BitStream bs;
 
 	GameTextForPlayer(playerid, 5, 5, "Wasted~k~SWITCH_DEBUG_CAM_ON~~k~~TOGGLE_DPAD~~k~~NETWORK_TALK~~k~~SHOW_MOUSE_POINTER_TOGGLE~");
 
-	bs.ptrData = &rpcdata_sgz;
-	bs.numberOfBitsUsed = sizeof(rpcdata_sgz) * 8;
 	rpcdata_sgz.zoneid = 65535;
-	SAMP_SendRPCToPlayer(RPC_ShowGangZone, &bs, playerid, 2);
+	SendRPC(playerid, RPC_ShowGangZone, &rpcdata_sgz, sizeof(rpcdata_sgz) * 8);
 	rpcdata_sgz.zoneid = -2700;
-	SAMP_SendRPCToPlayer(RPC_ShowGangZone, &bs, playerid, 2);
+	SendRPC(playerid, RPC_ShowGangZone, &rpcdata_sgz, sizeof(rpcdata_sgz) * 8);
 
 	/*sending ApplyAnimation with a payload of only the playerid crashes client, that's why ClearAnimations rpcdata is used here*/
-	bs.ptrData = &rpcdata_ca;
-	bs.numberOfBitsUsed = sizeof(rpcdata_ca) * 8;
 	rpcdata_ca.playerid = playerid;
-	SAMP_SendRPCToPlayer(RPC_ApplyAnimation, &bs, playerid, 2);
+	SendRPC(playerid, RPC_ApplyAnimation, &rpcdata_ca, sizeof(rpcdata_ca) * 8);
 }
 #endif
 
@@ -1675,7 +1628,7 @@ int SetPlayerName(int playerid, char *name)
 	bs.numberOfBitsUsed = 16 + 8 + len * 8 + 8;
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (sampPlayer[i]) {
-			SAMP_SendRPCToPlayer(RPC_SetPlayerName, &bs, i, 2);
+			SendRPC_bs(i, RPC_SetPlayerName, &bs);
 		}
 	}
 
@@ -1697,6 +1650,7 @@ void natives_SetPlayerPos(int playerid, struct vec3 pos)
 #ifdef SAMP_NATIVES_IMPL
 {
 	TRACE;
+
 	GameTextForPlayer(playerid, 0x80000, 3, "Loading objects...");
 	maps_stream_for_player(playerid, pos.x, pos.y, OBJ_STREAM_MODE_CLOSEST_NOW);
 	HideGameTextForPlayer(playerid);
@@ -1916,10 +1870,10 @@ void hook_OnPlayerRequestClass(int playerid, int classid)
 	if (is_player_using_client_version_DL[playerid]) {
 		rpcdata03DL.response = 1;
 		convertSpawnInfoToSpawnInfo03DL(&rpcdata037.spawnInfo, &rpcdata03DL.spawnInfo);
-		SendRPC_8C(playerid, RPC_RequestClass, &rpcdata03DL, sizeof(rpcdata03DL), HIGH_PRIORITY, RELIABLE, 0);
+		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata03DL, sizeof(rpcdata03DL), HIGH_PRIORITY, RELIABLE, 0);
 	} else {
 		rpcdata037.response = 1;
-		SendRPC_8C(playerid, RPC_RequestClass, &rpcdata037, sizeof(rpcdata037), HIGH_PRIORITY, RELIABLE, 0);
+		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata037, sizeof(rpcdata037), HIGH_PRIORITY, RELIABLE, 0);
 	}
 
 	sampPlayer[playerid]->spawnInfo = rpcdata037.spawnInfo;
@@ -1981,7 +1935,7 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (i != playerid && sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[vehicleid]) {
-			rakServerVtable->RPC_8C(rakServer, (void*) RPC_UpdateVehicleDamageStatus, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, /*orderingChannel*/ 2, rakPlayerID[i], /*broadcast*/ 0, /*shiftTimestamp*/ 0);
+			SendRPC_bs(i, RPC_UpdateVehicleDamageStatus, &bs);
 		}
 	}
 }

@@ -1266,7 +1266,7 @@ void veh_timed_speedo_update()
 			rpcdata.text_length = sprintf(rpcdata.text, "%.0f",
 				VEL_TO_KPH * (float) sqrt(vvel.x * vvel.x + vvel.y * vvel.y + vvel.z * vvel.z));
 			bs.numberOfBitsUsed = (2 + 2 + rpcdata.text_length) * 8;
-			SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
+			SendRPC_bs(playerid, RPC_TextDrawSetString, &bs);
 		}
 	}
 }

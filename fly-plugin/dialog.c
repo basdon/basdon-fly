@@ -97,7 +97,7 @@ void dialog_init()
 	dialog_empty_rpcdata.base.caption_length_0 = 0;
 	dialog_empty_rpcdata.base.button1_length_0 = 0;
 	dialog_empty_rpcdata.base.button2_length_0 = 0;
-	dialog_empty_rpcdata.bitlength = sizeof(dialog_empty_rpcdata.base);
+	dialog_empty_rpcdata.bitlength = sizeof(dialog_empty_rpcdata.base) * 8;
 	dialog_empty_rpcdata.bitlength += EncodeString(dialog_empty_rpcdata.info_empty, "", sizeof(dialog_empty_rpcdata.info_empty));
 }
 
@@ -115,14 +115,11 @@ static
 void dialog_hide_all(int playerid)
 {
 	TRACE;
-	struct BitStream bs;
 
 	dialog_reset_state(playerid);
 	active_dialog[playerid].last_sendtime = time_timestamp();
 
-	bs.ptrData = &dialog_empty_rpcdata;
-	bs.numberOfBitsUsed = dialog_empty_rpcdata.bitlength;
-	SAMP_SendRPCToPlayer(RPC_ShowDialog, &bs, playerid, 2);
+	SendRPC(playerid, RPC_ShowDialog, &dialog_empty_rpcdata, dialog_empty_rpcdata.bitlength);
 }
 
 static
@@ -272,8 +269,7 @@ void dialog_show(int playerid, struct DIALOG_INFO *dialog)
 {
 	TRACE;
 	register struct DIALOG_DATA *data;
-	struct BitStream bs;
-	char *ptr, captionlen, button1len, button2len;
+	char *ptr, *rpcdata, captionlen, button1len, button2len;
 	int bytelength;
 
 	data = &active_dialog[playerid];
@@ -307,8 +303,7 @@ void dialog_show(int playerid, struct DIALOG_INFO *dialog)
 	button1len = strlen(dialog->button1);
 	button2len = strlen(dialog->button2);
 	bytelength = 2 + 1 + 1 + captionlen + 1 + button1len + 1 + button2len;
-	bs.numberOfBitsUsed = bytelength * 8;
-	ptr = bs.ptrData = alloca(bytelength + LIMIT_DIALOG_INFO + /*extra for EncodeString*/100);
+	ptr = rpcdata = alloca(bytelength + LIMIT_DIALOG_INFO + /*extra for EncodeString*/100);
 
 	*((short*) ptr) = data->expected_dialogid;
 	ptr += 2;
@@ -326,8 +321,7 @@ void dialog_show(int playerid, struct DIALOG_INFO *dialog)
 	ptr += 1;
 	memcpy(ptr, dialog->button2, button2len);
 	ptr += button2len;
-	bs.numberOfBitsUsed += EncodeString(ptr, dialog->info, LIMIT_DIALOG_INFO);
-	SAMP_SendRPCToPlayer(RPC_ShowDialog, &bs, playerid, 2);
+	SendRPC(playerid, RPC_ShowDialog, rpcdata, bytelength * 8 + EncodeString(ptr, dialog->info, LIMIT_DIALOG_INFO));
 }
 
 /**

@@ -74,7 +74,7 @@ void kneeboard_update_distance(int playerid, struct vec3 *playerpos)
 		if (len) {
 			rpcdata.textdrawid = td_kb_distance.rpcdata->textdrawid;
 			rpcdata.text_length = (short) len;
-			SendRPCToPlayer(playerid, RPC_TextDrawSetString, &rpcdata, 2 + 2 + rpcdata.text_length, 2);
+			SendRPC(playerid, RPC_TextDrawSetString, &rpcdata, (2 + 2 + rpcdata.text_length) * 8);
 		}
 	}
 }
@@ -98,11 +98,11 @@ void kneeboard_update_all(int playerid, struct vec3 *playerpos)
 	if (kneeboard_is_shown[playerid]) {
 		rpcdata.textdrawid = td_kb_distance.rpcdata->textdrawid;
 		rpcdata.text_length = (short) kneeboard_format_distance(playerid, playerpos, rpcdata.text);
-		SendRPCToPlayer(playerid, RPC_TextDrawSetString, &rpcdata, 2 + 2 + rpcdata.text_length, 2);
+		SendRPC(playerid, RPC_TextDrawSetString, &rpcdata, (2 + 2 + rpcdata.text_length) * 8);
 
 		rpcdata.textdrawid = td_kb_info.rpcdata->textdrawid;
 		rpcdata.text_length = (short) missions_format_kneeboard_info_text(playerid, rpcdata.text);
-		SendRPCToPlayer(playerid, RPC_TextDrawSetString, &rpcdata, 2 + 2 + rpcdata.text_length, 2);
+		SendRPC(playerid, RPC_TextDrawSetString, &rpcdata, (2 + 2 + rpcdata.text_length) * 8);
 	} else {
 		td_kb_distance.rpcdata->text_length = kneeboard_format_distance(playerid, playerpos, td_kb_distance.rpcdata->text);
 		td_kb_info.rpcdata->text_length = (short) missions_format_kneeboard_info_text(playerid, td_kb_info.rpcdata->text);

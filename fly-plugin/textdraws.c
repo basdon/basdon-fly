@@ -210,7 +210,7 @@ void textdraws_show(int playerid, int num, ...)
 #endif
 		bs.ptrData = td->rpcdata;
 		bs.numberOfBitsUsed = (sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->rpcdata->text_length) * 8;
-		SAMP_SendRPCToPlayer(RPC_ShowTextDraw, &bs, playerid, 2);
+		SendRPC_bs(playerid, RPC_ShowTextDraw, &bs);
 	}
 	va_end(va);
 }
@@ -229,7 +229,7 @@ void textdraws_show_a(int playerid, int num, struct TEXTDRAW **tds)
 #endif
 		bs.ptrData = td->rpcdata;
 		bs.numberOfBitsUsed = (sizeof(struct RPCDATA_ShowTextDraw) - 1 + td->rpcdata->text_length) * 8;
-		SAMP_SendRPCToPlayer(RPC_ShowTextDraw, &bs, playerid, 2);
+		SendRPC_bs(playerid, RPC_ShowTextDraw, &bs);
 	}
 }
 
@@ -247,7 +247,7 @@ void textdraws_hide_consecutive(int playerid, int num, int base_id)
 	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
 	while (num--) {
 		rpcdata.textdrawid = (short) base_id;
-		SAMP_SendRPCToPlayer(RPC_HideTextDraw, &bs, playerid, 2);
+		SendRPC_bs(playerid, RPC_HideTextDraw, &bs);
 		base_id++;
 	}
 }

@@ -59,7 +59,7 @@ void HandleRpcPlayerSpawned(struct RakRPCHandlerArg *arg)
 		need_adjust_world_bounds[playerid] = 0;
 		*(int*)&rpcdata.x_max = *(int*)&rpcdata.y_max = WORLD_XY_MAX;
 		*(int*)&rpcdata.x_min = *(int*)&rpcdata.y_min = WORLD_XY_MIN;
-		SendRPCToPlayer(playerid, RPC_SetWorldBounds, &rpcdata, sizeof(rpcdata), 2);
+		SendRPC(playerid, RPC_SetWorldBounds, &rpcdata, sizeof(rpcdata) * 8);
 	}
 
 	if (!ISPLAYING(playerid)) {

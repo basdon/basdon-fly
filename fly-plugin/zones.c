@@ -160,7 +160,7 @@ showtext:
 		if (gps_text_is_shown[playerid]) {
 			rpcdata.textdrawid = td_gps.rpcdata->textdrawid;
 			rpcdata.text_length = td_text_length;
-			SendRPCToPlayer(playerid, RPC_TextDrawSetString, &rpcdata, 2 + 2 + td_text_length, 2);
+			SendRPC(playerid, RPC_TextDrawSetString, &rpcdata, (2 + 2 + td_text_length) * 8);
 		} else {
 			gps_text_is_shown[playerid] = 1;
 			td_gps.rpcdata->text_length = td_text_length;

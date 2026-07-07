@@ -214,7 +214,6 @@ int cmd_dev_platform(struct COMMANDCONTEXT cmdctx)
 {
 	TRACE;
 	struct RPCDATA_CreateObject rpcdata;
-	struct BitStream bs;
 
 	GetPlayerPos(cmdctx.playerid, (struct vec3*) &rpcdata.x);
 	rpcdata.objectid = OBJECT_DEV_PLATFORM;
@@ -224,9 +223,7 @@ int cmd_dev_platform(struct COMMANDCONTEXT cmdctx)
 	rpcdata.no_camera_col = 0;
 	rpcdata.attached_object_id = rpcdata.attached_vehicle_id = -1;
 	rpcdata.num_materials = 0;
-	bs.ptrData = &rpcdata;
-	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
-	SAMP_SendRPCToPlayer(RPC_CreateObject, &bs, cmdctx.playerid, 2);
+	SendRPC(cmdctx.playerid, RPC_CreateObject, &rpcdata, sizeof(rpcdata) * 8);
 
 	rpcdata.z += 4.0f;
 	SetPlayerPosRaw(cmdctx.playerid, (struct vec3*) &rpcdata.x);

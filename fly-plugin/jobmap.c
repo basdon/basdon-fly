@@ -283,7 +283,6 @@ void jobmap_change_page(int playerid, struct JOBMAP_DATA *jobmapdata, int direct
 {
 	TRACE;
 	struct RPCDATA_TextDrawSetString rpcdata1, rpcdata2;
-	struct BitStream bs;
 	int prev_page;
 
 	prev_page = jobmapdata->page;
@@ -297,18 +296,13 @@ void jobmap_change_page(int playerid, struct JOBMAP_DATA *jobmapdata, int direct
 	);
 	rpcdata1.textdrawid = td_jobmap_opts.rpcdata->textdrawid;
 	rpcdata2.textdrawid = td_jobmap_optdists.rpcdata->textdrawid;
-	bs.ptrData = &rpcdata1;
-	bs.numberOfBitsUsed = (2 + 2 + rpcdata1.text_length) * 8;
-	SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
-	bs.ptrData = &rpcdata2;
-	bs.numberOfBitsUsed = (2 + 2 + rpcdata2.text_length) * 8;
-	SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
+	SendRPC(playerid, RPC_TextDrawSetString, &rpcdata1, (2 + 2 + rpcdata1.text_length) * 8);
+	SendRPC(playerid, RPC_TextDrawSetString, &rpcdata2, (2 + 2 + rpcdata2.text_length) * 8);
 
 	/*Header.*/
 	rpcdata2.textdrawid = td_jobmap_header.rpcdata->textdrawid;
 	rpcdata2.text_length = jobmap_format_header(rpcdata2.text, jobmapdata);
-	bs.numberOfBitsUsed = (2 + 2 + rpcdata2.text_length) * 8;
-	SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
+	SendRPC(playerid, RPC_TextDrawSetString, &rpcdata2, (2 + 2 + rpcdata2.text_length) * 8);
 
 	/*Update prev/next enabled state (and if now first page, change selection to 'next page' and vice versa).*/
 	if (jobmapdata->page < jobmapdata->max_page) {
@@ -345,7 +339,6 @@ struct AIRPORT *jobmap_do_accept_button(int playerid)
 	register struct JOBMAP_DATA *jobmapdata = &jobmapdatas[playerid];
 	register unsigned char entry;
 	struct RPCDATA_TextDrawSetString rpcdata1, rpcdata2;
-	struct BitStream bs;
 
 	switch (jobmapdata->selected_entry) {
 	case JOBMAP_ENTRY_SORT:
@@ -358,16 +351,11 @@ struct AIRPORT *jobmap_do_accept_button(int playerid)
 		);
 		rpcdata1.textdrawid = td_jobmap_opts.rpcdata->textdrawid;
 		rpcdata2.textdrawid = td_jobmap_optdists.rpcdata->textdrawid;
-		bs.ptrData = &rpcdata1;
-		bs.numberOfBitsUsed = (2 + 2 + rpcdata1.text_length) * 8;
-		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
-		bs.ptrData = &rpcdata2;
-		bs.numberOfBitsUsed = (2 + 2 + rpcdata2.text_length) * 8;
-		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
+		SendRPC(playerid, RPC_TextDrawSetString, &rpcdata1, (2 + 2 + rpcdata1.text_length) * 8);
+		SendRPC(playerid, RPC_TextDrawSetString, &rpcdata2, (2 + 2 + rpcdata2.text_length) * 8);
 		rpcdata2.textdrawid = td_jobmap_sort.rpcdata->textdrawid;
 		rpcdata2.text_length = sprintf(rpcdata2.text, "%s", jobmap_sort_text[jobmapdata->sort]);
-		bs.numberOfBitsUsed = (2 + 2 + rpcdata2.text_length) * 8;
-		SAMP_SendRPCToPlayer(RPC_TextDrawSetString, &bs, playerid, 2);
+		SendRPC(playerid, RPC_TextDrawSetString, &rpcdata2, (2 + 2 + rpcdata2.text_length) * 8);
 		jobmap_update_selection_textdraws(playerid, jobmapdata);
 		return NULL;
 	case JOBMAP_ENTRY_PREV:

@@ -64,7 +64,7 @@ void StreamPlayerOut(struct SampPlayer *player, ushort subjectplayeridx)
 	struct RPCDATA_WorldPlayerRemove rpcdata;
 
 	rpcdata.playerid = subjectplayeridx;
-	SendRPCToPlayer(player->playerid, RPC_WorldPlayerRemove, &rpcdata, sizeof(rpcdata), 2);
+	SendRPC(player->playerid, RPC_WorldPlayerRemove, &rpcdata, sizeof(rpcdata) * 8);
 
 	/*OnPlayerStreamOut happens here*/
 }
@@ -103,12 +103,12 @@ void StreamVehicleIn(struct SampPlayer *player, struct SampVehicle *vehicle)
 	rpcCreate.paintjob = vehicle->paintjob; /*TODO: we could include paintjob/modcolors into VehicleMods*/
 	rpcCreate.moddedColor1 = vehicle->moddedColor1;
 	rpcCreate.moddedColor2 = vehicle->moddedColor2;
-	SendRPCToPlayer(playerid, RPC_CreateVehicle, &rpcCreate, sizeof(rpcCreate), 2);
+	SendRPC(playerid, RPC_CreateVehicle, &rpcCreate, sizeof(rpcCreate) * 8);
 
 	if (~vehicle->params.raw0 | ~vehicle->params.raw1 | ~vehicle->params.raw2 | ~vehicle->params.raw3) {
 		rpcParams.vehicleid = vehicle->vehicleid;
 		rpcParams.params = vehicle->params;
-		SendRPCToPlayer(playerid, RPC_SetVehicleParamsEx, &rpcParams, sizeof(rpcParams), 2);
+		SendRPC(playerid, RPC_SetVehicleParamsEx, &rpcParams, sizeof(rpcParams) * 8);
 	}
 
 	/*OnVehicleStreamIn happens here*/
@@ -124,7 +124,7 @@ void StreamVehicleOut(struct SampPlayer *player, struct SampVehicle *vehicle)
 	ushort playerid = player->playerid;
 
 	rpcDelete.vehicleid = vehicle->vehicleid;
-	SendRPCToPlayer(playerid, RPC_DeleteVehicle, &rpcDelete, sizeof(rpcDelete), 2);
+	SendRPC(playerid, RPC_DeleteVehicle, &rpcDelete, sizeof(rpcDelete) * 8);
 
 	/*OnVehicleStreamOut happens here*/
 	veh_on_vehicle_stream_out(vehicle->vehicleid, playerid);
@@ -160,6 +160,7 @@ void samp_core_init()
 	vehiclepool = samp->vehiclePool;
 	rakServer = samp->rakServer; /*also exposed at sampPlugins->GetRakServer()*/
 	rakServerVtable = rakServer->vtable;
+	rakRPC_8C = rakServerVtable->RPC_8C;
 
 	mem_mkjmp(0x80CAC70, crash__this_codepath_should_be_unreachable); /*SampPlayer::StreamInForOtherPlayer*/
 	mem_mkjmp(0x80CAF00, crash__this_codepath_should_be_unreachable); /*SampPlayer::StreamInPlayer*/
