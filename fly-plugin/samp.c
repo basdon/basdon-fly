@@ -898,34 +898,26 @@ int GetVehicleDriver(int vehicleid)
 	return INVALID_PLAYER_ID;
 }
 
-/**
-Use GetVehicleHealth, defined in anticheat.c
-*/
 static
-__attribute__((unused))
-float GetVehicleHealthRaw(int vehicleid)
+void SetVehicleHealth(struct SampVehicle *vehicle, float hp)
 {
 	TRACE;
-	struct SampVehicle *vehicle;
+	struct RPCDATA_SetVehicleHealth rpcdata;
+	struct BitStream bs;
+	int i;
 
-	vehicle = vehiclepool->vehicles[vehicleid];
-	if (vehicle) {
-		return vehicle->health;
-	}
-	return 0;
-}
+	vehicle->health = hp;
 
-#define SAMP_SetVehicleHealth(VEHICLE,HP) ((void (*)(struct SampVehicle*,float))0x814B860)(VEHICLE,HP);
+	rpcdata.vehicleid = vehicle->vehicleid;
+	rpcdata.health = hp;
 
-static
-void SetVehicleHealth(int vehicleid, float hp)
-{
-	TRACE;
-	struct SampVehicle *vehicle;
+	bs.ptrData = &rpcdata;
+	bs.numberOfBitsUsed = sizeof(rpcdata) * 8;
 
-	vehicle = vehiclepool->vehicles[vehicleid];
-	if (vehicle) {
-		SAMP_SetVehicleHealth(vehicle, hp);
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[rpcdata.vehicleid]) {
+			SendRPC_bs(i, RPC_SetVehicleHealth, &bs);
+		}
 	}
 }
 
@@ -1549,7 +1541,7 @@ int natives_PutPlayerInVehicle(int playerid, int vehicleid, int seat)
 	if (seat == 0) {
 		hp = vehicle->health;
 		if (hp != hp || hp < 0.0f || hp > 1000.0f) {
-			SAMP_SetVehicleHealth(vehicle, 1000.0f);
+			SetVehicleHealth(vehicle, 1000.0f);
 		}
 	}
 

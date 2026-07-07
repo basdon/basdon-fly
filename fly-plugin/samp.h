@@ -1277,6 +1277,12 @@ struct INOUTRPCDATA_UpdateVehicleDamageStatus {
 };
 EXPECT_SIZE(struct INOUTRPCDATA_UpdateVehicleDamageStatus, 2 + 4 + 4 + 1 + 1);
 
+struct RPCDATA_SetVehicleHealth {
+	ushort vehicleid;
+	float health;
+};
+EXPECT_SIZE(struct RPCDATA_SetVehicleHealth, 2 + 4);
+
 /**
 DriverSync
 	char packet_id; (200)

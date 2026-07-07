@@ -519,19 +519,19 @@ static
 int cmd_dev_vhp(struct COMMANDCONTEXT cmdctx)
 {
 	TRACE;
-	int vehicleid;
+	struct SampVehicle *vehicle;
 	int set_hp;
 
-	vehicleid = GetPlayerVehicleID(cmdctx.playerid);
-	if (!vehicleid) {
+	vehicle = vehiclepool->vehicles[sampPlayer[cmdctx.playerid]->vehicleid];
+	if (!vehicle) {
 		return CMD_OK;
 	}
 
 	if (cmd_get_int_param(&cmdctx, &set_hp)) {
-		SetVehicleHealth(vehicleid, set_hp);
+		SetVehicleHealth(vehicle, set_hp);
 	}
 
-	sprintf(cbuf32, "hp %f", GetVehicleHealthRaw(vehicleid));
+	sprintf(cbuf32, "hp %f", vehicle->health);
 	SendClientMessage(cmdctx.playerid, -1, cbuf32);
 	return CMD_OK;
 }
@@ -542,11 +542,15 @@ static
 int cmd_dev_vhpnan(struct COMMANDCONTEXT cmdctx)
 {
 	TRACE;
+	struct SampVehicle *vehicle;
 	float hp;
 
 	hp = 0.0 / 0.0;
 	assert(hp != hp);
-	SetVehicleHealth(GetPlayerVehicleID(cmdctx.playerid), hp);
+	vehicle = vehiclepool->vehicles[sampPlayer[cmdctx.playerid]->vehicleid];
+	if (vehicle) {
+		SetVehicleHealth(vehicle, hp);
+	}
 	return CMD_OK;
 }
 
@@ -556,7 +560,12 @@ static
 int cmd_dev_vhpninf(struct COMMANDCONTEXT cmdctx)
 {
 	TRACE;
-	SetVehicleHealth(GetPlayerVehicleID(cmdctx.playerid), float_ninf);
+	struct SampVehicle *vehicle;
+
+	vehicle = vehiclepool->vehicles[sampPlayer[cmdctx.playerid]->vehicleid];
+	if (vehicle) {
+		SetVehicleHealth(vehicle, float_ninf);
+	}
 	return CMD_OK;
 }
 
@@ -566,6 +575,11 @@ static
 int cmd_dev_vhppinf(struct COMMANDCONTEXT cmdctx)
 {
 	TRACE;
-	SetVehicleHealth(GetPlayerVehicleID(cmdctx.playerid), float_pinf);
+	struct SampVehicle *vehicle;
+
+	vehicle = vehiclepool->vehicles[sampPlayer[cmdctx.playerid]->vehicleid];
+	if (vehicle) {
+		SetVehicleHealth(vehicle, float_pinf);
+	}
 	return CMD_OK;
 }

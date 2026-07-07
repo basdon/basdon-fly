@@ -177,6 +177,7 @@ int anticheat_flood(int playerid, int amount)
 
 /**
 Gets vehicle hp, after checking for unnacceptable values and handling offenders.
+TODO: this should be done in driversync handler
 
 @return 0.0f if the vehicle is not valid.
 */
@@ -214,7 +215,7 @@ float GetVehicleHealth(int vehicleid)
 	CrashPlayer(playerid);
 	natives_Kick(playerid, "invalid vehicle hp", NULL, -1);
 resethp:
-	SAMP_SetVehicleHealth(vehicle, 1000.0f);
+	SetVehicleHealth(vehicle, 1000.0f);
 	return 1000.0f;
 }
 
@@ -264,7 +265,7 @@ void anticheat_on_player_enter_vehicle(int playerid, int vehicleid, int ispassen
 		if (vehicle) {
 			hp = vehicle->health;
 			if (hp != hp || hp < 0.0f || 1000.0f < hp) {
-				SAMP_SetVehicleHealth(vehicle, 1000.0f);
+				SetVehicleHealth(vehicle, 1000.0f);
 			}
 		}
 	}

@@ -280,7 +280,7 @@ int svp_repair(int playerid)
 	money_take(playerid, cost);
 
 	RepairVehicleVisualDamage(vehicle);
-	SetVehicleHealth(vehicleid, hp);
+	SetVehicleHealth(vehicle, hp);
 
 	if (GetPlayerState(playerid) != PLAYER_STATE_DRIVER) {
 		driverid = GetVehicleDriver(vehicleid);

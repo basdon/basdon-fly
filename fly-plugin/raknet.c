@@ -151,6 +151,7 @@ enum SampRPC {
 	RPC_UpdateVehicleDamageStatus = 0x815A64D, /*ptr to 0x6A(106)*/
 	RPC_ClearAnimations = 0x816322D, /*ptr to 0x57(87)*/
 	RPC_ApplyAnimation = 0x815CD24, /*ptr to 0x56(86)*/
+	RPC_SetVehicleHealth = 0x8166222, /*ptr to 0x93(147)*/
 };
 
 /*Uses HIGH_PRIORITY, RELIABLE_ORDERED, orderingchannel 2. Nearly all RPCs use this config.*/
