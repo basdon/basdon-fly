@@ -108,17 +108,6 @@ void VehicleMarkOccupied(struct SampVehicle *vehicle, ushort playerid, float hea
 		vehicle->playeridWhoReportedVehicleDeath = playerid;
 	}
 }
-/*jeanine:p:i:9;p:8;a:r;x:18.00;y:14.00;n:VehicleApplySync;*/
-static
-void VehicleApplySync(struct SampVehicle *vehicle, ushort playerid, struct SampMatrix *matrix, ushort trailerid)
-{
-	TRACE;
-
-	vehicle->lastSyncedByPlayerid = playerid;
-	memcpy(&vehicle->matrix, matrix, sizeof(struct SampMatrix));
-	/*TODO: lol why does this need to be 0 instead of INVALID_VEHICLE_ID*/
-	vehicle->trailerid = trailerid == INVALID_VEHICLE_ID ? 0 : trailerid;
-}
 /*jeanine:p:i:10;p:8;a:r;x:18.00;y:-6.00;n:VehicleHasDriver;*/
 static
 int VehicleHasDriver(ushort vehicleid)
@@ -198,7 +187,6 @@ void HandlePacketUnoccupiedSync(struct Samp *samp, struct RakPacket *packet)
 	struct SYNCDATA_UnoccupiedVehicle *syncdata;
 	struct SampVehicle *vehicle;
 	struct SampPlayer *player;
-	struct SampMatrix matrix;
 	ushort vehicleid;
 
 	if (
@@ -250,12 +238,16 @@ void HandlePacketUnoccupiedSync(struct Samp *samp, struct RakPacket *packet)
 	SendClientMessageToAll(-1, cbuf144);
 #endif
 
-	memcpy(&matrix.right, &syncdata->matrixRight, sizeof(struct vec3));
-	memcpy(&matrix.up, &syncdata->matrixUp, sizeof(struct vec3));
-	memcpy(&matrix.pos, &syncdata->matrixPos, sizeof(struct vec3));
-	VehicleApplySync(vehicle, packet->playerid, &matrix, INVALID_VEHICLE_ID);/*jeanine:r:i:9;*/
+	vehicle->lastSyncedByPlayerid = packet->playerid;
+	vehicle->matrix.right = syncdata->matrixRight;
+	vehicle->matrix.up = syncdata->matrixUp;
+	vehicle->matrix.pos = syncdata->matrixPos;
+	vehicle->pos = syncdata->matrixPos;
+	/*TODO: lol why does this need to be 0 instead of INVALID_VEHICLE_ID*/
+	/*TODO: why is this even here? does this mean trailers get detached?*/
+	vehicle->trailerid = 0;
 
-	memcpy(&player->unoccupiedVehicleSyncData, syncdata, sizeof(*syncdata));
+	player->unoccupiedVehicleSyncData = *syncdata;
 	player->hasNewUnoccupiedVehicleSyncData = 1;
 }
 /*jeanine:p:i:3;p:0;a:b;y:1.88;n:samp_incoming_init;*/
