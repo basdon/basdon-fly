@@ -21,6 +21,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/cp", 0, GROUPS_ALL, CMD_CP_SYNTAX, CMD_CP_DESC, cmd_dev_cp },
 	{ 0, 0, "/crashme", 0, GROUPS_ALL, CMD_CRASHME_SYNTAX, CMD_CRASHME_DESC, cmd_dev_crashme },
 	{ 0, 0, "/crashserver", 0, GROUPS_ALL, CMD_CRASHSERVER_SYNTAX, CMD_CRASHSERVER_DESC, cmd_dev_crashserver },
+	{ 0, 0, "/dev", 0, GROUPS_ALL, CMD_DEV_SYNTAX, CMD_DEV_DESC, cmd_dev_dev },
 	{ 0, 0, "/drvc", 0, GROUPS_ALL, CMD_DRVC_SYNTAX, CMD_DRVC_DESC, cmd_dev_disableremotevehiclecollisions },
 	{ 0, 0, "/fweather", 0, GROUPS_ALL, CMD_FWEATHER_SYNTAX, CMD_FWEATHER_DESC, cmd_dev_fweather },
 	{ 0, 0, "/getlastping", 0, GROUPS_ALL, CMD_GETLASTPING_SYNTAX, CMD_GETLASTPING_DESC, cmd_dev_getlastping },

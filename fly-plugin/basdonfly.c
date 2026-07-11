@@ -566,7 +566,9 @@ static void samp_incoming_init();
 #include "survey.c"
 
 #include "cmdhandlers.c"
+
 #ifdef DEV
+#include "dev.c"
 #include "cmdhandlers_dev.c"
 #endif /*DEV*/
 

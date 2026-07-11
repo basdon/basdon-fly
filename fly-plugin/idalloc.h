@@ -13,6 +13,7 @@ If an airport has more, they are probably split out enough anyways.*/
 /*DIALOG TRANSACTION IDS*/
 
 #define DLG_TID_NONE 0 /*Can be used for zero importance dialogs that will be overridden by any dialog.*/
+#define DLG_TID_DEV 1
 #define DLG_TID_AIRPORT_NEAREST 1000
 #define DLG_TID_AIRPORT_NEAREST_DETAIL 1001
 #define DLG_TID_AIRPORT_BEACONS 1100

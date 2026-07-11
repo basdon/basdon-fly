@@ -220,22 +220,7 @@ void HandlePacketUnoccupiedSync(struct Samp *samp, struct RakPacket *packet)
 	}
 
 #ifdef DEV
-	sprintf(
-		cbuf144,
-		"UnoccupiedVehicleSync pid %d vid %d seat %d health %.1f "
-			"vel %.1f %.1f %.1f angvel %.1f %.1f %.1f",
-		packet->playerid,
-		vehicleid,
-		syncdata->seat,
-		syncdata->health,
-		syncdata->velocity.x,
-		syncdata->velocity.y,
-		syncdata->velocity.z,
-		syncdata->angularVelocity.x,
-		syncdata->angularVelocity.y,
-		syncdata->angularVelocity.z
-	);
-	SendClientMessageToAll(-1, cbuf144);
+	dev_print_unoccupiedvehiclesync(packet->playerid, vehicleid, syncdata);
 #endif
 
 	vehicle->lastSyncedByPlayerid = packet->playerid;

@@ -1889,9 +1889,6 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 	struct SampVehicle *vehicle;
 	int playerid, vehicleid, i;
 	struct BitStream bs;
-#ifdef DEV
-	char msg144[144];
-#endif
 
 	if (
 		samp->gamestate != 1 ||
@@ -1913,16 +1910,7 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 	}
 
 #ifdef DEV
-	sprintf(
-		msg144,
-		"UpdateVehicleDamageStatus pid %d vid %d panels %08X->%08X doors %08X->%08X lights %02X->%02X tires %02X->%02X",
-		playerid, vehicleid,
-		vehicle->damageStatus.panels.raw, rpcdata->panels,
-		vehicle->damageStatus.doors.raw, rpcdata->doors,
-		vehicle->damageStatus.broken_lights.raw, rpcdata->broken_lights,
-		vehicle->damageStatus.popped_tires.raw, rpcdata->popped_tires
-	);
-	SendClientMessageToAll(COL_SAMP_GREY, msg144);
+	dev_print_updatevehicledamagestatus(playerid, vehicleid, vehicle, rpcdata);
 #endif
 
 	vehicle->damageStatus.panels.raw = rpcdata->panels;

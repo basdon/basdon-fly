@@ -77,6 +77,17 @@ int cmd_dev_crashserver(struct COMMANDCONTEXT cmdctx)
 	return j;
 }
 
+#define CMD_DEV_SYNTAX ""
+#define CMD_DEV_DESC "Dev menu"
+static
+int cmd_dev_dev(struct COMMANDCONTEXT cmdctx)
+{
+	TRACE;
+
+	dev_menu_show(cmdctx.playerid);
+	return CMD_OK;
+}
+
 #define CMD_DRVC_SYNTAX "<disable rvc>"
 #define CMD_DRVC_DESC "calls DisableRemoteVehicleCollisions"
 static
