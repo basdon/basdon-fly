@@ -88,4 +88,14 @@ struct RakRPCHandlerArg {
 	int numBits;
 	struct PlayerID playerID;
 };
+EXPECT_SIZE(struct RakRPCHandlerArg, 0xE);
+
+struct RakPacket {
+	ushort playerid;
+	struct PlayerID playerID;
+	int byteLength;
+	int bitLength;
+	uchar *data;
+};
+EXPECT_SIZE(struct RakPacket, 0x14);
 #pragma pack()

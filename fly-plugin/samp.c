@@ -841,8 +841,8 @@ void RespawnVehicle(int vehicleid)
 	vehicle->health = 1000.0f;
 	vehicle->isDead = 0;
 	vehicle->hasSentVehicleDeathEvent = 0;
-	vehicle->hasBeenDriverSyncedSinceRespawn = 0;
-	vehicle->lastOccupiedSyncTickCount = samp_GetTime();
+	vehicle->hasBeenOccupiedSinceRespawn = 0;
+	vehicle->lastOccupiedTickCount = samp_GetTime();
 	vehicle->lastSpawnTickCount = samp_GetTime();
 	memset(&vehicle->params, -1, sizeof(vehicle->params));
 
@@ -888,7 +888,6 @@ int GetVehicleDriver(int vehicleid)
 	TRACE;
 	int n, playerid;
 
-	/*vehicle->driverplayerid can not be used (yet) as it's not always correctly reset*/
 	for (n = playercount; n; ) {
 		playerid = players[--n];
 		if (sampPlayer[playerid]->vehicleid == vehicleid && sampPlayer[playerid]->vehicleseat == 0) {
@@ -1266,7 +1265,8 @@ int SetVehiclePos(int vehicleid, struct vec3 *pos)
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[vehicleid]) {
 			SendRPC_bs(i, RPC_SetVehiclePos, &bs);
-			if (vehicle->driverplayerid == i) {
+			/*TODO: this is weird, idk why SAMP does this. This should really check the actual driver/passenger, no?*/
+			if (vehicle->lastSyncedByPlayerid == i) {
 				sampPlayer[i]->hasExpectedLocationAfterTeleport = 1;
 				sampPlayer[i]->expectedLocationAfterTeleport = *pos;
 				sampPlayer[i]->expectedLocationSetAtTickCount = samp_GetTime();
@@ -1285,10 +1285,12 @@ void SetVehicleZAngle(int vehicleid, float angle)
 	struct SampVehicle *vehicle;
 
 	vehicle = vehiclepool->vehicles[vehicleid];
-	if (vehicle && vehicle->driverplayerid != INVALID_PLAYER_ID) {
+	/*TODO: this is weird, idk why SAMP does this. This should really check the actual driver/passenger, no?*/
+	/*TODO: does this mean this works if the vehicle is unoccupied, when sending it to the "owner" player?*/
+	if (vehicle && vehicle->lastSyncedByPlayerid != INVALID_PLAYER_ID) {
 		rpcdata.vehicleid = vehicleid;
 		rpcdata.angle = angle;
-		SendRPC(vehicle->driverplayerid, RPC_SetVehicleZAngle, &rpcdata, sizeof(rpcdata) * 8);
+		SendRPC(vehicle->lastSyncedByPlayerid, RPC_SetVehicleZAngle, &rpcdata, sizeof(rpcdata) * 8);
 	}
 }
 
@@ -1357,7 +1359,7 @@ didStreamOutVehicleToNotReachLimit:
 	}
 
 	if (seat == 0) {
-		vehicle->driverplayerid = playerid;
+		vehicle->lastSyncedByPlayerid = playerid;
 	}
 	player->vehicleid = vehicleid;
 
@@ -1905,7 +1907,7 @@ void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 		!playerpool->players[playerid] ||
 		(unsigned int) vehicleid >= 2000 ||
 		!(vehicle = vehiclepool->vehicles[vehicleid]) ||
-		vehicle->driverplayerid != playerid
+		vehicle->lastSyncedByPlayerid != playerid
 	) {
 		return;
 	}

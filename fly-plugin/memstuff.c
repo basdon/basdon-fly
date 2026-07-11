@@ -29,6 +29,16 @@ void mem_mkjmp(int at, void *to)
 	*((int*) at) = toaddr - at - 4;
 }
 
+static
+void mem_redirectjmp(int at, void *to)
+{
+	TRACE;
+
+	at++;
+	mem_protect(at, 4, PROT_READ | PROT_WRITE | PROT_EXEC);
+	*((int*) at) = (int) to - at - 4;
+}
+
 /*For functionality that we hooked and replaced, redirect code paths to this so the server*/
 /*crashes if it's executed somehow anyways instead of causing hard-to-trace corruption.*/
 static

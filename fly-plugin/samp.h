@@ -216,6 +216,18 @@ struct SYNCDATA_Trailer {
 };
 EXPECT_SIZE(struct SYNCDATA_Trailer, 0x36);
 
+struct SYNCDATA_UnoccupiedVehicle {
+	ushort vehicleid;
+	uchar seat; /*0 means the player is not in the car, non-0 means the player is in that passenger seat*/
+	struct vec3 matrixRight;
+	struct vec3 matrixUp;
+	struct vec3 matrixPos;
+	struct vec3 velocity;
+	struct vec3 angularVelocity;
+	float health;
+};
+EXPECT_SIZE(struct SYNCDATA_UnoccupiedVehicle, 0x43);
+
 struct SYNCDATA_Passenger {
 	short vehicle_id;
 	unsigned char seat_id : 6;
@@ -249,9 +261,12 @@ struct SampVehicle {
 	struct vec3 vel;
 	int field_58[3];
 	short vehicleid;
-	short trailervehicleid;
+	short trailerid;
 	short _pad68;
-	short driverplayerid;
+	/*Set by driver sync, unoccupied vehicle sync.*/
+	/*Also set by PutPlayerInVehicle when seat=driver, in which case this name is not so accurate.*/
+	/*SAMP also uses this in some cases to know who is the vehicle driver (kinda), which doesn't make sense to me.*/
+	ushort lastSyncedByPlayerid;
 	char _pad6C[0x7A-0x6C];
 	int _pad7A;
 	int _pad7E;
@@ -286,9 +301,10 @@ struct SampVehicle {
 	char numberplate[33]; /*32 + 0 term*/
 	struct SampVehicleParams params;
 	char hasSentVehicleDeathEvent;
-	/**to know if we need to check if the vehicle has been unoccupied long enough to respawn it*/
-	char hasBeenDriverSyncedSinceRespawn;
-	int lastOccupiedSyncTickCount; /*GetTickCount() at time of last occupied sync or respawn*/
+	/*Set to 1 on driver sync or unoccupied vehicle update where player is passenger. Not touched by passenger sync.*/
+	/*To know if we need to check if the vehicle has been unoccupied long enough to respawn it.*/
+	char hasBeenOccupiedSinceRespawn;
+	int lastOccupiedTickCount; /*GetTickCount() at time of last occupied sync or respawn*/
 	int lastSpawnTickCount; /*GetTickCount() at time of last (re)spawn*/
 	char use_siren;
 	char sirenState;
@@ -342,7 +358,7 @@ struct SampPlayer {
 	struct SYNCDATA_Driver driverSyncData;
 	struct SYNCDATA_Passenger passengerSyncData;
 	struct SYNCDATA_Onfoot onfootSyncData;
-	char _padC2[0x105-0xC2];
+	struct SYNCDATA_UnoccupiedVehicle unoccupiedVehicleSyncData;
 	struct SYNCDATA_Spectating spectatingSyncData;
 	struct SYNCDATA_Trailer trailerSyncData;
 	int _pad14D;
@@ -391,8 +407,8 @@ struct SampPlayer {
 	char attachedObjects[10][0x34];
 	int attachedObjectSlotUsed[10];
 	int hasNewAimSyncData; /*if true, broadcast aim sync data and set back to false*/
-	int hasTrailerToSync;
-	int _pad2BA5;
+	int hasNewTrailerSyncData;
+	int hasNewUnoccupiedVehicleSyncData;
 	char currentState;
 	struct vec3 checkpointPos;
 	float checkpointSize;
