@@ -47,36 +47,6 @@ int cmd_dev_cp(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-#define CMD_CRASHME_SYNTAX ""
-#define CMD_CRASHME_DESC "Crashes your game"
-static
-int cmd_dev_crashme(struct COMMANDCONTEXT cmdctx)
-{
-	TRACE;
-	CrashPlayer(cmdctx.playerid);
-	return CMD_OK;
-}
-
-#define CMD_CRASHSERVER_SYNTAX ""
-#define CMD_CRASHSERVER_DESC "Crashes the server"
-static
-int cmd_dev_crashserver(struct COMMANDCONTEXT cmdctx)
-{
-	TRACE;
-	static unsigned int *p;
-	unsigned int i, j;
-
-	j = 0;
-	p = &i;
-	while (p) {
-		logprintf("hi %p %p %d", &i, p, j);
-		*p = 0;
-		p++;
-		j++;
-	}
-	return j;
-}
-
 #define CMD_DEV_SYNTAX ""
 #define CMD_DEV_DESC "Dev menu"
 static
@@ -86,21 +56,6 @@ int cmd_dev_dev(struct COMMANDCONTEXT cmdctx)
 
 	dev_menu_show(cmdctx.playerid);
 	return CMD_OK;
-}
-
-#define CMD_DRVC_SYNTAX "<disable rvc>"
-#define CMD_DRVC_DESC "calls DisableRemoteVehicleCollisions"
-static
-int cmd_dev_disableremotevehiclecollisions(struct COMMANDCONTEXT cmdctx)
-{
-	TRACE;
-	int disable;
-
-	if (cmd_get_int_param(&cmdctx, &disable)) {
-		DisableRemoteVehicleCollisions(cmdctx.playerid, disable);
-		return CMD_OK;
-	}
-	return CMD_SYNTAX_ERR;
 }
 
 #define CMD_FWEATHER_SYNTAX "<weatherid>"
@@ -148,16 +103,6 @@ int cmd_dev_gt(struct COMMANDCONTEXT cmdctx)
 	return CMD_SYNTAX_ERR;
 }
 
-#define CMD_JETPACK_SYNTAX ""
-#define CMD_JETPACK_DESC "Gives a jetpack"
-static
-int cmd_dev_jetpack(struct COMMANDCONTEXT cmdctx)
-{
-	TRACE;
-	SetPlayerSpecialAction(cmdctx.playerid, SPECIAL_ACTION_USEJETPACK);
-	return CMD_OK;
-}
-
 static
 int cmd_dev_kickme_delayed(void *data)
 {
@@ -186,16 +131,6 @@ int cmd_dev_kickme(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-#define CMD_KILL_SYNTAX ""
-#define CMD_KILL_DESC "Kills you"
-static
-int cmd_dev_kill(struct COMMANDCONTEXT cmdctx)
-{
-	TRACE;
-	SetPlayerHealth(cmdctx.playerid, 0.0f);
-	return CMD_OK;
-}
-
 #define CMD_NWEATHER_SYNTAX ""
 #define CMD_NWEATHER_DESC "Trigger transitioning to next weather (as if it's called by the timer)"
 static
@@ -204,17 +139,6 @@ int cmd_dev_nweather(struct COMMANDCONTEXT cmdctx)
 	TRACE;
 	SendClientMessageToAll(-1, "changing weather");
 	timecyc_next_weather(NULL);
-	return CMD_OK;
-}
-
-#define CMD_OWNER_SYNTAX ""
-#define CMD_OWNER_DESC "Toggles owner group on your account"
-static
-int cmd_dev_owner(struct COMMANDCONTEXT cmdctx)
-{
-	TRACE;
-	pdata[cmdctx.playerid]->groups ^= GROUP_OWNER;
-	pdata[cmdctx.playerid]->groups |= GROUP_MEMBER;
 	return CMD_OK;
 }
 

@@ -55,12 +55,26 @@ static
 void dev_menu_callback(int playerid, struct DIALOG_RESPONSE response)
 {
 	TRACE;
+	static char disable_remote_vehicle_collisions = 0;
 
 	if (response.response) {
 		if (response.listitem == 1) {
 			dev_print_unoccupiedvehiclesync_enabled ^= 1;
 		} else if (response.listitem == 2) {
 			dev_print_updatevehicledamagestatus_enabled ^= 1;
+		} else if (response.listitem == 3) {
+			CrashPlayer(playerid);
+		} else if (response.listitem == 4) {
+			asmcrash();
+		} else if (response.listitem == 5) {
+			DisableRemoteVehicleCollisions(playerid, (disable_remote_vehicle_collisions ^= 1));
+		} else if (response.listitem == 6) {
+			SetPlayerHealth(playerid, 0.0f);
+		} else if (response.listitem == 7) {
+			SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USEJETPACK);
+		} else if (response.listitem == 8) {
+			pdata[playerid]->groups ^= GROUP_OWNER;
+			pdata[playerid]->groups |= GROUP_MEMBER;
 		}
 		dev_menu_show(playerid);/*jeanine:s:a:r;i:3;*/
 	}
@@ -93,7 +107,12 @@ void dev_menu_show(ushort playerid)
 	bp = dialog.info + sprintf(dialog.info, ECOL_SAMP_GREY"dummy entry\t\n");
 	bp = dev_menu_append_toggle_entry(bp, "print SYNC UnoccupiedVehicle", dev_print_unoccupiedvehiclesync_enabled);/*jeanine:s:a:r;i:2;*/
 	bp = dev_menu_append_toggle_entry(bp, "print RPC UpdateVehicleDamageStatus", dev_print_updatevehicledamagestatus_enabled);/*jeanine:r:i:2;*/
-	*bp = 0;
+	bp += sprintf(bp, "%s", "Crash player\n");
+	bp += sprintf(bp, "%s", "Crash server\n");
+	bp += sprintf(bp, "%s", "DisableRemoteVehicleCollisions\n");
+	bp += sprintf(bp, "%s", "Suicide\n");
+	bp += sprintf(bp, "%s", "Give jetpack\n");
+	bp += sprintf(bp, "%s", "Toggle owner group\n");
 	dialog.transactionid = DLG_TID_DEV;
 	dialog.style = DIALOG_STYLE_TABLIST;
 	dialog.caption = "Dev menu";
