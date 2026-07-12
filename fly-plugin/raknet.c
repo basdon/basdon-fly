@@ -78,6 +78,25 @@ void bitstream_write_velocity(struct BitStream *bitstream, float x, float y, flo
 	((void (*)(struct BitStream*,float,float,float))0x80CEA50)(bitstream, x, y, z);
 }
 
+/*returns a statically allocated buffer that will be reused*/
+static
+char* playerid_ntoa(struct PlayerID *playerID)
+{
+	struct in_addr in_addr;
+
+	in_addr.s_addr = playerID->binaryAddress;
+	return inet_ntoa(in_addr);
+}
+
+static
+char *playerid_tostring(struct PlayerID *playerID)
+{
+	static char buf[3 + 1 + 3 + 1 + 3 + 1 + 3 + 1 + 5 + 10];
+
+	sprintf(buf, "%s:%u", playerid_ntoa(playerID), playerID->port);
+	return buf;
+}
+
 enum SampRPC {
 
 	/*All below here use HIGH_PRIORITY, RELIABLE, orderingchannel 0*/
@@ -152,6 +171,8 @@ enum SampRPC {
 	RPC_ClearAnimations = 0x816322D, /*ptr to 0x57(87)*/
 	RPC_ApplyAnimation = 0x815CD24, /*ptr to 0x56(86)*/
 	RPC_SetVehicleHealth = 0x8166222, /*ptr to 0x93(147)*/
+	RPC_GameTimeUpdate = 0x815A7FC, /*ptr to 0x3C(60)*/
+	RPC_ConnectionRejected = 0x815A60C, /*ptr to 0x82(130)*/
 };
 
 /*Uses HIGH_PRIORITY, RELIABLE_ORDERED, orderingchannel 2. Nearly all RPCs use this config.*/

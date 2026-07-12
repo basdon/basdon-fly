@@ -1410,6 +1410,17 @@ void CrashPlayer(int playerid)
 	rpcdata_cv.model = MODEL_STREAK;
 	SendRPC(playerid, RPC_CreateVehicle, &rpcdata_cv, sizeof(rpcdata_cv) * 8);
 }
+
+static
+void SendGameTimeUpdate(ushort playerid)
+{
+	TRACE;
+	struct RPCDATA_GameTimeUpdate rpcdata;
+
+	/*Samp::GetGameTime*/
+	rpcdata.time = ((uint (*)(struct Samp*))0x80D1410)(samp);
+	SendRPC(playerid, RPC_GameTimeUpdate, &rpcdata, sizeof(rpcdata) * 8);
+}
 #endif
 
 /*-----------------------------------------------------------------------------*/
@@ -1973,8 +1984,6 @@ void samp_init()
 	/*stuff to allow both 0.3.7 and 0.3.DL clients */
 	AddServerRule("artwork", "No"); /*rule that DL added, probably not needed to have but setting it anyways*/
 	AddServerRule("allowed_clients", "0.3.7, 0.3.DL"); /*open.mp started setting this I guess so we roll with it too*/
-	mem_mkjmp(0x80B4B89, &ClientJoinCheckVersionHook);
-	/*StreamPlayerIn also sends different data depending on client version*/
 
 	AddServerRule("hotel", "Trivago"); /*be a little silly*/
 }

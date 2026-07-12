@@ -105,8 +105,6 @@ struct quat {
 EXPECT_SIZE(struct quat, 4 * sizeof(cell));
 
 #include "a_samp.h"
-#include "raknet.h"
-#include "raknet.c"
 #include "samp.h"
 
 /*anticheat*/
@@ -514,6 +512,8 @@ int CreateVehicle(int model, struct vec4 *pos, int col1, int col2, int respawn_d
 
 static void samp_incoming_init();
 
+#include "raknet.h"
+#include "raknet.c"
 #include "conf.c"
 #include "memstuff.c"
 #include "natives.c"

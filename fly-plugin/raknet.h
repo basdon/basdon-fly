@@ -51,6 +51,13 @@ struct RakNetStatistics {
 	int messagesOnResendQueue; /*aka messages waiting for ack*/
 };
 
+struct RakResult94 {
+	char _pad0[0xC67];
+	char fieldC67;
+	char fieldC68;
+};
+STATIC_ASSERT_MEMBER_OFFSET(struct RakResult94, fieldC67, 0xC67);
+
 struct RakServer {
 	struct RakServer_vtable *vtable;
 };
@@ -65,13 +72,21 @@ struct RakServer_vtable {
 	int (*GetLastPing)(struct RakServer *this, struct PlayerID playerID);
 	int _pad54[14];
 	int (*RPC_8C)(struct RakServer *this, char *rpc, struct BitStream *bitStream, enum PacketPriority priority, enum PacketReliability reliability, char orderingChannel, struct PlayerID playerID, int bBroadcast, int bShiftTimestamp);
-	int _pad90[22];
+	/*This one is only used to send the ConnectionRejected RPC, instantly followed by Kick.*/
+	/*Testing looks like RPC_8C doesn't get delivered when instantly followed by Kick, but RPC_90 does.*/
+	int (*RPC_90)(struct RakServer *this, char *rpc, struct BitStream *bitStream, enum PacketPriority priority, enum PacketReliability reliability, char orderingChannel, struct PlayerID playerID, int bBroadcast, int bShiftTimestamp);
+	struct RakResult94* (*proc94)(struct RakServer *this, struct PlayerID playerID);
+	int _pad98[20];
 	short (*GetIndexFromPlayerID)(struct RakServer *rakServer, struct PlayerID playerID);
 	/** equal to actual signature: void (*GetPlayerIDFromIndex)(struct PlayerID *outPlayerId, struct RakServer *rakServer, short playerIndex)*/
 	struct PlayerID (*GetPlayerIDFromIndex)(struct RakServer *rakServer, short playerIndex);
 	int _padF0;
 	void (*AddToBanList)(struct RakServer *rakServer, char *dottedIpAddr, int unkMaybeDurationMs);
-	char _padF8[0x118-0xF8];
+	int _padF8;
+	int _padFC;
+	int _pad100;
+	char (*proc104)(struct RakServer *rakServer, struct PlayerID playerID);
+	char _pad108[0x118-0x108];
 	struct RakNetStatistics *(*GetStatistics)(struct RakServer *rakServer, struct PlayerID playerID);
 };
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, SendBitStream, 0x24);
@@ -81,6 +96,7 @@ STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, RPC_8C, 0x8C);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetIndexFromPlayerID, 0xE8);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetPlayerIDFromIndex, 0xEC);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, AddToBanList, 0xF4);
+STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, proc104, 0x104);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetStatistics, 0x118); /*TODO: revalidate*/
 
 struct RakRPCHandlerArg {

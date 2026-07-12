@@ -506,13 +506,14 @@ struct SampPlayerPool {
 	int scoresAndPingsLastRequestAtTickCount[1000];
 	char gpci[1000][101];
 	char version[1000][25];
-	int playerSlotState_[1000]; /*?unsure*/
+	struct RakResult94 *rakResult94[1000];
 	int created[1000];
 	struct SampPlayer *players[1000];
 	char names[1000][25];
 	int isAdmin[1000];
 	int isNpc[1000];
-	char _pad2EA24[0x30968-0x2EA24];
+	char _pad2EA24[0x30964-0x2EA24];
+	int numPlayers;
 	int highestUsedPlayerid; /*0 can mean either no players or one player with id 0*/
 	int _field3096C;
 };
@@ -520,11 +521,12 @@ EXPECT_SIZE(struct SampPlayerPool, 0x30970); /*Complete*/
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, playerScore, 0xFAC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, gpci, 0x4E2C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, version, 0x1D8B4);
-STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, playerSlotState_, 0x23A5C);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, rakResult94, 0x23A5C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, created, 0x249FC);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, players, 0x2599C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, names, 0x2693C);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, isAdmin, 0x2CAE4);
+STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, numPlayers, 0x30964);
 STATIC_ASSERT_MEMBER_OFFSET(struct SampPlayerPool, highestUsedPlayerid, 0x30968);
 
 struct SampObjectMaterial {
@@ -1094,16 +1096,14 @@ EXPECT_SIZE(struct RPCDATA_Spectate, 3);
 
 struct RPCDATA_PlayerJoin {
 	short playerid;
-	/**
-	 *RGBA.
-	 * When a player joins, SAMP always sends this rpc to existing player with color 0 which results
-	 * in the client picking a preset (per id) color.
-	 * This rpc is also sent to the joining player with all already-connected players, in that case
-	 * the color is set to that player's color (which can still be 0 if the script never set it).
-	 */
+	/*RGBA.*/
+	/*When a player joins, SAMP always sends this rpc to existing players with color 0 which results*/
+	/*in the client picking a preset (per id) color.*/
+	/*This rpc is also sent to the joining player with all already-connected players, in that case*/
+	/*the color is set to that player's color (which can still be 0 if the script never set it).*/
 	int color;
-	/**NPCs don't have nametags and are not shown in the TAB list (scoreboard?),
-	NPCs also have different physics, they will barely fall when hanging in the sky.*/
+	/*NPCs don't have nametags and are not shown in the scoreboard (TAB list),*/
+	/*NPCs also have different physics: they will barely fall when hanging in the sky.*/
 	char npc;
 	char namelen;
 	char name[1]; /*actually arbitrary size with max length 24*/
@@ -1298,6 +1298,20 @@ struct RPCDATA_SetVehicleHealth {
 	float health;
 };
 EXPECT_SIZE(struct RPCDATA_SetVehicleHealth, 2 + 4);
+
+struct RPCDATA_GameTimeUpdate {
+	uint time;
+};
+EXPECT_SIZE(struct RPCDATA_GameTimeUpdate, 4);
+
+#define CONNECTION_REJECTED_REASON_BAD_VERSION 1
+#define CONNECTION_REJECTED_REASON_BAD_NICKNAME 2
+#define CONNECTION_REJECTED_REASON_BAD_MOD 3
+#define CONNECTION_REJECTED_REASON_SERVER_FULL 4
+struct RPCDATA_ConnectionRejected {
+	uchar reason;
+};
+EXPECT_SIZE(struct RPCDATA_ConnectionRejected, 1);
 
 /**
 DriverSync
