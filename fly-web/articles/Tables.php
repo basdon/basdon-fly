@@ -259,7 +259,7 @@
 
 <pre>gpci -- gpci values
   u - (usr.i)           v primkey
-  v - value (char, 100) ^ primkey
+  v - value (char, 40) ^ primkey
   c - count
   first - stamp of first use
   last - stamp of last use

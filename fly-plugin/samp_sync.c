@@ -4,6 +4,9 @@ float *stream_distance = (float*) 0x8197DD8;
 int *stream_rate = (int*) 0x8197DD4;
 #define PLAYER_MARKER_UPDATE_DELAY 2500 /*SAMP: 2500*/
 
+/*Returns uptime of the SAMP server process, despite this function also being used*/
+/*for the GetTickCount() PAWN function, of which the docs explicitely say it returns*/
+/*the uptime of the actual server and not the SAMP server. Maybe that was SAMP 0.2 behavior.*/
 static
 int samp_GetTime()
 {

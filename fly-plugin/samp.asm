@@ -8,6 +8,8 @@ extern hook_OnPlayerRequestClass
 extern hook_cmd_on_cmdtext
 extern hook_dialog_on_response
 extern printf
+extern memset
+extern memcpy
 extern is_player_using_client_version_DL
 extern player_netgame_version;
 
@@ -24,32 +26,89 @@ printf_logprintf:
 	push dword [logprintRetAddr]
 	ret
 
-;prot /**patch to allow both 0.3.7 and 0.3.DL clients to connect*/
-;prot void ClientJoinCheckVersionHook();
-global ClientJoinCheckVersionHook:function
-ClientJoinCheckVersionHook:
-	cmp dword [ebp-0126Ch], 4057 ; version 0.3.7
-	jnz .not037
-	movzx eax, word [ebp-012B0h] ; playerid
-	mov byte [is_player_using_client_version_DL+eax], 0
-	jmp .versionAllowed
-.not037:
-	cmp dword [ebp-0126Ch], 4062 ; version 0.3.DL
-	jnz .reject
-	movzx eax, word [ebp-012B0h] ; playerid
-	mov byte [is_player_using_client_version_DL+eax], 1
-.versionAllowed:
-	push dword [ebp-0126Ch] ; iVersion
-	pop dword [player_netgame_version+eax*4]
-	mov eax, dword [ebp-0126Ch] ; iVersion
-	xor eax, dword [ebp-01274h] ; uiClientChallengeResponse
-	cmp dword [081AA8A8h], eax ; challenge
-	jnz .reject
-	mov eax, 080B4BCCh ; ok
+;prot /*Should be called from ClientJoin RPC handler, jumps to the code of SAMP's*/
+;prot /*HandleRpcClientJoin that validates authKey and makes a gpci out of it.*/
+;prot /*Code path returns via ClientJoinReadAuthKeyAccepted or ClientJoinReadAuthKeyRejected below*/
+;prot int ClientJoinReadAuthKey(uchar *authKey, uchar authKeyLen, char *outGpci);
+global ClientJoinReadAuthKey:function
+ClientJoinReadAuthKey:
+	push ebp
+	mov ebp, esp
+	sub esp, 0x1328
+	sub esp, 4 ; 80B37C8
+	mov [ebp-0xC], ebx
+	mov [ebp-0x8], esi
+	mov [ebp-0x4], edi
+
+	mov ebx, [ebp+0x8] ; param authKey
+	mov esi, [ebp+0xC] ; param authKeyLen
+	lea edi, [ebp-0x498] ; local auth_key
+
+	mov dword [esp+8], 256
+	mov dword [esp+4], 0
+	mov dword [esp], edi ; local auth_key
+	call memset
+
+	mov [esp+8], esi ; param authKeyLen
+	mov [esp+4], ebx ; param authKey
+	mov [esp], edi ; local auth_key
+	call memcpy
+
+	mov eax, 0x80B4D48
 	jmp eax
-.reject:
-	mov eax, 080B4BA8h ; nok, bad version
-	jmp eax
+
+	; control will return to one of:
+	; - ClientJoinReadAuthKeyAccepted
+	; - ClientJoinReadAuthKeyRejected
+
+;prot /*Hooked at the end of the auth key code in HandleRpcClientJoin (accept path),*/
+;prot /*which is jumped to by ClientJoinReadAuthKey*/
+;prot int ClientJoinReadAuthKeyAccepted();
+global ClientJoinReadAuthKeyAccepted:function
+ClientJoinReadAuthKeyAccepted:
+	mov esi, [ebp-0xA68] ; local std::string gpci
+	mov esi, [esi-0xC] ; length of string
+	cmp esi, 40 ; see 0x80B51C5
+	jbe .gpci_len_ok
+	xor ebx, ebx
+.gpci_len_ok:
+	mov ebx, 1
+
+	mov [esp+8], esi ; length of local gpci
+	mov eax, [ebp-0xA68] ; local gpci->cstring
+	mov [esp+4], eax
+	mov edi, [ebp+0x10] ; param gcpiDest
+	mov [esp], edi
+	call memcpy
+
+	add edi, esi ; +length
+	mov byte [edi], 0 ; 0 term
+
+	lea eax, [ebp-0xA68] ; local gpci
+	mov [esp], eax
+	mov eax, 0x804ACCC ; std::string::~string()
+	call eax
+
+	mov eax, ebx
+	mov ebx, [ebp-0xC]
+	mov esi, [ebp-0x8]
+	mov edi, [ebp-0x4]
+	mov esp, ebp
+	pop ebp
+	ret
+
+;prot /*Hooked at the end of the auth key code in HandleRpcClientJoin (reject path),*/
+;prot /*which is jumped to by ClientJoinReadAuthKey*/
+;prot int ClientJoinReadAuthKeyRejected();
+global ClientJoinReadAuthKeyRejected:function
+ClientJoinReadAuthKeyRejected:
+	mov ebx, [ebp-0xC]
+	mov esi, [ebp-0x8]
+	mov edi, [ebp-0x4]
+	mov esp, ebp
+	pop ebp
+	xor eax, eax
+	ret
 
 ;prot void OnfootSyncHook();
 global OnfootSyncHook:function

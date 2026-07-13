@@ -1,9 +1,11 @@
 #define MAX_PLAYERS (50)
 #define MAX_PLAYER_NAME (24)
 #define INVALID_PLAYER_ID (0xFFFF)
+#define INVALID_ACTOR_ID (0xFFFF)
+#define INVALID_OBJECT_ID (0xFFFF)
 #define MAX_VEHICLES (2000)
-#define INVALID_VEHICLE_ID ((short) 0xFFFF)
-#define INVALID_3DTEXT_ID ((short) 0xFFFF)
+#define INVALID_VEHICLE_ID (0xFFFF)
+#define INVALID_3DTEXT_ID (0xFFFF)
 /*1024 global + 1024 per-player 3dtext labels*/
 #define MAX_3DTEXT_LABELS (2048)
 #define MAX_OBJECTS (1000)
