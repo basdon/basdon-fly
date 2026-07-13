@@ -1417,8 +1417,7 @@ void SendGameTimeUpdate(ushort playerid)
 	TRACE;
 	struct RPCDATA_GameTimeUpdate rpcdata;
 
-	/*Samp::GetGameTime*/
-	rpcdata.time = ((uint (*)(struct Samp*))0x80D1410)(samp);
+	rpcdata.time = samp_GetTime();
 	SendRPC(playerid, RPC_GameTimeUpdate, &rpcdata, sizeof(rpcdata) * 8);
 }
 #endif
