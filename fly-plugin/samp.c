@@ -1757,6 +1757,10 @@ void hook_OnOnfootSync(int playerid)
 
 static char drive_udkeystate[MAX_PLAYERS];
 
+/*NOTE: on vehicle warping: UnoccupiedVehicle updates are only sent from the client if the player is within 90 units.*/
+/*      This means the vehicle may continue driving further without the client updating it. It may also continue driving*/
+/*      for other clients. A player could then go to the vehicle where it is in their physical correct world and enter it,*/
+/*      which will result in a driver sync at a position that can be far away from the server's last known/accepted vehicle pos.*/
 void hook_OnDriverSync(int playerid)
 {
 	TRACE;
