@@ -10,8 +10,6 @@ extern hook_dialog_on_response
 extern printf
 extern memset
 extern memcpy
-extern strcpy
-extern strlen
 extern is_player_using_client_version_DL
 extern player_netgame_version;
 
@@ -68,20 +66,23 @@ ClientJoinReadAuthKey:
 ;prot int ClientJoinReadAuthKeyAccepted();
 global ClientJoinReadAuthKeyAccepted:function
 ClientJoinReadAuthKeyAccepted:
-	mov eax, [ebp-0xA68] ; local gpci->cstring
-	mov [esp], eax
-	call strlen
-	cmp eax, 99
+	mov esi, [ebp-0xA68] ; local std::string gpci
+	mov esi, [esi-0xC] ; length of string
+	cmp esi, 40 ; see 0x80B51C5
 	jbe .gpci_len_ok
 	xor ebx, ebx
 .gpci_len_ok:
 	mov ebx, 1
 
+	mov [esp+8], esi ; length of local gpci
 	mov eax, [ebp-0xA68] ; local gpci->cstring
 	mov [esp+4], eax
-	mov eax, [ebp+0x10] ; param gcpiDest
-	mov [esp], eax
-	call strcpy ; TODO: check length? must be less than 100+zeroterm
+	mov edi, [ebp+0x10] ; param gcpiDest
+	mov [esp], edi
+	call memcpy
+
+	add edi, esi ; +length
+	mov byte [edi], 0 ; 0 term
 
 	lea eax, [ebp-0xA68] ; local gpci
 	mov [esp], eax

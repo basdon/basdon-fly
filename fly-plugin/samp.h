@@ -504,6 +504,7 @@ struct SampPlayerPool {
 	int playerDrunkLevel[1000];
 	/** since SAMP throttles this to max once per 2000ms */
 	int scoresAndPingsLastRequestAtTickCount[1000];
+	/*note this is never longer than 40 characters, see 0x80B51C5*/
 	char gpci[1000][101];
 	char version[1000][25];
 	struct RakResult94 *rakResult94[1000];
