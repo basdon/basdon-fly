@@ -449,7 +449,7 @@ void SetPlayerMoneyRaw(int playerid, int amount)
 	if (playerpool->created[playerid]) {
 		playerpool->playerMoney[playerid] = amount;
 		SendRPC(playerid, RPC_MoneyReset, NULL, 0);
-		SendRPC(playerid, RPC_MoneyGive, &amount, sizeof(int));
+		SendRPC(playerid, RPC_MoneyGive, &amount, sizeof(int) * 8);
 	}
 }
 STATIC_ASSERT(sizeof(struct RPCDATA_MoneyGive) == sizeof(int));
