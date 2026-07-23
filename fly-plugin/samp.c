@@ -1708,10 +1708,10 @@ void samp_OnPlayerUpdate(int playerid)
 {
 	TRACE;
 	if (kick_update_delay[playerid] > 0) {
+		sampPlayer[playerid]->updateSyncType = 0; /*Reject update, equivalent to 'return 0' in OnPlayerUpdate.*/
 		if (--kick_update_delay[playerid] == 0) {
 			KickRaw(playerid);
 		}
-		sampPlayer[playerid]->updateSyncType = 0; /*Reject update, equivalent to 'return 0' in OnPlayerUpdate.*/
 		return;
 	}
 	playerstats_on_player_update(playerid);
