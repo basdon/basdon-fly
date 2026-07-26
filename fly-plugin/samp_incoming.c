@@ -109,7 +109,7 @@ int ReadValidateClientJoinPayload(struct RakRPCHandlerArg *arg, ushort *outPlaye
 	struct PlayerID playerID;
 	struct BitStream bs;
 	ushort playerid;
-	int bytesLeft;
+	int bytesLeft, i;
 	uchar *pdata;
 	uchar mod;
 	uchar nicknameLength;
@@ -185,6 +185,7 @@ int ReadValidateClientJoinPayload(struct RakRPCHandlerArg *arg, ushort *outPlaye
 	step = "proc104";
 	if (!rakServerVtable->proc104(rakServer, arg->playerID)) {
 		kickmsg = "proc104 says no";
+		/*yes reason of negative proc104 is 'server full'*/
 		rpcreject.reason = CONNECTION_REJECTED_REASON_SERVER_FULL;
 		goto rejectkick;/*jeanine:s:a:r;i:15;*/
 	}
@@ -213,7 +214,24 @@ int ReadValidateClientJoinPayload(struct RakRPCHandlerArg *arg, ushort *outPlaye
 	pdata += 1 + nicknameLength;
 	bytesLeft -= 1 + nicknameLength;
 
-	/*TODO: Here check if name is acceptable and not in use already.*/
+	/*ContainsInvalidNickChars*/
+	if (((int (*)(char*)) 0x80D5A60)(playerpool->names[playerid])) {
+		kickmsg = "nickname contains invalid characters";
+		rpcreject.reason = CONNECTION_REJECTED_REASON_BAD_NICKNAME;
+		goto rejectkick;/*jeanine:s:a:r;i:15;*/
+	}
+
+	/*TODO: move this to login code, don't reject clients on duplicate name but allow them to rename*/
+	for (i = 0; i < playercount; i++) {
+		if (!stricmp(playerpool->names[players[i]], playerpool->names[playerid])) {
+			/*BAD_NICKNAME prints messages in client about nickname requirements,*/
+			/*but that would be confusing if the nickname is valid but already taken.*/
+			/*Use SERVER_FULL with a custom kickmsg message.*/
+			kickmsg = "chosen nickname is already taken";
+			rpcreject.reason = CONNECTION_REJECTED_REASON_SERVER_FULL;
+			goto rejectkick;/*jeanine:s:a:r;i:15;*/
+		}
+	}
 
 	step = "challengeresponse";
 	if (((*(int*) pdata) ^ player_netgame_version[playerid]) != *(int*) 0x81AA8A8) {

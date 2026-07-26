@@ -1305,9 +1305,16 @@ struct RPCDATA_GameTimeUpdate {
 };
 EXPECT_SIZE(struct RPCDATA_GameTimeUpdate, 4);
 
+/*Will show message: CONNECTION REJECTED: Incorrect Version.*/
 #define CONNECTION_REJECTED_REASON_BAD_VERSION 1
+/*Will show messages: CONNECTION REJECTED: Unacceptable NickName*/
+/*Please choose another nick between and 3-20 characters*/
+/*Please use only a-z, A-Z, 0-9*/
+/*Use /quit to exit or press ESC and select Quit Game*/
 #define CONNECTION_REJECTED_REASON_BAD_NICKNAME 2
+/*Will show message: CONNECTION REJECTED: Bad mod version.*/
 #define CONNECTION_REJECTED_REASON_BAD_MOD 3
+/*Will show message: CONNECTION REJECTED: Unable to allocate a player slot.*/
 #define CONNECTION_REJECTED_REASON_SERVER_FULL 4
 struct RPCDATA_ConnectionRejected {
 	uchar reason;
