@@ -585,6 +585,17 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 	return SUPPORTS_VERSION | SUPPORTS_AMX_NATIVES | SUPPORTS_PROCESS_TICK;
 }
 
+static
+void SampCtorHook(struct Samp *this)
+{
+	/*REMEMBER THIS IS THE CONSTRUCTOR SO 'this' IS UNINITIALIZED*/
+
+	samp_incoming_init();
+
+	/*Samp::ctor*/
+	((void (*)(struct Samp*)) 0x80AF360)(this); /*this starts the rakserver*/
+}
+
 PLUGIN_EXPORT int PLUGIN_CALL Load(struct SampPlugins *lSampPlugins)
 {
 	char sha256buf[SHA256BUFSIZE + 1];
@@ -601,6 +612,7 @@ PLUGIN_EXPORT int PLUGIN_CALL Load(struct SampPlugins *lSampPlugins)
 
 	/* NOTE: SAMP is not initialized at this point, sampPlugins->GetSamp() returns NULL. */
 	/*       It gets initialized right after plugins finish loading.*/
+	mem_redirectjmp(0x80AA0E1, SampCtorHook);
 
 	*(int*) &float_pinf = 0x7F800000;
 	*(int*) &float_ninf = 0xFF800000;

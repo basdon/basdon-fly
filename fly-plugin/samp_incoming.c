@@ -531,6 +531,7 @@ static
 void HandleRpcScriptCash(struct RakRPCHandlerArg *arg)
 {
 	/*This is and old/neverused RPC. Maybe we should just not register it, and rak will ignore it?*/
+	/*(confirm that UnregisterRPCs won't make rak upset then)*/
 }
 /*jeanine:p:i:26;p:23;a:r;x:22.00;y:48.00;n:HandleRpcMapMarkerSet;*/
 static
@@ -673,18 +674,19 @@ void HandlePacketUnoccupiedSync(struct Samp *samp, struct RakPacket *packet)
 	player->unoccupiedVehicleSyncData = *syncdata;
 	player->hasNewUnoccupiedVehicleSyncData = 1;
 }
-/*jeanine:p:i:23;p:3;a:r;x:307.00;y:-169.00;n:samp_incoming_setup_rpcs;*/
+/*jeanine:p:i:23;p:3;a:r;x:307.00;y:-169.00;n:samp_incoming_setup_rak;*/
 static
-void samp_incoming_setup_rpcs()
+void samp_incoming_setup_rak(struct RakServer *_rakServer)
 {
 	TRACE;
 
-	/*UnregisterRakRPCs*/
-	((void (*)(struct RakServer*)) 0x80B4440)(rakServer);
-	/*That also nulls 81CA608 so we have to revert that quickly*/
+	rakServer = _rakServer;
+	rakServerVtable = rakServer->vtable;
+	rakRPC_8C = rakServerVtable->RPC_8C;
+	rakSendBitStream = rakServerVtable->SendBitStream;
+
+	/*The function this replaces registers RPCs but also sets 81CA608, so need to do that too*/
 	*((struct RakServer**) 0x81CA608) = rakServer;
-	/*UnregisterRakRPCs also gets called on Samp::dtor, but it doesn't seem to do harm if they're not actively registered.*/
-	/*Likewise, we also don't bother unregistering on shutdown.*/
 
 	rakServerVtable->RegisterRPC(rakServer, RPC_102, HandleRpc102);/*jeanine:r:i:24;*/
 	mem_mkjmp(0x80B1A30, crash__this_codepath_should_be_unreachable); /*HandleRpc102*/
@@ -776,7 +778,12 @@ void samp_incoming_init()
 {
 	TRACE;
 
-	samp_incoming_setup_rpcs();/*jeanine:r:i:23;*/
+	/*THIS GETS CALLED WHEN SAMP/POOLS/RAKSERVER IS NOT INITIALIZED YET*/
+
+	/*Replace RegisterRPCs, this gets called (in Samp::ctor) after plugins load and before rakserver starts.*/
+	mem_redirectjmp(0x80AF51A, samp_incoming_setup_rak);/*jeanine:r:i:23;*/
+	mem_mkjmp(0x80B30E0, crash__this_codepath_should_be_unreachable); /*RegisterRPCs*/
+	/*We initialize the same RPCs, so no need to patch UnregisterRPCs (it probably doesn't matter anyways)*/
 
 	mem_redirectjmp(0x80AEE42, HandlePacketUnoccupiedSync); /*Samp::HandlePacketUnoccupiedSync*//*jeanine:r:i:8;*/
 	mem_mkjmp(0x80ACD90, crash__this_codepath_should_be_unreachable); /*Samp::HandlePacketUnoccupiedSync*/

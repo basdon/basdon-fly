@@ -157,10 +157,6 @@ void samp_core_init()
 	samp_pConsole = sampPlugins->GetSampConsole();
 	playerpool = samp->playerPool;
 	vehiclepool = samp->vehiclePool;
-	rakServer = samp->rakServer; /*also exposed at sampPlugins->GetRakServer()*/
-	rakServerVtable = rakServer->vtable;
-	rakRPC_8C = rakServerVtable->RPC_8C;
-	rakSendBitStream = rakServerVtable->SendBitStream;
 
 	mem_mkjmp(0x80CAC70, crash__this_codepath_should_be_unreachable); /*SampPlayer::StreamInForOtherPlayer*/
 	mem_mkjmp(0x80CAF00, crash__this_codepath_should_be_unreachable); /*SampPlayer::StreamInPlayer*/
