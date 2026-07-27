@@ -33,12 +33,13 @@ out/samp.o: samp.asm
 	nasm -f elf32 samp.asm -o out/samp.o
 	echo recompiled samp.asm
 
+# NOTE: indenting inside if/else blocks with tab will break it silently. not indenting or using spaces works.
+
 # EXTRAFLAGS can be used to pass extra flags to gcc during compilation, when invoking make from commandline
 ifdef EXTRAFLAGS
-$(info using extraflags: $(EXTRAFLAGS))
+  $(info using extraflags: $(EXTRAFLAGS))
 endif
 
-# NOTE: indenting this with tab will break it silently. indenting with space works.
 ifdef BASDONDEV
   binaryname = basdonfly-dev
   cflags = -DDEV $(EXTRAFLAGS)
@@ -59,11 +60,11 @@ $(ofile): __settings.h __sampasm.h
 	echo "compile ok ($(ofile))"
 
 $(sofile): out/samp.o $(ofile)
-	gcc -ggdb -m32 -Wall -shared -lm -Xlinker --no-undefined out/samp.o out/$(binaryname).o -o $(sofile)
+	gcc -ggdb -m32 -Wall -shared -lm -Xlinker --no-undefined out/samp.o $(ofile) -o $(sofile)
 	echo "link ok ($(sofile))"
 
 .PHONY: so
-so: out/$(binaryname).so
+so: $(sofile)
 
 ### below here is test stuffs
 
