@@ -98,15 +98,42 @@ char *playerid_tostring(struct PlayerID *playerID)
 }
 
 enum SampRPC {
+	/*All below here are incoming*/
+	RPC_ClientJoin = 0x815A64B, /*ptr to 0x19(25)*/
+	RPC_NpcJoin = 0x8162EC8, /*ptr to 0x36(54)*/
+	RPC_Spawned = 0x8152524, /*ptr to 0x34(52)*/
+	RPC_InteriorChanged = 0x81638A9, /*ptr to 0x76(118)*/
+	RPC_ScriptCash = 0x815A63F, /*ptr to 0x1F(31)*/
+	RPC_MapMarkerSet = 0x8159868, /*ptr to 0x77(119)*/
+	RPC_VehicleDestroyed = 0x815A641, /*ptr to 0x88(136)*/
+	/*on some condition (which?) this is sent from client instead of the RPC that triggers OnPlayerPickUpPickup*/
+	/*this one also unconditionally broadcasts the received data*/
+	RPC_PickupCollected97 = 0x8162A1A, /*ptr to 0x61(97)*/
+	RPC_PickupCollected = 0x815A643, /*ptr to 0x83(131)*/
+	RPC_MenuSelect = 0x815A645, /*ptr to 0x84(132)*/
+	RPC_MenuQuit = 0x815A647, /*ptr to 0x8C(140)*/
+	RPC_DialogResponse = 0x8159253, /*ptr to 0x3E(62)*/
+	RPC_ClickPlayer = 0x815A649, /*ptr to 0x17(23)*/
+	RPC_ChatMessage = 0x816382D, /*ptr to 0x56(101)*/
+	RPC_ChatCommand = 0x8157C89, /*ptr to 0x32(50)*/
+	RPC_Death = 0x815A128, /*ptr to 0x35(53)*/
+	RPC_VehicleEnter = 0x815A64F, /*ptr to 0x1A(25)*/
+	RPC_VehicleExit = 0x815A651, /*ptr to 0x9A(154)*/
+	RPC_CameraTarget = 0x815A655, /*ptr to 0xA8(168)*/
+	RPC_GiveTakeDamage = 0x81591D9, /*ptr to 0x73(115)*/
+	RPC_GiveActorDamage = 0x815A657, /*ptr to 0xB1(177)*/
 
 	/*All below here use HIGH_PRIORITY, RELIABLE, orderingchannel 0*/
-	RPC_RequestClass = 0x81572DF, /*ptr to 0x80(128)*/
+	RPC_UpdateScoresPings = 0x815A639, /*ptr to 0x9B(155), also incoming*/
+	RPC_RequestClass = 0x81572DF, /*ptr to 0x80(128), also incoming*/
+	RPC_102 = 0x8159167, /*ptr to 0x66(102), also incoming*/
 
 	/*All below here use HIGH_PRIORITY, RELIABLE, orderingchannel 3*/
 	RPC_SendClientMessage = 0x815A027, /*ptr to 0x5D(93)*/
 	RPC_ShowGameText = 0x815A19A, /*ptr to 0x49(73)*/
 
 	/*All below here use HIGH_PRIORITY, RELIABLE_ORDERED, orderingchannel 2*/
+	RPC_VehicleEvent = 0x815A63D, /*ptr to 0x60(96), also incoming*/
 	RPC_ShowGangZone = 0x81587A1, /*ptr to 0x6C(108)*/
 	RPC_HideGangZone = 0x8163BA7, /*ptr to 0x78(120)*/
 	RPC_CreateObject = 0x815A7F8, /*ptr to 0x2C(44)*/
@@ -133,7 +160,7 @@ enum SampRPC {
 	RPC_Delete3DTextLabel = 0x8159960, /*ptr to 0x3A(58)*/
 	RPC_DisableRemoteVehicleCollisions = 0x815CD80, /*ptr to 0xA7(167)*/
 	RPC_ShowDialog = 0x815CD7C, /*ptr to 0x3D(61)*/
-	RPC_RequestSpawn = 0x815A61E, /*ptr to 0x81(129)*/
+	RPC_RequestSpawn = 0x815A61E, /*ptr to 0x81(129), also incoming*/
 	RPC_CreateVehicle = 0x8166228, /*ptr to 0xA4(164)*/
 	RPC_DeleteVehicle = 0x816622C, /*ptr to 0xA5(165)*/
 	RPC_SetVehicleNumberplate = 0x816622A, /*ptr to  0x7B(123)*/
@@ -167,12 +194,17 @@ enum SampRPC {
 	RPC_SetSpecialAction = 0x815ABC5, /*ptr to 0x58(88)*/
 	RPC_ForceClassSelection = 0x81587AC, /*ptr to 0x4A(74) (rpc has no data)*/
 	RPC_GiveWeapon = 0x815CD08, /*ptr to 0x16(22)*/
-	RPC_UpdateVehicleDamageStatus = 0x815A64D, /*ptr to 0x6A(106)*/
+	RPC_UpdateVehicleDamageStatus = 0x815A64D, /*ptr to 0x6A(106), also incoming*/
 	RPC_ClearAnimations = 0x816322D, /*ptr to 0x57(87)*/
 	RPC_ApplyAnimation = 0x815CD24, /*ptr to 0x56(86)*/
 	RPC_SetVehicleHealth = 0x8166222, /*ptr to 0x93(147)*/
 	RPC_GameTimeUpdate = 0x815A7FC, /*ptr to 0x3C(60)*/
 	RPC_ConnectionRejected = 0x815A60C, /*ptr to 0x82(130)*/
+	RPC_ObjectEditAttached = 0x815BC0B, /*ptr to 0x74(116), also incoming*/
+	RPC_ObjectEdit = 0x81572E9, /*ptr to 0x75(117), also incoming*/
+	RPC_ObjectSelect = 0x815A653, /*ptr to 0x1B(27), also incoming*/
+	RPC_TextDrawSelect = 0x8163616, /*ptr to 0x53(83), also incoming*/
+	RPC_ClientCheck = 0x816295C, /*ptr to 0x67(103), also incoming*/
 };
 
 /*Uses HIGH_PRIORITY, RELIABLE_ORDERED, orderingchannel 2. Nearly all RPCs use this config.*/

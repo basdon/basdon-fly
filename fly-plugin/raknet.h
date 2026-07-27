@@ -51,6 +51,13 @@ struct RakNetStatistics {
 	int messagesOnResendQueue; /*aka messages waiting for ack*/
 };
 
+struct RakRPCHandlerArg {
+	unsigned char *rpcdata;
+	int numBits;
+	struct PlayerID playerID;
+};
+EXPECT_SIZE(struct RakRPCHandlerArg, 0xE);
+
 struct RakResult94 {
 	char _pad0[0xC67];
 	char fieldC67;
@@ -70,7 +77,11 @@ struct RakServer_vtable {
 	int (*Kick)(struct RakServer *this, struct PlayerID playerID);
 	int _pad34[7];
 	int (*GetLastPing)(struct RakServer *this, struct PlayerID playerID);
-	int _pad54[14];
+	int _pad54[9];
+	void (*RegisterRPC)(struct RakServer *this, int RPC, void (*handler)(struct RakRPCHandlerArg *arg));
+	int _pad7C[1];
+	void (*UnregisterRPC)(struct RakServer *this, int RPC);
+	int _pad84[2];
 	int (*RPC_8C)(struct RakServer *this, char *rpc, struct BitStream *bitStream, enum PacketPriority priority, enum PacketReliability reliability, char orderingChannel, struct PlayerID playerID, int bBroadcast, int bShiftTimestamp);
 	/*This one is only used to send the ConnectionRejected RPC, instantly followed by Kick.*/
 	/*Testing looks like RPC_8C doesn't get delivered when instantly followed by Kick, but RPC_90 does.*/
@@ -92,19 +103,13 @@ struct RakServer_vtable {
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, SendBitStream, 0x24);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, Kick, 0x30);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetLastPing, 0x50);
+STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, RegisterRPC, 0x78);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, RPC_8C, 0x8C);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetIndexFromPlayerID, 0xE8);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetPlayerIDFromIndex, 0xEC);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, AddToBanList, 0xF4);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, proc104, 0x104);
 STATIC_ASSERT_MEMBER_OFFSET(struct RakServer_vtable, GetStatistics, 0x118); /*TODO: revalidate*/
-
-struct RakRPCHandlerArg {
-	unsigned char *rpcdata;
-	int numBits;
-	struct PlayerID playerID;
-};
-EXPECT_SIZE(struct RakRPCHandlerArg, 0xE);
 
 struct RakPacket {
 	ushort playerid;

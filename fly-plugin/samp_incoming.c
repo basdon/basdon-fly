@@ -1,7 +1,8 @@
 
-/*jeanine:p:i:2;p:3;a:r;x:30.00;y:-89.00;n:HandleRpcPlayerSpawned;*/
+/*jeanine:p:i:2;p:23;a:r;x:30.00;y:-89.00;n:HandleRpcSpawned;*/
+/*Client sends this when the player spawns. Player is already spawned at this point.*/
 static
-void HandleRpcPlayerSpawned(struct RakRPCHandlerArg *arg)
+void HandleRpcSpawned(struct RakRPCHandlerArg *arg)
 {
 	TRACE;
 	struct RPCDATA_SetWorldBounds rpcdata;
@@ -89,7 +90,7 @@ void HandleRpcPlayerSpawned(struct RakRPCHandlerArg *arg)
 	survey_on_player_spawn(playerid);
 	zones_update(playerid, pos);
 }
-/*jeanine:p:i:20;p:3;a:r;x:30.00;y:-94.00;n:HandleRpcNpcJoin;*/
+/*jeanine:p:i:20;p:23;a:r;x:30.00;y:-94.00;n:HandleRpcNpcJoin;*/
 static
 void HandleRpcNpcJoin(struct RakRPCHandlerArg *arg)
 {
@@ -309,7 +310,7 @@ rejectkick:
 	return 0;
 /*jeanine:p:i:21;p:22;a:b;y:1.00;*/
 }
-/*jeanine:p:i:13;p:3;a:r;x:31.00;y:-227.00;n:HandleRpcClientJoin;*/
+/*jeanine:p:i:13;p:23;a:r;x:31.00;y:-227.00;n:HandleRpcClientJoin;*/
 static
 void HandleRpcClientJoin(struct RakRPCHandlerArg *arg)
 {
@@ -573,14 +574,26 @@ void HandlePacketUnoccupiedSync(struct Samp *samp, struct RakPacket *packet)
 	player->unoccupiedVehicleSyncData = *syncdata;
 	player->hasNewUnoccupiedVehicleSyncData = 1;
 }
-/*jeanine:p:i:3;p:0;a:b;y:1.88;n:samp_incoming_init;*/
+/*jeanine:p:i:23;p:3;a:r;x:25.00;y:-62.00;n:samp_incoming_setup_rpcs;*/
 static
-void samp_incoming_init()
+void samp_incoming_setup_rpcs()
 {
 	TRACE;
 
-	mem_mkjmp(0x80B0030, &HandleRpcNpcJoin);/*jeanine:r:i:20;*/
-	mem_mkjmp(0x80B46D0, &HandleRpcClientJoin);/*jeanine:r:i:13;*/
+	/*UnregisterRakRPCs*/
+	((void (*)(struct RakServer*)) 0x80B4440)(rakServer);
+	/*That also nulls 81CA608 so we have to revert that quickly*/
+	*((struct RakServer**) 0x81CA608) = rakServer;
+	/*UnregisterRakRPCs also gets called on Samp::dtor, but it doesn't seem to do harm if they're not actively registered.*/
+	/*Likewise, we also don't bother unregistering on shutdown.*/
+
+	rakServerVtable->RegisterRPC(rakServer, RPC_102, (void*) 0x80B1A30);
+
+	rakServerVtable->RegisterRPC(rakServer, RPC_NpcJoin, HandleRpcNpcJoin);/*jeanine:r:i:20;*/
+	mem_mkjmp(0x80B0030, crash__this_codepath_should_be_unreachable); /*HandleRpcNpcJoin*/
+
+	rakServerVtable->RegisterRPC(rakServer, RPC_ClientJoin, HandleRpcClientJoin);/*jeanine:r:i:13;*/
+	mem_mkjmp(0x80B46D0, crash__this_codepath_should_be_unreachable); /*HandleRpcClientJoin*/
 	/*Our impl jumps to code in the original handler, to deal with all the auth_key stuff.*/
 	/*These two jumps below are the exit paths of that auth_key code, to return to our handler.*/
 	mem_mkjmp(0x80B56BE, &ClientJoinReadAuthKeyRejected);
@@ -590,9 +603,48 @@ void samp_incoming_init()
 	mem_mkjmp(0x80AE3E0, crash__this_codepath_should_be_unreachable); /*Samp::ProcessPlayerJoin*/
 	mem_mkjmp(0x80D0FD0, crash__this_codepath_should_be_unreachable); /*SampPlayerPool::SendExistingPlayersToConnectingPlayer*/
 
-	mem_mkjmp(0x80B0D90, &HandleRpcPlayerSpawned);/*jeanine:r:i:2;*/
+	rakServerVtable->RegisterRPC(rakServer, RPC_RequestClass, (void*) 0x80B08C0);
+	rakServerVtable->RegisterRPC(rakServer, RPC_RequestSpawn, (void*) 0x80B0B70);
+
+	rakServerVtable->RegisterRPC(rakServer, RPC_Spawned, HandleRpcSpawned);/*jeanine:r:i:2;*/
+	mem_mkjmp(0x80B0D90, crash__this_codepath_should_be_unreachable); /*HandleRpcPlayerSpawned*/
 	mem_mkjmp(0x80CCFC0, crash__this_codepath_should_be_unreachable); /*SampPlayer::Spawn*/
 	mem_mkjmp(0x80D1580, crash__this_codepath_should_be_unreachable); /*SampPlayerPool::StreamOutAllPlayersForPlayer*/
+
+	rakServerVtable->RegisterRPC(rakServer, RPC_InteriorChanged, (void*) 0x80B1B60);
+	rakServerVtable->RegisterRPC(rakServer, RPC_VehicleEvent, (void*) 0x80B1EC0);
+	rakServerVtable->RegisterRPC(rakServer, RPC_VehicleDestroyed, (void*) 0x80B23A0);
+	rakServerVtable->RegisterRPC(rakServer, RPC_ScriptCash, (void*) 0x80B1D10);
+	rakServerVtable->RegisterRPC(rakServer, RPC_MapMarkerSet, (void*) 0x80B21E0);
+	rakServerVtable->RegisterRPC(rakServer, RPC_PickupCollected97, (void*) 0x80B2560);
+	rakServerVtable->RegisterRPC(rakServer, RPC_PickupCollected, (void*) 0x80B2730);
+	rakServerVtable->RegisterRPC(rakServer, RPC_MenuSelect, (void*) 0x80B2880);
+	rakServerVtable->RegisterRPC(rakServer, RPC_MenuQuit, (void*) 0x80B29A0);
+	rakServerVtable->RegisterRPC(rakServer, RPC_DialogResponse, (void*) 0x80B2A00);
+	rakServerVtable->RegisterRPC(rakServer, RPC_ClickPlayer, (void*) 0x80B2C90);
+	rakServerVtable->RegisterRPC(rakServer, RPC_ChatMessage, (void*) 0x80B05F0);
+	rakServerVtable->RegisterRPC(rakServer, RPC_ChatCommand, (void*) 0x80B432E);
+	rakServerVtable->RegisterRPC(rakServer, RPC_Death, (void*) 0x80B0ED0);
+	rakServerVtable->RegisterRPC(rakServer, RPC_UpdateVehicleDamageStatus, (void*) 0x80B1020);
+	rakServerVtable->RegisterRPC(rakServer, RPC_VehicleEnter, (void*) 0x815A64F);
+	rakServerVtable->RegisterRPC(rakServer, RPC_VehicleExit, (void*) 0x80B13F0);
+	rakServerVtable->RegisterRPC(rakServer, RPC_UpdateScoresPings, (void*) 0x80B17A0);
+	rakServerVtable->RegisterRPC(rakServer, RPC_ObjectEditAttached, (void*) 0x80B3340);
+	rakServerVtable->RegisterRPC(rakServer, RPC_ObjectEdit, (void*) 0x80B3520);
+	rakServerVtable->RegisterRPC(rakServer, RPC_ObjectSelect, (void*) 0x80B3920);
+	rakServerVtable->RegisterRPC(rakServer, RPC_TextDrawSelect, (void*) 0x80B3C30);
+	rakServerVtable->RegisterRPC(rakServer, RPC_ClientCheck, (void*) 0x80B3E00);
+	rakServerVtable->RegisterRPC(rakServer, RPC_CameraTarget, (void*) 0x80B3FB0);
+	rakServerVtable->RegisterRPC(rakServer, RPC_GiveTakeDamage, (void*) 0x80B2E40);
+	rakServerVtable->RegisterRPC(rakServer, RPC_GiveActorDamage, (void*) 0x80B3130);
+}
+/*jeanine:p:i:3;p:0;a:b;y:1.88;n:samp_incoming_init;*/
+static
+void samp_incoming_init()
+{
+	TRACE;
+
+	samp_incoming_setup_rpcs();/*jeanine:r:i:23;*/
 
 	mem_redirectjmp(0x80AEE42, HandlePacketUnoccupiedSync); /*Samp::HandlePacketUnoccupiedSync*//*jeanine:r:i:8;*/
 	mem_mkjmp(0x80ACD90, crash__this_codepath_should_be_unreachable); /*Samp::HandlePacketUnoccupiedSync*/
