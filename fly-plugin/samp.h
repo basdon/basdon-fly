@@ -2,6 +2,9 @@ EXPECT_SIZE(char, 1);
 EXPECT_SIZE(short, 2);
 EXPECT_SIZE(int, 4);
 
+/*excluding zero term*/
+#define CLIENT_VERSIONSTRING_MAXLEN 24
+
 #pragma pack(1)
 struct Quaternion {
 	float w, x, y, z;
@@ -506,7 +509,7 @@ struct SampPlayerPool {
 	int scoresAndPingsLastRequestAtTickCount[1000];
 	/*note this is never longer than 40 characters, see 0x80B51C5*/
 	char gpci[1000][101];
-	char version[1000][25];
+	char version[1000][CLIENT_VERSIONSTRING_MAXLEN + 1];
 	struct RakResult94 *rakResult94[1000];
 	int created[1000];
 	struct SampPlayer *players[1000];

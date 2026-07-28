@@ -260,7 +260,7 @@ int ReadValidateClientJoinPayload(struct RakRPCHandlerArg *arg, ushort *outPlaye
 		clientVersionStringLength = *pdata;
 		pdata++;
 		bytesLeft--;
-		if (clientVersionStringLength > 24 || bytesLeft < clientVersionStringLength) {
+		if (clientVersionStringLength > CLIENT_VERSIONSTRING_MAXLEN || bytesLeft < clientVersionStringLength) {
 			goto rawkick;
 		}
 		memcpy(playerpool->version[playerid], pdata, clientVersionStringLength);
