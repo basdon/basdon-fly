@@ -114,8 +114,8 @@ enum SampRPC {
 	RPC_MenuQuit = 0x815A647, /*ptr to 0x8C(140)*/
 	RPC_DialogResponse = 0x8159253, /*ptr to 0x3E(62)*/
 	RPC_ClickPlayer = 0x815A649, /*ptr to 0x17(23)*/
+	RPC_ChatCommand = 0x8157CA5, /*ptr to 0x32(50)*/
 	RPC_ChatMessage = 0x816382D, /*ptr to 0x56(101)*/
-	RPC_ChatCommand = 0x8157C89, /*ptr to 0x32(50)*/
 	RPC_Death = 0x815A128, /*ptr to 0x35(53)*/
 	RPC_VehicleEnter = 0x815A64F, /*ptr to 0x1A(25)*/
 	RPC_VehicleExit = 0x815A651, /*ptr to 0x9A(154)*/

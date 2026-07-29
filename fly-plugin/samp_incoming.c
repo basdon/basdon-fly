@@ -741,10 +741,10 @@ void samp_incoming_setup_rak(struct RakServer *_rakServer)
 	mem_mkjmp(0x80B2C90, crash__this_codepath_should_be_unreachable); /*HandleRpcClickPlayer*/
 
 	rakServerVtable->RegisterRPC(rakServer, RPC_ChatMessage, (void*) 0x80B05F0);
-	rakServerVtable->RegisterRPC(rakServer, RPC_ChatCommand, (void*) 0x80B432E);
+	rakServerVtable->RegisterRPC(rakServer, RPC_ChatCommand, (void*) 0x80B1560);
 	rakServerVtable->RegisterRPC(rakServer, RPC_Death, (void*) 0x80B0ED0);
 	rakServerVtable->RegisterRPC(rakServer, RPC_UpdateVehicleDamageStatus, (void*) 0x80B1020);
-	rakServerVtable->RegisterRPC(rakServer, RPC_VehicleEnter, (void*) 0x815A64F);
+	rakServerVtable->RegisterRPC(rakServer, RPC_VehicleEnter, (void*) 0x80B1210);
 	rakServerVtable->RegisterRPC(rakServer, RPC_VehicleExit, (void*) 0x80B13F0);
 	rakServerVtable->RegisterRPC(rakServer, RPC_UpdateScoresPings, (void*) 0x80B17A0);
 
