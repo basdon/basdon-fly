@@ -90,6 +90,67 @@ void HandleRpcSpawned(struct RakRPCHandlerArg *arg)
 	survey_on_player_spawn(playerid);
 	zones_update(playerid, pos);
 }
+/*jeanine:p:i:40;p:23;a:r;x:286.00;n:HandleRpcChatMessage;*/
+static
+void HandleRpcChatMessage(struct RakRPCHandlerArg *arg)
+{
+	TRACE;
+#pragma pack(push,1)
+	struct {
+		struct RPCDATA_ChatMessage128 rpcchatmsg;
+		char zeroterm;
+	} data;
+#pragma pack(pop)
+	struct SampPlayer *player;
+	struct BitStream bs;
+	ushort playerid;
+	int i;
+
+	playerid = rakServerVtable->GetIndexFromPlayerID(rakServer, arg->playerID);
+	if (
+		playerid >= MAX_PLAYERS ||
+		!(player = playerpool->players[playerid]) ||
+		arg->numBits < 2 * 8 ||
+		(data.rpcchatmsg.msg_len = arg->rpcdata[0]) > 128 ||
+		arg->numBits != 8 + 8 * data.rpcchatmsg.msg_len
+	) {
+		return;
+	}
+
+	if (!ISPLAYING(playerid)) {
+		SendClientMessage(playerid, COL_WARN, NOLOG);
+		return;
+	}
+
+	if (!anticheat_on_player_text(playerid)) {
+		return;
+	}
+
+	data.rpcchatmsg.playerid = playerid;
+	memcpy(data.rpcchatmsg.msg, arg->rpcdata + 1, data.rpcchatmsg.msg_len);
+	data.rpcchatmsg.msg[data.rpcchatmsg.msg_len] = 0;
+
+	/*msg filtering happens here (removing embedded colors, %->#, ~k->#k), we don't care :D*/
+	/*chatlogging happens here if enabled, which we don't*/
+
+	/*OnPlayerText happens here*/
+
+	if (data.rpcchatmsg.msg[0] == '#') {
+		radio_send_radio_msg(playerid, data.rpcchatmsg.msg + 1);
+		return;
+	}
+
+	echo_on_game_chat_or_action(0, playerid, data.rpcchatmsg.msg);
+
+	bs.ptrData = &data;
+	bs.numberOfBitsUsed = 16 + 8 + data.rpcchatmsg.msg_len * 8;
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (playerpool->players[i]) {
+			/*chat radius limit is also a thing that samp does here*/
+			SendRPC_unordered_bs(i, RPC_ChatMessage, &bs);
+		}
+	}
+}
 /*jeanine:p:i:20;p:23;a:r;x:43.00;y:-214.00;n:HandleRpcNpcJoin;*/
 static
 void HandleRpcNpcJoin(struct RakRPCHandlerArg *arg)
@@ -740,7 +801,10 @@ void samp_incoming_setup_rak(struct RakServer *_rakServer)
 	rakServerVtable->RegisterRPC(rakServer, RPC_ClickPlayer, HandleRpcClickPlayer);/*jeanine:r:i:31;*/
 	mem_mkjmp(0x80B2C90, crash__this_codepath_should_be_unreachable); /*HandleRpcClickPlayer*/
 
-	rakServerVtable->RegisterRPC(rakServer, RPC_ChatMessage, (void*) 0x80B05F0);
+	rakServerVtable->RegisterRPC(rakServer, RPC_ChatMessage, HandleRpcChatMessage);/*jeanine:r:i:40;*/
+	mem_mkjmp(0x80B05F0, crash__this_codepath_should_be_unreachable); /*HandleRpcChatMessage*/
+	mem_mkjmp(0x80C99A0, crash__this_codepath_should_be_unreachable); /*SampPlayer::SendChatMessage*/
+
 	rakServerVtable->RegisterRPC(rakServer, RPC_ChatCommand, (void*) 0x80B1560);
 	rakServerVtable->RegisterRPC(rakServer, RPC_Death, (void*) 0x80B0ED0);
 	rakServerVtable->RegisterRPC(rakServer, RPC_UpdateVehicleDamageStatus, (void*) 0x80B1020);

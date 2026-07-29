@@ -1308,6 +1308,16 @@ struct RPCDATA_GameTimeUpdate {
 };
 EXPECT_SIZE(struct RPCDATA_GameTimeUpdate, 4);
 
+/*Note: unlike client message and chat bubble, the client doesn't care about the length of a chat message.*/
+/*It wraps once at a specific position, but then it doesn't wrap anymore.*/
+/*A full 255 length message doesn't fit on a full hd screen with normal chat scale.*/
+struct RPCDATA_ChatMessage128 {
+	ushort playerid;
+	uchar msg_len;
+	char msg[128];
+};
+EXPECT_SIZE(struct RPCDATA_ChatMessage128, 2 + 1 + 128);
+
 /*Will show message: CONNECTION REJECTED: Incorrect Version.*/
 #define CONNECTION_REJECTED_REASON_BAD_VERSION 1
 /*Will show messages: CONNECTION REJECTED: Unacceptable NickName*/

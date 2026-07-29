@@ -399,29 +399,8 @@ static
 cell AMX_NATIVE_CALL B_OnPlayerText(AMX *amx, cell *params)
 {
 	TRACE;
-	cell *addr;
-	char buf[144];
-	const int playerid = PARAM(1);
 
-	if (!ISPLAYING(playerid)) {
-		SendClientMessage(playerid, COL_WARN, NOLOG);
-		return 0;
-	}
-
-	if (!anticheat_on_player_text(playerid)) {
-		return 0;
-	}
-
-	amx_GetAddr(amx, PARAM(2), &addr);
-	ctoa(buf, addr, sizeof(buf));
-
-	if (buf[0] == '#') {
-		radio_send_radio_msg(playerid, buf + 1);
-		return 0;
-	}
-
-	echo_on_game_chat_or_action(0, playerid, buf);
-	return 1;
+	crash__this_codepath_should_be_unreachable(); /*ChatMessage RPC is replaced*/
 }
 
 /* native B_OnPlayerUpdate(playerid) */

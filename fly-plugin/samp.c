@@ -1950,10 +1950,6 @@ void samp_init()
 	char *str;
 
 	/*Remove filtering in chat messages coming from clients.*/
-	/*OnPlayerText*/
-	mem_protect(0x80B0760, 0x14, PROT_READ | PROT_WRITE | PROT_EXEC);
-	*(int*) 0x80B0760 = 0x90909090;
-	*(unsigned char*) 0x80B0764 = 0x90;
 	/*OnPlayerCommandText*/
 	mem_protect(0x80B16D6, 0x14, PROT_READ | PROT_WRITE | PROT_EXEC);
 	*(int*) 0x80B16D6 = 0x90909090;

@@ -115,7 +115,6 @@ enum SampRPC {
 	RPC_DialogResponse = 0x8159253, /*ptr to 0x3E(62)*/
 	RPC_ClickPlayer = 0x815A649, /*ptr to 0x17(23)*/
 	RPC_ChatCommand = 0x8157CA5, /*ptr to 0x32(50)*/
-	RPC_ChatMessage = 0x816382D, /*ptr to 0x56(101)*/
 	RPC_Death = 0x815A128, /*ptr to 0x35(53)*/
 	RPC_VehicleEnter = 0x815A64F, /*ptr to 0x1A(25)*/
 	RPC_VehicleExit = 0x815A651, /*ptr to 0x9A(154)*/
@@ -131,6 +130,7 @@ enum SampRPC {
 	/*All below here use HIGH_PRIORITY, RELIABLE, orderingchannel 3*/
 	RPC_SendClientMessage = 0x815A027, /*ptr to 0x5D(93)*/
 	RPC_ShowGameText = 0x815A19A, /*ptr to 0x49(73)*/
+	RPC_ChatMessage = 0x816382D, /*ptr to 0x56(101), also incoming*/
 
 	/*All below here use HIGH_PRIORITY, RELIABLE_ORDERED, orderingchannel 2*/
 	RPC_VehicleEvent = 0x815A63D, /*ptr to 0x60(96), also incoming*/
@@ -236,6 +236,13 @@ void SendRPC_unordered(ushort playerid, enum SampRPC rpc, void *rpcdata, int siz
 	bs.numberOfBitsUsed = size_bits;
 
 	rakRPC_8C(rakServer, (void*) rpc, &bs, HIGH_PRIORITY, RELIABLE, 3, rakPlayerID[playerid], /*broadcast*/ 0, /*shiftTimestamp*/ 0);
+}
+
+/*BitStream version of SendRPC_unordered. Use this for bulk sending.*/
+static
+void SendRPC_unordered_bs(ushort playerid, enum SampRPC rpc, struct BitStream *bs)
+{
+	rakRPC_8C(rakServer, (void*) rpc, bs, HIGH_PRIORITY, RELIABLE, 3, rakPlayerID[playerid], /*broadcast*/ 0, /*shiftTimestamp*/ 0);
 }
 
 static
