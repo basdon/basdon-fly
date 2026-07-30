@@ -554,6 +554,7 @@ else if (pModelInfo->IsBike())
 		<tr><td>On foot sync<td>HIGH_PRIORITY<td>UNRELIABLE_SEQUENCED<td>1
 		<tr><td>(all other scripting functions)<td>HIGH_PRIORITY<td>RELIABLE_ORDERED<td>2
 		<tr><td>Chat message<td>HIGH_PRIORITY<td>RELIABLE<td>3
+		<tr><td>Gametext (for unknown reason)<td>HIGH_PRIORITY<td>RELIABLE<td>3
 </table>
 
 <h3 id=misc>Misc</h3>
