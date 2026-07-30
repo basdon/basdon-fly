@@ -345,11 +345,8 @@ static
 cell AMX_NATIVE_CALL B_OnPlayerRequestClass(AMX *amx, cell *params)
 {
 	TRACE;
-	/*This is unused, OnPlayerRequestClass is hooked (in samp.c) and the
-	 *filterscript/gamemode callbacks are never invoked. This is being kept
-	 *here because otherwise the gamemode script needs to be recompiled and
-	 *I want to wait doing that until I got rid of all callbacks*/
-	return 1;
+
+	crash__this_codepath_should_be_unreachable(); /*RPC is replaced*/
 }
 
 /* native B_OnPlayerRequestSpawn(playerid) */

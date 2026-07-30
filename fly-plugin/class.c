@@ -10,6 +10,7 @@ void class_init()
 
 	/*we skip doing AddPlayerClass and just set numAvailableSpawns directly*/
 	/*we overwrote SAMP's OnPlayerRequestClass anyways, so the spawninfo data that AddPlayerClass adds isn't needed*/
+	/*this is still needed as this is sent to the client on initialization, we have not replaced that yet*/
 	samp->numAvailableSpawns = SETTING__NUM_CLASSES;
 }
 

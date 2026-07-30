@@ -90,6 +90,46 @@ void HandleRpcSpawned(struct RakRPCHandlerArg *arg)
 	survey_on_player_spawn(playerid);
 	zones_update(playerid, pos);
 }
+/*jeanine:p:i:41;p:23;a:r;x:461.00;y:-44.00;n:HandleRpcRequestClass;*/
+static
+void HandleRpcRequestClass(struct RakRPCHandlerArg *arg)
+{
+	TRACE;
+	struct RPCDATA_RequestClass03DL rpcdata03DL;
+	struct RPCDATA_RequestClass037 rpcdata037;
+	ushort playerid;
+	ushort classid;
+
+	playerid = rakServerVtable->GetIndexFromPlayerID(rakServer, arg->playerID);
+	if (
+		playerid >= MAX_PLAYERS ||
+		!client_inited[playerid] ||
+		arg->numBits < 16
+	) {
+		return;
+	}
+
+	classid = *((ushort*) arg->rpcdata);
+	/*not clamping classid here, class code will deal with it*/
+
+	class_on_player_request_class(playerid, classid);
+	timecyc_on_player_request_class(playerid);
+
+	spawn_get_random_spawn(playerid, &rpcdata037.spawnInfo);
+	if (is_player_using_client_version_DL[playerid]) {
+		rpcdata03DL.response = 1; /*this is the result of the OnPlayerRequestClass callback*/
+		convertSpawnInfoToSpawnInfo03DL(&rpcdata037.spawnInfo, &rpcdata03DL.spawnInfo);
+		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata03DL, sizeof(rpcdata03DL), HIGH_PRIORITY, RELIABLE, 0);
+	} else {
+		rpcdata037.response = 1; /*this is the result of the OnPlayerRequestClass callback*/
+		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata037, sizeof(rpcdata037), HIGH_PRIORITY, RELIABLE, 0);
+	}
+
+	sampPlayer[playerid]->spawnInfo = rpcdata037.spawnInfo;
+	/*TODO: replace this, still needed now because SAMP will ignore client Spawn packets and player will not be*/
+	/*marked (not broadcasted) as spawned despited being spawned*/
+	sampPlayer[playerid]->hasSpawnInfo = 1;
+}
 /*jeanine:p:i:40;p:23;a:r;x:286.00;n:HandleRpcChatMessage;*/
 static
 void HandleRpcChatMessage(struct RakRPCHandlerArg *arg)
@@ -767,7 +807,10 @@ void samp_incoming_setup_rak(struct RakServer *_rakServer)
 	mem_mkjmp(0x80AE3E0, crash__this_codepath_should_be_unreachable); /*Samp::ProcessPlayerJoin*/
 	mem_mkjmp(0x80D0FD0, crash__this_codepath_should_be_unreachable); /*SampPlayerPool::SendExistingPlayersToConnectingPlayer*/
 
-	rakServerVtable->RegisterRPC(rakServer, RPC_RequestClass, (void*) 0x80B08C0);
+	rakServerVtable->RegisterRPC(rakServer, RPC_RequestClass, HandleRpcRequestClass);/*jeanine:r:i:41;*/
+	mem_mkjmp(0x80B08C0, crash__this_codepath_should_be_unreachable); /*HandleRpcRequestClass*/
+	mem_mkjmp(0x80C9B70, crash__this_codepath_should_be_unreachable); /*SampPlayer::SetSpawnInfo*/
+
 	rakServerVtable->RegisterRPC(rakServer, RPC_RequestSpawn, (void*) 0x80B0B70);
 
 	rakServerVtable->RegisterRPC(rakServer, RPC_Spawned, HandleRpcSpawned);/*jeanine:r:i:2;*/

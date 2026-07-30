@@ -1872,29 +1872,6 @@ void hook_OnPassengerSync(int playerid)
 	/*When wanting to return 0, set CPlayer::updateSyncType to 0.*/
 }
 
-void hook_OnPlayerRequestClass(int playerid, int classid)
-{
-	TRACE;
-	struct RPCDATA_RequestClass03DL rpcdata03DL;
-	struct RPCDATA_RequestClass037 rpcdata037;
-
-	class_on_player_request_class(playerid, classid);
-	timecyc_on_player_request_class(playerid);
-
-	spawn_get_random_spawn(playerid, &rpcdata037.spawnInfo);
-	if (is_player_using_client_version_DL[playerid]) {
-		rpcdata03DL.response = 1;
-		convertSpawnInfoToSpawnInfo03DL(&rpcdata037.spawnInfo, &rpcdata03DL.spawnInfo);
-		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata03DL, sizeof(rpcdata03DL), HIGH_PRIORITY, RELIABLE, 0);
-	} else {
-		rpcdata037.response = 1;
-		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata037, sizeof(rpcdata037), HIGH_PRIORITY, RELIABLE, 0);
-	}
-
-	sampPlayer[playerid]->spawnInfo = rpcdata037.spawnInfo;
-	sampPlayer[playerid]->hasSpawnInfo = 1; /*otherwise SAMP will ignore client Spawn packets and player will not be marked (not broadcasted) as spawned despited being spawned*/
-}
-
 static
 void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
 {
@@ -1977,7 +1954,6 @@ void samp_init()
 	mem_mkjmp(0x80AEA7D, &PassengerSyncHook);
 	mem_mkjmp(0x80B1712, &OnPlayerCommandTextHook);
 	mem_mkjmp(0x80B2BA2, &OnDialogResponseHook);
-	mem_mkjmp(0x80B09D4, &OnPlayerRequestClassHook);
 	mem_mkjmp(0x80B1020, &OnRPCUpdateVehicleDamageStatus);
 
 	/*stuff to allow both 0.3.7 and 0.3.DL clients */
