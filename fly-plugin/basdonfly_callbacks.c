@@ -357,15 +357,8 @@ static
 cell AMX_NATIVE_CALL B_OnPlayerRequestSpawn(AMX *amx, cell *params)
 {
 	TRACE;
-	const int playerid = PARAM(1);
 
-	if (!ISPLAYING(playerid)) {
-		SendClientMessage(playerid, COL_WARN, NOLOG);
-		return 0;
-	}
-
-	class_on_player_request_spawn(playerid);
-	return 1;
+	crash__this_codepath_should_be_unreachable(); /*RPC is replaced*/
 }
 
 /* native B_OnPlayerSpawn(playerid) */

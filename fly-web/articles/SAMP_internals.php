@@ -6,6 +6,7 @@
 	<li><a href=#vehicle_categories_(client)>Vehicle categories (client)</a>
 	<li><a href=#vehicle_damage_status>Vehicle damage status</a>
 	<li><a href=#player_pos_server_streaming>Player position and server streaming</a>
+	<li><a href=#class_spawn_procedure>Class & Spawn procedure</a>
 	<li><a href=#packet_priority_reliability_ordering>Packet priority, reliability, ordering channel</a>
 	<li><a href=#misc>Misc</a>
 </ul>
@@ -539,6 +540,29 @@ else if (pModelInfo->IsBike())
 <p>
 	If that is not the case and the actor is still streamed in, they will be streamed out.
 
+<h3 id=class_spawn_procedure>Class & Spawn procedure</h3>
+
+<p>
+	On join, a player's <code>hasSpawnInfo</code> and <code>isAllowedToSpawn</code> is set to <code>0</code>.
+<p>
+	The client should go into class selection and request a class. The server will send the spawn info for the
+	class to the client and will set <code>hasSpawnInfo</code> to <code>1</code> (even if <code>OnPlayerRequestClass</code>
+	returns negatively). (Using <code>SetSpawnInfo()</code> does the same, without requiring a class request from the client.)
+
+<p>
+	When the player presses the spawn button, its client sends a spawn request. If <code>OnPlayerRequestSpawn</code>
+	returns positively, the server will set <code>isAllowedToSpawn</code> and respond success. It does not check
+	for <code>hasSpawnInfo</code>. The script can use <code>SpawnPlayer()</code> to force a player to spawn, it
+	will also set <code>isAllowedToSpawn</code>.
+
+<p>
+	When the client receives the spawn message, it will spawn the player and notify the server about it.
+	The server ignores this packet if either <code>hasSpawnInfo</code> or <code>isAllowedToSpawn</code> is not set.
+	Otherwise, <code>OnPlayerSpawn</code> is called.
+
+<p>
+	<code>hasSpawnInfo</code> and <code>isAllowedToSpawn</code> is never reset for the same player session.
+
 <h3 id=packet_priority_reliability_ordering>Packet priority, reliability, ordering channel</h3>
 
 <table class=new>
@@ -549,7 +573,8 @@ else if (pModelInfo->IsBike())
 		<tr><td>Legacy destroy pickup (151)<td>HIGH_PRIORITY<td>RELIABLE<td>0
 		<tr><td>Scores & pings update<td>HIGH_PRIORITY<td>RELIABLE<td>0
 		<tr><td>Stats update<td>HIGH_PRIORITY<td>UNRELIABLE<td>0
-		<tr><td>Request Class<td>HIGH_PRIORITY<td>RELIABLE<td>0
+		<tr><td>Request Class response<td>HIGH_PRIORITY<td>RELIABLE<td>0
+		<tr><td>Request Spawn response<td>HIGH_PRIORITY<td>RELIABLE<td>0
 		<tr><td>102 (get raknet stats?)<td>HIGH_PRIORITY<td>RELIABLE<td>0
 		<tr><td>On foot sync<td>HIGH_PRIORITY<td>UNRELIABLE_SEQUENCED<td>1
 		<tr><td>(all other scripting functions)<td>HIGH_PRIORITY<td>RELIABLE_ORDERED<td>2

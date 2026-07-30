@@ -130,6 +130,30 @@ void HandleRpcRequestClass(struct RakRPCHandlerArg *arg)
 	/*marked (not broadcasted) as spawned despited being spawned*/
 	sampPlayer[playerid]->hasSpawnInfo = 1;
 }
+/*jeanine:p:i:42;p:23;a:r;x:305.00;y:-25.00;n:HandleRpcRequestSpawn;*/
+static
+void HandleRpcRequestSpawn(struct RakRPCHandlerArg *arg)
+{
+	TRACE;
+	struct RPCDATA_RequestSpawn rpcdata;
+	ushort playerid;
+
+	playerid = rakServerVtable->GetIndexFromPlayerID(rakServer, arg->playerID);
+	if (playerid >= MAX_PLAYERS) {
+		return;
+	}
+
+	if (!ISPLAYING(playerid)) {
+		SendClientMessage(playerid, COL_WARN, NOLOG);
+		return;
+	}
+
+	class_on_player_request_spawn(playerid);
+
+	sampPlayer[playerid]->isAllowedToSpawn = 1; /*otherwise Spawned RPC gets ignored*/
+	rpcdata.type = 1; /*result of OnPlayerRequestSpawn*/
+	SendRPC_ex(playerid, RPC_RequestSpawn, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE, 0);
+}
 /*jeanine:p:i:40;p:23;a:r;x:286.00;n:HandleRpcChatMessage;*/
 static
 void HandleRpcChatMessage(struct RakRPCHandlerArg *arg)
@@ -811,7 +835,8 @@ void samp_incoming_setup_rak(struct RakServer *_rakServer)
 	mem_mkjmp(0x80B08C0, crash__this_codepath_should_be_unreachable); /*HandleRpcRequestClass*/
 	mem_mkjmp(0x80C9B70, crash__this_codepath_should_be_unreachable); /*SampPlayer::SetSpawnInfo*/
 
-	rakServerVtable->RegisterRPC(rakServer, RPC_RequestSpawn, (void*) 0x80B0B70);
+	rakServerVtable->RegisterRPC(rakServer, RPC_RequestSpawn, HandleRpcRequestSpawn);/*jeanine:r:i:42;*/
+	mem_mkjmp(0x80B0B70, crash__this_codepath_should_be_unreachable); /*HandleRpcRequestSpawn*/
 
 	rakServerVtable->RegisterRPC(rakServer, RPC_Spawned, HandleRpcSpawned);/*jeanine:r:i:2;*/
 	mem_mkjmp(0x80B0D90, crash__this_codepath_should_be_unreachable); /*HandleRpcPlayerSpawned*/

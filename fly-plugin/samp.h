@@ -1003,9 +1003,9 @@ struct RPCDATA_Delete3DTextLabel {
 EXPECT_SIZE(struct RPCDATA_Delete3DTextLabel, 2);
 
 struct RPCDATA_RequestSpawn {
-	int type; /*??. 2 is used for SpawnPlayer(). other values may be in response to client requesting spawn?*/
+	uchar type; /*0 means RequestSpawn is denied, 1 means approved, 2 is used when forcing spawn (by SpawnPlayer())*/
 };
-EXPECT_SIZE(struct RPCDATA_RequestSpawn, 4);
+EXPECT_SIZE(struct RPCDATA_RequestSpawn, 1);
 
 struct RPCDATA_CreateVehicle {
 	short vehicleid;

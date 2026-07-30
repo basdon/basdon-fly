@@ -125,6 +125,7 @@ enum SampRPC {
 	/*All below here use HIGH_PRIORITY, RELIABLE, orderingchannel 0*/
 	RPC_UpdateScoresPings = 0x815A639, /*ptr to 0x9B(155), also incoming*/
 	RPC_RequestClass = 0x81572DF, /*ptr to 0x80(128), also incoming*/
+	RPC_RequestSpawn = 0x815A61E, /*ptr to 0x81(129), also incoming*/
 	RPC_102 = 0x8159167, /*ptr to 0x66(102), also incoming*/
 
 	/*All below here use HIGH_PRIORITY, RELIABLE, orderingchannel 3*/
@@ -160,7 +161,6 @@ enum SampRPC {
 	RPC_Delete3DTextLabel = 0x8159960, /*ptr to 0x3A(58)*/
 	RPC_DisableRemoteVehicleCollisions = 0x815CD80, /*ptr to 0xA7(167)*/
 	RPC_ShowDialog = 0x815CD7C, /*ptr to 0x3D(61)*/
-	RPC_RequestSpawn = 0x815A61E, /*ptr to 0x81(129), also incoming*/
 	RPC_CreateVehicle = 0x8166228, /*ptr to 0xA4(164)*/
 	RPC_DeleteVehicle = 0x816622C, /*ptr to 0xA5(165)*/
 	RPC_SetVehicleNumberplate = 0x816622A, /*ptr to  0x7B(123)*/
