@@ -346,6 +346,7 @@ static int playercount;
 /*just a quick access to playerpool->players*/
 static struct SampPlayer *sampPlayer[MAX_PLAYERS];
 static int spawned[MAX_PLAYERS];
+static char client_inited[MAX_PLAYERS];
 
 /**set in samp.asm*/
 char is_player_using_client_version_DL[MAX_PLAYERS];

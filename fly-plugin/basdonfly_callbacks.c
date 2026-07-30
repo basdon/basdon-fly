@@ -321,6 +321,7 @@ cell AMX_NATIVE_CALL B_OnPlayerDisconnect(AMX *amx, cell *params)
 
 	nametags_on_player_disconnect(playerid); /*Needs to be after player was removed from players array.*/
 	sampPlayer[playerid] = NULL;
+	client_inited[playerid] = 0;
 
 	return 1;
 }

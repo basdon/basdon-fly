@@ -101,7 +101,6 @@ void HandleRpcChatMessage(struct RakRPCHandlerArg *arg)
 		char zeroterm;
 	} data;
 #pragma pack(pop)
-	struct SampPlayer *player;
 	struct BitStream bs;
 	ushort playerid;
 	int i;
@@ -109,7 +108,6 @@ void HandleRpcChatMessage(struct RakRPCHandlerArg *arg)
 	playerid = rakServerVtable->GetIndexFromPlayerID(rakServer, arg->playerID);
 	if (
 		playerid >= MAX_PLAYERS ||
-		!(player = playerpool->players[playerid]) ||
 		arg->numBits < 2 * 8 ||
 		(data.rpcchatmsg.msg_len = arg->rpcdata[0]) > 128 ||
 		arg->numBits != 8 + 8 * data.rpcchatmsg.msg_len
@@ -117,6 +115,8 @@ void HandleRpcChatMessage(struct RakRPCHandlerArg *arg)
 		return;
 	}
 
+	/*Note: we skipped the client_inited check because we have this condition.*/
+	/*Do not remove without replacement.*/
 	if (!ISPLAYING(playerid)) {
 		SendClientMessage(playerid, COL_WARN, NOLOG);
 		return;
@@ -462,6 +462,7 @@ void HandleRpcClientJoin(struct RakRPCHandlerArg *arg)
 	/*end of SampPlayerPool::AddPlayer*/
 
 	playerpool->rakResult94[playerid]->fieldC68 = 1;
+	client_inited[playerid] = 1;
 
 	/*below here is code of Samp::ProcessPlayerJoin*/
 
