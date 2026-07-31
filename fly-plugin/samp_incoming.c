@@ -119,10 +119,10 @@ void HandleRpcRequestClass(struct RakRPCHandlerArg *arg)
 	if (is_player_using_client_version_DL[playerid]) {
 		rpcdata03DL.response = 1; /*this is the result of the OnPlayerRequestClass callback*/
 		convertSpawnInfoToSpawnInfo03DL(&rpcdata037.spawnInfo, &rpcdata03DL.spawnInfo);
-		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata03DL, sizeof(rpcdata03DL), HIGH_PRIORITY, RELIABLE, 0);
+		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata03DL, sizeof(rpcdata03DL) * 8, HIGH_PRIORITY, RELIABLE, 0);
 	} else {
 		rpcdata037.response = 1; /*this is the result of the OnPlayerRequestClass callback*/
-		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata037, sizeof(rpcdata037), HIGH_PRIORITY, RELIABLE, 0);
+		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata037, sizeof(rpcdata037) * 8, HIGH_PRIORITY, RELIABLE, 0);
 	}
 
 	sampPlayer[playerid]->spawnInfo = rpcdata037.spawnInfo;
@@ -152,7 +152,7 @@ void HandleRpcRequestSpawn(struct RakRPCHandlerArg *arg)
 
 	sampPlayer[playerid]->isAllowedToSpawn = 1; /*otherwise Spawned RPC gets ignored*/
 	rpcdata.type = 1; /*result of OnPlayerRequestSpawn*/
-	SendRPC_ex(playerid, RPC_RequestSpawn, &rpcdata, sizeof(rpcdata), HIGH_PRIORITY, RELIABLE, 0);
+	SendRPC_ex(playerid, RPC_RequestSpawn, &rpcdata, sizeof(rpcdata) * 8, HIGH_PRIORITY, RELIABLE, 0);
 }
 /*jeanine:p:i:40;p:23;a:r;x:286.00;n:HandleRpcChatMessage;*/
 static

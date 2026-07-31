@@ -246,12 +246,12 @@ void SendRPC_unordered_bs(ushort playerid, enum SampRPC rpc, struct BitStream *b
 }
 
 static
-void SendRPC_ex(ushort playerid, enum SampRPC rpc, void *rpcdata, int size_bytes, enum PacketPriority priority, enum PacketReliability reliability, int orderingChannel)
+void SendRPC_ex(ushort playerid, enum SampRPC rpc, void *rpcdata, int size_bits, enum PacketPriority priority, enum PacketReliability reliability, int orderingChannel)
 {
 	struct BitStream bs;
 
 	bs.ptrData = rpcdata;
-	bs.numberOfBitsUsed = size_bytes * 8;
+	bs.numberOfBitsUsed = size_bits;
 	rakRPC_8C(rakServer, (void*) rpc, &bs, priority, reliability, orderingChannel, rakPlayerID[playerid], /*broadcast*/ 0, /*shiftTimestamp*/ 0);
 }
 
