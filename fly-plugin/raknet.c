@@ -122,10 +122,13 @@ enum SampRPC {
 	RPC_GiveTakeDamage = 0x81591D9, /*ptr to 0x73(115)*/
 	RPC_GiveActorDamage = 0x815A657, /*ptr to 0xB1(177)*/
 
+	/*Special ones*/
+	/*Uses HIGH_PRIORITY, RELIABLE when sent as response to client RequestSpawn but RELIABLE_ORDERED when sent from SpawnPlayer()*/
+	RPC_RequestSpawn = 0x815A61E, /*ptr to 0x81(129), also incoming*/
+
 	/*All below here use HIGH_PRIORITY, RELIABLE, orderingchannel 0*/
 	RPC_UpdateScoresPings = 0x815A639, /*ptr to 0x9B(155), also incoming*/
 	RPC_RequestClass = 0x81572DF, /*ptr to 0x80(128), also incoming*/
-	RPC_RequestSpawn = 0x815A61E, /*ptr to 0x81(129), also incoming*/
 	RPC_102 = 0x8159167, /*ptr to 0x66(102), also incoming*/
 
 	/*All below here use HIGH_PRIORITY, RELIABLE, orderingchannel 3*/
