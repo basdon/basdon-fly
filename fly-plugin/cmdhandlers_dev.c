@@ -13,7 +13,7 @@ int cmd_dev__m(struct COMMANDCONTEXT cmdctx)
 	return CMD_SYNTAX_ERR;
 }
 
-#define CMD__W_SYNTAX "[weaponid]"
+#define CMD__W_SYNTAX "<weaponid>"
 #define CMD__W_DESC "Gives a weapon"
 static
 int cmd_dev__w(struct COMMANDCONTEXT cmdctx)
@@ -56,6 +56,25 @@ int cmd_dev_dev(struct COMMANDCONTEXT cmdctx)
 
 	dev_menu_show(cmdctx.playerid);
 	return CMD_OK;
+}
+
+#define CMD_DRUNK_SYNTAX "<35|92|150>"
+#define CMD_DRUNK_DESC "Gives a weapon"
+static
+int cmd_dev_drunk(struct COMMANDCONTEXT cmdctx)
+{
+	TRACE;
+	int rpc, level;
+
+	if (
+		cmd_get_int_param(&cmdctx, &rpc) &&
+		cmd_get_int_param(&cmdctx, &level) &&
+		(rpc == 35 || rpc == 92 || rpc == 150)
+	) {
+		SendRPC(cmdctx.playerid, (int) &rpc, &level, 32);
+		return CMD_OK;
+	}
+	return CMD_SYNTAX_ERR;
 }
 
 #define CMD_FWEATHER_SYNTAX "<weatherid>"

@@ -20,6 +20,7 @@ static struct COMMAND cmds[] = {
 	{ 0, 0, "/*w", 0, GROUPS_ALL, CMD__W_SYNTAX, CMD__W_DESC, cmd_dev__w },
 	{ 0, 0, "/cp", 0, GROUPS_ALL, CMD_CP_SYNTAX, CMD_CP_DESC, cmd_dev_cp },
 	{ 0, 0, "/dev", 0, GROUPS_ALL, CMD_DEV_SYNTAX, CMD_DEV_DESC, cmd_dev_dev },
+	{ 0, 0, "/drunk", 0, GROUPS_ALL, CMD_DRUNK_SYNTAX, CMD_DRUNK_DESC, cmd_dev_drunk },
 	{ 0, 0, "/fweather", 0, GROUPS_ALL, CMD_FWEATHER_SYNTAX, CMD_FWEATHER_DESC, cmd_dev_fweather },
 	{ 0, 0, "/getlastping", 0, GROUPS_ALL, CMD_GETLASTPING_SYNTAX, CMD_GETLASTPING_DESC, cmd_dev_getlastping },
 	{ 0, 0, "/gt", 0, GROUPS_ALL, CMD_GT_SYNTAX, CMD_GT_DESC, cmd_dev_gt },
