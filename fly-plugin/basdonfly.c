@@ -349,7 +349,7 @@ static int spawned[MAX_PLAYERS];
 static char client_inited[MAX_PLAYERS];
 
 /**set in samp.asm*/
-char is_player_using_client_version_DL[MAX_PLAYERS];
+uchar is_player_using_client_version_DL[MAX_PLAYERS];
 /**set in samp.asm*/
 int player_netgame_version[MAX_PLAYERS];
 

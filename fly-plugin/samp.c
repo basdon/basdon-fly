@@ -147,31 +147,12 @@ void SetGameModeText(char *gamemodetext)
 }
 
 static
-void SetSpawnInfo(int playerid, struct SpawnInfo *spawnInfo)
-{
-	TRACE;
-	struct RPCDATA_SetSpawnInfo03DL rpcdata03DL;
-	struct RPCDATA_SetSpawnInfo037 rpcdata037;
-
-	if (is_player_using_client_version_DL[playerid]) {
-		convertSpawnInfoToSpawnInfo03DL(spawnInfo, &rpcdata03DL.spawnInfo);
-		SendRPC(playerid, RPC_SetSpawnInfo, &rpcdata03DL, sizeof(rpcdata03DL) * 8);
-	} else {
-		rpcdata037.spawnInfo = *spawnInfo;
-		SendRPC(playerid, RPC_SetSpawnInfo, &rpcdata037, sizeof(rpcdata037) * 8);
-	}
-
-	sampPlayer[playerid]->spawnInfo = *spawnInfo;
-	sampPlayer[playerid]->hasSpawnInfo = 1; /*otherwise SAMP will ignore client Spawn packets and player will not be marked (not broadcasted) as spawned despited being spawned*/
-}
-
-static
 void SetPlayerSkin(int playerid, int skin)
 {
 	TRACE;
 	struct RPCDATA_SetPlayerSkin03DL rpcdata03DL;
 	struct RPCDATA_SetPlayerSkin037 rpcdata037;
-	struct BitStream bs03DL, bs037;
+	struct BitStream bs03DL, bs037, *bs[2] = { &bs037, &bs03DL };
 	struct SampPlayer *player;
 	int i;
 
@@ -196,11 +177,7 @@ void SetPlayerSkin(int playerid, int skin)
 
 	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
 		if (i == playerid || (sampPlayer[i] && sampPlayer[i]->playerStreamedIn[playerid])) {
-			if (is_player_using_client_version_DL[i]) {
-				SendRPC_bs(i, RPC_SetPlayerSkin, &bs03DL);
-			} else {
-				SendRPC_bs(i, RPC_SetPlayerSkin, &bs037);
-			}
+			SendRPC_bs(i, RPC_SetPlayerSkin, bs[is_player_using_client_version_DL[i]]);
 		}
 	}
 }
@@ -394,6 +371,7 @@ void SpawnPlayer(int playerid)
 
 	rpcdata.type = 2;
 	SendRPC(playerid, RPC_RequestSpawn, &rpcdata, sizeof(rpcdata) * 8);
+	sampPlayer[playerid]->isAllowedToSpawn = 1;
 }
 
 /**
@@ -1420,6 +1398,26 @@ void SendGameTimeUpdate(ushort playerid)
 	rpcdata.time = samp_GetTime();
 	SendRPC(playerid, RPC_GameTimeUpdate, &rpcdata, sizeof(rpcdata) * 8);
 }
+
+static
+void SyncSpawnInfo(ushort playerid)
+{
+	TRACE;
+	struct RPCDATA_SetSpawnInfo03DL rpcdata03DL;
+	register struct SampPlayer *player = sampPlayer[playerid];
+
+	if (is_player_using_client_version_DL[playerid]) {
+		convertSpawnInfoToSpawnInfo03DL(&player->spawnInfo, &rpcdata03DL.spawnInfo);
+		SendRPC(playerid, RPC_SetSpawnInfo, &rpcdata03DL, sizeof(rpcdata03DL) * 8);
+	} else {
+		EXPECT_SIZE(struct RPCDATA_SetSpawnInfo037, sizeof(player->spawnInfo));
+		SendRPC(playerid, RPC_SetSpawnInfo, &player->spawnInfo, sizeof(player->spawnInfo) * 8);
+	}
+}
+
+/*We don't use SetSpawnInfo, write spawn info directly to spawnInfo in player's struct and call SyncSpawnInfo.*/
+void SetSpawnInfo();
+
 #endif
 
 /*-----------------------------------------------------------------------------*/
@@ -1685,14 +1683,13 @@ void natives_SpawnPlayer(int playerid)
 #ifdef SAMP_NATIVES_IMPL
 {
 	TRACE;
-	struct SpawnInfo spawnInfo;
 
 	/*eject player first if they're in a vehicle*/
 	if (GetPlayerVehicleID(playerid)) {
 		ClearAnimations(playerid);
 	}
-	spawn_get_random_spawn(playerid, &spawnInfo);
-	SetSpawnInfo(playerid, &spawnInfo);
+	spawn_get_random_spawn(classid[playerid], &sampPlayer[playerid]->spawnInfo);
+	SyncSpawnInfo(playerid);
 	SpawnPlayer(playerid);
 }
 #endif

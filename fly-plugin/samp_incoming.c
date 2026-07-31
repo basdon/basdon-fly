@@ -16,14 +16,9 @@ void HandleRpcSpawned(struct RakRPCHandlerArg *arg)
 		return;
 	}
 	player = playerpool->players[playerid];
-	if (!player->hasSpawnInfo) {
-		/*TODO remove this (we should set default spawn info when player connects & isAllowedToSpawn should prevent this anyways)*/
-		return;
-	}
-	if (player->spawnInfo.skin > 319) {
-		/*TODO remove this (this value should never been set to an invalid value, same as above)*/
-		return;
-	}
+
+	/*TODO: we can get rid of this, as we set default spawn info on connect so we don't care if clients*/
+	/*bypass RequestSpawn or whatever.*/
 	if (!player->isAllowedToSpawn) {
 		/*Getting here means the player is manually sending packets to circumvent initial class selection,*/
 		/*because passing this condition cannot happen with an unmodified client.*/
@@ -98,7 +93,6 @@ void HandleRpcRequestClass(struct RakRPCHandlerArg *arg)
 	struct RPCDATA_RequestClass03DL rpcdata03DL;
 	struct RPCDATA_RequestClass037 rpcdata037;
 	ushort playerid;
-	ushort classid;
 
 	playerid = rakServerVtable->GetIndexFromPlayerID(rakServer, arg->playerID);
 	if (
@@ -109,26 +103,19 @@ void HandleRpcRequestClass(struct RakRPCHandlerArg *arg)
 		return;
 	}
 
-	classid = *((ushort*) arg->rpcdata);
-	/*not clamping classid here, class code will deal with it*/
-
-	class_on_player_request_class(playerid, classid);
+	class_on_player_request_class(playerid, *((ushort*) arg->rpcdata));
 	timecyc_on_player_request_class(playerid);
 
-	spawn_get_random_spawn(playerid, &rpcdata037.spawnInfo);
+	spawn_get_random_spawn(classid[playerid], &sampPlayer[playerid]->spawnInfo);
 	if (is_player_using_client_version_DL[playerid]) {
 		rpcdata03DL.response = 1; /*this is the result of the OnPlayerRequestClass callback*/
-		convertSpawnInfoToSpawnInfo03DL(&rpcdata037.spawnInfo, &rpcdata03DL.spawnInfo);
+		convertSpawnInfoToSpawnInfo03DL(&sampPlayer[playerid]->spawnInfo, &rpcdata03DL.spawnInfo);
 		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata03DL, sizeof(rpcdata03DL) * 8, HIGH_PRIORITY, RELIABLE, 0);
 	} else {
 		rpcdata037.response = 1; /*this is the result of the OnPlayerRequestClass callback*/
+		rpcdata037.spawnInfo = sampPlayer[playerid]->spawnInfo;
 		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata037, sizeof(rpcdata037) * 8, HIGH_PRIORITY, RELIABLE, 0);
 	}
-
-	sampPlayer[playerid]->spawnInfo = rpcdata037.spawnInfo;
-	/*TODO: replace this, still needed now because SAMP will ignore client Spawn packets and player will not be*/
-	/*marked (not broadcasted) as spawned despited being spawned*/
-	sampPlayer[playerid]->hasSpawnInfo = 1;
 }
 /*jeanine:p:i:42;p:23;a:r;x:305.00;y:-25.00;n:HandleRpcRequestSpawn;*/
 static
@@ -150,7 +137,7 @@ void HandleRpcRequestSpawn(struct RakRPCHandlerArg *arg)
 
 	class_on_player_request_spawn(playerid);
 
-	sampPlayer[playerid]->isAllowedToSpawn = 1; /*otherwise Spawned RPC gets ignored*/
+	sampPlayer[playerid]->isAllowedToSpawn = 1;
 	rpcdata.type = 1; /*result of OnPlayerRequestSpawn*/
 	SendRPC_ex(playerid, RPC_RequestSpawn, &rpcdata, sizeof(rpcdata) * 8, HIGH_PRIORITY, RELIABLE, 0);
 }
@@ -479,6 +466,7 @@ void HandleRpcClientJoin(struct RakRPCHandlerArg *arg)
 	}
 	player->worldTime = 720.0f; /*hour*60+minute; 720 = 12:00*/
 	player->_pad2911 = 1;
+	spawn_get_random_spawn(0, &player->spawnInfo);
 	/*skipping allocating textdrawpool/textlabelpool/pool2CDA*/
 	/*below here is code of SampPlayerPool::AddPlayer*/
 	playerjoinrpc.base.playerid = playerid;
@@ -551,7 +539,6 @@ void HandleRpcClientJoin(struct RakRPCHandlerArg *arg)
 
 	/*Here we can use all the functions that SAMP wiki says do not work reliably in OnPlayerConnect,*/
 	/*because now GameInit has been sent so they should work reliably at this point.*/
-
 }
 /*jeanine:p:i:12;p:8;a:r;x:18.00;y:14.00;n:VehicleMarkOccupied;*/
 static

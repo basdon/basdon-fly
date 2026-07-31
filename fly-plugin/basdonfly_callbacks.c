@@ -243,7 +243,6 @@ static
 cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 {
 	TRACE;
-	struct SpawnInfo spawnInfo;
 	struct vec3 pos;
 	const int playerid = PARAM(1), killerid = PARAM(2);
 	const int reason = PARAM(3);
@@ -269,8 +268,8 @@ cell AMX_NATIVE_CALL B_OnPlayerDeath(AMX *amx, cell *params)
 	/*set player spawninfo to a random spawn.
 	 *doing this in OnPlayerDeath allows the client to immediately spawn at the new (random) spawn location,
 	 *as opposed to using SetPosition in OnPlayerSpawn, which would cause an extra teleport that may cause possible map/zone streaming headaches*/
-	spawn_get_random_spawn(playerid, &spawnInfo);
-	SetSpawnInfo(playerid, &spawnInfo);
+	spawn_get_random_spawn(classid[playerid], &sampPlayer[playerid]->spawnInfo);
+	SyncSpawnInfo(playerid);
 
 	timecyc_on_player_death(playerid);
 	GetPlayerPos(playerid, &pos);

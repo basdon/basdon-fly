@@ -103,23 +103,22 @@ void spawn_cb_dlg_spawn(int playerid, struct DIALOG_RESPONSE response)
 }
 
 static
-void spawn_get_random_spawn(int playerid, struct SpawnInfo *outSpawnInfo)
+void spawn_get_random_spawn(int classid, struct SpawnInfo *outSpawnInfo)
 {
 	TRACE;
 	int spawnidx = 0;
-	int klass = classid[playerid];
 
-	switch (numspawns[klass]) {
+	switch (numspawns[classid]) {
 	/*if no spawns, take first spawn of pilot class*/
-	case 0: klass = 0;
+	case 0: classid = 0;
 	case 1: spawnidx = 0; break;
-	default: spawnidx = amxrandom(numspawns[klass]); break;
+	default: spawnidx = amxrandom(numspawns[classid]); break;
 	}
 
 	outSpawnInfo->team = 11; /*using anything but NO_TEAM should make players not able to damage other players, except by slitting throat when having a knife*/
-	outSpawnInfo->skin = CLASS_SKINS[klass];
+	outSpawnInfo->skin = CLASS_SKINS[classid];
 	outSpawnInfo->_pad5 = 69;
-	memcpy(&outSpawnInfo->pos, spawns[klass] + spawnidx, sizeof(struct vec4));
+	outSpawnInfo->pos = spawns[classid][spawnidx];
 	outSpawnInfo->weapon[0] = WEAPON_CAMERA;
 	outSpawnInfo->weapon[1] = 0;
 	outSpawnInfo->weapon[2] = 0;
