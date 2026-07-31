@@ -787,6 +787,24 @@ void HandlePacketUnoccupiedSync(struct Samp *samp, struct RakPacket *packet)
 	player->unoccupiedVehicleSyncData = *syncdata;
 	player->hasNewUnoccupiedVehicleSyncData = 1;
 }
+/*jeanine:p:i:43;p:3;a:r;x:27.00;y:107.00;n:HandlePacketUnoccupiedSync;*/
+static
+void HandlePacketStatsUpdate(struct Samp *samp, struct RakPacket *packet)
+{
+	TRACE;
+	ushort playerid;
+
+	if (
+		(playerid = packet->playerid) >= MAX_PLAYERS ||
+		!client_inited[playerid] ||
+		packet->bitLength != 8 + 32 + 32
+	) {
+		return;
+	}
+
+	playerpool->playerMoney[playerid] = *((int*) (packet->data + 1));
+	playerpool->playerDrunkLevel[playerid] = *((int*) (packet->data + 5));
+}
 /*jeanine:p:i:23;p:3;a:r;x:307.00;y:-169.00;n:samp_incoming_setup_rak;*/
 static
 void samp_incoming_setup_rak(struct RakServer *_rakServer)
@@ -905,9 +923,12 @@ void samp_incoming_init()
 	mem_mkjmp(0x80B30E0, crash__this_codepath_should_be_unreachable); /*RegisterRPCs*/
 	/*We initialize the same RPCs, so no need to patch UnregisterRPCs (it probably doesn't matter anyways)*/
 
-	mem_redirectjmp(0x80AEE42, HandlePacketUnoccupiedSync); /*Samp::HandlePacketUnoccupiedSync*//*jeanine:r:i:8;*/
+	mem_redirectjmp(0x80AEE42, HandlePacketUnoccupiedSync);/*jeanine:r:i:8;*/
 	mem_mkjmp(0x80ACD90, crash__this_codepath_should_be_unreachable); /*Samp::HandlePacketUnoccupiedSync*/
 	mem_mkjmp(0x80C95C0, crash__this_codepath_should_be_unreachable); /*SampPlayer::StoreUnoccupiedVehicleSyncData*/
 	mem_mkjmp(0x814B3B0, crash__this_codepath_should_be_unreachable); /*SampVehicle::HasDriver*/
 	mem_mkjmp(0x814D290, crash__this_codepath_should_be_unreachable); /*SampVehicle::FindClosestPlayerId*/
+
+	mem_redirectjmp(0x80AEE75, HandlePacketStatsUpdate);/*jeanine:r:i:43;*/
+	mem_mkjmp(0x80AD430, crash__this_codepath_should_be_unreachable); /*Samp::HandlePacketStatsUpdate*/
 }
