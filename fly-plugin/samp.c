@@ -161,11 +161,7 @@ void SetPlayerSkin(int playerid, int skin)
 		return;
 	}
 
-	/*this is what SAMP does*/
-	if (!player->hasSpawnInfo) {
-		player->spawnInfo.skin = skin;
-		return;
-	}
+	player->spawnInfo.skin = skin;
 
 	rpcdata03DL.playerid = rpcdata037.playerid = playerid;
 	rpcdata03DL.skin = rpcdata037.skin = skin;
