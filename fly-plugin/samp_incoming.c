@@ -730,9 +730,9 @@ void HandleRpcGiveActorDamage(struct RakRPCHandlerArg *arg)
 {
 	/*we don't care about this*/
 }
-/*jeanine:p:i:8;p:3;a:r;x:27.00;y:51.00;n:HandlePacketUnoccupiedSync;*/
+/*jeanine:p:i:8;p:44;a:r;x:33.00;y:50.00;n:HandlePacketUnoccupiedSync;*/
 static
-void HandlePacketUnoccupiedSync(struct Samp *samp, struct RakPacket *packet)
+void HandlePacketUnoccupiedSync(struct RakPacket *packet)
 {
 	TRACE;
 	struct SYNCDATA_UnoccupiedVehicle *syncdata;
@@ -786,9 +786,9 @@ void HandlePacketUnoccupiedSync(struct Samp *samp, struct RakPacket *packet)
 	player->unoccupiedVehicleSyncData = *syncdata;
 	player->hasNewUnoccupiedVehicleSyncData = 1;
 }
-/*jeanine:p:i:43;p:3;a:r;x:27.00;y:107.00;n:HandlePacketStatsUpdate;*/
+/*jeanine:p:i:43;p:44;a:r;x:33.00;y:9.00;n:HandlePacketStatsUpdate;*/
 static
-void HandlePacketStatsUpdate(struct Samp *samp, struct RakPacket *packet)
+void HandlePacketStatsUpdate(struct RakPacket *packet)
 {
 	TRACE;
 	ushort playerid;
@@ -808,7 +808,7 @@ void HandlePacketStatsUpdate(struct Samp *samp, struct RakPacket *packet)
 	}
 	playerpool->playerDrunkLevel[playerid] = *((int*) (packet->data + 5));
 }
-/*jeanine:p:i:23;p:3;a:r;x:307.00;y:-169.00;n:samp_incoming_setup_rak;*/
+/*jeanine:p:i:23;p:3;a:r;x:60.00;y:-241.00;n:samp_incoming_setup_rak;*/
 static
 void samp_incoming_setup_rak(struct RakServer *_rakServer)
 {
@@ -913,6 +913,96 @@ void samp_incoming_setup_rak(struct RakServer *_rakServer)
 	rakServerVtable->RegisterRPC(rakServer, RPC_GiveActorDamage, HandleRpcGiveActorDamage);/*jeanine:r:i:39;*/
 	mem_mkjmp(0x80B3130, crash__this_codepath_should_be_unreachable); /*HandleRpcGiveActorDamage*/
 }
+/*jeanine:p:i:44;p:3;a:r;x:61.00;y:151.00;n:samp_incoming_process_incoming_packets;*/
+static
+void samp_incoming_process_incoming_packets()
+{
+	TRACE;
+	struct RakPacket *packet;
+
+	while ((packet = rakServerVtable->Receive(rakServer))) {
+		/*Expect at least packetid and a byte of data*/
+		if (packet->bitLength >= 16) {
+			/*SAMP checks if packetid (data[0]) is 0x28 and if so*/
+			/*real packet id is taken from data[5]. But every function*/
+			/*that handles a packet still reads data starting from data[1],*/
+			/*so if it's 0x28 then it means data[5] (data[4]) is overwritten*/
+			/*with the packet id, and that doesn't make any sense. I'll just*/
+			/*assume that this would be a malfunction in SAMP source and ignore*/
+			/*0x28 packets. What I would expect is that data would be read*/
+			/*starting from data[6], but then also ->bitLength and ->byteLength*/
+			/*would need to be adjusted. But SAMP does nothing like that. Ignoring.*/
+
+			switch (packet->data[0])
+			{
+			case 200:
+				/*Samp::HandlePacketDriverSync*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80AEB10)(samp, packet);
+				break;
+			case 201:
+				/*Samp::HandlePacketRconCommand*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80AD830)(samp, packet);
+				break;
+			case 203:
+				/*Samp::HandlePacketAimSync*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80ACA20)(samp, packet);
+				break;
+			case 204:
+				/*Samp::HandlePacketWeaponsUpdate*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80AC650)(samp, packet);
+				break;
+			case 205:
+				HandlePacketStatsUpdate(packet);/*jeanine:r:i:43;*/
+				break;
+			case 206:
+				/*Samp::HandlePacketBulletSync*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80AD130)(samp, packet);
+				break;
+			case 207:
+				/*Samp::HandlePacketOnFootSync*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80AC870)(samp, packet);
+				break;
+			case 209:
+				HandlePacketUnoccupiedSync(packet);/*jeanine:r:i:8;*/
+				break;
+			case 210:
+				/*Samp::HandlePacketTrailerSync*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80ACC80)(samp, packet);
+				break;
+			case 211:
+				/*Samp::HandlePacketPassengerSync*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80AE970)(samp, packet);
+				break;
+			case 212:
+				/*Samp::HandlePacketSpectatingSync*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80ACB00)(samp, packet);
+				break;
+			}
+
+			switch (packet->data[0])
+			{
+			case 24:
+				/*Samp::HandlePacketIncomingConnection*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80ACD590)(samp, packet);
+				break;
+			case 32:
+				/*Samp::HandlePacketDisconnect*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80AD690)(samp, packet);
+				break;
+			case 33:
+				/*Samp::HandlePacketConnectionLost*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80AD660)(samp, packet);
+				break;
+			case 38:
+				/*Samp::HandlePacketPacketModified*/
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80AD550)(samp, packet);
+				break;
+			}
+		}
+
+		rakServerVtable->FreePacket(rakServer, packet);
+	}
+}
 /*jeanine:p:i:3;p:0;a:b;y:1.88;n:samp_incoming_init;*/
 static
 void samp_incoming_init()
@@ -926,12 +1016,13 @@ void samp_incoming_init()
 	mem_mkjmp(0x80B30E0, crash__this_codepath_should_be_unreachable); /*RegisterRPCs*/
 	/*We initialize the same RPCs, so no need to patch UnregisterRPCs (it probably doesn't matter anyways)*/
 
-	mem_redirectjmp(0x80AEE42, HandlePacketUnoccupiedSync);/*jeanine:r:i:8;*/
+	mem_redirectjmp(0x80AEEFD, samp_incoming_process_incoming_packets);/*jeanine:r:i:44;*/
+	mem_mkjmp(0x80ACD90, crash__this_codepath_should_be_unreachable); /*Samp::ProcessIncomingPackets*/
+
 	mem_mkjmp(0x80ACD90, crash__this_codepath_should_be_unreachable); /*Samp::HandlePacketUnoccupiedSync*/
 	mem_mkjmp(0x80C95C0, crash__this_codepath_should_be_unreachable); /*SampPlayer::StoreUnoccupiedVehicleSyncData*/
 	mem_mkjmp(0x814B3B0, crash__this_codepath_should_be_unreachable); /*SampVehicle::HasDriver*/
 	mem_mkjmp(0x814D290, crash__this_codepath_should_be_unreachable); /*SampVehicle::FindClosestPlayerId*/
 
-	mem_redirectjmp(0x80AEE75, HandlePacketStatsUpdate);/*jeanine:r:i:43;*/
 	mem_mkjmp(0x80AD430, crash__this_codepath_should_be_unreachable); /*Samp::HandlePacketStatsUpdate*/
 }
