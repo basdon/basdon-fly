@@ -361,20 +361,6 @@ void DisablePlayerRaceCheckpoint(int playerid)
 }
 
 /**
- * Use natives_SpawnPlayer.
- */
-static
-void SpawnPlayer(int playerid)
-{
-	TRACE;
-	struct RPCDATA_RequestSpawn rpcdata;
-
-	rpcdata.type = 2;
-	SendRPC(playerid, RPC_RequestSpawn, &rpcdata, sizeof(rpcdata) * 8);
-	sampPlayer[playerid]->isAllowedToSpawn = 1;
-}
-
-/**
 Only use this if the distance from the player's current position is very small.
 Otherwise, use natives_SetPlayerPos.
 */
@@ -1418,6 +1404,25 @@ void SyncSpawnInfo(ushort playerid)
 /*We don't use SetSpawnInfo, write spawn info directly to spawnInfo in player's struct and call SyncSpawnInfo.*/
 void SetSpawnInfo();
 
+static void spawn_get_random_spawn(int,struct SpawnInfo*);
+static
+void SpawnPlayer(int playerid)
+{
+	TRACE;
+	struct RPCDATA_RequestSpawn rpcdata;
+	register struct SampPlayer *player = sampPlayer[playerid];
+
+	/*eject player first if they're in a vehicle*/
+	if (player->vehicleid) {
+		ClearAnimations(playerid);
+	}
+	player->isAllowedToSpawn = 1;
+	spawn_get_random_spawn(classid[playerid], &player->spawnInfo);
+	SyncSpawnInfo(playerid);
+
+	rpcdata.type = 2;
+	SendRPC(playerid, RPC_RequestSpawn, &rpcdata, sizeof(rpcdata) * 8);
+}
 #endif
 
 /*-----------------------------------------------------------------------------*/
@@ -1669,28 +1674,6 @@ void natives_SetPlayerPos(int playerid, struct vec3 pos)
 	zones_update(playerid, pos);
 
 	SetPlayerPosRaw(playerid, &pos);
-}
-#endif
-;
-
-/**
-SpawnPlayer kills players that are in vehicles, and spawns them with a bottle.
-
-So this wrapper does ClearAnimations first if needed, because that will eject a player.
-*/
-static
-void natives_SpawnPlayer(int playerid)
-#ifdef SAMP_NATIVES_IMPL
-{
-	TRACE;
-
-	/*eject player first if they're in a vehicle*/
-	if (GetPlayerVehicleID(playerid)) {
-		ClearAnimations(playerid);
-	}
-	spawn_get_random_spawn(classid[playerid], &sampPlayer[playerid]->spawnInfo);
-	SyncSpawnInfo(playerid);
-	SpawnPlayer(playerid);
 }
 #endif
 ;

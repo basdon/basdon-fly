@@ -255,13 +255,6 @@ void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 	}
 
 	if (!spawned[playerid]) {
-#if DEV
-		if (!strcmp(cmdtext, "/spawn")) {
-			SpawnPlayer(playerid);
-			spawned[playerid] = 1;
-			return;
-		}
-#endif
 		SendClientMessage(playerid, COL_WARN, WARN"You can't use commands when not spawned.");
 		return;
 	}

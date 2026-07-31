@@ -1063,7 +1063,7 @@ int cmd_respawn(struct COMMANDCONTEXT cmdctx)
 	if (missions_is_player_on_mission(cmdctx.playerid)) {
 		SendClientMessage(cmdctx.playerid, COL_WARN, NO_RECLASSSPAWN);
 	} else {
-		natives_SpawnPlayer(cmdctx.playerid);
+		SpawnPlayer(cmdctx.playerid);
 		vehicleid = GetPlayerVehicleID(cmdctx.playerid);
 		if (vehicleid) {
 			for (p = 0; p < playercount; p++) {

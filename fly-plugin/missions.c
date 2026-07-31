@@ -875,7 +875,7 @@ void missions_cleanup(int playerid)
 		veh_DestroyVehicle(missionvehicleid);
 		playerpool->virtualworld[playerid] = 0;
 		if (GetPlayerState(playerid) != PLAYER_STATE_WASTED) {
-			natives_SpawnPlayer(playerid);
+			SpawnPlayer(playerid);
 		}
 	} else {
 		kneeboard_update_all(playerid, &sampPlayer[playerid]->pos);
