@@ -40,9 +40,7 @@ void StreamPlayerIn(struct SampPlayer *player, struct SampPlayer *subject)
 	if (is_player_using_client_version_DL[player->playerid]) {
 		writeptr = &data.shifted.rpcdata037;
 		/* This field is used for "custom skin".*/
-		/*Brunoo16's packet list says to keep this 0 if it's not a default skin,*/
-		/* but if I make either skin field 0, it always shows a CJ skin..*/
-		writeptr->skin = subject->spawnInfo.skin;
+		writeptr->skin = 0;
 		bs.numberOfBitsUsed = sizeof(struct RPCDATA_WorldPlayerAdd03DL);
 	}
 	writeptr->pos = subject->pos;
