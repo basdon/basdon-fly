@@ -77,7 +77,6 @@ void HandleRpcSpawned(struct RakRPCHandlerArg *arg)
 
 	kneeboard_update_all(playerid, &pos);
 	maps_stream_for_player(playerid, pos.x, pos.y, OBJ_STREAM_MODE_CLOSEST_NOW);
-	money_on_player_spawn(playerid);
 	nametags_update_for_player(playerid);
 	spawn_on_player_spawn(playerid);
 	svp_update_mapicons(playerid, pos.x, pos.y);
@@ -787,12 +786,13 @@ void HandlePacketUnoccupiedSync(struct Samp *samp, struct RakPacket *packet)
 	player->unoccupiedVehicleSyncData = *syncdata;
 	player->hasNewUnoccupiedVehicleSyncData = 1;
 }
-/*jeanine:p:i:43;p:3;a:r;x:27.00;y:107.00;n:HandlePacketUnoccupiedSync;*/
+/*jeanine:p:i:43;p:3;a:r;x:27.00;y:107.00;n:HandlePacketStatsUpdate;*/
 static
 void HandlePacketStatsUpdate(struct Samp *samp, struct RakPacket *packet)
 {
 	TRACE;
 	ushort playerid;
+	int money;
 
 	if (
 		(playerid = packet->playerid) >= MAX_PLAYERS ||
@@ -802,7 +802,10 @@ void HandlePacketStatsUpdate(struct Samp *samp, struct RakPacket *packet)
 		return;
 	}
 
-	playerpool->playerMoney[playerid] = *((int*) (packet->data + 1));
+	money = *((int*) (packet->data + 1));
+	if (money != playerpool->playerMoney[playerid]) {
+		SetPlayerMoneyRaw(playerid, playerpool->playerMoney[playerid]);
+	}
 	playerpool->playerDrunkLevel[playerid] = *((int*) (packet->data + 5));
 }
 /*jeanine:p:i:23;p:3;a:r;x:307.00;y:-169.00;n:samp_incoming_setup_rak;*/

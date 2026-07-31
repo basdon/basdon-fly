@@ -1,17 +1,12 @@
 /**
-Money per player.
-TODO: we could use playerpool->playerMoney, if we hook StatsUpdate packet handling because that updates money (and drunk level) with value that client reports
-*/
-static int playermoney[MAX_PLAYERS];
-
-/**
 Get amount of money player has.
 */
 static
 int money_get(int playerid)
 {
 	TRACE;
-	return playermoney[playerid];
+
+	return playerpool->playerMoney[playerid];
 }
 
 static int money_take(int, int);
@@ -33,10 +28,10 @@ int money_give(int playerid, int amount)
 		return money_take(playerid, -amount);
 	}
 	/*prevent overflow*/
-	if (playermoney[playerid] + amount < playermoney[playerid]) {
+	if (playerpool->playerMoney[playerid] + amount < playerpool->playerMoney[playerid]) {
 		return 0;
 	}
-	playermoney[playerid] += amount;
+	playerpool->playerMoney[playerid] += amount;
 	GivePlayerMoneyRaw(playerid, amount);
 	return 1;
 }
@@ -53,27 +48,17 @@ static
 int money_take(int playerid, int amount)
 {
 	TRACE;
+
 	if (amount < 0) {
 		return money_give(playerid, -amount);
 	}
 	/*prevent underflow*/
-	if (playermoney[playerid] - amount > playermoney[playerid]) {
+	if (playerpool->playerMoney[playerid] - amount > playerpool->playerMoney[playerid]) {
 		return 0;
 	}
-	playermoney[playerid] -= amount;
+	playerpool->playerMoney[playerid] -= amount;
 	GivePlayerMoneyRaw(playerid, -amount);
 	return 1;
-}
-
-/**
-Used to set the player their money, to combat random -$100 on spawn.
-*/
-static
-void money_on_player_spawn(int playerid)
-{
-	TRACE;
-	/*spawning might take $100 randomly, so reset it here just in case*/
-	SetPlayerMoneyRaw(playerid, playermoney[playerid]);
 }
 
 /**
@@ -83,5 +68,6 @@ static
 void money_set(int playerid, int amount)
 {
 	TRACE;
-	SetPlayerMoneyRaw(playerid, playermoney[playerid] = amount);
+
+	SetPlayerMoneyRaw(playerid, playerpool->playerMoney[playerid] = amount);
 }
