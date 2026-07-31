@@ -1,5 +1,6 @@
 char dev_print_updatevehicledamagestatus_enabled;
 char dev_print_unoccupiedvehiclesync_enabled;
+char dev_print_statsync_enabled;
 
 static void dev_menu_show(ushort playerid);
 /*jeanine:p:i:4;p:0;a:b;y:1.88;n:dev_print_updatevehicledamagestatus;*/
@@ -50,6 +51,17 @@ void dev_print_unoccupiedvehiclesync(ushort playerid, ushort vehicleid, struct S
 		SendClientMessageToAll(COL_SAMP_GREY, cbuf144);
 	}
 }
+/*jeanine:p:i:6;p:5;a:b;y:1.88;n:dev_print_unoccupiedvehiclesync;*/
+static
+void dev_print_statsync(ushort playerid, int *data)
+{
+	TRACE;
+
+	if (dev_print_statsync_enabled) {
+		sprintf(cbuf144, "StatsUpdate pid %d money %d drunk %d", playerid, data[0], data[1]);
+		SendClientMessageToAll(COL_SAMP_GREY, cbuf144);
+	}
+}
 /*jeanine:p:i:1;p:3;a:r;x:9.00;n:dev_menu_callback;*/
 static
 void dev_menu_callback(int playerid, struct DIALOG_RESPONSE response)
@@ -61,18 +73,20 @@ void dev_menu_callback(int playerid, struct DIALOG_RESPONSE response)
 		if (response.listitem == 1) {
 			dev_print_unoccupiedvehiclesync_enabled ^= 1;
 		} else if (response.listitem == 2) {
-			dev_print_updatevehicledamagestatus_enabled ^= 1;
+			dev_print_statsync_enabled ^= 1;
 		} else if (response.listitem == 3) {
-			CrashPlayer(playerid);
+			dev_print_updatevehicledamagestatus_enabled ^= 1;
 		} else if (response.listitem == 4) {
-			asmcrash();
+			CrashPlayer(playerid);
 		} else if (response.listitem == 5) {
-			DisableRemoteVehicleCollisions(playerid, (disable_remote_vehicle_collisions ^= 1));
+			asmcrash();
 		} else if (response.listitem == 6) {
-			SetPlayerHealth(playerid, 0.0f);
+			DisableRemoteVehicleCollisions(playerid, (disable_remote_vehicle_collisions ^= 1));
 		} else if (response.listitem == 7) {
-			SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USEJETPACK);
+			SetPlayerHealth(playerid, 0.0f);
 		} else if (response.listitem == 8) {
+			SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USEJETPACK);
+		} else if (response.listitem == 9) {
 			pdata[playerid]->groups ^= GROUP_OWNER;
 			pdata[playerid]->groups |= GROUP_MEMBER;
 		}
@@ -94,7 +108,7 @@ char* dev_menu_append_toggle_entry(char *into, char *entry_name, char state)
 		return into + 12;
 	}
 }
-/*jeanine:p:i:3;p:5;a:b;y:1.88;n:dev_menu_show;*/
+/*jeanine:p:i:3;p:6;a:b;y:1.88;n:dev_menu_show;*/
 static
 void dev_menu_show(ushort playerid)
 {
@@ -106,6 +120,7 @@ void dev_menu_show(ushort playerid)
 	/*Dummy entry to prevent doing things when quicky/accidentally pressing enter after the dialog shows.*/
 	bp = dialog.info + sprintf(dialog.info, ECOL_SAMP_GREY"dummy entry\t\n");
 	bp = dev_menu_append_toggle_entry(bp, "print SYNC UnoccupiedVehicle", dev_print_unoccupiedvehiclesync_enabled);/*jeanine:s:a:r;i:2;*/
+	bp = dev_menu_append_toggle_entry(bp, "print SYNC StatsUpdate", dev_print_statsync_enabled);
 	bp = dev_menu_append_toggle_entry(bp, "print RPC UpdateVehicleDamageStatus", dev_print_updatevehicledamagestatus_enabled);/*jeanine:r:i:2;*/
 	bp += sprintf(bp, "%s", "Crash player\n");
 	bp += sprintf(bp, "%s", "Crash server\n");

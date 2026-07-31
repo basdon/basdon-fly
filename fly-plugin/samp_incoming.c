@@ -802,6 +802,10 @@ void HandlePacketStatsUpdate(struct RakPacket *packet)
 		return;
 	}
 
+#ifdef DEV
+	dev_print_statsync(packet->playerid, (int*) (packet->data + 1));
+#endif
+
 	money = *((int*) (packet->data + 1));
 	if (money != playerpool->playerMoney[playerid]) {
 		SetPlayerMoneyRaw(playerid, playerpool->playerMoney[playerid]);
