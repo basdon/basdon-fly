@@ -545,23 +545,48 @@ else if (pModelInfo->IsBike())
 <p>
 	On join, a player's <code>hasSpawnInfo</code> and <code>isAllowedToSpawn</code> is set to <code>0</code>.
 <p>
-	The client should go into class selection and request a class. The server will send the spawn info for the
-	class to the client and will set <code>hasSpawnInfo</code> to <code>1</code> (even if <code>OnPlayerRequestClass</code>
-	returns negatively). (Using <code>SetSpawnInfo()</code> does the same, without requiring a class request from the client.)
+	The client sends a RequestClass on join as soon as there is no dialog showing. This means showing a dialog when the
+	player connects will suppress the class selection buttons (<code>&lt;&lt;</code> and <code>&gt;&gt;</code> and
+	<code>spawn</code>) until the player dismisses it. There seems to be a very small delay, so if the server is fast
+	enough to send a new dialog after getting a response from the previous one, the buttons will keep being suppressed.
+	The client can also do this by pressing F1 to pop up the client's help dialog.
 
 <p>
-	When the player presses the spawn button, its client sends a spawn request. If <code>OnPlayerRequestSpawn</code>
+	When the server receives a RequestClass, it will send the spawn info for the class to the client and will
+	set <code>hasSpawnInfo</code> to <code>1</code> (even if <code>OnPlayerRequestClass</code> returns negatively).
+	(Using <code>SetSpawnInfo()</code> does the same, without requiring a class request from the client.)
+
+<p>
+	When the player presses the spawn button, its client sends a RequestClass. If <code>OnPlayerRequestSpawn</code>
 	returns positively, the server will set <code>isAllowedToSpawn</code> and respond success. It does not check
 	for <code>hasSpawnInfo</code>. The script can use <code>SpawnPlayer()</code> to force a player to spawn, it
 	will also set <code>isAllowedToSpawn</code>.
 
 <p>
-	When the client receives the spawn message, it will spawn the player and notify the server about it.
+	When the client receives the spawn message, it will spawn the player send RequestSpawn to the server.
 	The server ignores this packet if either <code>hasSpawnInfo</code> or <code>isAllowedToSpawn</code> is not set.
 	Otherwise, <code>OnPlayerSpawn</code> is called.
 
 <p>
 	<code>hasSpawnInfo</code> and <code>isAllowedToSpawn</code> is never reset for the same player session.
+
+<p>
+	After a player dies, it will spawn the player and notify the server about it. RequestSpawn is not sent.
+
+<p>
+	If a played pressed F4 to go back to class selection, the client will send a RequestClass after death
+	animation finishes.
+
+<p>
+	Note: player state is not updated when they enter class selection.
+
+<ul>
+	<li>On join, their state is <code>PLAYER_STATE_NONE</code>.
+	<li>When sent to class selection with <code>ForceClassSelection()</code>, they keep their current state. If they are streamed
+	in for other players, those other players will still see them but eventually have the hourglass icon next to their name
+	because they're not sending updates anymore. If they were in a car, the radio will keep playing while they're in class selection.
+	<li>When sent to class selection after death, their state will keep being <code>PLAYER_STATE_WASTED</code>.
+</ul>
 
 <h3 id=packet_priority_reliability_ordering>Packet priority, reliability, ordering channel</h3>
 
