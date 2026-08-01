@@ -332,17 +332,6 @@ struct SpawnInfo {
 };
 EXPECT_SIZE(struct SpawnInfo, 0x2E); /*Complete.*/
 
-struct SpawnInfo03DL {
-	char team;
-	int skin;
-	int customSkin; /*keep this 0*/
-	char _spawnInfoPad5;
-	struct vec4 pos;
-	int weapon[3];
-	int ammo[3];
-};
-EXPECT_SIZE(struct SpawnInfo03DL, 0x32);
-
 #define UPDATE_SYNC_TYPE_NONE 0
 #define UPDATE_SYNC_TYPE_ONFOOT 1
 #define UPDATE_SYNC_TYPE_INCAR 2
@@ -1140,27 +1129,44 @@ struct RPCDATA_PutPlayerInVehicle {
 };
 EXPECT_SIZE(struct RPCDATA_PutPlayerInVehicle, 2 + 1);
 
-struct RPCDATA_RequestClass037 {
-	char response; /*0 disallows the class. if 0, spawnInfo may be omitted*/
-	struct SpawnInfo spawnInfo;
-};
-EXPECT_SIZE(struct RPCDATA_RequestClass037, 0x2F);
-
-struct RPCDATA_RequestClass03DL {
-	char response; /*0 disallows the class. if 0, spawnInfo may be omitted*/
-	struct SpawnInfo03DL spawnInfo;
-};
-EXPECT_SIZE(struct RPCDATA_RequestClass03DL, 0x33);
-
 struct RPCDATA_SetSpawnInfo037 {
-	struct SpawnInfo spawnInfo;
+	char team;
+	int skin;
+	char _pad5;
+	struct vec4 pos;
+	int weapon[3];
+	int ammo[3];
 };
 EXPECT_SIZE(struct RPCDATA_SetSpawnInfo037, 0x2E);
 
 struct RPCDATA_SetSpawnInfo03DL {
-	struct SpawnInfo03DL spawnInfo;
+	char team;
+	int skin;
+	int customSkin; /*keep this 0*/
+	char _pad9;
+	struct vec4 pos;
+	int weapon[3];
+	int ammo[3];
 };
-EXPECT_SIZE(struct RPCDATA_SetSpawnInfo03DL, 0x32);
+EXPECT_SIZE(struct RPCDATA_SetSpawnInfo03DL, sizeof(struct RPCDATA_SetSpawnInfo037) + 4);
+STATIC_ASSERT(MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo03DL, team) == MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo037, team));
+STATIC_ASSERT(MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo03DL, skin) == MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo037, skin));
+STATIC_ASSERT(MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo03DL, customSkin) == MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo037, _pad5));
+STATIC_ASSERT(MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo03DL, pos) == MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo037, pos) + 4);
+STATIC_ASSERT(MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo03DL, weapon) == MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo037, weapon) + 4);
+STATIC_ASSERT(MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo03DL, ammo) == MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo037, ammo) + 4);
+
+struct RPCDATA_RequestClass037 {
+	char response; /*0 supposedly disallows the class. if 0, rpcdata_setspawninfo may be omitted*/
+	struct RPCDATA_SetSpawnInfo037 rpcdata_setspawninfo;
+};
+EXPECT_SIZE(struct RPCDATA_RequestClass037, 0x2F);
+
+struct RPCDATA_RequestClass03DL {
+	char response; /*0 supposedly disallows the class. if 0, rpcdata_setspawninfo may be omitted*/
+	struct RPCDATA_SetSpawnInfo03DL rpcdata_setspawninfo;
+};
+EXPECT_SIZE(struct RPCDATA_RequestClass03DL, sizeof(struct RPCDATA_RequestClass037) + 4);
 
 struct RPCDATA_WorldPlayerAdd037 {
 	short playerid;

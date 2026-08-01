@@ -127,19 +127,6 @@ void ForceSendPlayerOnfootSyncNow(int playerid)
 }
 
 static
-void convertSpawnInfoToSpawnInfo03DL(struct SpawnInfo *in, struct SpawnInfo03DL *out)
-{
-	TRACE;
-	out->team = in->team;
-	out->skin = in->skin;
-	out->customSkin = 0;
-	out->_spawnInfoPad5 = in->_pad5;
-	out->pos = in->pos;
-	memcpy(out->weapon, in->weapon, sizeof(in->weapon));
-	memcpy(out->ammo, in->ammo, sizeof(in->ammo));
-}
-
-static
 void SetGameModeText(char *gamemodetext)
 {
 	TRACE;
@@ -1382,25 +1369,47 @@ void SendGameTimeUpdate(ushort playerid)
 }
 
 static
+void WritePlayerSpawnInfo(ushort playerid, struct RPCDATA_SetSpawnInfo03DL *rpcdata)
+{
+	TRACE;
+	struct RPCDATA_SetSpawnInfo037 *writeptr;
+
+	EXPECT_SIZE(struct RPCDATA_SetSpawnInfo03DL, sizeof(struct RPCDATA_SetSpawnInfo037) + 4);
+	STATIC_ASSERT(MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo03DL, team) == MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo037, team));
+	STATIC_ASSERT(MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo03DL, skin) == MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo037, skin));
+	STATIC_ASSERT(MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo03DL, customSkin) == MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo037, _pad5));
+	STATIC_ASSERT(MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo03DL, pos) == MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo037, pos) + 4);
+	STATIC_ASSERT(MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo03DL, weapon) == MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo037, weapon) + 4);
+	STATIC_ASSERT(MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo03DL, ammo) == MEMBER_OFFSET(struct RPCDATA_SetSpawnInfo037, ammo) + 4);
+
+	memset(rpcdata, 0, sizeof(*rpcdata));
+	writeptr = (struct RPCDATA_SetSpawnInfo037*) rpcdata;
+	writeptr->team = DEFAULT_TEAM;
+	writeptr->skin = sampPlayer[playerid]->spawnInfo.skin;
+	if (is_player_using_client_version_DL[playerid]) {
+		writeptr = (struct RPCDATA_SetSpawnInfo037*) (((char*) rpcdata) + 4);
+	}
+	writeptr->pos = sampPlayer[playerid]->spawnInfo.pos;
+	writeptr->weapon[0] = WEAPON_CAMERA;
+	writeptr->ammo[0] = 3036; /*one clip is 36, that leaves an extra clean 3000*/
+}
+
+static
 void SyncSpawnInfo(ushort playerid)
 {
 	TRACE;
-	struct RPCDATA_SetSpawnInfo03DL rpcdata03DL;
-	register struct SampPlayer *player = sampPlayer[playerid];
+	static int bitlength[2] = { sizeof(struct RPCDATA_SetSpawnInfo037) * 8, sizeof(struct RPCDATA_SetSpawnInfo03DL) * 8 };
 
-	if (is_player_using_client_version_DL[playerid]) {
-		convertSpawnInfoToSpawnInfo03DL(&player->spawnInfo, &rpcdata03DL.spawnInfo);
-		SendRPC(playerid, RPC_SetSpawnInfo, &rpcdata03DL, sizeof(rpcdata03DL) * 8);
-	} else {
-		EXPECT_SIZE(struct RPCDATA_SetSpawnInfo037, sizeof(player->spawnInfo));
-		SendRPC(playerid, RPC_SetSpawnInfo, &player->spawnInfo, sizeof(player->spawnInfo) * 8);
-	}
+	struct RPCDATA_SetSpawnInfo03DL rpcdata;
+
+	WritePlayerSpawnInfo(playerid, &rpcdata);
+	SendRPC(playerid, RPC_SetSpawnInfo, &rpcdata, bitlength[is_player_using_client_version_DL[playerid]]);
 }
 
 /*We don't use SetSpawnInfo, write spawn info directly to spawnInfo in player's struct and call SyncSpawnInfo.*/
 void SetSpawnInfo();
 
-static void spawn_get_random_spawn(int,struct SpawnInfo*);
+static struct vec4* spawn_get_random_spawn(int);
 static
 void SpawnPlayer(int playerid)
 {
@@ -1413,7 +1422,7 @@ void SpawnPlayer(int playerid)
 		ClearAnimations(playerid);
 	}
 	player->isAllowedToSpawn = 1;
-	spawn_get_random_spawn(classid[playerid], &player->spawnInfo);
+	player->spawnInfo.pos = *spawn_get_random_spawn(classid[playerid]);
 	SyncSpawnInfo(playerid);
 
 	rpcdata.type = 2;

@@ -219,6 +219,10 @@ static int numairports;
 
 #define MONEY_DEFAULT_AMOUNT 15000
 
+/*Using anything but NO_TEAM(255) should make players not able to damage other players,*/
+/*and their vehicles[need more details here], except by slitting throat when having a knife.*/
+#define DEFAULT_TEAM 11
+
 /**
 User id of player, -1 if no valid session (should be extremely rare)
 

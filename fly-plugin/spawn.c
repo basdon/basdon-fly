@@ -103,7 +103,7 @@ void spawn_cb_dlg_spawn(int playerid, struct DIALOG_RESPONSE response)
 }
 
 static
-void spawn_get_random_spawn(int classid, struct SpawnInfo *outSpawnInfo)
+struct vec4* spawn_get_random_spawn(int classid)
 {
 	TRACE;
 	int spawnidx = 0;
@@ -115,16 +115,7 @@ void spawn_get_random_spawn(int classid, struct SpawnInfo *outSpawnInfo)
 	default: spawnidx = amxrandom(numspawns[classid]); break;
 	}
 
-	outSpawnInfo->team = 11; /*using anything but NO_TEAM should make players not able to damage other players, except by slitting throat when having a knife*/
-	outSpawnInfo->skin = CLASS_SKINS[classid];
-	outSpawnInfo->_pad5 = 69;
-	outSpawnInfo->pos = spawns[classid][spawnidx];
-	outSpawnInfo->weapon[0] = WEAPON_CAMERA;
-	outSpawnInfo->weapon[1] = 0;
-	outSpawnInfo->weapon[2] = 0;
-	outSpawnInfo->ammo[0] = 3036; /*one clip is 36, that leaves an extra clean 3000*/
-	outSpawnInfo->ammo[1] = 0;
-	outSpawnInfo->ammo[2] = 0;
+	return &spawns[classid][spawnidx];
 }
 
 /**

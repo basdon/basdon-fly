@@ -67,6 +67,8 @@ void class_on_player_request_class(int playerid, int _classid)
 	SetPlayerFacingAngle(playerid, 236.0f);
 
 	GameTextForPlayer(playerid, 0x800000, 3, (char*) CLASS_NAMES[_classid]);
+	sampPlayer[playerid]->spawnInfo.pos = *spawn_get_random_spawn(_classid);
+	sampPlayer[playerid]->spawnInfo.skin = CLASS_SKINS[_classid];
 }
 
 static

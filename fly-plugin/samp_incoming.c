@@ -89,8 +89,9 @@ static
 void HandleRpcRequestClass(struct RakRPCHandlerArg *arg)
 {
 	TRACE;
-	struct RPCDATA_RequestClass03DL rpcdata03DL;
-	struct RPCDATA_RequestClass037 rpcdata037;
+	static int bitlength[2] = { sizeof(struct RPCDATA_RequestClass037) * 8, sizeof(struct RPCDATA_RequestClass03DL) * 8 };
+
+	struct RPCDATA_RequestClass03DL rpcdata;
 	ushort playerid;
 
 	playerid = rakServerVtable->GetIndexFromPlayerID(rakServer, arg->playerID);
@@ -105,16 +106,9 @@ void HandleRpcRequestClass(struct RakRPCHandlerArg *arg)
 	class_on_player_request_class(playerid, *((ushort*) arg->rpcdata));
 	timecyc_on_player_request_class(playerid);
 
-	spawn_get_random_spawn(classid[playerid], &sampPlayer[playerid]->spawnInfo);
-	if (is_player_using_client_version_DL[playerid]) {
-		rpcdata03DL.response = 1; /*this is the result of the OnPlayerRequestClass callback*/
-		convertSpawnInfoToSpawnInfo03DL(&sampPlayer[playerid]->spawnInfo, &rpcdata03DL.spawnInfo);
-		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata03DL, sizeof(rpcdata03DL) * 8, HIGH_PRIORITY, RELIABLE, 0);
-	} else {
-		rpcdata037.response = 1; /*this is the result of the OnPlayerRequestClass callback*/
-		rpcdata037.spawnInfo = sampPlayer[playerid]->spawnInfo;
-		SendRPC_ex(playerid, RPC_RequestClass, &rpcdata037, sizeof(rpcdata037) * 8, HIGH_PRIORITY, RELIABLE, 0);
-	}
+	rpcdata.response = 1; /*this is the result of the OnPlayerRequestClass callback*/
+	WritePlayerSpawnInfo(playerid, &rpcdata.rpcdata_setspawninfo);
+	SendRPC_ex(playerid, RPC_RequestClass, &rpcdata, bitlength[is_player_using_client_version_DL[playerid]], HIGH_PRIORITY, RELIABLE, 0);
 }
 /*jeanine:p:i:42;p:23;a:r;x:305.00;y:-25.00;n:HandleRpcRequestSpawn;*/
 static
@@ -465,7 +459,9 @@ void HandleRpcClientJoin(struct RakRPCHandlerArg *arg)
 	}
 	player->worldTime = 720.0f; /*hour*60+minute; 720 = 12:00*/
 	player->_pad2911 = 1;
-	spawn_get_random_spawn(0, &player->spawnInfo);
+	player->spawnInfo.skin = CLASS_SKINS[0];
+	player->spawnInfo.team = DEFAULT_TEAM;
+	player->spawnInfo.pos = *spawn_get_random_spawn(0);
 	/*skipping allocating textdrawpool/textlabelpool/pool2CDA*/
 	/*below here is code of SampPlayerPool::AddPlayer*/
 	playerjoinrpc.base.playerid = playerid;
