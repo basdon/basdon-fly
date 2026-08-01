@@ -58,7 +58,7 @@ int cmd_dev_dev(struct COMMANDCONTEXT cmdctx)
 	return CMD_OK;
 }
 
-#define CMD_DRUNK_SYNTAX "<35|92|150>"
+#define CMD_DRUNK_SYNTAX "<35|92|150> <level>"
 #define CMD_DRUNK_DESC "Gives a weapon"
 static
 int cmd_dev_drunk(struct COMMANDCONTEXT cmdctx)
