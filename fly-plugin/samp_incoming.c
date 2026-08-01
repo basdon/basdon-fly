@@ -224,6 +224,10 @@ int ReadValidateClientJoinPayload(struct RakRPCHandlerArg *arg, ushort *outPlaye
 	uchar clientVersionStringLength;
 	char *step, *kickmsg;
 
+	/*Temporary set playerID (it will be overwritten below), but this is needed*/
+	/*in case we actually want to kick the client before that overwriting happens.*/
+	playerID = arg->playerID;
+
 	kickmsg = NULL;
 	step = "proc94";
 	result94 = rakServerVtable->proc94(rakServer, arg->playerID);
@@ -389,6 +393,7 @@ int ReadValidateClientJoinPayload(struct RakRPCHandlerArg *arg, ushort *outPlaye
 	return 1;
 /*jeanine:p:i:14;p:22;a:r;x:7.00;y:12.00;n:ReadValidateClientJoinPayload;*/
 rawkick:
+	/*DO NOT USE playerid HERE, IT MAY BE UNINITIALIZED*/
 	if (kickmsg) {
 		rpcmsg.color = COL_SAMP_GREEN;
 		rpcmsg.message_length = sprintf(rpcmsg.message, "%s", kickmsg);
