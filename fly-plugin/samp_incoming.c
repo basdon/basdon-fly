@@ -174,6 +174,13 @@ void HandleRpcChatMessage(struct RakRPCHandlerArg *arg)
 	memcpy(data.rpcchatmsg.msg, arg->rpcdata + 1, data.rpcchatmsg.msg_len);
 	data.rpcchatmsg.msg[data.rpcchatmsg.msg_len] = 0;
 
+	if (strlen(data.rpcchatmsg.msg) != data.rpcchatmsg.msg_len) {
+		/*This condition passing means intentional tampering with rpc data.*/
+		/*TODO: log/admin message why we're crashing this player*/
+		CrashPlayer(playerid);
+		return;
+	}
+
 	/*msg filtering happens here (removing embedded colors, %->#, ~k->#k), we don't care :D*/
 	/*chatlogging happens here if enabled, which we don't*/
 
