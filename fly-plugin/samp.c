@@ -1333,6 +1333,7 @@ void HideGameTextForPlayer(int playerid)
 	GameTextForPlayer(playerid, 2, 3, "_");
 }
 
+/*TODO: every call to this should be logged why we're doing it, to not confuse ourselves why players are crashing*/
 static
 void CrashPlayer(int playerid)
 {
@@ -1889,7 +1890,6 @@ void samp_init()
 	mem_mkjmp(0x80AC99C, &OnfootSyncHook);
 	mem_mkjmp(0x80AEC4F, &DriverSyncHook);
 	mem_mkjmp(0x80AEA7D, &PassengerSyncHook);
-	mem_mkjmp(0x80B1712, &OnPlayerCommandTextHook);
 	mem_mkjmp(0x80B2BA2, &OnDialogResponseHook);
 
 	/*stuff to allow both 0.3.7 and 0.3.DL clients */

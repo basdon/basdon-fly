@@ -227,10 +227,8 @@ int cmd_get_by_name_check_permissions(
 	return 0;
 }
 
-/**
-Called from hooked commandtext response packet handler.
-*/
-void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
+static
+void cmd_on_cmdtext(ushort playerid, char *cmdtext)
 {
 	TRACE;
 	struct COMMAND *cmd, *real_cmd;
@@ -268,6 +266,7 @@ void hook_cmd_on_cmdtext(short playerid, char *cmdtext)
 	} else if (is_cmd_resolved && real_cmd->handler == cmd_r) {
 		strcpy(cbuf144, "/r");
 	} else {
+		/*FIXME: this may escape too much, resulting in a length possibly longer than the column's limit (128)*/
 		common_mysql_escape_string(cmdtext, cbuf144, 144 * sizeof(cell));
 	}
 	csprintf(buf4096,

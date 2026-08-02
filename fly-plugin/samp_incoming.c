@@ -134,7 +134,7 @@ void HandleRpcRequestSpawn(struct RakRPCHandlerArg *arg)
 	rpcdata.type = 1; /*result of OnPlayerRequestSpawn*/
 	SendRPC_ex(playerid, RPC_RequestSpawn, &rpcdata, sizeof(rpcdata) * 8, HIGH_PRIORITY, RELIABLE, 0);
 }
-/*jeanine:p:i:40;p:23;a:r;x:286.00;n:HandleRpcChatMessage;*/
+/*jeanine:p:i:40;p:23;a:r;x:401.00;n:HandleRpcChatMessage;*/
 static
 void HandleRpcChatMessage(struct RakRPCHandlerArg *arg)
 {
@@ -194,6 +194,41 @@ void HandleRpcChatMessage(struct RakRPCHandlerArg *arg)
 			SendRPC_unordered_bs(i, RPC_ChatMessage, &bs);
 		}
 	}
+}
+/*jeanine:p:i:46;p:23;a:r;x:286.00;n:HandleRpcChatMessage;*/
+static
+void HandleRpcChatCommand(struct RakRPCHandlerArg *arg)
+{
+	TRACE;
+	ushort playerid;
+	uint cmd_len;
+	char cmdtext[129];
+
+	playerid = rakServerVtable->GetIndexFromPlayerID(rakServer, arg->playerID);
+	if (
+		playerid >= MAX_PLAYERS ||
+		!client_inited[playerid] ||
+		arg->numBits < 32 + 8 ||
+		/*Note: SAMP seems to check for a max len of 255 even*/
+		/*though client chat inputbox is capped to 128.*/
+		(cmd_len = *((int*) arg->rpcdata)) > 128 ||
+		arg->numBits != 32 + 8 * cmd_len
+	) {
+		return;
+	}
+
+	memcpy(cmdtext, arg->rpcdata + 4, cmd_len);
+	cmdtext[cmd_len] = 0;
+	if (cmdtext[0] != '/' || strlen(cmdtext) != cmd_len) {
+		/*This condition passing means intentional tampering with rpc data.*/
+		/*TODO: log/admin message why we're crashing this player*/
+		CrashPlayer(playerid);
+		return;
+	}
+
+	/*msg filtering happens here (removing embedded colors, %->#, ~k->#k), we don't care :D*/
+
+	cmd_on_cmdtext(playerid, cmdtext);
 }
 /*jeanine:p:i:20;p:23;a:r;x:43.00;y:-214.00;n:HandleRpcNpcJoin;*/
 static
@@ -936,7 +971,11 @@ void samp_incoming_setup_rak(struct RakServer *_rakServer)
 	mem_mkjmp(0x80B05F0, crash__this_codepath_should_be_unreachable); /*HandleRpcChatMessage*/
 	mem_mkjmp(0x80C99A0, crash__this_codepath_should_be_unreachable); /*SampPlayer::SendChatMessage*/
 
-	rakServerVtable->RegisterRPC(rakServer, RPC_ChatCommand, (void*) 0x80B1560);
+	rakServerVtable->RegisterRPC(rakServer, RPC_ChatCommand, HandleRpcChatCommand);/*jeanine:r:i:46;*/
+	mem_mkjmp(0x80B1560, crash__this_codepath_should_be_unreachable); /*HandleRpcChatCommand*/
+
+	mem_mkjmp(0x80D5CA0, crash__this_codepath_should_be_unreachable); /*FilterIncomingText (used in both chat msg & cmd)*/
+
 	rakServerVtable->RegisterRPC(rakServer, RPC_Death, (void*) 0x80B0ED0);
 
 	rakServerVtable->RegisterRPC(rakServer, RPC_UpdateVehicleDamageStatus, HandleRpcUpdateVehicleDamageStatus);/*jeanine:r:i:45;*/
