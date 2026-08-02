@@ -22,263 +22,52 @@ static char
 	*NAMECHANGE_CAPTION = "Change name",
 	*REGISTER_CAPTION = "Register";
 
-/*TODO cleanup this mess*/
-static void login_show_dialog_login(int playerid, int show_invalid_pw_error);
-static int login_change_name_from_input(int playerid, char *inputtext);
-static void login_show_dialog_change_name(int playerid, int show_invalid_name_error);
-static void login_spawn_as_guest(int playerid);
+/*minimum needed forward declarations for all circular flows*/
 static void login_query_check_user_exists(int playerid);
-static void login_cb_verify_password(void *data);
-static void login_show_dialog_register_step1(int playerid, int pw_mismatch);
-static void login_cb_register_password_hashed(void *data);
-/*jeanine:p:i:29;p:8;a:r;x:6.00;n:login_cb_failed_login_added;*/
-static
-void login_cb_update_lastfal_after_failed_login_added(void *data)
-{
-	TRACE;
-	csprintf(buf4096,
-		"UPDATE usr "
-		"SET lastfal="
-			"(SELECT stamp "
-			"FROM fal "
-			"WHERE u=%d "
-			"ORDER BY stamp DESC "
-			"LIMIT 1) "
-		"WHERE i=%d",
-		(int) data,
-		(int) data);
-	NC_mysql_tquery_nocb(buf4096a);
-}
-/*jeanine:p:i:30;p:22;a:r;x:187.00;n:login_format_register_dialog;*/
+static void login_show_dialog_register_firstpass(int playerid, int pw_mismatch);
+static void login_show_dialog_login(int playerid, int show_invalid_pw_error);
+static void login_show_dialog_change_name(int playerid, int show_invalid_name_error);
+/*jeanine:p:i:12;p:20;a:t;x:3.75;n:login_give_guest_name;*/
 /**
-Formats text to be displayed in the register dialog box.
+Give the user a name prefixed with an '@' symbol, indicating they're a guest.
 
-@param d destination buffer
-@param step 0 or 1
-@param pw_mismatch 1 to show an error that the passwords didn't match
+@return 0 on failure, the player will be kicked so abort all processing for player
 */
 static
-void login_format_register_dialog(char *d, int step, int pw_mismatch)
+int login_give_guest_name(int playerid)
 {
 	TRACE;
-	if (pw_mismatch) {
-		d += sprintf(d, ECOL_WARN"Passwords do not match!\n\n");
-	}
-	d += sprintf(d, ECOL_DIALOG_TEXT"Welcome! Register your account or "
-			"continue as a guest.\n\n");
-	d += sprintf(d, step == 0 ? ECOL_INFO : ECOL_DIALOG_TEXT);
-	d += sprintf(d, "* choose a password");
-	if (step == 0) d += sprintf(d, " <<<<");
-	d += sprintf(d, step == 1 ? ECOL_INFO"\n" : ECOL_DIALOG_TEXT"\n");
-	d += sprintf(d, "* confirm your password");
-	if (step == 1) d += sprintf(d, " <<<<");
-}
-/*jeanine:p:i:27;p:28;a:r;x:2.00;n:login_cb_dlg_namechange;*/
-static
-void login_cb_dlg_namechange(int playerid, struct DIALOG_RESPONSE response)
-{
-	TRACE;
-	if (response.response) {
-		if (!response.inputtext[0] || !stricmp(pdata[playerid]->name, response.inputtext)) {
-			/*Edge case: if empty string or same name as current, go back to login dialog.*/
-			login_show_dialog_login(playerid, 0);/*jeanine:s:a:r;i:26;*/
-		} else if (!login_change_name_from_input(playerid, response.inputtext)) {/*jeanine:r:i:19;*/
-			login_show_dialog_change_name(playerid, 1);/*jeanine:s:a:r;i:28;*/
-		} else {
-			unconfirmed_userid[playerid] = -1;
-			dialog_ensure_transaction(playerid, DLG_TID_LOGIN);
-			login_query_check_user_exists(playerid);/*jeanine:s:a:r;i:2;*/
-		}
-	} else {
-		/*Cancel should not go back to login dialog,*/
-		/*otherwise spamming escape will keep you in a loop.*/
-		/*If player keep hitting ESC, they are probably as fed up with login/register*/
-		/*dialogs as I am, so just spawn them as guest to let them play.*/
-		login_spawn_as_guest(playerid);/*jeanine:s:a:r;i:9;*/
-	}
-}
-/*jeanine:p:i:28;p:25;a:r;x:11.00;y:55.00;n:login_show_dialog_change_name;*/
-static
-void login_show_dialog_change_name(int playerid, int show_invalid_name_error)
-{
-	TRACE;
-	struct DIALOG_INFO dialog;
+	struct playerdata *p;
+	char newname[MAX_PLAYER_NAME + 1];
+	int attempts, i;
 
-	dialog_init_info(&dialog);
-	dialog.transactionid = DLG_TID_LOGIN;
-	dialog.style = DIALOG_STYLE_INPUT;
-	dialog.caption = NAMECHANGE_CAPTION;
-	dialog.info =
-		(ECOL_WARN"Invalid name or name is taken (press tab).\n"
-		"\n"ECOL_DIALOG_TEXT
-		"Enter your new name (3-20 length, 0-9a-zA-Z=()[]$@._).\n"
-		"Names starting with @ are reserved for guests.") + 60 * (show_invalid_name_error ^ 1);
-	dialog.button1 = "Change";
-	dialog.button2 = "Play as guest";
-	dialog.handler.callback = login_cb_dlg_namechange;/*jeanine:r:i:27;*/
-	dialog_show(playerid, &dialog);
-}
-/*jeanine:p:i:25;p:26;a:r;x:9.00;y:-19.00;n:login_cb_dlg_login_or_namechange;*/
-static
-void login_cb_dlg_login_or_namechange(int playerid, struct DIALOG_RESPONSE response)
-{
-	TRACE;
-	if (response.response) {
-		GameTextForPlayer(playerid, 0x800000, 3, "~b~Logging in...");
-		if (pwdata[playerid]) {
-			atoc(buf144, response.inputtext, 144);
-			atoc(buf4096, pwdata[playerid], 144);
-			common_bcrypt_check(
-				buf144a,
-				buf4096a,
-				login_cb_verify_password,/*jeanine:r:i:8;*/
-				V_MK_PLAYER_CC(playerid));
-			dialog_ensure_transaction(playerid, DLG_TID_LOGIN);
-		} else {
-			logprintf("login_cb_dlg_login_or_namechange: no password");
-		}
-	} else {
-		login_show_dialog_change_name(playerid, 0);/*jeanine:r:i:28;*/
-	}
-}
-/*jeanine:p:i:26;p:1;a:r;x:57.00;y:-92.00;n:login_show_dialog_login;*/
-static
-void login_show_dialog_login(int playerid, int show_invalid_pw_error)
-{
-	TRACE;
-	struct DIALOG_INFO dialog;
-
-	dialog_init_info(&dialog);
-	dialog.transactionid = DLG_TID_LOGIN;
-	dialog.style = DIALOG_STYLE_PASSWORD;
-	dialog.caption = LOGIN_CAPTION;
-	dialog.info =
-		(ECOL_WARN"Incorrect password!\n"
-		"\n"ECOL_DIALOG_TEXT
-		"Welcome! This account is registered.\n"
-		"Please sign in or change your name.") + 37 * (show_invalid_pw_error ^ 1);
-	dialog.button1 = "Login";
-	dialog.button2 = "Change name";
-	dialog.handler.options = DLG_OPT_NO_SANITIZE_INPUTTEXT;
-	dialog.handler.callback = login_cb_dlg_login_or_namechange;/*jeanine:r:i:25;*/
-	dialog_show(playerid, &dialog);
-}
-/*jeanine:p:i:23;p:24;a:r;x:17.00;n:login_cb_dlg_register_confirmpass;*/
-static
-void login_cb_dlg_register_confirmpass(int playerid, struct DIALOG_RESPONSE response)
-{
-	TRACE;
-	char tmp_hash_buf[SHA256BUFSIZE];
-	register int cmpres;
-
-	/*Confirm | Cancel*/
-	if (response.response) {
-		if (!pwdata[playerid]) {
-			logprintf("login_cb_dlg_register_confirmpass: confirmed pw without entering one!");
-			return;
-		}
-		SAMP_SHA256(tmp_hash_buf, response.inputtext);
-		cmpres = memcmp(tmp_hash_buf, pwdata[playerid], SHA256BUFSIZE);
-		free(pwdata[playerid]);
-		pwdata[playerid] = NULL;
-		if (cmpres) {
-			login_show_dialog_register_step1(playerid, 1);/*jeanine:s:a:r;i:22;*/
-		} else {
-			GameTextForPlayer(playerid, 0x800000, 3, "~b~Making your account...");
-			dialog_ensure_transaction(playerid, DLG_TID_LOGIN);
-			atoc(buf144, response.inputtext, 144);
-			common_bcrypt_hash(
-				buf144a,
-				login_cb_register_password_hashed,/*jeanine:r:i:6;*/
-				V_MK_PLAYER_CC(playerid));
-		}
-	} else {
-		if (pwdata[playerid]) {
-			free(pwdata[playerid]);
-			pwdata[playerid] = NULL;
-		}
-		login_show_dialog_register_step1(playerid, 0);/*jeanine:s:a:r;i:22;*/
-	}
-}
-/*jeanine:p:i:24;p:21;a:r;x:9.00;n:login_show_dialog_register_step2;*/
-/**
-Shows the register dialog box for the first step (confirm password).
-*/
-static
-void login_show_dialog_register_step2(int playerid)
-{
-	TRACE;
-	struct DIALOG_INFO dialog;
-
-	dialog_init_info(&dialog);
-	login_format_register_dialog(dialog.info, 1, 0);/*jeanine:s:a:r;i:30;*/
-	dialog.transactionid = DLG_TID_LOGIN;
-	dialog.style = DIALOG_STYLE_PASSWORD;
-	dialog.caption = REGISTER_CAPTION;
-	dialog.button1 = "Confirm";
-	dialog.button2 = "Cancel";
-	dialog.handler.options = DLG_OPT_NO_SANITIZE_INPUTTEXT;
-	dialog.handler.callback = login_cb_dlg_register_confirmpass;/*jeanine:r:i:23;*/
-	dialog_show(playerid, &dialog);
-}
-/*jeanine:p:i:21;p:22;a:r;x:4.00;n:login_cb_dlg_register_firstpass;*/
-static
-void login_cb_dlg_register_firstpass(int playerid, struct DIALOG_RESPONSE response)
-{
-	TRACE;
-	/*Next | Play as guest*/
-	if (!response.response) {
-		login_spawn_as_guest(playerid);/*jeanine:r:i:9;*/
-	} else {
-		if (pwdata[playerid]) {
-			free(pwdata[playerid]);
-		}
-		pwdata[playerid] = malloc(SHA256BUFSIZE);
-		SAMP_SHA256(pwdata[playerid], response.inputtext);
-		login_show_dialog_register_step2(playerid);/*jeanine:r:i:24;*/
-	}
-}
-/*jeanine:p:i:22;p:1;a:r;x:47.00;y:139.00;n:login_show_dialog_register_step1;*/
-/**
-Shows the register dialog box for the first step (enter password).
-*/
-static
-void login_show_dialog_register_step1(int playerid, int pw_mismatch)
-{
-	TRACE;
-	struct DIALOG_INFO dialog;
-
-	dialog_init_info(&dialog);
-	login_format_register_dialog(dialog.info, 0, pw_mismatch);/*jeanine:r:i:30;*/
-	dialog.transactionid = DLG_TID_LOGIN;
-	dialog.style = DIALOG_STYLE_PASSWORD;
-	dialog.caption = REGISTER_CAPTION;
-	dialog.button1 = "Next";
-	dialog.button2 = "Play as guest";
-	dialog.handler.options = DLG_OPT_NO_SANITIZE_INPUTTEXT;
-	dialog.handler.callback = login_cb_dlg_register_firstpass;/*jeanine:r:i:21;*/
-	dialog_show(playerid, &dialog);
-}
-/*jeanine:p:i:19;p:27;a:r;x:8.00;y:-5.00;n:login_change_name_from_input;*/
-/**
-Sets the player username from user input if it's a valid non-guest username.
-
-@return 1 if the username was valid and is now set
-*/
-static
-int login_change_name_from_input(int playerid, char *inputtext)
-{
-	TRACE;
-	int len;
-
-	len = strlen(inputtext);
+	p = pdata[playerid];
+	newname[0] = '@';
 	/*MAX_PLAYER_NAME is 24 but client may only connect if their name
 	length is at max 20*/
-	return 2 < len && len < MAX_PLAYER_NAME - 3 &&
-		inputtext[0] != '@' &&
-		SetPlayerName(playerid, inputtext) == 1;
+	if (p->namelen < MAX_PLAYER_NAME - 4) {
+		memcpy(newname + 1, p->name, p->namelen);
+		newname[p->namelen + 1] = 0;
+		if (SetPlayerName(playerid, newname) == 1) {
+			return 1;
+		}
+	}
+	newname[11] = 0;
+	attempts = 5;
+	while (attempts-- > 0) {
+		for (i = 1; i < 10; i++) {
+			newname[i] = 'a' + (char) amxrandom('z' - 'a' + 1);
+		}
+		if (SetPlayerName(playerid, newname) == 1) {
+			return 1;
+		}
+	}
+	logprintf("login: failed to give user a random guestname");
+	SendClientMessage(playerid, COL_WARN, WARN"Fatal error, please reconnect!");
+	natives_Kick(playerid, "can't login", NULL, -1);
+	return 0;
 }
-/*jeanine:p:i:20;p:17;a:t;x:3.75;n:login_create_user;*/
+/*jeanine:p:i:20;p:17;a:t;x:3.75;n:login_format_query_insert_user;*/
 static
 char* login_format_query_insert_user(int playerid, char *password, int groups)
 {
@@ -286,17 +75,17 @@ char* login_format_query_insert_user(int playerid, char *password, int groups)
 
 	sprintf(
 		cbuf4096_,
-	        "INSERT INTO "
+		"INSERT INTO "
 		"usr(name,pw,registertime,lastseengame,groups,prefs) "
 		"VALUES('%s','%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),%d,%d)",
-	        pdata[playerid]->name,
+		pdata[playerid]->name,
 		password,
 		groups,
-	        DEFAULTPREFS
-        );
-        return cbuf4096_;
+		DEFAULTPREFS
+	);
+	return cbuf4096_;
 }
-/*jeanine:p:i:17;p:3;a:t;x:115.00;y:-14.00;n:login_create_session;*/
+/*jeanine:p:i:17;p:3;a:t;x:115.00;y:-14.00;n:login_format_query_insert_session_row;*/
 static
 char* login_format_query_insert_session_row(int playerid)
 {
@@ -315,7 +104,7 @@ char* login_format_query_insert_session_row(int playerid)
 	);
 	return cbuf4096_;
 }
-/*jeanine:p:i:18;p:16;a:r;x:366.00;y:-150.00;n:login_login_player;*/
+/*jeanine:p:i:18;p:15;a:r;x:149.00;y:12.00;n:login_login_player;*/
 /*color list grabbed from archived samp wiki, with darker colors removed and colors shuffled*/
 static int player_colors[] = {
 	0x10DC29FF,0x05D1CDFF,0xCE79EEFF,0x93B7E4FF,0x93AB1CFF,0xDCDE3DFF,0xFFD720FF,0x11F891FF,0xBCE635FF,0x0C8E5DFF,
@@ -377,7 +166,29 @@ alreadyin:
 
 	SetPlayerColor(playerid, player_colors[amxrandom(sizeof(player_colors)/sizeof(player_colors[0]))]);
 }
-/*jeanine:p:i:15;p:11;a:r;x:19.00;n:login_cb_create_session_guest;*/
+/*jeanine:p:i:10;p:7;a:r;x:5.00;y:188.00;n:login_spawn_as_guest_WITHOUT_ACCOUNT;*/
+/**
+Spawns a player as a guest without account or session. ONLY USE ON ERROR!
+
+Use login_spawn_as_guest when wanting to let player continue as a guest.
+
+If the player does not have a guest name, they will be given one (or kicked on
+failure).
+*/
+static
+void login_spawn_as_guest_WITHOUT_ACCOUNT(int playerid)
+{
+	TRACE;
+	char msg144[144];
+
+	if (!login_give_guest_name(playerid)) {
+		return; /*user is kicked at this point*/
+	}
+	login_login_player(playerid, LOGGED_GUEST);/*jeanine:s:a:r;i:18;*/
+	sprintf(msg144, "%s[%d] joined as a guest (login error), welcome!", pdata[playerid]->name, playerid);
+	SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
+}
+/*jeanine:p:i:15;p:11;a:r;x:6.00;y:-24.00;n:login_cb_create_session_guest;*/
 /**
 Callback for query that creates a session for a guest user.
 */
@@ -404,11 +215,85 @@ void login_cb_create_session_guest(void *data)
 	}
 	*/
 	SendClientMessage(playerid, COL_INFO, INFO"You are now playing as a guest. You can use /register at any time to save your stats.");
+	login_login_player(playerid, LOGGED_GUEST);/*jeanine:r:i:18;*/
+	sprintf(msg144, "%s[%d] joined as a guest, welcome!", pdata[playerid]->name, playerid);
+	SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
+}
+/*jeanine:p:i:11;p:9;a:r;x:17.00;y:-12.00;n:login_cb_create_guest_usr;*/
+/**
+Callback for query that creates a guest user.
+*/
+static
+void login_cb_create_guest_usr(void *data)
+{
+	TRACE;
+	int playerid;
+	char msg144[144];
+
+	playerid = PLAYER_CC_GETID(data);
+	if (!PLAYER_CC_CHECK(data, playerid)) {
+		return;
+	}
+
+	GameTextForPlayer(playerid, 0x800000, 3, "~b~Creating game session...");
+	unconfirmed_userid[playerid] = NC_cache_insert_id();
+	if (unconfirmed_userid[playerid] != -1) {
+		common_mysql_tquery(login_format_query_insert_session_row(playerid), login_cb_create_session_guest, V_MK_PLAYER_CC(playerid));/*jeanine:r:i:15;*/
+		return;
+	}
+
+	HideGameTextForPlayer(playerid);
+	SendClientMessage(playerid, COL_WARN, WARN"An error occurred while creating a guest user.");
+	SendClientMessage(playerid, COL_WARN, WARN"You can play, but you won't be able to save your stats later.");
 	login_login_player(playerid, LOGGED_GUEST);/*jeanine:s:a:r;i:18;*/
 	sprintf(msg144, "%s[%d] joined as a guest, welcome!", pdata[playerid]->name, playerid);
 	SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
 }
-/*jeanine:p:i:16;p:5;a:r;x:3.75;n:login_cb_create_session_new_member;*/
+/*jeanine:p:i:9;p:21;a:r;x:314.00;y:-109.00;n:login_spawn_as_guest;*/
+/**
+Create a guest account and session for player and log them in and spawn them.
+
+If the player does not have a guest name, they will be given one (or kicked on
+failure).
+*/
+static
+void login_spawn_as_guest(int playerid)
+{
+	TRACE;
+	char *query;
+
+	if (pdata[playerid]->name[0] != '@' && !login_give_guest_name(playerid)) {
+		return; /*user is kicked at this point*/
+	}
+	GameTextForPlayer(playerid, 0x800000, 3, "~b~Creating guest account...");
+	query = login_format_query_insert_user(playerid, /*password*/ "", GROUP_GUEST);
+	common_mysql_tquery(query, login_cb_create_guest_usr, V_MK_PLAYER_CC(playerid));/*jeanine:r:i:11;*/
+}
+/*jeanine:p:i:30;p:22;a:r;x:187.00;n:login_format_register_dialog_infotext;*/
+/**
+Formats text to be displayed in the register dialog box.
+
+@param d destination buffer
+@param step 0 or 1
+@param pw_mismatch 1 to show an error that the passwords didn't match
+*/
+static
+void login_format_register_dialog_infotext(char *d, int step, int pw_mismatch)
+{
+	TRACE;
+	if (pw_mismatch) {
+		d += sprintf(d, ECOL_WARN"Passwords do not match!\n\n");
+	}
+	d += sprintf(d, ECOL_DIALOG_TEXT"Welcome! Register your account or "
+			"continue as a guest.\n\n");
+	d += sprintf(d, step == 0 ? ECOL_INFO : ECOL_DIALOG_TEXT);
+	d += sprintf(d, "* choose a password");
+	if (step == 0) d += sprintf(d, " <<<<");
+	d += sprintf(d, step == 1 ? ECOL_INFO"\n" : ECOL_DIALOG_TEXT"\n");
+	d += sprintf(d, "* confirm your password");
+	if (step == 1) d += sprintf(d, " <<<<");
+}
+/*jeanine:p:i:16;p:5;a:r;x:12.00;y:-24.00;n:login_cb_create_session_new_member;*/
 /**
 Callback for query that creates a session for a newly registered member.
 */
@@ -433,9 +318,146 @@ void login_cb_create_session_new_member(void *data)
 		no real problem, but time will not be registered
 	}
 	*/
-	login_login_player(playerid, LOGGED_IN);/*jeanine:r:i:18;*/
+	login_login_player(playerid, LOGGED_IN);/*jeanine:s:a:r;i:18;*/
 	sprintf(msg144, "%s[%d] just registered an account, welcome!", pdata[playerid]->name, playerid);
 	SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
+}
+/*jeanine:p:i:5;p:6;a:r;x:10.00;y:-19.00;n:login_cb_member_user_created;*/
+/**
+Callback for when member user has been created after registering.
+*/
+static
+void login_cb_member_user_created(void *data)
+{
+	TRACE;
+	int playerid;
+	char *query;
+
+	playerid = PLAYER_CC_GETID(data);
+	if (!PLAYER_CC_CHECK(data, playerid)) {
+		return;
+	}
+
+	pdata[playerid]->groups = GROUP_MEMBER;
+	unconfirmed_userid[playerid] = NC_cache_insert_id();
+	money_set(playerid, MONEY_DEFAULT_AMOUNT);
+	if (unconfirmed_userid[playerid] == -1) {
+		HideGameTextForPlayer(playerid);
+		SendClientMessage(playerid, COL_WARN, WARN"An error occured while registering.");
+		SendClientMessage(playerid, COL_WARN, WARN"You will be spawned as a guest.");
+		login_spawn_as_guest_WITHOUT_ACCOUNT(playerid);/*jeanine:s:a:r;i:10;*/
+		return;
+	}
+	GameTextForPlayer(playerid, 0x800000, 3, "~b~Creating game session...");
+	query = login_format_query_insert_session_row(playerid);
+	common_mysql_tquery(query, login_cb_create_session_new_member, V_MK_PLAYER_CC(playerid));/*jeanine:r:i:16;*/
+}
+/*jeanine:p:i:6;p:23;a:r;x:3.75;n:login_cb_register_password_hashed;*/
+/**
+Callback for register dialog password hash.
+*/
+static
+void login_cb_register_password_hashed(void *data)
+{
+	TRACE;
+	int playerid;
+	char *query;
+
+	playerid = PLAYER_CC_GETID(data);
+	if (PLAYER_CC_CHECK(data, playerid)) {
+		/*gametext still showing from previous*/
+		NC_bcrypt_get_hash(buf144a);
+		ctoa(cbuf64, buf144, 144);
+		query = login_format_query_insert_user(playerid, cbuf64, GROUP_MEMBER);
+		common_mysql_tquery(query, login_cb_member_user_created, V_MK_PLAYER_CC(playerid));/*jeanine:r:i:5;*/
+	}
+}
+/*jeanine:p:i:23;p:24;a:r;x:3.00;n:login_cb_dlg_register_confirmpass;*/
+static
+void login_cb_dlg_register_confirmpass(int playerid, struct DIALOG_RESPONSE response)
+{
+	TRACE;
+	char tmp_hash_buf[SHA256BUFSIZE];
+	register int cmpres;
+
+	/*Confirm | Cancel*/
+	if (response.response) {
+		if (!pwdata[playerid]) {
+			logprintf("login_cb_dlg_register_confirmpass: confirmed pw without entering one!");
+			return;
+		}
+		SAMP_SHA256(tmp_hash_buf, response.inputtext);
+		cmpres = memcmp(tmp_hash_buf, pwdata[playerid], SHA256BUFSIZE);
+		free(pwdata[playerid]);
+		pwdata[playerid] = NULL;
+		if (cmpres) {
+			login_show_dialog_register_firstpass(playerid, 1);/*jeanine:s:a:r;i:22;*/
+		} else {
+			GameTextForPlayer(playerid, 0x800000, 3, "~b~Making your account...");
+			dialog_ensure_transaction(playerid, DLG_TID_LOGIN);
+			atoc(buf144, response.inputtext, 144);
+			common_bcrypt_hash(buf144a, login_cb_register_password_hashed, V_MK_PLAYER_CC(playerid));/*jeanine:r:i:6;*/
+		}
+	} else {
+		if (pwdata[playerid]) {
+			free(pwdata[playerid]);
+			pwdata[playerid] = NULL;
+		}
+		login_show_dialog_register_firstpass(playerid, 0);/*jeanine:s:a:r;i:22;*/
+	}
+}
+/*jeanine:p:i:24;p:21;a:r;x:3.00;n:login_show_dialog_register_confirmpass;*/
+static
+void login_show_dialog_register_confirmpass(int playerid)
+{
+	TRACE;
+	struct DIALOG_INFO dialog;
+
+	dialog_init_info(&dialog);
+	login_format_register_dialog_infotext(dialog.info, 1, 0);/*jeanine:s:a:r;i:30;*/
+	dialog.transactionid = DLG_TID_LOGIN;
+	dialog.style = DIALOG_STYLE_PASSWORD;
+	dialog.caption = REGISTER_CAPTION;
+	dialog.button1 = "Confirm";
+	dialog.button2 = "Cancel";
+	dialog.handler.options = DLG_OPT_NO_SANITIZE_INPUTTEXT;
+	dialog.handler.callback = login_cb_dlg_register_confirmpass;/*jeanine:r:i:23;*/
+	dialog_show(playerid, &dialog);
+}
+/*jeanine:p:i:21;p:22;a:r;x:3.00;n:login_cb_dlg_register_firstpass;*/
+static
+void login_cb_dlg_register_firstpass(int playerid, struct DIALOG_RESPONSE response)
+{
+	TRACE;
+	/*Next | Play as guest*/
+	if (!response.response) {
+		login_spawn_as_guest(playerid);/*jeanine:r:i:9;*/
+	} else {
+		if (pwdata[playerid]) {
+			free(pwdata[playerid]);
+		}
+		pwdata[playerid] = malloc(SHA256BUFSIZE);
+		SAMP_SHA256(pwdata[playerid], response.inputtext);
+		login_show_dialog_register_confirmpass(playerid);/*jeanine:r:i:24;*/
+	}
+}
+/*jeanine:p:i:22;p:1;a:r;x:47.00;y:139.00;n:login_show_dialog_register_firstpass;*/
+static
+void login_show_dialog_register_firstpass(int playerid, int pw_mismatch)
+{
+	TRACE;
+	struct DIALOG_INFO dialog;
+
+	dialog_init_info(&dialog);
+	login_format_register_dialog_infotext(dialog.info, 0, pw_mismatch);/*jeanine:r:i:30;*/
+	dialog.transactionid = DLG_TID_LOGIN;
+	dialog.style = DIALOG_STYLE_PASSWORD;
+	dialog.caption = REGISTER_CAPTION;
+	dialog.button1 = "Next";
+	dialog.button2 = "Play as guest";
+	dialog.handler.options = DLG_OPT_NO_SANITIZE_INPUTTEXT;
+	dialog.handler.callback = login_cb_dlg_register_firstpass;/*jeanine:r:i:21;*/
+	dialog_show(playerid, &dialog);
 }
 /*jeanine:p:i:14;p:7;a:r;x:22.00;n:login_cb_create_session_existing_member;*/
 /**
@@ -487,118 +509,7 @@ void login_cb_create_session_existing_member(void *data)
 	);
 	SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
 }
-/*jeanine:p:i:11;p:9;a:r;x:15.00;n:login_cb_create_guest_usr;*/
-/**
-Callback for query that creates a guest user.
-*/
-static
-void login_cb_create_guest_usr(void *data)
-{
-	TRACE;
-	int playerid;
-	char msg144[144];
-
-	playerid = PLAYER_CC_GETID(data);
-	if (!PLAYER_CC_CHECK(data, playerid)) {
-		return;
-	}
-
-	GameTextForPlayer(playerid, 0x800000, 3, "~b~Creating game session...");
-	unconfirmed_userid[playerid] = NC_cache_insert_id();
-	if (unconfirmed_userid[playerid] == -1) {
-		HideGameTextForPlayer(playerid);
-		SendClientMessage(playerid, COL_WARN, WARN"An error occurred while creating a guest user.");
-		SendClientMessage(playerid, COL_WARN, WARN"You can play, but you won't be able to save your stats later.");
-		login_login_player(playerid, LOGGED_GUEST);/*jeanine:s:a:r;i:18;*/
-		sprintf(msg144, "%s[%d] joined as a guest, welcome!", pdata[playerid]->name, playerid);
-		SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
-		return;
-	}
-	common_mysql_tquery(login_format_query_insert_session_row(playerid), login_cb_create_session_guest, V_MK_PLAYER_CC(playerid));/*jeanine:r:i:15;*/
-}
-/*jeanine:p:i:12;p:20;a:t;x:3.75;n:login_give_guest_name;*/
-/**
-Give the user a name prefixed with an '@' symbol, indicating they're a guest.
-
-@return 0 on failure, the player will be kicked so abort all processing for player
-*/
-static
-int login_give_guest_name(int playerid)
-{
-	TRACE;
-	struct playerdata *p;
-	char newname[MAX_PLAYER_NAME + 1];
-	int attempts, i;
-
-	p = pdata[playerid];
-	newname[0] = '@';
-	/*MAX_PLAYER_NAME is 24 but client may only connect if their name
-	length is at max 20*/
-	if (p->namelen < MAX_PLAYER_NAME - 4) {
-		memcpy(newname + 1, p->name, p->namelen);
-		newname[p->namelen + 1] = 0;
-		if (SetPlayerName(playerid, newname) == 1) {
-			return 1;
-		}
-	}
-	newname[11] = 0;
-	attempts = 5;
-	while (attempts-- > 0) {
-		for (i = 1; i < 10; i++) {
-			newname[i] = 'a' + (char) amxrandom('z' - 'a' + 1);
-		}
-		if (SetPlayerName(playerid, newname) == 1) {
-			return 1;
-		}
-	}
-	logprintf("login: failed to give user a random guestname");
-	SendClientMessage(playerid, COL_WARN, WARN"Fatal error, please reconnect!");
-	natives_Kick(playerid, "can't login", NULL, -1);
-	return 0;
-}
-/*jeanine:p:i:9;p:21;a:r;x:279.00;y:-59.00;n:login_spawn_as_guest;*/
-/**
-Create a guest account and session for player and log them in and spawn them.
-
-If the player does not have a guest name, they will be given one (or kicked on
-failure).
-*/
-static
-void login_spawn_as_guest(int playerid)
-{
-	TRACE;
-	char *query;
-
-	if (pdata[playerid]->name[0] != '@' && !login_give_guest_name(playerid)) {
-		return; /*user is kicked at this point*/
-	}
-	GameTextForPlayer(playerid, 0x800000, 3, "~b~Creating guest account...");
-	query = login_format_query_insert_user(playerid, /*password*/ "", GROUP_GUEST);
-	common_mysql_tquery(query, login_cb_create_guest_usr, V_MK_PLAYER_CC(playerid));/*jeanine:r:i:11;*/
-}
-/*jeanine:p:i:10;p:7;a:r;x:15.00;y:120.00;n:login_spawn_as_guest_WITHOUT_ACCOUNT;*/
-/**
-Spawns a player as a guest without account or session. ONLY USE ON ERROR!
-
-Use login_spawn_as_guest when wanting to let player continue as a guest.
-
-If the player does not have a guest name, they will be given one (or kicked on
-failure).
-*/
-static
-void login_spawn_as_guest_WITHOUT_ACCOUNT(int playerid)
-{
-	TRACE;
-	char msg144[144];
-
-	if (!login_give_guest_name(playerid)) {
-		return; /*user is kicked at this point*/
-	}
-	login_login_player(playerid, LOGGED_GUEST);/*jeanine:s:a:r;i:18;*/
-	sprintf(msg144, "%s[%d] joined as a guest (login error), welcome!", pdata[playerid]->name, playerid);
-	SendClientMessageToAllAndIRC(ECHO_PACK12_LOGIN, COL_JOIN, msg144);
-}
-/*jeanine:p:i:7;p:8;a:r;x:84.00;n:login_cb_load_account_data;*/
+/*jeanine:p:i:7;p:8;a:r;x:66.00;y:-28.00;n:login_cb_load_account_data;*/
 static
 void login_cb_load_account_data(void *data)
 {
@@ -661,7 +572,25 @@ void login_cb_load_account_data(void *data)
 		dialog_show(playerid, dialog);
 	}
 }
-/*jeanine:p:i:8;p:25;a:r;x:139.00;n:login_cb_verify_password;*/
+/*jeanine:p:i:29;p:8;a:r;x:38.00;y:-33.00;n:login_cb_failed_login_added;*/
+static
+void login_cb_update_lastfal_after_failed_login_added(void *data)
+{
+	TRACE;
+	csprintf(buf4096,
+		"UPDATE usr "
+		"SET lastfal="
+			"(SELECT stamp "
+			"FROM fal "
+			"WHERE u=%d "
+			"ORDER BY stamp DESC "
+			"LIMIT 1) "
+		"WHERE i=%d",
+		(int) data,
+		(int) data);
+	NC_mysql_tquery_nocb(buf4096a);
+}
+/*jeanine:p:i:8;p:25;a:r;x:17.00;y:-13.00;n:login_cb_verify_password;*/
 static
 void login_cb_verify_password(void *data)
 {
@@ -702,53 +631,102 @@ void login_cb_verify_password(void *data)
 		common_mysql_tquery(cbuf4096_, login_cb_load_account_data, data);/*jeanine:r:i:7;*/
 	}
 }
-/*jeanine:p:i:5;p:6;a:r;x:16.00;n:login_cb_member_user_created;*/
-/**
-Callback for when member user has been created after registering.
-*/
+/*jeanine:p:i:27;p:28;a:r;x:2.00;n:login_cb_dlg_namechange;*/
 static
-void login_cb_member_user_created(void *data)
+void login_cb_dlg_namechange(int playerid, struct DIALOG_RESPONSE response)
 {
 	TRACE;
-	int playerid;
+	int len;
 
-	playerid = PLAYER_CC_GETID(data);
-	if (!PLAYER_CC_CHECK(data, playerid)) {
-		return;
-	}
+	if (response.response) {
+		if (!response.inputtext[0] || !stricmp(pdata[playerid]->name, response.inputtext)) {
+			/*Edge case: if empty string or same name as current, go back to login dialog.*/
+			login_show_dialog_login(playerid, 0);/*jeanine:s:a:r;i:26;*/
+		}
 
-	pdata[playerid]->groups = GROUP_MEMBER;
-	unconfirmed_userid[playerid] = NC_cache_insert_id();
-	money_set(playerid, MONEY_DEFAULT_AMOUNT);
-	if (unconfirmed_userid[playerid] == -1) {
-		HideGameTextForPlayer(playerid);
-		SendClientMessage(playerid, COL_WARN, WARN"An error occured while registering.");
-		SendClientMessage(playerid, COL_WARN, WARN"You will be spawned as a guest.");
-		login_spawn_as_guest_WITHOUT_ACCOUNT(playerid);/*jeanine:s:a:r;i:10;*/
-		return;
+		if (
+			response.inputtext[0] == '@' || /*reserved for guest accounts*/
+			(len = strlen(response.inputtext)) < 3 ||
+			/*MAX_PLAYER_NAME is 24 but client may only connect if their name
+			length is at max 20*/
+			len > MAX_PLAYER_NAME - 4 ||
+			SetPlayerName(playerid, response.inputtext) != 1
+		) {
+			login_show_dialog_change_name(playerid, 1);/*jeanine:s:a:r;i:28;*/
+		}
+
+		unconfirmed_userid[playerid] = -1;
+		dialog_ensure_transaction(playerid, DLG_TID_LOGIN);
+		login_query_check_user_exists(playerid);/*jeanine:s:a:r;i:2;*/
+	} else {
+		/*Cancel should not go back to login dialog,*/
+		/*otherwise spamming escape will keep you in a loop.*/
+		/*If player keep hitting ESC, they are probably as fed up with login/register*/
+		/*dialogs as I am, so just spawn them as guest to let them play.*/
+		login_spawn_as_guest(playerid);/*jeanine:s:a:r;i:9;*/
 	}
-	GameTextForPlayer(playerid, 0x800000, 3, "~b~Creating game session...");
-	common_mysql_tquery(login_format_query_insert_session_row(playerid), login_cb_create_session_new_member, V_MK_PLAYER_CC(playerid));/*jeanine:r:i:16;*/
 }
-/*jeanine:p:i:6;p:23;a:r;x:17.00;n:login_cb_register_password_hashed;*/
-/**
-Callback for register dialog password hash.
-*/
+/*jeanine:p:i:28;p:25;a:r;x:6.00;y:45.00;n:login_show_dialog_change_name;*/
 static
-void login_cb_register_password_hashed(void *data)
+void login_show_dialog_change_name(int playerid, int show_invalid_name_error)
 {
 	TRACE;
-	int playerid;
-	char *query;
+	struct DIALOG_INFO dialog;
 
-	playerid = PLAYER_CC_GETID(data);
-	if (PLAYER_CC_CHECK(data, playerid)) {
-		/*gametext still showing from previous*/
-		NC_bcrypt_get_hash(buf144a);
-		ctoa(cbuf64, buf144, 144);
-		query = login_format_query_insert_user(playerid, cbuf64, GROUP_MEMBER);
-		common_mysql_tquery(query, login_cb_member_user_created, V_MK_PLAYER_CC(playerid));/*jeanine:r:i:5;*/
+	dialog_init_info(&dialog);
+	dialog.transactionid = DLG_TID_LOGIN;
+	dialog.style = DIALOG_STYLE_INPUT;
+	dialog.caption = NAMECHANGE_CAPTION;
+	dialog.info =
+		(ECOL_WARN"Invalid name or name is taken (press tab).\n"
+		"\n"ECOL_DIALOG_TEXT
+		"Enter your new name (3-20 length, 0-9a-zA-Z=()[]$@._).\n"
+		"Names starting with @ are reserved for guests.") + 60 * (show_invalid_name_error ^ 1);
+	dialog.button1 = "Change";
+	dialog.button2 = "Play as guest";
+	dialog.handler.callback = login_cb_dlg_namechange;/*jeanine:r:i:27;*/
+	dialog_show(playerid, &dialog);
+}
+/*jeanine:p:i:25;p:26;a:r;x:6.00;y:-18.00;n:login_cb_dlg_login_or_namechange;*/
+static
+void login_cb_dlg_login_or_namechange(int playerid, struct DIALOG_RESPONSE response)
+{
+	TRACE;
+	if (response.response) {
+		GameTextForPlayer(playerid, 0x800000, 3, "~b~Logging in...");
+		if (pwdata[playerid]) {
+			atoc(buf144, response.inputtext, 144);
+			atoc(buf4096, pwdata[playerid], 144);
+			common_bcrypt_check(buf144a, buf4096a, login_cb_verify_password, V_MK_PLAYER_CC(playerid));/*jeanine:r:i:8;*/
+			dialog_ensure_transaction(playerid, DLG_TID_LOGIN);
+		} else {
+			logprintf("login_cb_dlg_login_or_namechange: no password");
+		}
+	} else {
+		login_show_dialog_change_name(playerid, 0);/*jeanine:r:i:28;*/
 	}
+}
+/*jeanine:p:i:26;p:1;a:r;x:42.00;y:-92.00;n:login_show_dialog_login;*/
+static
+void login_show_dialog_login(int playerid, int show_invalid_pw_error)
+{
+	TRACE;
+	struct DIALOG_INFO dialog;
+
+	dialog_init_info(&dialog);
+	dialog.transactionid = DLG_TID_LOGIN;
+	dialog.style = DIALOG_STYLE_PASSWORD;
+	dialog.caption = LOGIN_CAPTION;
+	dialog.info =
+		(ECOL_WARN"Incorrect password!\n"
+		"\n"ECOL_DIALOG_TEXT
+		"Welcome! This account is registered.\n"
+		"Please sign in or change your name.") + 37 * (show_invalid_pw_error ^ 1);
+	dialog.button1 = "Login";
+	dialog.button2 = "Change name";
+	dialog.handler.options = DLG_OPT_NO_SANITIZE_INPUTTEXT;
+	dialog.handler.callback = login_cb_dlg_login_or_namechange;/*jeanine:r:i:25;*/
+	dialog_show(playerid, &dialog);
 }
 /*jeanine:p:i:1;p:2;a:r;x:3.75;n:login_cb_check_user_exists;*/
 static
@@ -817,7 +795,7 @@ asguest:
 		unconfirmed_timesincelastseen[playerid] = (nc_params[2] = 2, NC(n_cache_get_field_i));
 		login_show_dialog_login(playerid, 0);/*jeanine:r:i:26;*/
 	} else {
-		login_show_dialog_register_step1(playerid, 0);/*jeanine:r:i:22;*/
+		login_show_dialog_register_firstpass(playerid, 0);/*jeanine:r:i:22;*/
 	}
 }
 /*jeanine:p:i:2;p:3;a:r;x:221.00;n:login_query_check_user_exists;*/
