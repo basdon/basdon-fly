@@ -926,9 +926,9 @@ void samp_incoming_process_incoming_packets()
 	struct RakPacket *packet;
 
 	while ((packet = rakServerVtable->Receive(rakServer))) {
-		/*Expect at least packetid and a byte of data*/
+		/*Expect at least packetid and a byte of data for sync packets*/
 		if (packet->bitLength >= 16) {
-			/*SAMP checks if packetid (data[0]) is 0x28 and if so*/
+			/*SAMP checks if packetid (data[0]) is 40 and if so*/
 			/*real packet id is taken from data[5]. But every function*/
 			/*that handles a packet still reads data starting from data[1],*/
 			/*so if it's 0x28 then it means data[5] (data[4]) is overwritten*/
@@ -943,52 +943,56 @@ void samp_incoming_process_incoming_packets()
 			case 200:
 				/*Samp::HandlePacketDriverSync*/
 				((void (*)(struct Samp*,struct RakPacket*)) 0x80AEB10)(samp, packet);
-				break;
+				goto handled;
 			case 201:
 				/*Samp::HandlePacketRconCommand*/
 				((void (*)(struct Samp*,struct RakPacket*)) 0x80AD830)(samp, packet);
-				break;
+				goto handled;
 			case 203:
 				/*Samp::HandlePacketAimSync*/
 				((void (*)(struct Samp*,struct RakPacket*)) 0x80ACA20)(samp, packet);
-				break;
+				goto handled;
 			case 204:
 				/*Samp::HandlePacketWeaponsUpdate*/
 				((void (*)(struct Samp*,struct RakPacket*)) 0x80AC650)(samp, packet);
-				break;
+				goto handled;
 			case 205:
 				HandlePacketStatsUpdate(packet);/*jeanine:r:i:43;*/
-				break;
+				goto handled;
 			case 206:
 				/*Samp::HandlePacketBulletSync*/
 				((void (*)(struct Samp*,struct RakPacket*)) 0x80AD130)(samp, packet);
-				break;
+				goto handled;
 			case 207:
 				/*Samp::HandlePacketOnFootSync*/
 				((void (*)(struct Samp*,struct RakPacket*)) 0x80AC870)(samp, packet);
-				break;
+				goto handled;
 			case 209:
 				HandlePacketUnoccupiedSync(packet);/*jeanine:r:i:8;*/
-				break;
+				goto handled;
 			case 210:
 				/*Samp::HandlePacketTrailerSync*/
 				((void (*)(struct Samp*,struct RakPacket*)) 0x80ACC80)(samp, packet);
-				break;
+				goto handled;
 			case 211:
 				/*Samp::HandlePacketPassengerSync*/
 				((void (*)(struct Samp*,struct RakPacket*)) 0x80AE970)(samp, packet);
-				break;
+				goto handled;
 			case 212:
 				/*Samp::HandlePacketSpectatingSync*/
 				((void (*)(struct Samp*,struct RakPacket*)) 0x80ACB00)(samp, packet);
-				break;
+				goto handled;
 			}
+		}
 
+		/*Some of these packets have no extra data (mostly disconnect/connectionlost)*/
+		/*Same above comment of SAMP checking if data[0] == 40 applies.*/
+		if (packet->bitLength >= 8) {
 			switch (packet->data[0])
 			{
 			case 24:
 				/*Samp::HandlePacketIncomingConnection*/
-				((void (*)(struct Samp*,struct RakPacket*)) 0x80ACD590)(samp, packet);
+				((void (*)(struct Samp*,struct RakPacket*)) 0x80AD590)(samp, packet);
 				break;
 			case 32:
 				/*Samp::HandlePacketDisconnect*/
@@ -1004,6 +1008,7 @@ void samp_incoming_process_incoming_packets()
 				break;
 			}
 		}
+handled:
 
 		rakServerVtable->FreePacket(rakServer, packet);
 	}
