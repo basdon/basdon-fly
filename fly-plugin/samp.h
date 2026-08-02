@@ -1293,13 +1293,13 @@ struct RPCDATA_ClearAnimations {
 };
 
 struct INOUTRPCDATA_UpdateVehicleDamageStatus {
-	short vehicleid;
-	/*this order is different from SampVehicleDamageStatus, as panels & doors are swapped!
-	 *the CreateVehicle RPC does use the same order as SampVehicleDamageStatus*/
-	unsigned int panels;
-	unsigned int doors;
-	unsigned char broken_lights;
-	unsigned char popped_tires;
+	ushort vehicleid;
+	/*this order is different from SampVehicleDamageStatus, as panels & doors are swapped!*/
+	/*the CreateVehicle RPC does use the same order as SampVehicleDamageStatus*/
+	uint panels;
+	uint doors;
+	uchar broken_lights;
+	uchar popped_tires;
 };
 EXPECT_SIZE(struct INOUTRPCDATA_UpdateVehicleDamageStatus, 2 + 4 + 4 + 1 + 1);
 

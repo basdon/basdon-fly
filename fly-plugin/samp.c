@@ -1858,54 +1858,6 @@ void hook_OnPassengerSync(int playerid)
 }
 
 static
-void OnRPCUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
-{
-	TRACE;
-	struct INOUTRPCDATA_UpdateVehicleDamageStatus *rpcdata;
-	struct SampVehicle *vehicle;
-	int playerid, vehicleid, i;
-	struct BitStream bs;
-
-	if (
-		samp->gamestate != 1 ||
-		arg->numBits != sizeof(struct INOUTRPCDATA_UpdateVehicleDamageStatus) * 8
-	) {
-		return;
-	}
-	rpcdata = (void*) arg->rpcdata;
-	vehicleid = rpcdata->vehicleid;
-	playerid = rakServer->vtable->GetIndexFromPlayerID(rakServer, arg->playerID);
-	if (
-		(unsigned int) playerid >= MAX_PLAYERS ||
-		!playerpool->players[playerid] ||
-		(unsigned int) vehicleid >= 2000 ||
-		!(vehicle = vehiclepool->vehicles[vehicleid]) ||
-		vehicle->lastSyncedByPlayerid != playerid
-	) {
-		return;
-	}
-
-#ifdef DEV
-	dev_print_updatevehicledamagestatus(playerid, vehicleid, vehicle, rpcdata);
-#endif
-
-	vehicle->damageStatus.panels.raw = rpcdata->panels;
-	vehicle->damageStatus.doors.raw = rpcdata->doors;
-	vehicle->damageStatus.broken_lights.raw = rpcdata->broken_lights;
-	vehicle->damageStatus.popped_tires.raw = rpcdata->popped_tires;
-
-	/*incoming rpcdata is same as outgoing*/
-	bs.ptrData = rpcdata;
-	bs.numberOfBitsUsed = arg->numBits;
-
-	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
-		if (i != playerid && sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[vehicleid]) {
-			SendRPC_bs(i, RPC_UpdateVehicleDamageStatus, &bs);
-		}
-	}
-}
-
-static
 void samp_init()
 {
 	TRACE;
@@ -1939,7 +1891,6 @@ void samp_init()
 	mem_mkjmp(0x80AEA7D, &PassengerSyncHook);
 	mem_mkjmp(0x80B1712, &OnPlayerCommandTextHook);
 	mem_mkjmp(0x80B2BA2, &OnDialogResponseHook);
-	mem_mkjmp(0x80B1020, &OnRPCUpdateVehicleDamageStatus);
 
 	/*stuff to allow both 0.3.7 and 0.3.DL clients */
 	AddServerRule("artwork", "No"); /*rule that DL added, probably not needed to have but setting it anyways*/

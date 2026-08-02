@@ -683,6 +683,55 @@ void HandleRpcClickPlayer(struct RakRPCHandlerArg *arg)
 {
 	/*we currently don't use this functionality.*/
 }
+/*jeanine:p:i:45;p:23;a:r;x:179.00;n:HandleRpcUpdateVehicleDamageStatus;*/
+static
+void HandleRpcUpdateVehicleDamageStatus(struct RakRPCHandlerArg *arg)
+{
+	TRACE;
+	struct INOUTRPCDATA_UpdateVehicleDamageStatus *rpcdata;
+	struct SampVehicle *vehicle;
+	ushort playerid, vehicleid;
+	struct BitStream bs;
+	int i;
+
+	if (
+		samp->gamestate != 1 ||
+		arg->numBits != sizeof(struct INOUTRPCDATA_UpdateVehicleDamageStatus) * 8
+	) {
+		return;
+	}
+	rpcdata = (void*) arg->rpcdata;
+	vehicleid = rpcdata->vehicleid;
+	playerid = rakServer->vtable->GetIndexFromPlayerID(rakServer, arg->playerID);
+	if (
+		playerid >= MAX_PLAYERS ||
+		!playerpool->players[playerid] ||
+		vehicleid >= 2000 ||
+		!(vehicle = vehiclepool->vehicles[vehicleid]) ||
+		vehicle->lastSyncedByPlayerid != playerid
+	) {
+		return;
+	}
+
+#ifdef DEV
+	dev_print_updatevehicledamagestatus(playerid, vehicleid, vehicle, rpcdata);
+#endif
+
+	vehicle->damageStatus.panels.raw = rpcdata->panels;
+	vehicle->damageStatus.doors.raw = rpcdata->doors;
+	vehicle->damageStatus.broken_lights.raw = rpcdata->broken_lights;
+	vehicle->damageStatus.popped_tires.raw = rpcdata->popped_tires;
+
+	/*incoming rpcdata is same as outgoing*/
+	bs.ptrData = rpcdata;
+	bs.numberOfBitsUsed = arg->numBits;
+
+	for (i = playerpool->highestUsedPlayerid; i >= 0; i--) {
+		if (i != playerid && sampPlayer[i] && sampPlayer[i]->vehicleStreamedIn[vehicleid]) {
+			SendRPC_bs(i, RPC_UpdateVehicleDamageStatus, &bs);
+		}
+	}
+}
 /*jeanine:p:i:32;p:23;a:r;x:23.00;y:69.00;n:HandleRpcObjectEditAttached;*/
 static
 void HandleRpcObjectEditAttached(struct RakRPCHandlerArg *arg)
@@ -889,7 +938,10 @@ void samp_incoming_setup_rak(struct RakServer *_rakServer)
 
 	rakServerVtable->RegisterRPC(rakServer, RPC_ChatCommand, (void*) 0x80B1560);
 	rakServerVtable->RegisterRPC(rakServer, RPC_Death, (void*) 0x80B0ED0);
-	rakServerVtable->RegisterRPC(rakServer, RPC_UpdateVehicleDamageStatus, (void*) 0x80B1020);
+
+	rakServerVtable->RegisterRPC(rakServer, RPC_UpdateVehicleDamageStatus, HandleRpcUpdateVehicleDamageStatus);/*jeanine:r:i:45;*/
+	mem_mkjmp(0x80B1020, crash__this_codepath_should_be_unreachable); /*HandleRpcUpdateVehicleDamageStatus*/
+
 	rakServerVtable->RegisterRPC(rakServer, RPC_VehicleEnter, (void*) 0x80B1210);
 	rakServerVtable->RegisterRPC(rakServer, RPC_VehicleExit, (void*) 0x80B13F0);
 	rakServerVtable->RegisterRPC(rakServer, RPC_UpdateScoresPings, (void*) 0x80B17A0);
