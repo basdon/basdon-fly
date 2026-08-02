@@ -656,8 +656,8 @@ void HandleRpcMapMarkerSet(struct RakRPCHandlerArg *arg)
 static
 void HandleRpcPickupCollected97(struct RakRPCHandlerArg *arg)
 {
-	/*TODO: if we start using pickups, figure out why this exists lol*/
-	/*SAMP unconditionally broadcasts this packet (which will destroy the pickup for all other players) and doesn't do anything else. Very strange.*/
+	/*SAMP unconditionally broadcasts this packet (which will destroy the pickup for all other players) and doesn't do anything else.*/
+	/*Allegedly this was used in older versions for weapon pickups that dropped when a player died. This behavior would make sense for that.*/
 }
 /*jeanine:p:i:28;p:23;a:r;x:22.00;y:59.00;n:HandleRpcPickupCollected;*/
 static
@@ -792,8 +792,8 @@ static
 void HandlePacketStatsUpdate(struct RakPacket *packet)
 {
 	TRACE;
+	struct PACKETDATA_StatsUpdate *data;
 	ushort playerid;
-	int money;
 
 	if (
 		(playerid = packet->playerid) >= MAX_PLAYERS ||
@@ -803,15 +803,15 @@ void HandlePacketStatsUpdate(struct RakPacket *packet)
 		return;
 	}
 
+	data = (void*) packet->data + 1;
 #ifdef DEV
-	dev_print_statsync(packet->playerid, (int*) (packet->data + 1));
+	dev_print_statsync(packet->playerid, data);
 #endif
 
-	money = *((int*) (packet->data + 1));
-	if (money != playerpool->playerMoney[playerid]) {
+	if (data->money != playerpool->playerMoney[playerid]) {
 		SetPlayerMoneyRaw(playerid, playerpool->playerMoney[playerid]);
 	}
-	playerpool->playerDrunkLevel[playerid] = *((int*) (packet->data + 5));
+	playerpool->playerDrunkLevel[playerid] = data->drunkLevel;
 }
 /*jeanine:p:i:23;p:3;a:r;x:60.00;y:-241.00;n:samp_incoming_setup_rak;*/
 static

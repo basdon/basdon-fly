@@ -51,14 +51,14 @@ void dev_print_unoccupiedvehiclesync(ushort playerid, ushort vehicleid, struct S
 		SendClientMessageToAll(COL_SAMP_GREY, cbuf144);
 	}
 }
-/*jeanine:p:i:6;p:5;a:b;y:1.88;n:dev_print_unoccupiedvehiclesync;*/
+/*jeanine:p:i:6;p:5;a:b;y:1.88;n:dev_print_statsync;*/
 static
-void dev_print_statsync(ushort playerid, int *data)
+void dev_print_statsync(ushort playerid, struct PACKETDATA_StatsUpdate *data)
 {
 	TRACE;
 
 	if (dev_print_statsync_enabled) {
-		sprintf(cbuf144, "StatsUpdate pid %d money %d drunk %d", playerid, data[0], data[1]);
+		sprintf(cbuf144, "StatsUpdate pid %d money %d drunk %d", playerid, data->money, data->drunkLevel);
 		SendClientMessageToAll(COL_SAMP_GREY, cbuf144);
 	}
 }

@@ -1340,6 +1340,12 @@ struct RPCDATA_ConnectionRejected {
 };
 EXPECT_SIZE(struct RPCDATA_ConnectionRejected, 1);
 
+struct PACKETDATA_StatsUpdate {
+	int money;
+	int drunkLevel;
+};
+EXPECT_SIZE(struct PACKETDATA_StatsUpdate, 0x8);
+
 /**
 DriverSync
 	char packet_id; (200)
